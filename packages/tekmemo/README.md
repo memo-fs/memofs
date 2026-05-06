@@ -1,5 +1,11 @@
 # TekMemo Core
 
+[![npm](https://img.shields.io/npm/v/tekmemo?label=npm)](https://www.npmjs.com/package/tekmemo)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-preview-orange)](../../README.md)
+
 Provider-neutral, file-first memory runtime for AI apps and agents.
 
 TekMemo core owns the local memory protocol. It does **not** talk to the filesystem, cloud, vector databases, embedding providers, rerankers, billing, or hosted tenancy.

@@ -1,5 +1,11 @@
 # `@tekmemo/recall`
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Frecall?label=npm)](https://www.npmjs.com/package/@tekmemo/recall)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-active-brightgreen)](../../README.md)
+
 Provider-neutral vector recall contracts, validation helpers, scoring utilities, filter matching, and an in-memory test implementation for TekMemo.
 
 This package does **not** talk to Upstash, Turso, Qdrant, Pinecone, Chroma, LanceDB, Weaviate, or Milvus directly.

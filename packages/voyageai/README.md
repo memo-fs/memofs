@@ -1,5 +1,11 @@
 # `@tekmemo/voyageai`
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Fvoyageai?label=npm)](https://www.npmjs.com/package/@tekmemo/voyageai)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-active-brightgreen)](../../README.md)
+
 Production-ready Voyage AI embedding adapter for TekMemo.
 
 This package is intentionally **provider-specific** and **BYOK-ready**. It accepts a Voyage API key from the host application and does not store secrets.

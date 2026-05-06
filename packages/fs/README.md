@@ -1,5 +1,11 @@
 # @tekmemo/fs
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Ffs?label=npm)](https://www.npmjs.com/package/@tekmemo/fs)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-active-brightgreen)](../../README.md)
+
 Node.js filesystem adapter for TekMemo's canonical `.tekmemo/` local memory protocol.
 
 This package implements the core `MemoryStore` interface from `tekmemo` using the local filesystem.

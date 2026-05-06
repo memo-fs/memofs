@@ -1,5 +1,11 @@
 # @tekmemo/ai-sdk
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Fai-sdk?label=npm)](https://www.npmjs.com/package/@tekmemo/ai-sdk)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-active-brightgreen)](../../README.md)
+
 Vercel AI SDK integration for **TekMemo**. This package enables AI agents to interact with their own memory through structured tools and automated context injection.
 
 ## Features

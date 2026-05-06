@@ -1,5 +1,11 @@
 # `@tekmemo/agentfs`
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Fagentfs?label=npm)](https://www.npmjs.com/package/@tekmemo/agentfs)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-experimental-yellow)](../../README.md)
+
 AgentFS-backed `MemoryStore` adapter for TekMemo.
 
 This package lets TekMemo use an AgentFS-like remote file runtime while preserving the canonical local memory protocol:

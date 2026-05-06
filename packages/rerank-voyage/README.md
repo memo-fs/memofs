@@ -1,5 +1,11 @@
 # `@tekmemo/rerank-voyage`
 
+[![npm](https://img.shields.io/npm/v/%40tekmemo%2Frerank-voyage?label=npm)](https://www.npmjs.com/package/@tekmemo/rerank-voyage)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Types](https://img.shields.io/badge/types-included-blue)](./dist/index.d.mts)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/status-preview-orange)](../../README.md)
+
 Voyage AI reranking adapter for TekMemo.
 
 This package implements the provider-neutral `Reranker` interface from `@tekmemo/rerank`.

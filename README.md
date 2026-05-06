@@ -2,6 +2,13 @@
 
 **File-first memory infrastructure for AI apps and agents.**
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/tekmemo?label=npm)](https://www.npmjs.com/package/tekmemo)
+[![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
+[![Docs](https://github.com/tekbreed/tekmemo/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/deploy-docs.yml)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ff69b4)](https://github.com/sponsors/christophersesugh)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
 TekMemo is an open-source memory runtime for AI applications. It gives agents, chat apps, coding tools, copilots, workflow systems, and developer platforms a structured way to store, organize, recall, sync, and inspect long-lived context.
 
 TekMemo is built around a simple idea:
