@@ -434,7 +434,7 @@ Those belong outside this public OSS repo.
 Public docs are hosted at:
 
 ```txt
-https://docs.tekmemo.dev
+yet to be determined
 ```
 
 The docs app lives in:
@@ -496,7 +496,9 @@ Contributions are welcome.
 Please read:
 
 [CONTRIBUTING](./CONTRIBUTING.md)
+
 [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md)
+
 [SECURITY](./SECURITY.md)
 
 before opening issues or pull requests.
