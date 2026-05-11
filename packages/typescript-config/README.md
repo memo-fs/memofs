@@ -9,7 +9,6 @@ This internal package provides the base TypeScript configurations that all packa
 | Config | Description |
 |--------|-------------|
 | `base.json` | Base config for Node.js packages (strict, ESM, target ES2022) |
-| `react.json` | Extends base with React JSX support |
 
 ---
 
@@ -33,13 +32,6 @@ This internal package provides the base TypeScript configurations that all packa
 }
 ```
 
-For React packages:
-
-```json
-{
-  "extends": "@repo/typescript-config/react.json"
-}
-```
 
 ---
 
