@@ -1,5 +1,5 @@
 {
-	"name": "@tekmemo/example-local-only",
+	"name": "@tekmemo/example-mcp",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -7,6 +7,8 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@tekmemo/cloud-client": "workspace:^",
+		"@tekmemo/mcp-server": "workspace:^",
 		"tekmemo": "workspace:^",
 		"@tekmemo/fs": "workspace:^"
 	},

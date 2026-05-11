@@ -1,13 +1,13 @@
-# Local-only TekMemo example
+# Cloud client example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Use `@tekmemo/cloud-client` from trusted backend code.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - creates a project-scoped cloud client
+- checks health
+- composes context
+- creates a note
 
     ## Install
 
@@ -28,13 +28,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-cloud-client dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add @tekmemo/cloud-client
     ```
 
     ## Safety notes

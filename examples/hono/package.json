@@ -1,5 +1,5 @@
 {
-	"name": "@tekmemo/example-local-only",
+	"name": "@tekmemo/example-hono",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -7,8 +7,8 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"tekmemo": "workspace:^",
-		"@tekmemo/fs": "workspace:^"
+		"@tekmemo/cloud-client": "workspace:^",
+		"hono": "^4.0.0"
 	},
 	"devDependencies": {
 		"tsx": "^4.21.0",

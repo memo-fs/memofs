@@ -1,13 +1,12 @@
-# Local-only TekMemo example
+# MCP example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Expose TekMemo memory to MCP-compatible tools such as Claude Code, Codex, Cursor, and OpenCode-style clients.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - prints a cloud MCP client config
+- creates a local MCP protocol server
+- calls the health tool through JSON-RPC
 
     ## Install
 
@@ -28,13 +27,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-mcp dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add @tekmemo/mcp-server @tekmemo/cloud-client tekmemo @tekmemo/fs
     ```
 
     ## Safety notes

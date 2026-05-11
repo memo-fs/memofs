@@ -1,13 +1,12 @@
-# Local-only TekMemo example
+# Graph memory example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Create local graph nodes and edges for relationship-aware memory.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - creates an in-memory graph store
+- stores concepts and relationships
+- queries neighbors and a path
 
     ## Install
 
@@ -28,13 +27,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-graph-memory dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add @tekmemo/graph
     ```
 
     ## Safety notes

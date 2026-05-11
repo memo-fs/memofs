@@ -1,13 +1,12 @@
-# Local-only TekMemo example
+# CLI example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Use TekMemo from shell scripts or programmatically through the CLI runner.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - runs `tekmemo init` programmatically
+- stores a durable note
+- prints JSON output from `tekmemo context`
 
     ## Install
 
@@ -28,13 +27,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-cli dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add -D @tekmemo/cli
     ```
 
     ## Safety notes

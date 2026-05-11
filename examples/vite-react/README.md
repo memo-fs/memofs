@@ -1,13 +1,12 @@
-# Local-only TekMemo example
+# Vite React safe browser boundary example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Show the safe browser boundary for a Vite React app.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - calls your own backend endpoint
+- explains why direct browser use is unsafe
+- keeps cloud-client in server code
 
     ## Install
 
@@ -28,13 +27,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-vite-react dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add @tekmemo/cloud-client
     ```
 
     ## Safety notes

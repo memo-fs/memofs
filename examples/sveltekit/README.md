@@ -1,13 +1,12 @@
-# Local-only TekMemo example
+# SvelteKit server route example
 
-    Create an inspectable `.tekmemo/` memory store without TekMemo Cloud.
+    Call TekMemo Cloud from the server side of this framework.
 
     ## What this example demonstrates
 
-    - bootstraps a temporary `.tekmemo/` folder
-- writes core memory
-- appends a note
-- reads memory back through the canonical APIs
+    - creates a server-side TekMemo Cloud client
+- composes context for a query
+- keeps `TEKMEMO_API_KEY` out of browser code
 
     ## Install
 
@@ -28,13 +27,13 @@
     ## Run
 
     ```bash
-    pnpm --filter @tekmemo/example-local-only dev
+    pnpm --filter @tekmemo/example-sveltekit dev
     ```
 
     ## Packages used
 
     ```bash
-    pnpm add tekmemo @tekmemo/fs
+    pnpm add @tekmemo/cloud-client
     ```
 
     ## Safety notes
