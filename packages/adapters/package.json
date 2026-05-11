@@ -1,0 +1,209 @@
+{
+	"name": "@tekmemo/adapters",
+	"version": "0.1.0",
+	"description": "Convenience reexports for TekMemo AI SDK, provider, vector, rerank, and cloud adapters.",
+	"private": false,
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/adapters"
+	},
+	"homepage": "https://docs.tekmemo.dev/packages/adapters",
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./agentfs": {
+			"import": {
+				"types": "./dist/agentfs/index.d.mts",
+				"default": "./dist/agentfs/index.mjs"
+			},
+			"require": {
+				"types": "./dist/agentfs/index.d.cts",
+				"default": "./dist/agentfs/index.cjs"
+			}
+		},
+		"./ai-sdk": {
+			"import": {
+				"types": "./dist/ai-sdk/index.d.mts",
+				"default": "./dist/ai-sdk/index.mjs"
+			},
+			"require": {
+				"types": "./dist/ai-sdk/index.d.cts",
+				"default": "./dist/ai-sdk/index.cjs"
+			}
+		},
+		"./cloud-client": {
+			"import": {
+				"types": "./dist/cloud-client/index.d.mts",
+				"default": "./dist/cloud-client/index.mjs"
+			},
+			"require": {
+				"types": "./dist/cloud-client/index.d.cts",
+				"default": "./dist/cloud-client/index.cjs"
+			}
+		},
+		"./openai": {
+			"import": {
+				"types": "./dist/openai/index.d.mts",
+				"default": "./dist/openai/index.mjs"
+			},
+			"require": {
+				"types": "./dist/openai/index.d.cts",
+				"default": "./dist/openai/index.cjs"
+			}
+		},
+		"./openai/testing": {
+			"import": {
+				"types": "./dist/openai/testing/index.d.mts",
+				"default": "./dist/openai/testing/index.mjs"
+			},
+			"require": {
+				"types": "./dist/openai/testing/index.d.cts",
+				"default": "./dist/openai/testing/index.cjs"
+			}
+		},
+		"./rerank-voyage": {
+			"import": {
+				"types": "./dist/rerank-voyage/index.d.mts",
+				"default": "./dist/rerank-voyage/index.mjs"
+			},
+			"require": {
+				"types": "./dist/rerank-voyage/index.d.cts",
+				"default": "./dist/rerank-voyage/index.cjs"
+			}
+		},
+		"./rerank-voyage/testing": {
+			"import": {
+				"types": "./dist/rerank-voyage/testing/index.d.mts",
+				"default": "./dist/rerank-voyage/testing/index.mjs"
+			},
+			"require": {
+				"types": "./dist/rerank-voyage/testing/index.d.cts",
+				"default": "./dist/rerank-voyage/testing/index.cjs"
+			}
+		},
+		"./upstash-vector": {
+			"import": {
+				"types": "./dist/upstash-vector/index.d.mts",
+				"default": "./dist/upstash-vector/index.mjs"
+			},
+			"require": {
+				"types": "./dist/upstash-vector/index.d.cts",
+				"default": "./dist/upstash-vector/index.cjs"
+			}
+		},
+		"./voyageai": {
+			"import": {
+				"types": "./dist/voyageai/index.d.mts",
+				"default": "./dist/voyageai/index.mjs"
+			},
+			"require": {
+				"types": "./dist/voyageai/index.d.cts",
+				"default": "./dist/voyageai/index.cjs"
+			}
+		},
+		"./voyageai/testing": {
+			"import": {
+				"types": "./dist/voyageai/testing/index.d.mts",
+				"default": "./dist/voyageai/testing/index.mjs"
+			},
+			"require": {
+				"types": "./dist/voyageai/testing/index.d.cts",
+				"default": "./dist/voyageai/testing/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"adapters",
+		"agents",
+		"ai",
+		"ai-sdk",
+		"embeddings",
+		"llm",
+		"memory",
+		"openai",
+		"recall",
+		"tekmemo",
+		"typescript",
+		"upstash",
+		"voyage"
+	],
+	"dependencies": {
+		"@tekmemo/agentfs": "workspace:^",
+		"@tekmemo/ai-sdk": "workspace:^",
+		"@tekmemo/cloud-client": "workspace:^",
+		"@tekmemo/openai": "workspace:^",
+		"@tekmemo/rerank-voyage": "workspace:^",
+		"@tekmemo/upstash-vector": "workspace:^",
+		"@tekmemo/voyageai": "workspace:^"
+	},
+	"peerDependencies": {
+		"@upstash/vector": ">=1.2.0",
+		"ai": ">=5.0.0 <7.0.0",
+		"openai": "^6.10.0"
+	},
+	"peerDependenciesMeta": {
+		"@upstash/vector": {
+			"optional": true
+		},
+		"ai": {
+			"optional": true
+		},
+		"openai": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@repo/tsdown-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"@vitest/coverage-v8": "^4.1.5",
+		"vitest": "^4.1.5"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	}
+}

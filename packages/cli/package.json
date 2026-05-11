@@ -1,0 +1,100 @@
+{
+	"name": "@tekmemo/cli",
+	"version": "0.1.0",
+	"description": "Production-grade CLI for TekMemo local memory, cloud memory, protocol validation, snapshots, context packing, and agent-tool integration.",
+	"type": "module",
+	"sideEffects": false,
+	"bin": {
+		"tekmemo": "./dist/bin/tekmemo.mjs"
+	},
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./testing": {
+			"import": {
+				"types": "./dist/testing/index.d.mts",
+				"default": "./dist/testing/index.mjs"
+			},
+			"require": {
+				"types": "./dist/testing/index.d.cts",
+				"default": "./dist/testing/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:watch": "vitest",
+		"lint:package": "publint",
+		"clean": "rm -rf dist coverage",
+		"test:coverage": "vitest run --coverage",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"devDependencies": {
+		"@repo/test-utils": "workspace:*",
+		"@repo/tsdown-config": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@repo/utils": "workspace:*"
+	},
+	"dependencies": {
+		"@tekmemo/agentfs": "workspace:^",
+		"@tekmemo/cloud-client": "workspace:^",
+		"@tekmemo/fs": "workspace:^",
+		"commander": "^14.0.3",
+		"tekmemo": "workspace:^",
+		"zod": "^4.4.2"
+	},
+	"license": "MIT",
+	"keywords": [
+		"agents",
+		"ai",
+		"cli",
+		"developer-tools",
+		"mcp",
+		"memory",
+		"rag",
+		"tekmemo",
+		"typescript"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/cli"
+	},
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"homepage": "https://docs.tekmemo.dev/packages/cli",
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
+	"private": false,
+	"engines": {
+		"node": ">=22"
+	},
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	}
+}
