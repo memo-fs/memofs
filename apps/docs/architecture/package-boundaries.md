@@ -1,31 +1,19 @@
----
-title: Package Boundaries
-description: How TekMemo packages stay small, testable, and provider-agnostic.
----
+# Package boundaries
 
-# Package Boundaries
+## Golden rule
 
-TekMemo should stay modular so developers can adopt only what they need.
+Only `@tekmemo/cloud-client` owns Cloud API transport.
 
-## Rule
+## Examples
 
-The core runtime defines contracts. Adapter packages implement those contracts.
+- CLI cloud commands call `@tekmemo/cloud-client`.
+- MCP cloud runtime calls `@tekmemo/cloud-client`.
+- AI SDK cloud tools call runtime helpers or `@tekmemo/cloud-client`.
+- Provider adapters accept credentials from their caller.
+- Low-level packages do not own dashboards, billing, tenancy, or hosted storage.
 
-```txt
-tekmemo
-  -> contracts and memory logic
-@tekmemo/fs
-  -> local filesystem store
-@tekmemo/ai-sdk
-  -> AI SDK integration
-@tekmemo/upstash-vector
-  -> vector store adapter
-@tekmemo/openai and @tekmemo/voyageai
-  -> embedding adapters
-```
+## Adapter aggregation
 
-## Why this matters
+`@tekmemo/adapters` is an application-facing aggregation package. It may depend on first-party adapter packages and expose convenience subpath reexports.
 
-Clean boundaries make the product easier to test, document, price, and support.
-
-<AdSlot placement="package-boundaries-bottom" />
+`tekmemo` core, recall contracts, rerank contracts, filesystem primitives, and graph primitives must not depend on `@tekmemo/adapters`. This keeps the core package solo and prevents provider SDKs, AI SDK tools, vector stores, or cloud transport from becoming transitive core dependencies.

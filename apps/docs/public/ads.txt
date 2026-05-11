@@ -1,2 +1,0 @@
-# Reserved for future ad network declarations.
-# This file intentionally contains no active ad sellers yet.

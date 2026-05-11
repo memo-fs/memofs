@@ -4,16 +4,12 @@
   --vp-c-brand-3: #60a5fa;
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(120deg, #2563eb 20%, #7c3aed 55%, #06b6d4);
-  --tm-ad-line: rgba(37, 99, 235, 0.16);
-  --tm-ad-fill: rgba(37, 99, 235, 0.045);
 }
 
 .dark {
   --vp-c-brand-1: #60a5fa;
   --vp-c-brand-2: #3b82f6;
   --vp-c-brand-3: #2563eb;
-  --tm-ad-line: rgba(96, 165, 250, 0.14);
-  --tm-ad-fill: rgba(96, 165, 250, 0.055);
 }
 
 .TekMemoSidebarBrand {
@@ -56,99 +52,12 @@
   font-weight: 500;
 }
 
-.TekMemoAdSlot {
-  position: relative;
-  overflow: hidden;
-  margin: 24px 0;
-  min-height: 84px;
-  border: 1px dashed var(--vp-c-divider);
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--tm-ad-fill), transparent 58%);
-  opacity: 0.72;
+.vp-doc table {
+  display: table;
+  width: 100%;
 }
 
-.TekMemoAdSlot--banner { min-height: 92px; }
-.TekMemoAdSlot--rail { min-height: 180px; margin-top: 0; }
-.TekMemoAdSlot--inline { min-height: 110px; }
-
-.TekMemoAdTriangle {
-  position: absolute;
-  display: block;
-  width: 0;
-  height: 0;
-  opacity: 0.38;
-}
-
-.TekMemoAdTriangle--one {
-  left: 18%;
-  top: 24%;
-  border-left: 22px solid transparent;
-  border-right: 22px solid transparent;
-  border-bottom: 38px solid var(--tm-ad-line);
-}
-
-.TekMemoAdTriangle--two {
-  right: 16%;
-  bottom: 20%;
-  border-left: 18px solid transparent;
-  border-right: 18px solid transparent;
-  border-top: 32px solid var(--tm-ad-line);
-}
-
-.TekMemoAdTriangle--three {
-  left: 48%;
-  top: 32%;
-  border-left: 13px solid transparent;
-  border-right: 13px solid transparent;
-  border-bottom: 22px solid var(--tm-ad-line);
-}
-
-.TekMemoHomePanels {
-  display: grid;
-  gap: 16px;
-  max-width: 1152px;
-  margin: 36px auto 0;
-  padding: 0 24px;
-}
-
-.TekMemoHomePanels article {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  padding: 22px;
-  background: var(--vp-c-bg-soft);
-}
-
-.TekMemoHomePanels h2 {
-  margin: 0 0 10px;
-  border-top: 0;
-  padding-top: 0;
-  font-size: 22px;
-  line-height: 1.25;
-}
-
-.TekMemoHomePanels p { margin: 0; color: var(--vp-c-text-2); }
-.TekMemoHomePanels .eyebrow { margin-bottom: 8px; color: var(--vp-c-brand-1); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-
-.TekMemoBlogIndex { display: flex; flex-direction: column; gap: 0; }
-.TekMemoBlogItem { padding: 16px 0; }
-.TekMemoBlogFooter { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
-.TekMemoBlogDate { color: var(--vp-c-text-2); font-size: 14px; font-weight: 500; }
-.TekMemoBlogTitle { margin: 0; border-top: 0; padding-top: 0; font-size: 22px; line-height: 1.35; letter-spacing: -0.015em; }
-.TekMemoBlogTitle a { color: var(--vp-c-text-1); text-decoration: none; }
-.TekMemoBlogTitle a:hover { color: var(--vp-c-brand-1); }
-.TekMemoBlogDescription { max-width: 680px; margin: 4px 0 0; color: var(--vp-c-text-2); font-size: 15px; line-height: 1.7; }
-.TekMemoBlogTags { display: flex; flex-wrap: wrap; gap: 6px; }
-.TekMemoBlogTag { display: inline-flex; align-items: center; border-radius: 999px; padding: 2px 8px; color: var(--vp-c-text-2); background: var(--vp-c-bg-soft); font-size: 12px; font-weight: 600; }
-
-.vp-doc table { display: table; width: 100%; }
-.vp-doc th, .vp-doc td { vertical-align: top; }
-
-@media (min-width: 768px) {
-  .TekMemoBlogItem { padding: 20px 0; }
-  .TekMemoBlogTitle { font-size: 24px; }
-  .TekMemoHomePanels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 960px) {
-  .TekMemoAdSlot--rail { display: none; }
+.vp-doc th,
+.vp-doc td {
+  vertical-align: top;
 }

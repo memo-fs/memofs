@@ -1,32 +1,14 @@
----
-title: Architecture
-description: Public architecture overview for TekMemo users and developers.
----
-
 # Architecture
 
-TekMemo is built around one principle:
+TekMemo is designed around inspectable memory boundaries.
 
-> Memory should be inspectable, portable, and usable locally before it becomes hosted infrastructure.
+## Layers
 
-## System layers
+1. Memory contracts
+2. Local filesystem adapter
+3. Recall and provider adapters
+4. Graph memory
+5. Cloud client transport
+6. CLI, MCP, and AI SDK integrations
 
-```txt
-Application or agent
-  → integration package
-  → TekMemo core runtime
-  → memory store
-  → optional recall/indexing
-  → optional hosted app API
-```
-
-## Public architecture topics
-
-- [Memory Model](/architecture/memory-model)
-- [Package Boundaries](/architecture/package-boundaries)
-- [Indexing and Recall](/architecture/indexing-recall)
-- [Sync and Events](/architecture/sync-events)
-- [Conflict Detection](/architecture/conflict-detection)
-- [Graph Memory](/architecture/graph-memory)
-
-<AdSlot placement="architecture-index" />
+Each layer should remain narrow so packages can be tested and published independently.

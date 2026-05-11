@@ -1,57 +1,32 @@
 ---
 layout: home
-
 hero:
-  name: "TekMemo"
-  text: "File-first memory for AI apps and agents"
-  tagline: "Build agents that remember without hiding state in a black box. Start with local .tekmemo files and the TypeScript SDK, then deploy the same memory runtime wherever your app runs."
-  image:
-    light: /tekmemo.svg
-    dark: /tekmemo.svg
-    alt: TekMemo
+  name: TekMemo
+  text: File-first memory for AI software.
+  tagline: Developer documentation for local memory, cloud sync, CLI workflows, MCP clients, graph memory, and AI SDK integrations.
   actions:
     - theme: brand
-      text: Start locally
+      text: Start in 5 minutes
       link: /guide/getting-started
     - theme: alt
-      text: TypeScript SDK
-      link: /sdks/typescript/
+      text: View packages
+      link: /packages/
     - theme: alt
-      text: Examples
+      text: Try examples
       link: /examples/
-
 features:
-  - title: Local testing costs nothing
-    details: Use the core runtime and local filesystem adapter without hosted services, vector databases, or paid provider keys.
-    link: /guide/local-testing
-    linkText: Test for free
-
-  - title: Memory is inspectable
-    details: Memory lives in a .tekmemo folder with core memory, notes, events, indexes, graph state, snapshots, and sync metadata.
-    link: /guide/memory-filesystem
-    linkText: See the filesystem
-
-  - title: TypeScript-first packages
-    details: "Install only what you need: core runtime, local FS, AI SDK tools, recall, reranking, and bring-your-own embedding providers."
-    link: /packages/
-    linkText: View packages
-
-  - title: Hosting is your choice
-    details: TekMemo runs inside TypeScript apps, Node services, React Router loaders, Next.js routes, Hono handlers, and Cloudflare Workers.
-    link: /hosting/
-    linkText: Host TekMemo
-
-  - title: Built for production memory
-    details: Event logs, chunk registries, conflict review, memory decay, graph recall, benchmarks, and governance are part of the product direction.
-    link: /architecture/
-    linkText: Read architecture
-
-  - title: Designed for developers
-    details: Use TekMemo in CLIs, React Router, Hono, Cloudflare Workers, coding agents, MCP tools, and long-running AI workflows.
-    link: /examples/
-    linkText: Browse examples
+  - title: File-first local runtime
+    details: Start with a .tekmemo folder, inspect memory as files, and keep durable context close to the project.
+  - title: Cloud-ready boundary
+    details: Use @tekmemo/cloud-client for hosted project memory, sync, recall, graph APIs, and self-hosted Cloud URLs.
+  - title: Agent and MCP friendly
+    details: Use the CLI, MCP server, and AI SDK tools to give coding agents stable memory before, during, and after work.
+  - title: Graph memory included
+    details: Use @tekmemo/graph for relationships, neighborhoods, paths, and source-aware memory structures.
 ---
 
-<AdSlot placement="home-after-hero" size="banner" />
+## What belongs in these docs
 
-<HomePanels />
+This VitePress app is the developer documentation for TekMemo OSS packages. It covers installation, local runtime, cloud-client, CLI, MCP, AI SDK, graph memory, package boundaries, examples, and production integration patterns.
+
+Product marketing, pricing, billing, blog, changelog, legal pages, public comparison pages, and launch content live in the TekMemo Cloud app CMS, not here.

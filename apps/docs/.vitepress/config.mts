@@ -7,7 +7,7 @@ import { site } from "./config/site.mts";
 export default defineConfig({
 	lang: "en-US",
 	title: site.title,
-	titleTemplate: ":title | TekMemo",
+	titleTemplate: ":title | TekMemo Docs",
 	description: site.description,
 	base: "/",
 	cleanUrls: true,
@@ -20,7 +20,7 @@ export default defineConfig({
 	},
 	themeConfig: {
 		logo: { light: "/tekmemo.svg", dark: "/tekmemo.svg", alt: "TekMemo" },
-		siteTitle: "TekMemo",
+		siteTitle: "TekMemo Docs",
 		nav,
 		sidebar,
 		search: { provider: "local" },
@@ -39,7 +39,7 @@ export default defineConfig({
 		},
 		docFooter: { prev: "Previous", next: "Next" },
 		footer: {
-			message: `Released under the ${site.license} License.`,
+			message: `Released under the ${site.license} License. Product, pricing, legal, blog, and changelog content live in TekMemo Cloud.`,
 			copyright: "Copyright © 2026-present TekBreed",
 		},
 	},

@@ -1,23 +1,24 @@
 import type { DefaultTheme } from "vitepress";
-import { apiVersionNavItems, latestApiVersion } from "../versions.mts";
 
 export const nav: DefaultTheme.NavItem[] = [
-	{ text: "Guide", link: "/guide/", activeMatch: "/guide/" },
-	{ text: "SDKs", link: "/sdks/", activeMatch: "/sdks/" },
+	{ text: "Start", link: "/guide/getting-started", activeMatch: "/guide/" },
 	{ text: "Packages", link: "/packages/", activeMatch: "/packages/" },
-	{ text: "API", link: "/api/", activeMatch: "/api/" },
-	{ text: latestApiVersion, items: apiVersionNavItems, activeMatch: "/api/" },
+	{ text: "CLI", link: "/cli/", activeMatch: "/cli/" },
+	{ text: "MCP", link: "/mcp/", activeMatch: "/mcp/" },
+	{
+		text: "Cloud Client",
+		link: "/cloud-client/",
+		activeMatch: "/cloud-client/",
+	},
+	{ text: "AI SDK", link: "/ai-sdk/", activeMatch: "/ai-sdk/" },
 	{ text: "Examples", link: "/examples/", activeMatch: "/examples/" },
 	{
-		text: "Resources",
+		text: "Reference",
 		items: [
-			{ text: "Hosting", link: "/hosting/" },
 			{ text: "Architecture", link: "/architecture/" },
-			{ text: "Roadmap", link: "/reference/roadmap" },
-			{ text: "Benchmarks", link: "/reference/benchmarks" },
-			{ text: "Blog", link: "/blog/" },
-			{ text: "Changelog", link: "/changelog/" },
-			{ text: "FAQs", link: "/faqs/" },
+			{ text: "Configuration", link: "/reference/configuration" },
+			{ text: "Errors", link: "/reference/errors" },
+			{ text: "Glossary", link: "/reference/glossary" },
 		],
 	},
 ];

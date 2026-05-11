@@ -1,10 +1,15 @@
----
-title: Rerank Package
-description: Provider-neutral reranking contracts for TekMemo recall.
----
+# Reranking packages
 
-# `@tekmemo/rerank`
+TekMemo separates rerank contracts from provider-specific adapters.
 
-`@tekmemo/rerank` defines reranking interfaces for recall pipelines.
+## Contracts
 
-Use it when your app retrieves candidate memories and needs a second pass to improve ordering before injecting context into a model call.
+```bash
+pnpm add @tekmemo/rerank
+```
+
+## VoyageAI adapter
+
+```bash
+pnpm add @tekmemo/rerank-voyage
+```

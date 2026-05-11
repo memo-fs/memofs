@@ -1,83 +1,29 @@
----
-title: Core Concepts
-description: Understand the terms used across TekMemo docs and APIs.
----
+# Core concepts
 
-# Core Concepts
+## Core memory
 
-TekMemo is built around a few durable ideas.
+Core memory is the stable project briefing. It should contain the facts an AI assistant should know every time it works in the project.
 
-## Memory store
+## Notes memory
 
-A memory store is a filesystem-like interface that can read, write, append, and check whether memory files exist.
+Notes are durable records such as decisions, constraints, preferences, references, summaries, and general notes.
 
-```ts
-export interface MemoryStore {
-  read(path: MemoryPath): Promise<string>
-  write(path: MemoryPath, content: string): Promise<void>
-  append(path: MemoryPath, content: string): Promise<void>
-  exists(path: MemoryPath): Promise<boolean>
-}
-```
+## Events
 
-Behind the scenes, the store might be local disk, AgentFS, or a database-backed file shim.
-
-## Memory path
-
-A memory path is a path inside `.tekmemo/`.
-
-```txt
-memory/core.md
-memory/notes.md
-events/conversations.jsonl
-events/memory-events.jsonl
-indexes/chunks.jsonl
-graph/nodes.jsonl
-graph/edges.jsonl
-snapshots/snapshots.jsonl
-```
-
-TekMemo uses internal relative paths so the same code can work across local files, syncable stores, and cloud-backed stores.
-
-## Memory layer
-
-A layer describes the scope and purpose of memory.
-
-| Layer | Purpose |
-| :--- | :--- |
-| User | Preferences and durable user-level facts. |
-| Workspace | Shared organization or team context. |
-| Project | Product, repo, assistant, or app-specific context. |
-| Agent | Memory learned by a specific agent. |
-| Session | Temporary working state for a run or conversation. |
-| Policy | Rules the agent must follow. |
-
-## Memory type
-
-A type describes what kind of memory is being stored.
-
-| Type | Storage | Example |
-| :--- | :--- | :--- |
-| Core | `memory/core.md` | Compact canonical truth. |
-| Notes | `memory/notes.md` | Durable long-form notes. |
-| Conversations | `events/conversations.jsonl` | Conversation history and summaries. |
+Events record changes over time. They make sync, audit, and agent workflows easier to inspect.
 
 ## Recall
 
-Recall means selecting useful memory for a new task.
+Recall turns memory into searchable context. Local recall can be keyword-based. Cloud or provider-backed recall can use vector search and reranking.
 
-TekMemo supports three recall levels:
+## Graph memory
 
-1. keyword recall for free local testing
-2. vector recall with BYO embedding/vector infrastructure
-3. provider-backed recall through your hosted application
+Graph memory stores entities and relationships. It helps answer questions like “what depends on this?” or “how are these two decisions connected?”
 
-## Memory compiler
+## Context package
 
-The memory compiler turns raw memory into prompt-ready context.
+A context package is the structured payload sent to an AI model or tool. It can combine core memory, notes, recall results, graph context, and source metadata.
 
-```txt
-raw files → chunk registry → retrieval → ranking → conflict filtering → prompt-ready memory block
-```
+## Boundary packages
 
-This is different from dumping every saved fact into the prompt.
+TekMemo packages have narrow responsibilities. For example, `@tekmemo/cloud-client` owns Cloud API communication. MCP and CLI delegate cloud calls to it instead of constructing raw URLs.

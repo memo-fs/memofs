@@ -1,144 +1,113 @@
 import type { DefaultTheme } from "vitepress";
-import { latestApiVersion, previousApiVersions } from "../versions.mts";
 
 const guide = [
-	{ text: "Introduction", link: "/guide/" },
-	{ text: "Getting Started", link: "/guide/getting-started" },
+	{ text: "Overview", link: "/guide/" },
+	{ text: "Getting started", link: "/guide/getting-started" },
 	{ text: "Installation", link: "/guide/installation" },
-	{ text: "Core Concepts", link: "/guide/concepts" },
-	{ text: "File-First Memory", link: "/guide/file-first-memory" },
-	{ text: "Memory Records", link: "/guide/memory-records" },
-	{ text: "Memory Filesystem", link: "/guide/memory-filesystem" },
-	{ text: "Recall", link: "/guide/recall" },
-	{ text: "Free Local Testing", link: "/guide/local-testing" },
+	{ text: "Core concepts", link: "/guide/concepts" },
+	{ text: "File-first memory", link: "/guide/file-first-memory" },
+	{ text: "Memory filesystem", link: "/guide/filesystem-layout" },
+	{ text: "Memory records", link: "/guide/memory-records" },
 	{ text: "Configuration", link: "/guide/configuration" },
-	{ text: "Production Checklist", link: "/guide/production-checklist" },
-];
-
-const sdks = [
-	{ text: "Overview", link: "/sdks/" },
-	{ text: "TypeScript SDK", link: "/sdks/typescript/" },
-	{ text: "Installation", link: "/sdks/typescript/installation" },
-	{ text: "Quickstart", link: "/sdks/typescript/quickstart" },
-	{ text: "Memory Records", link: "/sdks/typescript/memory-records" },
-	{ text: "Recall", link: "/sdks/typescript/recall" },
-	{ text: "API", link: "/sdks/typescript/api" },
+	{ text: "Local testing", link: "/guide/local-testing" },
+	{ text: "Production checklist", link: "/guide/production-checklist" },
 ];
 
 const packages = [
 	{ text: "Overview", link: "/packages/" },
-	{ text: "Core Runtime", link: "/packages/core-runtime" },
-	{ text: "Local FS Adapter", link: "/packages/fs-adapter" },
-	{ text: "AI SDK Integration", link: "/packages/ai-sdk" },
-	{ text: "AgentFS Adapter", link: "/packages/agentfs" },
-	{ text: "Recall", link: "/packages/recall" },
-	{ text: "Rerank", link: "/packages/rerank" },
-	{ text: "Rerank Voyage", link: "/packages/rerank-voyage" },
-	{ text: "Upstash Vector Adapter", link: "/packages/upstash-vector" },
-	{ text: "Voyage Embedder", link: "/packages/voyageai" },
-	{ text: "OpenAI Embedder", link: "/packages/openai" },
+	{ text: "tekmemo", link: "/packages/tekmemo" },
+	{ text: "@tekmemo/fs", link: "/packages/fs" },
+	{ text: "@tekmemo/agentfs", link: "/packages/agentfs" },
+	{ text: "@tekmemo/graph", link: "/packages/graph" },
+	{ text: "@tekmemo/cloud-client", link: "/packages/cloud-client" },
+	{ text: "@tekmemo/cli", link: "/packages/cli" },
+	{ text: "@tekmemo/mcp", link: "/packages/mcp" },
+	{ text: "@tekmemo/ai-sdk", link: "/packages/ai-sdk" },
+	{ text: "@tekmemo/adapters", link: "/packages/adapters" },
+	{ text: "@tekmemo/server", link: "/packages/server" },
+	{ text: "@tekmemo/recall", link: "/packages/recall" },
+	{ text: "Vector adapters", link: "/packages/vector-adapters" },
+	{ text: "Reranking", link: "/packages/rerank" },
+	{ text: "Provider adapters", link: "/packages/provider-adapters" },
+	{ text: "Benchmark kit", link: "/packages/benchmark-kit" },
 ];
 
-const api = [
-	{ text: "Overview", link: "/api/" },
-	{ text: "Runtime API", link: "/api/runtime" },
-	{ text: "Package API", link: "/api/packages" },
-	{ text: "CLI API", link: "/api/cli" },
-	{ text: "Config API", link: "/api/config" },
+const cli = [
+	{ text: "Overview", link: "/cli/" },
+	{ text: "Commands", link: "/cli/commands" },
+	{ text: "Cloud and hybrid mode", link: "/cli/cloud" },
+	{ text: "Agent workflow", link: "/cli/agent-workflow" },
+];
+
+const mcp = [
+	{ text: "Overview", link: "/mcp/" },
+	{ text: "Client setup", link: "/mcp/client-setup" },
+	{ text: "Tools", link: "/mcp/tools" },
+	{ text: "Runtime modes", link: "/mcp/runtime-modes" },
+	{ text: "Security", link: "/mcp/security" },
+];
+
+const cloudClient = [
+	{ text: "Overview", link: "/cloud-client/" },
+	{ text: "Quickstart", link: "/cloud-client/quickstart" },
+	{ text: "Routes", link: "/cloud-client/routes" },
+	{ text: "Runtime helpers", link: "/cloud-client/runtime" },
+	{ text: "Errors", link: "/cloud-client/errors" },
+];
+
+const aiSdk = [
+	{ text: "Overview", link: "/ai-sdk/" },
+	{ text: "Tools", link: "/ai-sdk/tools" },
+	{ text: "Agent patterns", link: "/ai-sdk/agent-patterns" },
+];
+
+const examples = [
+	{ text: "Overview", link: "/examples/" },
+	{ text: "Local only", link: "/examples/local-only" },
+	{ text: "Graph memory", link: "/examples/graph-memory" },
+	{ text: "CLI", link: "/examples/cli" },
+	{ text: "MCP", link: "/examples/mcp" },
+	{ text: "Cloud client", link: "/examples/cloud-client" },
+	{ text: "AI SDK", link: "/examples/ai-sdk" },
+];
+
+const architecture = [
+	{ text: "Overview", link: "/architecture/" },
+	{ text: "Package boundaries", link: "/architecture/package-boundaries" },
+	{ text: "Memory model", link: "/architecture/memory-model" },
+	{ text: "Graph memory", link: "/architecture/graph-memory" },
+	{ text: "Indexing and recall", link: "/architecture/indexing-recall" },
+	{ text: "Sync and events", link: "/architecture/sync-events" },
+	{ text: "Security", link: "/architecture/security" },
+];
+
+const reference = [
+	{ text: "Overview", link: "/reference/" },
+	{ text: "Configuration", link: "/reference/configuration" },
+	{ text: "Errors", link: "/reference/errors" },
+	{ text: "Glossary", link: "/reference/glossary" },
 ];
 
 export const sidebar: DefaultTheme.Sidebar = {
-	"/api/v0.1/": [
-		{
-			text: "API Reference v0.1",
-			items: [{ text: "Overview", link: "/api/v0.1/" }],
-		},
-		{
-			text: "Latest Version",
-			items: [{ text: `${latestApiVersion} latest`, link: "/api/" }],
-		},
-	],
-	"/api/": [
-		{ text: `API Reference ${latestApiVersion}`, items: api },
-		{
-			text: "Previous Versions",
-			items: previousApiVersions.map((v) => ({ text: v.label, link: v.link })),
-		},
-	],
 	"/guide/": [{ text: "Guide", items: guide }],
-	"/sdks/": [{ text: "SDKs", items: sdks }],
 	"/packages/": [{ text: "Packages", items: packages }],
-	"/examples/": [
-		{
-			text: "Examples",
-			items: [
-				{ text: "Overview", link: "/examples/" },
-				{ text: "Basic Memory", link: "/examples/basic-memory" },
-				{ text: "Local Only", link: "/examples/local-only" },
-				{ text: "AI SDK Memory", link: "/examples/ai-sdk-memory" },
-				{ text: "AI SDK Agent", link: "/examples/ai-sdk-agent" },
-				{ text: "Recall with Upstash", link: "/examples/recall-upstash" },
-				{ text: "BYO Provider", link: "/examples/byo-provider" },
-				{ text: "React Router", link: "/examples/react-router" },
-				{ text: "Next.js", link: "/examples/nextjs" },
-				{ text: "Express", link: "/examples/expressjs" },
-				{ text: "Hono", link: "/examples/honojs" },
-				{ text: "Cloudflare Workers", link: "/examples/cloudflare-workers" },
-			],
-		},
-	],
+	"/cli/": [{ text: "CLI", items: cli }],
+	"/mcp/": [{ text: "MCP", items: mcp }],
+	"/cloud-client/": [{ text: "Cloud Client", items: cloudClient }],
+	"/ai-sdk/": [{ text: "AI SDK", items: aiSdk }],
+	"/examples/": [{ text: "Examples", items: examples }],
+	"/architecture/": [{ text: "Architecture", items: architecture }],
+	"/reference/": [{ text: "Reference", items: reference }],
 	"/hosting/": [
 		{
 			text: "Hosting",
 			items: [
 				{ text: "Overview", link: "/hosting/" },
-				{ text: "Vercel", link: "/hosting/vercel" },
+				{ text: "Node", link: "/hosting/node" },
 				{ text: "Cloudflare Workers", link: "/hosting/cloudflare-workers" },
-				{ text: "Node Servers", link: "/hosting/node" },
+				{ text: "Vercel", link: "/hosting/vercel" },
 				{ text: "Security", link: "/hosting/security" },
 			],
-		},
-	],
-	"/architecture/": [
-		{
-			text: "Architecture",
-			items: [
-				{ text: "Overview", link: "/architecture/" },
-				{ text: "Memory Model", link: "/architecture/memory-model" },
-				{
-					text: "Package Boundaries",
-					link: "/architecture/package-boundaries",
-				},
-				{ text: "Indexing and Recall", link: "/architecture/indexing-recall" },
-				{ text: "Sync and Events", link: "/architecture/sync-events" },
-				{
-					text: "Conflict Detection",
-					link: "/architecture/conflict-detection",
-				},
-				{ text: "Graph Memory", link: "/architecture/graph-memory" },
-			],
-		},
-	],
-	"/reference/": [
-		{
-			text: "Reference",
-			items: [
-				{ text: "Overview", link: "/reference/" },
-				{ text: "Configuration", link: "/reference/configuration" },
-				{ text: "Errors", link: "/reference/errors" },
-				{ text: "Limits", link: "/reference/limits" },
-				{ text: "Glossary", link: "/reference/glossary" },
-				{ text: "Competitors", link: "/reference/competitors" },
-				{ text: "Benchmarks", link: "/reference/benchmarks" },
-				{ text: "Roadmap", link: "/reference/roadmap" },
-			],
-		},
-	],
-	"/blog/": [{ text: "Blog", items: [{ text: "All Posts", link: "/blog/" }] }],
-	"/changelog/": [
-		{
-			text: "Changelog",
-			items: [{ text: "Release Notes", link: "/changelog/" }],
 		},
 	],
 };

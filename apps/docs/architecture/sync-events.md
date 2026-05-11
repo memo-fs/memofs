@@ -1,36 +1,15 @@
----
-title: Sync and Events
-description: How TekMemo syncs memory and records changes through event logs.
----
+# Sync and events
 
-# Sync and Events
+Sync uses event-shaped changes so local and cloud runtimes can exchange memory updates.
 
-TekMemo should record memory changes before any hosted application workflow tries to coordinate them.
+## Push
 
-## Event types
+A client sends local memory changes to Cloud.
 
-```txt
-MEMORY_CREATED
-MEMORY_UPDATED
-MEMORY_MERGED
-MEMORY_CONFLICT_DETECTED
-MEMORY_DEPRECATED
-MEMORY_FORGOTTEN
-MEMORY_RESTORED
-```
+## Pull
 
-## Why events matter
+A client fetches server-side changes after a known version.
 
-Events make memory auditable. They also power restore, conflict detection, sync reconciliation, and usage analytics.
+## Conflicts
 
-## Sync flow
-
-```txt
-local change
-  -> memory event
-  -> sync manifest update
-  -> hosted app request
-  -> hosted index/update/history
-```
-
-<AdSlot placement="sync-events-bottom" />
+Conflicts should be explicit and resolved with a clear policy: keep cloud, use client, manual, or ignore.

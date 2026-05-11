@@ -1,47 +1,21 @@
----
-title: Local Only Example
-description: Run TekMemo locally with files and no cloud cost.
----
+# Local only example
 
-# Local Only Example
+Create, write, and read a temporary `.tekmemo/` workspace with `tekmemo` and `@tekmemo/fs`.
 
-```sh
-npm install tekmemo @tekmemo/fs
+Source folder:
+
+```txt
+examples/local-only/
 ```
 
-```ts
-import {
-  appendTimestampedNote,
-  bootstrapMemoryStore,
-  readCoreMemory,
-  writeCoreMemory
-} from 'tekmemo'
-import { createNodeFsMemoryStore } from '@tekmemo/fs'
+Run it from the repository root:
 
-const store = createNodeFsMemoryStore({
-  rootDir: process.cwd()
-})
-
-await bootstrapMemoryStore(store)
-
-await writeCoreMemory(store, `# Core Memory
-
-## Project
-- The app is a support assistant.
-
-## Constraints
-- Never expose private customer data.
-`)
-
-await appendTimestampedNote(store, {
-  timestamp: new Date().toISOString(),
-  kind: 'decision',
-  content: 'Use local TekMemo memory before enabling hosted sync.',
-  tags: ['memory', 'local'],
-  confidence: 1
-})
-
-console.log(await readCoreMemory(store))
+```bash
+pnpm --filter @tekmemo/example-local-only dev
 ```
 
-This creates local files under `.tekmemo/`. You can inspect them with your editor, commit them to a test repo, or delete them without calling any hosted service.
+Validate it:
+
+```bash
+pnpm --filter @tekmemo/example-local-only typecheck
+```

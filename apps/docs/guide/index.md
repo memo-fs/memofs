@@ -1,42 +1,23 @@
----
-title: Guide
-description: Learn how to use TekMemo as a file-first memory runtime for AI apps and agents.
----
-
 # Guide
 
-TekMemo helps AI applications keep useful memory without turning the entire system into a hidden prompt string or a locked hosted service.
+This guide gets you from zero to a working TekMemo memory setup.
 
-The core idea is simple:
+Start here if you want to understand the runtime model before choosing CLI, MCP, Cloud, or AI SDK integration.
 
-```txt
-Your app writes memory into a .tekmemo/ folder.
-Your app can inspect, search, compile, patch, and restore that memory.
-TekMemo runs inside the TypeScript application stack you already host.
-```
+## Recommended path
 
-## Start here
+1. [Install TekMemo](./installation)
+2. [Initialize local memory](./getting-started)
+3. [Understand the filesystem](./filesystem-layout)
+4. [Add durable records](./memory-records)
+5. [Use the CLI or MCP in an agent workflow](/cli/)
+6. [Connect cloud when you need sync or hosted APIs](/cloud-client/)
 
-1. [Getting Started](/guide/getting-started) gives you the fastest local setup.
-2. [Memory Filesystem](/guide/memory-filesystem) explains the `.tekmemo/` structure.
-3. [Free Local Testing](/guide/local-testing) shows what you can test without cost.
-4. [Packages](/packages/) explains what each package owns.
-5. [Examples](/examples/) shows practical integrations.
-6. [Hosting](/hosting/) explains how to deploy TekMemo-backed apps.
+## Runtime choices
 
-<AdSlot placement="guide-index-mid" />
-
-## What TekMemo is for
-
-| Use case | How TekMemo helps |
-| :--- | :--- |
-| AI assistants | Store durable user, workspace, and project memory. |
-| Coding agents | Keep repo decisions, conventions, bugs, and previous fixes. |
-| Learning agents | Remember learner preferences, progress, and friction points. |
-| Support agents | Track customer context without stuffing every chat into the prompt. |
-| Internal tools | Share team/project memory across AI workflows. |
-| Local prototyping | Test memory behavior without hosted services. |
-
-## What TekMemo is not
-
-TekMemo is not a chatbot UI, a vector database replacement, or an all-in-one agent framework. It is the memory runtime and infrastructure layer that your app, agent, or workflow can use.
+| Runtime | Use when |
+| --- | --- |
+| Local | You want inspectable project memory stored in `.tekmemo/`. |
+| Cloud | You want hosted project memory, sync, API keys, recall, and graph endpoints. |
+| Hybrid | You want local files plus cloud recall/sync. |
+| In-memory | You are writing tests, demos, or package examples. |

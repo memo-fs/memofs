@@ -1,50 +1,15 @@
----
-title: Graph Memory Architecture
-description: How TekMemo graph memory will work with files, vectors, and events.
----
+# Graph memory
 
-# Graph Memory Architecture
+Graph memory represents relationships.
 
-Graph memory stores relationships between entities.
+## Node
 
-Vector search answers:
+A node can represent a concept, decision, file, system, package, API, person, or workflow.
 
-> What text is similar to this question?
+## Edge
 
-Graph memory answers:
+An edge connects nodes. It can carry type, direction, weight, confidence, metadata, and source references.
 
-> Which decisions, users, projects, tools, and constraints are connected?
+## Runtime support
 
-## Graph files
-
-```txt
-.tekmemo/graph/
-├─ entities.jsonl
-├─ relations.jsonl
-├─ observations.jsonl
-└─ graph-manifest.json
-```
-
-## Retrieval flow
-
-```txt
-query
-→ keyword candidates
-→ vector candidates
-→ graph neighborhood
-→ temporal filtering
-→ reranking
-→ memory compiler
-```
-
-## Why it matters
-
-Graph memory helps with:
-
-- project decisions
-- dependency relationships
-- user preferences
-- team ownership
-- policy constraints
-- temporal fact changes
-- agent learning trails
+`@tekmemo/graph` provides graph contracts and local graph behavior. TekMemo Cloud exposes project-scoped graph APIs. `@tekmemo/cloud-client` calls those APIs. `@tekmemo/mcp-server` exposes graph tools through runtime adapters.

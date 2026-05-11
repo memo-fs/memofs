@@ -1,11 +1,6 @@
----
-title: Filesystem Layout
-description: Canonical filesystem layout for TekMemo memory stores.
----
+# Memory filesystem layout
 
-# Filesystem Layout
-
-TekMemo stores local memory in a `.tekmemo` directory.
+A local TekMemo project uses this structure:
 
 ```txt
 .tekmemo/
@@ -21,49 +16,14 @@ TekMemo stores local memory in a `.tekmemo` directory.
 ├── graph/
 │   ├── nodes.jsonl
 │   └── edges.jsonl
-└── snapshots/
-    └── snapshots.jsonl
+├── snapshots/
+│   └── snapshots.jsonl
+└── tmp/
 ```
 
-## `.tekmemo/manifest.json`
+## Rules
 
-Stores basic metadata about the memory workspace.
-
-## `.tekmemo/memory/core.md`
-
-Stores stable, high-signal memory.
-
-Examples:
-
-* durable project facts
-* user preferences
-* long-lived app decisions
-* current project constraints
-
-## `.tekmemo/memory/notes.md`
-
-Stores lower-pressure notes that may later be summarized, promoted, chunked, or indexed.
-
-## `.tekmemo/events/memory-events.jsonl`
-
-Append-only event log for memory changes.
-
-## `.tekmemo/events/conversations.jsonl`
-
-Conversation-turn history when the app chooses to persist turns.
-
-## `.tekmemo/indexes/chunks.jsonl`
-
-Local chunk index generated from memory files.
-
-## `.tekmemo/graph/nodes.jsonl`
-
-Optional graph nodes for relationship-aware memory.
-
-## `.tekmemo/graph/edges.jsonl`
-
-Optional graph edges for relationship-aware memory.
-
-## `.tekmemo/snapshots/snapshots.jsonl`
-
-Snapshot records for checkpointing memory state.
+- Do not store secrets in memory files.
+- Do not let agents write arbitrary paths inside `.tekmemo/`.
+- Prefer CLI or package APIs over manual writes.
+- Keep durable decisions concise.

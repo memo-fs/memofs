@@ -1,28 +1,33 @@
----
-title: Memory Records
-description: The durable record shape used by TekMemo memory stores.
----
+# Memory records
 
-# Memory Records
+Memory records should be small, explicit, and durable.
 
-A memory record is a durable unit of remembered information. Records are designed to be small enough to retrieve and review, but rich enough to preserve provenance.
+## Kinds
 
-## Recommended fields
+| Kind | Meaning |
+| --- | --- |
+| `decision` | A project decision that should be remembered later. |
+| `constraint` | A rule, limitation, or invariant. |
+| `preference` | A human or team preference. |
+| `reference` | A pointer to a document, file, or external source. |
+| `summary` | Condensed project knowledge. |
+| `note` | General durable memory. |
 
-| Field | Purpose |
-| :--- | :--- |
-| `id` | Stable record identifier. |
-| `scope` | Project, user, or session ownership boundary. |
-| `type` | Category such as fact, preference, decision, summary, or fragment. |
-| `content` | The remembered text or structured payload. |
-| `metadata` | Source, tags, confidence, timestamps, and provider-specific hints. |
+## Example
 
-## Scope discipline
+```bash
+tekmemo remember "Billing webhooks must verify signatures before mutating state." \
+  --kind constraint \
+  --tag billing \
+  --source architecture-review
+```
 
-Keep project, user, and session memory separate unless you intentionally promote a record across scopes.
+## Good memory
 
-Session memory is useful during one workflow. User memory should follow a person. Project memory should describe a repo, app, or workspace.
+Good memory is:
 
-## Retrieval
-
-Recall packages can index memory records for semantic search. The core runtime remains file-first and provider-neutral.
+- specific
+- source-aware
+- free of secrets
+- durable beyond one chat
+- easy for a human to audit

@@ -1,30 +1,38 @@
----
-title: Configuration
-description: Configure TekMemo stores, scopes, indexing, providers, and hosted TypeScript apps.
----
-
 # Configuration
 
-TekMemo does not support config files in the current release.
+TekMemo packages prefer explicit runtime configuration.
 
-There is currently no `tekmemo.config.ts`, `tekmemo.config.js`, or `tekmemo/config` export.
+## Local
 
-Configure TekMemo directly in code when creating stores, embedders, rerankers, and recall adapters.
-
-## Example
-
-```ts
-import { bootstrapMemoryStore } from "tekmemo";
-import { createNodeFsMemoryStore } from "@tekmemo/fs";
-
-const store = createNodeFsMemoryStore({
-  rootDir: process.cwd(),
-});
-
-await bootstrapMemoryStore(store);
+```bash
+tekmemo config init --runtime local
 ```
 
-## Planned
+## Cloud
 
-A config file API may be added later if it becomes necessary for CLI, framework, or cloud-sync workflows.
+```bash
+export TEKMEMO_CLOUD_URL="https://memo.tekbreed.com/api/v1"
+export TEKMEMO_API_KEY="tk_live_..."
+export TEKMEMO_PROJECT_ID="proj_123"
+```
 
+## Hybrid
+
+```bash
+tekmemo config init \
+  --runtime hybrid \
+  --cloud-url https://memo.tekbreed.com/api/v1 \
+  --project-id proj_123 \
+  --read-policy local-first \
+  --write-policy local-first
+```
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `TEKMEMO_CLOUD_URL` | Cloud API base URL ending in `/api/v1`. |
+| `TEKMEMO_API_KEY` | TekMemo Cloud API key. |
+| `TEKMEMO_PROJECT_ID` | Default Cloud project. |
+| `TEKMEMO_WORKSPACE_ID` | Optional caller-side workspace context. |
+| `TEKMEMO_RUNTIME` | `local`, `cloud`, `hybrid`, or `memory`. |

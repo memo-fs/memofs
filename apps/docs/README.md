@@ -1,36 +1,30 @@
-# TekMemo Docs
+# TekMemo Docs App
 
-Public user and developer documentation for TekMemo.
+Developer documentation for the TekMemo OSS workspace.
 
-This docs app is for external users, developers, customers, and teams evaluating or integrating TekMemo. It is not an internal execution plan.
+## Scope
 
-## Sections
+This VitePress app documents:
 
-- Guide
-- SDKs
-- Packages
-- API
-- Examples
-- Hosting
-- Architecture
-- Reference
-- Blog
-- Changelog
-- FAQs
+- `tekmemo`
+- `@tekmemo/fs`
+- `@tekmemo/agentfs`
+- `@tekmemo/graph`
+- `@tekmemo/cloud-client`
+- `@tekmemo/cli`
+- `@tekmemo/mcp-server`
+- `@tekmemo/ai-sdk`
+- `@tekmemo/adapters`
+- recall, rerank, vector, provider, and benchmark packages
+- examples and architecture
 
-## Development
+It intentionally does not contain blog, changelog, pricing, billing, legal, roadmap, or competitor pages. Those belong in the TekMemo Cloud app CMS.
 
-```sh
-pnpm install
-pnpm dev
+## Commands
+
+```bash
+pnpm --filter @tekmemo/docs dev
+pnpm --filter @tekmemo/docs build
+pnpm --filter @tekmemo/docs preview
+pnpm --filter @tekmemo/docs check:links
 ```
-
-## Build
-
-```sh
-pnpm build
-```
-
-## Ad placements
-
-Ad placeholders use the reusable `AdSlot` component. The right-side ad rail is mounted after the VitePress page outline/TOC.

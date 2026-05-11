@@ -1,24 +1,15 @@
----
-title: Indexing and Recall
-description: How TekMemo turns memory files into searchable local and semantic recall.
----
+# Indexing and recall
 
-# Indexing and Recall
+Recall converts memory into useful context.
 
-Recall should combine multiple strategies instead of relying only on vector search.
+## Local recall
 
-## Retrieval layers
+Useful for exact terms, file names, package names, decision IDs, and short projects.
 
-| Strategy | Purpose |
-| :--- | :--- |
-| Keyword search | Free local testing and exact matches. |
-| Vector search | Semantic recall for notes, conversations, and documents. |
-| Metadata filters | Scope by project, user, session, memory type, and tags. |
-| Graph traversal | Future entity and relationship recall. |
-| Reranking | Future final context selection. |
+## Provider-backed recall
 
-## Chunk registry
+Use vector stores and rerankers when projects have more content or need semantic search.
 
-`indexes/chunks.jsonl` maps memory sources to indexed chunks. This makes updates, stale chunk cleanup, and source deletion reliable.
+## Cloud recall
 
-<AdSlot placement="indexing-recall-bottom" />
+Use TekMemo Cloud when you need hosted indexing, project-scoped API keys, sync, and shared memory.

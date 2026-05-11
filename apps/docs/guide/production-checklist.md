@@ -1,57 +1,29 @@
----
-title: Production Checklist
-description: Checklist for moving a TekMemo integration from local testing to production.
----
+# Production checklist
 
-# Production Checklist
+Use this checklist before depending on TekMemo in production.
 
-Use this checklist before using TekMemo in a production AI app.
+## Local package usage
 
-## Memory model
+- Run `tekmemo validate` in CI.
+- Avoid committing secrets to `.tekmemo/`.
+- Use snapshots before large automated refactors.
+- Use stable package versions.
 
-- [ ] choose scopes: user, workspace, project, agent, session, policy
-- [ ] decide what belongs in core memory
-- [ ] decide what belongs in archival notes
-- [ ] decide which facts should be structured JSONL
-- [ ] define retention rules
-- [ ] define forgetting rules
+## Cloud usage
 
-## Storage
+- Use `@tekmemo/cloud-client` for all Cloud API calls.
+- Store API keys in server-side secrets only.
+- Scope API keys to the minimum required permissions.
+- Handle typed cloud errors.
+- Set request timeouts.
 
-- [ ] start with local `.tekmemo/` in development
-- [ ] choose durable production storage before relying on memory across deploys
-- [ ] configure snapshots
-- [ ] test restore behavior
-- [ ] avoid storing secrets in memory files
+## Agent usage
 
-## Recall
+- Ask agents to read context before planning.
+- Ask agents to store only durable decisions.
+- Use MCP read-only mode for untrusted clients.
+- Require approval for write tools.
 
-- [ ] start with keyword recall
-- [ ] add vector recall only when needed
-- [ ] set embedding dimensions explicitly
-- [ ] ensure vector index dimensions match embedder output
-- [ ] track source-to-chunk mappings
-- [ ] re-index changed sources safely
+## Documentation ownership
 
-## AI integration
-
-- [ ] inject only compact core memory by default
-- [ ] retrieve archival memory on demand
-- [ ] keep memory tools structured and safe
-- [ ] block arbitrary filesystem or shell access
-- [ ] log every memory mutation
-
-## Security
-
-- [ ] scope provider API keys to the minimum required permissions
-- [ ] rotate compromised provider keys
-- [ ] avoid exposing user-private memory across tenants
-- [ ] review policy memory updates
-- [ ] keep audit/event logs
-
-## Hosting
-
-- [ ] confirm the host has durable storage for memory state
-- [ ] configure provider request budgets
-- [ ] test deployment rollback with memory files intact
-- [ ] export memory before high-risk migrations
+Keep product marketing, pricing, billing, legal, blog, changelog, and public comparison content in the cloud app CMS. Keep developer package documentation in this VitePress app.

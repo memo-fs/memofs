@@ -1,7 +1,3 @@
-node_modules
-.vitepress/cache
-.vitepress/dist
-.vitepress/.temp
-.turbo
-.DS_Store
-*.log
+.vitepress/cache/
+.vitepress/dist/
+node_modules/

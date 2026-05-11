@@ -1,25 +1,13 @@
----
-title: AgentFS Adapter
-description: Use @tekmemo/agentfs for syncable filesystem-backed memory.
----
-
 # `@tekmemo/agentfs`
 
-Use this package when your environment provides an AgentFS-style filesystem backend and you want TekMemo memory to sync across sessions.
+Agent-oriented filesystem helpers for coding tools that need structured project memory access.
 
-## Use cases
+## Install
 
-- agent workspaces
-- portable memory stores
-- session checkpoints
-- sync before and after runs
-
-## Example
-
-```ts
-import { AgentfsMemoryStore, syncBeforeSession, syncAfterSession } from "@tekmemo/agentfs";
-
-await syncBeforeSession(client);
-const store = new AgentfsMemoryStore(client, { scope: "project", projectId: "proj_123" });
-await syncAfterSession(client, "memory-update");
+```bash
+pnpm add @tekmemo/agentfs
 ```
+
+## Use when
+
+Use this package when an agent needs safer file-oriented operations over `.tekmemo/` instead of arbitrary filesystem reads and writes.

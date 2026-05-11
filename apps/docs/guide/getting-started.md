@@ -1,97 +1,47 @@
----
-title: Getting Started
-description: Install TekMemo and create your first local memory store.
----
+# Getting started
 
-# Getting Started
+TekMemo starts with a normal project folder.
 
-This guide creates a local TekMemo memory store backed by files. It does not require hosted infrastructure, a vector database, or an embedding provider.
+## 1. Install the CLI
 
-## Install
-
-```sh
-npm install tekmemo @tekmemo/fs
+```bash
+pnpm add -D @tekmemo/cli
 ```
 
-## Create a memory store
+## 2. Initialize memory
 
-```ts
-import { bootstrapMemoryStore, readCoreMemory } from 'tekmemo'
-import { createNodeFsMemoryStore } from '@tekmemo/fs'
-
-const store = createNodeFsMemoryStore({
-  rootDir: process.cwd()
-})
-
-await bootstrapMemoryStore(store)
-
-const coreMemory = await readCoreMemory(store)
-console.log(coreMemory)
+```bash
+pnpm exec tekmemo init
 ```
 
-Behind the scenes, TekMemo creates a `.tekmemo/` folder with canonical memory files.
+This creates a `.tekmemo/` directory with core memory, notes, events, indexes, graph files, snapshots, and temp space.
 
-```txt
-.tekmemo/
-├── manifest.json
-├── memory/
-│   ├── core.md
-│   └── notes.md
-├── events/
-│   ├── memory-events.jsonl
-│   └── conversations.jsonl
-├── indexes/
-│   └── chunks.jsonl
-├── graph/
-│   ├── nodes.jsonl
-│   └── edges.jsonl
-└── snapshots/
-    └── snapshots.jsonl
+## 3. Store a durable decision
+
+```bash
+pnpm exec tekmemo remember "Use Cloudflare D1 for tenant metadata." --kind decision --tag database
 ```
 
-## Write a note
+## 4. Ask for context before coding
 
-```ts
-import { appendTimestampedNote } from 'tekmemo'
-
-await appendTimestampedNote(store, {
-  timestamp: new Date().toISOString(),
-  kind: 'decision',
-  content: 'Use TekMemo local file memory for the first prototype.',
-  tags: ['architecture', 'prototype'],
-  confidence: 1
-})
+```bash
+pnpm exec tekmemo context --query "database schema work" --json
 ```
 
-## Record a conversation entry
+## 5. Add MCP for coding agents
 
-```ts
-import { appendConversationEntry } from 'tekmemo'
-
-await appendConversationEntry(store, {
-  timestamp: new Date().toISOString(),
-  role: 'user',
-  content: 'Remember that this project uses React Router v7.'
-})
+```bash
+pnpm add -D @tekmemo/mcp-server
 ```
 
-## Add AI SDK integration
+Then configure your MCP client to run `tekmemo-mcp` in local, cloud, or hybrid mode.
 
-```sh
-npm install @tekmemo/ai-sdk
+## 6. Move to cloud when needed
+
+```bash
+export TEKMEMO_CLOUD_URL="https://memo.tekbreed.com/api/v1"
+export TEKMEMO_API_KEY="tk_live_..."
+export TEKMEMO_PROJECT_ID="proj_123"
+
+pnpm exec tekmemo cloud context --query "current task" --json
 ```
-
-```ts
-import { buildMemoryToolDefinition } from '@tekmemo/ai-sdk'
-
-const memoryTool = buildMemoryToolDefinition({ store })
-```
-
-The tool lets a model safely view, create, update, and search memory through structured commands. It does not expose arbitrary file or shell access.
-
-## Next steps
-
-- Use [Free Local Testing](/guide/local-testing) to test without hosted cost.
-- Read [Package Docs](/packages/) to understand package responsibilities.
-- Add [BYO Provider Recall](/examples/byo-provider) when you need semantic search.
-- Read [Hosting](/hosting/) before deploying TekMemo-backed apps.

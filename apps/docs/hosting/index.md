@@ -1,20 +1,30 @@
----
-title: Hosting
-description: Host TekMemo-backed TypeScript applications.
----
-
 # Hosting
 
-TekMemo runs inside your TypeScript application. The docs focus on hosting the app that uses TekMemo, not a separate hosted TekMemo cloud service.
+TekMemo packages run in any JavaScript environment. The key constraint is keeping Cloud API keys server-side.
 
-## Supported paths
+| Runtime | Best for | See |
+| --- | --- | --- |
+| Node.js | Express, Fastify, NestJS, CLI tools, MCP servers, background jobs | [Node](./node) |
+| Cloudflare Workers | Edge functions, Workers AI, D1-backed apps | [Cloudflare Workers](./cloudflare-workers) |
+| Vercel | Next.js route handlers, server actions, edge middleware | [Vercel](./vercel) |
+| Security principles | All runtimes | [Security](./security) |
 
-| Host | Use when |
-| :--- | :--- |
-| [Vercel](/hosting/vercel) | Your app uses Next.js, React Router, or serverless functions. |
-| [Cloudflare Workers](/hosting/cloudflare-workers) | You want edge runtime deployment and compatible storage bindings. |
-| [Node Servers](/hosting/node) | You run Express, Hono, workers, queues, or long-lived agents on a server. |
+## Minimum environment
 
-## Storage note
+```bash
+TEKMEMO_CLOUD_URL=https://memo.tekbreed.com/api/v1
+TEKMEMO_API_KEY=tk_live_...
+TEKMEMO_PROJECT_ID=proj_...
+```
 
-Local filesystem memory works best in development and durable Node environments. Serverless and edge deployments should use durable storage intentionally rather than assuming an ephemeral filesystem will persist memory.
+## Client creation pattern
+
+```ts
+import { createTekMemoCloudClient } from "@tekmemo/cloud-client";
+
+const client = createTekMemoCloudClient({
+  baseUrl: process.env.TEKMEMO_CLOUD_URL,
+  apiKey: process.env.TEKMEMO_API_KEY,
+  defaultProjectId: process.env.TEKMEMO_PROJECT_ID,
+});
+```

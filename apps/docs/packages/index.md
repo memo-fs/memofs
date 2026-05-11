@@ -1,58 +1,27 @@
----
-title: Packages
-description: Public package reference for TekMemo OSS packages.
----
-
 # Packages
 
-TekMemo packages let developers start with local file memory and add integrations only when needed.
+TekMemo is a package ecosystem. Each package has a narrow boundary.
 
-This section is for **using** the packages. It does not include internal package implementation plans.
+| Package | Purpose |
+| --- | --- |
+| [`tekmemo`](./tekmemo) | Core memory contracts and runtime helpers. |
+| [`@tekmemo/fs`](./fs) | Safe local `.tekmemo/` filesystem adapter. |
+| [`@tekmemo/agentfs`](./agentfs) | Agent-oriented filesystem helpers. |
+| [`@tekmemo/graph`](./graph) | Graph memory contracts and local graph behavior. |
+| [`@tekmemo/cloud-client`](./cloud-client) | TekMemo Cloud API transport and runtime helpers. |
+| [`@tekmemo/cli`](./cli) | Command-line tooling for local, cloud, and hybrid memory. |
+| [`@tekmemo/mcp-server`](./mcp) | MCP server boundary for agent tools. |
+| [`@tekmemo/ai-sdk`](./ai-sdk) | Vercel AI SDK tool helpers. |
+| [`@tekmemo/adapters`](./adapters) | Convenience subpath reexports for AI SDK, cloud, provider, vector, and rerank adapters. |
+| [`@tekmemo/server`](./server) | Hono-based self-host memory server package. |
+| [`@tekmemo/recall`](./recall) | Recall contracts and local recall helpers. |
+| [`@tekmemo/upstash-vector`](./vector-adapters) | Upstash Vector integration. |
+| [`@tekmemo/rerank`](./rerank) | Rerank contracts. |
+| [`@tekmemo/rerank-voyage`](./rerank) | VoyageAI reranking adapter. |
+| [`@tekmemo/openai`](./provider-adapters) | OpenAI provider adapter. |
+| [`@tekmemo/voyageai`](./provider-adapters) | VoyageAI provider adapter. |
+| [`@tekmemo/benchmark-kit`](./benchmark-kit) | Benchmark fixtures and runners. |
 
-## Current packages
+## Rule
 
-| Package | Use when you need |
-| :--- | :--- |
-| `tekmemo` | Core `.tekmemo/` runtime, memory commands, events, chunks, and local search contracts. |
-| `@tekmemo/fs` | Local Node filesystem-backed memory for free testing. |
-| `@tekmemo/ai-sdk` | Safe memory tools and prompt context helpers for AI SDK apps. |
-| `@tekmemo/agentfs` | Syncable filesystem-like storage adapter. |
-| `@tekmemo/recall` | Semantic recall orchestration over your chosen embedding and vector providers. |
-| `@tekmemo/rerank` | Reranking contracts for retrieval pipelines. |
-| `@tekmemo/rerank-voyage` | Voyage AI-backed reranking adapter. |
-| `@tekmemo/upstash-vector` | Upstash Vector-backed semantic recall. |
-| `@tekmemo/voyageai` | Voyage AI embedding adapter. |
-| `@tekmemo/openai` | OpenAI embedding adapter. |
-
-## Planned packages
-
-These are part of the public roadmap and will get user docs when they are ready:
-
-- `@tekmemo/cli`
-- `@tekmemo/mcp`
-- `@tekmemo/graph`
-- `@tekmemo/connectors`
-
-## Recommended install path
-
-Start with the free local stack:
-
-```sh
-npm install tekmemo @tekmemo/fs
-```
-
-Then add AI SDK support:
-
-```sh
-npm install @tekmemo/ai-sdk
-```
-
-Add semantic recall only when you are ready to bring your own providers:
-
-```sh
-npm install @tekmemo/upstash-vector @tekmemo/openai
-# or
-npm install @tekmemo/upstash-vector @tekmemo/voyageai
-```
-
-<AdSlot placement="packages-overview" />
+Low-level packages do not call TekMemo Cloud directly. Cloud transport belongs to `@tekmemo/cloud-client`.
