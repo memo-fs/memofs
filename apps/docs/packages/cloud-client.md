@@ -5,7 +5,7 @@ Project-scoped TekMemo Cloud API client.
 ## Install
 
 ```bash
-pnpm add @tekmemo/cloud-client
+npm install @tekmemo/cloud-client
 ```
 
 ## Create a client
@@ -22,12 +22,11 @@ const client = createTekMemoCloudClient({
 const core = await client.memory.readCore();
 ```
 
-## Owns
+## Features
 
-- URL construction
-- auth headers
-- canonical `{ data, meta }` and `{ error, meta }` envelopes
-- typed errors
-- retries/timeouts where configured
-- self-hosted cloud base URLs
-- runtime helpers for CLI, MCP, and AI SDK integrations
+- Automatic URL construction and auth headers
+- Canonical `{ data, meta }` and `{ error, meta }` response envelopes
+- Typed errors with status codes and request IDs
+- Configurable retries and timeouts
+- Works with self-hosted TekMemo Cloud base URLs
+- Runtime helpers for CLI, MCP, and AI SDK integrations

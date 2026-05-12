@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/adapters"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/adapters",
+	"homepage": "https://docs.memo.tekbreed.com/packages/adapters",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

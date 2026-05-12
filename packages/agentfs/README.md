@@ -28,7 +28,7 @@ It can also expose an AgentFS-like remote file runtime as a TekMemo `MemoryStore
 ## Installation
 
 ```bash
-pnpm add tekmemo @tekmemo/agentfs
+npm install tekmemo @tekmemo/agentfs
 ```
 
 ## Quickstart

@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/ai-sdk"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/ai-sdk",
+	"homepage": "https://docs.memo.tekbreed.com/packages/ai-sdk",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

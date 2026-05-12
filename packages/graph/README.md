@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@tekmemo/graph?label=npm)](https://www.npmjs.com/package/@tekmemo%2Fgraph)
 [![npm downloads](https://img.shields.io/npm/dm/@tekmemo/graph)](https://www.npmjs.com/package/@tekmemo%2Fgraph)
 [![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.tekmemo.dev)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.memo.tekbreed.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
 
@@ -14,7 +14,7 @@
 ## Install
 
 ```bash
-pnpm add @tekmemo/graph
+npm install @tekmemo/graph
 ```
 
 ## Quick start
@@ -43,8 +43,8 @@ pnpm --filter @tekmemo/graph lint:package
 
 ## Docs
 
-- Package docs: https://docs.tekmemo.dev/packages/
-- Examples: https://docs.tekmemo.dev/examples/
+- Package docs: https://docs.memo.tekbreed.com/packages/
+- Examples: https://docs.memo.tekbreed.com/examples/
 - Repository: https://github.com/tekbreed/tekmemo
 
 ## Publishing metadata

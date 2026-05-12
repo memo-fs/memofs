@@ -8,14 +8,16 @@ Source folder:
 examples/cli/
 ```
 
-Run it from the repository root:
+Navigate to the example folder and run it:
 
 ```bash
-pnpm --filter @tekmemo/example-cli dev
+cd examples/cli
+npm install
+npm run dev
 ```
 
 Validate it:
 
 ```bash
-pnpm --filter @tekmemo/example-cli typecheck
+npm run typecheck
 ```

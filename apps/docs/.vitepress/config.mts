@@ -15,12 +15,12 @@ export default defineConfig({
 	ignoreDeadLinks: false,
 	head,
 	markdown: {
-		lineNumbers: true,
+		// lineNumbers: true,
 		theme: { light: "github-light", dark: "github-dark" },
 	},
 	themeConfig: {
 		logo: { light: "/tekmemo.svg", dark: "/tekmemo.svg", alt: "TekMemo" },
-		siteTitle: "TekMemo Docs",
+		siteTitle: "tekmemo",
 		nav,
 		sidebar,
 		search: { provider: "local" },
@@ -28,6 +28,7 @@ export default defineConfig({
 		socialLinks: [
 			{ icon: "github", link: site.repo, ariaLabel: "TekMemo on GitHub" },
 			{ icon: "npm", link: site.npm, ariaLabel: "TekMemo on npm" },
+			{ icon: "x", link: site.x, ariaLabel: "TekMemo on X" },
 		],
 		editLink: {
 			pattern: `${site.repo}/edit/main/apps/docs/:path`,
@@ -39,7 +40,7 @@ export default defineConfig({
 		},
 		docFooter: { prev: "Previous", next: "Next" },
 		footer: {
-			message: `Released under the ${site.license} License. Product, pricing, legal, blog, and changelog content live in TekMemo Cloud.`,
+			message: `Released under the ${site.license} License.`,
 			copyright: "Copyright © 2026-present TekBreed",
 		},
 	},

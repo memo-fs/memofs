@@ -1,19 +1,19 @@
 # Packages
 
-TekMemo is a package ecosystem. Each package has a narrow boundary.
+TekMemo is a modular package ecosystem. Install only what you need.
 
 | Package | Purpose |
 | --- | --- |
-| [`tekmemo`](./tekmemo) | Core memory contracts and runtime helpers. |
-| [`@tekmemo/fs`](./fs) | Safe local `.tekmemo/` filesystem adapter. |
+| [`tekmemo`](./tekmemo) | Core memory types, contracts, and runtime helpers. |
+| [`@tekmemo/fs`](./fs) | Local `.tekmemo/` filesystem adapter. |
 | [`@tekmemo/agentfs`](./agentfs) | Agent-oriented filesystem helpers. |
-| [`@tekmemo/graph`](./graph) | Graph memory contracts and local graph behavior. |
-| [`@tekmemo/cloud-client`](./cloud-client) | TekMemo Cloud API transport and runtime helpers. |
+| [`@tekmemo/graph`](./graph) | Graph memory for entities and relationships. |
+| [`@tekmemo/cloud-client`](./cloud-client) | TekMemo Cloud API client. |
 | [`@tekmemo/cli`](./cli) | Command-line tooling for local, cloud, and hybrid memory. |
-| [`@tekmemo/mcp-server`](./mcp) | MCP server boundary for agent tools. |
+| [`@tekmemo/mcp-server`](./mcp) | MCP server for coding agents. |
 | [`@tekmemo/ai-sdk`](./ai-sdk) | Vercel AI SDK tool helpers. |
-| [`@tekmemo/adapters`](./adapters) | Convenience subpath reexports for AI SDK, cloud, provider, vector, and rerank adapters. |
-| [`@tekmemo/server`](./server) | Hono-based self-host memory server package. |
+| [`@tekmemo/adapters`](./adapters) | Convenience imports for AI SDK, cloud, embedding, vector, and rerank adapters. |
+| [`@tekmemo/server`](./server) | Self-hosted memory server (Hono-based). |
 | [`@tekmemo/recall`](./recall) | Recall contracts and local recall helpers. |
 | [`@tekmemo/upstash-vector`](./vector-adapters) | Upstash Vector integration. |
 | [`@tekmemo/rerank`](./rerank) | Rerank contracts. |
@@ -21,7 +21,3 @@ TekMemo is a package ecosystem. Each package has a narrow boundary.
 | [`@tekmemo/openai`](./provider-adapters) | OpenAI provider adapter. |
 | [`@tekmemo/voyageai`](./provider-adapters) | VoyageAI provider adapter. |
 | [`@tekmemo/benchmark-kit`](./benchmark-kit) | Benchmark fixtures and runners. |
-
-## Rule
-
-Low-level packages do not call TekMemo Cloud directly. Cloud transport belongs to `@tekmemo/cloud-client`.

@@ -5,7 +5,7 @@ Vercel AI SDK helpers for TekMemo memory tools.
 ## Install
 
 ```bash
-pnpm add @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
+npm install @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
 ```
 
 ## Purpose
@@ -14,11 +14,13 @@ Use this package to expose TekMemo memory as AI SDK tools in `generateText`, `st
 
 The package provides:
 
-- `createTekMemoTool()` for a single AI SDK-compatible tool
-- `defineTekMemoTools()` for a ready-to-pass `tools` object
-- `createLocalAiSdkRuntime()` for local file-backed memory
-- `buildTekMemoSystemPrompt()` for memory-aware system prompts
-- scope enforcement for project, user, conversation, and participant memory
+- `buildRuntimeMemoryToolDefinition()` for a ready-to-use AI SDK tool with memory operations
+- `runRuntimeMemoryTool()` for executing memory tool commands with scope enforcement
+- `createLocalAiSdkRuntime()` for local file-backed memory runtime
+- `buildRuntimeMemoryContext()` for building memory-aware context (system prompt)
+- `buildMemoryToolDefinition()` for a standard memory tool definition (legacy API)
+- `buildAgentSessionInstructions()` for agent session instruction blocks
+- Scope enforcement for project, user, conversation, and participant memory
 
 ## Minimal usage
 
@@ -26,23 +28,42 @@ The package provides:
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import {
-	buildTekMemoSystemPrompt,
+	buildRuntimeMemoryContext,
+	buildRuntimeMemoryToolDefinition,
 	createLocalAiSdkRuntime,
-	defineTekMemoTools,
 } from "@tekmemo/ai-sdk";
+import { createNodeFsMemoryStore } from "@tekmemo/fs";
 
+const store = createNodeFsMemoryStore({ rootDir: "./.tekmemo" });
+const runtime = createLocalAiSdkRuntime({ workspace: store });
 const access = { projectId: "demo", userId: "user_123" };
-const runtime = createLocalAiSdkRuntime({ workspace, access });
-const { system } = await buildTekMemoSystemPrompt({ runtime, access, query: prompt });
+const { text: system } = await buildRuntimeMemoryContext({
+	runtime,
+	access,
+	query: prompt,
+	baseInstructions: "You are a helpful assistant.",
+});
 
 await generateText({
 	model: openai("gpt-4.1-mini"),
 	system,
 	prompt,
-	tools: defineTekMemoTools({ runtime, access, allowWrites: true }),
+	tools: {
+		memory: buildRuntimeMemoryToolDefinition({ runtime, access, allowWrites: true }),
+	},
 });
 ```
 
-## Boundary
+## Cloud-backed tools
 
-Cloud-backed tools should use a runtime from `@tekmemo/cloud-client`. This package does not own hosted storage, billing, dashboards, or provider secrets.
+For cloud-backed memory tools, use a runtime from `@tekmemo/cloud-client` instead of the local runtime:
+
+```ts
+import { createTekMemoCloudClient } from "@tekmemo/cloud-client";
+
+const client = createTekMemoCloudClient({
+	baseUrl: "https://memo.tekbreed.com/api/v1",
+	apiKey: process.env.TEKMEMO_API_KEY!,
+	defaultProjectId: "proj_123",
+});
+```

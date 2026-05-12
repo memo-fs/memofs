@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@tekmemo/mcp-server?label=npm)](https://www.npmjs.com/package/@tekmemo%2Fmcp)
 [![npm downloads](https://img.shields.io/npm/dm/@tekmemo/mcp-server)](https://www.npmjs.com/package/@tekmemo%2Fmcp)
 [![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.tekmemo.dev)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.memo.tekbreed.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
 
@@ -14,13 +14,13 @@
 ## Install
 
 ```bash
-pnpm add @tekmemo/mcp-server
+npm install @tekmemo/mcp-server
 ```
 
 ## Quick start
 
 ```bash
-pnpm add @tekmemo/mcp-server @tekmemo/cloud-client tekmemo @tekmemo/fs
+npm install @tekmemo/mcp-server @tekmemo/cloud-client tekmemo @tekmemo/fs
 TEKMEMO_API_KEY="tk_live_..." \
 TEKMEMO_CLOUD_URL="https://memo.tekbreed.com/api/v1" \
 tekmemo-mcp-server --runtime cloud --project-id proj_123
@@ -43,8 +43,8 @@ pnpm --filter @tekmemo/mcp-server lint:package
 
 ## Docs
 
-- Package docs: https://docs.tekmemo.dev/packages/
-- Examples: https://docs.tekmemo.dev/examples/
+- Package docs: https://docs.memo.tekbreed.com/packages/
+- Examples: https://docs.memo.tekbreed.com/examples/
 - Repository: https://github.com/tekbreed/tekmemo
 
 ## Publishing metadata

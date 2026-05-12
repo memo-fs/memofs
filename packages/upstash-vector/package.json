@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/upstash-vector"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/upstash-vector",
+	"homepage": "https://docs.memo.tekbreed.com/packages/upstash-vector",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

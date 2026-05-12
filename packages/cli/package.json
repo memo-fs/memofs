@@ -81,7 +81,7 @@
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/cli",
+	"homepage": "https://docs.memo.tekbreed.com/packages/cli",
 	"publishConfig": {
 		"access": "public",
 		"registry": "https://registry.npmjs.org/"

@@ -21,7 +21,7 @@ const packages = [
 	{ text: "@tekmemo/graph", link: "/packages/graph" },
 	{ text: "@tekmemo/cloud-client", link: "/packages/cloud-client" },
 	{ text: "@tekmemo/cli", link: "/packages/cli" },
-	{ text: "@tekmemo/mcp", link: "/packages/mcp" },
+	{ text: "@tekmemo/mcp-server", link: "/packages/mcp" },
 	{ text: "@tekmemo/ai-sdk", link: "/packages/ai-sdk" },
 	{ text: "@tekmemo/adapters", link: "/packages/adapters" },
 	{ text: "@tekmemo/server", link: "/packages/server" },
@@ -88,26 +88,36 @@ const reference = [
 	{ text: "Glossary", link: "/reference/glossary" },
 ];
 
+const hosting = [
+	{ text: "Overview", link: "/hosting/" },
+	{ text: "Node", link: "/hosting/node" },
+	{ text: "Cloudflare Workers", link: "/hosting/cloudflare-workers" },
+	{ text: "Vercel", link: "/hosting/vercel" },
+	{ text: "Security", link: "/hosting/security" },
+];
+
+const ecosystemSidebar = [
+	{ text: "CLI", items: cli },
+	{ text: "MCP Server", items: mcp },
+	{ text: "Cloud Client", items: cloudClient },
+	{ text: "AI SDK", items: aiSdk },
+];
+
+const referenceSidebar = [
+	{ text: "Architecture", items: architecture },
+	{ text: "Hosting", items: hosting },
+	{ text: "Reference", items: reference },
+];
+
 export const sidebar: DefaultTheme.Sidebar = {
 	"/guide/": [{ text: "Guide", items: guide }],
 	"/packages/": [{ text: "Packages", items: packages }],
-	"/cli/": [{ text: "CLI", items: cli }],
-	"/mcp/": [{ text: "MCP", items: mcp }],
-	"/cloud-client/": [{ text: "Cloud Client", items: cloudClient }],
-	"/ai-sdk/": [{ text: "AI SDK", items: aiSdk }],
 	"/examples/": [{ text: "Examples", items: examples }],
-	"/architecture/": [{ text: "Architecture", items: architecture }],
-	"/reference/": [{ text: "Reference", items: reference }],
-	"/hosting/": [
-		{
-			text: "Hosting",
-			items: [
-				{ text: "Overview", link: "/hosting/" },
-				{ text: "Node", link: "/hosting/node" },
-				{ text: "Cloudflare Workers", link: "/hosting/cloudflare-workers" },
-				{ text: "Vercel", link: "/hosting/vercel" },
-				{ text: "Security", link: "/hosting/security" },
-			],
-		},
-	],
+	"/cli/": ecosystemSidebar,
+	"/mcp/": ecosystemSidebar,
+	"/cloud-client/": ecosystemSidebar,
+	"/ai-sdk/": ecosystemSidebar,
+	"/architecture/": referenceSidebar,
+	"/reference/": referenceSidebar,
+	"/hosting/": referenceSidebar,
 };

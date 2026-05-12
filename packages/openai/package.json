@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/openai"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/openai",
+	"homepage": "https://docs.memo.tekbreed.com/packages/openai",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

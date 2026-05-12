@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/benchmark-kit"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/benchmark-kit",
+	"homepage": "https://docs.memo.tekbreed.com/packages/benchmark-kit",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

@@ -5,7 +5,7 @@ Use Node for Express, Fastify, NestJS, CLI tools, MCP servers, and background jo
 ## Setup
 
 ```bash
-pnpm add @tekmemo/cloud-client
+npm install @tekmemo/cloud-client
 ```
 
 ## Express example

@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/fs"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/fs",
+	"homepage": "https://docs.memo.tekbreed.com/packages/fs",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

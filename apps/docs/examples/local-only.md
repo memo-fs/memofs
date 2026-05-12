@@ -8,14 +8,16 @@ Source folder:
 examples/local-only/
 ```
 
-Run it from the repository root:
+Navigate to the example folder and run it:
 
 ```bash
-pnpm --filter @tekmemo/example-local-only dev
+cd examples/local-only
+npm install
+npm run dev
 ```
 
 Validate it:
 
 ```bash
-pnpm --filter @tekmemo/example-local-only typecheck
+npm run typecheck
 ```

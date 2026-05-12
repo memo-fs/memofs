@@ -5,7 +5,7 @@ Command-line tooling for local, cloud, and hybrid memory workflows.
 ## Install
 
 ```bash
-pnpm add -D @tekmemo/cli
+npm install -D @tekmemo/cli
 ```
 
 ## Start

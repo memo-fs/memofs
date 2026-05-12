@@ -23,7 +23,3 @@ Use this checklist before depending on TekMemo in production.
 - Ask agents to store only durable decisions.
 - Use MCP read-only mode for untrusted clients.
 - Require approval for write tools.
-
-## Documentation ownership
-
-Keep product marketing, pricing, billing, legal, blog, changelog, and public comparison content in the cloud app CMS. Keep developer package documentation in this VitePress app.

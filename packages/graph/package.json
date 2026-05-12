@@ -54,7 +54,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/graph"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/graph",
+	"homepage": "https://docs.memo.tekbreed.com/packages/graph",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

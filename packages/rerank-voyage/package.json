@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/rerank-voyage"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/rerank-voyage",
+	"homepage": "https://docs.memo.tekbreed.com/packages/rerank-voyage",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

@@ -5,5 +5,6 @@ export const site = {
 	repo: "https://github.com/tekbreed/tekmemo",
 	npm: "https://www.npmjs.com/package/tekmemo",
 	cloud: "https://memo.tekbreed.com",
+	x: "https://x.com/tekbreed",
 	license: "MIT",
 } as const;

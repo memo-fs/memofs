@@ -2,17 +2,15 @@
 
 `@tekmemo/server` is the Hono-based API layer for self-hosted TekMemo memory servers.
 
-It is not TekMemo Cloud. It excludes billing, public marketing pages, CMS content, hosted signup, and SaaS-only workflows.
-
 ## Root import
 
-Use the root import for runtime-neutral app construction and contracts:
+Use the root import for runtime-neutral app construction:
 
 ```ts
 import { createTekMemoServer } from "@tekmemo/server";
 ```
 
-The root import intentionally avoids Node-only dependencies so Cloudflare Workers can keep using the shared Hono app.
+The root import avoids Node-only dependencies so Cloudflare Workers can use the shared Hono app.
 
 ## Node import
 
@@ -34,22 +32,25 @@ The Node runtime supports:
 - S3-compatible object storage.
 - Local filesystem object storage for development.
 
-## Portable Node app
+## Self-hosting with Node
 
-The recommended Node deployment target is `apps/self-host-node`.
+The recommended Node deployment target is `apps/self-host-node` in the [TekMemo repository](https://github.com/tekbreed/tekmemo).
 
-It can run as one API process plus one worker process from the same image:
+It runs as one API process plus one worker process:
 
 ```bash
-pnpm --filter @tekmemo/self-host-node server
-pnpm --filter @tekmemo/self-host-node worker
+# API server
+npm run server
+
+# Background worker
+npm run worker
 ```
 
-This is the correct path for Railway, Fly.io, Render, Coolify, Northflank, and similar hosts.
+This works with Railway, Fly.io, Render, Coolify, Northflank, and similar hosts.
 
-## Docker Compose
+## Self-hosting with Docker Compose
 
-`apps/self-host-docker` is packaging around the Node runtime. It starts:
+`apps/self-host-docker` provides a Docker Compose setup that starts:
 
 - `tekmemo-api`
 - `tekmemo-worker`
@@ -57,13 +58,13 @@ This is the correct path for Railway, Fly.io, Render, Coolify, Northflank, and s
 - `minio` for S3-compatible object storage
 
 ```bash
-cp apps/self-host-docker/.env.example apps/self-host-docker/.env
-docker compose -f apps/self-host-docker/docker-compose.yml up --build
+cp .env.example .env
+docker compose up --build
 ```
 
-## Compatible client
+## Connecting a client
 
-Use `@tekmemo/cloud-client` against the self-hosted base URL:
+Use `@tekmemo/cloud-client` against your self-hosted base URL:
 
 ```ts
 import { createTekMemoCloudClient } from "@tekmemo/cloud-client";
@@ -74,7 +75,3 @@ const client = createTekMemoCloudClient({
 	defaultProjectId: "default",
 });
 ```
-
-## Status
-
-Node/Docker now has a durable baseline. Cloudflare still uses the in-memory alpha wrapper and should be upgraded next with D1, R2, and Cloudflare Queues adapters.

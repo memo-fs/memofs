@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/rerank"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/rerank",
+	"homepage": "https://docs.memo.tekbreed.com/packages/rerank",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

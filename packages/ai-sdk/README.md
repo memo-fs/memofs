@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@tekmemo/ai-sdk?label=npm)](https://www.npmjs.com/package/@tekmemo%2Fai-sdk)
 [![npm downloads](https://img.shields.io/npm/dm/@tekmemo/ai-sdk)](https://www.npmjs.com/package/@tekmemo%2Fai-sdk)
 [![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.tekmemo.dev)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.memo.tekbreed.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
 
@@ -44,7 +44,7 @@ const system = buildAgentSessionInstructions({
 ## Install
 
 ```bash
-pnpm add @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
+npm install @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
 ```
 
 For hosted memory, also install `@tekmemo/cloud-client` and create a cloud runtime there.

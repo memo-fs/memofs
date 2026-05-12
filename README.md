@@ -6,7 +6,7 @@
 
 [![npm](https://img.shields.io/npm/v/tekmemo?label=tekmemo)](https://www.npmjs.com/package/tekmemo)
 [![CI](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml/badge.svg)](https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.tekmemo.dev)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://docs.memo.tekbreed.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ff69b4)](https://github.com/sponsors/christophersesugh)
@@ -79,9 +79,9 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createNodeFsMemoryStore } from "@tekmemo/fs";
 import {
-  buildTekMemoSystemPrompt,
+  buildRuntimeMemoryContext,
+  buildRuntimeMemoryToolDefinition,
   createLocalAiSdkRuntime,
-  defineTekMemoTools,
 } from "@tekmemo/adapters/ai-sdk";
 
 const workspace = createNodeFsMemoryStore({
@@ -96,19 +96,19 @@ const access = {
   conversationId: "thread_456",
 };
 
-const runtime = createLocalAiSdkRuntime({ workspace, access });
-const { system } = await buildTekMemoSystemPrompt({
+const runtime = createLocalAiSdkRuntime({ workspace });
+const { text: system } = await buildRuntimeMemoryContext({
   runtime,
   access,
   query: "current task",
-  system: "You are a helpful engineering assistant.",
+  baseInstructions: "You are a helpful engineering assistant.",
 });
 
 const result = await generateText({
   model: openai("gpt-4.1-mini"),
   system,
   prompt: "Summarize the current implementation risks.",
-  tools: defineTekMemoTools({ runtime, access, allowWrites: true }),
+  tools: { memory: buildRuntimeMemoryToolDefinition({ runtime, access, allowWrites: true }) },
 });
 
 console.log(result.text);
@@ -140,7 +140,7 @@ console.log(result.text);
 `tekmemo` stays solo and provider-neutral. Applications can either install direct adapter packages or use `@tekmemo/adapters` as a convenience entrypoint. Implementation APIs are exposed through subpaths so the root package does not load optional peer dependencies.
 
 ```ts
-import { defineTekMemoTools } from "@tekmemo/adapters/ai-sdk";
+import { buildRuntimeMemoryToolDefinition } from "@tekmemo/adapters/ai-sdk";
 import { createTekMemoAgentSession } from "@tekmemo/adapters/agentfs";
 import { createVoyageEmbedder } from "@tekmemo/adapters/voyageai";
 import { createOpenAIEmbedder } from "@tekmemo/adapters/openai";

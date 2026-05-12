@@ -1,19 +1,19 @@
 # Package boundaries
 
-## Golden rule
+Understanding how TekMemo packages relate to each other helps you choose the right imports.
 
-Only `@tekmemo/cloud-client` owns Cloud API transport.
+## Cloud API transport
 
-## Examples
+Only `@tekmemo/cloud-client` communicates with the TekMemo Cloud API. Other packages delegate to it when cloud access is needed:
 
-- CLI cloud commands call `@tekmemo/cloud-client`.
-- MCP cloud runtime calls `@tekmemo/cloud-client`.
-- AI SDK cloud tools call runtime helpers or `@tekmemo/cloud-client`.
-- Provider adapters accept credentials from their caller.
-- Low-level packages do not own dashboards, billing, tenancy, or hosted storage.
+- CLI cloud commands use `@tekmemo/cloud-client`.
+- MCP cloud runtime uses `@tekmemo/cloud-client`.
+- AI SDK cloud tools use `@tekmemo/cloud-client`.
 
-## Adapter aggregation
+## Provider adapters
 
-`@tekmemo/adapters` is an application-facing aggregation package. It may depend on first-party adapter packages and expose convenience subpath reexports.
+Provider adapters (`@tekmemo/openai`, `@tekmemo/voyageai`, `@tekmemo/upstash-vector`) accept credentials from your code. They do not store or manage provider keys.
 
-`tekmemo` core, recall contracts, rerank contracts, filesystem primitives, and graph primitives must not depend on `@tekmemo/adapters`. This keeps the core package solo and prevents provider SDKs, AI SDK tools, vector stores, or cloud transport from becoming transitive core dependencies.
+## Convenience imports
+
+`@tekmemo/adapters` is a convenience package that reexports multiple adapter packages through subpath imports. Use it when you want a single dependency for several integrations, or use the direct packages for a smaller dependency footprint.

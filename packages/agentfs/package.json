@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/agentfs"
 	},
-	"homepage": "https://github.com/tekbreed/tekmemo#readme",
+	"homepage": "https://docs.memo.tekbreed.com/packages/agentfs",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

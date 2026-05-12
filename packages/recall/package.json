@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/recall"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/recall",
+	"homepage": "https://docs.memo.tekbreed.com/packages/recall",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

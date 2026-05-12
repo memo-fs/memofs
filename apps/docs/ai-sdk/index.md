@@ -1,40 +1,71 @@
-# AI SDK
+# Vercel AI SDK Integration
 
-`@tekmemo/ai-sdk` exposes TekMemo memory as Vercel AI SDK tools and memory-aware prompt context.
+`@tekmemo/ai-sdk` provides official helpers for integrating TekMemo memory into applications built with the [Vercel AI SDK](https://sdk.vercel.ai).
+
+It allows your agents to automatically search memory for context and record new decisions or facts during a conversation.
 
 ## Install
 
 ```bash
-pnpm add @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
+npm install @tekmemo/ai-sdk ai tekmemo @tekmemo/fs
 ```
 
-## Primary API
+## Core Helpers
 
-Use `defineTekMemoTools()` when you want the default `tekmemo_memory` tool name.
+| Helper | Purpose |
+| --- | --- |
+| `buildRuntimeMemoryContext()` | Compiles memory-aware context (core memory, notes, recall) for system prompts. |
+| `buildRuntimeMemoryToolDefinition()` | Returns an AI SDK tool definition for runtime-based memory operations. |
+| `runRuntimeMemoryTool()` | Executes runtime memory tool commands with scope enforcement. |
+| `createLocalAiSdkRuntime()` | Creates a local runtime backed by a `MemoryStore`. |
+
+## Example Usage
+
+This example shows how to ground a `generateText` call in your project's local memory.
 
 ```ts
-const tools = defineTekMemoTools({ runtime, access, allowWrites: true });
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import {
+	buildRuntimeMemoryContext,
+	buildRuntimeMemoryToolDefinition,
+	createLocalAiSdkRuntime,
+} from "@tekmemo/ai-sdk";
+import { createNodeFsMemoryStore } from "@tekmemo/fs";
+
+const store = createNodeFsMemoryStore({ rootDir: "./.tekmemo" });
+const runtime = createLocalAiSdkRuntime({ workspace: store });
+
+async function chat(userPrompt: string) {
+	// 1. Build a memory-aware context
+	// This reads core memory, notes, and performs recall search, then
+	// compiles the results into a context block for the system prompt.
+	const { text: system } = await buildRuntimeMemoryContext({
+		runtime,
+		access: { projectId: "my-project" },
+		query: userPrompt,
+		baseInstructions: "You are a helpful coding assistant.",
+	});
+
+	// 2. Generate text with memory tools
+	// The model can now call tools to read core memory or save new notes.
+	const result = await generateText({
+		model: openai("gpt-4o"),
+		system,
+		prompt: userPrompt,
+		tools: {
+			memory: buildRuntimeMemoryToolDefinition({
+				runtime,
+				access: { projectId: "my-project" },
+				allowWrites: true,
+			}),
+		},
+	});
+
+	return result.text;
+}
 ```
 
-Use `createTekMemoTool()` when your app controls the tool key.
+## Architectural Note
 
-```ts
-const tools = {
-	memory: createTekMemoTool({ runtime, access }),
-};
-```
-
-Use `buildTekMemoSystemPrompt()` before `generateText()` or `streamText()` when memory should be injected as context before the model answers.
-
-```ts
-const { system } = await buildTekMemoSystemPrompt({
-	runtime,
-	access,
-	query: userPrompt,
-	system: baseSystemPrompt,
-});
-```
-
-## Boundary
-
-AI SDK helpers depend on runtime interfaces. They do not own storage, billing, tenancy, or provider secrets. Hosted memory should be supplied through `@tekmemo/cloud-client`.
+The AI SDK helpers are designed to be "pluggable." They rely on the `MemoryStore` and `RecallStore` interfaces, meaning they work equally well with local filesystem memory (`@tekmemo/fs`) or hosted cloud memory (`@tekmemo/cloud-client`).

@@ -1,6 +1,6 @@
 # Examples
 
-The examples folder shows the supported ways to use TekMemo packages in real projects.
+The examples folder shows practical ways to use TekMemo packages in real projects.
 
 ## Start here
 
@@ -37,13 +37,6 @@ TekMemo Cloud works with any JavaScript server runtime. The pattern is the same 
 | Nuxt | `server/api/`, server routes | Nitro server handlers |
 | Vite React | Backend API server | Separate backend from SPA |
 
-## Rule for cloud examples
+## Important
 
 `TEKMEMO_API_KEY` is a server-side secret. Use it in route handlers, loaders, workers, CLI tools, MCP runtimes, and backend services. Do not put it in browser-side code.
-
-## Validate examples
-
-```bash
-node examples/scripts/check-examples.mjs
-pnpm examples:check
-```

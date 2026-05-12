@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/voyageai"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/voyageai",
+	"homepage": "https://docs.memo.tekbreed.com/packages/voyageai",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},

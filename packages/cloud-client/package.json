@@ -58,7 +58,7 @@
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/cloud-client",
+	"homepage": "https://docs.memo.tekbreed.com/packages/cloud-client",
 	"devDependencies": {
 		"@repo/test-utils": "workspace:*",
 		"@repo/tsdown-config": "workspace:*",

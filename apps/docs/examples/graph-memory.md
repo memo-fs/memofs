@@ -8,14 +8,16 @@ Source folder:
 examples/graph-memory/
 ```
 
-Run it from the repository root:
+Navigate to the example folder and run it:
 
 ```bash
-pnpm --filter @tekmemo/example-graph-memory dev
+cd examples/graph-memory
+npm install
+npm run dev
 ```
 
 Validate it:
 
 ```bash
-pnpm --filter @tekmemo/example-graph-memory typecheck
+npm run typecheck
 ```

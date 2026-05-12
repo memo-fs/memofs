@@ -5,49 +5,49 @@ Install only the packages you need.
 ## Local runtime and filesystem
 
 ```bash
-pnpm add tekmemo @tekmemo/fs
+npm install tekmemo @tekmemo/fs
 ```
 
 ## CLI
 
 ```bash
-pnpm add -D @tekmemo/cli
+npm install -D @tekmemo/cli
 ```
 
 ## MCP server
 
 ```bash
-pnpm add -D @tekmemo/mcp-server
+npm install -D @tekmemo/mcp-server
 ```
 
 ## Cloud client
 
 ```bash
-pnpm add @tekmemo/cloud-client
+npm install @tekmemo/cloud-client
 ```
 
 ## AI SDK helpers
 
 ```bash
-pnpm add @tekmemo/ai-sdk ai
+npm install @tekmemo/ai-sdk ai
 # or, through the adapters convenience package
-pnpm add @tekmemo/adapters ai
+npm install @tekmemo/adapters ai
 ```
 
 ## Graph memory
 
 ```bash
-pnpm add @tekmemo/graph
+npm install @tekmemo/graph
 ```
 
 ## Provider adapters
 
 ```bash
-pnpm add @tekmemo/openai @tekmemo/voyageai @tekmemo/upstash-vector
+npm install @tekmemo/openai @tekmemo/voyageai @tekmemo/upstash-vector
 # or, through the adapters convenience package
-pnpm add @tekmemo/adapters openai @upstash/vector
+npm install @tekmemo/adapters openai @upstash/vector
 ```
 
-## Package manager note
+## Supported package managers
 
-The workspace uses pnpm. Published packages can be consumed by pnpm, npm, Yarn, or Bun unless a package README states otherwise.
+All TekMemo packages work with npm, pnpm, Yarn, and Bun.

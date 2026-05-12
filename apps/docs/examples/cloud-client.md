@@ -8,14 +8,16 @@ Source folder:
 examples/cloud-client/
 ```
 
-Run it from the repository root:
+Navigate to the example folder and run it:
 
 ```bash
-pnpm --filter @tekmemo/example-cloud-client dev
+cd examples/cloud-client
+npm install
+npm run dev
 ```
 
 Validate it:
 
 ```bash
-pnpm --filter @tekmemo/example-cloud-client typecheck
+npm run typecheck
 ```

@@ -5,7 +5,7 @@ Use Workers environment bindings for secrets. TekMemo Cloud works on Workers, Pa
 ## Setup
 
 ```bash
-pnpm add @tekmemo/cloud-client
+npm install @tekmemo/cloud-client
 ```
 
 ## Worker example

@@ -7,23 +7,23 @@ The core `tekmemo` package stays provider-neutral and does not depend on AI SDK,
 ## Install
 
 ```bash
-pnpm add @tekmemo/adapters
+npm install @tekmemo/adapters
 ```
 
 Install external peers only for the adapter subpaths you use:
 
 ```bash
 # AgentFS session workspace adapter
-pnpm add @tekmemo/adapters @tekmemo/agentfs tekmemo
+npm install @tekmemo/adapters @tekmemo/agentfs tekmemo
 
 # AI SDK tools
-pnpm add @tekmemo/adapters ai tekmemo @tekmemo/fs
+npm install @tekmemo/adapters ai tekmemo @tekmemo/fs
 
 # OpenAI embedding adapter
-pnpm add @tekmemo/adapters openai
+npm install @tekmemo/adapters openai
 
 # Upstash Vector recall adapter
-pnpm add @tekmemo/adapters @upstash/vector
+npm install @tekmemo/adapters @upstash/vector
 ```
 
 VoyageAI adapters use HTTP/fetch and do not require a provider SDK package.

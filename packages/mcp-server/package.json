@@ -112,12 +112,12 @@
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
-		"directory": "packages/mcp"
+		"directory": "packages/mcp-server"
 	},
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
-	"homepage": "https://docs.tekmemo.dev/packages/mcp",
+	"homepage": "https://docs.memo.tekbreed.com/packages/mcp-server",
 	"publishConfig": {
 		"access": "public",
 		"registry": "https://registry.npmjs.org/"

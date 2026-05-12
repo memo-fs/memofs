@@ -1,24 +1,32 @@
 import type { DefaultTheme } from "vitepress";
 
 export const nav: DefaultTheme.NavItem[] = [
-	{ text: "Start", link: "/guide/getting-started", activeMatch: "/guide/" },
-	{ text: "Packages", link: "/packages/", activeMatch: "/packages/" },
-	{ text: "CLI", link: "/cli/", activeMatch: "/cli/" },
-	{ text: "MCP", link: "/mcp/", activeMatch: "/mcp/" },
 	{
-		text: "Cloud Client",
-		link: "/cloud-client/",
-		activeMatch: "/cloud-client/",
+		text: "Guide",
+		link: "/guide/",
+		activeMatch: "/guide/",
 	},
-	{ text: "AI SDK", link: "/ai-sdk/", activeMatch: "/ai-sdk/" },
 	{ text: "Examples", link: "/examples/", activeMatch: "/examples/" },
+	{
+		text: "Ecosystem",
+		items: [
+			{ text: "CLI", link: "/cli/" },
+			{ text: "MCP Server", link: "/mcp/" },
+			{ text: "Cloud Client", link: "/cloud-client/" },
+			{ text: "AI SDK", link: "/ai-sdk/" },
+		],
+		activeMatch: "/(cli|mcp|cloud-client|ai-sdk)/",
+	},
 	{
 		text: "Reference",
 		items: [
+			{ text: "Packages", link: "/packages/" },
 			{ text: "Architecture", link: "/architecture/" },
+			{ text: "Hosting", link: "/hosting/" },
 			{ text: "Configuration", link: "/reference/configuration" },
 			{ text: "Errors", link: "/reference/errors" },
 			{ text: "Glossary", link: "/reference/glossary" },
 		],
+		activeMatch: "/(packages|architecture|hosting|reference)/",
 	},
 ];
