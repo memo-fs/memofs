@@ -6,9 +6,9 @@ Expose TekMemo memory as a scoped AI SDK-compatible tool.
 
 - creates a local file-backed memory store
 - creates a local TekMemo AI runtime
-- creates an AI SDK-compatible memory tool with `createTekMemoTool()`
+- creates an AI SDK-compatible memory tool with `buildRuntimeMemoryToolDefinition()`
 - executes a scoped `remember` command
-- builds a memory-aware system prompt with `buildTekMemoSystemPrompt()`
+- builds a memory-aware context with `buildRuntimeMemoryContext()`
 
 ## Install
 

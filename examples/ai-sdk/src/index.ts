@@ -2,9 +2,9 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-	buildTekMemoSystemPrompt,
+	buildRuntimeMemoryContext,
+	buildRuntimeMemoryToolDefinition,
 	createLocalAiSdkRuntime,
-	defineTekMemoTools,
 } from "@tekmemo/adapters/ai-sdk";
 import { createNodeFsMemoryStore } from "@tekmemo/fs";
 import { bootstrapMemoryStore, writeCoreMemory } from "tekmemo";
@@ -26,26 +26,22 @@ try {
 	);
 
 	const access = { projectId: "ai-sdk-example", actorId: "assistant:demo" };
-	const runtime = createLocalAiSdkRuntime({ workspace: store, access });
-	const tools = defineTekMemoTools({
-		runtime,
-		access,
-		allowWrites: true,
-		allowCoreUpdates: false,
-	});
+	const runtime = createLocalAiSdkRuntime({ workspace: store });
+	const tools = {
+		memory: buildRuntimeMemoryToolDefinition({ runtime, access, allowWrites: true, allowCoreUpdates: false }),
+	};
 
-	const { system, memory } = await buildTekMemoSystemPrompt({
+	const { text: system } = await buildRuntimeMemoryContext({
 		runtime,
 		access,
 		query: "coding questions",
-		system: "You are a coding assistant.",
+		baseInstructions: "You are a coding assistant.",
 	});
 
 	console.log({
 		system,
 		toolNames: Object.keys(tools),
-		sections: memory.sections,
-		warnings: memory.warnings,
+		warnings: [],
 	});
 } finally {
 	await rm(rootDir, { recursive: true, force: true });
