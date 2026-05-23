@@ -32,7 +32,7 @@ This package provides the logic for working with TekMemo's primary memory primit
 | `readCoreMemory(store)` | Reads and parses the `core.md` document. |
 | `writeCoreMemory(store, content)` | Validates and writes `core.md`. |
 | `readNotesMemory(store)` | Reads and parses the `notes.md` document. |
-| `appendTimestampedNote(store, note)` | Appends a new note with a formatted timestamp. |
+| `appendTimestampedNote(store, note)` | Appends a `TimestampedNote` (e.g., `{ kind, content, timestamp }`) to notes. |
 | `readManifest(store)` | Reads the `manifest.json` file. |
 | `searchMemoryText(options)` | Performs a simple keyword-based search on a text string. |
 
@@ -59,8 +59,10 @@ import { chunkText } from "tekmemo";
 
 const text = "A long document that needs to be indexed for recall...";
 const chunks = chunkText(text, {
+  source: { sourceType: "document", sourceId: "doc_1" },
+  memoryType: "core",
   maxChars: 500,
-  overlap: 50
+  overlapChars: 50
 });
 
 console.log(`Generated ${chunks.length} chunks.`);

@@ -1,6 +1,6 @@
 {
 	"name": "@tekmemo/graph",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Provider-neutral graph memory primitives for TekMemo.",
 	"type": "module",
 	"sideEffects": false,

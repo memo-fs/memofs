@@ -1,6 +1,6 @@
 {
 	"name": "@tekmemo/mcp-server",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Production-ready Model Context Protocol boundary adapter for local, cloud, and hybrid TekMemo runtimes.",
 	"type": "module",
 	"sideEffects": false,

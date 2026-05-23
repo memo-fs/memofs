@@ -1,5 +1,13 @@
 # @tekmemo/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- Replace `any` types with proper TypeScript types across runtime helpers
+- Updated dependencies
+  - @tekmemo/cloud-client@0.1.1
+
 ## 0.1.0
 
 Initial release.

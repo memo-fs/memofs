@@ -297,11 +297,11 @@ When appropriate, TekMemo may publish:
 Security reports:
 
 ```txt
-security@tekmemo.dev
+support@tekbreed.com
 ```
 
 General issues:
 
 ```txt
-https://github.com/tekmemo/tekmemo/issues
+https://github.com/tekbreed/tekmemo/issues
 ```

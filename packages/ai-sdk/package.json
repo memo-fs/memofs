@@ -1,6 +1,6 @@
 {
 	"name": "@tekmemo/ai-sdk",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Vercel AI SDK integration for TekMemo local, cloud, and hybrid memory runtimes.",
 	"private": false,
 	"license": "MIT",
@@ -79,7 +79,7 @@
 	},
 	"peerDependencies": {
 		"ai": ">=5.0.0 <7.0.0",
-		"@tekmemo/cloud-client": ">=0.1.0"
+		"@tekmemo/cloud-client": ">=0.1.1"
 	},
 	"peerDependenciesMeta": {
 		"@tekmemo/cloud-client": {

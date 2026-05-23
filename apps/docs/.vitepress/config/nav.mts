@@ -26,6 +26,10 @@ export const nav: DefaultTheme.NavItem[] = [
 			{ text: "Configuration", link: "/reference/configuration" },
 			{ text: "Errors", link: "/reference/errors" },
 			{ text: "Glossary", link: "/reference/glossary" },
+			{
+				text: "Changelog",
+				link: "https://github.com/tekbreed/tekmemo/blob/main/CHANGELOG.md",
+			},
 		],
 		activeMatch: "/(packages|architecture|hosting|reference)/",
 	},

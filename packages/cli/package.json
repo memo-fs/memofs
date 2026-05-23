@@ -1,6 +1,6 @@
 {
 	"name": "@tekmemo/cli",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Production-grade CLI for TekMemo local memory, cloud memory, protocol validation, snapshots, context packing, and agent-tool integration.",
 	"type": "module",
 	"sideEffects": false,

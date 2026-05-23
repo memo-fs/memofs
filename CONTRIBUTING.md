@@ -470,6 +470,8 @@ major:
 Rename public recall adapter interface.
 ```
 
+When changesets are versioned (`pnpm version-packages`), each package's `CHANGELOG.md` is updated and the root [CHANGELOG.md](./CHANGELOG.md) is regenerated with a release-oriented summary of all public package changes.
+
 ---
 
 ## Dependency rules

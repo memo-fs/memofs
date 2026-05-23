@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { runTekMemoCli } from "../src";
 
+const pkg = await import("../package.json", { with: { type: "json" } }).then(
+	(m) => m.default,
+);
+
 describe("help and version", () => {
 	it("shows help", async () => {
 		const result = await runTekMemoCli({ argv: ["--help"] });
@@ -17,6 +21,6 @@ describe("help and version", () => {
 	it("shows version", async () => {
 		const result = await runTekMemoCli({ argv: ["--version"] });
 		expect(result.exitCode).toBe(0);
-		expect(result.stdout.join("\n")).toContain("0.1.0");
+		expect(result.stdout.join("\n")).toContain(pkg.version);
 	});
 });

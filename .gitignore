@@ -1,10 +1,10 @@
 user-docs
-PRODUCTION_NOTES.md
 
 # Dependencies
 node_modules
 .pnp
 .pnp.js
+.pnpm-store
 
 # Local env files
 .env

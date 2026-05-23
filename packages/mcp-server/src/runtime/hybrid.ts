@@ -8,6 +8,8 @@ import type {
 } from "../types.js";
 import { buildRuntimeContext } from "./helpers.js";
 
+type AnyRuntimeMethod = (...args: unknown[]) => Promise<unknown>;
+
 export type HybridReadPolicy =
 	| "local-first"
 	| "cloud-first"
@@ -144,7 +146,11 @@ export function createHybridTekMemoMcpRuntime(
 				"readCoreMemory",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["readCoreMemory"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		readNotesMemory(input, signal) {
 			return readOptional(
@@ -154,7 +160,11 @@ export function createHybridTekMemoMcpRuntime(
 				"readNotesMemory",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["readNotesMemory"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		listRecentMemories(input, signal) {
 			return readOptional(
@@ -164,7 +174,11 @@ export function createHybridTekMemoMcpRuntime(
 				"listRecentMemories",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["listRecentMemories"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		validate(input, signal) {
 			return readOptional(
@@ -174,7 +188,11 @@ export function createHybridTekMemoMcpRuntime(
 				"validate",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["validate"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		createSnapshot(input, signal) {
 			return writeOptional(
@@ -184,7 +202,11 @@ export function createHybridTekMemoMcpRuntime(
 				"createSnapshot",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["createSnapshot"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		updateCoreMemory(input, signal) {
 			return writeOptional(
@@ -194,7 +216,11 @@ export function createHybridTekMemoMcpRuntime(
 				"updateCoreMemory",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["updateCoreMemory"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncPush(input, signal) {
 			return writeOptional(
@@ -204,7 +230,11 @@ export function createHybridTekMemoMcpRuntime(
 				"syncPush",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["syncPush"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncPull(input, signal) {
 			return readOptional(
@@ -214,7 +244,11 @@ export function createHybridTekMemoMcpRuntime(
 				"syncPull",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["syncPull"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncStatus(input, signal) {
 			return readOptional(
@@ -224,7 +258,11 @@ export function createHybridTekMemoMcpRuntime(
 				"syncStatus",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["syncStatus"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		resolveSyncConflict(input, signal) {
 			return writeOptional(
@@ -234,7 +272,11 @@ export function createHybridTekMemoMcpRuntime(
 				"resolveSyncConflict",
 				[input],
 				signal,
-			);
+			) as NonNullable<TekMemoMcpRuntime["resolveSyncConflict"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 
 		upsertGraphNodes(
@@ -252,7 +294,7 @@ export function createHybridTekMemoMcpRuntime(
 				"upsertGraphNodes",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["upsertGraphNodes"]>;
 		},
 		upsertGraphEdges(
 			input: {
@@ -269,7 +311,7 @@ export function createHybridTekMemoMcpRuntime(
 				"upsertGraphEdges",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["upsertGraphEdges"]>;
 		},
 		graphNeighbors(input, signal) {
 			return readOptional(
@@ -279,7 +321,7 @@ export function createHybridTekMemoMcpRuntime(
 				"graphNeighbors",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["graphNeighbors"]>;
 		},
 		graphPath(input, signal) {
 			return readOptional(
@@ -289,7 +331,7 @@ export function createHybridTekMemoMcpRuntime(
 				"graphPath",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["graphPath"]>;
 		},
 		listGraphNodes(input, signal) {
 			return readOptional(
@@ -299,7 +341,7 @@ export function createHybridTekMemoMcpRuntime(
 				"listGraphNodes",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["listGraphNodes"]>;
 		},
 		listGraphEdges(input, signal) {
 			return readOptional(
@@ -309,7 +351,7 @@ export function createHybridTekMemoMcpRuntime(
 				"listGraphEdges",
 				[input],
 				signal,
-			);
+			) as ReturnType<TekMemoMcpRuntime["listGraphEdges"]>;
 		},
 	};
 }
@@ -321,7 +363,7 @@ async function readOptional(
 	method: keyof TekMemoMcpRuntime,
 	args: unknown[],
 	signal: AbortSignal | undefined,
-): Promise<any> {
+): Promise<unknown> {
 	if (policy === "local-only") return call(local, method, args, signal);
 	if (policy === "cloud-only") return call(cloud, method, args, signal);
 	const first = policy === "cloud-first" ? cloud : local;
@@ -340,7 +382,7 @@ async function writeOptional(
 	method: keyof TekMemoMcpRuntime,
 	args: unknown[],
 	signal: AbortSignal | undefined,
-): Promise<any> {
+): Promise<unknown> {
 	if (policy === "local-only") return call(local, method, args, signal);
 	if (policy === "cloud-only") return call(cloud, method, args, signal);
 	const primary = policy === "cloud-first" ? cloud : local;
@@ -354,17 +396,17 @@ async function writeOptional(
 	return result;
 }
 
-async function call(
+function call(
 	runtime: TekMemoMcpRuntime,
 	method: keyof TekMemoMcpRuntime,
 	args: unknown[],
 	signal: AbortSignal | undefined,
-): Promise<any> {
+): Promise<unknown> {
 	const fn = runtime[method];
 	if (typeof fn !== "function") {
 		throw new Error(`Runtime method ${String(method)} is not available.`);
 	}
-	return (fn as (...methodArgs: unknown[]) => Promise<any>)(...args, signal);
+	return (fn as AnyRuntimeMethod)(...args, signal);
 }
 
 function formatError(error: unknown): string {

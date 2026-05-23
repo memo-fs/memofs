@@ -8,7 +8,7 @@ import {
 	inferWriteScope,
 	normalizeAccessContext,
 } from "../scope/scope-policy";
-import type { RuntimeMemoryToolOptions } from "../types/runtime";
+import type { JsonObject, RuntimeMemoryToolOptions } from "../types/runtime";
 
 export function buildRuntimeMemoryToolDefinition(
 	options: RuntimeMemoryToolOptions,
@@ -170,11 +170,11 @@ function assertSafeContent(
 	}
 }
 
-function toJsonObject(value: unknown): Record<string, any> | undefined {
+function toJsonObject(value: unknown): JsonObject | undefined {
 	if (value === undefined) return undefined;
 	if (value && typeof value === "object" && !Array.isArray(value)) {
 		JSON.stringify(value);
-		return value as Record<string, any>;
+		return value as JsonObject;
 	}
 	throw new Error("metadata must be a JSON object when provided.");
 }

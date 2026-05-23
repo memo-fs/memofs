@@ -1,5 +1,13 @@
 # @tekmemo/ai-sdk
 
+## 0.2.1
+
+### Patch Changes
+
+- Replace `any` types with proper TypeScript types across runtime helpers
+- Updated dependencies
+  - @tekmemo/cloud-client@0.1.1
+
 ## 0.2.0
 
 ### Minor Changes

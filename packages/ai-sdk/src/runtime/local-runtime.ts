@@ -14,6 +14,7 @@ import type {
 	AiRuntimeRecallHit,
 	AiRuntimeRecallInput,
 	AiRuntimeRecallResult,
+	JsonObject,
 	TekMemoAiRuntime,
 } from "../types/runtime";
 
@@ -199,15 +200,14 @@ function readMeta(lines: string[], key: string): string | undefined {
 	return found?.slice(prefix.length).trim();
 }
 
-function parseMetadata(
-	raw: string | undefined,
-): Record<string, any> | undefined {
+function parseMetadata(raw: string | undefined): JsonObject | undefined {
 	if (!raw) return undefined;
 	try {
 		const value = JSON.parse(raw);
-		return value && typeof value === "object" && !Array.isArray(value)
-			? value
-			: undefined;
+		if (value && typeof value === "object" && !Array.isArray(value)) {
+			return value as JsonObject;
+		}
+		return undefined;
 	} catch {
 		return undefined;
 	}

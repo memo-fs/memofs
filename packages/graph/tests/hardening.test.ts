@@ -69,7 +69,7 @@ describe("hardening", () => {
 
 		expect(first?.id).toBe(second?.id);
 		expect((await graph.queryEdges()).length).toBe(1);
-		expect(first!.id).toBeDefined();
+		expect(first?.id).toBeDefined();
 		expect((await graph.getEdge(first!.id))?.weight).toBe(0.9);
 	});
 

@@ -1,5 +1,11 @@
 # @tekmemo/graph
 
+## 0.2.1
+
+### Patch Changes
+
+- Replace `any` types with proper TypeScript types across runtime helpers
+
 ## 0.2.0
 
 ### Minor Changes

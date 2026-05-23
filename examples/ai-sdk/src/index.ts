@@ -28,7 +28,12 @@ try {
 	const access = { projectId: "ai-sdk-example", actorId: "assistant:demo" };
 	const runtime = createLocalAiSdkRuntime({ workspace: store });
 	const tools = {
-		memory: buildRuntimeMemoryToolDefinition({ runtime, access, allowWrites: true, allowCoreUpdates: false }),
+		memory: buildRuntimeMemoryToolDefinition({
+			runtime,
+			access,
+			allowWrites: true,
+			allowCoreUpdates: false,
+		}),
 	};
 
 	const { text: system } = await buildRuntimeMemoryContext({

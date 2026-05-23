@@ -1,6 +1,6 @@
 {
 	"name": "@tekmemo/cloud-client",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Project-scoped TekMemo Cloud API client, cloud runtime, and hybrid runtime helpers.",
 	"license": "MIT",
 	"type": "module",

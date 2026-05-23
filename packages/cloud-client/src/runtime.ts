@@ -4,6 +4,8 @@ import type {
 	TekMemoRuntime,
 } from "./types.js";
 
+type AnyRuntimeMethod = (...args: unknown[]) => Promise<unknown>;
+
 export function createCloudTekMemoRuntime(
 	options: CreateCloudRuntimeOptions,
 ): TekMemoRuntime {
@@ -59,7 +61,7 @@ export function createHybridTekMemoRuntime(
 				[],
 				signal,
 				warn,
-			);
+			) as ReturnType<TekMemoRuntime["readCoreMemory"]>;
 		},
 		updateCoreMemory(input, signal) {
 			return writeOperation(
@@ -70,7 +72,7 @@ export function createHybridTekMemoRuntime(
 				[input],
 				signal,
 				warn,
-			);
+			) as ReturnType<TekMemoRuntime["updateCoreMemory"]>;
 		},
 		listNotes(input = {}, signal) {
 			return readOperation(
@@ -81,7 +83,7 @@ export function createHybridTekMemoRuntime(
 				[input],
 				signal,
 				warn,
-			);
+			) as ReturnType<TekMemoRuntime["listNotes"]>;
 		},
 		createNote(input, signal) {
 			return writeOperation(
@@ -92,7 +94,7 @@ export function createHybridTekMemoRuntime(
 				[input],
 				signal,
 				warn,
-			);
+			) as ReturnType<TekMemoRuntime["createNote"]>;
 		},
 		recall(input, signal) {
 			return readOperation(
@@ -103,51 +105,71 @@ export function createHybridTekMemoRuntime(
 				[input],
 				signal,
 				warn,
-			);
+			) as ReturnType<TekMemoRuntime["recall"]>;
 		},
 		index(input = {}, signal) {
 			return optionalOperation(
 				writePolicy,
-				options.local.index,
-				options.cloud.index,
+				options.local,
+				options.cloud,
+				"index",
 				[input],
 				signal,
 				warn,
 				"index",
-			);
+			) as NonNullable<TekMemoRuntime["index"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncPush(input, signal) {
 			return optionalOperation(
 				writePolicy,
-				options.local.syncPush,
-				options.cloud.syncPush,
+				options.local,
+				options.cloud,
+				"syncPush",
 				[input],
 				signal,
 				warn,
 				"syncPush",
-			);
+			) as NonNullable<TekMemoRuntime["syncPush"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncPull(input, signal) {
 			return optionalOperation(
 				readPolicy,
-				options.local.syncPull,
-				options.cloud.syncPull,
+				options.local,
+				options.cloud,
+				"syncPull",
 				[input],
 				signal,
 				warn,
 				"syncPull",
-			);
+			) as NonNullable<TekMemoRuntime["syncPull"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 		syncStatus(input = {}, signal) {
 			return optionalOperation(
 				readPolicy,
-				options.local.syncStatus,
-				options.cloud.syncStatus,
+				options.local,
+				options.cloud,
+				"syncStatus",
 				[input],
 				signal,
 				warn,
 				"syncStatus",
-			);
+			) as NonNullable<TekMemoRuntime["syncStatus"]> extends (
+				...args: unknown[]
+			) => Promise<infer R>
+				? Promise<R>
+				: never;
 		},
 	};
 }
@@ -160,7 +182,7 @@ async function readOperation(
 	args: unknown[],
 	signal: AbortSignal | undefined,
 	warn: (warning: string) => void,
-): Promise<any> {
+): Promise<unknown> {
 	if (policy === "local-only") return call(local, method, args, signal);
 	if (policy === "cloud-only") return call(cloud, method, args, signal);
 	const first = policy === "cloud-first" ? cloud : local;
@@ -183,7 +205,7 @@ async function writeOperation(
 	args: unknown[],
 	signal: AbortSignal | undefined,
 	warn: (warning: string) => void,
-): Promise<any> {
+): Promise<unknown> {
 	if (policy === "local-only") return call(local, method, args, signal);
 	if (policy === "cloud-only") return call(cloud, method, args, signal);
 	const primary = policy === "cloud-first" ? cloud : local;
@@ -201,13 +223,16 @@ async function writeOperation(
 
 async function optionalOperation(
 	policy: string,
-	localMethod: ((...args: any[]) => Promise<any>) | undefined,
-	cloudMethod: ((...args: any[]) => Promise<any>) | undefined,
+	local: TekMemoRuntime,
+	cloud: TekMemoRuntime,
+	method: keyof TekMemoRuntime,
 	args: unknown[],
 	signal: AbortSignal | undefined,
 	warn: (warning: string) => void,
 	label: string,
-): Promise<any> {
+): Promise<unknown> {
+	const localMethod = local[method] as AnyRuntimeMethod | undefined;
+	const cloudMethod = cloud[method] as AnyRuntimeMethod | undefined;
 	const first =
 		policy === "cloud-first" || policy === "cloud-only"
 			? cloudMethod
@@ -222,18 +247,18 @@ async function optionalOperation(
 			throw new Error(
 				`Hybrid runtime ${label} is not available for ${policy}.`,
 			);
-		return first(...args, signal);
+		return invokeMethod(first, args, signal);
 	}
 
 	if (first) {
 		try {
-			return await first(...args, signal);
+			return await invokeMethod(first, args, signal);
 		} catch (error) {
 			warn(`Hybrid ${label} primary operation failed: ${formatError(error)}`);
 		}
 	}
 	if (!second) throw new Error(`Hybrid runtime ${label} is not available.`);
-	return second(...args, signal);
+	return invokeMethod(second, args, signal);
 }
 
 function call(
@@ -241,11 +266,19 @@ function call(
 	method: keyof TekMemoRuntime,
 	args: unknown[],
 	signal: AbortSignal | undefined,
-): Promise<any> {
+): Promise<unknown> {
 	const fn = runtime[method];
 	if (typeof fn !== "function")
 		throw new Error(`Runtime method ${String(method)} is not available.`);
-	return (fn as (...methodArgs: unknown[]) => Promise<any>)(...args, signal);
+	return (fn as AnyRuntimeMethod)(...args, signal);
+}
+
+function invokeMethod(
+	method: AnyRuntimeMethod,
+	args: unknown[],
+	signal: AbortSignal | undefined,
+): Promise<unknown> {
+	return method(...args, signal);
 }
 
 function formatError(error: unknown): string {

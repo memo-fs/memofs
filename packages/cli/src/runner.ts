@@ -115,7 +115,7 @@ export async function runTekMemoCli(
 	program
 		.name("tekmemo")
 		.description(
-			"Production-grade CLI for TekMemo .tekmemo/ memory, context, validation, snapshots, and agent tools.",
+			"CLI for TekMemo .tekmemo/ memory, context, validation, snapshots, and agent tools.",
 		)
 		.version(pkg.version)
 		.option(
