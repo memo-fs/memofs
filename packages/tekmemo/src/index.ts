@@ -7,167 +7,65 @@
  * @public
  */
 
+export * from "./agentfs";
+export { isNotFoundError } from "./agentfs";
+export * from "./ai-sdk";
+export * from "./benchmark-kit";
 export type {
-	BootstrapMemoryStoreOptions,
-	BootstrapMemoryStoreResult,
-} from "./bootstrap/bootstrap-memory-store.js";
-export { bootstrapMemoryStore } from "./bootstrap/bootstrap-memory-store.js";
-export type { ChunkTextOptions } from "./chunking/chunk-text.js";
-export { chunkText, createChunkId, hashString } from "./chunking/chunk-text.js";
-export {
-	runMemoryCommand,
-	validateMemoryCommand,
-} from "./commands/run-memory-command.js";
+	MemoryKind,
+	Page,
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	SyncConflictResolution,
+	SyncEventInput,
+	SyncPullInput,
+	SyncPullResult,
+	SyncPushInput,
+	SyncPushResult,
+	SyncStatusInput,
+	SyncStatusResult,
+} from "./cloud-client";
+export * from "./cloud-client";
+export * from "./core/bootstrap/bootstrap-memory-store";
+export * from "./core/chunking/chunk-text";
+export * from "./core/commands/run-memory-command";
+export * from "./core/constants/memory-paths";
+export * from "./core/defaults/templates";
+export * from "./core/documents/conversations-memory";
+export * from "./core/documents/core-memory";
+export * from "./core/documents/notes-memory";
+export * from "./core/documents/source-manifest";
+export * from "./core/errors/errors";
+export * from "./core/events/memory-events";
+export * from "./core/indexes/chunk-records";
+export * from "./core/manifest/manifest";
+export * from "./core/search/search-memory";
+export * from "./core/snapshots/snapshot-records";
+export * from "./core/stores/in-memory-store";
+export * from "./core/types/config";
 export type {
-	CanonicalTekMemoFile,
-	MemoryPath,
-	PathKind,
-	SnapshotFilePath,
-} from "./constants/memory-paths.js";
-export {
-	assertMemoryPath,
-	CANONICAL_TEKMEMO_FILES,
-	CHUNKS_INDEX_PATH,
-	CONVERSATIONS_MEMORY_PATH,
-	CORE_MEMORY_PATH,
-	createSnapshotPath,
-	GRAPH_EDGES_PATH,
-	GRAPH_NODES_PATH,
-	isMemoryPath,
-	MANIFEST_PATH,
-	MEMORY_EVENTS_PATH,
-	MEMORY_PATHS,
-	MEMORY_ROOT,
-	memoryTypeFromPath,
-	NOTES_MEMORY_PATH,
-	SNAPSHOTS_INDEX_PATH,
-	TEKMEMO_DIR,
-	TEKMEMO_PATHS,
-} from "./constants/memory-paths.js";
-export type { MemoryTemplates } from "./defaults/templates.js";
-export {
-	createDefaultMemoryTemplates,
-	DEFAULT_CONVERSATIONS_MEMORY,
-	DEFAULT_CORE_MEMORY,
-	DEFAULT_JSONL,
-	DEFAULT_MEMORY_TEMPLATES,
-	DEFAULT_NOTES_MEMORY,
-} from "./defaults/templates.js";
-export type {
-	ConversationHistoryResult,
-	ReadConversationHistoryOptions,
-} from "./documents/conversations-memory.js";
-export {
-	appendConversationEntry,
-	normalizeConversationEntry,
-	readConversationHistory,
-	readConversationHistoryWithIssues,
-	validateConversationEntry,
-} from "./documents/conversations-memory.js";
-export {
-	buildCoreMemoryText,
-	normalizeMarkdownDocument,
-	readCoreMemory,
-	writeCoreMemory,
-} from "./documents/core-memory.js";
-export type { NormalizedTimestampedNote } from "./documents/notes-memory.js";
-export {
-	appendTimestampedNote,
-	formatTimestampedNote,
-	normalizeTimestampedNote,
-	readNotesMemory,
-} from "./documents/notes-memory.js";
-export {
-	assertMemorySourceReference,
-	createSourceKey,
-	encodeSourceKeyPart,
-} from "./documents/source-manifest.js";
-export {
-	isTekMemoError,
-	MemoryCommandError,
-	MemoryNotFoundError,
-	MemoryParseError,
-	MemoryPathError,
-	MemoryStoreError,
-	MemoryValidationError,
-	TekMemoError,
-} from "./errors/errors.js";
-export type {
-	CreateMemoryEventInput,
-	MemoryEventsResult,
-	ReadMemoryEventsOptions,
-} from "./events/memory-events.js";
-export {
-	appendMemoryEvent,
-	createMemoryEvent,
-	normalizeMemoryEvent,
-	readMemoryEvents,
-	readMemoryEventsWithIssues,
-	validateMemoryEvent,
-} from "./events/memory-events.js";
-export type {
-	ChunkRecordsResult,
-	CreateChunkRecordOptions,
-	ReadChunkRecordsOptions,
-} from "./indexes/chunk-records.js";
-export {
-	appendChunkRecord,
-	createChunkRecord,
-	markChunkRecordStale,
-	normalizeChunkRecord,
-	readChunkRecords,
-	readChunkRecordsWithIssues,
-	validateChunkRecord,
-} from "./indexes/chunk-records.js";
-export type { CreateDefaultTekMemoManifestOptions } from "./manifest/manifest.js";
-export {
-	createDefaultTekMemoManifest,
-	parseManifest,
-	readManifest,
-	stringifyManifest,
-	validateTekMemoManifest,
-	writeManifest,
-} from "./manifest/manifest.js";
-export type {
-	MemorySearchResult,
-	SearchMemoryTextOptions,
-} from "./search/search-memory.js";
-export { searchMemoryText, splitSearchBlocks } from "./search/search-memory.js";
-export type {
-	CreateSnapshotRecordInput,
-	ReadSnapshotRecordsOptions,
-	SnapshotRecordsResult,
-} from "./snapshots/snapshot-records.js";
-export {
-	appendSnapshotRecord,
-	createSnapshotRecord,
-	normalizeSnapshotRecord,
-	readSnapshotRecords,
-	readSnapshotRecordsWithIssues,
-	validateSnapshotRecord,
-} from "./snapshots/snapshot-records.js";
-export type { InMemoryStoreInitialFiles } from "./stores/in-memory-store.js";
-export { InMemoryMemoryStore } from "./stores/in-memory-store.js";
-
-export type {
-	MemoryCommand,
-	SearchableMemoryPath,
-} from "./types/memory-commands.js";
-export type {
-	ChunkRecord,
-	ConversationEntry,
-	ConversationRole,
-	MemoryActorType,
-	MemoryChunk,
-	MemoryDocumentType,
-	MemoryEvent,
-	MemoryEventType,
-	MemorySourceReference,
-	MemorySourceType,
-	MemoryType,
-	NoteKind,
-	SnapshotRecord,
-	TekMemoManifest,
-	TimestampedNote,
-} from "./types/memory-documents.js";
-export type { MemoryStore, MemoryStoreSnapshot } from "./types/memory-store.js";
+	EmbeddingRecord,
+	EmbedTextsInput,
+	EmbedTextsResult,
+} from "./core/types/embeddings";
+export * from "./core/types/embeddings";
+// Explicit exports to resolve ambiguities from duplicate exports in sub-packages
+export type { JsonObject, JsonPrimitive, JsonValue } from "./core/types/json";
+export * from "./core/types/json";
+export * from "./core/types/memory-commands";
+export * from "./core/types/memory-documents";
+export * from "./core/types/memory-store";
+// consolidated subpath exports
+export * from "./fs";
+export * from "./graph";
+export { cloneAndValidateMetadata } from "./graph";
+export * from "./openai";
+export { expectedVectorLength } from "./openai";
+export type { RecallResult } from "./recall";
+export * from "./recall";
+export { assertNonEmptyString } from "./recall";
+export * from "./rerank";
+export * from "./rerank-voyage";
+export * from "./testing";
+export * from "./upstash-vector";
+export * from "./voyageai";

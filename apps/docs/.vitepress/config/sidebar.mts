@@ -9,66 +9,6 @@ const guide = [
 	{ text: "Memory filesystem", link: "/guide/filesystem-layout" },
 	{ text: "Memory records", link: "/guide/memory-records" },
 	{ text: "Configuration", link: "/guide/configuration" },
-	{ text: "Local testing", link: "/guide/local-testing" },
-	{ text: "Production checklist", link: "/guide/production-checklist" },
-];
-
-const packages = [
-	{ text: "Overview", link: "/packages/" },
-	{ text: "@tekbreed/tekmemo", link: "/packages/tekmemo" },
-	{ text: "@tekbreed/tekmemo-fs", link: "/packages/fs" },
-	{ text: "@tekbreed/tekmemo-agentfs", link: "/packages/agentfs" },
-	{ text: "@tekbreed/tekmemo-graph", link: "/packages/graph" },
-	{ text: "@tekbreed/tekmemo-cloud-client", link: "/packages/cloud-client" },
-	{ text: "@tekbreed/tekmemo-cli", link: "/packages/cli" },
-	{ text: "@tekbreed/tekmemo-mcp-server", link: "/packages/mcp" },
-	{ text: "@tekbreed/tekmemo-ai-sdk", link: "/packages/ai-sdk" },
-	{ text: "@tekbreed/tekmemo-adapters", link: "/packages/adapters" },
-	{ text: "@tekbreed/tekmemo-server", link: "/packages/server" },
-	{ text: "@tekbreed/tekmemo-recall", link: "/packages/recall" },
-	{ text: "Vector adapters", link: "/packages/vector-adapters" },
-	{ text: "Reranking", link: "/packages/rerank" },
-	{ text: "Provider adapters", link: "/packages/provider-adapters" },
-	{ text: "Benchmark kit", link: "/packages/benchmark-kit" },
-];
-
-const cli = [
-	{ text: "Overview", link: "/cli/" },
-	{ text: "Commands", link: "/cli/commands" },
-	{ text: "Cloud and hybrid mode", link: "/cli/cloud" },
-	{ text: "Agent workflow", link: "/cli/agent-workflow" },
-];
-
-const mcp = [
-	{ text: "Overview", link: "/mcp/" },
-	{ text: "Client setup", link: "/mcp/client-setup" },
-	{ text: "Tools", link: "/mcp/tools" },
-	{ text: "Runtime modes", link: "/mcp/runtime-modes" },
-	{ text: "Security", link: "/mcp/security" },
-];
-
-const cloudClient = [
-	{ text: "Overview", link: "/cloud-client/" },
-	{ text: "Quickstart", link: "/cloud-client/quickstart" },
-	{ text: "Routes", link: "/cloud-client/routes" },
-	{ text: "Runtime helpers", link: "/cloud-client/runtime" },
-	{ text: "Errors", link: "/cloud-client/errors" },
-];
-
-const aiSdk = [
-	{ text: "Overview", link: "/ai-sdk/" },
-	{ text: "Tools", link: "/ai-sdk/tools" },
-	{ text: "Agent patterns", link: "/ai-sdk/agent-patterns" },
-];
-
-const examples = [
-	{ text: "Overview", link: "/examples/" },
-	{ text: "Local only", link: "/examples/local-only" },
-	{ text: "Graph memory", link: "/examples/graph-memory" },
-	{ text: "CLI", link: "/examples/cli" },
-	{ text: "MCP", link: "/examples/mcp" },
-	{ text: "Cloud client", link: "/examples/cloud-client" },
-	{ text: "AI SDK", link: "/examples/ai-sdk" },
 ];
 
 const architecture = [
@@ -79,6 +19,32 @@ const architecture = [
 	{ text: "Indexing and recall", link: "/architecture/indexing-recall" },
 	{ text: "Sync and events", link: "/architecture/sync-events" },
 	{ text: "Security", link: "/architecture/security" },
+];
+
+const api = [
+	{ text: "Overview", link: "/packages/" },
+	{
+		text: "Core Runtime (@tekbreed/tekmemo)",
+		items: [
+			{ text: "Overview & Primitives", link: "/packages/tekmemo" },
+			{ text: "Filesystem Store", link: "/packages/fs" },
+			{ text: "Agent Filesystem", link: "/packages/agentfs" },
+			{ text: "Graph Memory", link: "/packages/graph" },
+			{ text: "Recall & Vectors", link: "/packages/vector-adapters" },
+			{ text: "Provider Adapters", link: "/packages/provider-adapters" },
+			{ text: "Reranking", link: "/packages/rerank" },
+			{ text: "Cloud Client", link: "/packages/cloud-client" },
+			{ text: "Benchmark Kit", link: "/packages/benchmark-kit" },
+		],
+	},
+	{ text: "CLI (@tekbreed/tekmemo-cli)", link: "/packages/cli" },
+	{ text: "MCP Server (@tekbreed/tekmemo-mcp-server)", link: "/packages/mcp" },
+];
+
+const agentInterfaces = [
+	{ text: "CLI", link: "/cli/" },
+	{ text: "MCP", link: "/mcp/" },
+	{ text: "AI SDK", link: "/ai-sdk/" },
 ];
 
 const reference = [
@@ -93,36 +59,12 @@ const reference = [
 	},
 ];
 
-const hosting = [
-	{ text: "Overview", link: "/hosting/" },
-	{ text: "Node", link: "/hosting/node" },
-	{ text: "Cloudflare Workers", link: "/hosting/cloudflare-workers" },
-	{ text: "Vercel", link: "/hosting/vercel" },
-	{ text: "Security", link: "/hosting/security" },
-];
-
-const ecosystemSidebar = [
-	{ text: "CLI", items: cli },
-	{ text: "MCP Server", items: mcp },
-	{ text: "Cloud Client", items: cloudClient },
-	{ text: "AI SDK", items: aiSdk },
-];
-
-const referenceSidebar = [
-	{ text: "Architecture", items: architecture },
-	{ text: "Hosting", items: hosting },
-	{ text: "Reference", items: reference },
-];
-
 export const sidebar: DefaultTheme.Sidebar = {
 	"/guide/": [{ text: "Guide", items: guide }],
-	"/packages/": [{ text: "Packages", items: packages }],
-	"/examples/": [{ text: "Examples", items: examples }],
-	"/cli/": ecosystemSidebar,
-	"/mcp/": ecosystemSidebar,
-	"/cloud-client/": ecosystemSidebar,
-	"/ai-sdk/": ecosystemSidebar,
-	"/architecture/": referenceSidebar,
-	"/reference/": referenceSidebar,
-	"/hosting/": referenceSidebar,
+	"/architecture/": [{ text: "Architecture", items: architecture }],
+	"/packages/": [{ text: "API Reference", items: api }],
+	"/cli/": [{ text: "Agent Interfaces", items: agentInterfaces }],
+	"/mcp/": [{ text: "Agent Interfaces", items: agentInterfaces }],
+	"/ai-sdk/": [{ text: "Agent Interfaces", items: agentInterfaces }],
+	"/reference/": [{ text: "Reference", items: reference }],
 };

@@ -1,10 +1,10 @@
-# Contributing to TekMemo
+# Contributing to TekBreed OSS
 
-Thank you for your interest in contributing to TekMemo.
+Thank you for your interest in contributing to TekBreed OSS.
 
-TekMemo is an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only TekMemo Cloud.
+This repository hosts TekBreed open-source work. TekMemo is the first product family: an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only TekMemo Cloud.
 
-This guide explains how to contribute code, docs, examples, tests, and package improvements.
+This guide explains how to contribute code, docs, tests, and package improvements.
 
 ---
 
@@ -14,12 +14,12 @@ TekMemo aims to provide:
 
 - file-first memory infrastructure
 - provider-neutral memory contracts
-- vector recall adapters
-- reranking adapters
+- vector recall capabilities
+- reranking capabilities
 - graph memory
 - connector ingestion
 - MCP support
-- cloud-sync client contracts
+- cloud client contracts
 - observability hooks
 - evaluation and benchmark utilities
 
@@ -80,8 +80,8 @@ corepack prepare pnpm@9 --activate
 Clone the repo:
 
 ```bash
-git clone https://github.com/tekmemo/tekmemo.git
-cd tekmemo
+git clone https://github.com/tekbreed/oss.git
+cd oss
 ```
 
 Install dependencies:
@@ -223,29 +223,9 @@ Before opening a pull request, verify:
 
 ## Package boundary rules
 
-Each package should own one concern.
+Each product package should own one concern. TekMemo is one unified package where all public APIs are exported from `@tekbreed/tekmemo`.
 
-Examples:
-
-```txt
-tekmemo
-  Core contracts and memory records.
-
-@tekbreed/tekmemo-fs
-  Filesystem-backed storage.
-
-@tekbreed/tekmemo-recall
-  Provider-neutral recall contracts.
-
-@tekbreed/tekmemo-upstash-vector
-  Upstash Vector adapter.
-
-@tekbreed/tekmemo-agentfs
-  AgentFS adapter.
-
-@tekbreed/tekmemo-ai-sdk
-  AI SDK integration.
-```
+Internally, code is organized by feature area (such as `fs`, `recall`, `agentfs`, `ai-sdk`, etc.), but these are not exposed as separate package entrypoints. All public features are imported directly from `@tekbreed/tekmemo`.
 
 Packages in this OSS repo must not contain private TekMemo Cloud logic such as:
 
@@ -260,9 +240,10 @@ Packages in this OSS repo must not contain private TekMemo Cloud logic such as:
 
 ---
 
-## Adding a new package
+## Adding a new package or feature
 
-A standard package should follow this structure:
+- **TekMemo features**: Add all new TekMemo capabilities as internal modules under `packages/tekmemo/src/<feature>/` and re-export them from the package root [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
+- **New workspace packages**: Future workspace packages (such as TekCode components) should live beside `packages/tekmemo/` under `packages/<package-name>/` and conform to the following directory structure:
 
 ```txt
 packages/package-name/
@@ -275,7 +256,6 @@ packages/package-name/
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   └── EDGE_CASES.md
-├── examples/
 ├── README.md
 ├── package.json
 ├── tsconfig.json
@@ -288,7 +268,6 @@ The package should include:
 * TypeScript types
 * tests
 * edge-case tests
-* examples if useful
 * no unnecessary dependencies
 * a small public API
 * stable package exports
@@ -304,11 +283,7 @@ The public API should be exported from:
 src/index.ts
 ```
 
-Avoid deep imports like:
-
-```ts
-import { something } from "@tekbreed/tekmemo-recall/dist/internal/something";
-```
+Avoid deep imports. Since everything is exported from the root entrypoint `@tekbreed/tekmemo`, import directly from `@tekbreed/tekmemo`.
 
 If something is public, export it intentionally.
 
@@ -385,10 +360,10 @@ Run all tests:
 pnpm test
 ```
 
-Run tests for a package:
+Run tests for a product package:
 
 ```bash
-pnpm --filter @tekbreed/tekmemo-package-name test
+pnpm --filter @tekbreed/tekmemo test
 ```
 
 ---
@@ -404,42 +379,11 @@ Each package should explain:
 * advanced usage if relevant
 * edge cases
 * package boundaries
-* examples
 * production notes
 
 Avoid vague package docs.
 
 A developer should be able to understand why the package exists and how to use it.
-
----
-
-## Examples expectations
-
-Examples should be:
-
-* small
-* runnable
-* focused
-* documented
-* safe by default
-
-Do not require paid providers unless the example is clearly provider-specific.
-
-Provider examples should support environment variables, not hardcoded keys.
-
-Bad:
-
-```ts
-apiKey: "sk_live_..."
-```
-
-Good:
-
-```ts
-apiKey: process.env.OPENAI_API_KEY
-```
-
----
 
 ## Changesets
 
@@ -470,7 +414,7 @@ major:
 Rename public recall adapter interface.
 ```
 
-When changesets are versioned (`pnpm version-packages`), each package's `CHANGELOG.md` is updated and the root [CHANGELOG.md](./CHANGELOG.md) is regenerated with a release-oriented summary of all public package changes.
+When changesets are versioned (`pnpm version-packages`), both individual package changelogs and the root `CHANGELOG.md` are updated by Changesets.
 
 ---
 
@@ -562,19 +506,7 @@ apps/docs
 Run it locally:
 
 ```bash
-pnpm --filter docs dev
-```
-
-Slides live in:
-
-```txt
-apps/slides
-```
-
-Run the demo deck:
-
-```bash
-pnpm --filter slides dev
+pnpm docs:dev
 ```
 
 ---
@@ -595,7 +527,7 @@ When opening an issue, include:
 Good title:
 
 ```txt
-@tekbreed/tekmemo-fs: JSONL parser skips valid line after malformed object
+@tekbreed/tekmemo: fs JSONL parser skips valid line after malformed object
 ```
 
 Bad title:

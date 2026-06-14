@@ -1,5 +1,5 @@
 import { defineMemoryStoreContractTests } from "@repo/test-utils/contracts";
-import { InMemoryMemoryStore } from "../src/index.js";
+import { InMemoryMemoryStore } from "../src/index";
 
 defineMemoryStoreContractTests({
 	name: "InMemoryMemoryStore",

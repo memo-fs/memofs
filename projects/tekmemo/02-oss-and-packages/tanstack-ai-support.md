@@ -11,7 +11,7 @@ TekMemo should support TanStack AI through a dedicated optional package:
 This package is needed, but it should not replace:
 
 ```txt
-@tekbreed/tekmemo-ai-sdk
+@tekbreed/tekmemo/ai-sdk
 ```
 
 ## Reason
@@ -51,7 +51,7 @@ It improves adoption and ecosystem coverage, but it should not block the first s
 AI runtime integrations:
 
 ```txt
-@tekbreed/tekmemo-ai-sdk
+@tekbreed/tekmemo/ai-sdk
 @tekbreed/tekmemo-tanstack-ai
 ```
 

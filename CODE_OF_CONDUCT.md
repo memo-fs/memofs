@@ -2,7 +2,7 @@
 
 ## Our commitment
 
-TekMemo is an open-source project for developers building memory infrastructure for AI apps and agents.
+TekBreed OSS is an open-source project for developers building agent infrastructure, starting with TekMemo memory infrastructure for AI apps and agents.
 
 We want this project to be a respectful, practical, and productive environment for everyone.
 
@@ -78,7 +78,7 @@ This also includes behavior outside project spaces when it directly affects the 
 
 Technical disagreement is welcome.
 
-TekMemo deals with complex topics:
+TekBreed OSS deals with complex topics:
 
 * memory architecture
 * AI provider adapters
@@ -158,7 +158,7 @@ Enforcement decisions are based on impact, severity, and repeated behavior.
 If you experience or witness unacceptable behavior, contact a maintainer privately through GitHub or report it to:
 
 ```txt
-conduct@tekmemo.dev
+conduct@tekbreed.com
 ```
 
 If the email is not active, use a private GitHub maintainer contact path.

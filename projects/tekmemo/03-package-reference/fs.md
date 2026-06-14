@@ -1,8 +1,8 @@
-# `@tekbreed/tekmemo-fs` Package
+# `@tekbreed/tekmemo/fs` Package
 
 ## Purpose
 
-`@tekbreed/tekmemo-fs` is the Node.js filesystem adapter for the TekMemo local memory protocol.
+`@tekbreed/tekmemo/fs` is the Node.js filesystem adapter for the TekMemo local memory protocol.
 
 It makes this product promise real:
 
@@ -13,7 +13,7 @@ It makes this product promise real:
 # Installation
 
 ```bash
-pnpm add @tekbreed/tekmemo-fs tekmemo
+pnpm add @tekbreed/tekmemo/fs tekmemo
 ```
 
 ---
@@ -22,7 +22,7 @@ pnpm add @tekbreed/tekmemo-fs tekmemo
 
 ```ts
 import { bootstrapMemoryStore, updateCoreMemory, readCoreMemory } from "@tekbreed/tekmemo";
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo-fs";
+import { createNodeFsMemoryStore } from "@tekbreed/tekmemo/fs";
 
 const store = await createNodeFsMemoryStore({
   rootDir: process.cwd()

@@ -11,7 +11,7 @@ Use this checklist before depending on TekMemo in production.
 
 ## Cloud usage
 
-- Use `@tekbreed/tekmemo-cloud-client` for all Cloud API calls.
+- Use the cloud client helper APIs (imported from `@tekbreed/tekmemo`) for all Cloud API calls.
 - Store API keys in server-side secrets only.
 - Scope API keys to the minimum required permissions.
 - Handle typed cloud errors.

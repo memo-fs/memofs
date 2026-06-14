@@ -4,7 +4,7 @@
 
 ```txt
 @tekbreed/tekmemo-voyage
-@tekbreed/tekmemo-openai
+@tekbreed/tekmemo/openai
 ```
 
 ## Purpose
@@ -35,7 +35,7 @@ They should implement a provider-neutral embedder contract from `@tekbreed/tekme
 
 ---
 
-# `@tekbreed/tekmemo-openai`
+# `@tekbreed/tekmemo/openai`
 
 ## Use for
 

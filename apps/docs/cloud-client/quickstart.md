@@ -1,7 +1,6 @@
 # Cloud client quickstart
 
-```ts
-import { createTekMemoCloudClient } from "@tekbreed/tekmemo-cloud-client";
+import { createTekMemoCloudClient } from "@tekbreed/tekmemo";
 
 const client = createTekMemoCloudClient({
   baseUrl: process.env.TEKMEMO_CLOUD_URL!,
@@ -20,7 +19,3 @@ const context = await client.context.compose({
   topK: 8,
 });
 ```
-
-## Self-hosted Cloud
-
-Set `baseUrl` to your own Cloud deployment ending in `/api/v1`.

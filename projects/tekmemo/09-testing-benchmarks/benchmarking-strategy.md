@@ -130,14 +130,14 @@ Unit tests validate pure package logic.
 | Package | Unit test focus |
 |---|---|
 | `@tekbreed/tekmemo` | memory paths, manifests, events, chunk registry, conflict detection, memory compiler primitives |
-| `@tekbreed/tekmemo-fs` | path resolution, safe read/write/append, missing files, path traversal protection |
-| `@tekbreed/tekmemo-ai-sdk` | tool schema validation, command mapping, safe memory injection |
-| `@tekbreed/tekmemo-agentfs` | root resolution, sync hooks, leases, checkpoint behavior |
+| `@tekbreed/tekmemo/fs` | path resolution, safe read/write/append, missing files, path traversal protection |
+| `@tekbreed/tekmemo/ai-sdk` | tool schema validation, command mapping, safe memory injection |
+| `@tekbreed/tekmemo/agentfs` | root resolution, sync hooks, leases, checkpoint behavior |
 | `@tekbreed/tekmemo-upstash` | namespace resolution, metadata filters, hit mapping, dimension validation assumptions |
 | `@tekbreed/tekmemo-voyage` | batching, request mapping, dimension validation, malformed responses |
-| `@tekbreed/tekmemo-openai` | model validation, dimensions support, request mapping, empty input handling |
-| `@tekbreed/tekmemo-rerank` | deterministic ranking, score normalization, fallback behavior |
-| `@tekbreed/tekmemo-graph` | entity extraction boundaries, temporal edges, invalidation, graph expansion |
+| `@tekbreed/tekmemo/openai` | model validation, dimensions support, request mapping, empty input handling |
+| `@tekbreed/tekmemo/rerank` | deterministic ranking, score normalization, fallback behavior |
+| `@tekbreed/tekmemo/graph` | entity extraction boundaries, temporal edges, invalidation, graph expansion |
 | `@tekbreed/tekmemo-connectors` | cursor state, dedupe, source manifest, retryable ingestion |
 | `@tekbreed/tekmemo-cloud-sync` | sync manifest, conflict resolution, idempotency, offline recovery |
 
@@ -175,11 +175,11 @@ Integration tests verify package combinations.
 Required integration combinations:
 
 ```txt
-tekmemo + @tekbreed/tekmemo-fs
-tekmemo + @tekbreed/tekmemo-fs + @tekbreed/tekmemo-ai-sdk
-tekmemo + @tekbreed/tekmemo-fs + @tekbreed/tekmemo-voyage + @tekbreed/tekmemo-upstash
-tekmemo + @tekbreed/tekmemo-fs + @tekbreed/tekmemo-openai + @tekbreed/tekmemo-upstash
-tekmemo + @tekbreed/tekmemo-graph + @tekbreed/tekmemo-rerank
+tekmemo + @tekbreed/tekmemo/fs
+tekmemo + @tekbreed/tekmemo/fs + @tekbreed/tekmemo/ai-sdk
+tekmemo + @tekbreed/tekmemo/fs + @tekbreed/tekmemo-voyage + @tekbreed/tekmemo-upstash
+tekmemo + @tekbreed/tekmemo/fs + @tekbreed/tekmemo/openai + @tekbreed/tekmemo-upstash
+tekmemo + @tekbreed/tekmemo/graph + @tekbreed/tekmemo/rerank
 tekmemo + @tekbreed/tekmemo-connectors + @tekbreed/tekmemo-cloud-sync
 ```
 

@@ -22,6 +22,11 @@ POST /api/v1/projects/:projectId/graph/edges
 POST /api/v1/projects/:projectId/graph/neighbors
 POST /api/v1/projects/:projectId/graph/path
 
+GET  /api/v1/projects/:projectId/candidates
+POST /api/v1/projects/:projectId/candidates
+POST /api/v1/projects/:projectId/candidates/:candidateId/promote
+POST /api/v1/projects/:projectId/candidates/:candidateId/dismiss
+
 POST /api/v1/projects/:projectId/extraction/run
 GET  /api/v1/projects/:projectId/extraction/jobs
 POST /api/v1/projects/:projectId/evals/run
@@ -30,6 +35,7 @@ POST /api/v1/projects/:projectId/benchmarks/run
 POST /api/v1/projects/:projectId/sync/push
 POST /api/v1/projects/:projectId/sync/pull
 GET  /api/v1/projects/:projectId/sync/status
+GET  /api/v1/projects/:projectId/sync/conflicts
 POST /api/v1/projects/:projectId/sync/conflicts/:conflictId/resolve
 
 POST /api/v1/projects/:projectId/exports

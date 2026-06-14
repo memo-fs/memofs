@@ -61,12 +61,12 @@ The package line should now follow this ownership model:
 | Concern | Owner |
 |---|---|
 | `.tekmemo/` protocol | `@tekbreed/tekmemo` |
-| local filesystem persistence | `@tekbreed/tekmemo-fs` |
-| AgentFS/Turso file-backed sync | `@tekbreed/tekmemo-agentfs` |
-| vector recall contracts | `@tekbreed/tekmemo-recall` |
+| local filesystem persistence | `@tekbreed/tekmemo/fs` |
+| AgentFS/Turso file-backed sync | `@tekbreed/tekmemo/agentfs` |
+| vector recall contracts | `@tekbreed/tekmemo/recall` |
 | vector provider adapters | `@tekbreed/tekmemo-upstash`, `@tekbreed/tekmemo-turso-vector`, `@tekbreed/tekmemo-qdrant`, etc. |
-| rerank contracts | `@tekbreed/tekmemo-rerank` |
-| rerank provider adapters | `@tekbreed/tekmemo-rerank-voyage`, `@tekbreed/tekmemo-rerank-cohere`, etc. |
+| rerank contracts | `@tekbreed/tekmemo/rerank` |
+| rerank provider adapters | `@tekbreed/tekmemo/rerank-voyage`, `@tekbreed/tekmemo/rerank-cohere`, etc. |
 | hosted sync/teams/billing/usage | TekMemo Cloud |
 
 ---
@@ -80,7 +80,7 @@ The following docs have been updated to match the new architecture:
 - [Core Runtime](/03-package-reference/core-runtime)
 - [`@tekbreed/tekmemo` Package](/03-package-reference/tekmemo)
 - [Memory Stores](/03-package-reference/memory-stores)
-- [`@tekbreed/tekmemo-fs` Package](/03-package-reference/fs)
+- [`@tekbreed/tekmemo/fs` Package](/03-package-reference/fs)
 - [Package Boundaries](/02-oss-and-packages/package-boundaries)
 - [Package Map](/02-oss-and-packages/package-map)
 - [Package Test Plan](/09-testing-benchmarks/package-test-plan)

@@ -40,7 +40,7 @@ Use these as the public docs for package users.
 | Section | Purpose |
 |---|---|
 | `03-package-reference/core-runtime.md` | `@tekbreed/tekmemo`, memory records, bootstrap, operations |
-| `03-package-reference/memory-stores.md` | `@tekbreed/tekmemo-fs`, `@tekbreed/tekmemo-agentfs` |
+| `03-package-reference/memory-stores.md` | `@tekbreed/tekmemo/fs`, `@tekbreed/tekmemo/agentfs` |
 | `03-package-reference/embeddings.md` | Voyage/OpenAI adapters |
 | `03-package-reference/vector-recall.md` | Recall interface and vector providers |
 | `03-package-reference/reranking.md` | Rerank interface and providers |
@@ -132,7 +132,7 @@ Start here:
 - [Current Architecture Update](/00-start-here/current-architecture-update)
 - [Local `.tekmemo/` Protocol](/05-architecture/local-tekmemo-protocol)
 - [`@tekbreed/tekmemo` Package](/03-package-reference/tekmemo)
-- [`@tekbreed/tekmemo-fs` Package](/03-package-reference/fs)
+- [`@tekbreed/tekmemo/fs` Package](/03-package-reference/fs)
 
 
 ---

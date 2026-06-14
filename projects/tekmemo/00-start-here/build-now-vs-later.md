@@ -6,15 +6,15 @@ These directly support the one-month survival launch.
 
 ### OSS
 - `@tekbreed/tekmemo`
-- `@tekbreed/tekmemo-fs`
-- `@tekbreed/tekmemo-ai-sdk`
-- `@tekbreed/tekmemo-agentfs`
-- `@tekbreed/tekmemo-recall`
+- `@tekbreed/tekmemo/fs`
+- `@tekbreed/tekmemo/ai-sdk`
+- `@tekbreed/tekmemo/agentfs`
+- `@tekbreed/tekmemo/recall`
 - `@tekbreed/tekmemo-upstash`
 - `@tekbreed/tekmemo-voyage`
-- `@tekbreed/tekmemo-openai`
-- `@tekbreed/tekmemo-rerank`
-- `@tekbreed/tekmemo-rerank-voyage`
+- `@tekbreed/tekmemo/openai`
+- `@tekbreed/tekmemo/rerank`
+- `@tekbreed/tekmemo/rerank-voyage`
 
 ### Cloud beta
 - signup/onboarding
@@ -43,9 +43,9 @@ These improve trust and provider coverage after the first beta is usable.
 
 - `@tekbreed/tekmemo-turso-vector`
 - `@tekbreed/tekmemo-qdrant`
-- `@tekbreed/tekmemo-benchmark-kit`
+- `@tekbreed/tekmemo/benchmark-kit`
 - `@tekbreed/tekmemo-evals`
-- `@tekbreed/tekmemo-cli`
+- `@tekbreed/tekmemo/cli`
 - `@tekbreed/tekmemo-tanstack-ai`
 - package contract test suite
 - better usage/quota enforcement
@@ -58,8 +58,8 @@ These improve trust and provider coverage after the first beta is usable.
 These are valuable but should not delay launch.
 
 - `@tekbreed/tekmemo-pinecone`
-- `@tekbreed/tekmemo-rerank-cohere`
-- `@tekbreed/tekmemo-rerank-jina`
+- `@tekbreed/tekmemo/rerank-cohere`
+- `@tekbreed/tekmemo/rerank-jina`
 - `@tekbreed/tekmemo-chroma`
 - `@tekbreed/tekmemo-lancedb`
 - `@tekbreed/tekmemo-weaviate`

@@ -9,14 +9,14 @@ Upstash is only one implementation.
 TekMemo needs a provider-neutral recall interface:
 
 ```txt
-@tekbreed/tekmemo-recall
+@tekbreed/tekmemo/recall
 ```
 
 Then each vector backend implements it.
 
 ---
 
-# 2. Required package: `@tekbreed/tekmemo-recall`
+# 2. Required package: `@tekbreed/tekmemo/recall`
 
 ## Purpose
 Provider-neutral vector recall contracts.
@@ -198,7 +198,7 @@ Good for large-scale self-hosted vector infrastructure.
 # 4. Implementation order
 
 ```txt
-1. @tekbreed/tekmemo-recall
+1. @tekbreed/tekmemo/recall
 2. update @tekbreed/tekmemo-upstash to implement RecallStore
 3. @tekbreed/tekmemo-turso-vector
 4. @tekbreed/tekmemo-qdrant
@@ -213,7 +213,7 @@ Good for large-scale self-hosted vector infrastructure.
 TekMemo Cloud beta should use:
 
 ```txt
-@tekbreed/tekmemo-recall
+@tekbreed/tekmemo/recall
 @tekbreed/tekmemo-upstash
 ```
 

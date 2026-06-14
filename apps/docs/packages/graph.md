@@ -1,12 +1,10 @@
-# `@tekbreed/tekmemo-graph`
+# Graph Memory Module
 
-The graph memory engine for TekMemo. This package provides the logic for managing entities (nodes) and their relationships (edges).
+The graph memory module of `@tekbreed/tekmemo` provides the engine and storage structure for managing entities (nodes) and their relationships (edges).
 
-## Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo-graph
-```
+All graph memory APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## Core Concepts
 
@@ -34,7 +32,7 @@ npm install @tekbreed/tekmemo-graph
 ## Example: Managing a Graph
 
 ```ts
-import { createInMemoryGraphStore } from "@tekbreed/tekmemo-graph";
+import { createInMemoryGraphStore } from "@tekbreed/tekmemo";
 
 const store = createInMemoryGraphStore();
 

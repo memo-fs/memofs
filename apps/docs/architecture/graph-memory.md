@@ -30,6 +30,6 @@ Edges can also carry weight, confidence scores, and source references back to th
 
 You can interact with graph memory through multiple surfaces:
 
-1. **Local Graph**: `@tekbreed/tekmemo-graph` provides the TypeScript contracts and local graph behavior, saving nodes and edges as JSON lines in `.tekmemo/`.
-2. **Cloud APIs**: TekMemo Cloud exposes project-scoped graph APIs for managing massive graphs. `@tekbreed/tekmemo-cloud-client` wraps these endpoints.
-3. **Agent Tools**: `@tekbreed/tekmemo-mcp-server` exposes graph tools to coding agents so they can traverse relationships at runtime.
+1. **Local Graph**: The graph memory module (imported from `@tekbreed/tekmemo`) provides the TypeScript contracts and local graph behavior, saving nodes and edges as JSON lines in `.tekmemo/`.
+2. **Cloud APIs**: TekMemo Cloud exposes project-scoped graph APIs for managing massive graphs. The cloud client wraps these endpoints.
+3. **Agent Tools**: The `@tekbreed/tekmemo-mcp-server` package exposes graph tools to coding agents so they can traverse relationships at runtime.

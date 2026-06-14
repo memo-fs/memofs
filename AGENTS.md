@@ -1,116 +1,82 @@
 # AGENTS.md - TekBreed OSS
 
-This file provides guidance for AI coding agents (e.g. Codex, Copilot, Antigravity, Claude) working inside this monorepo. Read this before touching any code.
-
----
+This file is the source of truth for agents working in this repo.
 
 ## What This Repository Is
 
-`@tekbreed/oss` is the monorepo for **TekBreed OSS** work.
+`@tekbreed/oss` is the TekBreed open-source monorepo.
 
-The monorepo is organized around product families:
+TekMemo is the first product family. It is published as three main packages:
 
-1. **TekMemo** - file-first memory runtime packages, adapters, apps, docs, and examples
-2. **Future TekBreed OSS products** - for example TekCode packages and apps when they are introduced
+```txt
+@tekbreed/tekmemo            # Core memory runtime
+@tekbreed/tekmemo-cli        # CLI distribution
+@tekbreed/tekmemo-mcp-server # Model Context Protocol server
+```
 
----
+Everything is imported directly from their respective packages. Do not reintroduce separate public TekMemo adapter packages.
 
-## Monorepo Structure
+## Current Structure
 
-See `.agents/monorepo-structure.md` for detailed structure.
+```txt
+tekbreed-oss/
+├── apps/
+│   └── docs/              # TekBreed OSS docs site
+├── packages/
+│   ├── tekmemo/           # TekMemo core runtime package
+│   ├── tekmemo-cli/       # TekMemo CLI package
+│   ├── tekmemo-mcp-server/# TekMemo MCP server package
+│   ├── tekcode-cli/       # future TekCode placeholder
+│   └── tekcode-desktop/   # future TekCode placeholder
+├── projects/
+│   └── tekmemo/           # planning and architecture notes
+├── tooling/               # private @repo/* workspace tooling
+├── docs/                  # repo operations notes
+└── scripts/               # repo maintenance scripts
+```
 
----
-
-## Technology Stack
-
-See `.agents/technology-stack.md` for details.
-
----
-
-## Package Naming Convention
-
-See `.agents/package-naming.md` for details.
-
----
-
-## Core Concepts
-
-See `.agents/core-concepts.md` for details.
-
----
-
-## Development Commands
-
-See `.agents/development-commands.md` for details.
-
----
-
-## Code Style Rules
-
-See `.agents/code-style.md` for details.
-
----
-
-## TypeScript Rules
-
-See `.agents/typescript-rules.md` for details.
-
----
-
-## Testing Requirements
-
-See `.agents/testing-requirements.md` for details.
-
----
-
-## Package Build Rules (`tsdown`)
-
-See `.agents/package-build-rules.md` for details.
-
----
+The repo should not keep runnable examples or self-host apps as first-class surfaces during this cleanup.
 
 ## Package Boundaries
 
-See `.agents/package-boundaries.md` for details.
+- Public TekMemo Core APIs belong in `packages/tekmemo/src/` and are re-exported in `packages/tekmemo/src/index.ts`.
+- TekMemo CLI logic and binaries belong in `packages/tekmemo-cli/`.
+- TekMemo MCP server logic and binaries belong in `packages/tekmemo-mcp-server/`.
+- Private shared tooling belongs in `tooling/` and keeps the `@repo/*` namespace.
+- Future TekCode work should live beside TekMemo, not inside TekMemo.
+- Private SaaS concerns do not belong in OSS packages: billing, tenancy, hosted dashboards, encrypted BYOK storage, internal admin tooling, or production cloud ownership.
 
----
+## Commands
 
-## Adding a New Package
+Run commands from the repo root.
 
-See `.agents/adding-new-package.md` for details.
+```bash
+pnpm install
+pnpm build
+pnpm typecheck
+pnpm test
+pnpm format-and-lint
+pnpm format-and-lint:fix
+pnpm lint:package
+pnpm docs:dev
+pnpm docs:build
+pnpm validate:workspace
+```
 
----
+## Style And Safety
 
-## Testing
+- Use TypeScript strict mode and ESM.
+- Use Biome formatting: tabs and double quotes.
+- Do not add Prettier.
+- Do not use `any` unless the reason is documented.
+- Prefer `unknown` for untrusted external data.
+- Add tests for new logic-heavy behavior.
+- Do not commit secrets, API keys, `.env` files, private credentials, or private cloud internals.
 
-See `.agents/testing.md` for details.
+## Repository Standards
 
----
+1. Keep root docs aligned with TekBreed OSS as the umbrella.
+2. Keep TekMemo documented as modular packages with clear entrypoints.
+3. Remove stale examples/self-host references from docs.
+4. Keep exports consolidated and clean.
 
-## CI / GitHub Actions
-
-See `.agents/ci-github-actions.md` for details.
-
----
-
-## What Agents Should Avoid
-
-See `.agents/what-agents-should-avoid.md` for details.
-
----
-
-## Git Conventions
-
-See `.agents/git-conventions.md` for details.
-
----
-
-## Key Internal Documents
-
-See `.agents/key-internal-documents.md` for details.
-
----
-
-## Quick Reference
-
-See `.agents/quick-reference.md` for details.

@@ -320,7 +320,7 @@ Developers can prototype memory-enabled apps without paying for hosted memory or
 Example:
 
 ```bash
-pnpm add @tekbreed/tekmemo @tekbreed/tekmemo-fs
+pnpm add @tekbreed/tekmemo @tekbreed/tekmemo/fs
 ```
 
 ---
@@ -503,7 +503,7 @@ It should not depend on:
 - React
 - a specific LLM provider
 
-### `@tekbreed/tekmemo-fs`
+### `@tekbreed/tekmemo/fs`
 
 Owns:
 
@@ -513,7 +513,7 @@ Owns:
 - local snapshots
 - local import/export
 
-### `@tekbreed/tekmemo-ai-sdk`
+### `@tekbreed/tekmemo/ai-sdk`
 
 Owns:
 
@@ -535,7 +535,7 @@ Owns:
 - chunk IDs
 - stale chunk replacement
 
-### `@tekbreed/tekmemo-voyage` and `@tekbreed/tekmemo-openai`
+### `@tekbreed/tekmemo-voyage` and `@tekbreed/tekmemo/openai`
 
 Own:
 
@@ -594,7 +594,7 @@ Files make memory:
 
 ```ts
 import { createTekMemo } from "@tekbreed/tekmemo";
-import { createFsStore } from "@tekbreed/tekmemo-fs";
+import { createFsStore } from "@tekbreed/tekmemo/fs";
 
 const memo = createTekMemo({
   store: createFsStore(".tekmemo"),
@@ -3278,7 +3278,7 @@ By the end of Week 1, TekMemo should run locally and the cloud app should suppor
 - docs app boots
 - cloud app boots
 - `@tekbreed/tekmemo` package works
-- `@tekbreed/tekmemo-fs` works
+- `@tekbreed/tekmemo/fs` works
 - create tenant works
 - create project works
 - read/update core memory works
@@ -3289,7 +3289,7 @@ By the end of Week 1, TekMemo should run locally and the cloud app should suppor
 | Day | Focus |
 |---:|---|
 | 1 | Scaffold monorepo, cloud app, docs app, packages. |
-| 2 | Implement `@tekbreed/tekmemo` core and `@tekbreed/tekmemo-fs`. |
+| 2 | Implement `@tekbreed/tekmemo` core and `@tekbreed/tekmemo/fs`. |
 | 3 | Scaffold cloud backend folders and DB clients. |
 | 4 | Implement minimal control-plane and tenant/project repositories. |
 | 5 | Implement core memory read/update in cloud. |

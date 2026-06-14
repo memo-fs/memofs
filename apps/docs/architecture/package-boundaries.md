@@ -1,19 +1,27 @@
-# Package boundaries
+# Package Boundaries
 
-Understanding how TekMemo packages relate to each other helps you choose the right imports.
+Understanding how TekMemo packages relate to each other helps you maintain clean architecture and import patterns.
 
-## Cloud API transport
+## The Core Package (`@tekbreed/tekmemo`)
 
-Only `@tekbreed/tekmemo-cloud-client` communicates with the TekMemo Cloud API. Other packages delegate to it when cloud access is needed:
+The core package defines the protocol contracts, schemas, document types, events, and validation logic. It also contains:
+- Filesystem storage (`createNodeFsMemoryStore`)
+- Graph memory engine
+- Vector recall contracts and Upstash Vector adapter
+- Provider embedders (OpenAI, VoyageAI) and rerankers
+- AI SDK tool helpers
 
-- CLI cloud commands use `@tekbreed/tekmemo-cloud-client`.
-- MCP cloud runtime uses `@tekbreed/tekmemo-cloud-client`.
-- AI SDK cloud tools use `@tekbreed/tekmemo-cloud-client`.
+It contains no standalone CLI or MCP server binaries. All programmatic API access is imported from `@tekbreed/tekmemo`.
 
-## Provider adapters
+## CLI Package (`@tekbreed/tekmemo-cli`)
 
-Provider adapters (`@tekbreed/tekmemo-openai`, `@tekbreed/tekmemo-voyageai`, `@tekbreed/tekmemo-upstash-vector`) accept credentials from your code. They do not store or manage provider keys.
+A standalone package providing the `tekmemo` binary. It parses command-line input and executes memory commands. It depends on `@tekbreed/tekmemo` for core memory operations and local storage management.
 
-## Convenience imports
+## MCP Server Package (`@tekbreed/tekmemo-mcp-server`)
 
-`@tekbreed/tekmemo-adapters` is a convenience package that reexports multiple adapter packages through subpath imports. Use it when you want a single dependency for several integrations, or use the direct packages for a smaller dependency footprint.
+A standalone package providing the `tekmemo-mcp` binary. It runs a Model Context Protocol server exposing TekMemo capabilities as tools and resources to coding agents and AI applications. It depends on `@tekbreed/tekmemo` for the underlying memory logic.
+
+## Safety & Secrets
+
+- Monorepo packages accept credentials from host applications/runtimes and never store secrets or private keys in the code or `.tekmemo/` files.
+- Private SaaS concerns (billing, tenancy, internally encrypted store, INTERNAL admin dashboard) do not belong in the open-source packages.

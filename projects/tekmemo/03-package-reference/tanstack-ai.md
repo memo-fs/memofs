@@ -4,7 +4,7 @@
 
 `@tekbreed/tekmemo-tanstack-ai` exposes TekMemo memory operations as TanStack AI-compatible tools.
 
-It is similar in purpose to `@tekbreed/tekmemo-ai-sdk`, but it targets TanStack AI's `toolDefinition()` architecture.
+It is similar in purpose to `@tekbreed/tekmemo/ai-sdk`, but it targets TanStack AI's `toolDefinition()` architecture.
 
 ## Decision
 
@@ -13,13 +13,13 @@ We should support TanStack AI, but as an optional integration package.
 It should not replace:
 
 ```txt
-@tekbreed/tekmemo-ai-sdk
+@tekbreed/tekmemo/ai-sdk
 ```
 
 It should sit beside it:
 
 ```txt
-@tekbreed/tekmemo-ai-sdk
+@tekbreed/tekmemo/ai-sdk
 @tekbreed/tekmemo-tanstack-ai
 ```
 
@@ -154,6 +154,6 @@ This package belongs in **Build Next**, not Build Now.
 
 Reason:
 
-- Build Now already has `@tekbreed/tekmemo-ai-sdk`.
+- Build Now already has `@tekbreed/tekmemo/ai-sdk`.
 - TanStack AI support improves adoption and runtime portability.
 - It should not delay the survival launch.

@@ -7,14 +7,14 @@ import type {
 	BenchmarkThresholdFailure,
 	BenchmarkThresholdResult,
 	BenchmarkThresholds,
-} from "@tekbreed/tekmemo-benchmark-kit";
+	RecallDocument,
+} from "@tekbreed/tekmemo";
 import {
 	BenchmarkRunner,
 	evaluateBenchmarkThresholds,
 	jsonBenchmarkReport,
 	markdownBenchmarkReport,
-} from "@tekbreed/tekmemo-benchmark-kit";
-import type { RecallDocument } from "@tekbreed/tekmemo-recall";
+} from "@tekbreed/tekmemo";
 
 const BENCHMARK_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),

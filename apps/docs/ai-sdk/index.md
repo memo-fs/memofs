@@ -1,13 +1,15 @@
 # Vercel AI SDK Integration
 
-`@tekbreed/tekmemo-ai-sdk` provides official helpers for integrating TekMemo memory into applications built with the [Vercel AI SDK](https://sdk.vercel.ai).
+TekMemo provides official helpers for integrating memory into applications built with the [Vercel AI SDK](https://sdk.vercel.ai). These helpers are built directly into the `@tekbreed/tekmemo` package.
 
 It allows your agents to automatically search memory for context and record new decisions or facts during a conversation.
 
-## Install
+## Installation
+
+Ensure you install the Vercel AI SDK peer dependency alongside the main package:
 
 ```bash
-npm install @tekbreed/tekmemo-ai-sdk ai tekmemo @tekbreed/tekmemo-fs
+npm install ai @tekbreed/tekmemo
 ```
 
 ## Core Helpers
@@ -30,8 +32,8 @@ import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
 	createLocalAiSdkRuntime,
-} from "@tekbreed/tekmemo-ai-sdk";
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo-fs";
+	createNodeFsMemoryStore,
+} from "@tekbreed/tekmemo";
 
 const store = createNodeFsMemoryStore({ rootDir: "./.tekmemo" });
 const runtime = createLocalAiSdkRuntime({ workspace: store });
@@ -68,4 +70,4 @@ async function chat(userPrompt: string) {
 
 ## Architectural Note
 
-The AI SDK helpers are designed to be "pluggable." They rely on the `MemoryStore` and `RecallStore` interfaces, meaning they work equally well with local filesystem memory (`@tekbreed/tekmemo-fs`) or hosted cloud memory (`@tekbreed/tekmemo-cloud-client`).
+The AI SDK helpers are designed to be "pluggable." They rely on the `MemoryStore` and `RecallStore` interfaces, meaning they work equally well with local filesystem memory or hosted cloud memory.

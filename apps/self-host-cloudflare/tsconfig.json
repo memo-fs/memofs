@@ -1,9 +1,0 @@
-{
-	"extends": "@repo/typescript-config/base.json",
-	"compilerOptions": {
-		"types": ["@cloudflare/workers-types"],
-		"outDir": "dist"
-	},
-	"include": ["src/**/*.ts"],
-	"exclude": ["node_modules", "dist"]
-}

@@ -1,12 +1,18 @@
-# `@tekbreed/tekmemo-ai-sdk`
+# AI SDK Module
 
-Vercel AI SDK helpers for TekMemo memory tools.
+The AI SDK module provides Vercel AI SDK helpers for integrating TekMemo memory tools.
 
-## Install
+## Installation
+
+Ensure you install the Vercel AI SDK peer dependency alongside the main package:
 
 ```bash
-npm install @tekbreed/tekmemo-ai-sdk ai tekmemo @tekbreed/tekmemo-fs
+npm install ai @tekbreed/tekmemo
 ```
+
+## Import
+
+All AI SDK helper APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## Purpose
 
@@ -31,8 +37,8 @@ import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
 	createLocalAiSdkRuntime,
-} from "@tekbreed/tekmemo-ai-sdk";
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo-fs";
+	createNodeFsMemoryStore,
+} from "@tekbreed/tekmemo";
 
 const store = createNodeFsMemoryStore({ rootDir: "./.tekmemo" });
 const runtime = createLocalAiSdkRuntime({ workspace: store });
@@ -56,10 +62,10 @@ await generateText({
 
 ## Cloud-backed tools
 
-For cloud-backed memory tools, use a runtime from `@tekbreed/tekmemo-cloud-client` instead of the local runtime:
+For cloud-backed memory tools, use a runtime initialized with the cloud client instead of the local runtime:
 
 ```ts
-import { createTekMemoCloudClient } from "@tekbreed/tekmemo-cloud-client";
+import { createTekMemoCloudClient } from "@tekbreed/tekmemo";
 
 const client = createTekMemoCloudClient({
 	baseUrl: "https://memo.tekbreed.com/api/v1",

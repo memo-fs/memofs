@@ -1,6 +1,6 @@
 # Release Process
 
-TekMemo uses Changesets for package versioning and publishing.
+TekBreed OSS uses Changesets for package versioning and publishing. TekMemo is published as one public package, `@tekbreed/tekmemo`, with all public APIs exported from the single root entrypoint.
 
 ## Validation
 
@@ -22,12 +22,12 @@ Before a release, verify:
 - `pnpm-lock.yaml` is current.
 - `benchmark-results/` contains only ignored generated output.
 - Public README examples use exported APIs.
-- Package `README.md`, `LICENSE`, and `exports` are included in package contents.
+- Package `README.md`, `LICENSE`, `bin`, and `exports` are included in package contents.
 - No secrets, private cloud implementation details, or local-only docs are committed.
 
 ## Changesets
 
-For the first publish of packages already versioned at `0.1.0`, a changeset file is not required if those exact versions are the intended npm versions.
+For the first publish of packages already versioned at the intended npm version, a changeset file is not required.
 
 For every release after the initial publish, add a changeset for public package changes:
 
@@ -41,14 +41,14 @@ Use patch/minor/major according to the public API impact:
 - Minor: new backwards-compatible public APIs or package capabilities.
 - Major: breaking public API, behavior, or export changes.
 
-Internal-only packages under `@repo/*` should not be published externally.
+Internal-only packages under `@repo/*` and private workspaces such as docs or benchmarks should not be published externally.
 
 ## Workflow modes
 
 The release workflow has two manual modes:
 
 - `prepare`: runs `pnpm release:check`, then opens a version PR through Changesets.
-- `publish`: runs `pnpm release:check`, then publishes packages with `pnpm release`.
+- `publish`: runs `pnpm release:check`, then publishes public packages with `pnpm release`.
 
 Use `prepare` when changesets need to update versions and changelogs. Use `publish` when the current committed package versions are ready to publish.
 
@@ -57,7 +57,7 @@ Use `prepare` when changesets need to update versions and changelogs. Use `publi
 Publish from GitHub Actions when possible. The publish workflow expects:
 
 - `NPM_TOKEN` configured in repository secrets.
-- npm publishing permissions for the `@tekbreed/tekmemo` and `@tekbreed/tekmemo-*` packages.
+- npm publishing permission for `@tekbreed/tekmemo`.
 - release branch contents already reviewed and merged.
 
 For local emergency publishing, verify npm auth first:
@@ -70,15 +70,13 @@ pnpm release
 
 ## Package inspection
 
-Before a major or first public release, inspect at least the core package contents:
+Before a major or first public release, inspect the TekMemo package contents:
 
 ```bash
-pnpm --filter tekmemo pack --dry-run
-pnpm --filter @tekbreed/tekmemo-fs pack --dry-run
-pnpm --filter @tekbreed/tekmemo-recall pack --dry-run
+pnpm --filter @tekbreed/tekmemo pack:dry-run
 ```
 
-The package tarballs should contain `dist`, `README.md`, and `LICENSE`, and should not contain source-only tests, local docs, credentials, or generated benchmark results.
+The tarball should contain `dist`, `README.md`, and `LICENSE`, and should not contain source-only tests, local docs, credentials, or generated benchmark results.
 
 ## Rollback
 

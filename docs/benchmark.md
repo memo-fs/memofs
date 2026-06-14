@@ -12,7 +12,7 @@ A package should not be published if smoke benchmarks fail. Full benchmark regre
 
 TekMemo keeps benchmark infrastructure in two places:
 
-- `packages/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
+- `packages/tekmemo/src/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
 - `benchmarks` is the private workspace package that owns TekMemo-specific suites, thresholds, reports, and release scripts.
 
 Generated output is written to `benchmark-results/` and ignored by Git.

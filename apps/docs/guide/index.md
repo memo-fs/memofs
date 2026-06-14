@@ -40,9 +40,11 @@ This guide gets you from zero to a working TekMemo memory setup.
 
 ## Runtime choices
 
+All runtime modes are configured as options when initializing your memory store using `@tekbreed/tekmemo`:
+
 | Runtime | Use when |
 | --- | --- |
 | Local | You want inspectable project memory stored in `.tekmemo/`. |
 | Cloud | You want hosted project memory, sync, API keys, recall, and graph endpoints. |
 | Hybrid | You want local files plus cloud recall/sync. |
-| In-memory | You are writing tests, demos, or package examples. |
+| In-memory | You are writing tests, demos, or examples. |

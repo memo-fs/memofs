@@ -72,8 +72,8 @@ Must test:
 
 Used by:
 
-- `@tekbreed/tekmemo-fs`
-- `@tekbreed/tekmemo-agentfs`
+- `@tekbreed/tekmemo/fs`
+- `@tekbreed/tekmemo/agentfs`
 
 Must test:
 
@@ -96,7 +96,7 @@ Must test:
 Used by:
 
 - `@tekbreed/tekmemo-voyage`
-- `@tekbreed/tekmemo-openai`
+- `@tekbreed/tekmemo/openai`
 
 Must test:
 
@@ -139,9 +139,9 @@ Must test:
 
 Used by:
 
-- `@tekbreed/tekmemo-rerank-voyage`
-- `@tekbreed/tekmemo-rerank-cohere`
-- `@tekbreed/tekmemo-rerank-jina`
+- `@tekbreed/tekmemo/rerank-voyage`
+- `@tekbreed/tekmemo/rerank-cohere`
+- `@tekbreed/tekmemo/rerank-jina`
 
 Must test:
 

@@ -1,11 +1,12 @@
-# TekMemo developer docs
+# TekMemo Developer Docs
 
-TekMemo is a file-first memory runtime and package ecosystem for AI apps, agents, coding tools, MCP clients, and cloud/hybrid workflows.
+TekMemo is a file-first memory runtime and package ecosystem specifically designed for AI apps and agents. It provides a structured sandbox (AgentFS), graph memory, and semantic recall for building autonomous tools and MCP clients.
 
-Start: /guide/getting-started
-Packages: /packages/
-CLI: /cli/
-MCP: /mcp/
-Cloud client: /cloud-client/
-AI SDK: /ai-sdk/
-Examples: /examples/
+Start here: /guide/getting-started
+Core Primitives & Modules: /packages/
+Agent & Local CLI: /cli/
+MCP Server & Tools: /mcp/
+Cloud Client & Sync: /cloud-client/
+AI SDK Integration: /ai-sdk/
+
+Note: This documentation strictly covers public APIs and tools for users and developers. Internal implementations are abstracted away to provide a clean, safe interface for your AI workflows.

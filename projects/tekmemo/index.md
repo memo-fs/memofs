@@ -48,41 +48,12 @@ Start with:
 - [Package Boundaries](/02-oss-and-packages/package-boundaries)
 - [Core Runtime](/03-package-reference/core-runtime)
 - [`@tekbreed/tekmemo` Package](/03-package-reference/tekmemo)
-- [`@tekbreed/tekmemo-fs` Package](/03-package-reference/fs)
+- [`@tekbreed/tekmemo/fs` Package](/03-package-reference/fs)
 - [Vector Recall](/03-package-reference/vector-recall)
 - [Reranking](/03-package-reference/reranking)
-
----
-
-# TekMemo Cloud
-
-The hosted SaaS layer for managed projects, memory dashboards, API keys, usage, billing, tenant routing, and beta revenue.
-
-Start with:
-
-- [Cloud Product Spec](/04-cloud-product/cloud-product-spec)
-- [Infra Architecture](/05-architecture/infra-architecture)
-- [API Contract](/06-api/api-contract)
-- [Pricing and Billing](/08-pricing-billing/pricing-billing)
-
----
-
-# 1-month survival launch
-
-Your immediate operating system is here:
-
-- [Launch Index](/10-launch-survival/index)
-- [4-Week Survival Plan](/10-launch-survival/4-week-survival-plan)
-- [Week 1 Checklist](/10-launch-survival/week-1)
-- [Week 2 Checklist](/10-launch-survival/week-2)
-- [Week 3 Checklist](/10-launch-survival/week-3)
-- [Week 4 Checklist](/10-launch-survival/week-4)
-
 
 ---
 
 # AI runtime integrations
 
 - [AI Runtime Integrations](/05-architecture/ai-runtime-integrations)
-- [`@tekbreed/tekmemo-tanstack-ai`](/03-package-reference/tanstack-ai)
-- [TanStack AI Support Decision](/02-oss-and-packages/tanstack-ai-support)

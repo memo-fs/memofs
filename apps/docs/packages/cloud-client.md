@@ -1,17 +1,15 @@
-# `@tekbreed/tekmemo-cloud-client`
+# Cloud Client Module
 
-Project-scoped TekMemo Cloud API client.
+The cloud client module provides a project-scoped TekMemo Cloud API client.
 
-## Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo-cloud-client
-```
+All cloud client APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## Create a client
 
 ```ts
-import { createTekMemoCloudClient } from "@tekbreed/tekmemo-cloud-client";
+import { createTekMemoCloudClient } from "@tekbreed/tekmemo";
 
 const client = createTekMemoCloudClient({
   baseUrl: "https://memo.tekbreed.com/api/v1",

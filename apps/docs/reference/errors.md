@@ -63,6 +63,6 @@ For list endpoints, the `meta` object includes pagination details.
 
 ## Security and redaction
 
-By default, the `@tekbreed/tekmemo-cloud-client` strips upstream provider secrets and internal tokens from error messages before throwing them. 
+By default, the cloud client strips upstream provider secrets and internal tokens from error messages before throwing them. 
 
 **Rule:** Never blindly log raw HTTP response bodies if you aren't using the official client, as some providers may echo keys back on failure.

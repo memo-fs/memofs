@@ -1,19 +1,19 @@
 # Cloud Client
 
-`@tekbreed/tekmemo-cloud-client` is the official client for connecting to the TekMemo Cloud API.
+The cloud client is built directly into the `@tekbreed/tekmemo` package and provides the official client for connecting to the TekMemo Cloud API.
 
 Use it to access hosted project memory, sync, recall, graph APIs, and more from any JavaScript server runtime.
 
-## Install
+## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-cloud-client
+npm install @tekbreed/tekmemo
 ```
 
 ## Create a client
 
 ```ts
-import { createTekMemoCloudClient } from "@tekbreed/tekmemo-cloud-client";
+import { createTekMemoCloudClient } from "@tekbreed/tekmemo";
 
 const client = createTekMemoCloudClient({
   baseUrl: "https://memo.tekbreed.com/api/v1",
@@ -88,7 +88,18 @@ Synchronize local `.tekmemo/` files with the cloud.
 | `client.sync.push(input)` | Sends local memory events to the cloud. |
 | `client.sync.pull(input)` | Fetches remote memory events to apply locally. |
 | `client.sync.status(input?)` | Checks sync status and detects conflicts. |
+| `client.sync.listConflicts(input?)` | Lists open synchronization conflicts. |
 | `client.sync.resolveConflict(input)` | Applies a resolution policy to a sync conflict. |
+
+### `candidates`
+Review and promote AI-generated memory candidates.
+
+| Method | Purpose |
+| --- | --- |
+| `client.candidates.listCandidates(input?)` | Paginates through memory candidates. |
+| `client.candidates.createCandidate(input)` | Creates a new memory candidate. |
+| `client.candidates.promoteCandidate(input)` | Promotes a candidate into durable memory. |
+| `client.candidates.dismissCandidate(input)` | Dismisses a candidate. |
 
 ### `agentSessions`
 Manage AgentFS sandboxed coding sessions.

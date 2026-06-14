@@ -81,7 +81,7 @@ No package should invent another local memory root.
 
 ---
 
-## `@tekbreed/tekmemo-fs`
+## `@tekbreed/tekmemo/fs`
 
 ### Owns
 
@@ -118,7 +118,7 @@ No package should invent another local memory root.
 
 ---
 
-## `@tekbreed/tekmemo-recall`
+## `@tekbreed/tekmemo/recall`
 
 ### Owns
 
@@ -141,7 +141,7 @@ No package should invent another local memory root.
 
 ---
 
-## `@tekbreed/tekmemo-rerank`
+## `@tekbreed/tekmemo/rerank`
 
 ### Owns
 
@@ -171,8 +171,8 @@ Examples:
 
 - `@tekbreed/tekmemo-upstash` maps `RecallStore` to Upstash Vector.
 - `@tekbreed/tekmemo-turso-vector` maps `RecallStore` to Turso vector tables.
-- `@tekbreed/tekmemo-rerank-voyage` maps `Reranker` to Voyage rerank API.
-- `@tekbreed/tekmemo-openai` maps `MemoryEmbedder` to OpenAI embeddings.
+- `@tekbreed/tekmemo/rerank-voyage` maps `Reranker` to Voyage rerank API.
+- `@tekbreed/tekmemo/openai` maps `MemoryEmbedder` to OpenAI embeddings.
 
 ---
 

@@ -1,9 +1,9 @@
 # Cloud client errors
 
-`@tekbreed/tekmemo-cloud-client` should expose typed errors for auth, validation, rate limits, network failures, and server errors.
+The cloud client exposes typed errors for auth, validation, rate limits, network failures, and server errors.
 
 ```ts
-import { isTekMemoCloudError } from "@tekbreed/tekmemo-cloud-client";
+import { isTekMemoCloudError } from "@tekbreed/tekmemo";
 
 try {
   await client.memory.readCore();

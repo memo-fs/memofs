@@ -7,7 +7,7 @@ import { site } from "./config/site.mts";
 export default defineConfig({
 	lang: "en-US",
 	title: site.title,
-	titleTemplate: ":title | TekMemo Docs",
+	titleTemplate: ":title | TekBreed OSS Docs",
 	description: site.description,
 	base: "/",
 	cleanUrls: true,
@@ -19,16 +19,16 @@ export default defineConfig({
 		theme: { light: "github-light", dark: "github-dark" },
 	},
 	themeConfig: {
-		logo: { light: "/tekmemo.svg", dark: "/tekmemo.svg", alt: "TekMemo" },
-		siteTitle: "@tekbreed/tekmemo",
+		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "TekBreed OSS" },
+		siteTitle: "TekBreed OSS",
 		nav,
 		sidebar,
 		search: { provider: "local" },
 		outline: { level: [2, 3], label: "On this page" },
 		socialLinks: [
-			{ icon: "github", link: site.repo, ariaLabel: "TekMemo on GitHub" },
-			{ icon: "npm", link: site.npm, ariaLabel: "TekMemo on npm" },
-			{ icon: "x", link: site.x, ariaLabel: "TekMemo on X" },
+			{ icon: "github", link: site.repo, ariaLabel: "TekBreed OSS on GitHub" },
+			{ icon: "npm", link: site.npm, ariaLabel: "TekBreed OSS on npm" },
+			{ icon: "x", link: site.x, ariaLabel: "TekBreed on X" },
 		],
 		editLink: {
 			pattern: `${site.repo}/edit/main/apps/docs/:path`,

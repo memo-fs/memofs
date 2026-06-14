@@ -2,12 +2,12 @@
 layout: home
 hero:
   name: TekBreed OSS
-  text: Open-source agent infrastructure from TekBreed.
-  image: /tekmemo.svg
-  tagline: Developer documentation for TekMemo today, with room for TekCode and future TekBreed OSS projects.
+  text: Next-generation memory infrastructure for AI apps and agents.
+  image: /logo.svg
+  tagline: "Build smarter AI apps with TekMemo — a file-first memory runtime, unified API, and built-in MCP integration."
   actions:
     - theme: brand
-      text: TekMemo quickstart
+      text: Quickstart
       link: /guide/
     - theme: alt
       text: View on GitHub 
@@ -19,13 +19,10 @@ features:
   - title: File-first local runtime
     icon: 📁
     details: Start with a .tekmemo folder, inspect memory as files, and keep durable context close to the project.
-  - title: Cloud sync and APIs
+  - title: Unified Root Import
     icon: ☁️
-    details: Use @tekbreed/tekmemo-cloud-client for hosted project memory, sync, recall, graph APIs, and self-hosted Cloud URLs.
+    details: Import all memory stores, provider adapters, MCP server capabilities, and testing tools directly from @tekbreed/tekmemo.
   - title: Agent and MCP friendly
     icon: 🤖
     details: Use the CLI, MCP server, and AI SDK tools to give coding agents stable memory before, during, and after work.
-  - title: Product-level packages
-    icon: 📦
-    details: Use @tekbreed/tekmemo and focused TekMemo packages today; future TekBreed OSS products can live beside them.
 ---

@@ -6,16 +6,9 @@ Developer documentation for the TekMemo OSS workspace.
 
 This VitePress app documents:
 
-- `@tekbreed/tekmemo`
-- `@tekbreed/tekmemo-fs`
-- `@tekbreed/tekmemo-agentfs`
-- `@tekbreed/tekmemo-graph`
-- `@tekbreed/tekmemo-cloud-client`
-- `@tekbreed/tekmemo-cli`
-- `@tekbreed/tekmemo-mcp-server`
-- `@tekbreed/tekmemo-ai-sdk`
-- `@tekbreed/tekmemo-adapters`
-- recall, rerank, vector, provider, and benchmark packages
+- `@tekbreed/tekmemo` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
+- `@tekbreed/tekmemo-cli` (CLI distribution)
+- `@tekbreed/tekmemo-mcp-server` (Model Context Protocol server)
 - examples and architecture
 
 It intentionally does not contain blog, changelog, pricing, billing, legal, roadmap, or competitor pages. Those belong in the TekMemo Cloud app CMS.

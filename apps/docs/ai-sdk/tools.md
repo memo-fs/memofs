@@ -12,7 +12,7 @@ Typical use with AI SDK:
 ```ts
 import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { defineTekMemoTools } from "@tekbreed/tekmemo-ai-sdk";
+import { defineTekMemoTools } from "@tekbreed/tekmemo";
 
 const result = await generateText({
 	model: openai("gpt-4.1-mini"),

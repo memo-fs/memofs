@@ -46,7 +46,7 @@ The package map is now centered around the canonical local memory protocol:
 ```
 
 `@tekbreed/tekmemo` owns this protocol.
-`@tekbreed/tekmemo-fs` implements it for the local filesystem.
+`@tekbreed/tekmemo/fs` implements it for the local filesystem.
 Provider packages must not invent their own file layout.
 
 ---
@@ -58,9 +58,9 @@ Provider packages must not invent their own file layout.
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
 | `@tekbreed/tekmemo` | Yes | No | Core memory contracts, `.tekmemo/` standard, memory records, memory operations, chunk/source contracts |
-| `@tekbreed/tekmemo-fs` | Yes | No | Local filesystem memory store |
-| `@tekbreed/tekmemo-agentfs` | Yes | Config-based | AgentFS/Turso AgentFS-backed memory store and sync hooks |
-| `@tekbreed/tekmemo-ai-sdk` | Yes | No | AI SDK tool definitions and memory tool bridge |
+| `@tekbreed/tekmemo/fs` | Yes | No | Local filesystem memory store |
+| `@tekbreed/tekmemo/agentfs` | Yes | Config-based | AgentFS/Turso AgentFS-backed memory store and sync hooks |
+| `@tekbreed/tekmemo/ai-sdk` | Yes | No | AI SDK tool definitions and memory tool bridge |
 
 ---
 
@@ -72,7 +72,7 @@ Provider packages must not invent their own file layout.
 
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
-| `@tekbreed/tekmemo-ai-sdk` | Yes | No | Vercel AI SDK-compatible TekMemo tools |
+| `@tekbreed/tekmemo/ai-sdk` | Yes | No | Vercel AI SDK-compatible TekMemo tools |
 | `@tekbreed/tekmemo-tanstack-ai` | Yes | No | TanStack AI-compatible TekMemo tools |
 
 ### Rule
@@ -87,7 +87,7 @@ They must not own storage, billing, provider keys, cloud tenancy, or vector-prov
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
 | `@tekbreed/tekmemo-voyage` | Yes | Yes | Voyage embedding adapter |
-| `@tekbreed/tekmemo-openai` | Yes | Yes | OpenAI embedding adapter |
+| `@tekbreed/tekmemo/openai` | Yes | Yes | OpenAI embedding adapter |
 | `@tekbreed/tekmemo-cohere-embed` | Later | Yes | Cohere embedding adapter if demand appears |
 | `@tekbreed/tekmemo-jina-embed` | Later | Yes | Jina embedding adapter if demand appears |
 
@@ -96,7 +96,7 @@ Implement and stabilize only these first:
 
 ```txt
 @tekbreed/tekmemo-voyage
-@tekbreed/tekmemo-openai
+@tekbreed/tekmemo/openai
 ```
 
 Do not add Cohere/Jina embeddings until the first 7 packages pass tests.
@@ -107,7 +107,7 @@ Do not add Cohere/Jina embeddings until the first 7 packages pass tests.
 
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
-| `@tekbreed/tekmemo-recall` | Yes | No | Provider-neutral vector recall contracts |
+| `@tekbreed/tekmemo/recall` | Yes | No | Provider-neutral vector recall contracts |
 | `@tekbreed/tekmemo-upstash` | Yes | Yes | Upstash Vector recall adapter |
 | `@tekbreed/tekmemo-turso-vector` | Yes | Yes | Turso/libSQL vector recall adapter |
 | `@tekbreed/tekmemo-qdrant` | Yes | Yes | Qdrant vector recall adapter |
@@ -121,7 +121,7 @@ Do not add Cohere/Jina embeddings until the first 7 packages pass tests.
 Build in this order:
 
 ```txt
-1. @tekbreed/tekmemo-recall
+1. @tekbreed/tekmemo/recall
 2. @tekbreed/tekmemo-upstash
 3. @tekbreed/tekmemo-turso-vector
 4. @tekbreed/tekmemo-qdrant
@@ -145,24 +145,24 @@ until real user demand appears.
 
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
-| `@tekbreed/tekmemo-rerank` | Yes | No | Provider-neutral reranking contracts |
-| `@tekbreed/tekmemo-rerank-voyage` | Yes | Yes | Voyage rerank adapter |
-| `@tekbreed/tekmemo-rerank-cohere` | Yes | Yes | Cohere rerank adapter |
-| `@tekbreed/tekmemo-rerank-jina` | Yes | Yes | Jina rerank adapter |
+| `@tekbreed/tekmemo/rerank` | Yes | No | Provider-neutral reranking contracts |
+| `@tekbreed/tekmemo/rerank-voyage` | Yes | Yes | Voyage rerank adapter |
+| `@tekbreed/tekmemo/rerank-cohere` | Yes | Yes | Cohere rerank adapter |
+| `@tekbreed/tekmemo/rerank-jina` | Yes | Yes | Jina rerank adapter |
 
 ### Recommendation
 Build first:
 
 ```txt
-@tekbreed/tekmemo-rerank
-@tekbreed/tekmemo-rerank-voyage
+@tekbreed/tekmemo/rerank
+@tekbreed/tekmemo/rerank-voyage
 ```
 
 Add later:
 
 ```txt
-@tekbreed/tekmemo-rerank-cohere
-@tekbreed/tekmemo-rerank-jina
+@tekbreed/tekmemo/rerank-cohere
+@tekbreed/tekmemo/rerank-jina
 ```
 
 ---
@@ -171,13 +171,13 @@ Add later:
 
 | Package | OSS? | BYOK? | Purpose |
 |---|---:|---:|---|
-| `@tekbreed/tekmemo-graph` | Yes | No | Graph memory contracts and local graph expansion |
+| `@tekbreed/tekmemo/graph` | Yes | No | Graph memory contracts and local graph expansion |
 | `@tekbreed/tekmemo-connectors` | Yes | Provider-config | Connector framework, source manifests, cursors |
-| `@tekbreed/tekmemo-mcp-server` | Yes | Config-based | MCP server exposing TekMemo tools |
-| `@tekbreed/tekmemo-cli` | Yes | Config-based | Developer CLI for local memory, indexing, diagnostics |
+| `@tekbreed/tekmemo/mcp` | Yes | Config-based | MCP server exposing TekMemo tools |
+| `@tekbreed/tekmemo/cli` | Yes | Config-based | Developer CLI for local memory, indexing, diagnostics |
 | `@tekbreed/tekmemo-cloud-sync` | Yes/Partial | Token-based | Cloud sync client contracts, not full cloud backend |
 | `@tekbreed/tekmemo-evals` | Yes | No | Evaluation utilities and recall quality checks |
-| `@tekbreed/tekmemo-benchmark-kit` | Yes | Config-based | Benchmark runner and reproducible performance tests |
+| `@tekbreed/tekmemo/benchmark-kit` | Yes | Config-based | Benchmark runner and reproducible performance tests |
 | `@tekbreed/tekmemo-observability` | Yes | Config-based | Telemetry hooks and event helpers |
 
 ---
@@ -208,14 +208,14 @@ TekMemo Cloud’s encrypted BYOK storage, tenant routing, billing, usage enforce
 
 ```txt
 tekmemo
-@tekbreed/tekmemo-fs
-@tekbreed/tekmemo-agentfs
-@tekbreed/tekmemo-ai-sdk
+@tekbreed/tekmemo/fs
+@tekbreed/tekmemo/agentfs
+@tekbreed/tekmemo/ai-sdk
 
 @tekbreed/tekmemo-voyage
-@tekbreed/tekmemo-openai
+@tekbreed/tekmemo/openai
 
-@tekbreed/tekmemo-recall
+@tekbreed/tekmemo/recall
 @tekbreed/tekmemo-upstash
 @tekbreed/tekmemo-turso-vector
 @tekbreed/tekmemo-qdrant
@@ -225,18 +225,18 @@ tekmemo
 @tekbreed/tekmemo-weaviate
 @tekbreed/tekmemo-milvus
 
-@tekbreed/tekmemo-rerank
-@tekbreed/tekmemo-rerank-voyage
-@tekbreed/tekmemo-rerank-cohere
-@tekbreed/tekmemo-rerank-jina
+@tekbreed/tekmemo/rerank
+@tekbreed/tekmemo/rerank-voyage
+@tekbreed/tekmemo/rerank-cohere
+@tekbreed/tekmemo/rerank-jina
 
-@tekbreed/tekmemo-graph
+@tekbreed/tekmemo/graph
 @tekbreed/tekmemo-connectors
-@tekbreed/tekmemo-mcp-server
-@tekbreed/tekmemo-cli
+@tekbreed/tekmemo/mcp
+@tekbreed/tekmemo/cli
 @tekbreed/tekmemo-cloud-sync
 @tekbreed/tekmemo-evals
-@tekbreed/tekmemo-benchmark-kit
+@tekbreed/tekmemo/benchmark-kit
 @tekbreed/tekmemo-observability
 ```
 
@@ -261,15 +261,15 @@ The first serious OSS release should include:
 
 ```txt
 tekmemo
-@tekbreed/tekmemo-fs
-@tekbreed/tekmemo-ai-sdk
-@tekbreed/tekmemo-agentfs
-@tekbreed/tekmemo-recall
+@tekbreed/tekmemo/fs
+@tekbreed/tekmemo/ai-sdk
+@tekbreed/tekmemo/agentfs
+@tekbreed/tekmemo/recall
 @tekbreed/tekmemo-upstash
 @tekbreed/tekmemo-voyage-ai
-@tekbreed/tekmemo-openai
-@tekbreed/tekmemo-rerank
-@tekbreed/tekmemo-rerank-voyage
+@tekbreed/tekmemo/openai
+@tekbreed/tekmemo/rerank
+@tekbreed/tekmemo/rerank-voyage
 ```
 
 The second release can add:
@@ -277,8 +277,8 @@ The second release can add:
 ```txt
 @tekbreed/tekmemo-turso-vector
 @tekbreed/tekmemo-qdrant
-@tekbreed/tekmemo-cli
-@tekbreed/tekmemo-benchmark-kit
+@tekbreed/tekmemo/cli
+@tekbreed/tekmemo/benchmark-kit
 @tekbreed/tekmemo-evals
 ```
 
@@ -286,9 +286,9 @@ The third release can add:
 
 ```txt
 @tekbreed/tekmemo-pinecone
-@tekbreed/tekmemo-rerank-cohere
-@tekbreed/tekmemo-rerank-jina
-@tekbreed/tekmemo-mcp-server
+@tekbreed/tekmemo/rerank-cohere
+@tekbreed/tekmemo/rerank-jina
+@tekbreed/tekmemo/mcp
 @tekbreed/tekmemo-connectors
 @tekbreed/tekmemo-observability
 ```

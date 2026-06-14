@@ -1,53 +1,42 @@
 # Installation
 
-Install only the packages you need.
+TekMemo is published as three main packages: the core runtime, the CLI distribution, and the MCP server.
 
-## Local runtime and filesystem
+## Core Runtime
+
+To integrate TekMemo's memory runtime into your application, install the core package:
 
 ```bash
-npm install @tekbreed/tekmemo @tekbreed/tekmemo-fs
+npm install @tekbreed/tekmemo
 ```
 
 ## CLI
+
+To manage your memory folders and run local/cloud/hybrid commands, install the CLI:
 
 ```bash
 npm install -D @tekbreed/tekmemo-cli
 ```
 
-## MCP server
+## MCP Server
+
+To expose TekMemo memory to MCP-compatible agents (like Claude Code or Cursor), install the MCP server:
 
 ```bash
 npm install -D @tekbreed/tekmemo-mcp-server
 ```
 
-## Cloud client
+## Optional Peer Dependencies
 
-```bash
-npm install @tekbreed/tekmemo-cloud-client
-```
+Depending on which features you use, you may need to install one or more peer dependencies:
 
-## AI SDK helpers
+| Feature | Dependency | Install Command |
+| --- | --- | --- |
+| **Vercel AI SDK integration** | `ai` | `npm install ai` |
+| **OpenAI embeddings/chat** | `openai` | `npm install openai` |
+| **Upstash Vector recall** | `@upstash/vector` | `npm install @upstash/vector` |
+| **MCP client setup** (e.g. for custom scripts) | `@modelcontextprotocol/sdk` | `npm install @modelcontextprotocol/sdk` |
 
-```bash
-npm install @tekbreed/tekmemo-ai-sdk ai
-# or, through the adapters convenience package
-npm install @tekbreed/tekmemo-adapters ai
-```
+## Supported Package Managers
 
-## Graph memory
-
-```bash
-npm install @tekbreed/tekmemo-graph
-```
-
-## Provider adapters
-
-```bash
-npm install @tekbreed/tekmemo-openai @tekbreed/tekmemo-voyageai @tekbreed/tekmemo-upstash-vector
-# or, through the adapters convenience package
-npm install @tekbreed/tekmemo-adapters openai @upstash/vector
-```
-
-## Supported package managers
-
-All TekMemo packages work with npm, pnpm, Yarn, and Bun.
+The `@tekbreed/tekmemo` package works out of the box with npm, pnpm, Yarn, and Bun.

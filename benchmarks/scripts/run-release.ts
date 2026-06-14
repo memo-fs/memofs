@@ -2,17 +2,15 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import {
-	createBenchmarkSuite,
-	createMemoryReadBenchmarkCase,
-	createMemoryWriteBenchmarkCase,
-	createRecallQueryBenchmarkCase,
-} from "@tekbreed/tekmemo-benchmark-kit";
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo-fs";
-import { createInMemoryRecallStore } from "@tekbreed/tekmemo-recall";
-import { createDeterministicFallbackReranker } from "@tekbreed/tekmemo-rerank";
-import {
 	CORE_MEMORY_PATH,
 	chunkText,
+	createBenchmarkSuite,
+	createDeterministicFallbackReranker,
+	createInMemoryRecallStore,
+	createMemoryReadBenchmarkCase,
+	createMemoryWriteBenchmarkCase,
+	createNodeFsMemoryStore,
+	createRecallQueryBenchmarkCase,
 	NOTES_MEMORY_PATH,
 	readCoreMemory,
 	writeCoreMemory,
@@ -53,13 +51,7 @@ try {
 						iterations: 10,
 						warmupIterations: 1,
 						async run() {
-							await Promise.all([
-								import("@tekbreed/tekmemo"),
-								import("@tekbreed/tekmemo-fs"),
-								import("@tekbreed/tekmemo-recall"),
-								import("@tekbreed/tekmemo-rerank"),
-								import("@tekbreed/tekmemo-benchmark-kit"),
-							]);
+							await import("@tekbreed/tekmemo");
 						},
 					},
 					createMemoryWriteBenchmarkCase({

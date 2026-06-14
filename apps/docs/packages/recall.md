@@ -1,18 +1,16 @@
-# `@tekbreed/tekmemo-recall`
+# Recall Module
 
-Semantic recall memory for AI agents. This package provides the standard contracts and in-memory implementation for storing and querying text embeddings.
+The recall module provides semantic recall memory for AI agents. It defines the standard contracts and in-memory implementation for storing and querying text embeddings.
 
-## Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo-recall
-```
+All recall APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## How it works
 
 "Recall" is the process of retrieving relevant memory fragments using vector similarity (semantic search). 
 
-This package defines the `RecallStore` interface, which is implemented by various adapters (e.g., `@tekbreed/tekmemo-upstash-vector`). It also provides `InMemoryRecallStore` for testing and local ephemeral sessions.
+This module defines the `RecallStore` interface, which is implemented by various adapters (e.g., the Upstash Vector adapter). It also provides `InMemoryRecallStore` for testing and local ephemeral sessions.
 
 ## API Reference
 
@@ -28,7 +26,7 @@ This package defines the `RecallStore` interface, which is implemented by variou
 ## Example usage
 
 ```ts
-import { createInMemoryRecallStore } from "@tekbreed/tekmemo-recall";
+import { createInMemoryRecallStore } from "@tekbreed/tekmemo";
 
 const store = createInMemoryRecallStore({
   dimension: 1536 // Match your embedding model (e.g. text-embedding-3-small)

@@ -24,6 +24,11 @@ Graph memory stores entities and relationships. It helps answer questions like â
 
 A context package is the structured payload sent to an AI model or tool. It can combine core memory, notes, recall results, graph context, and source metadata.
 
-## Modular packages
+## Package architecture
 
-TekMemo is split into focused packages so you only install what you need. For example, `@tekbreed/tekmemo-cloud-client` handles Cloud API communication, while `@tekbreed/tekmemo-fs` handles local file storage. See the [Packages](/packages/) page for the full list.
+TekMemo is published as three main packages:
+- `@tekbreed/tekmemo` (the core runtime containing the filesystem store, graph memory, vector adapters, and API modules)
+- `@tekbreed/tekmemo-cli` (the CLI distribution)
+- `@tekbreed/tekmemo-mcp-server` (the MCP server)
+
+When writing code to integrate TekMemo, you import everything directly from the core `@tekbreed/tekmemo` package. See the [API Reference](/packages/) page for the list of modules and helper APIs.

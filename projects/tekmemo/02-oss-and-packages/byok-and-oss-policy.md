@@ -26,20 +26,20 @@ TekMemo packages should not store provider secrets.
 | Package | BYOK? | Notes |
 |---|---:|---|
 | `@tekbreed/tekmemo` | No | No provider dependency |
-| `@tekbreed/tekmemo-fs` | No | Local filesystem only |
-| `@tekbreed/tekmemo-agentfs` | Config-based | Depends on AgentFS/Turso setup |
-| `@tekbreed/tekmemo-ai-sdk` | No | Should receive configured tools/runtime |
+| `@tekbreed/tekmemo/fs` | No | Local filesystem only |
+| `@tekbreed/tekmemo/agentfs` | Config-based | Depends on AgentFS/Turso setup |
+| `@tekbreed/tekmemo/ai-sdk` | No | Should receive configured tools/runtime |
 | `@tekbreed/tekmemo-voyage` | Yes | User can pass Voyage API key |
-| `@tekbreed/tekmemo-openai` | Yes | User can pass OpenAI API key |
-| `@tekbreed/tekmemo-recall` | No | Interface only |
+| `@tekbreed/tekmemo/openai` | Yes | User can pass OpenAI API key |
+| `@tekbreed/tekmemo/recall` | No | Interface only |
 | `@tekbreed/tekmemo-upstash` | Yes | User can pass Upstash credentials |
 | `@tekbreed/tekmemo-turso-vector` | Yes | User can pass Turso/libSQL credentials |
 | `@tekbreed/tekmemo-qdrant` | Yes | User can pass Qdrant URL/API key |
 | `@tekbreed/tekmemo-pinecone` | Yes | User can pass Pinecone API key |
-| `@tekbreed/tekmemo-rerank` | No | Interface only |
-| `@tekbreed/tekmemo-rerank-voyage` | Yes | User can pass Voyage API key |
-| `@tekbreed/tekmemo-rerank-cohere` | Yes | User can pass Cohere API key |
-| `@tekbreed/tekmemo-rerank-jina` | Yes | User can pass Jina API key |
+| `@tekbreed/tekmemo/rerank` | No | Interface only |
+| `@tekbreed/tekmemo/rerank-voyage` | Yes | User can pass Voyage API key |
+| `@tekbreed/tekmemo/rerank-cohere` | Yes | User can pass Cohere API key |
+| `@tekbreed/tekmemo/rerank-jina` | Yes | User can pass Jina API key |
 
 ---
 

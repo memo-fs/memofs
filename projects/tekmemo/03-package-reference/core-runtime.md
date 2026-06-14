@@ -97,8 +97,8 @@ A memory store is any backend that can read/write canonical TekMemo paths.
 Examples:
 
 - in-memory test store
-- local filesystem store from `@tekbreed/tekmemo-fs`
-- AgentFS-backed store from `@tekbreed/tekmemo-agentfs`
+- local filesystem store from `@tekbreed/tekmemo/fs`
+- AgentFS-backed store from `@tekbreed/tekmemo/agentfs`
 - future cloud-sync-backed store
 
 ## Manifest

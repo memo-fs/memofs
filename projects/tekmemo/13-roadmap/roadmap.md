@@ -146,7 +146,7 @@ Must provide:
 - structured memory commands
 - chunk registry primitives later
 
-### 2. `@tekbreed/tekmemo-ai-sdk`
+### 2. `@tekbreed/tekmemo/ai-sdk`
 Build second.
 
 Must provide:
@@ -155,13 +155,13 @@ Must provide:
 - prepare-call integration
 - thin AI SDK binding
 
-### 3. `@tekbreed/tekmemo-fs`
+### 3. `@tekbreed/tekmemo/fs`
 Build third.
 
 Must provide:
 - local filesystem-backed `MemoryStore`
 
-### 4. `@tekbreed/tekmemo-agentfs`
+### 4. `@tekbreed/tekmemo/agentfs`
 Build fourth.
 
 Must provide:
@@ -186,7 +186,7 @@ Must provide:
 - batching
 - dimension validation
 
-### 7. `@tekbreed/tekmemo-openai`
+### 7. `@tekbreed/tekmemo/openai`
 Build seventh.
 
 Must provide:

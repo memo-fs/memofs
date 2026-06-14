@@ -1,12 +1,10 @@
-# `@tekbreed/tekmemo`
+# Core Memory Module
 
-`@tekbreed/tekmemo` is the core package that defines the memory model, document types, and canonical file path conventions used throughout the ecosystem.
+The core memory module of `@tekbreed/tekmemo` defines the memory model, document types, validation, and canonical file path conventions.
 
-## Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo
-```
+All core helpers and structures are imported directly from `@tekbreed/tekmemo`:
 
 ## Core concepts
 

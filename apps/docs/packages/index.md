@@ -1,23 +1,42 @@
-# Packages
+# Packages Overview
 
-TekMemo is a modular package ecosystem. Install only what you need.
+TekMemo is published as three main packages:
 
-| Package | Purpose |
-| --- | --- |
-| [`@tekbreed/tekmemo`](./tekmemo) | Core memory types, contracts, and runtime helpers. |
-| [`@tekbreed/tekmemo-fs`](./fs) | Local `.tekmemo/` filesystem adapter. |
-| [`@tekbreed/tekmemo-agentfs`](./agentfs) | Agent-oriented filesystem helpers. |
-| [`@tekbreed/tekmemo-graph`](./graph) | Graph memory for entities and relationships. |
-| [`@tekbreed/tekmemo-cloud-client`](./cloud-client) | TekMemo Cloud API client. |
-| [`@tekbreed/tekmemo-cli`](./cli) | Command-line tooling for local, cloud, and hybrid memory. |
-| [`@tekbreed/tekmemo-mcp-server`](./mcp) | MCP server for coding agents. |
-| [`@tekbreed/tekmemo-ai-sdk`](./ai-sdk) | Vercel AI SDK tool helpers. |
-| [`@tekbreed/tekmemo-adapters`](./adapters) | Convenience imports for AI SDK, cloud, embedding, vector, and rerank adapters. |
-| [`@tekbreed/tekmemo-server`](./server) | Self-hosted memory server (Hono-based). |
-| [`@tekbreed/tekmemo-recall`](./recall) | Recall contracts and local recall helpers. |
-| [`@tekbreed/tekmemo-upstash-vector`](./vector-adapters) | Upstash Vector integration. |
-| [`@tekbreed/tekmemo-rerank`](./rerank) | Rerank contracts. |
-| [`@tekbreed/tekmemo-rerank-voyage`](./rerank) | VoyageAI reranking adapter. |
-| [`@tekbreed/tekmemo-openai`](./provider-adapters) | OpenAI provider adapter. |
-| [`@tekbreed/tekmemo-voyageai`](./provider-adapters) | VoyageAI provider adapter. |
-| [`@tekbreed/tekmemo-benchmark-kit`](./benchmark-kit) | Benchmark fixtures and runners. |
+1. **`@tekbreed/tekmemo`**: The core memory runtime, providing memory primitives, filesystem/graph storage, vector recall, provider integrations, and evaluation/testing helpers.
+2. **`@tekbreed/tekmemo-cli`**: The command-line interface for managing local, cloud, and hybrid memory workflows.
+3. **`@tekbreed/tekmemo-mcp-server`**: The Model Context Protocol (MCP) server for exposing TekMemo memory to coding agents and AI applications.
+
+---
+
+## Core Runtime Modules (`@tekbreed/tekmemo`)
+
+Inside `@tekbreed/tekmemo`, the runtime is organized into several modules. All helper functions, classes, and types are imported directly from the root entrypoint:
+
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
+
+| Module / Adapter | Purpose | Detail Link |
+| --- | --- | --- |
+| **Core Primitives** | Core structures, event ledgers, and note structures. | [`Core Primitives`](./tekmemo) |
+| **Filesystem Store** | Local filesystem storage adapter (`createNodeFsMemoryStore`). | [`Filesystem Store`](./fs) |
+| **Agent Filesystem** | Sandbox and session protection for coding agents. | [`Agent Filesystem`](./agentfs) |
+| **Graph Memory** | Entities and relationships indexing and tracking. | [`Graph Memory`](./graph) |
+| **Recall** | Base retrieval contracts and memory queries. | [`Recall`](./recall) |
+| **Vector Adapters** | Implementations for vector stores (e.g. Upstash Vector). | [`Vector Adapters`](./vector-adapters) |
+| **Provider Adapters** | Integrations for OpenAI and VoyageAI. | [`Provider Adapters`](./provider-adapters) |
+| **Reranking** | Reranking contracts and VoyageAI adapter. | [`Reranking`](./rerank) |
+| **AI SDK** | Helper tools and adapters for Vercel AI SDK. | [`AI SDK`](./ai-sdk) |
+| **Cloud Client** | Connection and data syncing client for TekMemo Cloud API. | [`Cloud Client`](./cloud-client) |
+| **Benchmark Kit** | Benchmark runners and testing utilities. | [`Benchmark Kit`](./benchmark-kit) |
+
+---
+
+## Standalone Distribution Packages
+
+These packages provide runnable distributions or tools built on top of the core runtime.
+
+| Package | Purpose | Detail Link |
+| --- | --- | --- |
+| **`@tekbreed/tekmemo-cli`** | Command-line tool for developer workflows. | [`CLI Guide`](/cli/) |
+| **`@tekbreed/tekmemo-mcp-server`** | Model Context Protocol server for AI apps and agents. | [`MCP Guide`](/mcp/) |

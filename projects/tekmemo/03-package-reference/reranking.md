@@ -20,7 +20,7 @@ query
 
 ---
 
-# 2. Required package: `@tekbreed/tekmemo-rerank`
+# 2. Required package: `@tekbreed/tekmemo/rerank`
 
 ## Purpose
 Provider-neutral reranking contracts.
@@ -64,7 +64,7 @@ export interface Reranker {
 
 # 3. Provider packages
 
-## `@tekbreed/tekmemo-rerank-voyage`
+## `@tekbreed/tekmemo/rerank-voyage`
 
 ### Role
 Default cloud beta reranker.
@@ -89,7 +89,7 @@ Default cloud beta reranker.
 
 ---
 
-## `@tekbreed/tekmemo-rerank-cohere`
+## `@tekbreed/tekmemo/rerank-cohere`
 
 ### Role
 Later rerank provider for users who already use Cohere.
@@ -103,7 +103,7 @@ Later rerank provider for users who already use Cohere.
 
 ---
 
-## `@tekbreed/tekmemo-rerank-jina`
+## `@tekbreed/tekmemo/rerank-jina`
 
 ### Role
 Later rerank provider for users who prefer Jina or multilingual rerank options.
@@ -120,10 +120,10 @@ Later rerank provider for users who prefer Jina or multilingual rerank options.
 # 4. Implementation order
 
 ```txt
-1. @tekbreed/tekmemo-rerank
-2. @tekbreed/tekmemo-rerank-voyage
-3. @tekbreed/tekmemo-rerank-cohere
-4. @tekbreed/tekmemo-rerank-jina
+1. @tekbreed/tekmemo/rerank
+2. @tekbreed/tekmemo/rerank-voyage
+3. @tekbreed/tekmemo/rerank-cohere
+4. @tekbreed/tekmemo/rerank-jina
 ```
 
 ---
@@ -133,8 +133,8 @@ Later rerank provider for users who prefer Jina or multilingual rerank options.
 Use only:
 
 ```txt
-@tekbreed/tekmemo-rerank
-@tekbreed/tekmemo-rerank-voyage
+@tekbreed/tekmemo/rerank
+@tekbreed/tekmemo/rerank-voyage
 ```
 
 Do not expose provider selection in Cloud beta.

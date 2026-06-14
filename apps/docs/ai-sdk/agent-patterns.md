@@ -10,7 +10,7 @@ Store only durable, non-secret facts.
 
 ## In cloud mode
 
-Use `@tekbreed/tekmemo-cloud-client` to construct the runtime.
+Use the cloud client (imported from `@tekbreed/tekmemo`) to construct the runtime.
 
 ## In local mode
 

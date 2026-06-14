@@ -54,14 +54,14 @@ See [CLI runtime modes](/cli/) for the full breakdown.
 
 ## How do I add TekMemo to my coding agent?
 
-Use the **MCP server** (`@tekbreed/tekmemo-mcp-server`). It exposes tools like `read_core`, `add_note`, and `search_memory` to any MCP-compatible client (Claude Code, Cursor, etc.). Add it to your client configuration:
+Use the **MCP server** included in `@tekbreed/tekmemo`. It exposes tools like `read_core`, `add_note`, and `search_memory` to any MCP-compatible client (Claude Code, Cursor, etc.). Add it to your client configuration:
 
 ```json
 {
 	"mcpServers": {
 		"@tekbreed/tekmemo": {
 			"command": "npx",
-			"args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "/path/to/project"]
+			"args": ["-y", "--package", "@tekbreed/tekmemo", "tekmemo-mcp", "--runtime", "local", "--root", "/path/to/project"]
 		}
 	}
 }
@@ -71,7 +71,7 @@ See [MCP Server](/mcp/) for setup and [Client setup](/mcp/client-setup) for clie
 
 ## How do I use TekMemo with the Vercel AI SDK?
 
-Install `@tekbreed/tekmemo-ai-sdk` and use the provided tools inside your `generateText` or `streamText` calls. The package wraps core memory, notes, recall, and graph operations as AI SDK-compatible tools. See [AI SDK](/ai-sdk/) for the overview and [Agent patterns](/ai-sdk/agent-patterns) for integration examples.
+Import AI SDK tools directly from `@tekbreed/tekmemo` and use the provided tools inside your `generateText` or `streamText` calls. The package wraps core memory, notes, recall, and graph operations as AI SDK-compatible tools. See [AI SDK](/ai-sdk/) for the overview and [Agent patterns](/ai-sdk/agent-patterns) for integration examples.
 
 ## What is graph memory for?
 
@@ -93,7 +93,7 @@ TekMemo runs in any JavaScript environment. Supported platforms:
 | **Cloudflare Workers** | Edge functions, Workers AI, D1-backed apps |
 | **Vercel** | Next.js route handlers, server actions, edge middleware |
 
-The only constraint is keeping Cloud API keys server-side. See [Hosting](/hosting/) for platform-specific guides.
+The only constraint is keeping Cloud API keys server-side.
 
 ## What is a context package?
 
@@ -122,16 +122,8 @@ npx tekmemo context --query "current task"
 
 Since memory is file-first, you can also directly read `.tekmemo/core.md` and `.tekmemo/notes.md` in your editor.
 
-## Do I need to install every TekMemo package?
+## Do I need to install multiple packages?
 
-No. TekMemo is split into focused packages so you only install what you need:
+No. TekMemo is published as one unified package, `@tekbreed/tekmemo`. It contains all memory stores, provider adapters, CLI commands, the MCP server, and the AI SDK integrations. You only need to install a single package to use all features.
 
-- `@tekbreed/tekmemo` — core types and runtime helpers
-- `@tekbreed/tekmemo-fs` — local filesystem adapter
-- `@tekbreed/tekmemo-cloud-client` — cloud API transport
-- `@tekbreed/tekmemo-cli` — command-line interface
-- `@tekbreed/tekmemo-mcp-server` — MCP server for IDE/agent integration
-- `@tekbreed/tekmemo-ai-sdk` — Vercel AI SDK tools
-- `@tekbreed/tekmemo-graph` — graph memory
-
-See [Packages](/packages/) for the full list and when to use each one.
+See [Packages](/packages/) for the module breakdown.

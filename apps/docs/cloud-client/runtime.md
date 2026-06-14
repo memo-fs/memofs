@@ -1,9 +1,9 @@
 # Cloud runtime helpers
 
-`@tekbreed/tekmemo-cloud-client` can create runtime objects used by CLI, MCP, and AI SDK helpers.
+The cloud client module can create runtime objects used by CLI, MCP, and AI SDK helpers.
 
 ```ts
-import { createCloudTekMemoRuntime, createTekMemoCloudClient } from "@tekbreed/tekmemo-cloud-client";
+import { createCloudTekMemoRuntime, createTekMemoCloudClient } from "@tekbreed/tekmemo";
 
 const client = createTekMemoCloudClient({
   baseUrl: process.env.TEKMEMO_CLOUD_URL!,

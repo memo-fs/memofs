@@ -116,6 +116,4 @@ export default defineConfig({
 
 ## Related packages;
 
-- `@tekbreed/tekmemo` — Core memory contracts
-- `@tekbreed/tekmemo-recall` — Recall store contracts
-- `@tekbreed/tekmemo-rerank` — Ranker contracts
+- `@tekbreed/tekmemo` — Unified core memory runtime

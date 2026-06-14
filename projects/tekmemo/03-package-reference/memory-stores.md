@@ -3,8 +3,8 @@
 ## Packages
 
 ```txt
-@tekbreed/tekmemo-fs
-@tekbreed/tekmemo-agentfs
+@tekbreed/tekmemo/fs
+@tekbreed/tekmemo/agentfs
 ```
 
 Memory stores implement physical persistence for the canonical `.tekmemo/` protocol.
@@ -13,7 +13,7 @@ The protocol itself belongs to `@tekbreed/tekmemo`.
 
 ---
 
-# `@tekbreed/tekmemo-fs`
+# `@tekbreed/tekmemo/fs`
 
 ## Purpose
 
@@ -30,7 +30,7 @@ Use it for:
 
 ## Canonical layout
 
-`@tekbreed/tekmemo-fs` must read and write:
+`@tekbreed/tekmemo/fs` must read and write:
 
 ```txt
 .tekmemo/
@@ -71,7 +71,7 @@ Use it for:
 
 ---
 
-# `@tekbreed/tekmemo-agentfs`
+# `@tekbreed/tekmemo/agentfs`
 
 ## Purpose
 

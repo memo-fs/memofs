@@ -1,12 +1,10 @@
-# `@tekbreed/tekmemo-fs`
+# Filesystem Store Module
 
-Filesystem-backed memory store for TekMemo. This package provides the primary storage adapter for local development and CLI usage.
+The filesystem store module provides the primary filesystem-backed memory store for local development and CLI usage.
 
-## Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo-fs
-```
+All filesystem store APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## Features
 
@@ -32,7 +30,7 @@ The primary class for filesystem storage.
 ## Example: Setup
 
 ```ts
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo-fs";
+import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
 import { readCoreMemory } from "@tekbreed/tekmemo";
 
 // Initialize the store in the current directory

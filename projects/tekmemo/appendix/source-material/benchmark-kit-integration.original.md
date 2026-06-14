@@ -29,7 +29,7 @@ Add these to root `package.json`:
   "scripts": {
     "bench:recall": "pnpm --filter @tekbreed/tekmemo-benchmarks bench:recall",
     "bench:all": "pnpm --filter @tekbreed/tekmemo-benchmarks bench:all",
-    "test:benchmark-kit": "pnpm --filter @tekbreed/tekmemo-benchmark-kit test"
+    "test:benchmark-kit": "pnpm --filter @tekbreed/tekmemo/benchmark-kit test"
   }
 }
 ```
@@ -56,10 +56,10 @@ Then add these benchmark runners when each package is ready:
 
 ```txt
 @tekbreed/tekmemo-upstash vector recall runner
-@tekbreed/tekmemo-openai embedding smoke runner
+@tekbreed/tekmemo/openai embedding smoke runner
 @tekbreed/tekmemo-voyage embedding smoke runner
-@tekbreed/tekmemo-rerank reranker runner
-@tekbreed/tekmemo-graph graph-expansion runner
+@tekbreed/tekmemo/rerank reranker runner
+@tekbreed/tekmemo/graph graph-expansion runner
 @tekbreed/tekmemo-cloud-sync sync benchmark runner
 ```
 

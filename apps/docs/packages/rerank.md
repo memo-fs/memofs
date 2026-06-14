@@ -1,16 +1,14 @@
-# Reranking
+# Reranking Module
 
 Reranking is a crucial step in the recall pipeline. After retrieving a set of potentially relevant documents (e.g. via keyword search or basic vector search), a reranker uses a more powerful semantic model to re-order those documents by their true relevance to the query.
 
-## Core Package
+## Core Capabilities
 
-`@tekbreed/tekmemo-rerank` provides the standard `Reranker` contract and a deterministic fallback implementation.
+The core reranking capabilities, contract interfaces, and deterministic fallback reranker are built directly into `@tekbreed/tekmemo`.
 
-### Install
+## Import
 
-```bash
-npm install @tekbreed/tekmemo-rerank
-```
+All reranking helper functions and structures are imported directly from `@tekbreed/tekmemo`:
 
 ### API Reference
 
@@ -21,20 +19,14 @@ npm install @tekbreed/tekmemo-rerank
 
 ---
 
-## VoyageAI Adapter
+## VoyageAI Integration
 
-`@tekbreed/tekmemo-rerank-voyage` provides a production-ready implementation of the reranker contract using VoyageAI's specialized rerank models.
-
-### Install
-
-```bash
-npm install @tekbreed/tekmemo-rerank-voyage
-```
+Exposes a production-ready implementation of the reranker contract using VoyageAI's specialized rerank models.
 
 ### Example usage
 
 ```ts
-import { createVoyageReranker } from "@tekbreed/tekmemo-rerank-voyage";
+import { createVoyageReranker } from "@tekbreed/tekmemo";
 
 // Create the reranker instance
 const reranker = createVoyageReranker({

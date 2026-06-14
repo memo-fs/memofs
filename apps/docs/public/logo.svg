@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <style>
+      .blue-stroke { stroke: #258acb; }
+      .green-stroke { stroke: #4cae61; }
+      @media (prefers-color-scheme: dark) {
+        .blue-stroke { stroke: #4fb2f3; }
+        .green-stroke { stroke: #5bd473; }
+      }
+    </style>
+    <mask id="mask-green">
+      <rect width="100" height="100" fill="white" />
+      <path d="M 35,10 C 35,30 65,30 65,50" stroke="black" stroke-width="12" stroke-linecap="round" fill="none" />
+    </mask>
+
+    <mask id="mask-blue">
+      <rect width="100" height="100" fill="white" />
+      <path d="M 35,50 C 35,70 65,70 65,90" stroke="black" stroke-width="12" stroke-linecap="round" fill="none" />
+    </mask>
+  </defs>
+
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Brackets -->
+    <polyline points="25,25 5,50 25,75" class="blue-stroke" stroke-width="6" />
+    <polyline points="75,25 95,50 75,75" class="green-stroke" stroke-width="6" />
+
+    <!-- Rungs -->
+    <g class="green-stroke" stroke-width="4">
+      <line x1="44" y1="22" x2="56" y2="22" />
+      <line x1="41" y1="44" x2="59" y2="44" />
+      <line x1="41" y1="56" x2="59" y2="56" />
+      <line x1="44" y1="78" x2="56" y2="78" />
+    </g>
+
+    <!-- DNA Strands -->
+    <path d="M 65,10 C 65,30 35,30 35,50 C 35,70 65,70 65,90" class="green-stroke" stroke-width="6" mask="url(#mask-green)" />
+    
+    <path d="M 35,10 C 35,30 65,30 65,50 C 65,70 35,70 35,90" class="blue-stroke" stroke-width="6" mask="url(#mask-blue)" />
+  </g>
+</svg>

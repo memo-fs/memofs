@@ -26,7 +26,7 @@ The first release must prove the local-first story:
 
 ```txt
 tekmemo
-@tekbreed/tekmemo-fs
+@tekbreed/tekmemo/fs
 ```
 
 ## Goal
@@ -38,7 +38,7 @@ Make the `.tekmemo/` local protocol production-grade.
 - `@tekbreed/tekmemo` owns canonical `.tekmemo/` constants
 - `@tekbreed/tekmemo` bootstraps full protocol layout
 - `@tekbreed/tekmemo` handles manifest, events, conversations, chunk records, snapshots
-- `@tekbreed/tekmemo-fs` safely reads/writes `.tekmemo/`
+- `@tekbreed/tekmemo/fs` safely reads/writes `.tekmemo/`
 - unit tests cover path safety, JSONL, chunking, snapshots, atomic writes, and symlinks
 - docs explain local protocol clearly
 
@@ -49,8 +49,8 @@ Make the `.tekmemo/` local protocol production-grade.
 ## Packages
 
 ```txt
-@tekbreed/tekmemo-ai-sdk
-@tekbreed/tekmemo-agentfs
+@tekbreed/tekmemo/ai-sdk
+@tekbreed/tekmemo/agentfs
 ```
 
 ## Goal
@@ -71,8 +71,8 @@ Make TekMemo usable from agents and syncable file-backed environments.
 
 ```txt
 @tekbreed/tekmemo-voyage
-@tekbreed/tekmemo-openai
-@tekbreed/tekmemo-recall
+@tekbreed/tekmemo/openai
+@tekbreed/tekmemo/recall
 @tekbreed/tekmemo-upstash
 ```
 
@@ -82,7 +82,7 @@ Index `.tekmemo/` memory into recall providers.
 
 ## Exit criteria
 
-- `@tekbreed/tekmemo-recall` defines provider-neutral contracts
+- `@tekbreed/tekmemo/recall` defines provider-neutral contracts
 - `@tekbreed/tekmemo-upstash` implements `RecallStore`
 - Voyage/OpenAI embedders pass contract tests
 - chunk registry maps source to indexed chunks
@@ -94,8 +94,8 @@ Index `.tekmemo/` memory into recall providers.
 ## Packages
 
 ```txt
-@tekbreed/tekmemo-rerank
-@tekbreed/tekmemo-rerank-voyage
+@tekbreed/tekmemo/rerank
+@tekbreed/tekmemo/rerank-voyage
 ```
 
 ## Goal
@@ -131,8 +131,8 @@ Support your stack and OSS/self-host users better.
 
 ```txt
 @tekbreed/tekmemo-pinecone
-@tekbreed/tekmemo-rerank-cohere
-@tekbreed/tekmemo-rerank-jina
+@tekbreed/tekmemo/rerank-cohere
+@tekbreed/tekmemo/rerank-jina
 ```
 
 ## Goal
@@ -146,8 +146,8 @@ Support production teams and provider preference.
 ## Packages
 
 ```txt
-@tekbreed/tekmemo-cli
-@tekbreed/tekmemo-benchmark-kit
+@tekbreed/tekmemo/cli
+@tekbreed/tekmemo/benchmark-kit
 @tekbreed/tekmemo-evals
 @tekbreed/tekmemo-observability
 ```
@@ -163,9 +163,9 @@ Make TekMemo easier to inspect, test, benchmark, and trust.
 ## Packages
 
 ```txt
-@tekbreed/tekmemo-graph
+@tekbreed/tekmemo/graph
 @tekbreed/tekmemo-connectors
-@tekbreed/tekmemo-mcp-server
+@tekbreed/tekmemo/mcp
 @tekbreed/tekmemo-cloud-sync
 ```
 

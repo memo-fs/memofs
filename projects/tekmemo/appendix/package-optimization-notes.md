@@ -5,12 +5,12 @@
 This archive completes and hardens the first package line:
 
 - `@tekbreed/tekmemo`
-- `@tekbreed/tekmemo-fs`
-- `@tekbreed/tekmemo-ai-sdk`
-- `@tekbreed/tekmemo-agentfs`
+- `@tekbreed/tekmemo/fs`
+- `@tekbreed/tekmemo/ai-sdk`
+- `@tekbreed/tekmemo/agentfs`
 - `@tekbreed/tekmemo-upstash`
 - `@tekbreed/tekmemo-voyage`
-- `@tekbreed/tekmemo-openai`
+- `@tekbreed/tekmemo/openai`
 
 ## Edge cases covered
 

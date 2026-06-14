@@ -1,5 +1,7 @@
 import { pkgConfig } from "@repo/tsdown-config";
 
 export default pkgConfig({
-	entry: ["src/index.ts"],
+	entry: {
+		index: "src/index.ts",
+	},
 });

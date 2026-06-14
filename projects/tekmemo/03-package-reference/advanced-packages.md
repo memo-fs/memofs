@@ -2,7 +2,7 @@
 
 These packages should not block the first launch. They are roadmap packages.
 
-## `@tekbreed/tekmemo-graph`
+## `@tekbreed/tekmemo/graph`
 
 Graph memory contracts and graph expansion.
 
@@ -24,7 +24,7 @@ Use later for:
 - Slack/Discord-like sources
 - file source manifests
 
-## `@tekbreed/tekmemo-mcp-server`
+## `@tekbreed/tekmemo/mcp`
 
 MCP server exposing TekMemo tools.
 
@@ -34,7 +34,7 @@ Use later for:
 - Claude/OpenAI-compatible tool environments
 - local memory server workflows
 
-## `@tekbreed/tekmemo-cli`
+## `@tekbreed/tekmemo/cli`
 
 Developer CLI for:
 
@@ -55,7 +55,7 @@ It should not include the closed-source cloud backend.
 
 Recall and memory quality evaluation tools.
 
-## `@tekbreed/tekmemo-benchmark-kit`
+## `@tekbreed/tekmemo/benchmark-kit`
 
 Benchmark harness for:
 

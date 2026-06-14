@@ -2,6 +2,8 @@
 
 Add the TekMemo MCP server to your coding agent's MCP config. Choose local mode for file-first memory or cloud mode for TekMemo Cloud memory.
 
+The binary name is `tekmemo-mcp` (from the `@tekbreed/tekmemo-mcp-server` package).
+
 ## Claude Code
 
 Create or edit `.claude/mcp.json` in your project root (or `~/.claude/mcp.json` for global):
@@ -11,7 +13,7 @@ Create or edit `.claude/mcp.json` in your project root (or `~/.claude/mcp.json` 
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
     }
@@ -24,7 +26,7 @@ Create or edit `.claude/mcp.json` in your project root (or `~/.claude/mcp.json` 
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "cloud"],
       "env": {
@@ -48,7 +50,7 @@ Create or edit `.codex/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
     }
@@ -61,7 +63,7 @@ Create or edit `.codex/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "cloud"],
       "env": {
@@ -85,7 +87,7 @@ Add to `opencode.json` in your project root:
 ```json
 {
   "mcp": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "type": "local",
       "command": ["npx", "-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."],
       "enabled": true
@@ -99,7 +101,7 @@ Add to `opencode.json` in your project root:
 ```json
 {
   "mcp": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "type": "local",
       "command": ["npx", "-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "cloud"],
       "enabled": true,
@@ -122,7 +124,7 @@ To enable TekMemo only for specific agents while keeping it disabled globally:
 ```json
 {
   "mcp": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "type": "local",
       "command": ["npx", "-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."],
       "enabled": true
@@ -150,7 +152,7 @@ Create or edit `.cursor/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
     }
@@ -163,7 +165,7 @@ Create or edit `.cursor/mcp.json` in your project root:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "cloud"],
       "env": {
@@ -199,7 +201,7 @@ For untrusted clients or safety-first workflows, add `--read-only`:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", ".", "--read-only"]
     }
@@ -207,7 +209,7 @@ For untrusted clients or safety-first workflows, add `--read-only`:
 }
 ```
 
-In read-only mode, all write tools (`memory_write`, `memory_append`, `memory_snapshot`, etc.) are blocked. Read tools (`memory_read`, `memory_search`, `context_compose`) remain available.
+In read-only mode, all write tools (`tekmemo.remember`, `tekmemo.update_core_memory`, `tekmemo.snapshot`, etc.) are blocked. Read tools (`tekmemo.health`, `tekmemo.context`, `tekmemo.recall`, `tekmemo.read_core_memory`, etc.) remain available.
 
 ## Read policy
 
@@ -223,9 +225,31 @@ Control where reads come from with `--read-policy`:
 ```json
 {
   "mcpServers": {
-    "@tekbreed/tekmemo": {
+    "tekmemo": {
       "command": "npx",
       "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "hybrid", "--root", ".", "--read-policy", "local-first"]
+    }
+  }
+}
+```
+
+## Write policy
+
+Control where writes go with `--write-policy`:
+
+| Value | Behavior |
+| --- | --- |
+| `local-first` | Write local first, then cloud |
+| `cloud-first` | Write cloud first, then local |
+| `local-only` | Only write to local |
+| `cloud-only` | Only write to cloud |
+
+```json
+{
+  "mcpServers": {
+    "tekmemo": {
+      "command": "npx",
+      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "hybrid", "--root", ".", "--write-policy", "local-first"]
     }
   }
 }

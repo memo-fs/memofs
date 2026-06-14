@@ -1,21 +1,23 @@
-# Provider adapters
+# Provider Adapters Module
 
 TekMemo provides official adapters for industry-leading embedding and AI models. These adapters implement the standard `MemoryEmbedder` contract.
 
-## OpenAI
+## Installation
 
-`@tekbreed/tekmemo-openai` provides embedding integration for OpenAI's `text-embedding-3-*` and `ada-002` models.
-
-### Install
+Install the provider's peer dependency alongside the main `@tekbreed/tekmemo` package. For example, for OpenAI:
 
 ```bash
-npm install @tekbreed/tekmemo-openai
+npm install openai @tekbreed/tekmemo
 ```
+
+## OpenAI Integration
+
+Exposes embedding integration for OpenAI's `text-embedding-3-*` and `ada-002` models.
 
 ### Usage
 
 ```ts
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo-openai";
+import { createOpenAIEmbedder } from "@tekbreed/tekmemo";
 
 const embedder = createOpenAIEmbedder({
   apiKey: process.env.OPENAI_API_KEY,
@@ -32,20 +34,14 @@ console.log(results.embeddings[0].vector);
 
 ---
 
-## VoyageAI
+## VoyageAI Integration
 
-`@tekbreed/tekmemo-voyageai` provides high-performance embedding integration for Voyage's specialized models (e.g. `voyage-large-2`, `voyage-code-2`).
-
-### Install
-
-```bash
-npm install @tekbreed/tekmemo-voyageai
-```
+Provides high-performance embedding integration for Voyage's specialized models (e.g. `voyage-large-2`, `voyage-code-2`).
 
 ### Usage
 
 ```ts
-import { createVoyageEmbedder } from "@tekbreed/tekmemo-voyageai";
+import { createVoyageEmbedder } from "@tekbreed/tekmemo";
 
 const embedder = createVoyageEmbedder({
   apiKey: process.env.VOYAGE_API_KEY,
