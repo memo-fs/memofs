@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/logo.svg" alt="TekBreed Logo" />
+<img src="./assets/logo.svg" alt="TekBreed Logo" width="120" />
 
 # TekBreed OSS
 
@@ -40,7 +40,7 @@ TekMemo is the first product family and is published as three main packages:
 The core memory runtime package.
 
 ```bash
-pnpm add @tekbreed/tekmemo
+npm install @tekbreed/tekmemo
 ```
 
 All public APIs are imported directly from the core package root entrypoint:
@@ -68,8 +68,8 @@ The CLI distribution package.
 ```bash
 npx @tekbreed/tekmemo-cli
 # or install locally:
-pnpm add -D @tekbreed/tekmemo-cli
-pnpm exec tekmemo
+npm install -D @tekbreed/tekmemo-cli
+npx tekmemo
 ```
 
 ### `@tekbreed/tekmemo-mcp-server`

@@ -68,10 +68,8 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
+		"@modelcontextprotocol/sdk": ">=1.29.0",
 		"@tekbreed/tekmemo": "workspace:*"
-	},
-	"peerDependencies": {
-		"@modelcontextprotocol/sdk": ">=1.29.0"
 	},
 	"devDependencies": {
 		"@repo/test-utils": "workspace:*",
