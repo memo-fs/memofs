@@ -74,7 +74,7 @@
 		"typescript"
 	],
 	"peerDependencies": {
-		"openai": "^6.10.0"
+		"openai": "^6.42.0"
 	},
 	"peerDependenciesMeta": {
 		"openai": {
@@ -82,7 +82,7 @@
 		}
 	},
 	"devDependencies": {
-		"openai": "^6.10.0",
+		"openai": "^6.42.0",
 		"@repo/test-utils": "workspace:*",
 		"@repo/tsdown-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",

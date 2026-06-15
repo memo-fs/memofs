@@ -8,13 +8,13 @@
 	},
 	"dependencies": {
 		"@tekmemo/cloud-client": "workspace:^",
-		"@tanstack/react-router": "^1.0.0",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"@tanstack/react-router": "^1.170.13",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7"
 	},
 	"devDependencies": {
-		"tsx": "^4.21.0",
-		"typescript": "5.9.2",
-		"@types/node": "^22.15.3"
+		"tsx": "^4.22.4",
+		"typescript": "6.0.3",
+		"@types/node": "^25.9.2"
 	}
 }

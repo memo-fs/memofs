@@ -8,14 +8,14 @@
 	},
 	"dependencies": {
 		"@tekmemo/cloud-client": "workspace:^",
-		"@nestjs/common": "^11.0.0",
-		"@nestjs/core": "^11.0.0",
+		"@nestjs/common": "^11.1.24",
+		"@nestjs/core": "^11.1.24",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.0"
 	},
 	"devDependencies": {
-		"tsx": "^4.21.0",
-		"typescript": "5.9.2",
-		"@types/node": "^22.15.3"
+		"tsx": "^4.22.4",
+		"typescript": "6.0.3",
+		"@types/node": "^25.9.2"
 	}
 }

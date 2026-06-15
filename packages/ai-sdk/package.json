@@ -68,14 +68,14 @@
 	},
 	"dependencies": {
 		"tekmemo": "workspace:^",
-		"zod": "^4.4.2"
+		"zod": "^4.4.3"
 	},
 	"devDependencies": {
 		"@repo/test-utils": "workspace:*",
 		"@repo/tsdown-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"ai": "^6.0.174"
+		"ai": "^6.0.197"
 	},
 	"peerDependencies": {
 		"ai": ">=5.0.0 <7.0.0",

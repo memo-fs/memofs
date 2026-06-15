@@ -68,18 +68,18 @@
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/server",
 	"dependencies": {
-		"hono": "^4.0.0",
-		"@aws-sdk/client-s3": "^3.940.0",
-		"@aws-sdk/s3-request-presigner": "^3.940.0",
-		"pg": "^8.16.3"
+		"hono": "^4.12.23",
+		"@aws-sdk/client-s3": "^3.1063.0",
+		"@aws-sdk/s3-request-presigner": "^3.1063.0",
+		"pg": "^8.21.0"
 	},
 	"devDependencies": {
 		"@repo/tsdown-config": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@tekmemo/cloud-client": "workspace:*",
-		"@vitest/coverage-v8": "^4.1.5",
-		"typescript": "5.9.2",
-		"vitest": "^4.1.5",
+		"@vitest/coverage-v8": "^4.1.8",
+		"typescript": "6.0.3",
+		"vitest": "^4.1.8",
 		"@types/pg": "^8.15.6"
 	},
 	"private": false,
