@@ -8,7 +8,7 @@ All Agent Filesystem APIs are imported directly from `@tekbreed/tekmemo`:
 
 ## How it works
 
-Instead of giving a coding agent raw read/write access to your entire codebase, `@tekbreed/tekmemo/agentfs` provides a safe sandbox (an "agent session") tailored for AI tools. It tracks what the agent reads, modifies, and decides.
+Instead of giving a coding agent raw read/write access to your entire codebase, `agentfs` provides a safe sandbox (an "agent session") tailored for AI tools. It tracks what the agent reads, modifies, and decides.
 
 ### Agent sessions
 
@@ -20,7 +20,7 @@ When an agent begins a task, it starts a session. This session acts as a tempora
 
 ## Example usage
 
-If you are building a custom AI coding tool, you can use `@tekbreed/tekmemo/agentfs` programmatically:
+If you are building a custom AI coding tool, you can use `agentfs` programmatically:
 
 ```ts
 import {

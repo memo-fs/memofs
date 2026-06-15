@@ -31,4 +31,4 @@ TekMemo is published as three main packages:
 - `@tekbreed/tekmemo-cli` (the CLI distribution)
 - `@tekbreed/tekmemo-mcp-server` (the MCP server)
 
-When writing code to integrate TekMemo, you import everything directly from the core `@tekbreed/tekmemo` package. See the [API Reference](/packages/) page for the list of modules and helper APIs.
+When writing code to integrate TekMemo, you import everything directly from the core `@tekbreed/tekmemo` package. See the [API Reference](/api/tekmemo/) page for the list of modules and helper APIs.

@@ -164,7 +164,6 @@ async function executeTool(
 		case "tekmemo.recall":
 			return textResult(await options.runtime.recall(args as never, signal));
 		case "tekmemo.remember":
-		case "tekmemo.write_note":
 			return textResult(
 				await options.runtime.writeMemory(args as never, signal),
 			);
@@ -523,8 +522,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo.remember":
-		case "tekmemo.write_note": {
+		case "tekmemo.remember": {
 			const scope = scopeArgs(object);
 			const title = optionalString(object.title, "title", 512);
 			const kind = validateMemoryKind(object.kind);

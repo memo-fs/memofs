@@ -97,10 +97,7 @@ The MCP server exposes the following tools to your coding agent:
 | `tekmemo.providers_create` | Create provider credential. |
 | `tekmemo.providers_test` | Test provider credential. |
 
-### Legacy alias
-| Tool | Purpose |
-| --- | --- |
-| `tekmemo.write_note` | Backward-compatible alias for `tekmemo.remember`. |
+
 
 ## Configuration
 
@@ -119,4 +116,4 @@ To add TekMemo to an MCP-compatible client, add it to your configuration file (e
 
 ## How it works
 
-The MCP server acts as a bridge between your coding agent and TekMemo memory. In **local mode**, it reads and writes directly to your `.tekmemo/` folder. In **cloud mode**, it connects to the TekMemo Cloud API using the core client. The binary runs as a local stdio subprocess — no remote hosting required.
+The MCP server acts as a bridge between your coding agent and TekMemo memory. In **local mode**, it reads and writes directly to your `.tekmemo/` folder. In **cloud mode**, it connects to the TekMemo Cloud API using the core client. The binary runs as a local stdio subprocess.

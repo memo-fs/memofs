@@ -17,6 +17,11 @@ export default defineConfig({
 	markdown: {
 		// lineNumbers: true,
 		theme: { light: "github-light", dark: "github-dark" },
+		container: {
+			tipLabel: "TIP",
+			warningLabel: "WARNING",
+			dangerLabel: "DANGER",
+		},
 	},
 	themeConfig: {
 		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "TekBreed OSS" },

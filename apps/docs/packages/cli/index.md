@@ -1,16 +1,16 @@
-# CLI
+# Command Line Interface (CLI)
 
-The TekMemo command-line interface (CLI) is built directly into the `@tekbreed/tekmemo` package. It gives you a command-line tool for managing local, cloud, and hybrid memory.
+The `@tekbreed/tekmemo-cli` package gives you a command-line tool for managing local, cloud, and hybrid memory.
 
 ## Installation
 
 ```bash
-npm install -D @tekbreed/tekmemo
+npm install -D @tekbreed/tekmemo-cli
 ```
 
 ## Quick start
 
-```bash
+```bash 
 # Initialize memory in your project
 npx tekmemo init
 
@@ -63,12 +63,12 @@ The CLI reads an optional `config.json` file at `.tekmemo/config.json`. This all
 
 ```json
 {
-  "version": 1,
-  "runtime": "hybrid",
+  "$schema": "https://oss.tekbreed.com/1.0.0/config.schema.json",
+  "runtime": "hybrid", 
   "root": ".",
   "cloud": {
-    "baseUrl": "https://memo.tekbreed.com/api/v1",
-    "projectId": "proj_123",
+    "baseUrl": "https://api.tekbreed.com/memo/v1",
+    "projectId": "proj_123", 
     "workspaceId": "ws_456",
     "timeoutMs": 10000
   },

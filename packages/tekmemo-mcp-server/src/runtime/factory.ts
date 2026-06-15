@@ -30,7 +30,6 @@ export interface CloudRuntimeFactoryOptions {
 	timeoutMs?: number | undefined;
 	userAgent?: string | undefined;
 	requireApiKey?: boolean | undefined;
-	acceptLegacyEnvelope?: boolean | undefined;
 	retry?: TekMemoCloudClientOptions["retry"] | undefined;
 }
 
@@ -149,9 +148,6 @@ export function createCloudClientFromRuntimeOptions(
 		...(options.requireApiKey === undefined
 			? {}
 			: { requireApiKey: options.requireApiKey }),
-		...(options.acceptLegacyEnvelope === undefined
-			? {}
-			: { acceptLegacyEnvelope: options.acceptLegacyEnvelope }),
 		...(options.retry === undefined ? {} : { retry: options.retry }),
 	});
 }

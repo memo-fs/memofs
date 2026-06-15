@@ -6,7 +6,6 @@ export * from "./runtime/local-runtime";
 export * from "./schemas/memory-tool-schema";
 export * from "./schemas/runtime-memory-tool-schema";
 export * from "./scope/scope-policy";
-export * from "./tools/build-memory-tool-definition";
 export * from "./tools/build-runtime-memory-tool-definition";
 export * from "./tools/run-structured-memory-tool";
 export * from "./types/ai-sdk-memory";

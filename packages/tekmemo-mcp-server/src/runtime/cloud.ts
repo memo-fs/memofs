@@ -335,19 +335,7 @@ export function createCloudTekMemoMcpRuntime(
 				signal,
 			) as never;
 		},
-		resolveSyncConflict(input, signal) {
-			return client.sync.resolveConflict(
-				{
-					...((input.projectId ?? projectId)
-						? { projectId: input.projectId ?? projectId }
-						: {}),
-					conflictId: input.conflictId,
-					resolution: input.resolution,
-					...(input.content === undefined ? {} : { content: input.content }),
-				},
-				signal,
-			);
-		},
+
 
 		upsertGraphNodes: unsupportedGraphWrite,
 		upsertGraphEdges: unsupportedGraphWrite,

@@ -35,13 +35,12 @@ import {
 	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-	runCloudSyncResolveCommand,
+
 	runCloudSyncStatusCommand,
 	runCloudUpdateCoreCommand,
 	runCloudValidateCommand,
 	runDiffCommand,
 	runDoctorCommand,
-	runEditCommand,
 	runEventsCommand,
 	runInitCommand,
 	runInspectCommand,
@@ -446,34 +445,6 @@ export async function runTekMemoCli(
 				json: g.json,
 				query,
 				regex: options.regex,
-			});
-		});
-
-	program
-		.command("edit")
-		.description("legacy alias: append a note or core memory text")
-		.argument("<type>", "note or core")
-		.argument("<message>", "content to append")
-		.option(
-			"--allow-secrets",
-			"allow content that looks like a secret after manual review",
-			false,
-		)
-		.action(async (type, message, options) => {
-			currentCommand = "edit";
-			const g = await globals();
-			if (type !== "note" && type !== "core") {
-				output.error("Edit type must be 'note' or 'core'");
-				exitCode = 1;
-				return;
-			}
-			exitCode = await runEditCommand({
-				fs: createFs(g.root),
-				output,
-				json: g.json,
-				type,
-				message,
-				allowSecrets: options.allowSecrets,
 			});
 		});
 
@@ -972,32 +943,6 @@ export async function runTekMemoCli(
 				checkpointJson: options.checkpointJson,
 				stdin: options.stdin,
 				file: options.file,
-			});
-		});
-
-	sync
-		.command("resolve")
-		.description("resolve a cloud sync conflict")
-		.argument("<conflictId>", "conflict ID")
-		.requiredOption(
-			"--resolution <resolution>",
-			"keep_cloud | use_client | ignore",
-		)
-		.option("--content-json <json>", "optional resolution content JSON object")
-		.action(async (conflictId, options) => {
-			currentCommand = "cloud.sync.resolve";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSyncResolveCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				conflictId,
-				resolution: options.resolution,
-				contentJson: options.contentJson,
 			});
 		});
 

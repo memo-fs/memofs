@@ -5,7 +5,6 @@ import {
 	createHybridTekMemoRuntime,
 	createTekMemoCloudClient,
 	TekMemoCloudAuthError,
-	TekMemoCloudResponseParseError,
 	TekMemoCloudValidationError,
 } from "../../src/index";
 
@@ -48,30 +47,6 @@ describe("@tekbreed/tekmemo/cloud", () => {
 		expect(
 			(calls[0]?.init?.headers as Record<string, string>).Authorization,
 		).toBe("Bearer tk_live_test");
-	});
-
-	it("encodes project IDs and conflict IDs safely", async () => {
-		const urls: string[] = [];
-		const fetch: TekMemoCloudFetch = async (url) => {
-			urls.push(String(url));
-			return jsonResponse({
-				data: { conflictId: "c/1", resolved: true },
-				meta: {},
-			});
-		};
-		const client = createTekMemoCloudClient({
-			baseUrl: "https://x.test/api/v1",
-			apiKey: "tk_live_test",
-			fetch,
-		});
-		await client.sync.resolveConflict({
-			projectId: "proj / unsafe",
-			conflictId: "conflict / 1",
-			resolution: "ignore",
-		});
-		expect(urls[0]).toBe(
-			"https://x.test/api/v1/projects/proj%20%2F%20unsafe/sync/conflicts/conflict%20%2F%201/resolve",
-		);
 	});
 
 	it("parses canonical error envelope", async () => {
@@ -142,21 +117,6 @@ describe("@tekbreed/tekmemo/cloud", () => {
 				events: [{ clientEventId: "", type: "x" }],
 			}),
 		).toThrow(TekMemoCloudValidationError);
-	});
-
-	it("rejects invalid response envelope when legacy compatibility is disabled", async () => {
-		const fetch: TekMemoCloudFetch = async () =>
-			jsonResponse({ ok: true, content: "legacy" });
-		const client = createTekMemoCloudClient({
-			baseUrl: "https://x.test/api/v1",
-			apiKey: "tk_live_test",
-			defaultProjectId: "p",
-			fetch,
-			acceptLegacyEnvelope: false,
-		});
-		await expect(client.memory.readCore()).rejects.toBeInstanceOf(
-			TekMemoCloudResponseParseError,
-		);
 	});
 
 	it("retries transient statuses", async () => {
@@ -362,7 +322,7 @@ describe("@tekbreed/tekmemo/cloud", () => {
 			fetch,
 		});
 
-		await client.candidates.create({ content: "test", type: "implicit" });
+		await client.candidates.create({ content: "test", kind: "decision" });
 		await client.candidates.list({ status: "pending" });
 		await client.candidates.promote({ candidateId: "c_1" });
 		await client.candidates.dismiss({ candidateId: "c_1" });

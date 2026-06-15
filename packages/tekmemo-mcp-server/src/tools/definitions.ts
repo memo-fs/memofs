@@ -292,35 +292,7 @@ export function createToolDefinitions(
 				["content"],
 			),
 		},
-		{
-			name: "tekmemo.write_note",
-			title: "Write TekMemo Note (legacy alias)",
-			description:
-				"Backward-compatible alias for tekmemo.remember. New clients should use tekmemo.remember.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					title: stringSchema("Optional title.", 512),
-					content: stringSchema("Memory note content.", 100_000),
-					kind: kindSchema,
-					...commonScopeProperties,
-					tags: {
-						type: "array",
-						items: stringSchema("Tag", 128),
-						maxItems: 50,
-					},
-					sourceRefs: { type: "array", items: sourceRefSchema, maxItems: 100 },
-					metadata: { type: "object", description: "JSON metadata." },
-				},
-				["content"],
-			),
-		},
+
 		{
 			name: "tekmemo.read_core_memory",
 			title: "Read Core Memory",

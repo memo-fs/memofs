@@ -11,7 +11,7 @@ import { expect, test, vi } from "vitest";
 import { buildPrepareCallMemoryText } from "../../src/ai-sdk/prepare-call/build-prepare-call-memory-text";
 import { safeReadMemoryPath } from "../../src/ai-sdk/prepare-call/safe-read-memory-path";
 import { memoryToolInputSchema } from "../../src/ai-sdk/schemas/memory-tool-schema";
-import { buildMemoryToolDefinition } from "../../src/ai-sdk/tools/build-memory-tool-definition";
+
 import { runStructuredMemoryTool } from "../../src/ai-sdk/tools/run-structured-memory-tool";
 
 test("safeReadMemoryPath returns default when memory not found", async () => {
@@ -56,13 +56,6 @@ test("buildPrepareCallMemoryText assembles context correctly", async () => {
 	});
 	expect(text).toContain("core content");
 	expect(text).toContain("notes content");
-});
-
-test("buildMemoryToolDefinition provides correct description and schema", () => {
-	const store = new InMemoryMemoryStore();
-	const toolDef = buildMemoryToolDefinition({ store });
-	expect(toolDef.description).toContain("Read, create, update, or search");
-	expect(toolDef.inputSchema).toBeDefined();
 });
 
 test("runStructuredMemoryTool throws on invalid parameters", async () => {

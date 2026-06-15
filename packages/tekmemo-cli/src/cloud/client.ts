@@ -49,7 +49,6 @@ export function toCloudClientOptions(
 			: {}),
 		userAgent: "@tekbreed/tekmemo/cli",
 		requireApiKey: !options.allowMissingApiKey,
-		acceptLegacyEnvelope: false,
 	};
 }
 

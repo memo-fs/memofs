@@ -24,7 +24,6 @@ The package provides:
 - `runRuntimeMemoryTool()` for executing memory tool commands with scope enforcement
 - `createLocalAiSdkRuntime()` for local file-backed memory runtime
 - `buildRuntimeMemoryContext()` for building memory-aware context (system prompt)
-- `buildMemoryToolDefinition()` for a standard memory tool definition (legacy API)
 - `buildAgentSessionInstructions()` for agent session instruction blocks
 - Scope enforcement for project, user, conversation, and participant memory
 

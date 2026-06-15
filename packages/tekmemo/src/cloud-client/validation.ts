@@ -24,7 +24,6 @@ import type {
 	ResolveConflictInput,
 	SyncPullInput,
 	SyncPushInput,
-	SyncResolveConflictInput,
 	SyncStatusInput,
 	TekMemoCloudBenchmarkRunInput,
 	TekMemoCloudContextComposeInput,
@@ -239,20 +238,6 @@ export function validateSyncPullInput(input: SyncPullInput): SyncPullInput {
 export function validateSyncStatusInput(
 	input: SyncStatusInput,
 ): SyncStatusInput {
-	return input;
-}
-
-export function validateSyncResolveConflictInput(
-	input: SyncResolveConflictInput,
-): SyncResolveConflictInput {
-	assertNonEmptyString(input.conflictId, "conflictId");
-	if (!["keep_cloud", "use_client", "ignore"].includes(input.resolution)) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "resolution must be keep_cloud, use_client, or ignore.",
-		});
-	}
-	assertOptionalJsonObject(input.content, "content");
 	return input;
 }
 

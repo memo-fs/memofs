@@ -68,11 +68,7 @@ The TekMemo MCP server exposes 50+ tools across several categories. All tools ar
 | `tekmemo.providers_create` | write | Create a provider credential. |
 | `tekmemo.providers_test` | read | Test a provider credential. |
 
-## Legacy alias
 
-| Tool | Safety | Purpose |
-| --- | --- | --- |
-| `tekmemo.write_note` | write | Backward-compatible alias for `tekmemo.remember`. |
 
 ## Safety annotations
 

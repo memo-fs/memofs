@@ -13,7 +13,6 @@ import type {
 	TekMemoCloudRequestOptions,
 	TekMemoCloudRetryOptions,
 	TekMemoCloudSuccessEnvelope,
-	TekMemoLegacyCloudEnvelope,
 } from "./types";
 import { normalizeApiKey, normalizeBaseUrl } from "./validation";
 
@@ -38,7 +37,6 @@ export class TekMemoCloudTransport {
 	private readonly retryOptions: Required<TekMemoCloudRetryOptions> | false;
 	private readonly headers: Record<string, string>;
 	private readonly requireApiKey: boolean;
-	private readonly acceptLegacyEnvelope: boolean;
 
 	constructor(options: TekMemoCloudTransportOptions) {
 		this.baseUrl = normalizeBaseUrl(options.baseUrl);
@@ -55,7 +53,6 @@ export class TekMemoCloudTransport {
 		this.retryOptions = normalizeRetryOptions(options.retry);
 		this.headers = normalizeHeaders(options.headers, options.userAgent);
 		this.requireApiKey = options.requireApiKey ?? true;
-		this.acceptLegacyEnvelope = options.acceptLegacyEnvelope ?? true;
 	}
 
 	async request<T>(options: TekMemoCloudRequestOptions): Promise<T> {
@@ -122,11 +119,8 @@ export class TekMemoCloudTransport {
 				});
 			}
 
-			return unwrapSuccessPayload<T>(
-				payload,
-				headerRequestId,
-				this.acceptLegacyEnvelope,
-			);
+			const unwrapped = unwrapSuccessPayload<T>(payload, headerRequestId);
+			return unwrapped;
 		} catch (error) {
 			if (error instanceof Error && error.name === "AbortError") {
 				throw new TekMemoCloudTimeoutError({
@@ -231,7 +225,6 @@ async function parseJsonPayload(response: {
 function unwrapSuccessPayload<T>(
 	payload: unknown,
 	headerRequestId: string | undefined,
-	acceptLegacyEnvelope: boolean,
 ): T {
 	if (isSuccessEnvelope<T>(payload)) return payload.data;
 	if (isErrorEnvelope(payload)) {
@@ -242,16 +235,7 @@ function unwrapSuccessPayload<T>(
 			details: payload.error.details,
 		});
 	}
-	if (acceptLegacyEnvelope && isLegacyEnvelope<T>(payload)) {
-		if (payload.ok) return payload.data;
-		throw createHttpError({
-			code: payload.error.code,
-			message: payload.error.message,
-			requestId:
-				payload.requestId ?? payload.meta?.requestId ?? headerRequestId,
-			details: payload.error.details,
-		});
-	}
+
 	throw new TekMemoCloudResponseParseError({
 		code: "invalid_response_envelope",
 		message:
@@ -272,15 +256,7 @@ function unwrapErrorBody(
 			requestId: payload.meta?.requestId ?? headerRequestId,
 		};
 	}
-	if (isLegacyEnvelope<unknown>(payload) && !payload.ok) {
-		return {
-			code: payload.error.code,
-			message: payload.error.message,
-			details: payload.error.details,
-			requestId:
-				payload.requestId ?? payload.meta?.requestId ?? headerRequestId,
-		};
-	}
+
 	if (typeof payload === "object" && payload !== null && "message" in payload) {
 		return {
 			message: String((payload as { message: unknown }).message),
@@ -311,12 +287,6 @@ function isErrorEnvelope(
 		typeof (payload as { error?: unknown }).error === "object" &&
 		(payload as { error?: unknown }).error !== null
 	);
-}
-
-function isLegacyEnvelope<T>(
-	payload: unknown,
-): payload is TekMemoLegacyCloudEnvelope<T> {
-	return typeof payload === "object" && payload !== null && "ok" in payload;
 }
 
 function getHeader(headers: Headers, name: string): string | null {

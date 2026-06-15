@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../../assets/architecture.svg" alt="Memory Layer" />
+<p>
+
 # `@tekbreed/tekmemo`
 
 <p align="center">

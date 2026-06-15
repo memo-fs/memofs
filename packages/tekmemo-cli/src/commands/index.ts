@@ -35,7 +35,7 @@ export {
 	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-	runCloudSyncResolveCommand,
+
 	runCloudSyncStatusCommand,
 	runCloudUpdateCoreCommand,
 	runCloudValidateCommand,
@@ -43,7 +43,6 @@ export {
 export { runContextCommand } from "./context";
 export { runDiffCommand } from "./diff";
 export { runDoctorCommand } from "./doctor";
-export { runEditCommand } from "./edit";
 export { runEventsCommand } from "./events";
 export { runInitCommand } from "./init";
 export { runInspectCommand } from "./inspect";

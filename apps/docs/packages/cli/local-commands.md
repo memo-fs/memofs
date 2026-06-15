@@ -131,15 +131,7 @@ Performs strict protocol validation. Useful for CI pipelines.
 npx tekmemo validate
 ```
 
-## `edit`
-Legacy alias to append a note or core memory text.
 
-```bash
-npx tekmemo edit note "Added a new endpoint"
-```
-
-**Options:**
-- `--allow-secrets` Allow content that looks like a secret
 
 # Agent Commands
 

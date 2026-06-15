@@ -38,5 +38,5 @@ These packages provide runnable distributions or tools built on top of the core 
 
 | Package | Purpose | Detail Link |
 | --- | --- | --- |
-| **`@tekbreed/tekmemo-cli`** | Command-line tool for developer workflows. | [`CLI Guide`](/cli/) |
-| **`@tekbreed/tekmemo-mcp-server`** | Model Context Protocol server for AI apps and agents. | [`MCP Guide`](/mcp/) |
+| **`@tekbreed/tekmemo-cli`** | Command-line tool for developer workflows. | [`CLI Guide`](/packages/cli/) |
+| **`@tekbreed/tekmemo-mcp-server`** | Model Context Protocol server for AI apps and agents. | [`MCP Guide`](/packages/mcp/) |

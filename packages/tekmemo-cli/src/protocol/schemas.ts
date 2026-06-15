@@ -110,12 +110,4 @@ export const SnapshotEntrySchema = z.object({
 	metadata: JsonRecordSchema.optional(),
 });
 
-export const LegacySnapshotEntrySchema = z.object({
-	id: NonEmptyStringSchema,
-	timestamp: IsoDateSchema,
-	label: NonEmptyStringSchema,
-	path: NonEmptyStringSchema,
-	metadata: JsonRecordSchema.optional(),
-});
-
 export const MemoryChunkSchema = ChunkRecordSchema;

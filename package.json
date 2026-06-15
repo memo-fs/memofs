@@ -3,7 +3,7 @@
 	"private": true,
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/oss.git"
+		"url": "git+https://github.com/tekbreed/tekbreed-oss.git"
 	},
 	"scripts": {
 		"build": "turbo run build",
@@ -68,7 +68,7 @@
 	"description": "TekBreed OSS monorepo for open-source agent infrastructure, starting with the TekMemo memory runtime.",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/tekbreed/oss/issues"
+		"url": "https://github.com/tekbreed/tekbreed-oss/issues"
 	},
 	"homepage": "https://oss.tekbreed.com/",
 	"funding": {

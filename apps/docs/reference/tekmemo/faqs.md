@@ -15,7 +15,7 @@ TekMemo uses four memory layers:
 | **Recall** | `conversations.jsonl` | Indexed fragments for semantic retrieval |
 | **Graph** | Runtime | Entities and relationships for architectural queries |
 
-See [Core concepts](/guide/concepts) for details.
+See [Core concepts](/packages/tekmemo/concepts) for details.
 
 ## Why file-first?
 
@@ -27,7 +27,7 @@ Memory is stored as plain text and JSON files in your project's `.tekmemo/` dire
 - Agents get durable context without a hosted dashboard.
 - Nothing is hidden inside opaque model prompts.
 
-See [File-first memory](/guide/file-first-memory) for the rationale.
+See [File-first memory](/packages/tekmemo/file-first-memory) for the rationale.
 
 ## When should I use cloud instead of local-only?
 
@@ -50,28 +50,28 @@ Hybrid mode writes memory to local files **and** syncs changes to TekMemo Cloud 
 npx tekmemo config init --runtime hybrid
 ```
 
-See [CLI runtime modes](/cli/) for the full breakdown.
+See [CLI runtime modes](/packages/cli/) for the full breakdown.
 
 ## How do I add TekMemo to my coding agent?
 
-Use the **MCP server** included in `@tekbreed/tekmemo`. It exposes tools like `read_core`, `add_note`, and `search_memory` to any MCP-compatible client (Claude Code, Cursor, etc.). Add it to your client configuration:
+Use the **MCP server `@tekbreed/tekmemo-mcp-server`**. It exposes tools like `read_core`, `add_note`, and `search_memory` to any MCP-compatible client (Codex, Claude Code, Opencode, Cursor, etc.). Add it to your client configuration:
 
 ```json
 {
-	"mcpServers": {
-		"@tekbreed/tekmemo": {
-			"command": "npx",
-			"args": ["-y", "--package", "@tekbreed/tekmemo", "tekmemo-mcp", "--runtime", "local", "--root", "/path/to/project"]
-		}
-	}
+  "mcpServers": {
+    "tekmemo": {
+      "command": "npx",
+      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "/path/to/project"]
+    }
+  }
 }
 ```
 
-See [MCP Server](/mcp/) for setup and [Client setup](/mcp/client-setup) for client-specific instructions.
+See [MCP Server](/packages/mcp/) for setup and [Client setup](/packages/mcp/client-setup) for client-specific instructions.
 
 ## How do I use TekMemo with the Vercel AI SDK?
 
-Import AI SDK tools directly from `@tekbreed/tekmemo` and use the provided tools inside your `generateText` or `streamText` calls. The package wraps core memory, notes, recall, and graph operations as AI SDK-compatible tools. See [AI SDK](/ai-sdk/) for the overview and [Agent patterns](/ai-sdk/agent-patterns) for integration examples.
+Import AI SDK tools directly from `@tekbreed/tekmemo` and use the provided tools inside your `generateText` or `streamText` calls. The package wraps core memory, notes, recall, and graph operations as AI SDK-compatible tools. See [AI SDK](/packages/tekmemo/ai-sdk/) for the overview and [Agent patterns](/packages/tekmemo/ai-sdk/agent-patterns) for integration examples.
 
 ## What is graph memory for?
 
@@ -81,9 +81,9 @@ Graph memory stores **entities** (files, concepts, decisions) and **relationship
 - "How are these two decisions connected?"
 - "Which files are affected by this change?"
 
-See [Graph memory](/architecture/graph-memory) for the architecture details.
+See [Graph memory](/packages/tekmemo/architecture/graph-memory) for the architecture details.
 
-## Where can I host TekMemo?
+<!-- ## Where can I host TekMemo?
 
 TekMemo runs in any JavaScript environment. Supported platforms:
 
@@ -93,7 +93,7 @@ TekMemo runs in any JavaScript environment. Supported platforms:
 | **Cloudflare Workers** | Edge functions, Workers AI, D1-backed apps |
 | **Vercel** | Next.js route handlers, server actions, edge middleware |
 
-The only constraint is keeping Cloud API keys server-side.
+The only constraint is keeping Cloud API keys server-side. -->
 
 ## What is a context package?
 
@@ -103,7 +103,7 @@ A context package is the structured payload TekMemo sends to an AI model or tool
 
 Sync resolves memory state between your local `.tekmemo/` filesystem and the TekMemo Cloud database. In hybrid mode, the CLI writes locally first, then syncs to cloud in the background. Events track changes over time, making conflict resolution and audit trails possible.
 
-See [Sync and events](/architecture/sync-events) for the full architecture.
+See [Sync and events](/packages/tekmemo/architecture/sync-events) for the full architecture.
 
 ## How do I inspect or validate my memory?
 
@@ -126,4 +126,4 @@ Since memory is file-first, you can also directly read `.tekmemo/core.md` and `.
 
 No. TekMemo is published as one unified package, `@tekbreed/tekmemo`. It contains all memory stores, provider adapters, CLI commands, the MCP server, and the AI SDK integrations. You only need to install a single package to use all features.
 
-See [Packages](/packages/) for the module breakdown.
+See [Packages](/api/tekmemo/) for the module breakdown.

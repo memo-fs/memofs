@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./assets/logo.svg" alt="TekBreed Logo" />
+
 # TekBreed OSS
 
 Open-source ai infrastructure from TekBreed.
@@ -24,29 +26,30 @@ Open-source ai infrastructure from TekBreed.
 
 Current product family:
 
-| Project | Published package | Purpose |
+| Project | Published packages | Purpose |
 | --- | --- | --- |
-| TekMemo | `@tekbreed/tekmemo` | File-first memory runtime for AI apps and agents |
+| TekMemo | `@tekbreed/tekmemo`<br>`@tekbreed/tekmemo-cli`<br>`@tekbreed/tekmemo-mcp-server` | File-first memory runtime for AI apps and agents |
 
-Future product families, such as TekCode, should be added beside TekMemo when they are ready.
 
 ---
 
-## TekMemo Import Model
+## TekMemo Packages
 
-TekMemo publishes as **one package**:
+TekMemo is the first product family and is published as three main packages:
+
+### `@tekbreed/tekmemo`
+
+The core memory runtime package.
 
 ```bash
 pnpm add @tekbreed/tekmemo
 ```
 
-All public APIs are imported directly from the root entrypoint:
+All public APIs are imported directly from the core package root entrypoint:
 
 ```ts
 import { 
 	createNodeFsMemoryStore, 
-	createTekMemoMcpServer,
-	defineTekMemoTools,
 	createOpenAIEmbedder,
 	createVoyageEmbedder,
 	createUpstashRecallStore,
@@ -60,11 +63,23 @@ import {
 
 Do not introduce separate public TekMemo adapter packages or public subpath imports. Everything is imported directly from `@tekbreed/tekmemo`.
 
-The CLI command remains:
+### `@tekbreed/tekmemo-cli`
+
+The CLI distribution package.
 
 ```bash
-pnpm add -D @tekbreed/tekmemo
+npx @tekbreed/tekmemo-cli
+# or install locally:
+pnpm add -D @tekbreed/tekmemo-cli
 pnpm exec tekmemo
+```
+
+### `@tekbreed/tekmemo-mcp-server`
+
+The Model Context Protocol server for coding agents.
+
+```bash
+npx @tekbreed/tekmemo-mcp-server
 ```
 
 ---
@@ -76,27 +91,9 @@ tekbreed-oss/
 ├── apps/
 │   └── docs/              # TekBreed OSS docs site
 ├── packages/
-│   ├── tekmemo/           # @tekbreed/tekmemo unified source package
-│   │   └── src/
-│   │       ├── index.ts           # Core memory runtime exports
-│   │       ├── agentfs/           # AgentFS session workspaces
-│   │       ├── ai-sdk/            # Vercel AI SDK integration
-│   │       ├── benchmark-kit/     # Benchmark fixtures and runners
-│   │       ├── cli/               # CLI commands and runner
-│   │       ├── cloud-client/      # TekMemo Cloud API client
-│   │       ├── core/              # Internal: bootstrap, chunking, constants, documents, errors, events, indexes, manifest, search, snapshots, stores, types, validation
-│   │       ├── fs/                # Local filesystem memory store
-│   │       ├── graph/             # Graph memory for entities/relationships
-│   │       ├── mcp-server/        # MCP server for coding agents
-│   │       ├── openai/            # OpenAI embedding adapter
-│   │       ├── recall/            # Recall contracts and local store
-│   │       ├── rerank/            # Rerank contracts and fallback
-│   │       ├── rerank-voyage/     # VoyageAI reranking adapter
-│   │       ├── testing/           # Testing utilities
-│   │       ├── upstash-vector/    # Upstash Vector recall adapter
-│   │       └── voyageai/          # VoyageAI embedding adapter
-│   ├── tekcode-cli/       # future TekCode CLI package placeholder
-│   └── tekcode-desktop/   # future TekCode desktop package placeholder
+│   ├── tekmemo/           # TekMemo core runtime package
+│   ├── tekmemo-cli/       # TekMemo CLI package
+│   ├── tekmemo-mcp-server/# TekMemo MCP server package
 ├── projects/
 │   └── tekmemo/           # TekMemo planning, architecture, and product notes
 ├── tooling/               # private @repo/* workspace tooling

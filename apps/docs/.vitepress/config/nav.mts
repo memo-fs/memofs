@@ -2,33 +2,44 @@ import type { DefaultTheme } from "vitepress";
 
 export const nav: DefaultTheme.NavItem[] = [
 	{
-		text: "TekMemo",
+		text: "Packages",
 		items: [
-			{ text: "Guide", link: "/guide/" },
-			{ text: "Architecture", link: "/architecture/" },
-			{ text: "API Reference", link: "/packages/" },
+			{
+				text: "tekmemo",
+				link: "/packages/tekmemo",
+				activeMatch: "/packages/tekmemo/",
+			},
+			{
+				text: "tekmemo-cli",
+				link: "/packages/cli",
+				activeMatch: "/packages/cli/",
+			},
+			{
+				text: "tekmemo-mcp",
+				link: "/packages/mcp",
+				activeMatch: "/packages/mcp/",
+			},
 		],
-		activeMatch: "/(guide|architecture|packages)/",
+		activeMatch: "/packages/",
 	},
 	{
-		text: "Agent Interfaces",
+		text: "API",
 		items: [
-			{ text: "CLI", link: "/cli/" },
-			{ text: "MCP", link: "/mcp/" },
-			{ text: "AI SDK", link: "/ai-sdk/" },
+			{
+				text: "tekmemo",
+				link: "/api/tekmemo",
+				activeMatch: "/api/tekmemo/",
+			},
 		],
-		activeMatch: "/(cli|mcp|ai-sdk)/",
+		activeMatch: "/api/",
 	},
 	{
 		text: "Reference",
 		items: [
-			{ text: "Configuration", link: "/reference/configuration" },
-			{ text: "Errors", link: "/reference/errors" },
-			{ text: "Glossary", link: "/reference/glossary" },
-			{ text: "FAQs", link: "/reference/faqs" },
 			{
-				text: "Changelog",
-				link: "https://github.com/tekbreed/oss/blob/main/CHANGELOG.md",
+				text: "tekmemo",
+				link: "/reference/tekmemo",
+				activeMatch: "/reference/tekmemo/",
 			},
 		],
 		activeMatch: "/reference/",

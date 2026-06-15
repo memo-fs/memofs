@@ -26,8 +26,6 @@ tekbreed-oss/
 │   ├── tekmemo/           # TekMemo core runtime package
 │   ├── tekmemo-cli/       # TekMemo CLI package
 │   ├── tekmemo-mcp-server/# TekMemo MCP server package
-│   ├── tekcode-cli/       # future TekCode placeholder
-│   └── tekcode-desktop/   # future TekCode placeholder
 ├── projects/
 │   └── tekmemo/           # planning and architecture notes
 ├── tooling/               # private @repo/* workspace tooling
@@ -43,8 +41,6 @@ The repo should not keep runnable examples or self-host apps as first-class surf
 - TekMemo CLI logic and binaries belong in `packages/tekmemo-cli/`.
 - TekMemo MCP server logic and binaries belong in `packages/tekmemo-mcp-server/`.
 - Private shared tooling belongs in `tooling/` and keeps the `@repo/*` namespace.
-- Future TekCode work should live beside TekMemo, not inside TekMemo.
-- Private SaaS concerns do not belong in OSS packages: billing, tenancy, hosted dashboards, encrypted BYOK storage, internal admin tooling, or production cloud ownership.
 
 ## Commands
 
@@ -77,6 +73,5 @@ pnpm validate:workspace
 
 1. Keep root docs aligned with TekBreed OSS as the umbrella.
 2. Keep TekMemo documented as modular packages with clear entrypoints.
-3. Remove stale examples/self-host references from docs.
-4. Keep exports consolidated and clean.
+3. Keep exports consolidated and clean.
 

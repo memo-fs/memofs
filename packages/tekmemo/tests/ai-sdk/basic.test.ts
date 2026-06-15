@@ -5,10 +5,7 @@ import {
 } from "@tekbreed/tekmemo";
 import { expect, test } from "vitest";
 
-import {
-	buildMemoryToolDefinition,
-	buildPrepareCallMemoryText,
-} from "../../src/index";
+import { buildPrepareCallMemoryText } from "../../src/index";
 
 test("buildPrepareCallMemoryText includes workspace core memory", async () => {
 	const store = new InMemoryMemoryStore();
@@ -36,17 +33,4 @@ test("buildPrepareCallMemoryText includes workspace core memory", async () => {
 	expect(text).toMatch(/You are a helpful agent\./);
 	expect(text).toMatch(/Workspace Memory/);
 	expect(text).toMatch(/Project: Test/);
-});
-
-test("buildMemoryToolDefinition can view core memory", async () => {
-	const store = new InMemoryMemoryStore();
-	await bootstrapMemoryStore(store);
-
-	const tool = buildMemoryToolDefinition({ store });
-	const result = await tool.execute({
-		command: "view",
-		path: ".tekmemo/memory/core.md",
-	});
-
-	expect(result).toMatch(/Core Memory/);
 });

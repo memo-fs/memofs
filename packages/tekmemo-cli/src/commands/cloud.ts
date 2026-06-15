@@ -106,12 +106,7 @@ export interface CloudSyncPushCommandOptions extends CloudCommandBaseOptions {
 	checkpointJson?: string | undefined;
 }
 
-export interface CloudSyncResolveCommandOptions
-	extends CloudCommandBaseOptions {
-	conflictId: string;
-	resolution: string;
-	contentJson?: string | undefined;
-}
+
 
 export interface CloudReadinessCommandOptions extends CloudCommandBaseOptions {}
 
@@ -664,28 +659,6 @@ export async function runCloudSyncPushCommand(
 	return result.rejected.length === 0 && result.conflicts.length === 0 ? 0 : 1;
 }
 
-export async function runCloudSyncResolveCommand(
-	options: CloudSyncResolveCommandOptions,
-): Promise<number> {
-	const client = createCloudClient(options);
-	const resolution = normalizeConflictResolution(options.resolution);
-	const content = options.contentJson
-		? parseJsonObject(options.contentJson, "content JSON")
-		: undefined;
-	const result = await client.sync.resolveConflict({
-		conflictId: options.conflictId,
-		resolution,
-		...(content !== undefined ? { content } : {}),
-	});
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.sync.resolve", result);
-		return 0;
-	}
-	options.output.success(`Resolved conflict ${result.conflictId}`);
-	if (result.serverVersion !== undefined)
-		options.output.write(`serverVersion: ${result.serverVersion}`);
-	return result.resolved ? 0 : 1;
-}
 
 export async function runCloudReadinessCommand(
 	options: CloudReadinessCommandOptions,

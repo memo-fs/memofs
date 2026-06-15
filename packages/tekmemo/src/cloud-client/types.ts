@@ -38,26 +38,6 @@ export type TekMemoCloudEnvelope<T> =
 	| TekMemoCloudSuccessEnvelope<T>
 	| TekMemoCloudErrorEnvelope;
 
-/** Legacy generated-client shape. Not canonical. Kept only as compatibility. */
-export type TekMemoLegacyCloudEnvelope<T> =
-	| {
-			ok: true;
-			data: T;
-			warnings?: string[];
-			requestId?: string;
-			meta?: TekMemoCloudMeta;
-	  }
-	| {
-			ok: false;
-			error: {
-				code: string;
-				message: string;
-				details?: JsonValue;
-			};
-			requestId?: string;
-			meta?: TekMemoCloudMeta;
-	  };
-
 export interface TekMemoCloudFetchResponse {
 	readonly ok: boolean;
 	readonly status: number;
@@ -93,8 +73,6 @@ export interface TekMemoCloudClientOptions {
 	headers?: Record<string, string>;
 	userAgent?: string;
 	requireApiKey?: boolean;
-	/** Accept older { ok, data } envelopes temporarily during compatibility windows. */
-	acceptLegacyEnvelope?: boolean;
 }
 
 export interface TekMemoCloudRequestOptions {
@@ -294,18 +272,6 @@ export interface SyncStatusResult {
 	}>;
 	openConflicts: number;
 	recentEvents?: number;
-}
-
-export interface SyncResolveConflictInput extends ProjectScopedInput {
-	conflictId: string;
-	resolution: SyncConflictResolution;
-	content?: JsonObject;
-}
-
-export interface SyncResolveConflictResult {
-	conflictId: string;
-	resolved: boolean;
-	serverVersion?: number;
 }
 
 export type CandidateStatus = "pending" | "promoted" | "dismissed" | "archived";
@@ -758,10 +724,6 @@ export interface TekMemoCloudSyncClient {
 		input?: SyncStatusInput,
 		signal?: AbortSignal,
 	): Promise<SyncStatusResult>;
-	resolveConflict(
-		input: SyncResolveConflictInput,
-		signal?: AbortSignal,
-	): Promise<SyncResolveConflictResult>;
 }
 
 export interface TekMemoCloudHealthResult {

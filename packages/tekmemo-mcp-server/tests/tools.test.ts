@@ -79,7 +79,7 @@ describe("MCP tools", () => {
 				runtime: createInMemoryTekMemoRuntime(),
 				authorize: ({ safety }) => safety === "read",
 			},
-			"tekmemo.write_note",
+			"tekmemo.remember",
 			{ content: "Save this durable preference" },
 		);
 		expect(result.isError).toBe(true);
@@ -91,7 +91,7 @@ describe("MCP tools", () => {
 	it("source refs reject path traversal and non-http URLs", async () => {
 		const result = await callTekMemoTool(
 			{ runtime: createInMemoryTekMemoRuntime() },
-			"tekmemo.write_note",
+			"tekmemo.remember",
 			{
 				content: "hello",
 				sourceRefs: [
@@ -128,7 +128,7 @@ describe("MCP tools", () => {
 
 	it("output text is truncated safely when max output bytes is small", async () => {
 		const runtime = createInMemoryTekMemoRuntime();
-		const write = await callTekMemoTool({ runtime }, "tekmemo.write_note", {
+		const write = await callTekMemoTool({ runtime }, "tekmemo.remember", {
 			content: "a".repeat(5000),
 		});
 		expect(write.isError).toBeUndefined();

@@ -4,10 +4,10 @@ The CLI includes specific commands to help coding agents manage sessions and mem
 
 ## Adding to agent instructions
 
-You can add this to your coding agent's system prompt or custom instructions (e.g. in `.cursorrules`):
+You can add this to your coding agent's system prompt or custom instructions (e.g. in `.cursorrules`, `AGENTS.md`, `CLAUDE.md`, e.t.c):
 
 ```md
-This project uses TekMemo for durable project memory.
+**This project uses TekMemo for durable project memory.**
 
 Before planning, run:
 npx tekmemo context --query "<current task>"

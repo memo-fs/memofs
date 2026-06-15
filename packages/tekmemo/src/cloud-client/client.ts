@@ -40,8 +40,7 @@ import type {
 	SyncPullResult,
 	SyncPushInput,
 	SyncPushResult,
-	SyncResolveConflictInput,
-	SyncResolveConflictResult,
+
 	SyncStatusInput,
 	SyncStatusResult,
 	TekMemoCloudBenchmarkRunInput,
@@ -99,7 +98,7 @@ import {
 	validateResolveConflictInput,
 	validateSyncPullInput,
 	validateSyncPushInput,
-	validateSyncResolveConflictInput,
+
 	validateSyncStatusInput,
 	validateUpdateCoreInput,
 	validateUpdateProviderInput,
@@ -366,19 +365,6 @@ export function createTekMemoCloudClient(
 					method: "GET",
 					path: projectPath(normalized.projectId, "/sync/status"),
 					query: compactQuery({ clientId: normalized.clientId }),
-					signal,
-				});
-			},
-			resolveConflict(input: SyncResolveConflictInput, signal?: AbortSignal) {
-				const normalized = validateSyncResolveConflictInput(input);
-				const { projectId: _projectId, conflictId, ...body } = normalized;
-				return transport.request<SyncResolveConflictResult>({
-					method: "POST",
-					path: projectPath(
-						normalized.projectId,
-						`/sync/conflicts/${encodeURIComponent(conflictId)}/resolve`,
-					),
-					body,
 					signal,
 				});
 			},
@@ -788,9 +774,6 @@ export function createProjectScopedClient(
 			},
 			status(input, signal) {
 				return client.sync.status(withProject(input), signal);
-			},
-			resolveConflict(input, signal) {
-				return client.sync.resolveConflict(withProject(input), signal);
 			},
 		},
 		exports: {

@@ -6,12 +6,12 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/oss.git",
+		"url": "git+https://github.com/tekbreed/tekbreed-oss.git",
 		"directory": "packages/tekmemo-mcp-server"
 	},
 	"homepage": "https://oss.tekbreed.com/tekmemo-mcp-server",
 	"bugs": {
-		"url": "https://github.com/tekbreed/oss/issues"
+		"url": "https://github.com/tekbreed/tekbreed-oss/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
