@@ -56,7 +56,7 @@
 		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
 	},
 	"dependencies": {
-		"@tekbreed/tekmemo": "workspace:*",
+		"@tekbreed/tekmemo": "workspace:^",
 		"commander": "^14.0.3"
 	},
 	"devDependencies": {

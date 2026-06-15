@@ -70,7 +70,7 @@
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": ">=1.29.0",
-		"@tekbreed/tekmemo": "workspace:*"
+		"@tekbreed/tekmemo": "workspace:^"
 	},
 	"devDependencies": {
 		"@repo/test-utils": "workspace:*",
