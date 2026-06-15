@@ -111,7 +111,7 @@ jobs:
         run: pnpm --filter ${{ env.DOCS_PACKAGE }} build
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ env.DOCS_DIST_DIR }}
 
