@@ -1,7 +1,7 @@
 {
 	"extends": "../../tooling/typescript-config/base.json",
 	"compilerOptions": {
-		"types": ["node"],
+		"types": ["node", "vitepress/client"],
 		"skipLibCheck": true,
 		"noEmit": true,
 		"allowImportingTsExtensions": true
