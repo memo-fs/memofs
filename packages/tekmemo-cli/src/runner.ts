@@ -1,5 +1,5 @@
-import pkg from "../package.json" with { type: "json" };
 import { Command, CommanderError } from "commander";
+import pkg from "../package.json" with { type: "json" };
 import {
 	runAgentCompleteCommand,
 	runAgentExtractCommand,
@@ -35,7 +35,6 @@ import {
 	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-
 	runCloudSyncStatusCommand,
 	runCloudUpdateCoreCommand,
 	runCloudValidateCommand,

@@ -106,8 +106,6 @@ export interface CloudSyncPushCommandOptions extends CloudCommandBaseOptions {
 	checkpointJson?: string | undefined;
 }
 
-
-
 export interface CloudReadinessCommandOptions extends CloudCommandBaseOptions {}
 
 export interface CloudContextComposeCommandOptions
@@ -658,7 +656,6 @@ export async function runCloudSyncPushCommand(
 	);
 	return result.rejected.length === 0 && result.conflicts.length === 0 ? 0 : 1;
 }
-
 
 export async function runCloudReadinessCommand(
 	options: CloudReadinessCommandOptions,

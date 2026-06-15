@@ -6,6 +6,9 @@ The filesystem store module provides the primary filesystem-backed memory store 
 
 All filesystem store APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
+```
 ## Features
 
 - **Atomic Writes:** Prevents data corruption during sudden crashes.

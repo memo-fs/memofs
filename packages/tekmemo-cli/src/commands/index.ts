@@ -35,7 +35,6 @@ export {
 	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-
 	runCloudSyncStatusCommand,
 	runCloudUpdateCoreCommand,
 	runCloudValidateCommand,

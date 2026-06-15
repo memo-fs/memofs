@@ -12,6 +12,9 @@ npm install -D @tekbreed/tekmemo
 
 All benchmark APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## How it works
 
 The benchmark kit provides a structured way to measure latency, throughput, and accuracy across different components of the TekMemo stack. Use it to:

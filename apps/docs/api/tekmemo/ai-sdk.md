@@ -14,6 +14,9 @@ npm install ai @tekbreed/tekmemo
 
 All AI SDK helper APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## Purpose
 
 Use this package to expose TekMemo memory as AI SDK tools in `generateText`, `streamText`, and agent workflows.

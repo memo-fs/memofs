@@ -40,7 +40,6 @@ import type {
 	SyncPullResult,
 	SyncPushInput,
 	SyncPushResult,
-
 	SyncStatusInput,
 	SyncStatusResult,
 	TekMemoCloudBenchmarkRunInput,
@@ -98,7 +97,6 @@ import {
 	validateResolveConflictInput,
 	validateSyncPullInput,
 	validateSyncPushInput,
-
 	validateSyncStatusInput,
 	validateUpdateCoreInput,
 	validateUpdateProviderInput,

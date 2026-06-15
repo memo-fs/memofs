@@ -68,9 +68,9 @@ export { cloneAndValidateMetadata } from "./graph";
 export * from "./openai";
 // Explicit re-export resolves TS2308 ambiguity: expectedVectorLength appears in multiple export * sources.
 export { expectedVectorLength } from "./openai";
-export * from "./recall";
 // Explicit re-exports resolve TS2308 ambiguities: RecallResult and assertNonEmptyString appear in multiple export * sources.
 export type { RecallResult } from "./recall";
+export * from "./recall";
 export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
 export * from "./rerank-voyage";

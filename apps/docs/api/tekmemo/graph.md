@@ -6,6 +6,9 @@ The graph memory module of `@tekbreed/tekmemo` provides the engine and storage s
 
 All graph memory APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## Core Concepts
 
 - **Nodes:** Represent discrete entities like a `Decision`, `File`, or `Requirement`.

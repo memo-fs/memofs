@@ -6,6 +6,9 @@ The cloud client module provides a project-scoped TekMemo Cloud API client.
 
 All cloud client APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## Create a client
 
 ```ts

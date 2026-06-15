@@ -1,50 +1,54 @@
-# @tekbreed/tekmemo-mcp-server
+# `@tekbreed/tekmemo-mcp-server`
 
-Model Context Protocol (MCP) server for TekMemo — expose agent memory as MCP tools.
+Model Context Protocol (MCP) server for TekMemo — expose agent memory as MCP tools, resources, and prompts.
+
+## What is this?
+
+The `@tekbreed/tekmemo-mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 40+ standardized tools for memory operations, cloud syncing, graph search, and AgentFS sandboxing.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-mcp-server
+npm install -D @tekbreed/tekmemo-mcp-server
 ```
 
-Or use directly without installing:
+Or use directly via `npx` in your client's configuration:
 
 ```bash
-npx @tekbreed/tekmemo-mcp-server --help
+npx -y @tekbreed/tekmemo-mcp-server --help
 ```
 
-## Usage
+## Quick Start
 
-Run as a stdio MCP server (the standard integration pattern for coding agents):
+You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the server via stdio.
 
-```bash
-npx tekmemo-mcp --dir /path/to/memory
-```
-
-### Claude Desktop / Cursor config
+### Claude Desktop / Cursor Config
 
 ```json
 {
   "mcpServers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["tekmemo-mcp", "--dir", "/path/to/memory"]
+      "args": [
+        "-y",
+        "@tekbreed/tekmemo-mcp-server",
+        "--runtime", "local",
+        "--root", "/absolute/path/to/project"
+      ]
     }
   }
 }
 ```
 
-### Runtime modes
+## Configuration and Usage
 
-| Flag | Values | Default |
-|------|--------|---------|
-| `--mode` | `local`, `memory`, `cloud`, `hybrid` | `local` |
-| `--dir` | path to memory directory | `./memory` |
+The server supports advanced runtime modes (`local`, `cloud`, `hybrid`, `memory`), customizable read/write policies, and a strict `--read-only` flag to block mutating tools when used with untrusted clients.
 
-## Documentation
+For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://oss.tekbreed.com/packages/mcp/).
 
-Full documentation at [oss.tekbreed.com/tekmemo-mcp-server](https://oss.tekbreed.com/tekmemo-mcp-server).
+## Contributing
+
+See our central [Contributing Guide](../../CONTRIBUTING.md) and development scripts for details on formatting, linting, and testing within the monorepo.
 
 ## License
 

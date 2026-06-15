@@ -13,30 +13,53 @@
   <a href="https://github.com/tekbreed/tekbreed-oss/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-## Purpose
+## What is this?
 
 **Unified core memory runtime.** Core memory contracts, records, chunks, source references, manifest validation, local protocol helpers, and provider-neutral runtime primitives. Consolidates file-based storage, embeddings (OpenAI, VoyageAI), vector store integration (Upstash Vector), and reranking providers into a single package.
 
-## Install
+## Installation
 
 ```bash
 npm install @tekbreed/tekmemo
 ```
 
-## Quick start
+## Quick Start
+
+Initialize memory in your project and read the core memory:
 
 ```ts
-import { bootstrapMemoryStore } from "@tekbreed/tekmemo";
+import { bootstrapMemoryStore, readCoreMemory } from "@tekbreed/tekmemo";
 
+// Initialize the store in a given directory
 const store = await bootstrapMemoryStore({
   rootDir: "./.tekmemo",
 });
+
+// Use the store with core helpers
+const core = await readCoreMemory(store);
+console.log(core.content);
 ```
+
+## Configuration and Usage
+
+The `@tekbreed/tekmemo` package is designed to be highly modular. You can import only the specific adapters and utilities you need.
+
+- **Filesystem Store**: `import { createNodeFsMemoryStore } from "@tekbreed/tekmemo"`
+- **Agent Sandbox**: `import { createTekMemoAgentSession } from "@tekbreed/tekmemo"`
+- **Graph Memory**: `import { createInMemoryGraphStore } from "@tekbreed/tekmemo"`
+- **Vector Adapters**: `import { createUpstashRecallStore } from "@tekbreed/tekmemo"`
+- **Provider Adapters**: `import { createOpenAIEmbedder } from "@tekbreed/tekmemo"`
+
+For a complete breakdown of configuration options, interfaces, and architecture, see our [Full Documentation](https://oss.tekbreed.com/api/tekmemo/).
 
 ## Boundary
 
 This package owns the TekMemo core contracts, memory store adapters, and runtime primitives. It does not own private SaaS concerns such as billing, tenancy, hosted dashboards, encrypted BYOK storage, or internal admin tooling. All public API capabilities are consolidated and exported directly from the root namespace of `@tekbreed/tekmemo`.
 
+## Contributing
+
+See our central [Contributing Guide](../../CONTRIBUTING.md) and development scripts for details on formatting, linting, and testing within the monorepo.
+
 ## License
 
-MIT.
+MIT

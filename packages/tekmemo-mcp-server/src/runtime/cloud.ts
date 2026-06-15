@@ -336,7 +336,6 @@ export function createCloudTekMemoMcpRuntime(
 			) as never;
 		},
 
-
 		upsertGraphNodes: unsupportedGraphWrite,
 		upsertGraphEdges: unsupportedGraphWrite,
 		graphNeighbors: unsupportedGraphRead,

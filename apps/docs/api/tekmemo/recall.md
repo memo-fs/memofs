@@ -6,6 +6,9 @@ The recall module provides semantic recall memory for AI agents. It defines the 
 
 All recall APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## How it works
 
 "Recall" is the process of retrieving relevant memory fragments using vector similarity (semantic search). 

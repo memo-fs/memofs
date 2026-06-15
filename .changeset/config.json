@@ -1,6 +1,9 @@
 {
 	"$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
-	"changelog": ["@changesets/changelog-github", { "repo": "tekbreed/tekbreed-oss" }],
+	"changelog": [
+		"@changesets/changelog-github",
+		{ "repo": "tekbreed/tekbreed-oss" }
+	],
 	"commit": false,
 	"fixed": [],
 	"linked": [],

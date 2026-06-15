@@ -6,6 +6,9 @@ The core memory module of `@tekbreed/tekmemo` defines the memory model, document
 
 All core helpers and structures are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { bootstrapMemoryStore } from "@tekbreed/tekmemo";
+```
 ## Core concepts
 
 This package provides the logic for working with TekMemo's primary memory primitives:

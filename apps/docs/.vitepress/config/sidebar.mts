@@ -9,15 +9,7 @@ const tekmemo = [
 	{ text: "Memory filesystem", link: "/packages/tekmemo/filesystem-layout" },
 	{ text: "Memory records", link: "/packages/tekmemo/memory-records" },
 	{ text: "Configuration", link: "/packages/tekmemo/configuration" },
-	{
-		text: "How-to guides",
-		items: [
-			{ text: "Inject project memory", link: "/packages/tekmemo/how-to/vercel-ai-sdk" },
-			{ text: "Mount AgentFS session", link: "/packages/tekmemo/how-to/agentfs-session" },
-			{ text: "Search past notes", link: "/packages/tekmemo/how-to/semantic-recall" },
-			{ text: "Sync to TekMemo Cloud", link: "/packages/tekmemo/how-to/cloud-sync" },
-		],
-	},
+
 	{
 		text: "Architecture",
 		items: [

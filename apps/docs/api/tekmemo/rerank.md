@@ -10,6 +10,9 @@ The core reranking capabilities, contract interfaces, and deterministic fallback
 
 All reranking helper functions and structures are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ### API Reference
 
 | Method | Purpose |

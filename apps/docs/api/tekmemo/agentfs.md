@@ -6,6 +6,9 @@ The agent filesystem module provides agent-oriented filesystem helpers for codin
 
 All Agent Filesystem APIs are imported directly from `@tekbreed/tekmemo`:
 
+```ts
+import { ... } from "@tekbreed/tekmemo";
+```
 ## How it works
 
 Instead of giving a coding agent raw read/write access to your entire codebase, `agentfs` provides a safe sandbox (an "agent session") tailored for AI tools. It tracks what the agent reads, modifies, and decides.
