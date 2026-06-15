@@ -1156,12 +1156,21 @@ function normalizeIndexMode(
 	throw new CliUsageError("index mode must be all, changed, core, or notes.");
 }
 
-function normalizeConflictResolution(value: string): SyncConflictResolution {
-	if (CONFLICT_RESOLUTIONS.has(value as SyncConflictResolution))
-		return value as SyncConflictResolution;
-	throw new CliUsageError(
-		"conflict resolution must be keep_cloud, use_client, or ignore.",
-	);
+function normalizeConflictResolution(
+	value: string,
+): "keep_existing" | "use_incoming" | "merge" | "dismiss" {
+	switch (value) {
+		case "keep_cloud":
+			return "keep_existing";
+		case "use_client":
+			return "use_incoming";
+		case "ignore":
+			return "dismiss";
+		default:
+			throw new CliUsageError(
+				"conflict resolution must be keep_cloud, use_client, or ignore.",
+			);
+	}
 }
 
 function normalizeConfidence(value: string | number): number {

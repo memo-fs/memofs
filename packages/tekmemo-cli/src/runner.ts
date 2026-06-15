@@ -1461,7 +1461,6 @@ export async function runTekMemoCli(
 				root: g.root,
 				force: options.force,
 				config: {
-					version: 1,
 					runtime: options.runtime,
 					root: ".",
 					cloud: {
