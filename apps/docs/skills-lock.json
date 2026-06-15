@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "changesets": {
+      "source": "oakoss/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/changesets/SKILL.md",
+      "computedHash": "277a6b337157539ad0ef8fcba1569a4981b6d9d369392b80f041eab74d2e6c1a"
+    }
+  }
+}

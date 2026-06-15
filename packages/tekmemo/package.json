@@ -2,7 +2,7 @@
 	"name": "@tekbreed/tekmemo",
 	"version": "1.0.0-alpha.0",
 	"private": false,
-	"description": "TekMemo memory runtime for AI apps and agents, published as one TekBreed package with a single unified root entrypoint.",
+	"description": "TekMemo memory runtime for AI apps and agents",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -37,7 +37,8 @@
 	],
 	"publishConfig": {
 		"access": "public",
-		"registry": "https://registry.npmjs.org/"
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
 	},
 	"scripts": {
 		"build": "tsdown",
