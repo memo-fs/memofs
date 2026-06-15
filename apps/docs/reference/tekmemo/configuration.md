@@ -39,7 +39,7 @@ npx tekmemo config init --runtime hybrid
   "runtime": "hybrid",
   "root": ".",
   "cloud": {
-    "baseUrl": "https://memo.tekbreed.com/api/v1",
+    "baseUrl": "https://api.tekbreed.com/memo/v1",
     "projectId": "proj_123",
     "workspaceId": "ws_456",
     "timeoutMs": 10000

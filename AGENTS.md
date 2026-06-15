@@ -4,7 +4,7 @@ This file is the source of truth for agents working in this repo.
 
 ## What This Repository Is
 
-`@tekbreed/oss` is the TekBreed open-source monorepo.
+`@tekbreed/tekbreed-oss` is the TekBreed open-source monorepo.
 
 TekMemo is the first product family. It is published as three main packages:
 
@@ -32,8 +32,6 @@ tekbreed-oss/
 ├── docs/                  # repo operations notes
 └── scripts/               # repo maintenance scripts
 ```
-
-The repo should not keep runnable examples or self-host apps as first-class surfaces during this cleanup.
 
 ## Package Boundaries
 
