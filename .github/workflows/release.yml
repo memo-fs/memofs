@@ -95,6 +95,8 @@ jobs:
 
       - name: Publish packages with trusted publishing
         if: github.event.inputs.mode == 'publish'
+        env:
+          NPM_CONFIG_PROVENANCE: true
         run: |
           pnpm release
           git push --follow-tags
