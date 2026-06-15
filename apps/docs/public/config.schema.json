@@ -8,10 +8,6 @@
 			"type": "string",
 			"description": "URL to the schema for this configuration file."
 		},
-		"version": {
-			"type": "number",
-			"description": "The configuration format version."
-		},
 		"runtime": {
 			"type": "string",
 			"enum": ["local", "cloud", "hybrid"],

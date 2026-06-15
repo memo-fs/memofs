@@ -63,7 +63,7 @@ The CLI reads an optional `config.json` file at `.tekmemo/config.json`. This all
 
 ```json
 {
-  "$schema": "https://oss.tekbreed.com/1.0.0/config.schema.json",
+  "$schema": "https://oss.tekbreed.com/1.0.0-alpha.0/config.schema.json",
   "runtime": "hybrid", 
   "root": ".",
   "cloud": {

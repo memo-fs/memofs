@@ -35,7 +35,7 @@ npx tekmemo config init --runtime hybrid
 
 ```json
 {
-  "$schema": "https://oss.tekbreed.com/1.0.0/config.schema.json",
+  "$schema": "https://oss.tekbreed.com/1.0.0-alpha.0/config.schema.json",
   "runtime": "hybrid",
   "root": ".",
   "cloud": {

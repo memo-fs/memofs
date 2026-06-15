@@ -1,0 +1,77 @@
+{
+  "$id": "https://oss.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TekMemo CLI Configuration",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URL to the schema for this configuration file."
+    },
+    "runtime": {
+      "type": "string",
+      "enum": [
+        "local",
+        "cloud",
+        "hybrid"
+      ],
+      "description": "The runtime mode to use."
+    },
+    "root": {
+      "type": "string",
+      "description": "The root directory for the local project memory."
+    },
+    "cloud": {
+      "type": "object",
+      "description": "Configuration for the TekMemo Cloud API.",
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "description": "The base URL for the cloud API."
+        },
+        "workspaceId": {
+          "type": "string",
+          "description": "The default workspace ID."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "The default project ID."
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "API request timeout in milliseconds."
+        }
+      },
+      "additionalProperties": false
+    },
+    "hybrid": {
+      "type": "object",
+      "description": "Configuration for hybrid runtime behavior.",
+      "properties": {
+        "readPolicy": {
+          "type": "string",
+          "enum": [
+            "local-first",
+            "cloud-first",
+            "local-only",
+            "cloud-only"
+          ],
+          "description": "The read fallback policy."
+        },
+        "writePolicy": {
+          "type": "string",
+          "enum": [
+            "local-first",
+            "cloud-first",
+            "local-only",
+            "cloud-only"
+          ],
+          "description": "The write fallback policy."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

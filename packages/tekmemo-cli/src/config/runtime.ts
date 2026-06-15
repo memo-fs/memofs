@@ -15,7 +15,6 @@ export type TekMemoWritePolicy =
 	| "cloud-only";
 
 export interface TekMemoConfigFile {
-	version?: number;
 	runtime?: TekMemoRuntimeMode;
 	root?: string;
 	cloud?: {
@@ -153,7 +152,6 @@ export async function writeDefaultCliConfig(input: {
 	if (exists && !input.force)
 		return { path: configPath, created: false, overwritten: false };
 	const config = input.config ?? {
-		version: 1,
 		runtime: "local",
 		root: ".",
 	};
