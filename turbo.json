@@ -73,7 +73,7 @@
 			"outputs": []
 		},
 		"release:check": {
-			"dependsOn": ["build"],
+			"dependsOn": ["^release:check", "build"],
 			"cache": false,
 			"outputs": []
 		}
