@@ -1,3 +1,4 @@
+import { assertNonEmptyString as baseAssertNonEmptyString } from "@repo/utils";
 import { RerankValidationError } from "../errors/rerank-errors";
 import type {
 	NormalizedRerankInput,
@@ -54,13 +55,7 @@ export function assertNonEmptyString(
 	value: unknown,
 	name: string,
 ): asserts value is string {
-	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new RerankValidationError(`${name} must be a non-empty string.`);
-	}
-
-	if (value.includes("\0")) {
-		throw new RerankValidationError(`${name} must not contain null bytes.`);
-	}
+	baseAssertNonEmptyString(value, name, RerankValidationError);
 }
 
 /**

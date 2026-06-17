@@ -1,4 +1,13 @@
 import {
+	assertNonEmptyString as baseAssertNonEmptyString,
+	assertValidApiKey as baseAssertValidApiKey,
+	normalizeBaseUrl as baseNormalizeBaseUrl,
+	normalizeBatchSize as baseNormalizeBatchSize,
+	validateModel as baseValidateModel,
+	validateTexts as baseValidateTexts,
+	validateVector as baseValidateVector,
+} from "@repo/utils";
+import {
 	VoyageConfigError,
 	VoyageResponseError,
 	VoyageValidationError,
@@ -13,137 +22,47 @@ export function assertNonEmptyString(
 	value: unknown,
 	name: string,
 ): asserts value is string {
-	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new VoyageValidationError(`${name} must be a non-empty string.`);
-	}
-
-	if (value.includes("\0")) {
-		throw new VoyageValidationError(`${name} must not contain null bytes.`);
-	}
+	baseAssertNonEmptyString(value, name, VoyageValidationError);
 }
 
 export function normalizeBaseUrl(baseUrl: string | undefined): string {
-	const value = baseUrl ?? VOYAGE_DEFAULT_BASE_URL;
-	assertNonEmptyString(value, "baseUrl");
-
-	let url: URL;
-	try {
-		url = new URL(value);
-	} catch (error) {
-		throw new VoyageConfigError("baseUrl must be a valid URL.", {
-			cause: error,
-		});
-	}
-
-	if (
-		url.protocol !== "https:" &&
-		url.hostname !== "localhost" &&
-		url.hostname !== "127.0.0.1"
-	) {
-		throw new VoyageConfigError(
-			"baseUrl must use https unless targeting localhost for tests.",
-		);
-	}
-
-	url.pathname = url.pathname.replace(/\/+$/, "");
-	return url.toString().replace(/\/+$/, "");
+	return baseNormalizeBaseUrl(
+		baseUrl,
+		VOYAGE_DEFAULT_BASE_URL,
+		VoyageConfigError,
+	);
 }
 
 export function assertValidApiKey(apiKey: unknown): asserts apiKey is string {
-	if (typeof apiKey !== "string" || apiKey.trim().length === 0) {
-		throw new VoyageConfigError("Voyage apiKey is required.");
-	}
-
-	if (apiKey.includes("\0")) {
-		throw new VoyageConfigError("Voyage apiKey must not contain null bytes.");
-	}
+	baseAssertValidApiKey(apiKey, "Voyage", VoyageConfigError);
 }
 
 export function normalizeBatchSize(value: number | undefined): number {
-	const batchSize = value ?? 128;
-
-	if (!Number.isInteger(batchSize) || batchSize <= 0) {
-		throw new VoyageValidationError("batchSize must be a positive integer.");
-	}
-
-	if (batchSize > VOYAGE_MAX_BATCH_SIZE) {
-		throw new VoyageValidationError(
-			`batchSize must be <= ${VOYAGE_MAX_BATCH_SIZE}.`,
-		);
-	}
-
-	return batchSize;
+	return baseNormalizeBatchSize(
+		value,
+		1,
+		VOYAGE_MAX_BATCH_SIZE,
+		128,
+		VoyageValidationError,
+	);
 }
 
 export function validateTexts(
 	texts: unknown,
 	options?: { allowEmptyText?: boolean },
 ): asserts texts is string[] {
-	if (!Array.isArray(texts)) {
-		throw new VoyageValidationError("texts must be an array.");
-	}
-
-	for (let i = 0; i < texts.length; i += 1) {
-		const text = texts[i];
-
-		if (typeof text !== "string") {
-			throw new VoyageValidationError(`texts[${i}] must be a string.`);
-		}
-
-		if (text.includes("\0")) {
-			throw new VoyageValidationError(
-				`texts[${i}] must not contain null bytes.`,
-			);
-		}
-
-		if (!options?.allowEmptyText && text.trim().length === 0) {
-			throw new VoyageValidationError(
-				`texts[${i}] must not be empty or whitespace-only.`,
-			);
-		}
-	}
+	baseValidateTexts(texts, options, VoyageValidationError);
 }
 
 export function validateModel(model: unknown): asserts model is string {
-	assertNonEmptyString(model, "model");
-
-	if (model.length > 128) {
-		throw new VoyageValidationError("model is too long.");
-	}
+	baseValidateModel(model, VoyageValidationError);
 }
 
 export function validateVector(
 	vector: unknown,
 	input: { expectedDimensions?: number; label: string },
 ): asserts vector is number[] {
-	if (!Array.isArray(vector)) {
-		throw new VoyageResponseError(`${input.label} embedding must be an array.`);
-	}
-
-	if (vector.length === 0) {
-		throw new VoyageResponseError(
-			`${input.label} embedding must not be empty.`,
-		);
-	}
-
-	if (
-		input.expectedDimensions !== undefined &&
-		vector.length !== input.expectedDimensions
-	) {
-		throw new VoyageResponseError(
-			`${input.label} embedding dimension mismatch. Expected ${input.expectedDimensions}, received ${vector.length}.`,
-		);
-	}
-
-	for (let i = 0; i < vector.length; i += 1) {
-		const value = vector[i];
-
-		if (typeof value !== "number" || !Number.isFinite(value)) {
-			throw new VoyageResponseError(
-				`${input.label} embedding[${i}] must be a finite number.`,
-			);
-		}
-	}
+	baseValidateVector(vector, input, VoyageResponseError);
 }
 
 export function validateEmbeddingsResponse(

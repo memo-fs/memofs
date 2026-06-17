@@ -1,4 +1,13 @@
 import {
+	assertNonEmptyString as baseAssertNonEmptyString,
+	assertValidApiKey as baseAssertValidApiKey,
+	normalizeBaseUrl as baseNormalizeBaseUrl,
+	normalizeBatchSize as baseNormalizeBatchSize,
+	validateModel as baseValidateModel,
+	validateTexts as baseValidateTexts,
+	validateVector as baseValidateVector,
+} from "@repo/utils";
+import {
 	OpenAIConfigError,
 	OpenAIResponseError,
 	OpenAIValidationError,
@@ -13,103 +22,40 @@ export function assertNonEmptyString(
 	value: unknown,
 	name: string,
 ): asserts value is string {
-	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new OpenAIValidationError(`${name} must be a non-empty string.`);
-	}
-
-	if (value.includes("\0")) {
-		throw new OpenAIValidationError(`${name} must not contain null bytes.`);
-	}
+	baseAssertNonEmptyString(value, name, OpenAIValidationError);
 }
 
 export function assertValidApiKey(apiKey: unknown): asserts apiKey is string {
-	if (typeof apiKey !== "string" || apiKey.trim().length === 0) {
-		throw new OpenAIConfigError("OpenAI apiKey is required.");
-	}
-
-	if (apiKey.includes("\0")) {
-		throw new OpenAIConfigError("OpenAI apiKey must not contain null bytes.");
-	}
+	baseAssertValidApiKey(apiKey, "OpenAI", OpenAIConfigError);
 }
 
 export function normalizeBaseUrl(baseUrl: string | undefined): string {
-	const value = baseUrl ?? OPENAI_DEFAULT_BASE_URL;
-	assertNonEmptyString(value, "baseUrl");
-
-	let url: URL;
-	try {
-		url = new URL(value);
-	} catch (error) {
-		throw new OpenAIConfigError("baseUrl must be a valid URL.", {
-			cause: error,
-		});
-	}
-
-	if (
-		url.protocol !== "https:" &&
-		url.hostname !== "localhost" &&
-		url.hostname !== "127.0.0.1"
-	) {
-		throw new OpenAIConfigError(
-			"baseUrl must use https unless targeting localhost for tests.",
-		);
-	}
-
-	url.pathname = url.pathname.replace(/\/+$/, "");
-	return url.toString().replace(/\/+$/, "");
+	return baseNormalizeBaseUrl(
+		baseUrl,
+		OPENAI_DEFAULT_BASE_URL,
+		OpenAIConfigError,
+	);
 }
 
 export function normalizeBatchSize(value: number | undefined): number {
-	const batchSize = value ?? 128;
-
-	if (!Number.isInteger(batchSize) || batchSize <= 0) {
-		throw new OpenAIValidationError("batchSize must be a positive integer.");
-	}
-
-	if (batchSize > OPENAI_MAX_BATCH_SIZE) {
-		throw new OpenAIValidationError(
-			`batchSize must be <= ${OPENAI_MAX_BATCH_SIZE}.`,
-		);
-	}
-
-	return batchSize;
+	return baseNormalizeBatchSize(
+		value,
+		1,
+		OPENAI_MAX_BATCH_SIZE,
+		128,
+		OpenAIValidationError,
+	);
 }
 
 export function validateTexts(
 	texts: unknown,
 	options?: { allowEmptyText?: boolean | undefined },
 ): asserts texts is string[] {
-	if (!Array.isArray(texts)) {
-		throw new OpenAIValidationError("texts must be an array.");
-	}
-
-	for (let i = 0; i < texts.length; i += 1) {
-		const text = texts[i];
-
-		if (typeof text !== "string") {
-			throw new OpenAIValidationError(`texts[${i}] must be a string.`);
-		}
-
-		if (text.includes("\0")) {
-			throw new OpenAIValidationError(
-				`texts[${i}] must not contain null bytes.`,
-			);
-		}
-
-		if (!options?.allowEmptyText && text.trim().length === 0) {
-			throw new OpenAIValidationError(
-				`texts[${i}] must not be empty or whitespace-only.`,
-			);
-		}
-	}
+	baseValidateTexts(texts, options, OpenAIValidationError);
 }
 
 export function validateModel(model: unknown): asserts model is string {
-	assertNonEmptyString(model, "model");
-
-	if (model.length > 128) {
-		throw new OpenAIValidationError("model is too long.");
-	}
+	baseValidateModel(model, OpenAIValidationError);
 }
 
 export function validateUser(value: string | undefined): void {
@@ -125,34 +71,7 @@ export function validateVector(
 	vector: unknown,
 	input: { expectedDimensions?: number | undefined; label: string },
 ): asserts vector is number[] {
-	if (!Array.isArray(vector)) {
-		throw new OpenAIResponseError(`${input.label} embedding must be an array.`);
-	}
-
-	if (vector.length === 0) {
-		throw new OpenAIResponseError(
-			`${input.label} embedding must not be empty.`,
-		);
-	}
-
-	if (
-		input.expectedDimensions !== undefined &&
-		vector.length !== input.expectedDimensions
-	) {
-		throw new OpenAIResponseError(
-			`${input.label} embedding dimension mismatch. Expected ${input.expectedDimensions}, received ${vector.length}.`,
-		);
-	}
-
-	for (let i = 0; i < vector.length; i += 1) {
-		const value = vector[i];
-
-		if (typeof value !== "number" || !Number.isFinite(value)) {
-			throw new OpenAIResponseError(
-				`${input.label} embedding[${i}] must be a finite number.`,
-			);
-		}
-	}
+	baseValidateVector(vector, input, OpenAIResponseError);
 }
 
 export function validateEmbeddingsResponse(

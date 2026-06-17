@@ -1,3 +1,5 @@
+import { MemoryParseError } from "../../core/errors/errors";
+import { parseJsonl as coreParseJsonl } from "../../core/validation/jsonl";
 import { GraphParseError, GraphValidationError } from "../errors/graph-errors";
 import type {
 	GraphEdge,
@@ -175,30 +177,29 @@ function parseJsonl<T>(
 	if (typeof input !== "string")
 		throw new GraphParseError(`${kind} JSONL input must be a string.`);
 
-	const rows: T[] = [];
-	const issues: JsonlParseIssue[] = [];
-	const lines = input.split(/\r?\n/);
 	const onInvalidLine = options?.onInvalidLine ?? "throw";
 
-	lines.forEach((line, index) => {
-		const trimmed = line.trim();
-		if (!trimmed) return;
+	try {
+		const result = coreParseJsonl(input, {
+			mode: onInvalidLine === "skip" ? "skip" : "throw",
+			validate: (value) => normalize(value),
+		});
 
-		try {
-			rows.push(normalize(JSON.parse(trimmed)));
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : `Invalid ${kind} JSONL.`;
-			if (onInvalidLine === "skip") {
-				issues.push({ line: index + 1, message, raw: line });
-				return;
-			}
+		return {
+			rows: result.entries,
+			issues: result.issues.map((issue) => ({
+				line: issue.lineNumber,
+				message: issue.message,
+				raw: issue.line,
+			})),
+		};
+	} catch (error) {
+		if (error instanceof MemoryParseError) {
 			throw new GraphParseError(
-				`Invalid ${kind} JSONL on line ${index + 1}: ${message}`,
+				`Invalid ${kind} JSONL on line ${error.details?.lineNumber ?? "unknown"}: ${error.message}`,
 				{ cause: error },
 			);
 		}
-	});
-
-	return { rows, issues };
+		throw error;
+	}
 }

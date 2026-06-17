@@ -8,6 +8,11 @@
  * @internal
  */
 
+import {
+	assertFiniteNumber as baseAssertFiniteNumber,
+	assertNonEmptyString as baseAssertNonEmptyString,
+	assertPositiveInteger as baseAssertPositiveInteger,
+} from "@repo/utils";
 import { RecallDimensionError, RecallValidationError } from "../errors/errors";
 import type { RecallDocument, RecallMetadata, RecallQuery } from "../types";
 import {
@@ -33,16 +38,7 @@ export function assertNonEmptyString(
 	value: unknown,
 	name: string,
 ): asserts value is string {
-	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new RecallValidationError(`${name} must be a non-empty string.`, {
-			name,
-		});
-	}
-	if (value.includes("\0")) {
-		throw new RecallValidationError(`${name} must not contain null bytes.`, {
-			name,
-		});
-	}
+	baseAssertNonEmptyString(value, name, RecallValidationError);
 }
 
 /**
@@ -124,12 +120,7 @@ export function assertPositiveInteger(
 	value: unknown,
 	name: string,
 ): asserts value is number {
-	if (!Number.isInteger(value) || typeof value !== "number" || value <= 0) {
-		throw new RecallValidationError(`${name} must be a positive integer.`, {
-			name,
-			value,
-		});
-	}
+	baseAssertPositiveInteger(value, name, RecallValidationError);
 }
 
 /**
@@ -145,12 +136,7 @@ export function assertFiniteNumber(
 	value: unknown,
 	name: string,
 ): asserts value is number {
-	if (typeof value !== "number" || !Number.isFinite(value)) {
-		throw new RecallValidationError(`${name} must be a finite number.`, {
-			name,
-			value,
-		});
-	}
+	baseAssertFiniteNumber(value, name, RecallValidationError);
 }
 
 /**

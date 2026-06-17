@@ -10,6 +10,10 @@
  */
 
 import {
+	assertValidApiKey as baseAssertValidApiKey,
+	normalizeBaseUrl as baseNormalizeBaseUrl,
+} from "@repo/utils";
+import {
 	VoyageRerankConfigError,
 	VoyageRerankResponseError,
 	VoyageRerankValidationError,
@@ -29,15 +33,7 @@ import type { VoyageRerankerConfig, VoyageRerankResponse } from "../types";
  * @throws {VoyageRerankConfigError} When the API key is invalid (empty, not a string, or contains null bytes).
  */
 export function assertValidApiKey(value: unknown): asserts value is string {
-	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new VoyageRerankConfigError("Voyage apiKey is required.");
-	}
-
-	if (value.includes("\0")) {
-		throw new VoyageRerankConfigError(
-			"Voyage apiKey must not contain null bytes.",
-		);
-	}
+	baseAssertValidApiKey(value, "Voyage", VoyageRerankConfigError);
 }
 
 /**
@@ -49,32 +45,11 @@ export function assertValidApiKey(value: unknown): asserts value is string {
  * @throws {VoyageRerankConfigError} When the URL is invalid or doesn't use HTTPS (except for localhost).
  */
 export function normalizeBaseUrl(value: string | undefined): string {
-	const raw = value ?? VOYAGE_RERANK_DEFAULT_BASE_URL;
-
-	if (typeof raw !== "string" || raw.trim().length === 0) {
-		throw new VoyageRerankConfigError("baseUrl must be a non-empty string.");
-	}
-
-	let url: URL;
-	try {
-		url = new URL(raw);
-	} catch (error) {
-		throw new VoyageRerankConfigError("baseUrl must be a valid URL.", {
-			cause: error,
-		});
-	}
-
-	if (
-		url.protocol !== "https:" &&
-		url.hostname !== "localhost" &&
-		url.hostname !== "127.0.0.1"
-	) {
-		throw new VoyageRerankConfigError(
-			"baseUrl must use https unless targeting localhost for tests.",
-		);
-	}
-
-	return url.toString().replace(/\/+$/, "");
+	return baseNormalizeBaseUrl(
+		value,
+		VOYAGE_RERANK_DEFAULT_BASE_URL,
+		VoyageRerankConfigError,
+	);
 }
 
 /**

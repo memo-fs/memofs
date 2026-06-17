@@ -18,7 +18,7 @@ import type {
 	NormalizedNodeFsMemoryStoreOptions,
 } from "./types/options";
 import { assertNoSymlinkPath } from "./utils/assert-no-symlink-path";
-import { assertString } from "./utils/assert-string";
+import { assertString } from "../core/validation/assertions";
 import { ensureParentDir } from "./utils/ensure-parent-dir";
 import { ensureRootDir } from "./utils/ensure-root-dir";
 import { normalizeOptions } from "./utils/normalize-options";

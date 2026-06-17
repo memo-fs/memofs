@@ -1,4 +1,4 @@
-import { PathLock } from "@repo/utils";
+import { assertString, PathLock } from "@repo/utils";
 import {
 	assertMemoryPath,
 	MemoryNotFoundError,
@@ -19,7 +19,7 @@ import type {
 	AgentfsMemoryStoreConfig,
 	NormalizedAgentfsMemoryStoreConfig,
 } from "../types/config";
-import { assertString } from "../utils/assert-string";
+
 import { isNotFoundError } from "../utils/is-not-found-error";
 import { resolveAgentfsMemoryPath } from "./resolve-agentfs-memory-path";
 import { normalizeAgentfsMemoryStoreConfig } from "./resolve-store-root";
@@ -123,7 +123,7 @@ export class AgentfsMemoryStore implements MemoryStore {
 	 */
 	async write(path: MemoryPath, content: string): Promise<void> {
 		assertMemoryPath(path);
-		assertString(content, "content");
+		assertString(content, "content", AgentfsValidationError);
 		const remotePath = this.absolute(path);
 
 		try {
@@ -155,7 +155,7 @@ export class AgentfsMemoryStore implements MemoryStore {
 	 */
 	async append(path: MemoryPath, content: string): Promise<void> {
 		assertMemoryPath(path);
-		assertString(content, "content");
+		assertString(content, "content", AgentfsValidationError);
 		const remotePath = this.absolute(path);
 
 		await this.appendLock.runExclusive(remotePath, async () => {
