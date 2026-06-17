@@ -1,0 +1,10 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"sourceMap": true,
+		"exactOptionalPropertyTypes": true,
+		"verbatimModuleSyntax": true
+	},
+	"include": ["src", "tests"]
+}

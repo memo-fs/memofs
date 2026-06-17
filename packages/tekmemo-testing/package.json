@@ -1,7 +1,7 @@
 {
-	"name": "@repo/test-utils",
-	"version": "0.0.0",
-	"private": true,
+	"name": "@tekbreed/tekmemo-testing",
+	"version": "1.0.0-alpha.0",
+	"private": false,
 	"description": "Shared contract tests, fixtures, and fakes for TekMemo packages.",
 	"type": "module",
 	"sideEffects": false,
@@ -72,11 +72,18 @@
 		"lint:package": "publint",
 		"clean": "rm -rf dist coverage"
 	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
 	"peerDependencies": {
+		"@tekbreed/tekmemo": "workspace:^",
 		"vitest": "^4.1.5"
 	},
 	"devDependencies": {
-		"@repo/tsdown-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*"
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@tekbreed/tekmemo": "workspace:^"
 	}
 }
