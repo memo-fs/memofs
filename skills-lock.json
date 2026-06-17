@@ -13,6 +13,12 @@
 			"skillPath": "plugins/developer-essentials/skills/code-review-excellence/SKILL.md",
 			"computedHash": "0f585a4ad2f6d8353069ca9051c6f0e8865abb9d3a6a268d423784c3c3852962"
 		},
+		"copywriting": {
+			"source": "coreyhaines31/marketingskills",
+			"sourceType": "github",
+			"skillPath": "skills/copywriting/SKILL.md",
+			"computedHash": "706847e1bc56893140baea9bab3f36611eda30ab22db91144feb1d7fff8bf1ea"
+		},
 		"create-skill": {
 			"source": "siviter-xyz/dot-agent",
 			"sourceType": "github",

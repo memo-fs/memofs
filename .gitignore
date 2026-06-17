@@ -1,4 +1,6 @@
 internal-docs
+CONTEXT.md
+docs/adr
 .opencode
 # Dependencies
 node_modules

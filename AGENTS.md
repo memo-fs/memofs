@@ -16,7 +16,6 @@ TekMemo is the first product family. It is published as three main packages:
 ## What Agents Should Avoid
 
 - **Do not** add new npm dependencies without evaluating if an existing package already covers the need
-- **Do not** add cloud-specific logic (auth, billing, sync) into any OSS package
 - **Do not** use `console.log` in production code — use structured logging or remove it
 - **Do not** commit secrets, API keys, or environment values — use `.env` files that are gitignored
 - **Do not** run `pnpm build` during a code-editing session unless you are explicitly validating production correctness
