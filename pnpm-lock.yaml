@@ -53,6 +53,9 @@ importers:
 
   apps/docs:
     devDependencies:
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
       vitepress:
         specifier: 2.0.0-alpha.17
         version: 2.0.0-alpha.17(@types/node@25.9.3)(postcss@8.5.15)(tsx@4.22.4)(typescript@6.0.3)
@@ -65,8 +68,11 @@ importers:
       '@tekbreed/tekmemo':
         specifier: workspace:*
         version: link:../packages/tekmemo
+      '@tekbreed/tekmemo-benchmark-kit':
+        specifier: workspace:*
+        version: link:../packages/tekmemo-benchmark-kit
     devDependencies:
-      '@repo/typescript-config':
+      '@repo/typescript':
         specifier: workspace:*
         version: link:../tooling/typescript
       tsx:
@@ -82,24 +88,106 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2
     devDependencies:
-      '@repo/test-utils':
-        specifier: workspace:*
-        version: link:../../tooling/test-utils
-      '@repo/tsdown-config':
+      '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
-      '@repo/typescript-config':
+      '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
       ai:
         specifier: ^6.0.174
         version: 6.0.174(zod@4.4.2)
+
+  packages/tekmemo-adapter-openai:
+    dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
       openai:
         specifier: ^6.10.0
-        version: 6.36.0(zod@4.4.2)
+        version: 6.36.0(zod@4.4.3)
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+
+  packages/tekmemo-adapter-upstash:
+    dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
+      '@upstash/vector':
+        specifier: ^1.2.0
+        version: 1.2.3
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
+
+  packages/tekmemo-adapter-voyage:
+    dependencies:
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+
+  packages/tekmemo-benchmark-kit:
+    dependencies:
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
 
   packages/tekmemo-cli:
     dependencies:
@@ -110,18 +198,18 @@ importers:
         specifier: ^14.0.3
         version: 14.0.3
     devDependencies:
-      '@repo/test-utils':
-        specifier: workspace:*
-        version: link:../../tooling/test-utils
-      '@repo/tsdown-config':
+      '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
-      '@repo/typescript-config':
+      '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
@@ -135,30 +223,33 @@ importers:
         specifier: workspace:^
         version: link:../tekmemo
     devDependencies:
-      '@repo/test-utils':
-        specifier: workspace:*
-        version: link:../../tooling/test-utils
-      '@repo/tsdown-config':
+      '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
-      '@repo/typescript-config':
+      '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
 
-  tooling/test-utils:
+  packages/tekmemo-testing:
     devDependencies:
-      '@repo/tsdown-config':
+      '@repo/tsdown':
         specifier: workspace:*
-        version: link:../tsdown
-      '@repo/typescript-config':
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
         specifier: workspace:*
-        version: link:../typescript
+        version: link:../../tooling/typescript
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
 
   tooling/tsdown: {}
 
@@ -166,10 +257,10 @@ importers:
 
   tooling/utils:
     devDependencies:
-      '@repo/tsdown-config':
+      '@repo/tsdown':
         specifier: workspace:*
         version: link:../tsdown
-      '@repo/typescript-config':
+      '@repo/typescript':
         specifier: workspace:*
         version: link:../typescript
 
@@ -1101,6 +1192,9 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
     deprecated: Potential CWE-502 - Update to 1.3.1 or higher
+
+  '@upstash/vector@1.2.3':
+    resolution: {integrity: sha512-yXsWKeuHNYyH72BcSZd3bV5ZD5MybAoTvKxkMaeV2UzuGfNzbHBVh5eO+ysTWTFAf8I9XcOueF4tZfAGjCa4Iw==}
 
   '@vercel/oidc@3.2.0':
     resolution: {integrity: sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==}
@@ -3218,6 +3312,8 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
+  '@upstash/vector@1.2.3': {}
+
   '@vercel/oidc@3.2.0': {}
 
   '@vitejs/plugin-vue@6.0.6(vite@7.3.2(@types/node@25.9.3)(tsx@4.22.4))(vue@3.5.38(typescript@6.0.3))':
@@ -4003,9 +4099,9 @@ snapshots:
       regex: 6.1.0
       regex-recursion: 6.0.2
 
-  openai@6.36.0(zod@4.4.2):
+  openai@6.36.0(zod@4.4.3):
     optionalDependencies:
-      zod: 4.4.2
+      zod: 4.4.3
 
   outdent@0.5.0: {}
 

@@ -72,6 +72,18 @@
 			"sourceType": "github",
 			"skillPath": "skills/vitepress/SKILL.md",
 			"computedHash": "629d8ec4bcbf7cac86c15c3ca5f173933f01729bcb6396c0d74733755a896a41"
+		},
+		"writing-beats": {
+			"source": "mattpocock/skills",
+			"sourceType": "github",
+			"skillPath": "skills/in-progress/writing-beats/SKILL.md",
+			"computedHash": "ee085ddd96636cd55306a11e75396a5cc3d98b5658bf2460439d511095ad86f9"
+		},
+		"writing-guidelines": {
+			"source": "vercel-labs/agent-skills",
+			"sourceType": "github",
+			"skillPath": "skills/writing-guidelines/SKILL.md",
+			"computedHash": "25aa3a33a97bddbcb1847ce4a6169106ec25e5b19b15b99c66e75ab383866ef2"
 		}
 	}
 }
