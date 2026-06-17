@@ -1,6 +1,10 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, TekMemoFileSystem } from "../src";
+import { runTekMemoCli } from "../src";
 
 describe("diff", () => {
 	it("compares two snapshots", async () => {
@@ -10,8 +14,8 @@ describe("diff", () => {
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nFirst version.\n",
 			);
@@ -19,7 +23,7 @@ describe("diff", () => {
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v1"],
 			});
 
-			await fs.writeText(
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nSecond version.\n",
 			);
@@ -70,8 +74,8 @@ describe("diff", () => {
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nAlpha.\n",
 			);
@@ -79,7 +83,10 @@ describe("diff", () => {
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "alpha"],
 			});
 
-			await fs.writeText(TEKMEMO_PATHS.memory.core, "# Core Memory\n\nBeta.\n");
+			await memo.store.write(
+				TEKMEMO_PATHS.memory.core,
+				"# Core Memory\n\nBeta.\n",
+			);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "beta"],
 			});

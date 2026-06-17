@@ -4,8 +4,16 @@
  * @module init
  */
 
+import { mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
 import readline from "node:readline/promises";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import {
+	exists,
+	getRootDir,
+	readTextIfExists,
+	writeText,
+} from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import {
@@ -20,9 +28,9 @@ import { createDefaultManifest } from "../protocol/manifest";
  */
 export interface InitCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -54,7 +62,8 @@ export interface InitCommandOptions {
 export async function runInitCommand(
 	options: InitCommandOptions,
 ): Promise<number> {
-	await options.fs.ensureSafeRoot();
+	const rootDir = getRootDir(options.memo.store);
+	await options.memo.bootstrap();
 
 	let projectId: string | undefined = options.projectId?.trim();
 	if (projectId !== undefined && projectId.length === 0) projectId = undefined;
@@ -75,15 +84,18 @@ export async function runInitCommand(
 		}
 	}
 
-	for (const dir of REQUIRED_DIRS) await options.fs.mkdir(dir);
+	for (const dir of REQUIRED_DIRS) {
+		await mkdir(resolve(rootDir, dir), { recursive: true });
+	}
 
-	const existingManifest = await options.fs.readTextIfExists(
+	const existingManifest = await readTextIfExistsSafe(
+		options.memo.store,
 		TEKMEMO_PATHS.manifest,
 	);
 	if (existingManifest && !options.force) {
 		const data = {
 			created: false,
-			rootDir: options.fs.rootDir,
+			rootDir,
 			message: ".tekmemo already exists. Use --force to overwrite seed files.",
 		};
 		if (options.json) printJsonEnvelope(options.output, "init", data);
@@ -109,10 +121,10 @@ export async function runInitCommand(
 	const skipped: string[] = [];
 
 	for (const file of REQUIRED_FILES) {
-		const exists = await options.fs.exists(file);
-		if (!exists || options.force) {
-			await options.fs.writeText(file, seedFiles[file] ?? "");
-			if (exists) overwritten.push(file);
+		const fileExists = await exists(options.memo.store, file);
+		if (!fileExists || options.force) {
+			await writeText(options.memo.store, file, seedFiles[file] ?? "");
+			if (fileExists) overwritten.push(file);
 			else created.push(file);
 		} else {
 			skipped.push(file);
@@ -121,14 +133,21 @@ export async function runInitCommand(
 
 	const data = {
 		created: true,
-		rootDir: options.fs.rootDir,
+		rootDir,
 		manifest,
 		files: { created, overwritten, skipped },
 	};
 	if (options.json) printJsonEnvelope(options.output, "init", data);
 	else
 		options.output.success(
-			`Initialized .tekmemo at ${options.fs.rootDir} (Project ID: ${manifest.projectId ?? "none"})`,
+			`Initialized .tekmemo at ${rootDir} (Project ID: ${manifest.projectId ?? "none"})`,
 		);
 	return 0;
+}
+
+async function readTextIfExistsSafe(
+	store: import("@tekbreed/tekmemo").MemoryStore,
+	path: string,
+): Promise<string | undefined> {
+	return readTextIfExists(store, path);
 }

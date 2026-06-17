@@ -1,15 +1,8 @@
 /**
- * Config module entry point for the TekMemo CLI.
+ * Config module barrel.
  *
  * @module config
  */
 
-export type {
-	CliRuntimeFlags,
-	ResolvedCliRuntimeConfig,
-	TekMemoConfigFile,
-	TekMemoReadPolicy,
-	TekMemoRuntimeMode,
-	TekMemoWritePolicy,
-} from "./runtime";
-export { resolveCliRuntimeConfig, writeDefaultCliConfig } from "./runtime";
+export type { TekMemoConfigFile } from "./runtime";
+export { writeDefaultCliConfig } from "./runtime";

@@ -1,14 +1,18 @@
-import { createTempTekMemoDir } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	type MemoryPath,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { TekMemoFileSystem } from "../src";
 
-describe("TekMemoFileSystem", () => {
+describe("Tekmemo store", () => {
 	it("writes and reads files safely", async () => {
 		const temp = await createTempTekMemoDir();
 		try {
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(".tekmemo/memory/core.md", "hello");
-			await expect(fs.readText(".tekmemo/memory/core.md")).resolves.toBe(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(TEKMEMO_PATHS.memory.core, "hello");
+			await expect(memo.store.read(TEKMEMO_PATHS.memory.core)).resolves.toBe(
 				"hello",
 			);
 		} finally {
@@ -19,9 +23,13 @@ describe("TekMemoFileSystem", () => {
 	it("rejects path traversal", async () => {
 		const temp = await createTempTekMemoDir();
 		try {
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			expect(() => fs.resolve("../bad")).toThrow();
-			expect(() => fs.resolve(".tekmemo/../bad")).toThrow();
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await expect(
+				memo.store.write("../bad" as MemoryPath, "content"),
+			).rejects.toThrow();
+			await expect(
+				memo.store.write(".tekmemo/../bad" as MemoryPath, "content"),
+			).rejects.toThrow();
 		} finally {
 			await temp.cleanup();
 		}

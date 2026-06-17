@@ -1,6 +1,10 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, TekMemoFileSystem } from "../src";
+import { runTekMemoCli } from "../src";
 
 describe("remember and context", () => {
 	it("stores a structured agent memory note", async () => {
@@ -29,8 +33,8 @@ describe("remember and context", () => {
 			expect(parsed.ok).toBe(true);
 			expect(parsed.data.kind).toBe("decision");
 
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			const notes = await fs.readText(TEKMEMO_PATHS.memory.notes);
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			const notes = await memo.store.read(TEKMEMO_PATHS.memory.notes);
 			expect(notes).toContain("Use VoyageAI for embeddings");
 		} finally {
 			await temp.cleanup();

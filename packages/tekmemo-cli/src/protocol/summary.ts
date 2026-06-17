@@ -4,7 +4,10 @@
  * @module summary
  */
 
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import { stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import type { MemoryStore } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import { TEKMEMO_PATHS } from "./constants";
 import { parseJsonl } from "./jsonl";
 import { parseManifest, type TekMemoCliManifest } from "./manifest";
@@ -84,14 +87,22 @@ export interface TekMemoInspection {
 /**
  * Inspects a TekMemo workspace and constructs a detailed health report.
  *
- * @param fs - The TekMemo CLI filesystem wrapper instance.
+ * @param store - The memory store to inspect.
+ * @param rootDir - The root directory of the workspace.
  * @returns Detailed TekMemoInspection health/status report.
  */
 export async function inspectTekMemo(
-	fs: TekMemoFileSystem,
+	store: MemoryStore,
+	rootDir: string,
 ): Promise<TekMemoInspection> {
-	const exists = await fs.exists(".tekmemo");
-	const manifestContent = await fs.readTextIfExists(TEKMEMO_PATHS.manifest);
+	let dirExists = false;
+	try {
+		await stat(resolve(rootDir, ".tekmemo"));
+		dirExists = true;
+	} catch {
+		dirExists = false;
+	}
+	const manifestContent = await readTextIfExists(store, TEKMEMO_PATHS.manifest);
 	const manifest =
 		manifestContent === undefined ? undefined : parseManifest(manifestContent);
 
@@ -111,7 +122,7 @@ export async function inspectTekMemo(
 	const recordCounts: Record<string, number> = {};
 
 	for (const filePath of tracked) {
-		const content = await fs.readTextIfExists(filePath);
+		const content = await readTextIfExists(store, filePath);
 		const isJsonl = filePath.endsWith(".jsonl");
 
 		let records = 0;
@@ -132,8 +143,8 @@ export async function inspectTekMemo(
 	}
 
 	return {
-		rootDir: fs.rootDir,
-		exists,
+		rootDir,
+		exists: dirExists,
 		...(manifest ? { manifest } : {}),
 		files,
 		summary: {

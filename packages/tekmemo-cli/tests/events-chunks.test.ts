@@ -1,6 +1,10 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, stringifyJsonl, TekMemoFileSystem } from "../src";
+import { runTekMemoCli, stringifyJsonl } from "../src";
 
 describe("events and chunks", () => {
 	it("prints event records", async () => {
@@ -9,8 +13,8 @@ describe("events and chunks", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.appendText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.append(
 				TEKMEMO_PATHS.events.memoryEvents,
 				stringifyJsonl([
 					{
@@ -37,8 +41,8 @@ describe("events and chunks", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.appendText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.append(
 				TEKMEMO_PATHS.indexes.chunks,
 				stringifyJsonl([
 					{

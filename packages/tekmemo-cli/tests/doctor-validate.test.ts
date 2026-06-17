@@ -1,6 +1,10 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, stringifyJsonl, TekMemoFileSystem } from "../src";
+import { runTekMemoCli, stringifyJsonl } from "../src";
 
 describe("doctor and validate", () => {
 	it("passes doctor after init", async () => {
@@ -54,8 +58,8 @@ describe("doctor and validate", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.events.memoryEvents,
 				stringifyJsonl([{ type: "patch" }]),
 			);
@@ -82,8 +86,8 @@ describe("doctor and validate", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(TEKMEMO_PATHS.events.memoryEvents, "{bad json}\n");
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(TEKMEMO_PATHS.events.memoryEvents, "{bad json}\n");
 
 			const result = await runTekMemoCli({
 				argv: ["validate", "--root", temp.rootDir, "--json"],

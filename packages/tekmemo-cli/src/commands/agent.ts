@@ -6,11 +6,11 @@
 
 import {
 	type AgentfsLikeClient,
-	createNodeFsMemoryStore,
 	createTekMemoAgentSession,
 	extractSessionMemory,
+	type Tekmemo,
 } from "@tekbreed/tekmemo";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import { appendText, exists, readText, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
@@ -22,9 +22,9 @@ const LATEST_AGENT_SESSION_PATH = `${TEKMEMO_PATHS.tmpDir}/agent-sessions/latest
  */
 interface AgentCommandBaseOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -90,15 +90,10 @@ export interface AgentCompleteCommandOptions extends AgentSessionLookupOptions {
 export async function runAgentStartCommand(
 	options: AgentStartCommandOptions,
 ): Promise<number> {
-	const client = createLocalAgentfsClient(options.fs);
-	const memory = createNodeFsMemoryStore({
-		rootDir: options.fs.rootDir,
-		missingFileBehavior: "empty",
-		createRoot: true,
-	});
+	const client = createLocalAgentfsClient(options.memo);
 	const session = createTekMemoAgentSession({
 		client,
-		memory,
+		memory: options.memo.store,
 		task: options.task,
 		projectId: options.projectId,
 		actorId: options.actorId,
@@ -114,7 +109,8 @@ export async function runAgentStartCommand(
 		createdAt: new Date().toISOString(),
 		paths: session.paths,
 	};
-	await options.fs.writeText(
+	await writeText(
+		options.memo.store,
 		LATEST_AGENT_SESSION_PATH,
 		`${JSON.stringify(pointer, null, 2)}\n`,
 	);
@@ -138,7 +134,7 @@ export async function runAgentStartCommand(
 export async function runAgentPathsCommand(
 	options: AgentSessionLookupOptions,
 ): Promise<number> {
-	const pointer = await readSessionPointer(options.fs, options.session);
+	const pointer = await readSessionPointer(options.memo, options.session);
 	if (options.json) {
 		printJsonEnvelope(options.output, "agent.paths", pointer);
 		return 0;
@@ -156,9 +152,9 @@ export async function runAgentPathsCommand(
 export async function runAgentExtractCommand(
 	options: AgentSessionLookupOptions,
 ): Promise<number> {
-	const pointer = await readSessionPointer(options.fs, options.session);
+	const pointer = await readSessionPointer(options.memo, options.session);
 	const extracted = await extractSessionMemory(
-		createLocalAgentfsClient(options.fs),
+		createLocalAgentfsClient(options.memo),
 		pointer.paths,
 	);
 	if (options.json) {
@@ -194,16 +190,11 @@ export async function runAgentExtractCommand(
 export async function runAgentCompleteCommand(
 	options: AgentCompleteCommandOptions,
 ): Promise<number> {
-	const pointer = await readSessionPointer(options.fs, options.session);
-	const client = createLocalAgentfsClient(options.fs);
-	const memory = createNodeFsMemoryStore({
-		rootDir: options.fs.rootDir,
-		missingFileBehavior: "empty",
-		createRoot: true,
-	});
+	const pointer = await readSessionPointer(options.memo, options.session);
+	const client = createLocalAgentfsClient(options.memo);
 	const session = createTekMemoAgentSession({
 		client,
-		memory,
+		memory: options.memo.store,
 		task: pointer.task,
 		projectId: pointer.projectId ?? undefined,
 		sessionId: pointer.sessionId,
@@ -236,22 +227,22 @@ export async function runAgentCompleteCommand(
 /**
  * Adapts the CLI filesystem to the AgentFS-like client contract.
  *
- * @param fs - CLI filesystem.
+ * @param memo - Tekmemo client instance.
  * @returns AgentFS-like client.
  */
-function createLocalAgentfsClient(fs: TekMemoFileSystem): AgentfsLikeClient {
+function createLocalAgentfsClient(memo: Tekmemo): AgentfsLikeClient {
 	return {
 		readText(path: string) {
-			return fs.readText(toRelativeAgentPath(path));
+			return readText(memo.store, toRelativeAgentPath(path));
 		},
 		writeText(path: string, content: string) {
-			return fs.writeText(toRelativeAgentPath(path), content);
+			return writeText(memo.store, toRelativeAgentPath(path), content);
 		},
 		appendText(path: string, content: string) {
-			return fs.appendText(toRelativeAgentPath(path), content);
+			return appendText(memo.store, toRelativeAgentPath(path), content);
 		},
 		exists(path: string) {
-			return fs.exists(toRelativeAgentPath(path));
+			return exists(memo.store, toRelativeAgentPath(path));
 		},
 		sync: {
 			pull: async () => {},
@@ -274,15 +265,15 @@ function toRelativeAgentPath(path: string): string {
 /**
  * Reads a session pointer from `.tekmemo/tmp`.
  *
- * @param fs - CLI filesystem.
+ * @param memo - Tekmemo client instance.
  * @param session - Session ID or latest.
  * @returns Session pointer.
  */
 async function readSessionPointer(
-	fs: TekMemoFileSystem,
+	memo: Tekmemo,
 	session: string | undefined,
 ): Promise<AgentSessionPointer> {
-	const latest = await fs.readText(LATEST_AGENT_SESSION_PATH);
+	const latest = await readText(memo.store, LATEST_AGENT_SESSION_PATH);
 	const pointer = JSON.parse(latest) as AgentSessionPointer;
 	if (!session || session === "latest" || session === pointer.sessionId) {
 		return pointer;

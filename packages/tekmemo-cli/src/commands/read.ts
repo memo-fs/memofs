@@ -4,7 +4,8 @@
  * @module read
  */
 
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
@@ -14,9 +15,9 @@ import { TEKMEMO_PATHS } from "../protocol/constants";
  */
 export interface ReadCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -50,7 +51,12 @@ export async function runReadCommand(
 	options: ReadCommandOptions,
 ): Promise<number> {
 	const path = TARGET_PATHS[options.target];
-	const content = await options.fs.readTextIfExists(path);
+	const content =
+		options.target === "core"
+			? await options.memo.core.read().catch(() => undefined)
+			: options.target === "notes"
+				? await options.memo.notes.read().catch(() => undefined)
+				: await readTextIfExists(options.memo.store, path);
 	if (content === undefined) {
 		options.output.error(`${path} does not exist. Run tekmemo init first.`);
 		return 1;

@@ -4,8 +4,10 @@
  * @module runner
  */
 
+import type { Tekmemo } from "@tekbreed/tekmemo";
 import { Command, CommanderError } from "commander";
 import pkg from "../package.json" with { type: "json" };
+import { createTekmemoFromCli } from "./cli/tekmemo";
 import {
 	runAgentCompleteCommand,
 	runAgentExtractCommand,
@@ -45,26 +47,21 @@ import {
 	runCloudSyncStatusCommand,
 	runCloudUpdateCoreCommand,
 	runCloudValidateCommand,
+	runContextCommand,
 	runDiffCommand,
 	runDoctorCommand,
 	runEventsCommand,
 	runInitCommand,
 	runInspectCommand,
-	runRuntimeContextCommand,
-	runRuntimeReadCommand,
-	runRuntimeRememberCommand,
-	runRuntimeSnapshotCommand,
-	runRuntimeValidateCommand,
+	runReadCommand,
+	runRememberCommand,
 	runSearchCommand,
+	runSnapshotCommand,
+	runValidateCommand,
 } from "./commands";
-import {
-	type ResolvedCliRuntimeConfig,
-	resolveCliRuntimeConfig,
-	type TekMemoConfigFile,
-	writeDefaultCliConfig,
-} from "./config";
-import { CliError } from "./errors/cli-errors";
-import { TekMemoFileSystem } from "./fs/tekmemo-fs";
+import type { TekMemoConfigFile } from "./config";
+import { writeDefaultCliConfig } from "./config";
+import { CliError, CliUsageError } from "./errors/cli-errors";
 import {
 	type CliOutput,
 	createBufferedOutput,
@@ -142,13 +139,29 @@ export interface RunTekMemoCliResult {
 }
 
 /**
- * Instantiates the TekMemoFileSystem helper using a root path.
+ * Instantiates a Tekmemo client from CLI flags and environment.
  *
  * @param root - Absolute path to workspace root.
- * @returns Instantiated TekMemoFileSystem.
+ * @param opts - CLI option flags.
+ * @returns Instantiated Tekmemo client.
  */
-function createFs(root: string): TekMemoFileSystem {
-	return new TekMemoFileSystem({ rootDir: root });
+function createMemo(
+	root: string,
+	opts: {
+		runtime?: string;
+		cloudUrl?: string;
+		apiKey?: string;
+		workspaceId?: string;
+		projectId?: string;
+		timeoutMs?: number;
+		readPolicy?: string;
+		writePolicy?: string;
+	},
+): Tekmemo {
+	return createTekmemoFromCli({
+		root,
+		...opts,
+	});
 }
 
 /**
@@ -229,7 +242,7 @@ export async function runTekMemoCli(
 		json: boolean;
 		verbose: boolean;
 		quiet: boolean;
-		config: ResolvedCliRuntimeConfig;
+		memo: Tekmemo;
 	}> {
 		const opts = program.opts() as {
 			root?: string;
@@ -246,26 +259,23 @@ export async function runTekMemoCli(
 			writePolicy?: string;
 		};
 		wantsJson = Boolean(opts.json);
-		const config = await resolveCliRuntimeConfig({
-			cwd: input.cwd ?? process.cwd(),
-			flags: {
-				root: opts.root,
-				runtime: opts.runtime,
-				cloudUrl: opts.cloudUrl,
-				apiKey: opts.apiKey,
-				workspaceId: opts.workspaceId,
-				projectId: opts.projectId,
-				timeoutMs: opts.timeoutMs,
-				readPolicy: opts.readPolicy,
-				writePolicy: opts.writePolicy,
-			},
+		const root = opts.root ?? input.cwd ?? process.cwd();
+		const memo = createMemo(root, {
+			runtime: opts.runtime,
+			cloudUrl: opts.cloudUrl,
+			apiKey: opts.apiKey,
+			workspaceId: opts.workspaceId,
+			projectId: opts.projectId,
+			timeoutMs: opts.timeoutMs,
+			readPolicy: opts.readPolicy,
+			writePolicy: opts.writePolicy,
 		});
 		return {
-			root: config.root,
+			root,
 			json: Boolean(opts.json),
 			verbose: Boolean(opts.verbose),
 			quiet: Boolean(opts.quiet),
-			config,
+			memo,
 		};
 	}
 
@@ -279,7 +289,7 @@ export async function runTekMemoCli(
 			currentCommand = "init";
 			const g = await globals();
 			exitCode = await runInitCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				force: options.force,
@@ -295,7 +305,7 @@ export async function runTekMemoCli(
 			currentCommand = "inspect";
 			const g = await globals();
 			exitCode = await runInspectCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 			});
@@ -316,11 +326,10 @@ export async function runTekMemoCli(
 		.action(async (options) => {
 			currentCommand = "context";
 			const g = await globals();
-			exitCode = await runRuntimeContextCommand({
-				fs: createFs(g.root),
+			exitCode = await runContextCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				query: options.query,
 				maxChars: options.maxChars,
 				includeEvents: options.includeEvents,
@@ -360,11 +369,10 @@ export async function runTekMemoCli(
 		.action(async (content, options) => {
 			currentCommand = "remember";
 			const g = await globals();
-			exitCode = await runRuntimeRememberCommand({
-				fs: createFs(g.root),
+			exitCode = await runRememberCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				content,
 				stdin: options.stdin,
 				file: options.file,
@@ -392,11 +400,10 @@ export async function runTekMemoCli(
 				exitCode = 1;
 				return;
 			}
-			exitCode = await runRuntimeReadCommand({
-				fs: createFs(g.root),
+			exitCode = await runReadCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				target,
 			});
 		});
@@ -415,7 +422,7 @@ export async function runTekMemoCli(
 			currentCommand = "events";
 			const g = await globals();
 			exitCode = await runEventsCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				limit: options.limit,
@@ -437,7 +444,7 @@ export async function runTekMemoCli(
 			currentCommand = "chunks";
 			const g = await globals();
 			exitCode = await runChunksCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				limit: options.limit,
@@ -452,11 +459,10 @@ export async function runTekMemoCli(
 		.action(async (options) => {
 			currentCommand = "snapshot";
 			const g = await globals();
-			exitCode = await runRuntimeSnapshotCommand({
-				fs: createFs(g.root),
+			exitCode = await runSnapshotCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				label: options.label,
 			});
 		});
@@ -469,7 +475,7 @@ export async function runTekMemoCli(
 			currentCommand = "doctor";
 			const g = await globals();
 			exitCode = await runDoctorCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				strict: options.strict,
@@ -482,11 +488,10 @@ export async function runTekMemoCli(
 		.action(async () => {
 			currentCommand = "validate";
 			const g = await globals();
-			exitCode = await runRuntimeValidateCommand({
-				fs: createFs(g.root),
+			exitCode = await runValidateCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 			});
 		});
 
@@ -499,7 +504,7 @@ export async function runTekMemoCli(
 			currentCommand = "search";
 			const g = await globals();
 			exitCode = await runSearchCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				query,
@@ -516,7 +521,7 @@ export async function runTekMemoCli(
 			currentCommand = "diff";
 			const g = await globals();
 			exitCode = await runDiffCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				labelA,
@@ -541,11 +546,11 @@ export async function runTekMemoCli(
 			currentCommand = "agent.start";
 			const g = await globals();
 			exitCode = await runAgentStartCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				task: options.task,
-				projectId: options.project ?? g.config.cloud.projectId,
+				projectId: options.project ?? g.memo.projectId,
 				actorId: options.actor,
 				sessionId: options.session,
 			});
@@ -559,7 +564,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.paths";
 			const g = await globals();
 			exitCode = await runAgentPathsCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -576,7 +581,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.extract";
 			const g = await globals();
 			exitCode = await runAgentExtractCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -599,7 +604,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.complete";
 			const g = await globals();
 			exitCode = await runAgentCompleteCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -610,45 +615,18 @@ export async function runTekMemoCli(
 
 	const cloud = program
 		.command("cloud")
-		.description("use TekMemo Cloud through @tekbreed/tekmemo/cloud")
-		.option(
-			"--cloud-url <url>",
-			"TekMemo Cloud API URL; defaults to TEKMEMO_CLOUD_URL or TEKMEMO_API_URL",
-		)
-		.option(
-			"--api-key <key>",
-			"TekMemo Cloud API key; defaults to TEKMEMO_API_KEY",
-		)
-		.option(
-			"--workspace-id <id>",
-			"default cloud workspace ID; defaults to TEKMEMO_WORKSPACE_ID",
-		)
-		.option(
-			"--project-id <id>",
-			"default cloud project ID; defaults to TEKMEMO_PROJECT_ID",
-		)
-		.option(
-			"--timeout-ms <n>",
-			"cloud request timeout in milliseconds",
-			parsePositiveOption,
-		);
+		.description("use TekMemo Cloud through @tekbreed/tekmemo/cloud");
 
 	async function cloudGlobals() {
 		const g = await globals();
-		const opts = cloud.opts() as {
-			cloudUrl?: string;
-			apiKey?: string;
-			workspaceId?: string;
-			projectId?: string;
-			timeoutMs?: number;
-		};
+		if (!g.memo.cloud) {
+			throw new CliUsageError(
+				"Cloud mode requires --cloud-url and --api-key or TEKMEMO_CLOUD_URL/TEKMEMO_API_KEY",
+			);
+		}
 		return {
 			...g,
-			cloudUrl: opts.cloudUrl ?? g.config.cloud.cloudUrl,
-			apiKey: opts.apiKey ?? g.config.cloud.apiKey,
-			workspaceId: opts.workspaceId ?? g.config.cloud.workspaceId,
-			projectId: opts.projectId ?? g.config.cloud.projectId,
-			timeoutMs: opts.timeoutMs ?? g.config.cloud.timeoutMs,
+			client: g.memo.cloud,
 		};
 	}
 
@@ -661,11 +639,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudHealthCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 			});
 		});
 
@@ -684,11 +658,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudContextCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				query: options.query,
 				limit: options.limit,
 				maxBytes: options.maxBytes,
@@ -712,11 +682,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudRecallCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				query,
 				limit: options.limit,
 				strategy: options.strategy,
@@ -736,11 +702,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudRecallIndexCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				mode: options.mode,
 				force: options.force,
 			});
@@ -778,11 +740,7 @@ export async function runTekMemoCli(
 				json: g.json,
 				rootDir: g.root,
 				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				content,
 				stdin: options.stdin,
 				file: options.file,
@@ -816,11 +774,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudReadCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				target,
 				limit: options.limit,
 			});
@@ -848,11 +802,7 @@ export async function runTekMemoCli(
 				json: g.json,
 				rootDir: g.root,
 				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				content,
 				stdin: options.stdin,
 				file: options.file,
@@ -870,11 +820,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudRecentCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				limit: options.limit,
 			});
 		});
@@ -889,11 +835,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudValidateCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				strict: options.strict,
 			});
 		});
@@ -913,11 +855,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSnapshotCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				label: options.label,
 				type: options.type,
 			});
@@ -937,11 +875,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSyncStatusCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				clientId: options.clientId,
 			});
 		});
@@ -962,11 +896,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSyncPullCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				clientId: options.clientId,
 				sinceServerVersion: options.sinceServerVersion,
 				limit: options.limit,
@@ -992,11 +922,7 @@ export async function runTekMemoCli(
 				json: g.json,
 				rootDir: g.root,
 				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				clientId: options.clientId,
 				eventsJson: options.eventsJson,
 				checkpointJson: options.checkpointJson,
@@ -1016,11 +942,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSyncResolveCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				conflictId: options.conflictId,
 				resolution: options.resolution,
 			});
@@ -1035,11 +957,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudReadinessCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 			});
 		});
 
@@ -1059,11 +977,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudContextComposeCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				query: options.query,
 				topK: options.limit,
 				strategy: options.strategy,
@@ -1088,11 +1002,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphListNodesCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				limit: options.limit,
 				cursor: options.cursor,
 				status: options.status,
@@ -1117,11 +1027,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphCreateNodeCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				nodeId: options.nodeId,
 				type: options.type,
 				label: options.label,
@@ -1143,11 +1049,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphListEdgesCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				limit: options.limit,
 				cursor: options.cursor,
 				status: options.status,
@@ -1170,11 +1072,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphCreateEdgeCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				edgeId: options.edgeId,
 				fromNodeId: options.from,
 				toNodeId: options.to,
@@ -1198,11 +1096,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphNeighborsCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				nodeId: options.nodeId,
 				direction: options.direction,
 				depth: options.depth,
@@ -1222,11 +1116,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudGraphPathCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				fromNodeId: options.from,
 				toNodeId: options.to,
 				maxDepth: options.maxDepth,
@@ -1248,11 +1138,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudExtractionRunCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				mode: options.mode,
 				force: options.force,
 			});
@@ -1268,11 +1154,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudExtractionJobsCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				limit: options.limit,
 			});
 		});
@@ -1289,11 +1171,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudEvalsRunCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				fixtureIds: options.fixtureIds,
 				iterations: options.iterations,
 				thresholdsJson: options.thresholdsJson,
@@ -1312,11 +1190,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudBenchmarksRunCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				fixtureIds: options.fixtureIds,
 				iterations: options.iterations,
 				thresholdsJson: options.thresholdsJson,
@@ -1335,11 +1209,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudExportsCreateCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				label: options.label,
 			});
 		});
@@ -1354,11 +1224,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudExportsDownloadCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				exportId: options.exportId,
 			});
 		});
@@ -1378,11 +1244,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSnapshotsCreateCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				label: options.label,
 				trigger: options.trigger,
 			});
@@ -1398,11 +1260,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudSnapshotsDownloadCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				snapshotId: options.snapshotId,
 			});
 		});
@@ -1420,11 +1278,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudProvidersListCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 			});
 		});
 
@@ -1446,11 +1300,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudProvidersCreateCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				provider: options.provider,
 				keyName: options.keyName,
 				secret: options.secret,
@@ -1470,11 +1320,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudProvidersTestCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 				credentialId: options.credentialId,
 			});
 		});
@@ -1490,11 +1336,16 @@ export async function runTekMemoCli(
 			currentCommand = "config.get";
 			const g = await globals();
 			const safeConfig = {
-				...g.config,
-				cloud: {
-					...g.config.cloud,
-					apiKey: g.config.cloud.apiKey ? "<redacted>" : undefined,
-				},
+				mode: g.memo.mode,
+				projectId: g.memo.projectId,
+				...(g.memo.workspaceId !== undefined
+					? { workspaceId: g.memo.workspaceId }
+					: {}),
+				readPolicy: g.memo.readPolicy,
+				writePolicy: g.memo.writePolicy,
+				...(g.memo.cloud
+					? { cloud: { configured: true } }
+					: { cloud: { configured: false } }),
 			};
 			if (g.json) printJsonEnvelope(output, "config.get", safeConfig);
 			else output.write(JSON.stringify(safeConfig, null, 2));

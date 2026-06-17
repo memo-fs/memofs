@@ -4,7 +4,8 @@
  * @module search
  */
 
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 
@@ -13,9 +14,9 @@ import { TEKMEMO_PATHS } from "../protocol/constants";
  */
 export interface SearchCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -38,17 +39,8 @@ export interface SearchCommandOptions {
  * Represents a matched line with details on line number and parent file path.
  */
 interface SearchMatch {
-	/**
-	 * The workspace-relative path of the matching file.
-	 */
 	file: string;
-	/**
-	 * The 1-based line number of the match.
-	 */
 	line: number;
-	/**
-	 * The trimmed text content of the matching line.
-	 */
 	content: string;
 }
 
@@ -86,7 +78,7 @@ export async function runSearchCommand(
 	}
 
 	for (const file of filesToSearch) {
-		const content = await options.fs.readTextIfExists(file);
+		const content = await readTextIfExists(options.memo.store, file);
 		if (!content) continue;
 
 		const lines = content.split(/\r?\n/);

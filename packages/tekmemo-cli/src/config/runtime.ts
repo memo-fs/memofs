@@ -1,155 +1,31 @@
 /**
- * CLI Runtime config file loaders, options validation, and priority mergers.
+ * CLI config file writer for `.tekmemo/config.json`.
+ *
+ * Config resolution (env vars, flags, config file merging) is now handled by
+ * `Tekmemo`'s internal `resolveTekmemoConfig` — this module only retains the
+ * `writeDefaultCliConfig` function for the `tekmemo config init` command.
  *
  * @module runtime
  */
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CliUsageError } from "../errors/cli-errors";
-
-export type TekMemoRuntimeMode = "local" | "cloud" | "hybrid";
-export type TekMemoReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-export type TekMemoWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
 
 export interface TekMemoConfigFile {
-	runtime?: TekMemoRuntimeMode;
+	runtime?: "local" | "cloud" | "hybrid" | "memory";
 	root?: string;
+	projectId?: string;
+	workspaceId?: string;
 	cloud?: {
 		baseUrl?: string;
-		workspaceId?: string;
-		projectId?: string;
-		timeoutMs?: number;
-	};
-	hybrid?: {
-		readPolicy?: TekMemoReadPolicy;
-		writePolicy?: TekMemoWritePolicy;
-	};
-}
-
-export interface CliRuntimeFlags {
-	root?: string;
-	runtime?: string;
-	cloudUrl?: string;
-	apiKey?: string;
-	workspaceId?: string;
-	projectId?: string;
-	timeoutMs?: string | number;
-	readPolicy?: string;
-	writePolicy?: string;
-}
-
-export interface ResolvedCliRuntimeConfig {
-	runtime: TekMemoRuntimeMode;
-	root: string;
-	configPath: string;
-	configLoaded: boolean;
-	cloud: {
-		cloudUrl?: string;
 		apiKey?: string;
 		workspaceId?: string;
 		projectId?: string;
 		timeoutMs?: number;
 	};
-	hybrid: {
-		readPolicy: TekMemoReadPolicy;
-		writePolicy: TekMemoWritePolicy;
-	};
-}
-
-/**
- * Resolves the CLI runtime configurations by parsing flags, process environment keys,
- * and checking local config files.
- *
- * @param input - Setup variables mapping process cwd, CLI flags, and env variables.
- * @returns The resolved CliRuntimeConfig object.
- * @throws {CliUsageError} If policies or timeouts are invalid.
- */
-export async function resolveCliRuntimeConfig(input: {
-	cwd: string;
-	flags?: CliRuntimeFlags;
-	env?: NodeJS.ProcessEnv;
-}): Promise<ResolvedCliRuntimeConfig> {
-	const flags = input.flags ?? {};
-	const env = input.env ?? process.env;
-	const initialRoot =
-		firstNonEmpty(flags.root, env.TEKMEMO_ROOT, input.cwd) ?? input.cwd;
-	const configPath = path.join(
-		path.resolve(input.cwd, initialRoot),
-		".tekmemo",
-		"config.json",
-	);
-	const config = await readOptionalConfig(configPath);
-	const configRoot = config.value?.root;
-	const root = path.resolve(
-		input.cwd,
-		firstNonEmpty(flags.root, env.TEKMEMO_ROOT, configRoot, initialRoot) ??
-			initialRoot,
-	);
-	const runtime = normalizeRuntime(
-		firstNonEmpty(
-			flags.runtime,
-			env.TEKMEMO_RUNTIME,
-			config.value?.runtime,
-			"local",
-		),
-	);
-	const readPolicy = normalizeReadPolicy(
-		firstNonEmpty(
-			flags.readPolicy,
-			env.TEKMEMO_READ_POLICY,
-			config.value?.hybrid?.readPolicy,
-			"local-first",
-		),
-	);
-	const writePolicy = normalizeWritePolicy(
-		firstNonEmpty(
-			flags.writePolicy,
-			env.TEKMEMO_WRITE_POLICY,
-			config.value?.hybrid?.writePolicy,
-			"local-first",
-		),
-	);
-	const timeoutValue = firstDefined(
-		flags.timeoutMs,
-		env.TEKMEMO_CLOUD_TIMEOUT_MS,
-		config.value?.cloud?.timeoutMs,
-	);
-	const timeoutMs = normalizeTimeoutMs(timeoutValue);
-	return {
-		runtime,
-		root,
-		configPath,
-		configLoaded: config.loaded,
-		cloud: compactCloud({
-			cloudUrl: firstNonEmpty(
-				flags.cloudUrl,
-				env.TEKMEMO_CLOUD_URL,
-				env.TEKMEMO_API_URL,
-				config.value?.cloud?.baseUrl,
-			),
-			apiKey: firstNonEmpty(flags.apiKey, env.TEKMEMO_API_KEY),
-			workspaceId: firstNonEmpty(
-				flags.workspaceId,
-				env.TEKMEMO_WORKSPACE_ID,
-				config.value?.cloud?.workspaceId,
-			),
-			projectId: firstNonEmpty(
-				flags.projectId,
-				env.TEKMEMO_PROJECT_ID,
-				config.value?.cloud?.projectId,
-			),
-			...(timeoutMs !== undefined ? { timeoutMs } : {}),
-		}),
-		hybrid: { readPolicy, writePolicy },
+	hybrid?: {
+		readPolicy?: "local-first" | "cloud-first" | "local-only" | "cloud-only";
+		writePolicy?: "local-first" | "cloud-first" | "local-only" | "cloud-only";
 	};
 }
 
@@ -183,199 +59,13 @@ export async function writeDefaultCliConfig(input: {
 	return { path: configPath, created: !exists, overwritten: exists };
 }
 
-/**
- * Reads an optional configuration file from the filesystem.
- *
- * @param configPath - The absolute path to the configuration file.
- * @returns An object containing the load status and the parsed configuration if successful.
- * @throws {CliUsageError} If the configuration JSON is invalid or malformed.
- */
-async function readOptionalConfig(
-	configPath: string,
-): Promise<{ loaded: boolean; value?: TekMemoConfigFile }> {
-	try {
-		const raw = await fs.readFile(configPath, "utf8");
-		const parsed = JSON.parse(raw) as unknown;
-		return { loaded: true, value: validateConfig(parsed, configPath) };
-	} catch (error) {
-		if (isNodeError(error) && error.code === "ENOENT") return { loaded: false };
-		if (error instanceof SyntaxError) {
-			throw new CliUsageError(
-				`Invalid TekMemo config JSON at ${configPath}: ${error.message}`,
-			);
-		}
-		throw error;
-	}
-}
-
-/**
- * Validates the loaded configuration object structure and types.
- *
- * @param value - The parsed configuration candidate.
- * @param configPath - Path to the config file (for descriptive errors).
- * @returns The validated TekMemoConfigFile object.
- * @throws {CliUsageError} If validation fails.
- */
-function validateConfig(value: unknown, configPath: string): TekMemoConfigFile {
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new CliUsageError(`TekMemo config must be an object: ${configPath}`);
-	}
-	const record = value as TekMemoConfigFile;
-	if (record.runtime !== undefined) normalizeRuntime(record.runtime);
-	if (record.hybrid?.readPolicy !== undefined)
-		normalizeReadPolicy(record.hybrid.readPolicy);
-	if (record.hybrid?.writePolicy !== undefined)
-		normalizeWritePolicy(record.hybrid.writePolicy);
-	if (record.cloud?.timeoutMs !== undefined)
-		normalizeTimeoutMs(record.cloud.timeoutMs);
-	return record;
-}
-
-/**
- * Validates and normalizes the runtime mode.
- *
- * @param value - The runtime mode candidate.
- * @returns The normalized TekMemoRuntimeMode.
- * @throws {CliUsageError} If the runtime mode is invalid.
- */
-function normalizeRuntime(value: unknown): TekMemoRuntimeMode {
-	if (value === "local" || value === "cloud" || value === "hybrid")
-		return value;
-	throw new CliUsageError("runtime must be local, cloud, or hybrid.");
-}
-
-/**
- * Validates and normalizes the read policy.
- *
- * @param value - The read policy candidate.
- * @returns The normalized TekMemoReadPolicy.
- * @throws {CliUsageError} If the read policy is invalid.
- */
-function normalizeReadPolicy(value: unknown): TekMemoReadPolicy {
-	if (
-		value === "local-first" ||
-		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
-	)
-		return value;
-	throw new CliUsageError(
-		"read policy must be local-first, cloud-first, local-only, or cloud-only.",
-	);
-}
-
-/**
- * Validates and normalizes the write policy.
- *
- * @param value - The write policy candidate.
- * @returns The normalized TekMemoWritePolicy.
- * @throws {CliUsageError} If the write policy is invalid.
- */
-function normalizeWritePolicy(value: unknown): TekMemoWritePolicy {
-	if (
-		value === "local-first" ||
-		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
-	)
-		return value;
-	throw new CliUsageError(
-		"write policy must be local-first, cloud-first, local-only, or cloud-only.",
-	);
-}
-
-/**
- * Validates and normalizes the cloud timeout value.
- *
- * @param value - The timeout candidate in milliseconds.
- * @returns The normalized positive integer timeout, or undefined if not provided.
- * @throws {CliUsageError} If the timeout value is negative or invalid.
- */
-function normalizeTimeoutMs(value: unknown): number | undefined {
-	if (value === undefined || value === null || value === "") return undefined;
-	const parsed = typeof value === "number" ? value : Number(value);
-	if (!Number.isInteger(parsed) || parsed < 1) {
-		throw new CliUsageError(
-			"cloud timeout must be a positive integer in milliseconds.",
-		);
-	}
-	return parsed;
-}
-
-/**
- * Finds the first non-empty string value from the provided arguments.
- *
- * @param values - A list of candidates to inspect.
- * @returns The first non-empty string, or undefined if none are found.
- */
-function firstNonEmpty(...values: unknown[]): string | undefined {
-	for (const value of values) {
-		if (typeof value !== "string") continue;
-		const trimmed = value.trim();
-		if (trimmed) return trimmed;
-	}
-	return undefined;
-}
-
-/**
- * Finds the first defined value from the provided arguments.
- *
- * @param values - A list of candidates to inspect.
- * @returns The first defined value, or undefined if none are found.
- */
-function firstDefined(...values: unknown[]): unknown {
-	for (const value of values) {
-		if (value !== undefined) return value;
-	}
-	return undefined;
-}
-
-/**
- * Compacts the cloud configuration by removing undefined properties.
- *
- * @param input - The raw cloud configuration details.
- * @returns A consolidated cloud configuration object.
- */
-function compactCloud(input: {
-	cloudUrl?: string;
-	apiKey?: string;
-	workspaceId?: string;
-	projectId?: string;
-	timeoutMs?: number;
-}): ResolvedCliRuntimeConfig["cloud"] {
-	return {
-		...(input.cloudUrl !== undefined ? { cloudUrl: input.cloudUrl } : {}),
-		...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
-		...(input.workspaceId !== undefined
-			? { workspaceId: input.workspaceId }
-			: {}),
-		...(input.projectId !== undefined ? { projectId: input.projectId } : {}),
-		...(input.timeoutMs !== undefined ? { timeoutMs: input.timeoutMs } : {}),
-	};
-}
-
-/**
- * Checks if a file exists at the specified path.
- *
- * @param filePath - The path to the file.
- * @returns Promise resolving to true if the file exists, false otherwise.
- */
 async function fileExists(filePath: string): Promise<boolean> {
 	try {
 		await fs.stat(filePath);
 		return true;
 	} catch (error) {
-		if (isNodeError(error) && error.code === "ENOENT") return false;
+		if (error instanceof Error && "code" in error && error.code === "ENOENT")
+			return false;
 		throw error;
 	}
-}
-
-/**
- * Checks if an error is a NodeJS System/ErrnoException error.
- *
- * @param error - The error object to check.
- * @returns True if the error is a NodeJS ErrnoException, false otherwise.
- */
-function isNodeError(error: unknown): error is NodeJS.ErrnoException {
-	return error instanceof Error && "code" in error;
 }

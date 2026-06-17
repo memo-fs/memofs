@@ -4,7 +4,8 @@
  * @module inspect
  */
 
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { getRootDir } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { inspectTekMemo } from "../protocol/summary";
 
@@ -13,9 +14,9 @@ import { inspectTekMemo } from "../protocol/summary";
  */
 export interface InspectCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -35,7 +36,10 @@ export interface InspectCommandOptions {
 export async function runInspectCommand(
 	options: InspectCommandOptions,
 ): Promise<number> {
-	const inspection = await inspectTekMemo(options.fs);
+	const inspection = await inspectTekMemo(
+		options.memo.store,
+		getRootDir(options.memo.store),
+	);
 
 	if (options.json) {
 		options.output.write(JSON.stringify(inspection, null, 2));

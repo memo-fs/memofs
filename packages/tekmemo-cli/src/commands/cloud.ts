@@ -15,7 +15,6 @@ import type {
 	SyncEventInput,
 	TekMemoCloudClient,
 } from "@tekbreed/tekmemo";
-import { type CloudConnectionOptions, createCliCloudClient } from "../cloud";
 import { CliUsageError } from "../errors/cli-errors";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
@@ -27,7 +26,11 @@ import { scanForSecrets } from "../utils/secrets";
 /**
  * Base options shared by all cloud commands.
  */
-export interface CloudCommandBaseOptions extends CloudConnectionOptions {
+export interface CloudCommandBaseOptions {
+	/**
+	 * Pre-instantiated TekMemo Cloud client from memo.cloud.
+	 */
+	client: TekMemoCloudClient;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -688,7 +691,7 @@ const _CONFLICT_RESOLUTIONS = new Set<SyncConflictResolution>([
 export async function runCloudHealthCommand(
 	options: CloudHealthCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options, true, true);
+	const client = options.client;
 	const result = await client.health();
 	if (options.json) {
 		printJsonEnvelope(options.output, "cloud.health", result);
@@ -718,7 +721,7 @@ export async function runCloudHealthCommand(
 export async function runCloudContextCommand(
 	options: CloudContextCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const topK = normalizeOptionalPositiveInteger(options.limit, "limit");
 	const maxBytes = normalizeOptionalPositiveInteger(
 		options.maxBytes,
@@ -786,7 +789,7 @@ export async function runCloudContextCommand(
 export async function runCloudRecallCommand(
 	options: CloudRecallCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const topK = normalizeOptionalPositiveInteger(options.limit, "limit");
 	const strategy = normalizeRecallStrategy(options.strategy);
 	const fallback = normalizeRecallFallback(options.fallback);
@@ -814,7 +817,7 @@ export async function runCloudRecallCommand(
 export async function runCloudRecallIndexCommand(
 	options: CloudRecallIndexCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const mode = normalizeIndexMode(options.mode);
 	const result = await client.recall.index({
 		...(mode !== undefined ? { mode } : {}),
@@ -843,7 +846,7 @@ export async function runCloudRecallIndexCommand(
 export async function runCloudRememberCommand(
 	options: CloudRememberCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const content = await resolveCommandContent({
 		rootDir: options.rootDir ?? process.cwd(),
 		inline: options.content,
@@ -899,7 +902,7 @@ export async function runCloudRememberCommand(
 export async function runCloudReadCommand(
 	options: CloudReadCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	if (options.target === "core") {
 		const result = await client.memory.readCore();
 		if (options.json)
@@ -936,7 +939,7 @@ export async function runCloudReadCommand(
 export async function runCloudUpdateCoreCommand(
 	options: CloudUpdateCoreCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const content = await resolveCommandContent({
 		rootDir: options.rootDir ?? process.cwd(),
 		inline: options.content,
@@ -988,7 +991,7 @@ export async function runCloudRecentCommand(
 export async function runCloudValidateCommand(
 	options: CloudValidateCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const errors: string[] = [];
 	const warnings: string[] = [];
 	let healthOk = false;
@@ -1061,7 +1064,7 @@ export async function runCloudSnapshotCommand(
 export async function runCloudSyncStatusCommand(
 	options: CloudSyncStatusCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.sync.status({
 		...(options.clientId ? { clientId: options.clientId } : {}),
 	});
@@ -1091,7 +1094,7 @@ export async function runCloudSyncStatusCommand(
 export async function runCloudSyncPullCommand(
 	options: CloudSyncPullCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const sinceServerVersion = normalizeOptionalNonNegativeInteger(
 		options.sinceServerVersion,
 		"since server version",
@@ -1121,7 +1124,7 @@ export async function runCloudSyncPullCommand(
 export async function runCloudSyncPushCommand(
 	options: CloudSyncPushCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const payload = await resolveJsonPayload({
 		rootDir: options.rootDir ?? process.cwd(),
 		inline: options.eventsJson,
@@ -1164,7 +1167,7 @@ export async function runCloudSyncPushCommand(
 export async function runCloudSyncResolveCommand(
 	options: CloudSyncResolveCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const resolution = normalizeConflictResolution(options.resolution);
 	const result = await client.conflicts.resolve({
 		conflictId: options.conflictId,
@@ -1187,7 +1190,7 @@ export async function runCloudSyncResolveCommand(
 export async function runCloudReadinessCommand(
 	options: CloudReadinessCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options, true, true);
+	const client = options.client;
 	const result = await client.readiness();
 	if (options.json) {
 		printJsonEnvelope(options.output, "cloud.readiness", result);
@@ -1216,7 +1219,7 @@ export async function runCloudReadinessCommand(
 export async function runCloudContextComposeCommand(
 	options: CloudContextComposeCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const topK = normalizeOptionalPositiveInteger(options.topK, "topK");
 	const result = await client.context.compose({
 		query: options.query,
@@ -1252,7 +1255,7 @@ export async function runCloudContextComposeCommand(
 export async function runCloudGraphListNodesCommand(
 	options: CloudGraphListNodesCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const limit = normalizeOptionalPositiveInteger(options.limit, "limit");
 	const result = await client.graph.listNodes({
 		...(limit !== undefined ? { limit } : {}),
@@ -1288,7 +1291,7 @@ export async function runCloudGraphListNodesCommand(
 export async function runCloudGraphCreateNodeCommand(
 	options: CloudGraphCreateNodeCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const metadata = options.metadataJson
 		? parseJsonObject(options.metadataJson, "metadata JSON")
 		: undefined;
@@ -1317,7 +1320,7 @@ export async function runCloudGraphCreateNodeCommand(
 export async function runCloudGraphListEdgesCommand(
 	options: CloudGraphListEdgesCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const limit = normalizeOptionalPositiveInteger(options.limit, "limit");
 	const result = await client.graph.listEdges({
 		...(limit !== undefined ? { limit } : {}),
@@ -1356,7 +1359,7 @@ export async function runCloudGraphListEdgesCommand(
 export async function runCloudGraphCreateEdgeCommand(
 	options: CloudGraphCreateEdgeCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const metadata = options.metadataJson
 		? parseJsonObject(options.metadataJson, "metadata JSON")
 		: undefined;
@@ -1390,7 +1393,7 @@ export async function runCloudGraphCreateEdgeCommand(
 export async function runCloudGraphNeighborsCommand(
 	options: CloudGraphNeighborsCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const depth =
 		options.depth !== undefined
 			? parseInt(String(options.depth), 10)
@@ -1423,7 +1426,7 @@ export async function runCloudGraphNeighborsCommand(
 export async function runCloudGraphPathCommand(
 	options: CloudGraphPathCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const maxDepth =
 		options.maxDepth !== undefined
 			? parseInt(String(options.maxDepth), 10)
@@ -1452,7 +1455,7 @@ export async function runCloudGraphPathCommand(
 export async function runCloudExtractionRunCommand(
 	options: CloudExtractionRunCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.extraction.run({
 		...(options.mode
 			? {
@@ -1485,7 +1488,7 @@ export async function runCloudExtractionRunCommand(
 export async function runCloudExtractionJobsCommand(
 	options: CloudExtractionJobsCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const limit = normalizeOptionalPositiveInteger(options.limit, "limit");
 	const result = await client.extraction.jobs({
 		...(limit !== undefined ? { limit } : {}),
@@ -1510,7 +1513,7 @@ export async function runCloudExtractionJobsCommand(
 export async function runCloudEvalsRunCommand(
 	options: CloudEvalsRunCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.evals.run({
 		...(options.fixtureIds
 			? { fixtureIds: options.fixtureIds.split(",").map((s) => s.trim()) }
@@ -1536,7 +1539,7 @@ export async function runCloudEvalsRunCommand(
 export async function runCloudBenchmarksRunCommand(
 	options: CloudBenchmarksRunCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.benchmarks.run({
 		...(options.fixtureIds
 			? { fixtureIds: options.fixtureIds.split(",").map((s) => s.trim()) }
@@ -1564,7 +1567,7 @@ export async function runCloudBenchmarksRunCommand(
 export async function runCloudExportsCreateCommand(
 	options: CloudExportsCreateCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.exports.create({
 		...(options.label ? { label: options.label } : {}),
 	});
@@ -1585,7 +1588,7 @@ export async function runCloudExportsCreateCommand(
 export async function runCloudExportsDownloadCommand(
 	options: CloudExportsDownloadCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.exports.downloadUrl({
 		exportId: options.exportId,
 	});
@@ -1606,7 +1609,7 @@ export async function runCloudExportsDownloadCommand(
 export async function runCloudSnapshotsCreateCommand(
 	options: CloudSnapshotsCreateCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.snapshots.create({
 		...(options.label ? { label: options.label } : {}),
 		...(options.trigger
@@ -1630,7 +1633,7 @@ export async function runCloudSnapshotsCreateCommand(
 export async function runCloudSnapshotsDownloadCommand(
 	options: CloudSnapshotsDownloadCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.snapshots.downloadUrl({
 		snapshotId: options.snapshotId,
 	});
@@ -1651,7 +1654,7 @@ export async function runCloudSnapshotsDownloadCommand(
 export async function runCloudProvidersListCommand(
 	options: CloudProvidersListCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.providers.list();
 	if (options.json) {
 		printJsonEnvelope(options.output, "cloud.providers.list", result);
@@ -1674,7 +1677,7 @@ export async function runCloudProvidersListCommand(
 export async function runCloudProvidersCreateCommand(
 	options: CloudProvidersCreateCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.providers.create({
 		provider: options.provider as "voyageai" | "openai" | "upstash-vector",
 		keyName: options.keyName,
@@ -1702,7 +1705,7 @@ export async function runCloudProvidersCreateCommand(
 export async function runCloudProvidersTestCommand(
 	options: CloudProvidersTestCommandOptions,
 ): Promise<number> {
-	const client = createCloudClient(options);
+	const client = options.client;
 	const result = await client.providers.test({
 		credentialId: options.credentialId,
 	});
@@ -1714,30 +1717,6 @@ export async function runCloudProvidersTestCommand(
 		`Test result: ${result.ok ? "OK" : "Failed"}${result.message ? ` - ${result.message}` : ""}`,
 	);
 	return result.ok ? 0 : 1;
-}
-
-/**
- * Creates and configures a cloud client instance using the provided connection settings.
- *
- * @param options - Base cloud connection options.
- * @param allowMissingApiKey - If true, does not throw if api key is missing.
- * @param allowMissingProjectId - If true, does not throw if project id is missing.
- * @returns Instantiated TekMemoCloudClient.
- */
-function createCloudClient(
-	options: CloudCommandBaseOptions,
-	allowMissingApiKey = false,
-	allowMissingProjectId = false,
-): TekMemoCloudClient {
-	return createCliCloudClient({
-		cloudUrl: options.cloudUrl,
-		apiKey: options.apiKey,
-		workspaceId: options.workspaceId,
-		projectId: options.projectId,
-		timeoutMs: options.timeoutMs,
-		allowMissingApiKey,
-		allowMissingProjectId,
-	});
 }
 
 /**

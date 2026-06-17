@@ -54,13 +54,6 @@ export { runInitCommand } from "./init";
 export { runInspectCommand } from "./inspect";
 export { runReadCommand } from "./read";
 export { runRememberCommand } from "./remember";
-export {
-	runRuntimeContextCommand,
-	runRuntimeReadCommand,
-	runRuntimeRememberCommand,
-	runRuntimeSnapshotCommand,
-	runRuntimeValidateCommand,
-} from "./runtime";
 export { runSearchCommand } from "./search";
 export { runSnapshotCommand } from "./snapshot";
 export { runValidateCommand } from "./validate";

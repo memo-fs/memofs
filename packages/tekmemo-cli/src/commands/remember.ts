@@ -4,8 +4,14 @@
  * @module remember
  */
 
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import {
+	appendText,
+	getRootDir,
+	readTextIfExists,
+	writeText,
+} from "../cli/store-helpers";
 import { CliUsageError } from "../errors/cli-errors";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
@@ -20,9 +26,9 @@ import { scanForSecrets } from "../utils/secrets";
  */
 export interface RememberCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -183,7 +189,7 @@ export async function runRememberCommand(
 	options: RememberCommandOptions,
 ): Promise<number> {
 	const content = await resolveCommandContent({
-		rootDir: options.fs.rootDir,
+		rootDir: getRootDir(options.memo.store),
 		inline: options.content,
 		stdin: options.stdin,
 		file: options.file,
@@ -225,12 +231,14 @@ export async function runRememberCommand(
 		...(metadata ? { metadata } : {}),
 	});
 
-	const currentNotes = await options.fs.readTextIfExists(
+	const currentNotes = await readTextIfExists(
+		options.memo.store,
 		TEKMEMO_PATHS.notesMemory,
 	);
 	const nextNotes =
 		`${(currentNotes ?? "# Notes\n").trimEnd()}\n\n${note}`.trimStart();
-	await options.fs.writeText(
+	await writeText(
+		options.memo.store,
 		TEKMEMO_PATHS.notesMemory,
 		`${nextNotes.trimEnd()}\n`,
 	);
@@ -255,7 +263,8 @@ export async function runRememberCommand(
 			createdBy: "@tekbreed/tekmemo/cli",
 		},
 	};
-	await options.fs.appendText(
+	await appendText(
+		options.memo.store,
 		TEKMEMO_PATHS.memoryEvents,
 		stringifyJsonl([event]),
 	);

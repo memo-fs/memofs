@@ -1,6 +1,10 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, TekMemoFileSystem } from "../src";
+import { runTekMemoCli } from "../src";
 
 describe("search", () => {
 	it("finds matches in memory files", async () => {
@@ -9,8 +13,8 @@ describe("search", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nImportant fact here.\n",
 			);
@@ -48,8 +52,8 @@ describe("search", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.notes,
 				"# Notes\n\nABC-123\nXYZ-456\n",
 			);
@@ -86,8 +90,8 @@ describe("search", () => {
 			await runTekMemoCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nhello world\n",
 			);

@@ -4,7 +4,8 @@
  * @module chunks
  */
 
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
@@ -14,9 +15,9 @@ import { parseJsonl } from "../protocol/jsonl";
  */
 export interface ChunksCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -44,7 +45,10 @@ export interface ChunksCommandOptions {
 export async function runChunksCommand(
 	options: ChunksCommandOptions,
 ): Promise<number> {
-	const content = await options.fs.readTextIfExists(TEKMEMO_PATHS.chunks);
+	const content = await readTextIfExists(
+		options.memo.store,
+		TEKMEMO_PATHS.chunks,
+	);
 	const records = content
 		? parseJsonl(content, { strict: options.strict ?? false })
 		: [];

@@ -5,7 +5,8 @@
  */
 
 import { createHash } from "node:crypto";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { appendText, readTextIfExists, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { REQUIRED_FILES, TEKMEMO_PATHS } from "../protocol/constants";
@@ -17,9 +18,9 @@ import { createSafeIdFromLabel, validateSnapshotLabel } from "../utils/labels";
  */
 export interface SnapshotCommandOptions {
 	/**
-	 * The TekMemo filesystem wrapper.
+	 * The Tekmemo client instance.
 	 */
-	fs: TekMemoFileSystem;
+	memo: Tekmemo;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -38,29 +39,11 @@ export interface SnapshotCommandOptions {
  * Structured bundle format storing all tracked database files in a snapshot.
  */
 interface SnapshotBundle {
-	/**
-	 * Unique identifier generated for the snapshot.
-	 */
 	id: string;
-	/**
-	 * User-provided label for the snapshot.
-	 */
 	label: string;
-	/**
-	 * ISO timestamp of when the snapshot was created.
-	 */
 	createdAt: string;
-	/**
-	 * Protocol format version version number.
-	 */
 	protocolVersion: string;
-	/**
-	 * Map of file names to their text content.
-	 */
 	files: Record<string, string>;
-	/**
-	 * SHA256 integrity checksum.
-	 */
 	checksum: string;
 }
 
@@ -90,7 +73,7 @@ export async function runSnapshotCommand(
 	const files: Record<string, string> = {};
 
 	for (const filePath of REQUIRED_FILES) {
-		const content = await options.fs.readTextIfExists(filePath);
+		const content = await readTextIfExists(options.memo.store, filePath);
 		if (content !== undefined) files[filePath] = content;
 	}
 
@@ -106,7 +89,11 @@ export async function runSnapshotCommand(
 		checksum: checksum(bundleWithoutChecksum),
 	};
 
-	await options.fs.writeText(path, `${JSON.stringify(bundle, null, 2)}\n`);
+	await writeText(
+		options.memo.store,
+		path,
+		`${JSON.stringify(bundle, null, 2)}\n`,
+	);
 
 	const record = {
 		id,
@@ -122,11 +109,13 @@ export async function runSnapshotCommand(
 		},
 	};
 
-	await options.fs.appendText(
+	await appendText(
+		options.memo.store,
 		TEKMEMO_PATHS.snapshots,
 		stringifyJsonl([record]),
 	);
-	await options.fs.appendText(
+	await appendText(
+		options.memo.store,
 		TEKMEMO_PATHS.memoryEvents,
 		stringifyJsonl([
 			{
