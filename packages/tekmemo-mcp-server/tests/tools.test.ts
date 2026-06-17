@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
 	callTekMemoTool,
-	createCloudTekMemoMcpRuntime,
-	createInMemoryTekMemoRuntime,
 	createTekMemoMcpProtocolServer,
+	createTekMemoMcpRuntimeFromConfig,
 } from "../src/index";
 
 function makeFakeClient(calls: string[], extra?: Record<string, unknown>) {
@@ -76,7 +75,7 @@ describe("MCP tools", () => {
 	it("write tool can be blocked by authorization policy", async () => {
 		const result = await callTekMemoTool(
 			{
-				runtime: createInMemoryTekMemoRuntime(),
+				runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }),
 				authorize: ({ safety }) => safety === "read",
 			},
 			"tekmemo.remember",
@@ -90,7 +89,7 @@ describe("MCP tools", () => {
 
 	it("source refs reject path traversal and non-http URLs", async () => {
 		const result = await callTekMemoTool(
-			{ runtime: createInMemoryTekMemoRuntime() },
+			{ runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }) },
 			"tekmemo.remember",
 			{
 				content: "hello",
@@ -111,7 +110,7 @@ describe("MCP tools", () => {
 
 	it("graph node upsert rejects duplicate batch ids", async () => {
 		const result = await callTekMemoTool(
-			{ runtime: createInMemoryTekMemoRuntime() },
+			{ runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }) },
 			"tekmemo.graph_upsert_nodes",
 			{
 				nodes: [
@@ -127,7 +126,7 @@ describe("MCP tools", () => {
 	});
 
 	it("output text is truncated safely when max output bytes is small", async () => {
-		const runtime = createInMemoryTekMemoRuntime();
+		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
 		const write = await callTekMemoTool({ runtime }, "tekmemo.remember", {
 			content: "a".repeat(5000),
 		});
@@ -145,7 +144,7 @@ describe("MCP tools", () => {
 
 	it("resources/read exposes graph nodes as JSON content", async () => {
 		const server = createTekMemoMcpProtocolServer({
-			runtime: createInMemoryTekMemoRuntime(),
+			runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }),
 		});
 		await server.handleJsonRpcMessage({
 			jsonrpc: "2.0",
@@ -172,8 +171,9 @@ describe("MCP tools", () => {
 	it("cloud runtime delegates remember to project-scoped cloud memory API", async () => {
 		const calls: string[] = [];
 		const client = makeFakeClient(calls);
-		const runtime = createCloudTekMemoMcpRuntime({
-			client: client as never,
+		const runtime = createTekMemoMcpRuntimeFromConfig({
+			mode: "cloud",
+			cloudClient: client as never,
 			projectId: "proj_1",
 		});
 		const result = await callTekMemoTool({ runtime }, "tekmemo.remember", {
@@ -189,8 +189,9 @@ describe("MCP tools", () => {
 	it("cloud runtime exposes sync status through project-scoped sync API", async () => {
 		const calls: string[] = [];
 		const client = makeFakeClient(calls);
-		const runtime = createCloudTekMemoMcpRuntime({
-			client: client as never,
+		const runtime = createTekMemoMcpRuntimeFromConfig({
+			mode: "cloud",
+			cloudClient: client as never,
 			projectId: "proj_1",
 		});
 		const result = await callTekMemoTool({ runtime }, "tekmemo.sync_status", {
@@ -206,8 +207,9 @@ describe("MCP tools", () => {
 	it("cloud graph tools fail clearly while cloud graph is not wired", async () => {
 		const calls: string[] = [];
 		const client = makeFakeClient(calls);
-		const runtime = createCloudTekMemoMcpRuntime({
-			client: client as never,
+		const runtime = createTekMemoMcpRuntimeFromConfig({
+			mode: "cloud",
+			cloudClient: client as never,
 			projectId: "proj_1",
 		});
 		const result = await callTekMemoTool(

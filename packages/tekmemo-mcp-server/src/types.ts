@@ -1,19 +1,101 @@
 /**
  * Type declarations and interface definitions for MCP Server execution.
  *
+ * Memory/recall/graph/sync types are imported from @tekbreed/tekmemo to avoid duplication.
+ * Only MCP-protocol-specific types (tool results, definitions, options) are defined here.
+ *
  * @module types
  */
 
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue =
-	| JsonPrimitive
-	| JsonValue[]
-	| { [key: string]: JsonValue };
-export type JsonObject = { [key: string]: JsonValue };
+export type {
+	AgentSessionCompleteInput,
+	AgentSessionExtractResult,
+	AgentSessionFileInput,
+	AgentSessionResult,
+	AgentSessionStartInput,
+	GraphEdgeInput,
+	GraphNeighborsInput,
+	GraphNodeInput,
+	GraphPathInput,
+	GraphPathResult,
+	JsonObject,
+	JsonPrimitive,
+	JsonValue,
+	ListGraphInput,
+	MemoryContextInput,
+	MemoryContextResult,
+	MemoryDocumentResult,
+	MemoryKind,
+	Page,
+	ReadMemoryInput,
+	RecallInput,
+	RecallItem,
+	RecallResult,
+	RecentMemoryInput,
+	RecentMemoryResult,
+	ResolveSyncConflictInput,
+	ResolveSyncConflictResult,
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	SnapshotMemoryInput,
+	SnapshotMemoryResult,
+	SourceRef,
+	SyncConflictResolution,
+	SyncEventInput,
+	SyncPullInput,
+	SyncPullResult,
+	SyncPushInput,
+	SyncPushResult,
+	SyncStatusInput,
+	SyncStatusResult,
+	TekMemoHealthResult,
+	TekMemoRuntimeMode,
+	ValidateMemoryInput,
+	ValidateMemoryResult,
+	WriteMemoryInput,
+	WriteMemoryResult,
+} from "@tekbreed/tekmemo";
+
+import type {
+	AgentSessionCompleteInput,
+	AgentSessionExtractResult,
+	AgentSessionFileInput,
+	AgentSessionResult,
+	AgentSessionStartInput,
+	GraphEdgeInput,
+	GraphNeighborsInput,
+	GraphNodeInput,
+	GraphPathInput,
+	GraphPathResult,
+	JsonObject,
+	ListGraphInput,
+	MemoryContextInput,
+	MemoryContextResult,
+	MemoryDocumentResult,
+	ReadMemoryInput,
+	RecallInput,
+	RecallItem,
+	RecallResult,
+	RecentMemoryInput,
+	RecentMemoryResult,
+	ResolveSyncConflictInput,
+	SnapshotMemoryInput,
+	SnapshotMemoryResult,
+	SyncPullInput,
+	SyncPullResult,
+	SyncPushInput,
+	SyncPushResult,
+	SyncStatusInput,
+	SyncStatusResult,
+	TekMemoHealthResult,
+	ValidateMemoryInput,
+	ValidateMemoryResult,
+	WriteMemoryInput,
+	WriteMemoryResult,
+} from "@tekbreed/tekmemo";
 
 export type ToolSafety = "read" | "write" | "destructive" | "external";
 export type McpRole = "user" | "assistant";
-export type TekMemoRuntimeMode = "local" | "cloud" | "hybrid" | "memory";
 
 export interface TextContentItem {
 	type: "text";
@@ -64,292 +146,27 @@ export interface McpPromptDefinition {
 	description: string;
 	arguments?: Array<{ name: string; description?: string; required?: boolean }>;
 }
-export interface Page<T> {
-	items: T[];
-	nextCursor?: string;
-}
 
-export type MemoryKind =
-	| "decision"
-	| "constraint"
-	| "goal"
-	| "preference"
-	| "reference"
-	| "summary"
-	| "note";
-
-export interface SourceRef {
-	sourceType: string;
-	sourceId?: string;
-	path?: string;
-	title?: string;
-	url?: string;
-	metadata?: JsonObject;
-}
-export interface RecallInput {
-	query: string;
+export interface AuthorizationContext {
+	operation: string;
+	safety: ToolSafety;
 	workspaceId?: string;
-	projectId?: string;
-	limit?: number;
-	includeGraph?: boolean;
-	includeSources?: boolean;
-	filters?: JsonObject;
-}
-export interface RecallItem {
-	id: string;
-	text: string;
-	score?: number;
-	sourceRefs?: SourceRef[];
-	metadata?: JsonObject;
-}
-export interface RecallResult {
-	items: RecallItem[];
-	warnings?: string[];
-}
-export interface MemoryContextInput extends RecallInput {
-	maxBytes?: number;
-	includeCore?: boolean;
-	includeNotes?: boolean;
-	includeRecent?: boolean;
-}
-export interface MemoryContextResult {
-	text: string;
-	sections: Array<{
-		type: "core" | "notes" | "recent" | "recall" | "graph";
-		title: string;
-		content: string;
-	}>;
-	items?: RecallItem[];
-	warnings?: string[];
-}
-export interface WriteMemoryInput {
-	title?: string;
-	content: string;
-	kind?: MemoryKind;
-	workspaceId?: string;
-	projectId?: string;
-	tags?: string[];
-	sourceRefs?: SourceRef[];
-	metadata?: JsonObject;
-	confidence?: number;
-	source?: string;
-}
-export interface WriteMemoryResult {
-	id: string;
-	created: boolean;
-	sourceRefs?: SourceRef[];
-	warnings?: string[];
-}
-export interface ReadMemoryInput {
-	workspaceId?: string;
-	projectId?: string;
-}
-export interface MemoryDocumentResult {
-	content: string;
-	warnings?: string[];
-}
-export interface RecentMemoryInput extends ReadMemoryInput {
-	limit?: number;
-}
-export interface RecentMemoryResult {
-	items: Array<{
-		id: string;
-		type?: string;
-		timestamp?: string;
-		summary?: string;
-		metadata?: JsonObject;
-	}>;
-	warnings?: string[];
-}
-export interface ValidateMemoryInput extends ReadMemoryInput {
-	strict?: boolean;
-}
-export interface ValidateMemoryResult {
-	ok: boolean;
-	warnings: string[];
-	errors: string[];
-}
-export interface SnapshotMemoryInput extends ReadMemoryInput {
-	label?: string;
-	type?: "manual" | "automatic" | "pre-sync" | "pre-restore";
-}
-export interface SnapshotMemoryResult {
-	id: string;
-	path?: string;
-	created: boolean;
-	warnings?: string[];
+	arguments: unknown;
 }
 
-export interface AgentSessionStartInput extends ReadMemoryInput {
-	task: string;
-	actorId?: string;
-	sessionId?: string;
-}
-
-export interface AgentSessionFileInput extends ReadMemoryInput {
-	sessionId: string;
-	path: string;
-	content?: string;
-}
-
-export interface AgentSessionCompleteInput extends ReadMemoryInput {
-	sessionId: string;
-	extractDurableMemory?: boolean;
-	checkpointLabel?: string;
-}
-
-export interface AgentSessionResult {
-	sessionId: string;
-	root: string;
-	paths: JsonObject;
-}
-
-export interface AgentSessionExtractResult {
-	sessionId: string;
-	extracted: JsonObject;
-}
-
-export type SyncConflictResolution = "keep_cloud" | "use_client" | "ignore";
-export interface SyncEventInput {
-	clientEventId: string;
-	type: string;
-	path?: string;
-	payload?: JsonObject;
-	payloadHash?: string;
-	createdAt?: string;
-	baseServerVersion?: number;
-}
-export interface SyncPushInput extends ReadMemoryInput {
-	clientId: string;
-	events: SyncEventInput[];
-	checkpoint?: {
-		localVersion?: number;
-		serverVersion?: number;
-		hash?: string;
-	};
-}
-export interface SyncPushResult {
-	accepted: Array<{
-		clientEventId: string;
-		serverEventId: string;
-		serverVersion: number;
-	}>;
-	duplicates: string[];
-	rejected: Array<{ clientEventId: string; code: string; message: string }>;
-	conflicts: Array<{
-		conflictId: string;
-		clientEventId: string;
-		reason: string;
-	}>;
-	serverVersion: number;
-}
-export interface SyncPullInput extends ReadMemoryInput {
-	clientId: string;
-	sinceServerVersion?: number;
-	limit?: number;
-}
-export interface SyncPullResult {
-	events: Array<{
-		serverEventId: string;
-		serverVersion: number;
-		type: string;
-		path?: string;
-		payload?: JsonObject;
-		createdAt?: string;
-	}>;
-	serverVersion: number;
-	nextCursor?: string;
-}
-export interface SyncStatusInput extends ReadMemoryInput {
-	clientId?: string;
-}
-export interface SyncStatusResult {
-	serverVersion: number;
-	clients: Array<{
-		clientId: string;
-		lastSeenAt?: string;
-		serverVersion?: number;
-		status?: string;
-	}>;
-	openConflicts: number;
-	recentEvents?: number;
-}
-export interface ResolveSyncConflictInput extends ReadMemoryInput {
-	conflictId: string;
-	resolution: SyncConflictResolution;
-	content?: JsonObject;
-}
-export interface ResolveSyncConflictResult {
-	conflictId: string;
-	resolved: boolean;
-	serverVersion?: number;
-}
-
-export interface GraphNodeInput {
-	id: string;
-	type: string;
-	label: string;
-	aliases?: string[];
-	summary?: string;
-	confidence?: number;
-	importance?: number;
-	status?: string;
-	sourceRefs?: SourceRef[];
-	metadata?: JsonObject;
-}
-export interface GraphEdgeInput {
-	id?: string;
-	from: string;
-	to: string;
-	type: string;
-	directed?: boolean;
-	dedupeKey?: string;
-	weight?: number;
-	confidence?: number;
-	status?: string;
-	sourceRefs?: SourceRef[];
-	metadata?: JsonObject;
-}
-export interface GraphNeighborsInput {
-	nodeId: string;
-	workspaceId?: string;
-	projectId?: string;
-	direction?: "in" | "out" | "both";
-	edgeTypes?: string[];
-	minWeight?: number;
-	limit?: number;
-	cursor?: string;
-}
-export interface GraphPathInput {
-	from: string;
-	to: string;
-	workspaceId?: string;
-	projectId?: string;
-	weighted?: boolean;
-	maxDepth?: number;
-	edgeTypes?: string[];
-	minWeight?: number;
-}
-export interface ListGraphInput {
-	workspaceId?: string;
-	projectId?: string;
-	limit?: number;
-	cursor?: string;
-}
-export interface GraphPathResult {
-	found: boolean;
-	nodes: GraphNodeInput[];
-	edges: GraphEdgeInput[];
-	totalWeight?: number;
-	totalCost?: number;
-}
-export interface TekMemoHealthResult {
-	ok: boolean;
-	name: string;
-	version: string;
-	mode?: TekMemoRuntimeMode;
-	capabilities: string[];
-	warnings?: string[];
+export interface TekMemoMcpOptions {
+	runtime: TekMemoMcpRuntime;
+	name?: string;
+	version?: string;
+	instructions?: string;
+	readOnly?: boolean;
+	defaultPageSize?: number;
+	maxPageSize?: number;
+	requestTimeoutMs?: number;
+	maxInputBytes?: number;
+	maxOutputBytes?: number;
+	authorize?: (context: AuthorizationContext) => Promise<boolean> | boolean;
+	redact?: (args: unknown) => unknown;
 }
 
 export interface TekMemoMcpRuntime {
@@ -443,7 +260,7 @@ export interface TekMemoMcpRuntime {
 	resolveSyncConflict?(
 		input: ResolveSyncConflictInput,
 		signal?: AbortSignal,
-	): Promise<ResolveSyncConflictResult>;
+	): Promise<unknown>;
 	upsertGraphNodes(
 		input: {
 			workspaceId?: string;
@@ -484,23 +301,4 @@ export interface TekMemoMcpRuntime {
 	): Promise<Page<GraphEdgeInput>>;
 }
 
-export interface AuthorizationContext {
-	operation: string;
-	safety: ToolSafety;
-	workspaceId?: string;
-	arguments?: unknown;
-}
-export interface TekMemoMcpOptions {
-	runtime: TekMemoMcpRuntime;
-	name?: string;
-	version?: string;
-	instructions?: string;
-	maxInputBytes?: number;
-	maxOutputBytes?: number;
-	requestTimeoutMs?: number;
-	defaultPageSize?: number;
-	maxPageSize?: number;
-	readOnly?: boolean;
-	authorize?: (context: AuthorizationContext) => boolean | Promise<boolean>;
-	redact?: (value: unknown, context: { operation: string }) => unknown;
-}
+import type { Page } from "@tekbreed/tekmemo";

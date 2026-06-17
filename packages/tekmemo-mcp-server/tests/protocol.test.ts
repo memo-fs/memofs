@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-	createInMemoryTekMemoRuntime,
 	createTekMemoMcpProtocolServer,
+	createTekMemoMcpRuntimeFromConfig,
 } from "../src/index";
 
 function makeServer() {
 	return createTekMemoMcpProtocolServer({
-		runtime: createInMemoryTekMemoRuntime(),
+		runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }),
 		defaultPageSize: 2,
 		maxPageSize: 5,
 	});

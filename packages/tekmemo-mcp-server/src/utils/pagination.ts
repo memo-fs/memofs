@@ -63,10 +63,7 @@ export function normalizeLimit(
 export function encodeCursor(offset: number, namespace = "page"): string {
 	if (!Number.isInteger(offset) || offset < 0)
 		throw new McpValidationError("cursor offset is invalid.");
-	return Buffer.from(
-		JSON.stringify({ v: 1, namespace, offset }),
-		"utf8",
-	).toString("base64url");
+	return encodeBase64Url(JSON.stringify({ v: 1, namespace, offset }));
 }
 
 /**
@@ -84,9 +81,7 @@ export function decodeCursor(
 	if (cursor === undefined || cursor === "") return 0;
 	if (cursor.length > 512) throw new McpValidationError("cursor is too long.");
 	try {
-		const decoded = JSON.parse(
-			Buffer.from(cursor, "base64url").toString("utf8"),
-		) as unknown;
+		const decoded = JSON.parse(decodeBase64Url(cursor)) as unknown;
 		if (typeof decoded !== "object" || decoded === null)
 			throw new Error("bad cursor");
 		const data = decoded as {
@@ -106,6 +101,38 @@ export function decodeCursor(
 	} catch {
 		throw new McpValidationError("cursor is invalid or expired.");
 	}
+}
+
+/**
+ * Encodes UTF-8 text as base64url without requiring Node.js Buffer.
+ *
+ * @param value - Plain UTF-8 string to encode.
+ * @returns Base64url-encoded string.
+ */
+function encodeBase64Url(value: string): string {
+	const bytes = new TextEncoder().encode(value);
+	let binary = "";
+	for (const byte of bytes) binary += String.fromCharCode(byte);
+	return btoa(binary)
+		.replaceAll("+", "-")
+		.replaceAll("/", "_")
+		.replaceAll("=", "");
+}
+
+/**
+ * Decodes base64url text without requiring Node.js Buffer.
+ *
+ * @param value - Base64url string to decode.
+ * @returns Decoded UTF-8 string.
+ */
+function decodeBase64Url(value: string): string {
+	const base64 = value
+		.replaceAll("-", "+")
+		.replaceAll("_", "/")
+		.padEnd(Math.ceil(value.length / 4) * 4, "=");
+	const binary = atob(base64);
+	const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+	return new TextDecoder().decode(bytes);
 }
 
 /**

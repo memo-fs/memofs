@@ -12,6 +12,11 @@ import {
 	createTekMemoMcpRuntimeFromConfig,
 	runStdioServer,
 } from "../index";
+import type {
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	TekMemoRuntimeMode,
+} from "../types";
 
 main().catch((error) => {
 	console.error(
@@ -79,18 +84,6 @@ async function main(): Promise<void> {
 
 	await runStdioServer(server);
 }
-
-type TekMemoRuntimeMode = "local" | "memory" | "cloud" | "hybrid";
-type RuntimeReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-type RuntimeWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
 
 /**
  * Parses argv command line parameters into a structured record dictionary mapping option keys.

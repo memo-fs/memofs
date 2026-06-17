@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
 	callTekMemoTool,
-	createInMemoryTekMemoRuntime,
+	createTekMemoMcpRuntimeFromConfig,
 	type WriteMemoryInput,
 } from "../src/index";
 
 describe("Security", () => {
 	it("metadata rejects prototype pollution keys", async () => {
 		const result = await callTekMemoTool(
-			{ runtime: createInMemoryTekMemoRuntime() },
-			"tekmemo.write_note",
+			{ runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }) },
+			"tekmemo.remember",
 			{
 				content: "hello",
 				metadata: JSON.parse('{"__proto__":{"polluted":true}}'),
@@ -23,7 +23,7 @@ describe("Security", () => {
 
 	it("oversized input is rejected before runtime execution", async () => {
 		let called = false;
-		const runtime = createInMemoryTekMemoRuntime();
+		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
 		const wrapped = {
 			...runtime,
 			async writeMemory(input: WriteMemoryInput, signal?: AbortSignal) {
@@ -33,7 +33,7 @@ describe("Security", () => {
 		};
 		const result = await callTekMemoTool(
 			{ runtime: wrapped, maxInputBytes: 100 },
-			"tekmemo.write_note",
+			"tekmemo.remember",
 			{ content: "x".repeat(1000) },
 		);
 		expect(result.isError).toBe(true);
@@ -41,7 +41,7 @@ describe("Security", () => {
 	});
 
 	it("runtime timeouts are converted into tool-level errors", async () => {
-		const runtime = createInMemoryTekMemoRuntime();
+		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
 		const slow = {
 			...runtime,
 			async health(signal?: AbortSignal) {

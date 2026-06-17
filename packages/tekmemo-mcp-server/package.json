@@ -28,6 +28,16 @@
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
+		},
+		"./http": {
+			"import": {
+				"types": "./dist/http.d.mts",
+				"default": "./dist/http.mjs"
+			},
+			"require": {
+				"types": "./dist/http.d.cts",
+				"default": "./dist/http.cjs"
+			}
 		}
 	},
 	"bin": {
