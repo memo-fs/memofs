@@ -5,9 +5,9 @@ import {
 	RecallDimensionError,
 	type RecallDocument,
 	RecallProviderError,
-	type RecallResult,
 	type RecallStore,
 	type RecallStoreCapabilities,
+	type StoreRecallResult,
 	validateRecallDocuments,
 	validateRecallQuery,
 } from "@tekbreed/tekmemo";
@@ -179,7 +179,7 @@ function mapResult(
 		includeMetadata: boolean;
 		namespace: string;
 	},
-): RecallResult {
+): StoreRecallResult {
 	if (typeof item.id !== "string" && typeof item.id !== "number") {
 		throw new UpstashRecallError(
 			"Upstash query returned a result with an invalid id.",
@@ -190,7 +190,7 @@ function mapResult(
 		);
 	}
 
-	const result: RecallResult = {
+	const result: StoreRecallResult = {
 		id: String(item.id),
 		score:
 			typeof item.score === "number" && Number.isFinite(item.score)
@@ -366,7 +366,7 @@ export class UpstashRecallStore implements RecallStore {
 	 */
 	async query(
 		query: Parameters<RecallStore["query"]>[0],
-	): Promise<RecallResult[]> {
+	): Promise<StoreRecallResult[]> {
 		const validated = validateRecallQuery(query, this.dimension);
 		if (validated.topK > MAX_TOP_K) {
 			throw new UpstashRecallValidationError(`topK must be <= ${MAX_TOP_K}.`, {

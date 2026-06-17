@@ -1,0 +1,61 @@
+/**
+ * Tekmemo unified client — the single entry point for all memory operations.
+ *
+ * @public
+ */
+
+export {
+	type ResolvedTekmemoConfig,
+	resolveTekmemoConfig,
+	type TekmemoCloudOptions,
+	type TekmemoConfig,
+} from "./config";
+export { Tekmemo } from "./Tekmemo";
+export type {
+	AgentSessionCompleteInput,
+	AgentSessionExtractResult,
+	AgentSessionFileInput,
+	AgentSessionResult,
+	AgentSessionStartInput,
+	GraphEdgeInput,
+	GraphNeighborsInput,
+	GraphNodeInput,
+	GraphPathInput,
+	GraphPathResult,
+	JsonObject,
+	JsonPrimitive,
+	JsonValue,
+	ListGraphInput,
+	MemoryContextInput,
+	MemoryContextResult,
+	MemoryDocumentResult,
+	MemoryKind,
+	Page,
+	ReadMemoryInput,
+	RecallInput,
+	RecallItem,
+	RecallResult,
+	RecentMemoryInput,
+	RecentMemoryResult,
+	ResolveSyncConflictInput,
+	ResolveSyncConflictResult,
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	SnapshotMemoryInput,
+	SnapshotMemoryResult,
+	SourceRef,
+	SyncConflictResolution,
+	SyncEventInput,
+	SyncPullInput,
+	SyncPullResult,
+	SyncPushInput,
+	SyncPushResult,
+	SyncStatusInput,
+	SyncStatusResult,
+	TekMemoHealthResult,
+	TekMemoRuntimeMode,
+	ValidateMemoryInput,
+	ValidateMemoryResult,
+	WriteMemoryInput,
+	WriteMemoryResult,
+} from "./types";

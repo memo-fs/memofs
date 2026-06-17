@@ -28,6 +28,16 @@
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
+		},
+		"./cloud-client": {
+			"import": {
+				"types": "./dist/cloud-client.d.mts",
+				"default": "./dist/cloud-client.mjs"
+			},
+			"require": {
+				"types": "./dist/cloud-client.d.cts",
+				"default": "./dist/cloud-client.cjs"
+			}
 		}
 	},
 	"files": [

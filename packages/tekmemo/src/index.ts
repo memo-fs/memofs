@@ -64,8 +64,10 @@ export * from "./fs";
 export * from "./graph";
 // Explicit re-export resolves TS2308 ambiguity: cloneAndValidateMetadata appears in multiple export * sources.
 export { cloneAndValidateMetadata } from "./graph";
-export type { RecallResult } from "./recall";
+export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
+export type { RecallResult } from "./tekmemo";
+export * from "./tekmemo";
 export * from "./testing";

@@ -10,8 +10,24 @@
  * @public
  */
 import type { JsonObject, JsonPrimitive, JsonValue } from "../core/types/json";
+import type {
+	MemoryKind,
+	Page,
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	SyncConflictResolution,
+} from "../tekmemo/types";
 
-export type { JsonObject, JsonPrimitive, JsonValue };
+export type {
+	JsonObject,
+	JsonPrimitive,
+	JsonValue,
+	MemoryKind,
+	Page,
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	SyncConflictResolution,
+};
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -90,29 +106,9 @@ export interface TekMemoCloudRequestMeta {
 	retryAfterMs?: number;
 }
 
-export type MemoryKind =
-	| "decision"
-	| "constraint"
-	| "goal"
-	| "preference"
-	| "reference"
-	| "summary"
-	| "note";
-
 export type RecallStrategy = "local" | "vector" | "hybrid";
 export type RecallFallbackMode = "none" | "local";
 export type RecallIndexMode = "all" | "changed" | "core" | "notes";
-export type SyncConflictResolution = "keep_cloud" | "use_client" | "ignore";
-export type RuntimeReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-export type RuntimeWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
 
 export interface ProjectScopedInput {
 	projectId?: string;
@@ -158,11 +154,6 @@ export interface MemoryNote {
 	metadata?: JsonObject;
 	createdAt?: string;
 	updatedAt?: string;
-}
-
-export interface Page<T> {
-	items: T[];
-	nextCursor?: string;
 }
 
 export interface RecallQueryInput extends ProjectScopedInput {
