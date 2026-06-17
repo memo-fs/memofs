@@ -1,32 +1,34 @@
 ---
 layout: home
+
 hero:
-  name: TekBreed OSS
-  text: Next-generation memory infrastructure for AI apps and agents.
+  name: "TekMemo"
+  text: "Your AI tools forget everything between sessions. They shouldn't."
   image: /logo.svg
-  # tagline: "Build smarter AI apps with TekMemo — a file-first memory runtime, unified API, and built-in MCP integration."
+  tagline: "Durable, project-scoped memory for AI agents and coding assistants. Plain text files in your repo. No cloud required."
   actions:
     - theme: brand
-      text: Explore TekMemo
-      link: /packages/tekmemo
+      text: "Install TekMemo"
+      link: /packages/tekmemo/getting-started
     - theme: alt
-      text: View on GitHub 
-      link: https://github.com/tekbreed/tekbreed-oss
+      text: "Read the Docs"
+      link: /packages/tekmemo/
+
 features:
-  - title: TekMemo
-    icon: 🧠
-    link: "/packages/tekmemo/"
-    details: Start with TekBreed's file-first memory runtime for AI apps, agents, CLIs, MCP clients, and graph-aware recall.
-  - title: File-first local runtime
+  - title: Memory you can read
     icon: 📁
-    link: "/packages/tekmemo/file-first-memory"
-    details: Start with a .tekmemo folder, inspect memory as files, and keep durable context close to the project.
-  - title: TekMemo CLI
-    icon: ⬛️
-    link: "/packages/cli/"
-    details: The command-line interface for managing local, cloud, and hybrid memory workflows.
-  - title: TekMemo MCP
-    icon: ⚡️
-    link: "/packages/mcp/"
-    details: The Model Context Protocol (MCP) server for exposing TekMemo memory to coding agents and AI applications.
+    link: /packages/tekmemo/file-first-memory
+    details: Every memory is a plain text file in `.tekmemo/`. Read it in VS Code. Review it in PRs. Git-track it alongside your code.
+  - title: Start local, scale to cloud
+    icon: 🔌
+    link: /packages/tekmemo/cloud-client
+    details: Local mode works offline. Cloud mode adds sync and hosted search. Hybrid gives you both. One API, zero rewrites.
+  - title: Your agent plugs in directly
+    icon: 🧠
+    link: /packages/mcp/
+    details: The MCP server ships in the box. Claude Code, Cursor, Codex, Opencode — add one config block and your agent remembers.
+  - title: Ask, don't search
+    icon: 💬
+    link: /packages/tekmemo/architecture/indexing-recall
+    details: Semantic recall fetches the right memory for the task. No keyword guessing. No scrolling through old prompts.
 ---
