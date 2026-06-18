@@ -41,3 +41,6 @@ yarn-error.log*
 # Editor / agent tool config (local-only, machine-specific)
 # opencode.json
 # skills-lock.json
+
+# Agent runtime data
+agent-sessions/
