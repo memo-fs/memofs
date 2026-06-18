@@ -1,13 +1,60 @@
 {
+	// Cloudflare Worker config for the hosted TekMemo MCP endpoint.
+	// Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "tekmemo-mcp-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-06-17",
+
+	// Production routes. The worker serves MCP at the host root
+	// (https://mcp.memo.tekbreed.com/).
+	"routes": [
+		{
+			"pattern": "mcp.memo.tekbreed.com",
+			"custom_domain": true
+		}
+	],
+
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1
 	},
+
+	// Non-secret defaults. Override per environment with `--env`.
+	// Secrets (TEKMEMO_API_KEY, TEKMEMO_MCP_BEARER_TOKEN) MUST be set via
+	// `wrangler secret put` and are never committed here.
 	"vars": {
+		"TEKMEMO_CLOUD_URL": "https://api.tekbreed.com/memo/v1",
 		"TEKMEMO_MCP_READ_ONLY": "true"
+	},
+
+	// Environment overrides. Deploy with `wrangler deploy --env <name>`.
+	"env": {
+		"production": {
+			"name": "tekmemo-mcp-worker",
+			"routes": [
+				{
+					"pattern": "mcp.memo.tekbreed.com",
+					"custom_domain": true
+				}
+			],
+			"vars": {
+				"TEKMEMO_CLOUD_URL": "https://api.tekbreed.com/memo/v1",
+				"TEKMEMO_MCP_READ_ONLY": "true"
+			}
+		},
+		"staging": {
+			"name": "tekmemo-mcp-worker-staging",
+			"routes": [
+				{
+					"pattern": "mcp-staging.memo.tekbreed.com",
+					"custom_domain": true
+				}
+			],
+			"vars": {
+				"TEKMEMO_CLOUD_URL": "https://api-staging.tekbreed.com/memo/v1",
+				"TEKMEMO_MCP_READ_ONLY": "true"
+			}
+		}
 	}
 }
