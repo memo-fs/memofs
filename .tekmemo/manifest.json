@@ -1,0 +1,24 @@
+{
+  "version": "1",
+  "projectId": "proj_3529143a-0e90-402f-b4b9-ae4fa193dc2f",
+  "createdAt": "2026-06-18T08:45:30.950Z",
+  "updatedAt": "2026-06-18T08:45:30.950Z",
+  "memory": {
+    "core": ".tekmemo/memory/core.md",
+    "notes": ".tekmemo/memory/notes.md"
+  },
+  "events": {
+    "memoryEvents": ".tekmemo/events/memory-events.jsonl",
+    "conversations": ".tekmemo/events/conversations.jsonl"
+  },
+  "indexes": {
+    "chunks": ".tekmemo/indexes/chunks.jsonl"
+  },
+  "graph": {
+    "nodes": ".tekmemo/graph/nodes.jsonl",
+    "edges": ".tekmemo/graph/edges.jsonl"
+  },
+  "snapshots": {
+    "index": ".tekmemo/snapshots/snapshots.jsonl"
+  }
+}
