@@ -4,20 +4,52 @@ The recall module provides semantic recall memory for AI agents. It defines the 
 
 ## Import
 
-All recall APIs are imported directly from `@tekbreed/tekmemo`:
-
 ```ts
-import { ... } from "@tekbreed/tekmemo";
+import { createInMemoryRecallStore } from "@tekbreed/tekmemo";
 ```
+
 ## How it works
 
-"Recall" is the process of retrieving relevant memory fragments using vector similarity (semantic search). 
+"Recall" is the process of retrieving relevant memory fragments using vector similarity (semantic search).
 
-This module defines the `RecallStore` interface, which is implemented by various adapters (e.g., the Upstash Vector adapter). It also provides `InMemoryRecallStore` for testing and local ephemeral sessions.
+This module defines the `RecallStore` interface, which is implemented by various adapters (e.g., the [Upstash Vector adapter](./vector-adapters)). It also provides `InMemoryRecallStore` for testing and local ephemeral sessions.
+
+## Quick start with Tekmemo
+
+The [`Tekmemo`](./tekmemo) class exposes recall through the top-level `recall` method, which handles embedding and store lookup automatically:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+
+const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
+
+// Semantic recall — Tekmemo uses the configured embedder and recall store
+const hits = await memo.recall("How do I handle sync conflicts?");
+console.log(hits.results.map((r) => r.text));
+```
+
+For recall with a custom embedder or store, pass them through the constructor:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+
+const memo = new Tekmemo({
+  rootDir: "./.tekmemo",
+  projectId: "my-app",
+  embedder: createOpenAIEmbedder({ apiKey: process.env.OPENAI_API_KEY }),
+});
+```
 
 ## API Reference
 
-### `RecallStore` Interface
+### `Tekmemo.recall`
+
+| Method | Purpose |
+| --- | --- |
+| `memo.recall(query, options?)` | Semantic or keyword recall. Returns top-K results with scores. |
+
+### `RecallStore` interface
 
 | Method | Purpose |
 | --- | --- |
@@ -26,30 +58,30 @@ This module defines the `RecallStore` interface, which is implemented by various
 | `delete(ids)` | Removes specific documents by ID. |
 | `deleteBySource(input)` | Deletes all documents matching source identifiers. |
 
-## Example usage
+### Store implementations
+
+| Helper | Package | Purpose |
+| --- | --- | --- |
+| `createInMemoryRecallStore()` | `@tekbreed/tekmemo` | Volatile in-memory store for tests. |
+| `createUpstashRecallStore()` | `@tekbreed/tekmemo-adapter-upstash` | Production Upstash Vector store. |
+
+## Direct usage (advanced)
+
+For standalone recall operations outside of `Tekmemo`:
 
 ```ts
 import { createInMemoryRecallStore } from "@tekbreed/tekmemo";
 
-const store = createInMemoryRecallStore({
-  dimension: 1536 // Match your embedding model (e.g. text-embedding-3-small)
-});
+const store = createInMemoryRecallStore({ dimension: 1536 });
 
-// Upsert a document with its vector
 await store.upsert([{
   id: "doc_1",
   text: "TekMemo is a layered memory runtime.",
-  embedding: [0.1, 0.2, ...], // Actual vector array
-  metadata: { kind: "summary" }
+  embedding: [0.1, 0.2, ...],
+  metadata: { kind: "summary" },
 }]);
 
-// Search for similar context
-const results = await store.query({
-  embedding: [0.11, 0.19, ...],
-  topK: 1,
-  includeText: true
-});
-
+const results = await store.query({ embedding: [0.11, 0.19, ...], topK: 1, includeText: true });
 console.log(results[0].text);
 ```
 

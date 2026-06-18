@@ -1,38 +1,44 @@
-# Vector Adapters Module
+# Vector Adapters
 
-Vector adapters implement the `RecallStore` contract, allowing TekMemo to store and search memory using semantic vector search.
+Vector adapters implement the `RecallStore` contract, allowing TekMemo to store and search memory using semantic vector search. These are now standalone packages.
 
-## Upstash Vector
+## Upstash Vector (`@tekbreed/tekmemo-adapter-upstash`)
 
-The Upstash Vector adapter provides a serverless recall store backed by Upstash's global vector database. It is optimized for low-latency retrieval in serverless environments like Cloudflare Workers and Vercel.
+Serverless recall store backed by Upstash's global vector database. Optimized for low-latency retrieval in serverless environments like Cloudflare Workers and Vercel.
 
 ### Installation
 
-Ensure you install the `@upstash/vector` peer dependency alongside the main package:
-
 ```bash
-npm install @upstash/vector @tekbreed/tekmemo
+npm install @tekbreed/tekmemo-adapter-upstash @tekbreed/tekmemo
 ```
 
 ### Usage
 
 ```ts
-import { createUpstashRecallStore } from "@tekbreed/tekmemo";
+import { createUpstashRecallStore } from "@tekbreed/tekmemo-adapter-upstash";
 
 const store = createUpstashRecallStore({
   url: process.env.UPSTASH_VECTOR_REST_URL,
   token: process.env.UPSTASH_VECTOR_REST_TOKEN,
-  namespace: "my-project-production" // Optional
+  namespace: "my-project-production",
 });
+```
 
-// Search for relevant memory
-const results = await store.query({
-  query: "How do I configure the CLI?",
-  limit: 5,
-  includeMetadata: true
+Use with the [`Tekmemo`](./tekmemo) class:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+import { createUpstashRecallStore } from "@tekbreed/tekmemo-adapter-upstash";
+
+const memo = new Tekmemo({
+  rootDir: "./.tekmemo",
+  projectId: "my-app",
+  embedder: myEmbedder,
+  recallStore: createUpstashRecallStore({
+    url: process.env.UPSTASH_VECTOR_REST_URL!,
+    token: process.env.UPSTASH_VECTOR_REST_TOKEN!,
+  }),
 });
-
-console.log(`Found ${results.items.length} relevant fragments.`);
 ```
 
 ## Features

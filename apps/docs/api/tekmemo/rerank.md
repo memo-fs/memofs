@@ -8,44 +8,67 @@ The core reranking capabilities, contract interfaces, and deterministic fallback
 
 ## Import
 
-All reranking helper functions and structures are imported directly from `@tekbreed/tekmemo`:
+```ts
+import { createDeterministicFallbackReranker, createVoyageReranker } from "@tekbreed/tekmemo";
+```
+
+## Quick start with Tekmemo
+
+The [`Tekmemo`](./tekmemo) class exposes reranking utilities through `memo.rerank`:
 
 ```ts
-import { ... } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekbreed/tekmemo";
+
+const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
+
+// Sort results by rerank score
+const sorted = memo.rerank.sort(results);
+
+// Trim to top K
+const top3 = memo.rerank.applyTopK(sorted, 3);
+
+// Get a deterministic fallback reranker
+const fallback = memo.rerank.createFallback();
 ```
-### API Reference
+
+## API Reference
+
+### `Tekmemo.rerank`
+
+| Method | Purpose |
+| --- | --- |
+| `memo.rerank.sort(results, key?)` | Sorts rerank results by score. |
+| `memo.rerank.applyTopK(results, topK)` | Trims results to top K. |
+| `memo.rerank.createFallback()` | Creates a deterministic fallback reranker (keyword-based). |
+
+### Reranker contract
 
 | Method | Purpose |
 | --- | --- |
 | `reranker.rerank(input)` | Scores and sorts documents by relevance. |
-| `createDeterministicFallbackReranker()` | Creates a local reranker that sorts based on keyword presence (useful as a fallback). |
-
----
+| `createDeterministicFallbackReranker()` | Creates a local reranker that sorts based on keyword presence. |
 
 ## VoyageAI Integration
 
-Exposes a production-ready implementation of the reranker contract using VoyageAI's specialized rerank models.
-
-### Example usage
+For production reranking with VoyageAI's specialized models:
 
 ```ts
-import { createVoyageReranker } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekbreed/tekmemo";
+import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
 
-// Create the reranker instance
 const reranker = createVoyageReranker({
   apiKey: process.env.VOYAGE_API_KEY,
-  model: "voyage-rerank-2"
+  model: "voyage-rerank-2",
 });
 
-// Re-order recall results for maximum relevance
 const results = await reranker.rerank({
   query: "How do I handle sync conflicts?",
   documents: [
     "Conflict resolution policy: keep-cloud...",
     "Sync push sends local events to the cloud...",
-    "Memory records should be small and explicit."
+    "Memory records should be small and explicit.",
   ],
-  topK: 1
+  topK: 1,
 });
 
 console.log(`Top match: ${results[0].document}`);
@@ -53,6 +76,6 @@ console.log(`Top match: ${results[0].document}`);
 
 ## Use Cases
 
-- **Quality Improvement:** Use a cheaper, faster search (like keyword or small vector) for the first pass, then use a reranker to ensure the top results are the most relevant.
-- **Context Window Optimization:** Ensure that only the absolute best information is injected into your agent's context window.
+- **Quality Improvement:** Use a cheaper, faster search for the first pass, then rerank to ensure top results are the most relevant.
+- **Context Window Optimization:** Ensure only the absolute best information is injected into an agent's context window.
 - **Hybrid Recall:** Combine local keyword results and cloud vector results, then rerank the union for a unified set of context hits.

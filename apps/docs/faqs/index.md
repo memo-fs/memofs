@@ -42,30 +42,50 @@ Local-only memory is fine for single-developer projects, CI, or when you want ev
 
 ## What is the hybrid runtime?
 
-Hybrid mode writes memory to local files **and** syncs changes to TekMemo Cloud in the background. You get local inspectability plus cloud recall and team access. Configure it with:
+Hybrid mode combines the **local** filesystem store and the **cloud** client, routing every read and write through a [read/write policy](/packages/tekmemo/client#read-and-write-policies) (`local-first`, `cloud-first`, `local-only`, or `cloud-only`). Reads hit the primary store and fall back to the secondary on error; writes go to the primary first and then the secondary, with failures surfaced as warnings rather than thrown. Configure it with:
 
 ```bash
 npx tekmemo config init --runtime hybrid
 ```
 
-See [CLI runtime modes](/packages/cli/) for the full breakdown.
+See [The `Tekmemo` client](/packages/tekmemo/client) for the policy matrix and [CLI runtime modes](/packages/cli/) for the CLI breakdown.
 
 ## How do I add TekMemo to my coding agent?
 
-Use the **MCP server `@tekbreed/tekmemo-mcp-server`**. It exposes tools like `read_core`, `add_note`, and `search_memory` to any MCP-compatible client (Codex, Claude Code, Opencode, Cursor, etc.). Add it to your client configuration:
+There are **two MCP paths**, depending on where your memory lives:
+
+- **Hosted server (cloud-only)** — point your client at `https://mcp.memo.tekbreed.com/` with a bearer token. Zero local setup; uses TekMemo Cloud as the backing store.
+- **Self-hosted stdio server** — run `@tekbreed/tekmemo-mcp-server` as a subprocess for file-first memory in `.tekmemo/` (supports `local`, `cloud`, and `hybrid` modes).
+
+Hosted example:
+
+```json
+{
+  "mcpServers": {
+    "tekmemo": {
+      "url": "https://mcp.memo.tekbreed.com/",
+      "headers": {
+        "Authorization": "Bearer <your TEKMEMO_MCP_BEARER_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+Stdio example (local memory):
 
 ```json
 {
   "mcpServers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "/path/to/project"]
+      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
     }
   }
 }
 ```
 
-See [MCP Server](/packages/mcp/) for setup and [Client setup](/packages/mcp/client-setup) for client-specific instructions.
+See [MCP getting started](/packages/mcp/) for the comparison, [Hosted MCP](/packages/mcp/hosted) for the hosted endpoint, and [Client setup](/packages/mcp/client-setup) for client-specific examples.
 
 ## How do I use TekMemo with the Vercel AI SDK?
 
