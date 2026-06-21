@@ -7,19 +7,17 @@
  * @public
  */
 
-export type TekMemoRuntimeMode = "local" | "cloud" | "hybrid" | "memory";
+export type TekMemoRuntimeMode = "local" | "hybrid" | "memory";
 
 export type RuntimeReadPolicy =
 	| "local-first"
 	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
+	| "local-only";
 
 export type RuntimeWritePolicy =
 	| "local-first"
 	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
+	| "local-only";
 
 export type MemoryKind =
 	| "decision"

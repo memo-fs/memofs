@@ -10,9 +10,10 @@
  * await memo.recall("architecture decisions");
  * ```
  *
- * Supports four modes: `"local"` (filesystem), `"cloud"` (TekMemo Cloud API),
- * `"hybrid"` (local + cloud with read/write policies), and `"memory"` (volatile,
- * for tests). Mode is resolved from constructor args > env vars > `.tekmemo/config.json`.
+ * Supports three modes: `"local"` (filesystem engine, no cloud),
+ * `"hybrid"` (local engine + cloud file-replica sync), and `"memory"` (volatile,
+ * for tests). There is no cloud-engine mode — the cloud is a file replica.
+ * Mode is resolved from constructor args > env vars > `.tekmemo/config.json`.
  *
  * @public
  */

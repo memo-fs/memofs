@@ -273,7 +273,6 @@ function resolveMode(
 	const envValue = env.TEKMEMO_RUNTIME;
 	if (
 		envValue === "local" ||
-		envValue === "cloud" ||
 		envValue === "hybrid" ||
 		envValue === "memory"
 	)
@@ -404,10 +403,7 @@ function extractConfigFile(parsed: Record<string, unknown>): TekMemoConfigFile {
 
 function isRuntimeMode(value: unknown): value is TekMemoRuntimeMode {
 	return (
-		value === "local" ||
-		value === "cloud" ||
-		value === "hybrid" ||
-		value === "memory"
+		value === "local" || value === "hybrid" || value === "memory"
 	);
 }
 
@@ -415,8 +411,7 @@ function isReadPolicy(value: unknown): value is RuntimeReadPolicy {
 	return (
 		value === "local-first" ||
 		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
+		value === "local-only"
 	);
 }
 
