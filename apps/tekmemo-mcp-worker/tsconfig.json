@@ -1,8 +1,0 @@
-{
-	"extends": "@repo/typescript/base.json",
-	"compilerOptions": {
-		"noEmit": true,
-		"types": []
-	},
-	"include": ["src/**/*.ts", "tests/**/*.ts"]
-}
