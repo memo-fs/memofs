@@ -86,8 +86,12 @@ export function createTekMemoCloudClient(
 			 * Phase 1 of a two-phase push. Sends the local file manifest; the server
 			 * diffs it against its own manifest and returns presigned upload URLs for
 			 * every file it needs (missing or changed).
+			 *
+			 * Validation runs inside the async body so every error — bad input,
+			 * missing API key, or a failed request — surfaces as a rejected promise,
+			 * giving the client a single uniform error model.
 			 */
-			push(input: SyncPushInput, signal?: AbortSignal) {
+			async push(input: SyncPushInput, signal?: AbortSignal) {
 				const normalized = validateSyncPushInput(input);
 				return transport.request<SyncPushResult>({
 					method: "POST",
@@ -103,7 +107,7 @@ export function createTekMemoCloudClient(
 			 * Phase 2 of a two-phase push. Confirms which files the client uploaded;
 			 * the server verifies each object's sha256 and commits the manifest update.
 			 */
-			complete(
+			async complete(
 				input: SyncPushCompleteInput,
 				signal?: AbortSignal,
 			): Promise<SyncPushCompleteResult> {
@@ -126,7 +130,7 @@ export function createTekMemoCloudClient(
 			 * returns presigned download URLs for files the client is behind on, plus
 			 * paths removed server-side.
 			 */
-			pull(input: SyncPullInput = {}, signal?: AbortSignal) {
+			async pull(input: SyncPullInput = {}, signal?: AbortSignal) {
 				const normalized = validateSyncPullInput(input);
 				return transport.request<SyncPullResult>({
 					method: "POST",
@@ -139,7 +143,7 @@ export function createTekMemoCloudClient(
 				});
 			},
 			/** Reads the cloud manifest, cursor, and storage usage. */
-			status(input: SyncStatusInput = {}, signal?: AbortSignal) {
+			async status(input: SyncStatusInput = {}, signal?: AbortSignal) {
 				const normalized = validateSyncStatusInput(input);
 				return transport.request<SyncStatusResult>({
 					method: "GET",

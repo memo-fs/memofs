@@ -107,6 +107,28 @@ export function assertProjectId(value: unknown, fallback?: string): string {
 }
 
 /**
+ * Validates an optional local file manifest. When present, it must be a map of
+ * canonical `.tekmemo/` path → sha256; when absent, the server treats the
+ * request as "pull/push everything known" (see §4.5 of the refactor doc).
+ */
+export function assertOptionalFileManifest(
+	value: unknown,
+	fieldName: string,
+): asserts value is FileManifest | undefined {
+	if (value === undefined || value === null) return;
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		throw new TekMemoCloudValidationError({
+			code: "invalid_input",
+			message: `${fieldName} must be a JSON object mapping paths to sha256 digests.`,
+		});
+	}
+	for (const [path, sha] of Object.entries(value as Record<string, unknown>)) {
+		assertNonEmptyString(path, `${fieldName} key`);
+		assertSha256(sha, `${fieldName}["${path}"]`);
+	}
+}
+
+/**
  * Validates a local file manifest: a map of canonical `.tekmemo/` path → sha256.
  * Each path must be a non-empty string; each value must be a sha256 hex digest.
  */
@@ -170,7 +192,7 @@ export function validateSyncPushCompleteInput(
  */
 export function validateSyncPullInput(input: SyncPullInput): SyncPullInput {
 	assertOptionalCursor(input.since, "since");
-	assertFileManifest(input.manifest, "manifest");
+	assertOptionalFileManifest(input.manifest, "manifest");
 	return input;
 }
 
