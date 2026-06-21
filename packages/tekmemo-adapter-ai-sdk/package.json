@@ -1,0 +1,85 @@
+{
+	"name": "@tekbreed/tekmemo-adapter-ai-sdk",
+	"version": "1.0.0-alpha.0",
+	"private": false,
+	"description": "Vercel AI SDK adapter for TekMemo — memory tool, runtime bridge, and context builders.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/tekmemo-adapter-ai-sdk"
+	},
+	"homepage": "https://docs.memo.tekbreed.com/packages/tekmemo/",
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"ai-sdk",
+		"vercel",
+		"ai",
+		"agents",
+		"memory",
+		"tekmemo",
+		"adapter",
+		"typescript"
+	],
+	"engines": {
+		"node": ">=22"
+	},
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"dependencies": {
+		"@tekbreed/tekmemo": "workspace:^",
+		"zod": "^4.4.2"
+	},
+	"peerDependencies": {
+		"ai": ">=5.0.0 <7.0.0"
+	},
+	"devDependencies": {
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@tekbreed/tekmemo-testing": "workspace:^"
+	}
+}
