@@ -28,7 +28,11 @@ describe("Security", () => {
 			...runtime,
 			async writeMemory(input: WriteMemoryInput, signal?: AbortSignal) {
 				called = true;
-				return runtime.writeMemory?.(input, signal);
+				// The local factory always wires `writeMemory`; the non-null
+				// assertion preserves the `WriteMemoryResult` (non-optional)
+				// return type the runtime contract requires.
+				// biome-ignore lint/style/noNonNullAssertion: local factory always wires writeMemory
+				return runtime.writeMemory!(input, signal);
 			},
 		};
 		const result = await callTekMemoTool(

@@ -58,7 +58,10 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 			const health = await runtime.health();
 			expect(health.ok).toBe(true);
 			// memory mode is volatile; recall returns no items but must not throw.
-			const result = await runtime.recall?.({ query: "anything" });
+			// The local factory always wires `recall`, so the non-null assertion
+			// is safe here and keeps the result type non-optional.
+			// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
+			const result = await runtime.recall!({ query: "anything" });
 			expect(result.items).toEqual([]);
 		});
 
@@ -92,13 +95,15 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 					recall: { localEmbeddings: true, engine: "hybrid" },
 				});
 
-				await runtime.writeMemory?.({
+				// biome-ignore lint/style/noNonNullAssertion: local factory always wires writeMemory
+				await runtime.writeMemory!({
 					content: "Authentication uses JWT tokens in the login flow.",
 					kind: "decision",
 					title: "Auth",
 				});
 
-				const result = await runtime.recall?.({
+				// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
+				const result = await runtime.recall!({
 					query: "login auth",
 					limit: 5,
 				});
@@ -121,12 +126,14 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 					recall: { localEmbeddings: false },
 				});
 
-				await runtime.writeMemory?.({
+				// biome-ignore lint/style/noNonNullAssertion: local factory always wires writeMemory
+				await runtime.writeMemory!({
 					content: "The deployment pipeline runs on GitHub Actions.",
 					kind: "reference",
 				});
 
-				const result = await runtime.recall?.({
+				// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
+				const result = await runtime.recall!({
 					query: "deployment pipeline",
 					limit: 5,
 				});
@@ -148,11 +155,13 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 						rootDir,
 						projectId: "mcp-factory",
 					});
-					await runtime.writeMemory?.({
+					// biome-ignore lint/style/noNonNullAssertion: local factory always wires writeMemory
+					await runtime.writeMemory!({
 						content: "Env-disabled embedder still recalls lexically.",
 						kind: "note",
 					});
-					const result = await runtime.recall?.({
+					// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
+					const result = await runtime.recall!({
 						query: "env-disabled embedder",
 						limit: 5,
 					});
