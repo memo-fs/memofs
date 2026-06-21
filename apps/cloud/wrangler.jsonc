@@ -1,0 +1,35 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tekmemo-cloud",
+	"compatibility_date": "2026-06-20",
+	"compatibility_flags": ["nodejs_compat"],
+	"observability": {
+		"enabled": true
+	},
+	"main": "./workers/app.ts",
+	"assets": {
+		"directory": "./build/client",
+		"binding": "ASSETS"
+	},
+	"r2_buckets": [
+		{
+			"binding": "BLOBS",
+			"bucket_name": "tekmemo-blobs"
+		}
+	],
+	"vars": {
+		"ENVIRONMENT": "development",
+		"CLOUD_PUBLIC_BASE_URL": "http://localhost:8787",
+		"PRESIGN_TTL_SECONDS": "900",
+		"R2_S3_ENDPOINT": "",
+		"R2_BUCKET_NAME": "tekmemo-blobs"
+	},
+	// Secrets (set via `wrangler secret put <NAME>`): DATABASE_URL,
+	// DATABASE_AUTH_TOKEN, R2_S3_ACCESS_KEY_ID, R2_S3_SECRET_ACCESS_KEY,
+	// TEKMEMO_API_KEY_SALT, SESSION_SECRET.
+	//
+	// NOTE: path aliases (e.g. `~/*` → `src/*`) are owned by Vite's
+	// `resolve.alias` (see vite.config.ts + tsconfig `paths`), NOT by the
+	// `alias` field here — wrangler unconditionally warns that it's ignored
+	// under the Vite plugin, so we omit it entirely.
+}
