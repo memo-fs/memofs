@@ -8,7 +8,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/mockServiceWorker.js", "!**/*.css"]
+		"includes": ["**", "!**/mockServiceWorker.js", "!**/*.css", "!**/worker-configuration.d.ts"]
 	},
 	"formatter": {
 		"enabled": true,
