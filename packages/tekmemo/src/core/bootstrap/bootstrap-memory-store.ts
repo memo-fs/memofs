@@ -12,6 +12,7 @@ import { assertString } from "@repo/utils";
 import {
 	type CanonicalTekMemoFile,
 	CHUNKS_INDEX_PATH,
+	CONNECTORS_PATH,
 	CONVERSATIONS_MEMORY_PATH,
 	CORE_MEMORY_PATH,
 	EMBEDDINGS_INDEX_PATH,
@@ -68,6 +69,7 @@ const BOOTSTRAP_FILE_ORDER: Array<{
 	{ path: GRAPH_NODES_PATH, key: "graphNodes" },
 	{ path: GRAPH_EDGES_PATH, key: "graphEdges" },
 	{ path: SNAPSHOTS_INDEX_PATH, key: "snapshots" },
+	{ path: CONNECTORS_PATH, key: "connectors" },
 ];
 
 /**

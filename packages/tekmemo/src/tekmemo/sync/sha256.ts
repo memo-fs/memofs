@@ -5,7 +5,7 @@
  * `docs/architecture/cloud-sync-and-refactor.md` §4.1). The cloud-client
  * contract treats this as a 64-character lowercase hex digest.
  *
- * @internal
+ * @public
  */
 
 import { createHash } from "node:crypto";
@@ -15,6 +15,8 @@ import { createHash } from "node:crypto";
  *
  * @param value - The string to hash.
  * @returns A 64-character lowercase hexadecimal digest.
+ *
+ * @public
  */
 export function sha256Hex(value: string): string {
 	return createHash("sha256").update(value).digest("hex");

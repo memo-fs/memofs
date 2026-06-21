@@ -42,6 +42,8 @@ export const TEKMEMO_PATHS = Object.freeze({
 	snapshots: Object.freeze({
 		index: `${TEKMEMO_DIR}/snapshots/snapshots.jsonl`,
 	}),
+	/** Connector config — the 11th canonical file (ADR 0002 / decision Q2). No secrets. */
+	connectors: `${TEKMEMO_DIR}/connectors.json`,
 	tmpDir: `${TEKMEMO_DIR}/tmp`,
 } as const);
 
@@ -65,6 +67,8 @@ export const GRAPH_NODES_PATH = TEKMEMO_PATHS.graph.nodes;
 export const GRAPH_EDGES_PATH = TEKMEMO_PATHS.graph.edges;
 /** Path to the snapshots index JSONL file. */
 export const SNAPSHOTS_INDEX_PATH = TEKMEMO_PATHS.snapshots.index;
+/** Path to the connector-config JSON file (no secrets; `secretRef` only). */
+export const CONNECTORS_PATH = TEKMEMO_PATHS.connectors;
 
 export const CANONICAL_TEKMEMO_FILES = [
 	MANIFEST_PATH,
@@ -77,6 +81,7 @@ export const CANONICAL_TEKMEMO_FILES = [
 	GRAPH_NODES_PATH,
 	GRAPH_EDGES_PATH,
 	SNAPSHOTS_INDEX_PATH,
+	CONNECTORS_PATH,
 ] as const;
 
 /**
@@ -188,6 +193,7 @@ export type PathKind =
 	| "graph-node"
 	| "graph-edge"
 	| "snapshot-index"
+	| "connector"
 	| "snapshot";
 
 /**
@@ -220,6 +226,8 @@ export function memoryTypeFromPath(path: MemoryPath): PathKind {
 			return "graph-edge";
 		case SNAPSHOTS_INDEX_PATH:
 			return "snapshot-index";
+		case CONNECTORS_PATH:
+			return "connector";
 		default:
 			return "snapshot";
 	}

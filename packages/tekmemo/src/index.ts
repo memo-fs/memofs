@@ -10,7 +10,10 @@
 export * from "./agentfs";
 // Explicit re-export resolves TS2308 ambiguity: isNotFoundError appears in multiple export * sources.
 export { isNotFoundError } from "./agentfs";
-export * from "./ai-sdk";
+// Framework-neutral AI-runtime contract (implemented by adapter packages).
+// Replaces the vendor-coupled ai-sdk re-export that moved to
+// @tekbreed/tekmemo-adapter-ai-sdk (ADR 0007).
+export * from "./ai-runtime";
 // The cloud is a file replica: its file-manifest sync types are the canonical
 // public surface and are re-exported explicitly to win over the legacy
 // event-based types still exported from "./tekmemo" (removed in a later batch).

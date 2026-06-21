@@ -8,6 +8,7 @@ export {
 	type LazyLocalEmbedderOptions,
 	createLazyLocalEmbedder,
 } from "./local-embedder";
+export { sha256Hex } from "./sync/sha256";
 export {
 	type RecallEngineConfig,
 	type ResolvedTekmemoConfig,
