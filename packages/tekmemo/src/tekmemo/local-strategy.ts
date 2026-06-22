@@ -56,6 +56,7 @@ import {
 import type { BM25Store } from "../recall/lexical/bm25";
 import type { RecallStore } from "../recall/types";
 import { buildContext, paginateArray } from "./helpers";
+import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
 import type { FileSyncLayer } from "./sync/file-replication";
 import type {
 	AgentSessionCompleteInput,
@@ -522,7 +523,14 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 					// Strategist Resolve (ADR 0009 Component 2): supply the graph node
 					// snapshot so the query's expanded terms resolve to entities. The
 					// map is rehydrated on boot and kept in sync on writes.
-					listGraphNodes: async () => [...graphNodes.values()],
+					listGraphNodes: async () =>
+						[...graphNodes.values()] as ResolveGraphNode[],
+					// Strategist entity enrichment (ADR 0009 Component 3 / Q26): supply
+					// the active edge snapshot so each resolved entity renders its
+					// current state derived from active edges. `graphEdges` is kept in
+					// sync with the persistent store on writes and on consolidation.
+					listGraphEdges: async () =>
+						[...graphEdges.values()] as ResolveGraphEdge[],
 					// Strategist Filter (ADR 0009 Component 5): the lexical doc ids for
 					// deprecated graph nodes, so vector-sourced recall candidates are
 					// dropped here too (the lexical path already skips them at search).

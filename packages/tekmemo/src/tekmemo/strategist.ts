@@ -16,7 +16,8 @@
  *    variants when configured.
  * 2. **Resolve** — collapse recall fragments to graph entities by alias/label
  *    lookup. v1 does deterministic label/alias matching; the Entities section
- *    (ADR 0009 Component 3 / Q26) renders the resolved set.
+ *    (ADR 0009 Component 3 / Q26) renders the resolved set, each entity
+ *    enriched with its current state derived from active edges (Stage 2b).
  * 3. **Filter** — drop deprecated nodes/fragments (the Q24 staleness loop),
  *    dedupe, and apply a relevance cut.
  * 4. **Budget** — allocate the remaining `maxBytes` (after core memory, which
@@ -53,6 +54,41 @@ export interface ResolveGraphNode {
 	aliases?: string[];
 	summary?: string;
 	status?: string;
+}
+
+/**
+ * Minimal structural shape {@link resolveEntityState} consumes. Both the
+ * internal `GraphEdge` and the public `GraphEdgeInput` satisfy this — entity
+ * enrichment only reads endpoints, type, status, and provenance. Declared
+ * locally for the same decoupling reason as {@link ResolveGraphNode}.
+ *
+ * @public
+ */
+export interface ResolveGraphEdge {
+	/** The node the edge points away from. */
+	from: string;
+	/** The node the edge points toward. */
+	to: string;
+	/** Edge type (`uses`, `prefers`, `supersedes`, ...). */
+	type: string;
+	/** Edge status; `deprecated` edges are dropped (ADR 0009 Component 5). */
+	status?: string;
+	/** Provenance: where this fact came from. */
+	sourceRefs?: ResolveGraphSourceRef[];
+}
+
+/**
+ * Minimal source-ref shape for {@link ResolveGraphEdge}. Declared locally so
+ * the strategist stays decoupled from the graph package's `GraphSourceRef`.
+ *
+ * @public
+ */
+export interface ResolveGraphSourceRef {
+	sourceType?: string;
+	sourceId?: string;
+	path?: string;
+	title?: string;
+	url?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -258,6 +294,138 @@ export function resolveEntities(
 			summary: node.summary ?? "",
 			matchedTerm: matched,
 		});
+	}
+	return out;
+}
+
+// ---------------------------------------------------------------------------
+// Resolve — entity enrichment (ADR 0009 Component 3 / Q26)
+// ---------------------------------------------------------------------------
+
+/**
+ * An entity the Resolve stage matched, enriched with its current state derived
+ * from active graph edges. This is what the Entities section renders — the
+ * high-trust artifact that sits between core and recall in trust order.
+ *
+ * @public
+ */
+export interface EntityState {
+	/** The graph node id. */
+	nodeId: string;
+	/** The canonical label. */
+	label: string;
+	/** The node type. */
+	type: string;
+	/**
+	 * Edge-derived current state, e.g. `"uses OAuth2 (supersedes JWT)"`. Empty
+	 * when no active edges describe this entity — the caller then falls back to
+	 * {@link summary}. Only active edges contribute (Component 5 filter), so the
+	 * state is "current" by construction.
+	 */
+	currentState: string;
+	/**
+	 * The static node summary. Used as the rendered text when
+	 * {@link currentState} is empty (graceful degradation for entities the
+	 * extractor stored as bare nodes).
+	 */
+	summary: string;
+	/** Count of active edges touching this entity (provenance density signal). */
+	activeEdgeCount: number;
+	/**
+	 * First active edge's source ref rendered as a human-readable string
+	 * (`path ?? title ?? sourceId ?? sourceType`). Omitted when no active edge
+	 * carries provenance.
+	 */
+	provenance?: string;
+}
+
+/**
+ * The edge types whose outgoing edges express an entity's current state, in
+ * the order they're consulted. `supersedes` is included so the rendered state
+ * names what was retired (the staleness story in one line).
+ *
+ * @internal
+ */
+const STATEFUL_EDGE_TYPES = ["uses", "prefers", "depends_on", "supersedes"];
+
+/**
+ * Stage 2b — enrich each resolved entity with its current state derived from
+ * active graph edges (ADR 0009 Component 3 / Q26).
+ *
+ * Pure: takes the resolved entities + an edge snapshot + a node lookup (so
+ * `supersedes` can name the retired neighbor), returns the enriched set. Only
+ * active edges (status unset or `"active"` — i.e. not `"deprecated"`) contribute,
+ * so the Component 5 staleness filter is enforced here: the rendered state is
+ * current by construction. `supersedes` edges additionally name the retired
+ * neighbor, surfacing the staleness story in one line ("supersedes JWT").
+ *
+ * Degrades gracefully: an entity with no active stateful edges gets an empty
+ * {@link EntityState.currentState}, and the caller renders its static summary
+ * instead — identical to the pre-Q26 output. This is the ADR's "empty section
+ * when the graph has nothing" contract.
+ *
+ * @public
+ */
+export function resolveEntityState(
+	entities: ResolvedEntity[],
+	edges: ResolveGraphEdge[],
+	nodes: ReadonlyMap<string, ResolveGraphNode>,
+): EntityState[] {
+	// Index edges by endpoint so each entity's touching edges are one lookup.
+	// Both directions count — `uses` is out, but an entity can also be the
+	// object of a `prefers`/`owns` edge that describes it.
+	const out: EntityState[] = [];
+	for (const entity of entities) {
+		const touching = edges.filter(
+			(edge) =>
+				(edge.from === entity.nodeId || edge.to === entity.nodeId) &&
+				edge.status !== "deprecated" &&
+				edge.status !== "deleted",
+		);
+		const stateParts: string[] = [];
+		// Outgoing stateful edges describe what this entity does/uses/prefers.
+		for (const type of STATEFUL_EDGE_TYPES) {
+			for (const edge of touching) {
+				if (edge.from !== entity.nodeId || edge.type !== type) continue;
+				const neighbor = nodes.get(edge.to);
+				const neighborLabel = neighbor?.label ?? edge.to;
+				if (type === "supersedes") {
+					stateParts.push(`supersedes ${neighborLabel}`);
+				} else {
+					stateParts.push(`${type} ${neighborLabel}`);
+				}
+			}
+		}
+		const activeEdgeCount = touching.length;
+		const provenance = touching
+			.flatMap((edge) => edge.sourceRefs ?? [])
+			.map((ref) => ref.path ?? ref.title ?? ref.sourceId ?? ref.sourceType)
+			.find((value): value is string => typeof value === "string");
+		out.push({
+			nodeId: entity.nodeId,
+			label: entity.label,
+			type: entity.type,
+			currentState: dedupePreserveOrder(stateParts).join("; "),
+			summary: entity.summary,
+			activeEdgeCount,
+			...(provenance === undefined ? {} : { provenance }),
+		});
+	}
+	return out;
+}
+
+/**
+ * Drop duplicates from an array while preserving first-seen order.
+ *
+ * @internal
+ */
+function dedupePreserveOrder(values: string[]): string[] {
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const value of values) {
+		if (seen.has(value)) continue;
+		seen.add(value);
+		out.push(value);
 	}
 	return out;
 }

@@ -7,9 +7,12 @@
 import {
 	allocateBudget,
 	type BudgetSection,
+	type EntityState,
 	filterCandidates,
+	type ResolveGraphEdge,
 	type ResolveGraphNode,
 	resolveEntities,
+	resolveEntityState,
 	rewriteQuery,
 	SECTION_WEIGHTS,
 } from "./strategist";
@@ -159,6 +162,14 @@ export async function buildContext(
 		 */
 		listGraphNodes?: (signal?: AbortSignal) => Promise<ResolveGraphNode[]>;
 		/**
+		 * Graph edge snapshot for entity enrichment (ADR 0009 Component 3 / Q26).
+		 * When supplied alongside {@link listGraphNodes}, the resolved entities are
+		 * enriched with their current state derived from active edges (the
+		 * high-trust "Entities" section). When omitted, entities fall back to
+		 * their static summaries — the pre-Q26 behavior.
+		 */
+		listGraphEdges?: (signal?: AbortSignal) => Promise<ResolveGraphEdge[]>;
+		/**
 		 * Lexical doc ids referring to deprecated graph nodes (`graph:{id}`),
 		 * used by the Filter stage to drop retired facts from recall. When
 		 * omitted, recall's own lexical guard still skips deprecated graph
@@ -221,11 +232,44 @@ export async function buildContext(
 			const nodes = await operations.listGraphNodes(signal);
 			const resolved = resolveEntities(nodes, rewrite.expandedTerms);
 			if (resolved.length > 0) {
-				entitiesContent = resolved
-					.map(
-						(entity, index) =>
-							`${index + 1}. ${entity.label} (${entity.type})${entity.summary ? ` — ${entity.summary}` : ""}`,
-					)
+				// --- Stage 2b: enrich each entity with current state from active
+				// edges (ADR 0009 Component 3 / Q26). Falls back to the static
+				// summary when no edges are supplied or none are active.
+				let enriched: EntityState[] = resolved.map((entity) => ({
+					nodeId: entity.nodeId,
+					label: entity.label,
+					type: entity.type,
+					currentState: "",
+					summary: entity.summary,
+					activeEdgeCount: 0,
+				}));
+				if (operations.listGraphEdges) {
+					try {
+						const edges = await operations.listGraphEdges(signal);
+						const nodeById = new Map<string, ResolveGraphNode>(
+							nodes.map((node) => [node.id, node]),
+						);
+						enriched = resolveEntityState(resolved, edges, nodeById);
+					} catch (error) {
+						warnings.push(
+							`Could not resolve entity state: ${error instanceof Error ? error.message : String(error)}`,
+						);
+					}
+				}
+				entitiesContent = enriched
+					.map((entity, index) => {
+						const head = `${index + 1}. ${entity.label} (${entity.type})`;
+						// Prefer the edge-derived current state; fall back to the
+						// static summary when no active edges describe the entity.
+						const body = entity.currentState
+							? `currently: ${entity.currentState}`
+							: entity.summary;
+						const tail = body ? ` — ${body}` : "";
+						const provenance = entity.provenance
+							? `\n   ↳ source: ${entity.provenance}`
+							: "";
+						return `${head}${tail}${provenance}`;
+					})
 					.join("\n");
 			}
 		} catch (error) {

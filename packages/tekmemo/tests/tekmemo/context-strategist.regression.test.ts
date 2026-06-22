@@ -257,6 +257,20 @@ describe("tekmemo.context strategist — regression harness", () => {
 		try {
 			const entry = await captureEntry(memo, QUERY_CASES[2]);
 			expect(entry.contains.pnpm).toBe(true);
+			// Q26 (ADR 0009 Component 3): when an Entities section is present, it
+			// must sit after core and before recall in trust order. The
+			// zero-config extractor may or may not emit a node for the pnpm note,
+			// so this only asserts the ordering contract when the section exists.
+			const entitiesIndex = entry.sectionTypes.indexOf("entities");
+			if (entitiesIndex !== -1) {
+				const coreIndex = entry.sectionTypes.indexOf("core");
+				const recallIndex = entry.sectionTypes.indexOf("recall");
+				expect(coreIndex).toBeGreaterThan(-1);
+				expect(entitiesIndex).toBeGreaterThan(coreIndex);
+				if (recallIndex !== -1) {
+					expect(entitiesIndex).toBeLessThan(recallIndex);
+				}
+			}
 		} finally {
 			await cleanup();
 		}

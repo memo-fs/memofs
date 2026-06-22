@@ -12,8 +12,10 @@ import type { RecallItem } from "../../src/index";
 import {
 	allocateBudget,
 	filterCandidates,
+	type ResolveGraphEdge,
 	type ResolveGraphNode,
 	resolveEntities,
+	resolveEntityState,
 	rewriteQuery,
 	SECTION_WEIGHTS,
 } from "../../src/tekmemo/strategist";
@@ -140,6 +142,134 @@ describe("resolveEntities (stage 2)", () => {
 	it("records which term matched (provenance)", () => {
 		const result = resolveEntities(SAMPLE_NODES, ["oauth"]);
 		expect(result[0]?.matchedTerm).toBe("oauth");
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Stage 2b — Resolve: entity enrichment (ADR 0009 Component 3 / Q26)
+// ---------------------------------------------------------------------------
+
+/**
+ * Shared edge fixture for the enrichment tests. Mirrors what the rule-based
+ * extractor + consolidation produce: an active `uses` edge, a `supersedes`
+ * edge marking the staleness story, and a deprecated edge that must be dropped.
+ */
+const SAMPLE_EDGES: ResolveGraphEdge[] = [
+	{
+		from: "node-jwt",
+		to: "node-oauth",
+		type: "uses",
+		status: "active",
+		sourceRefs: [{ sourceType: "note", path: "notes.md" }],
+	},
+	{
+		from: "node-oauth",
+		to: "node-jwt",
+		type: "supersedes",
+		status: "active",
+		sourceRefs: [{ sourceType: "note", sourceId: "mem_abc" }],
+	},
+	{
+		from: "node-jwt",
+		to: "node-old-auth",
+		type: "uses",
+		status: "deprecated", // Component 5 filter: dropped.
+	},
+];
+
+const SAMPLE_NODE_MAP = new Map<string, ResolveGraphNode>(
+	SAMPLE_NODES.map((node) => [node.id, node]),
+);
+
+describe("resolveEntityState (stage 2b — entity enrichment)", () => {
+	it("derives current state from active outgoing edges", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["jwt"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const jwt = enriched.find((e) => e.nodeId === "node-jwt");
+		expect(jwt).toBeDefined();
+		// The active `uses OAuth2` edge renders as current state.
+		expect(jwt?.currentState).toContain("uses OAuth2");
+	});
+
+	it("names the retired neighbor for supersedes edges", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["oauth"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const oauth = enriched.find((e) => e.nodeId === "node-oauth");
+		// `supersedes JWT` surfaces the staleness story in one line.
+		expect(oauth?.currentState).toContain("supersedes JWT");
+	});
+
+	it("drops deprecated edges (Component 5 staleness filter)", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["jwt"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const jwt = enriched.find((e) => e.nodeId === "node-jwt");
+		// The deprecated `uses Legacy Auth` edge must NOT contribute.
+		expect(jwt?.currentState).not.toContain("Legacy Auth");
+	});
+
+	it("counts active edges touching the entity", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["jwt"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const jwt = enriched.find((e) => e.nodeId === "node-jwt");
+		// JWT touches: 1 active outgoing `uses` + 1 incoming `supersedes`
+		// (from OAuth2) + 1 deprecated `uses` (dropped). Active count = 2.
+		expect(jwt?.activeEdgeCount).toBe(2);
+	});
+
+	it("extracts provenance from the first active edge's source ref", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["jwt"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const jwt = enriched.find((e) => e.nodeId === "node-jwt");
+		// First touching active edge is `uses OAuth2` with path "notes.md".
+		expect(jwt?.provenance).toBe("notes.md");
+	});
+
+	it("falls back to the static summary when no active edges describe it", () => {
+		// OAuth2 has an incoming `uses` (from JWT) and an outgoing `supersedes`.
+		// The outgoing `supersedes` does contribute, but if we strip all edges,
+		// currentState must be empty and summary is what the caller renders.
+		const resolved = resolveEntities(SAMPLE_NODES, ["oauth"]);
+		const enriched = resolveEntityState(resolved, [], SAMPLE_NODE_MAP);
+		const oauth = enriched.find((e) => e.nodeId === "node-oauth");
+		expect(oauth?.currentState).toBe("");
+		expect(oauth?.summary).toBe("Authorization framework.");
+		expect(oauth?.provenance).toBeUndefined();
+	});
+
+	it("handles an empty entity list", () => {
+		expect(resolveEntityState([], SAMPLE_EDGES, SAMPLE_NODE_MAP)).toEqual([]);
+	});
+
+	it("joins multiple state parts with a semicolon", () => {
+		const resolved = resolveEntities(SAMPLE_NODES, ["oauth"]);
+		const enriched = resolveEntityState(
+			resolved,
+			SAMPLE_EDGES,
+			SAMPLE_NODE_MAP,
+		);
+		const oauth = enriched.find((e) => e.nodeId === "node-oauth");
+		// Only one stateful outgoing edge (`supersedes JWT`); verify clean join.
+		expect(oauth?.currentState).toBe("supersedes JWT");
 	});
 });
 
