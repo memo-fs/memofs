@@ -90,3 +90,95 @@ export interface MinimalReranker {
 		topK?: number;
 	}): Promise<MinimalRerankResult[]>;
 }
+
+/**
+ * Structural subset of the graph source-ref every extractor stamps onto the
+ * nodes/edges it emits. Kept minimal so adapter packages don't need to depend
+ * on `@tekbreed/tekmemo` to satisfy the contract — the real `GraphSourceRef`
+ * (a strict superset) is assignable to this.
+ */
+export interface MinimalGraphSourceRef {
+	sourceType: string;
+	sourceId?: string;
+	path?: string;
+	title?: string;
+	url?: string;
+}
+
+/**
+ * Structural subset of {@link MinimalExtractionResult}`.nodes`. The real
+ * `GraphNode` carries additional optional fields; both shapes are mutually
+ * assignable at the contract boundary.
+ */
+export interface MinimalGraphNode {
+	id: string;
+	type: string;
+	label: string;
+	aliases?: string[];
+	summary?: string;
+	sourceRefs?: MinimalGraphSourceRef[];
+	confidence?: number;
+	importance?: number;
+	status?: string;
+	validFrom?: string;
+	validUntil?: string;
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+/**
+ * Structural subset of {@link MinimalExtractionResult}`.edges`.
+ */
+export interface MinimalGraphEdge {
+	id?: string;
+	from: string;
+	to: string;
+	type: string;
+	directed?: boolean;
+	weight?: number;
+	confidence?: number;
+	status?: string;
+	validFrom?: string;
+	validUntil?: string;
+	sourceRefs?: MinimalGraphSourceRef[];
+	createdAt?: string;
+	updatedAt?: string;
+}
+
+/** Structural subset of the contradiction signal extractors may emit. */
+export interface MinimalExtractionContradiction {
+	from: string;
+	to: string;
+	type: string;
+}
+
+/** Input to a {@link MinimalExtractor.extract} call. */
+export interface MinimalExtractionInput {
+	text: string;
+	sourceRef?: MinimalGraphSourceRef;
+	defaultNodeType?: string;
+	maxFacts?: number;
+	mode?: "fast" | "balanced" | "quality";
+}
+
+/** Output of a {@link MinimalExtractor.extract} call. */
+export interface MinimalExtractionResult {
+	nodes: MinimalGraphNode[];
+	edges: MinimalGraphEdge[];
+	contradictions?: MinimalExtractionContradiction[];
+	model?: string;
+	usage?: {
+		promptTokens?: number;
+		totalTokens?: number;
+	};
+}
+
+/**
+ * Provider-neutral graph extractor contract — the minimal surface adapter
+ * packages must satisfy (mirrors the embedder/reranker pattern). Any concrete
+ * `Extractor` from `@tekbreed/tekmemo` is assignable to this.
+ */
+export interface MinimalExtractor {
+	readonly name: string;
+	extract(input: MinimalExtractionInput): Promise<MinimalExtractionResult>;
+}

@@ -20,6 +20,13 @@ export * from "./fakes/index";
 export * from "./fixtures/index";
 export type {
 	MinimalEmbedder,
+	MinimalExtractionContradiction,
+	MinimalExtractionInput,
+	MinimalExtractionResult,
+	MinimalExtractor,
+	MinimalGraphEdge,
+	MinimalGraphNode,
+	MinimalGraphSourceRef,
 	MinimalMemoryStore,
 	MinimalRecallDocument,
 	MinimalRecallQuery,

@@ -1,3 +1,4 @@
+export * from "./consolidation-fixtures";
 export * from "./embedding-fixtures";
 export * from "./memory-fixtures";
 export * from "./recall-fixtures";

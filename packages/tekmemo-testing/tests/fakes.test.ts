@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	createFakeEmbedder,
+	createFakeExtractor,
 	createFakeMemoryStore,
 	createFakeRecallStore,
 	createFakeReranker,
@@ -47,5 +48,32 @@ describe("fakes", () => {
 		});
 
 		expect(results[0]?.rank).toBe(1);
+	});
+
+	it("fake extractor emits nodes, edges, and contradictions", async () => {
+		const extractor = createFakeExtractor();
+		const result = await extractor.extract({
+			text: "TekMemo uses BM25\nOAuth2 supersedes JWT",
+			sourceRef: { sourceType: "document", sourceId: "core" },
+		});
+
+		expect(result.model).toBe("fake-extractor");
+		expect(result.nodes.length).toBeGreaterThanOrEqual(3);
+		expect(result.edges.map((e) => e.type)).toEqual(
+			expect.arrayContaining(["uses", "supersedes"]),
+		);
+		expect(result.contradictions?.[0]?.type).toBe("supersedes");
+		// Provenance is stamped onto every emitted entity.
+		for (const node of result.nodes) {
+			expect(node.sourceRefs?.[0]).toMatchObject({
+				sourceType: "document",
+				sourceId: "core",
+			});
+		}
+	});
+
+	it("fake extractor rejects empty text", async () => {
+		const extractor = createFakeExtractor();
+		await expect(extractor.extract({ text: "" })).rejects.toThrow();
 	});
 });
