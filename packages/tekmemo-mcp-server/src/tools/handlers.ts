@@ -316,6 +316,37 @@ function validateToolArguments(
 				1024,
 				262144,
 			);
+			// Progressive disclosure (ADR 0009 Component 4 / Q27).
+			const detailRaw = optionalString(object.detail, "detail", 16);
+			if (
+				detailRaw !== undefined &&
+				detailRaw !== "compact" &&
+				detailRaw !== "full"
+			) {
+				throw new McpValidationError(
+					'detail must be one of: "compact", "full".',
+				);
+			}
+			const detail = detailRaw as "compact" | "full" | undefined;
+			const sectionRaw = optionalString(object.section, "section", 32);
+			if (
+				sectionRaw !== undefined &&
+				sectionRaw !== "entities" &&
+				sectionRaw !== "recall" &&
+				sectionRaw !== "recent" &&
+				sectionRaw !== "notes"
+			) {
+				throw new McpValidationError(
+					'section must be one of: "entities", "recall", "recent", "notes".',
+				);
+			}
+			const section = sectionRaw as
+				| "entities"
+				| "recall"
+				| "recent"
+				| "notes"
+				| undefined;
+			const expand = optionalString(object.expand, "expand", 512);
 			const includeCore = optionalBoolean(object.includeCore, "includeCore");
 			const includeNotes = optionalBoolean(object.includeNotes, "includeNotes");
 			const includeRecent = optionalBoolean(
@@ -337,6 +368,9 @@ function validateToolArguments(
 					...scope,
 					...(limit === undefined ? {} : { limit }),
 					...(maxBytes === undefined ? {} : { maxBytes }),
+					...(detail === undefined ? {} : { detail }),
+					...(section === undefined ? {} : { section }),
+					...(expand === undefined ? {} : { expand }),
 					...(includeCore === undefined ? {} : { includeCore }),
 					...(includeNotes === undefined ? {} : { includeNotes }),
 					...(includeRecent === undefined ? {} : { includeRecent }),

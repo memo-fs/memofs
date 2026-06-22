@@ -195,7 +195,7 @@ export function createToolDefinitions(
 			name: "tekmemo.context",
 			title: "Build TekMemo Agent Context",
 			description:
-				"REQUIRED at the start of every task: build task-ready memory context by combining core memory, recent memory, and recall. TekMemo is the single source of truth for project identity, architecture, constraints, and decisions — ALWAYS call this before planning or writing code so your work adheres to stored memory. The returned text already tells you how to act on it. Read-only.",
+				'REQUIRED at the start of every task: build task-ready memory context by combining core memory, recent memory, and recall. TekMemo is the single source of truth for project identity, architecture, constraints, and decisions — ALWAYS call this before planning or writing code so your work adheres to stored memory. The returned text already tells you how to act on it. Read-only.\n\nBy default returns a COMPACT briefing (~6kb): core memory in full, the top entities and a few recall fragments, plus an `expandable` list. Each expandable entry names a section (entities/recall/recent/notes), how many more items it holds, and an opaque cursor. To pull just one section in full, call tekmemo.context again with the same query plus `section` and `expand` (the cursor). Expand only the sections you need, then stop — do not expand everything. Pass `detail: "full"` to get the entire context in one call instead (larger; use when you want the whole dump).',
 			safety: "read",
 			annotations: {
 				readOnlyHint: true,
@@ -217,6 +217,24 @@ export function createToolDefinitions(
 						minimum: 1024,
 						maximum: 262144,
 						description: "Maximum context text bytes.",
+					},
+					detail: {
+						type: "string",
+						enum: ["compact", "full"],
+						description:
+							'Disclosure level. "compact" (default): a small briefing with expandable sections. "full": the entire context in one call.',
+					},
+					section: {
+						type: "string",
+						enum: ["entities", "recall", "recent", "notes"],
+						description:
+							"Expand a single section: set together with `expand` to the cursor a compact call returned.",
+					},
+					expand: {
+						type: "string",
+						maxLength: 512,
+						description:
+							"Opaque expansion cursor returned by a prior compact call. Set together with `section`.",
 					},
 					includeCore: booleanSchema("Include core memory."),
 					includeNotes: booleanSchema("Include notes memory."),

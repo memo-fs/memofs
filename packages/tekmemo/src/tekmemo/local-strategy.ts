@@ -56,6 +56,7 @@ import {
 import type { BM25Store } from "../recall/lexical/bm25";
 import type { RecallStore } from "../recall/types";
 import { buildContext, paginateArray } from "./helpers";
+import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
 import type { FileSyncLayer } from "./sync/file-replication";
 import type {
@@ -232,6 +233,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	// existing list/neighbors/path fast paths keep working without a rewrite.
 	const graphNodes = new Map<string, GraphNodeInput>();
 	const graphEdges = new Map<string, GraphEdgeInput>();
+	// Per-instance progressive-disclosure cache (ADR 0009 Component 4 / Q27).
+	// Holds the resolved pointers from a compact call so an expand call
+	// re-resolves one section fast. One cache per Tekmemo instance, never
+	// global; LRU + TTL bounded (see ContextCache).
+	const contextCache = new ContextCache();
 	let bootstrapped = false;
 
 	async function ensureReady(): Promise<void> {
@@ -535,6 +541,9 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 					// deprecated graph nodes, so vector-sourced recall candidates are
 					// dropped here too (the lexical path already skips them at search).
 					retiredGraphDocIds: collectRetiredGraphDocIds(),
+					// Progressive disclosure (ADR 0009 Component 4 / Q27): the cache
+					// lets a compact call hand off resolved pointers to an expand call.
+					cache: contextCache,
 				},
 				input,
 				signal,

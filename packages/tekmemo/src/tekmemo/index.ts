@@ -34,6 +34,8 @@ export type {
 	JsonPrimitive,
 	JsonValue,
 	ListGraphInput,
+	MemoryContextExpandableSection,
+	MemoryContextExpansion,
 	MemoryContextInput,
 	MemoryContextResult,
 	MemoryDocumentResult,

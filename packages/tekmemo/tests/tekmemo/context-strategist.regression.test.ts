@@ -359,4 +359,39 @@ describe("tekmemo.context strategist — regression harness", () => {
 			await cleanup();
 		}
 	});
+
+	// --------------------------------------------------------------------
+	// Q27 (ADR 0009 Component 4): progressive recall. The default call is now
+	// a compact briefing with expandable sections; `detail: "full"` restores
+	// the whole-budget behavior. The golden-content assertions above survive
+	// the compact cap (the fixture corpus is small and the golden notes are
+	// the top lexical hits). These tests pin the progressive-disclosure
+	// contract the regression harness must not lose.
+	// --------------------------------------------------------------------
+	it("default (compact) populates the expandable affordance list", async () => {
+		const { memo, cleanup } = await seedMemo();
+		try {
+			const result = await memo.context({ query: "auth deploy pnpm" });
+			expect(result.expandable).toBeDefined();
+			expect(result.expandable?.length).toBeGreaterThan(0);
+			// The affordance instruction is copy-pasteable in the rendered text.
+			expect(result.text).toMatch(/expand.*tekmemo\.context/);
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it('detail: "full" restores whole-budget output with no affordances', async () => {
+		const { memo, cleanup } = await seedMemo();
+		try {
+			const result = await memo.context({
+				query: "auth deploy pnpm",
+				detail: "full",
+			});
+			expect(result.expandable).toBeUndefined();
+			expect(result.text).not.toMatch(/expand.*tekmemo\.context/);
+		} finally {
+			await cleanup();
+		}
+	});
 });

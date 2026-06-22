@@ -73,7 +73,50 @@ export interface MemoryContextInput extends RecallInput {
 	includeCore?: boolean;
 	includeNotes?: boolean;
 	includeRecent?: boolean;
+	/**
+	 * Progressive disclosure level (ADR 0009 Component 4 / Q27).
+	 *
+	 * - `"compact"` (default): a small briefing with expandable sections. The
+	 *   agent calls back with `section` + `expand` to pull only the section it
+	 *   needs. Compact ≈ 6kb vs ~64kb truncated today — the Q16 cold-start
+	 *   token-reduction north star.
+	 * - `"full"`: today's whole-budget behavior — all sections packed into
+	 *   `maxBytes`, no expansion affordances, no cache. Use this when you want
+	 *   the entire dump in one call (the benchmark kit measuring recall
+	 *   coverage, power users, debugging).
+	 */
+	detail?: "compact" | "full";
+	/**
+	 * Expand a single section (progressive disclosure, ADR 0009 Component 4 /
+	 * Q27). Set together with {@link expand} to the opaque cursor the compact
+	 * call returned in `MemoryContextResult.expandable`. The result then
+	 * contains only that one section, expanded beyond the compact cap, and
+	 * reuses the first call's resolved pointers (no re-rewrite). Ignored unless
+	 * `expand` is also set.
+	 */
+	section?: MemoryContextExpandableSection;
+	/**
+	 * Opaque expansion cursor returned by a prior compact
+	 * `tekmemo.context` call (`MemoryContextResult.expandable[].cursor`). Set
+	 * together with {@link section} to pull that section's expanded content.
+	 * Malformed/expired cursors degrade gracefully: a fresh compact briefing is
+	 * returned with a warning (expansion is best-effort, never a hard error).
+	 */
+	expand?: string;
 }
+
+/**
+ * The sections a compact `tekmemo.context` briefing marks expandable (ADR 0009
+ * Component 4 / Q27). Each can be pulled individually on a second call via
+ * `section` + `expand`.
+ *
+ * @public
+ */
+export type MemoryContextExpandableSection =
+	| "entities"
+	| "recall"
+	| "recent"
+	| "notes";
 
 export interface MemoryContextResult {
 	text: string;
@@ -97,7 +140,40 @@ export interface MemoryContextResult {
 		content: string;
 	}>;
 	items?: RecallItem[];
+	/**
+	 * Expandable sections for progressive disclosure (ADR 0009 Component 4 /
+	 * Q27). Populated on compact calls; absent on `detail: "full"` and on
+	 * expand calls. Each entry tells the agent what it can pull and the opaque
+	 * cursor to pass back via `tekmemo.context(section, expand)`. The agent
+	 * expands only what it needs and stops — the headline delivery of the Q16
+	 * cold-start token-reduction north star.
+	 */
+	expandable?: MemoryContextExpansion[];
 	warnings?: string[];
+}
+
+/**
+ * One expandable section in a compact `tekmemo.context` briefing (ADR 0009
+ * Component 4 / Q27).
+ *
+ * @public
+ */
+export interface MemoryContextExpansion {
+	/** The section this cursor expands. */
+	section: MemoryContextExpandableSection;
+	/**
+	 * Opaque cursor. Pass back as `tekmemo.context({ section, expand: cursor })`.
+	 * Encodes the first call's resolved pointers so the second call re-resolves
+	 * fast. Opaque by contract — callers must not inspect it.
+	 */
+	cursor: string;
+	/**
+	 * How many additional units are available behind the cursor (recall
+	 * fragments, recent events, ...). Omitted when the count isn't meaningful.
+	 */
+	available?: number;
+	/** One-line description of what expanding returns ("14 more recall fragments"). */
+	hint: string;
 }
 
 export interface WriteMemoryInput {

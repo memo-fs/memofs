@@ -5,6 +5,15 @@
  */
 
 import {
+	buildExpansionAffordances,
+	type CachedRecentEvent,
+	COMPACT_BUDGET,
+	type ContextCache,
+	type ContextCacheEntry,
+	decodeExpansionCursor,
+	expandAffordanceLine,
+} from "./progressive";
+import {
 	allocateBudget,
 	type BudgetSection,
 	type EntityState,
@@ -17,6 +26,8 @@ import {
 	SECTION_WEIGHTS,
 } from "./strategist";
 import type {
+	MemoryContextExpandableSection,
+	MemoryContextExpansion,
 	MemoryContextInput,
 	MemoryContextResult,
 	RecallItem,
@@ -177,14 +188,85 @@ export async function buildContext(
 		 * vector candidates.
 		 */
 		retiredGraphDocIds?: ReadonlySet<string>;
+		/**
+		 * Session-scoped cache for progressive disclosure (ADR 0009 Component 4 /
+		 * Q27). Supplied by the runtime strategy (one {@link ContextCache} per
+		 * `Tekmemo` instance). When present, compact calls write their resolved
+		 * pointers into it and expand calls read from it; when absent, compact
+		 * and expand degrade to stateless behavior (no cross-call reuse).
+		 */
+		cache?: ContextCache;
 	},
 	input: MemoryContextInput,
 	signal?: AbortSignal,
 ): Promise<MemoryContextResult> {
-	const maxBytes = input.maxBytes ?? 64_000;
 	const warnings: string[] = [];
+
+	// --- Mode dispatch (ADR 0009 Component 4 / Q27) ---
+	//
+	// Expand mode takes precedence: the caller passed a cursor from a prior
+	// compact call. Full mode opts out of progressive disclosure entirely
+	// (today's behavior). Compact is the default.
+	const isExpandCall =
+		input.section !== undefined && input.expand !== undefined;
+	const isFullMode = input.detail === "full";
+
+	if (isExpandCall) {
+		return expandContext(operations, input, warnings, signal);
+	}
+	if (isFullMode) {
+		return assembleContext(operations, input, warnings, signal, {
+			mode: "full",
+		});
+	}
+	return assembleContext(operations, input, warnings, signal, {
+		mode: "compact",
+		cache: operations.cache,
+	});
+}
+
+// ---------------------------------------------------------------------------
+// Internal: assembled context (compact + full share this; expand re-renders)
+// ---------------------------------------------------------------------------
+
+interface AssembleMode {
+	mode: "compact" | "full";
+	cache?: ContextCache;
+}
+
+/**
+ * Runs the 4-stage strategist and packs sections under a byte budget. Compact
+ * mode caps section counts (capturing the full lists into the cache first so
+ * expand can re-render them) and appends expansion affordances; full mode is
+ * today's whole-budget behavior.
+ */
+async function assembleContext(
+	operations: BuildContextOperations,
+	input: MemoryContextInput,
+	warnings: string[],
+	signal: AbortSignal | undefined,
+	mode: AssembleMode,
+): Promise<MemoryContextResult> {
+	const isCompact = mode.mode === "compact";
+	// Compact mode caps the briefing at the compact budget (unless the caller
+	// explicitly asked for a smaller `maxBytes`). Full mode honors the caller's
+	// `maxBytes` or the 64kb default (today's behavior).
+	const maxBytes = isCompact
+		? Math.min(
+				input.maxBytes ?? COMPACT_BUDGET.maxBytes,
+				COMPACT_BUDGET.maxBytes,
+			)
+		: (input.maxBytes ?? 64_000);
+	// In compact mode, cap recall/recent fetches higher than the rendered count
+	// so the cache captures the full ranked lists (the agent may expand them).
+	const compactRecallFetchLimit = Math.max(
+		input.limit ?? 20,
+		COMPACT_BUDGET.recallItems,
+	);
 	const nonNegotiable: BudgetSection[] = [];
 	let recallItems: RecallItem[] = [];
+	let recentItems: CachedRecentEvent[] = [];
+	let hasNotes = false;
 
 	// Directive — always first, non-negotiable.
 	nonNegotiable.push({
@@ -219,22 +301,17 @@ export async function buildContext(
 	}
 
 	// --- Stage 1: Rewrite ---
-	// Expand the query through the deterministic lexicon. The expanded terms
-	// feed both recall (as a union query) and entity resolution.
 	const rewrite = rewriteQuery({ query: input.query });
 
 	// --- Stage 2: Resolve ---
-	// Find graph entities whose label/alias matches the expanded terms. Empty
-	// when no graph snapshot is available (graceful degradation).
 	let entitiesContent = "";
+	let hasEntities = false;
 	if (operations.listGraphNodes) {
 		try {
 			const nodes = await operations.listGraphNodes(signal);
 			const resolved = resolveEntities(nodes, rewrite.expandedTerms);
 			if (resolved.length > 0) {
-				// --- Stage 2b: enrich each entity with current state from active
-				// edges (ADR 0009 Component 3 / Q26). Falls back to the static
-				// summary when no edges are supplied or none are active.
+				hasEntities = true;
 				let enriched: EntityState[] = resolved.map((entity) => ({
 					nodeId: entity.nodeId,
 					label: entity.label,
@@ -256,21 +333,7 @@ export async function buildContext(
 						);
 					}
 				}
-				entitiesContent = enriched
-					.map((entity, index) => {
-						const head = `${index + 1}. ${entity.label} (${entity.type})`;
-						// Prefer the edge-derived current state; fall back to the
-						// static summary when no active edges describe the entity.
-						const body = entity.currentState
-							? `currently: ${entity.currentState}`
-							: entity.summary;
-						const tail = body ? ` — ${body}` : "";
-						const provenance = entity.provenance
-							? `\n   ↳ source: ${entity.provenance}`
-							: "";
-						return `${head}${tail}${provenance}`;
-					})
-					.join("\n");
+				entitiesContent = renderEntities(enriched);
 			}
 		} catch (error) {
 			warnings.push(
@@ -280,13 +343,14 @@ export async function buildContext(
 	}
 
 	// --- Stage 3: Filter ---
-	// Recall (with the expanded query) then drop retired graph docs, dedupe,
-	// and apply a relevance cut. The lexical path already skips deprecated
-	// graph docs at search time; this filter covers vector candidates too.
 	try {
 		const recallInput: MemoryContextInput = rewrite.expanded
-			? { ...input, query: rewrite.expandedTerms.join(" ") }
-			: input;
+			? {
+					...input,
+					query: rewrite.expandedTerms.join(" "),
+					...(isCompact ? { limit: compactRecallFetchLimit } : {}),
+				}
+			: { ...input, ...(isCompact ? { limit: compactRecallFetchLimit } : {}) };
 		const recall = await operations.recall(recallInput, signal);
 		recallItems = filterCandidates({
 			items: recall.items,
@@ -314,36 +378,38 @@ export async function buildContext(
 		});
 	}
 
-	if (recallItems.length > 0) {
+	// Compact mode caps recall to the top-K fragments; the full list is cached.
+	const recallSlice = isCompact
+		? recallItems.slice(0, COMPACT_BUDGET.recallItems)
+		: recallItems;
+	if (recallSlice.length > 0) {
 		negotiable.push({
 			type: "recall",
 			title: "Relevant Recall",
-			content: recallItems
-				.map(
-					(item, index) =>
-						`${index + 1}. ${item.text}${item.score === undefined ? "" : `\n   score: ${item.score}`}`,
-				)
-				.join("\n\n"),
+			content: renderRecall(recallSlice),
 			weight: SECTION_WEIGHTS.recall,
 		});
 	}
 
 	if (input.includeRecent !== false && operations.listRecentMemories) {
 		try {
+			const recentLimit = isCompact
+				? Math.max(COMPACT_BUDGET.recentItems * 2, input.limit ?? 5)
+				: Math.min(input.limit ?? 5, 20);
 			const recent = await operations.listRecentMemories(
-				{ limit: Math.min(input.limit ?? 5, 20) },
+				{ limit: recentLimit },
 				signal,
 			);
-			if (recent.items.length > 0) {
+			recentItems = recent.items;
+			// Compact mode caps recent to the top-K events.
+			const recentSlice = isCompact
+				? recent.items.slice(0, COMPACT_BUDGET.recentItems)
+				: recent.items;
+			if (recentSlice.length > 0) {
 				negotiable.push({
 					type: "recent",
 					title: "Recent Memory Events",
-					content: recent.items
-						.map(
-							(item) =>
-								`- ${item.timestamp ?? "unknown"} ${item.type ?? "memory"}: ${item.summary ?? item.id}`,
-						)
-						.join("\n"),
+					content: renderRecent(recentSlice),
 					weight: SECTION_WEIGHTS.recent,
 				});
 			}
@@ -355,10 +421,16 @@ export async function buildContext(
 		}
 	}
 
-	if (input.includeNotes === true && operations.readNotesMemory) {
+	// Notes: omitted in compact mode (it's the expand target); included in full
+	// mode when explicitly requested (today's behavior).
+	const includeNotes = isCompact
+		? COMPACT_BUDGET.includeNotes
+		: input.includeNotes === true;
+	if (includeNotes && operations.readNotesMemory) {
 		try {
 			const notes = await operations.readNotesMemory(signal);
 			if (notes.content.trim()) {
+				hasNotes = true;
 				negotiable.push({
 					type: "notes",
 					title: "Notes Memory",
@@ -375,18 +447,260 @@ export async function buildContext(
 	}
 
 	// --- Stage 4: Budget ---
-	// Allocate maxBytes across the sections in trust order. Non-negotiable
-	// sections (directive, core) are carved out first; the rest share the
-	// remaining budget by weight.
 	const budget = allocateBudget({
 		sections: [...nonNegotiable, ...negotiable],
 		maxBytes,
 	});
 
+	// --- Progressive disclosure: capture resolved pointers + add affordances ---
+	if (isCompact && mode.cache) {
+		const key = mode.cache.generateKey(input, rewrite.expandedTerms);
+		const entry: ContextCacheEntry = {
+			createdAt: Date.now(),
+			accessedAt: Date.now(),
+			expandedTerms: rewrite.expandedTerms,
+			recallItems,
+			recentItems,
+			hasNotes: hasNotes || operations.readNotesMemory !== undefined,
+			hasEntities,
+		};
+		mode.cache.put(key, entry);
+		const affordances = buildExpansionAffordances(key, entry, {
+			renderedRecall: recallSlice.length,
+			renderedRecent: Math.min(recentItems.length, COMPACT_BUDGET.recentItems),
+		});
+		return addAffordances(
+			{
+				text: budget.text,
+				sections: budget.sections,
+				items: recallSlice,
+				...(warnings.length === 0 ? {} : { warnings }),
+			},
+			affordances,
+		);
+	}
+
 	return {
 		text: budget.text,
 		sections: budget.sections,
-		items: recallItems,
+		items: recallSlice,
 		...(warnings.length === 0 ? {} : { warnings }),
 	};
 }
+
+// ---------------------------------------------------------------------------
+// Internal: expand mode — re-render one section from the cache
+// ---------------------------------------------------------------------------
+
+/**
+ * Expand one section from a prior compact call's resolved pointers. Decodes the
+ * cursor, looks up the cache entry, and re-renders only the requested section
+ * beyond the compact cap. Falls back to a fresh compact briefing on any cache
+ * miss / malformation (progressive disclosure is best-effort, never a hard
+ * error — ADR 0009 Component 4).
+ */
+async function expandContext(
+	operations: BuildContextOperations,
+	input: MemoryContextInput,
+	warnings: string[],
+	signal: AbortSignal | undefined,
+): Promise<MemoryContextResult> {
+	const decoded =
+		input.expand !== undefined
+			? decodeExpansionCursor(input.expand)
+			: undefined;
+	const cache = operations.cache;
+	const section = input.section as MemoryContextExpandableSection | undefined;
+
+	if (decoded === undefined || cache === undefined || section === undefined) {
+		// Malformed cursor or no cache — fall back to a fresh compact briefing.
+		warnings.push(
+			"Expansion cursor was invalid or expired; returning a fresh briefing.",
+		);
+		return assembleContext(operations, input, warnings, signal, {
+			mode: "compact",
+			cache: operations.cache,
+		});
+	}
+
+	const entry = cache.get(decoded.key);
+	if (entry === undefined) {
+		warnings.push(
+			"Expansion cursor was invalid or expired; returning a fresh briefing.",
+		);
+		return assembleContext(operations, input, warnings, signal, {
+			mode: "compact",
+			cache: operations.cache,
+		});
+	}
+
+	// Re-render only the requested section from the cached resolved pointers.
+	const nonNegotiable: BudgetSection[] = [
+		{
+			type: "directive",
+			title: "How to use TekMemo context",
+			content: AGENT_CONTEXT_DIRECTIVE,
+			nonNegotiable: true,
+		},
+	];
+	const negotiable: BudgetSection[] = [];
+	let expandedRecallItems: RecallItem[] = [];
+
+	if (section === "recall") {
+		expandedRecallItems = entry.recallItems;
+		if (expandedRecallItems.length > 0) {
+			negotiable.push({
+				type: "recall",
+				title: "Relevant Recall (expanded)",
+				content: renderRecall(expandedRecallItems),
+				weight: SECTION_WEIGHTS.recall,
+			});
+		}
+	} else if (section === "recent") {
+		const recent = entry.recentItems;
+		if (recent.length > 0) {
+			negotiable.push({
+				type: "recent",
+				title: "Recent Memory Events (expanded)",
+				content: renderRecent(recent),
+				weight: SECTION_WEIGHTS.recent,
+			});
+		}
+	} else if (section === "notes") {
+		if (operations.readNotesMemory) {
+			try {
+				const notes = await operations.readNotesMemory(signal);
+				if (notes.content.trim()) {
+					negotiable.push({
+						type: "notes",
+						title: "Notes Memory (expanded)",
+						content: notes.content.trim(),
+						weight: SECTION_WEIGHTS.notes,
+					});
+				}
+				if (notes.warnings?.length) warnings.push(...notes.warnings);
+			} catch (error) {
+				warnings.push(
+					`Could not read notes memory: ${error instanceof Error ? error.message : String(error)}`,
+				);
+			}
+		}
+	} else if (section === "entities") {
+		// Re-resolve entities from the cached expanded terms + fresh graph
+		// snapshot (entities are cheap to re-resolve and the graph may have
+		// changed since the first call).
+		if (operations.listGraphNodes && entry.hasEntities) {
+			try {
+				const nodes = await operations.listGraphNodes(signal);
+				const resolved = resolveEntities(nodes, entry.expandedTerms);
+				if (resolved.length > 0) {
+					let enriched: EntityState[] = resolved.map((entity) => ({
+						nodeId: entity.nodeId,
+						label: entity.label,
+						type: entity.type,
+						currentState: "",
+						summary: entity.summary,
+						activeEdgeCount: 0,
+					}));
+					if (operations.listGraphEdges) {
+						const edges = await operations.listGraphEdges(signal);
+						const nodeById = new Map<string, ResolveGraphNode>(
+							nodes.map((node) => [node.id, node]),
+						);
+						enriched = resolveEntityState(resolved, edges, nodeById);
+					}
+					negotiable.push({
+						type: "entities",
+						title: "Entities (expanded)",
+						content: renderEntities(enriched),
+						weight: SECTION_WEIGHTS.entities,
+					});
+				}
+			} catch (error) {
+				warnings.push(
+					`Could not resolve entities: ${error instanceof Error ? error.message : String(error)}`,
+				);
+			}
+		}
+	}
+
+	const budget = allocateBudget({
+		sections: [...nonNegotiable, ...negotiable],
+		maxBytes: input.maxBytes ?? 64_000,
+	});
+
+	return {
+		text: budget.text,
+		sections: budget.sections,
+		...(expandedRecallItems.length > 0 ? { items: expandedRecallItems } : {}),
+		...(warnings.length === 0 ? {} : { warnings }),
+	};
+}
+
+// ---------------------------------------------------------------------------
+// Renderers — shared by assemble (compact/full) and expand
+// ---------------------------------------------------------------------------
+
+function renderEntities(enriched: EntityState[]): string {
+	return enriched
+		.map((entity, index) => {
+			const head = `${index + 1}. ${entity.label} (${entity.type})`;
+			const body = entity.currentState
+				? `currently: ${entity.currentState}`
+				: entity.summary;
+			const tail = body ? ` — ${body}` : "";
+			const provenance = entity.provenance
+				? `\n   ↳ source: ${entity.provenance}`
+				: "";
+			return `${head}${tail}${provenance}`;
+		})
+		.join("\n");
+}
+
+function renderRecall(items: RecallItem[]): string {
+	return items
+		.map(
+			(item, index) =>
+				`${index + 1}. ${item.text}${item.score === undefined ? "" : `\n   score: ${item.score}`}`,
+		)
+		.join("\n\n");
+}
+
+function renderRecent(
+	items: Array<{
+		id: string;
+		type?: string;
+		timestamp?: string;
+		summary?: string;
+	}>,
+): string {
+	return items
+		.map(
+			(item) =>
+				`- ${item.timestamp ?? "unknown"} ${item.type ?? "memory"}: ${item.summary ?? item.id}`,
+		)
+		.join("\n");
+}
+
+/**
+ * Append expansion affordance lines to a compact briefing. Each affordance is
+ * added to the end of its section's content and collected into the result's
+ * `expandable` array. Byte-honesty is preserved because the affordance lines
+ * are accounted within the section budget (the Budget stage already packed the
+ * body; we append the short affordance line after it).
+ */
+function addAffordances(
+	result: MemoryContextResult,
+	affordances: MemoryContextExpansion[],
+): MemoryContextResult {
+	if (affordances.length === 0) return result;
+	const lines = affordances.map(expandAffordanceLine).join("\n");
+	return {
+		...result,
+		text: `${result.text}\n\n${lines}`,
+		expandable: affordances,
+	};
+}
+
+// The operations type, named for reference inside the internal helpers.
+type BuildContextOperations = Parameters<typeof buildContext>[0];

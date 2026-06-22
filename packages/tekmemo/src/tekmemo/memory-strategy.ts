@@ -11,6 +11,7 @@ import { NOTES_MEMORY_PATH } from "../core/constants/memory-paths";
 import { classifyDurability } from "../security/durability-tier";
 import { assertWriteAllowed } from "../security/secret-blocklist";
 import { buildContext, paginateArray } from "./helpers";
+import { ContextCache } from "./progressive";
 import type {
 	AgentSessionCompleteInput,
 	AgentSessionExtractResult,
@@ -68,6 +69,8 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 	const notes = new Map<string, StoredNote>();
 	const nodes = new Map<string, GraphNodeInput>();
 	const edges = new Map<string, GraphEdgeInput>();
+	// Per-instance progressive-disclosure cache (ADR 0009 Component 4 / Q27).
+	const contextCache = new ContextCache();
 
 	function edgeId(edge: GraphEdgeInput): string {
 		return (
@@ -128,6 +131,10 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 						};
 					},
 					recall: (i) => recallImpl(i),
+					// Progressive disclosure (ADR 0009 Component 4 / Q27): the
+					// cache lets a compact call hand off resolved pointers to an
+					// expand call. Memory mode gets progressive recall too.
+					cache: contextCache,
 				},
 				input,
 				signal,
