@@ -1,4 +1,5 @@
 todosss
+social
 .opencode
 # Dependencies
 node_modules
@@ -45,6 +46,9 @@ agent-sessions/
 
 # Example agent runtime stores (demo memory created by examples/*)
 examples/**/.tekmemo/
+
+# Sub-package runtime data (regenerable; root .tekmemo/ is the project's own store)
+packages/**/.tekmemo/
 
 # Wrangler build cache
 .wrangler/
