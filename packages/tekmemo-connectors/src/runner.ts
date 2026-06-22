@@ -222,11 +222,19 @@ async function loadExistingNoteIds(memo: Tekmemo): Promise<Set<string>> {
 	const recent = await memo.listRecentMemories({ limit: 500 });
 	const ids = new Set<string>();
 	for (const item of recent.items) {
-		// `item.id` is the note id — `conn_…` for connector notes, `mem_…` for
-		// agent notes. Only the connector-prefixed ones matter for dedup, but
-		// collecting all is harmless (agent ids never collide with conn_ ids).
+		// The note id location varies by strategy:
+		//  - memory-strategy (in-memory fake): `item.id` is the note id.
+		//  - local-strategy (filesystem): `item.id` is the event id (`evt_…`),
+		//    and the note id lives at `item.metadata.id`.
+		// Collect both — agent/event ids never collide with `conn_` ids, so the
+		// extra entries are harmless.
 		if (typeof item.id === "string" && item.id.length > 0) {
 			ids.add(item.id);
+		}
+		const metaNoteId = (item.metadata as Record<string, unknown> | undefined)
+			?.id;
+		if (typeof metaNoteId === "string" && metaNoteId.length > 0) {
+			ids.add(metaNoteId);
 		}
 	}
 	return ids;

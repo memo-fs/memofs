@@ -6,6 +6,7 @@
  */
 
 import { GitHubConnector } from "./connectors/github";
+import { NotionConnector } from "./connectors/notion";
 import type { Connector } from "./types";
 
 /**
@@ -20,7 +21,12 @@ import type { Connector } from "./types";
 export class ConnectorRegistry {
 	private readonly connectors = new Map<string, Connector>();
 
-	constructor(builtins: readonly Connector[] = [new GitHubConnector()]) {
+	constructor(
+		builtins: readonly Connector[] = [
+			new GitHubConnector(),
+			new NotionConnector(),
+		],
+	) {
 		for (const connector of builtins) {
 			this.register(connector);
 		}
@@ -50,14 +56,18 @@ export class ConnectorRegistry {
 
 /**
  * Convenience factory: a fresh registry seeded with the built-in connectors
- * (GitHub by default; Notion added when it ships).
+ * (GitHub + Notion).
  *
  * @public
  */
 export function createConnectorRegistry(
 	extras: readonly Connector[] = [],
 ): ConnectorRegistry {
-	return new ConnectorRegistry([new GitHubConnector(), ...extras]);
+	return new ConnectorRegistry([
+		new GitHubConnector(),
+		new NotionConnector(),
+		...extras,
+	]);
 }
 
 /**

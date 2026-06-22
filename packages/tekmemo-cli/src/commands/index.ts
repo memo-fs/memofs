@@ -18,6 +18,12 @@ export {
 	runCloudSyncPushCommand,
 	runCloudSyncStatusCommand,
 } from "./cloud";
+export {
+	runConnectorsAddCommand,
+	runConnectorsListCommand,
+	runConnectorsRemoveCommand,
+	runConnectorsRunCommand,
+} from "./connectors";
 export { runContextCommand } from "./context";
 export { runDiffCommand } from "./diff";
 export { runDoctorCommand } from "./doctor";

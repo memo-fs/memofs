@@ -101,7 +101,7 @@ Implement the `SecretResolver` interface to wire any backend (a cloud fetch, a v
 | Connector | `type` | Source | Status |
 |-----------|--------|--------|--------|
 | **GitHub** | `"github"` | Issues, PRs, discussions (GraphQL API) | ✅ Shipped |
-| Notion | `"notion"` | Pages, databases | 🚧 Follow-up |
+| **Notion** | `"notion"` | Pages from a database or workspace search (REST API) | ✅ Shipped |
 
 ### GitHub
 
@@ -124,6 +124,20 @@ await runConnectors({ rootDir, memo, secretResolver, connectorRegistry: registry
 | `limit` | `number` | `50` | Max items per kind (per-page cost control) |
 
 The token is a fine-grained PAT or OAuth token with read access to the repository. Rate-limit errors are surfaced in `result.errors` (no retry/backoff in v1).
+
+### Notion
+
+Ingests Notion pages from a database (`POST /v1/databases/:id/query`) or a workspace search (`POST /v1/search`) via the Notion v1 REST API.
+
+`sourceMapping` for Notion:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `databaseId` | `string` | — | 32-char hex database id (hyphenated or not). Either this or `searchQuery` is required. |
+| `searchQuery` | `string` | — | Free-text workspace search (falls back when no `databaseId`). |
+| `limit` | `number` | `50` | Max pages to ingest (cost control). |
+
+The token is a Notion internal integration token (`ntn_…` / `secret_…`) with the target database/page shared to the integration. The `Notion-Version: 2022-06-28` header is set automatically. Rate-limit errors (403/429) are surfaced in `result.errors` (no retry/backoff in v1).
 
 ## Writing a connector
 
@@ -156,8 +170,7 @@ This package owns the connector framework + the built-in connectors. It does **n
 
 ## What's not here yet (v1 deferrals)
 
-- **Notion connector** — follow-up (mechanical once the framework is proven).
-- **CLI `tekmemo connectors {add|remove|list|run}`** — follow-up PR in `packages/tekmemo-cli`.
+- **CLI `tekmemo connectors {add|remove|list|run}`** — lives in `packages/tekmemo-cli`; wires to this package.
 - **Cloud `GET .../connectors/:id/secret` resolver** — ships when the cloud app does.
 - **Schedule enforcement** — `schedule` is stored but not acted on; execution happens only while the local runtime is alive (CLI / MCP session / daemon).
 

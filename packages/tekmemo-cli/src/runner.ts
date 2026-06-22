@@ -19,6 +19,10 @@ import {
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
 	runCloudSyncStatusCommand,
+	runConnectorsAddCommand,
+	runConnectorsListCommand,
+	runConnectorsRemoveCommand,
+	runConnectorsRunCommand,
 	runContextCommand,
 	runDiffCommand,
 	runDoctorCommand,
@@ -619,6 +623,94 @@ export async function runTekMemoCli(
 				session: options.session,
 				extract: options.extract,
 				checkpointLabel: options.checkpointLabel,
+			});
+		});
+
+	const connectors = program
+		.command("connectors")
+		.description(
+			"manage local connectors: add, remove, list, run ingestion into .tekmemo/",
+		);
+
+	connectors
+		.command("list")
+		.description("list configured connectors from .tekmemo/connectors.json")
+		.action(async () => {
+			currentCommand = "connectors.list";
+			const g = await globals();
+			exitCode = await runConnectorsListCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+			});
+		});
+
+	connectors
+		.command("add")
+		.description(
+			"add a connector row to .tekmemo/connectors.json (never the token — use --secret-ref)",
+		)
+		.requiredOption("--type <type>", "connector type (github, notion, ...)")
+		.requiredOption(
+			"--secret-ref <ref>",
+			"opaque pointer to a token stored server-side (ADR 0002); never the token itself",
+		)
+		.option("--id <id>", "connector id (defaults to <type> or <type>-<n>)")
+		.option("--schedule <schedule>", "schedule hint (not enforced in v1)")
+		.option(
+			"--source-mapping <json>",
+			'source-specific config as JSON, e.g. \'{"repository":"owner/repo"}\'',
+		)
+		.option("--disabled", "add the connector in disabled state", false)
+		.action(async (options) => {
+			currentCommand = "connectors.add";
+			const g = await globals();
+			exitCode = await runConnectorsAddCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				type: options.type,
+				secretRef: options.secretRef,
+				...(options.id === undefined ? {} : { id: options.id }),
+				...(options.schedule === undefined
+					? {}
+					: { schedule: options.schedule }),
+				...(options.sourceMapping === undefined
+					? {}
+					: { sourceMapping: options.sourceMapping }),
+				enabled: !options.disabled,
+			});
+		});
+
+	connectors
+		.command("remove")
+		.description("remove a connector by id from .tekmemo/connectors.json")
+		.argument("<id>", "connector id to remove")
+		.action(async (id) => {
+			currentCommand = "connectors.remove";
+			const g = await globals();
+			exitCode = await runConnectorsRemoveCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				id,
+			});
+		});
+
+	connectors
+		.command("run")
+		.description(
+			"run enabled connectors, ingesting external sources into .tekmemo/ (secrets resolved at run time)",
+		)
+		.option("--type <type>", "run only connectors of this type")
+		.action(async (options) => {
+			currentCommand = "connectors.run";
+			const g = await globals();
+			exitCode = await runConnectorsRunCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				...(options.type === undefined ? {} : { onlyType: options.type }),
 			});
 		});
 

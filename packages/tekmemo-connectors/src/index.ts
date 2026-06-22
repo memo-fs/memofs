@@ -15,8 +15,9 @@ export {
 	selectConnectors,
 	validateConnectorsFile,
 } from "./config";
-// Built-in connectors — GitHub ships now; Notion is a follow-up.
+// Built-in connectors — GitHub + Notion.
 export { GitHubConnector } from "./connectors/github";
+export { NotionConnector } from "./connectors/notion";
 export {
 	ConnectorConfigError,
 	ConnectorError,
