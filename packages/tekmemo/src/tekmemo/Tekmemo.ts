@@ -30,6 +30,7 @@ import type {
 	TimestampedNote,
 } from "../core/types/memory-documents";
 import type { MemoryStore } from "../core/types/memory-store";
+import type { Extractor } from "../graph/extraction/extractor";
 import type { AgentfsLikeClient, AgentfsMemoryStoreConfig } from "../index";
 import {
 	AgentfsMemoryStore,
@@ -68,6 +69,8 @@ import type {
 	AgentSessionCompleteInput,
 	AgentSessionFileInput,
 	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
 	GraphEdgeInput,
 	GraphNeighborsInput,
 	GraphNodeInput,
@@ -114,6 +117,7 @@ export class Tekmemo {
 	readonly workspaceId?: string;
 	readonly store: MemoryStore;
 	readonly embedder?: MemoryEmbedder;
+	readonly extractor?: Extractor;
 	readonly recallStore?: RecallStore;
 	readonly cloud?: TekMemoCloudClient;
 	readonly readPolicy: RuntimeReadPolicy;
@@ -146,7 +150,10 @@ export class Tekmemo {
 		},
 
 		record: async (
-			note: Omit<TimestampedNote, "timestamp"> & { timestamp?: string },
+			note: Omit<TimestampedNote, "timestamp"> & {
+				timestamp?: string;
+				tier?: WriteMemoryInput["tier"];
+			},
 			signal?: AbortSignal,
 		): Promise<WriteMemoryResult> => {
 			return this.strategy.writeMemory(
@@ -159,6 +166,7 @@ export class Tekmemo {
 						? {}
 						: { confidence: note.confidence }),
 					...(note.source === undefined ? {} : { source: note.source }),
+					...(note.tier === undefined ? {} : { tier: note.tier }),
 					...(note.metadata === undefined
 						? {}
 						: { metadata: note.metadata as WriteMemoryInput["metadata"] }),
@@ -407,6 +415,7 @@ export class Tekmemo {
 		}
 
 		this.embedder = this.resolved.embedder;
+		this.extractor = this.resolved.extractor;
 		if (this.embedder) {
 			// When an embedder is configured, a recall store is needed to persist
 			// embeddings. Default to the file-backed store so embeddings survive
@@ -465,6 +474,7 @@ export class Tekmemo {
 			local = createLocalStrategy({
 				store: this.store,
 				embedder: this.embedder,
+				extractor: this.extractor,
 				recallStore: this.recallStore,
 				projectId: this.projectId,
 				tenantId: this.tenantId,
@@ -484,6 +494,7 @@ export class Tekmemo {
 		return createLocalStrategy({
 			store: this.store,
 			embedder: this.embedder,
+			extractor: this.extractor,
 			recallStore: this.recallStore,
 			projectId: this.projectId,
 			tenantId: this.tenantId,
@@ -550,6 +561,26 @@ export class Tekmemo {
 		signal?: AbortSignal,
 	): Promise<ValidateMemoryResult> {
 		return this.strategy.validate(input, signal);
+	}
+
+	/**
+	 * Run a memory consolidation pass over the local graph.
+	 *
+	 * Consolidation is a deterministic, local pass that merges duplicate
+	 * entities and retires facts superseded by a `supersedes` edge — never
+	 * deleting (the audit trail is preserved; facts are marked `deprecated`).
+	 * It is the second half of v1 intelligence (ADR 0004): extraction grows the
+	 * graph, consolidation keeps it tidy.
+	 *
+	 * Pass `{ apply: false }` to preview the plan without persisting it.
+	 *
+	 * @public
+	 */
+	async consolidate(
+		input?: ConsolidateMemoryInput,
+		signal?: AbortSignal,
+	): Promise<ConsolidateMemoryResult> {
+		return this.strategy.consolidateMemory(input ?? {}, signal);
 	}
 
 	async health(signal?: AbortSignal): Promise<TekMemoHealthResult> {

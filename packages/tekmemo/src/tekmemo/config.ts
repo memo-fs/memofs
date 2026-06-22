@@ -13,6 +13,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import type { TekMemoCloudClientOptions } from "../cloud-client/types";
+import type { Extractor } from "../graph/extraction/extractor";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
 import type { RecallStore } from "../recall/types";
@@ -38,6 +39,12 @@ export interface TekmemoConfig {
 	store?: MemoryStore;
 	embedder?: MemoryEmbedder;
 	recallStore?: RecallStore;
+	/**
+	 * Optional graph extractor (LLM-based or otherwise). When omitted, the
+	 * zero-config rule-based extractor runs (ADR 0004 fallback). When provided,
+	 * extraction + consolidation can grow the graph from natural prose.
+	 */
+	extractor?: Extractor;
 	projectId?: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -89,6 +96,7 @@ export interface ResolvedTekmemoConfig {
 	store?: MemoryStore;
 	embedder?: MemoryEmbedder;
 	recallStore?: RecallStore;
+	extractor?: Extractor;
 	projectId: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -185,6 +193,7 @@ export function resolveTekmemoConfig(input: {
 		rootDir,
 		...(config.store !== undefined ? { store: config.store } : {}),
 		...(config.embedder !== undefined ? { embedder: config.embedder } : {}),
+		...(config.extractor !== undefined ? { extractor: config.extractor } : {}),
 		...(config.recallStore !== undefined
 			? { recallStore: config.recallStore }
 			: {}),

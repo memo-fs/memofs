@@ -1,5 +1,7 @@
+export * from "./consolidation/consolidate";
 export * from "./errors/graph-errors";
 export * from "./expansion/expand-from-entities";
+export * from "./extraction/extractor";
 export * from "./extraction/rule-based-extractor";
 export * from "./filters/metadata-filter";
 export * from "./invalidation/invalidate-superseded-edges";

@@ -22,18 +22,23 @@ import {
 	appendMemoryEvent,
 	appendSnapshotRecord,
 	appendTimestampedNote,
+	applyConsolidation,
+	assertWriteAllowed,
 	bootstrapMemoryStore,
 	CORE_MEMORY_PATH,
+	classifyDurability,
+	consolidateGraph,
 	createAgentWorkspacePaths,
 	createBM25Store,
 	createFsGraphStore,
 	createMemoryEvent,
 	createNodeFsMemoryStore,
+	createRuleBasedExtractor,
 	createSnapshotPath,
 	createSnapshotRecord,
 	createTekMemoAgentSession,
 	DeterministicFallbackReranker,
-	extractGraphFactsRuleBased,
+	type Extractor,
 	extractSessionMemory,
 	type GraphEdge,
 	type GraphNode,
@@ -58,6 +63,8 @@ import type {
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
 	GraphEdgeInput,
 	GraphNeighborsInput,
 	GraphNodeInput,
@@ -99,11 +106,14 @@ type LocalGraphStore = Pick<
 	InMemoryGraphStore,
 	| "upsertNodes"
 	| "upsertEdges"
+	| "getNode"
+	| "getEdge"
 	| "queryNodes"
 	| "queryEdges"
 	| "neighbors"
 	| "fewestHopsPath"
 	| "weightedShortestPath"
+	| "mergeNodes"
 	| "stats"
 	| "exportSnapshot"
 	| "importSnapshot"
@@ -112,6 +122,12 @@ type LocalGraphStore = Pick<
 export interface LocalStrategyOptions {
 	store: MemoryStore;
 	embedder?: MemoryEmbedder;
+	/**
+	 * Optional graph extractor (LLM-based or otherwise). When omitted, the
+	 * zero-config rule-based extractor runs (ADR 0004 fallback). The write
+	 * fan-out always calls this one shape regardless of which is configured.
+	 */
+	extractor?: Extractor;
 	recallStore?: RecallStore;
 	projectId: string;
 	tenantId?: string;
@@ -141,6 +157,11 @@ export interface LocalStrategyOptions {
 
 export function createLocalStrategy(options: LocalStrategyOptions) {
 	const { store, projectId } = options;
+	// The extractor the write fan-out calls. When none is configured, fall back
+	// to the zero-config rule-based extractor (ADR 0004) so the graph still
+	// accumulates from regex patterns with no API key. An LLM adapter layers on
+	// top only when provided.
+	const extractor: Extractor = options.extractor ?? createRuleBasedExtractor();
 	// Persistent graph store: survives restarts by hydrating from / persisting
 	// to .tekmemo/graph/{nodes,edges}.jsonl. Falls back to a plain in-memory
 	// store when one is injected (tests).
@@ -162,6 +183,32 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	function indexLexical(doc: { id: string; text: string }): void {
 		lexicalTextById.set(doc.id, doc.text);
 		lexicalStore.upsert([doc]);
+	}
+
+	/**
+	 * Drop documents from the lexical store and the sidecar text map (the
+	 * disposable index prunes — the source-of-truth files keep everything).
+	 * Called by consolidation when it retires or merges a graph node.
+	 *
+	 * @internal
+	 */
+	function pruneLexical(ids: string[]): void {
+		if (ids.length === 0) return;
+		lexicalStore.delete(ids);
+		for (const id of ids) lexicalTextById.delete(id);
+	}
+
+	/**
+	 * Whether a lexical document id refers to a graph node that consolidation
+	 * (or a manual upsert) has marked `deprecated`. Used by recall to skip
+	 * retired facts so the staleness loop (ADR 0009 Component 5) closes.
+	 *
+	 * @internal
+	 */
+	function isRetiredGraphDoc(lexicalId: string): boolean {
+		if (!lexicalId.startsWith("graph:")) return false;
+		const node = graphNodes.get(lexicalId.slice("graph:".length));
+		return node?.status === "deprecated";
 	}
 	// Keep the legacy in-memory maps in sync with the persistent store so the
 	// existing list/neighbors/path fast paths keep working without a rewrite.
@@ -359,6 +406,14 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		try {
 			const bm25Results = lexicalStore.search(query, { topK: limit * 2 });
 			for (const result of bm25Results) {
+				// Staleness loop (ADR 0009 Component 5): a graph node retired by
+				// consolidation is marked `deprecated` but was already indexed into
+				// the lexical store when it was written. Skip it here so recall stops
+				// serving the old answer. `consolidateMemory` prunes these eagerly
+				// too; this guard also covers manual deprecations and any race before
+				// the prune runs. v1 drops `deprecated` only (v1.x will surface
+				// `unverified` with a warning rather than hiding it).
+				if (isRetiredGraphDoc(result.id)) continue;
 				const text = lexicalTextById.get(result.id) ?? "";
 				out.set(result.id, {
 					text,
@@ -466,6 +521,27 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		): Promise<WriteMemoryResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			await ensureReady();
+			// Write intelligence gate (ADR 0009 Component 6, layer 1): hard-reject
+			// secrets/PII before they reach syncable notes.md. Scans the two
+			// user-controlled text fields (title + content); metadata/tags are
+			// structured and not prose the agent leaks secrets into.
+			assertWriteAllowed(
+				[input.content, ...(input.title === undefined ? [] : [input.title])],
+				NOTES_MEMORY_PATH,
+			);
+			// Layer 2: durability tier. `transient` memories are written to
+			// notes.md (the audit trail) but NOT indexed into recall/graph — they
+			// don't pollute retrieval. The file keeps everything; the disposable
+			// index prunes by tier (ADR 0009 invariant).
+			const tierDecision = classifyDurability({
+				content: input.content,
+				...(input.kind === undefined ? {} : { kind: input.kind }),
+				...(input.confidence === undefined
+					? {}
+					: { confidence: input.confidence }),
+				...(input.tier === undefined ? {} : { tier: input.tier }),
+			});
+			const durable = tierDecision.tier === "durable";
 			const now = new Date().toISOString();
 			const id = `mem_${hash(`${now}:${input.content}`).slice(0, 16)}`;
 			await appendTimestampedNote(store, {
@@ -511,34 +587,44 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				}),
 			);
 
-			if (options.embedder && options.recallStore) {
-				const noteText = `${input.title ?? input.content.slice(0, 80)}\n${input.content}`;
-				await indexDocument(noteText, {
-					sourceType: "note",
-					sourceId: now,
-					sourcePath: NOTES_MEMORY_PATH,
-					memoryType: "notes",
-					tags: input.tags,
-					kind: input.kind,
-					confidence: input.confidence,
-				});
-			}
-
-			// Always index into the lexical store so zero-config recall (no
-			// embedder) still surfaces this memory, and so the lexical path stays
-			// warm even when a vector index exists.
 			const noteText = `${input.title ?? input.content.slice(0, 80)}\n${input.content}`;
-			indexLexical({ id, text: noteText });
 
-			// Auto-extract graph facts from the written memory so the graph
-			// accumulates without human intervention. Best-effort.
-			if (options.autoExtractGraph !== false) {
-				await autoExtractGraph(noteText, { sourceType: "note", sourceId: id });
+			// Index only durable memories. Transient ones stay in notes.md (audit
+			// trail + listRecentMemories) but never reach the recall store, the
+			// lexical index, or the graph — so they can't steer retrieval.
+			if (durable) {
+				if (options.embedder && options.recallStore) {
+					await indexDocument(noteText, {
+						sourceType: "note",
+						sourceId: now,
+						sourcePath: NOTES_MEMORY_PATH,
+						memoryType: "notes",
+						tags: input.tags,
+						kind: input.kind,
+						confidence: input.confidence,
+					});
+				}
+
+				// Always index into the lexical store so zero-config recall (no
+				// embedder) still surfaces this memory, and so the lexical path
+				// stays warm even when a vector index exists.
+				indexLexical({ id, text: noteText });
+
+				// Auto-extract graph facts from the written memory so the graph
+				// accumulates without human intervention. Best-effort.
+				if (options.autoExtractGraph !== false) {
+					await autoExtractGraph(noteText, {
+						sourceType: "note",
+						sourceId: id,
+					});
+				}
 			}
 
 			return {
 				id,
 				created: true,
+				tier: tierDecision.tier,
+				tierReason: tierDecision.reason,
 				...(input.sourceRefs === undefined
 					? {}
 					: { sourceRefs: input.sourceRefs }),
@@ -563,6 +649,9 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		): Promise<MemoryDocumentResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			await ensureReady();
+			// Write intelligence gate (ADR 0009 Component 6): core memory syncs to
+			// the cloud replica, so it gets the same secret rejection as notes.
+			assertWriteAllowed([content], CORE_MEMORY_PATH);
 			await writeCoreMemory(store, content);
 			await appendMemoryEvent(
 				store,
@@ -942,6 +1031,92 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			);
 		},
 
+		async consolidateMemory(
+			input: ConsolidateMemoryInput,
+			signal?: AbortSignal,
+		): Promise<ConsolidateMemoryResult> {
+			if (signal?.aborted) throw new Error("Operation aborted.");
+			await ensureReady();
+			const apply = input.apply ?? true;
+			// Reason over the whole graph snapshot — every active + inactive node
+			// and edge — so the plan accounts for the full audit trail, not just
+			// the fast-path view. The pure `consolidateGraph` decides; the store
+			// stays the source of truth for applying.
+			const nodes = await graphStore.queryNodes({ includeInactive: true });
+			const edges = await graphStore.queryEdges({ includeInactive: true });
+			const plan = consolidateGraph({
+				nodes,
+				edges,
+				...(input.now === undefined ? {} : { now: input.now }),
+				...(input.supersedingEdgeType === undefined
+					? {}
+					: { supersedingEdgeType: input.supersedingEdgeType }),
+			});
+			if (!apply || !plan.changed) {
+				return {
+					plan: {
+						merges: plan.merges.length,
+						retiredEdges: plan.retiredEdges.length,
+						retiredNodes: plan.retiredNodes.length,
+						changed: plan.changed,
+						now: plan.now,
+					},
+					mergesApplied: 0,
+					retirementsApplied: 0,
+					applied: false,
+				};
+			}
+			// Apply the plan best-effort (mirrors `autoExtractGraph`): a failing
+			// merge/retirement never breaks the whole pass — the graph converges
+			// over successive runs.
+			const applied = await applyConsolidation(graphStore, plan);
+			// Mirror applied retirements into the fast-path maps so list/neighbors
+			// reflect them without waiting for a re-hydrate, and prune the disposable
+			// lexical index so recall stops serving retired facts (ADR 0009 Component 5
+			// staleness loop — the derived index prunes, the files keep everything).
+			const retiredNodeIds = new Set(plan.retiredNodes.map((r) => r.id));
+			for (const id of retiredNodeIds) {
+				const existing = graphNodes.get(id);
+				if (!existing) continue;
+				graphNodes.set(id, { ...existing, status: "deprecated" });
+			}
+			for (const r of plan.retiredEdges) {
+				for (const edge of graphEdges.values()) {
+					if (edge.id !== r.id) continue;
+					graphEdges.set(
+						edge.id ?? stableEdgeKey(edge.from, edge.type, edge.to),
+						{
+							...edge,
+							status: "deprecated",
+						},
+					);
+				}
+			}
+			// Merges delete the absorbed node from the store; drop it from the
+			// fast-path map so it stops appearing in neighbors/path/list, and prune its
+			// lexical doc so it stops surfacing in recall.
+			for (const merge of plan.merges) {
+				graphNodes.delete(merge.sourceId);
+			}
+			// Prune the lexical index for every retired and absorbed node. Best-effort.
+			pruneLexical([
+				...plan.retiredNodes.map((r) => `graph:${r.id}`),
+				...plan.merges.map((m) => `graph:${m.sourceId}`),
+			]);
+			return {
+				plan: {
+					merges: plan.merges.length,
+					retiredEdges: plan.retiredEdges.length,
+					retiredNodes: plan.retiredNodes.length,
+					changed: plan.changed,
+					now: plan.now,
+				},
+				mergesApplied: applied.mergesApplied,
+				retirementsApplied: applied.retirementsApplied,
+				applied: true,
+			};
+		},
+
 		async syncPush(
 			_input: SyncPushInput,
 			signal?: AbortSignal,
@@ -1050,9 +1225,15 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	}
 
 	/**
-	 * Run rule-based graph extraction over a text blob and persist any facts
+	 * Run the configured graph extractor over a text blob and persist any facts
 	 * (nodes + edges) to the graph store and lexical index. Best-effort:
 	 * extraction or persistence failures never break the caller.
+	 *
+	 * The extractor is either a configured LLM adapter or the zero-config
+	 * rule-based fallback (ADR 0004); both satisfy the {@link Extractor} contract,
+	 * so the write fan-out calls one shape. Contradictions an adapter reports
+	 * (same subject + predicate, disagreeing object) become `supersedes` edges
+	 * the consolidation pass later consumes to mark facts retired.
 	 *
 	 * @internal
 	 */
@@ -1065,19 +1246,35 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				sourceType: source.sourceType,
 				sourceId: source.sourceId,
 			};
-			const extracted = extractGraphFactsRuleBased({
+			const result = await extractor.extract({
 				text,
 				sourceRef,
 				defaultNodeType: "concept",
 			});
-			if (extracted.nodes.length === 0 && extracted.edges.length === 0) {
+			// Normalize any reported contradictions into `supersedes` edges so the
+			// graph encodes them uniformly (consolidation reads both shapes, but a
+			// single edge stream keeps the store's invariants the source of truth).
+			const contradictionEdges: GraphEdge[] = (result.contradictions ?? []).map(
+				(c) => ({
+					from: c.from,
+					to: c.to,
+					type: c.type === "" ? "supersedes" : c.type,
+					directed: true,
+					weight: 0.5,
+					confidence: 0.5,
+					sourceRefs: [sourceRef],
+					metadata: { extractor: extractor.name, contradiction: true },
+				}),
+			);
+			const edges = [...result.edges, ...contradictionEdges];
+			if (result.nodes.length === 0 && edges.length === 0) {
 				return;
 			}
 			// Persist nodes first, then mirror into the fast-path map + lexical
 			// index so a later edge failure does not discard the nodes.
-			if (extracted.nodes.length > 0) {
-				await graphStore.upsertNodes(extracted.nodes);
-				for (const node of extracted.nodes) {
+			if (result.nodes.length > 0) {
+				await graphStore.upsertNodes(result.nodes);
+				for (const node of result.nodes) {
 					graphNodes.set(node.id, toGraphNodeInput(node));
 					indexLexical({
 						id: `graph:${node.id}`,
@@ -1087,7 +1284,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			}
 			// Edges reference the nodes above; persist best-effort (the store
 			// validates references and may reject self-loops or duplicates).
-			for (const edge of extracted.edges) {
+			for (const edge of edges) {
 				try {
 					await graphStore.upsertEdges([edge]);
 					graphEdges.set(stableEdgeKey(edge.from, edge.type, edge.to), {

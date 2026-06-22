@@ -7,6 +7,9 @@
  * @internal
  */
 
+import { NOTES_MEMORY_PATH } from "../core/constants/memory-paths";
+import { classifyDurability } from "../security/durability-tier";
+import { assertWriteAllowed } from "../security/secret-blocklist";
 import { buildContext, paginateArray } from "./helpers";
 import type {
 	AgentSessionCompleteInput,
@@ -14,6 +17,8 @@ import type {
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
 	GraphEdgeInput,
 	GraphNeighborsInput,
 	GraphNodeInput,
@@ -142,6 +147,22 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<WriteMemoryResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
+			// Mirror write intelligence (ADR 0009 Component 6) so the in-memory fake
+			// stays honest with the real local strategy: blocklist rejects secrets,
+			// tier classifier decides durability. Transient memories are still
+			// stored here (the audit trail), they just report their tier.
+			assertWriteAllowed(
+				[input.content, ...(input.title === undefined ? [] : [input.title])],
+				NOTES_MEMORY_PATH,
+			);
+			const tierDecision = classifyDurability({
+				content: input.content,
+				...(input.kind === undefined ? {} : { kind: input.kind }),
+				...(input.confidence === undefined
+					? {}
+					: { confidence: input.confidence }),
+				...(input.tier === undefined ? {} : { tier: input.tier }),
+			});
 			const id = `note_${notes.size + 1}`;
 			notes.set(id, {
 				id,
@@ -160,6 +181,8 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			return {
 				id,
 				created: true,
+				tier: tierDecision.tier,
+				tierReason: tierDecision.reason,
 				...(input.sourceRefs === undefined
 					? {}
 					: { sourceRefs: input.sourceRefs }),
@@ -440,6 +463,118 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 				},
 				"graph:edges",
 			);
+		},
+
+		async consolidateMemory(
+			input: ConsolidateMemoryInput,
+			signal?: AbortSignal,
+		): Promise<ConsolidateMemoryResult> {
+			if (signal?.aborted) throw new Error("Operation aborted.");
+			const apply = input.apply ?? true;
+			const now = input.now ?? new Date().toISOString();
+			const supersedingType = input.supersedingEdgeType ?? "supersedes";
+
+			// Duplicate-label merges: two active nodes sharing a canonical label.
+			const byLabel = new Map<string, GraphNodeInput[]>();
+			for (const node of nodes.values()) {
+				if (node.status !== undefined && node.status !== "active") continue;
+				const key = node.label.trim().toLowerCase();
+				if (key.length === 0) continue;
+				const bucket = byLabel.get(key) ?? [];
+				bucket.push(node);
+				byLabel.set(key, bucket);
+			}
+			const mergeCount = [...byLabel.values()].filter(
+				(b) => b.length >= 2,
+			).length;
+			// Supersession retirements: edges whose `to` is pointed at by a
+			// `supersedes` edge retire that node + referencing edges.
+			const supersededNodeIds = new Set<string>();
+			for (const edge of edges.values()) {
+				if (edge.type !== supersedingType) continue;
+				if (edge.status !== undefined && edge.status !== "active") continue;
+				supersededNodeIds.add(edge.to);
+			}
+			const retiredEdgeCount = [...edges.values()].filter(
+				(e) =>
+					e.status !== "deprecated" &&
+					e.type !== supersedingType &&
+					(supersededNodeIds.has(e.from) || supersededNodeIds.has(e.to)),
+			).length;
+
+			const changed =
+				mergeCount > 0 || retiredEdgeCount > 0 || supersededNodeIds.size > 0;
+
+			if (!apply || !changed) {
+				return {
+					plan: {
+						merges: mergeCount,
+						retiredEdges: retiredEdgeCount,
+						retiredNodes: supersededNodeIds.size,
+						changed,
+						now,
+					},
+					mergesApplied: 0,
+					retirementsApplied: 0,
+					applied: false,
+				};
+			}
+
+			// Apply merges: absorb each duplicate into the earliest node.
+			let mergesApplied = 0;
+			for (const bucket of byLabel.values()) {
+				if (bucket.length < 2) continue;
+				const sorted = [...bucket].sort((a, b) => a.id.localeCompare(b.id));
+				const target = sorted[0];
+				if (!target) continue;
+				for (const source of sorted.slice(1)) {
+					if (source === target) continue;
+					nodes.delete(source.id);
+					// Rewrite edges that referenced the absorbed node.
+					for (const [key, edge] of [...edges.entries()]) {
+						if (edge.from !== source.id && edge.to !== source.id) continue;
+						edges.delete(key);
+						edges.set(key, {
+							...edge,
+							from: edge.from === source.id ? target.id : edge.from,
+							to: edge.to === source.id ? target.id : edge.to,
+						});
+					}
+					mergesApplied += 1;
+				}
+			}
+			// Apply retirements.
+			let retirementsApplied = 0;
+			for (const [key, edge] of [...edges.entries()]) {
+				if (edge.type === supersedingType) continue;
+				if (edge.status === "deprecated") continue;
+				if (
+					!supersededNodeIds.has(edge.from) &&
+					!supersededNodeIds.has(edge.to)
+				)
+					continue;
+				edges.set(key, { ...edge, status: "deprecated" });
+				retirementsApplied += 1;
+			}
+			for (const id of supersededNodeIds) {
+				const node = nodes.get(id);
+				if (!node) continue;
+				nodes.set(id, { ...node, status: "deprecated" });
+				retirementsApplied += 1;
+			}
+
+			return {
+				plan: {
+					merges: mergeCount,
+					retiredEdges: retiredEdgeCount,
+					retiredNodes: supersededNodeIds.size,
+					changed,
+					now,
+				},
+				mergesApplied,
+				retirementsApplied,
+				applied: true,
+			};
 		},
 
 		async syncPush(

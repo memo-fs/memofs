@@ -218,3 +218,180 @@ describe("best-effort write path (failing embedder)", () => {
 		}
 	});
 });
+
+/**
+ * Consolidation end-to-end: the second half of v1 intelligence (ADR 0004).
+ * Extraction grows the graph from prose; consolidation keeps it tidy by
+ * retiring facts a `supersedes` edge marks as replaced — without ever deleting
+ * (the audit trail is preserved).
+ */
+describe("consolidation (end-to-end)", () => {
+	it("previews the plan without persisting when apply is false", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
+
+			// The rule-based extractor emits a `supersedes` edge from this prose.
+			await memo.notes.record({
+				content: "OAuth2 supersedes JWT for authentication.",
+				kind: "decision",
+			});
+
+			const preview = await memo.consolidate({ apply: false });
+			expect(preview.applied).toBe(false);
+			expect(preview.mergesApplied).toBe(0);
+			expect(preview.retirementsApplied).toBe(0);
+			// The plan still describes what *would* change.
+			expect(preview.plan.changed).toBe(true);
+			expect(preview.plan.retiredNodes).toBeGreaterThan(0);
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it("retires a superseded fact and preserves the audit trail when applied", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
+
+			await memo.notes.record({
+				content: "OAuth2 supersedes JWT for authentication.",
+				kind: "decision",
+			});
+
+			const result = await memo.consolidate({ apply: true });
+			expect(result.applied).toBe(true);
+			expect(result.plan.retiredNodes).toBeGreaterThan(0);
+			// At least the superseded node should be retired; the JWT node was
+			// extracted from prose and marked deprecated by the pass.
+			expect(result.retirementsApplied).toBeGreaterThanOrEqual(1);
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it("reports an unchanged plan when there is nothing to consolidate", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
+			// No supersession, no duplicates.
+			await memo.notes.record({
+				content: "TekMemo uses BM25 for lexical recall.",
+				kind: "reference",
+			});
+			const result = await memo.consolidate();
+			expect(result.plan.changed).toBe(false);
+			expect(result.applied).toBe(false);
+		} finally {
+			await cleanup();
+		}
+	});
+});
+
+/**
+ * The staleness loop (ADR 0009 Component 5): consolidation retires a superseded
+ * fact, and recall must stop serving it. Before the fix, `runLexicalRecall`
+ * served graph facts from the BM25 store without ever consulting node status, so
+ * a `deprecated` JWT kept surfacing after "OAuth2 supersedes JWT" was
+ * consolidated. The fix is two-layer: consolidation eagerly prunes the retired
+ * node's lexical doc (the disposable index prunes), and recall lazily skips any
+ * `graph:*` hit whose node is `deprecated` (safety net for manual deprecations).
+ */
+describe("staleness loop — recall honors consolidation retirements", () => {
+	it("does not surface a superseded graph fact in recall after consolidation", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				rootDir,
+				projectId: "staleness",
+				mode: "local",
+			});
+
+			// The rule-based extractor emits a `supersedes` edge (JWT → retired)
+			// and indexes both nodes into the lexical store under `graph:{id}`.
+			await memo.notes.record({
+				content: "OAuth2 supersedes JWT for authentication.",
+				kind: "decision",
+			});
+
+			// Identify the JWT graph node's lexical doc id before consolidation.
+			const nodesBefore = await memo.graph.listNodes({ limit: 50 });
+			const jwtNode = nodesBefore.items.find(
+				(n) => /jwt/i.test(n.label) && !/oauth/i.test(n.label),
+			);
+			expect(jwtNode).toBeDefined();
+			const jwtDocId = `graph:${(jwtNode as NonNullable<typeof jwtNode>).id}`;
+
+			// Sanity: the JWT graph doc is served before consolidation.
+			const before = await memo.recall("JWT authentication", { limit: 10 });
+			expect(before.items.some((item) => item.id === jwtDocId)).toBe(true);
+
+			// Consolidate: the JWT node is marked `deprecated` and pruned from the
+			// disposable lexical index.
+			const result = await memo.consolidate({ apply: true });
+			expect(result.applied).toBe(true);
+			expect(result.plan.retiredNodes).toBeGreaterThan(0);
+
+			// After consolidation, recall must not serve the retired JWT graph
+			// doc. (The note chunk recording the supersession may still match —
+			// that's the audit trail, not the retired fact.)
+			const after = await memo.recall("JWT authentication", { limit: 10 });
+			expect(after.items.some((item) => item.id === jwtDocId)).toBe(false);
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it("drops a manually deprecated graph node from lexical recall", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				rootDir,
+				projectId: "staleness",
+				mode: "local",
+			});
+
+			// "uses" triggers the rule-based extractor so a Fly.io node exists to
+			// deprecate. (A sentence with no relation verb extracts nothing.)
+			await memo.notes.record({
+				content: "TekMemo uses Fly.io for deployment.",
+				kind: "decision",
+			});
+
+			const nodes = await memo.graph.listNodes({ limit: 50 });
+			const flyNode = nodes.items.find((n) => /fly\.io/i.test(n.label));
+			expect(flyNode).toBeDefined();
+			const typedFlyNode = flyNode as NonNullable<typeof flyNode>;
+			const flyDocId = `graph:${typedFlyNode.id}`;
+
+			// Sanity: the Fly.io graph doc is retrievable before deprecation.
+			const before = await memo.recall("Fly deployment", { limit: 10 });
+			expect(before.items.some((item) => item.id === flyDocId)).toBe(true);
+
+			// Manually deprecate the Fly.io node (bypassing consolidation) to prove
+			// the lazy filter is the real guarantee, not just the eager prune.
+			await memo.graph.upsertNodes({
+				nodes: [{ ...typedFlyNode, status: "deprecated" }],
+			});
+
+			// The lazy filter must drop the deprecated node from BM25 results even
+			// though no consolidation pass ran.
+			const after = await memo.recall("Fly deployment", { limit: 10 });
+			expect(after.items.some((item) => item.id === flyDocId)).toBe(false);
+		} finally {
+			await cleanup();
+		}
+	});
+});

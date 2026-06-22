@@ -23,6 +23,8 @@ export type {
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
 	GraphEdgeInput,
 	GraphNeighborsInput,
 	GraphNodeInput,

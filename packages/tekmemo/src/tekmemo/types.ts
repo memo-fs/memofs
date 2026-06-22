@@ -7,6 +7,11 @@
  * @public
  */
 
+import type {
+	DurabilityReason,
+	DurabilityTier,
+} from "../security/durability-tier";
+
 export type TekMemoRuntimeMode = "local" | "hybrid" | "memory";
 
 export type RuntimeReadPolicy = "local-first" | "cloud-first" | "local-only";
@@ -97,12 +102,29 @@ export interface WriteMemoryInput {
 	metadata?: JsonObject;
 	confidence?: number;
 	source?: string;
+	/**
+	 * Optional explicit durability tier override (ADR 0009 Component 6). When
+	 * set, the classifier returns it verbatim; when omitted, the deterministic
+	 * classifier decides from `kind` + `confidence` + content shape. `transient`
+	 * memories are written to `notes.md` (audit trail) but not indexed into
+	 * recall/graph — they don't pollute retrieval.
+	 */
+	tier?: DurabilityTier;
 }
 
 export interface WriteMemoryResult {
 	id: string;
 	created: boolean;
 	sourceRefs?: SourceRef[];
+	/**
+	 * The durability tier the write was classified into (ADR 0009 Component 6).
+	 * `transient` means the memory was written to `notes.md` but **not** indexed
+	 * into recall/graph. Always present on a successful write so callers can
+	 * audit the decision.
+	 */
+	tier: DurabilityTier;
+	/** Why the classifier chose `tier` (auditable; the benchmark kit reads it). */
+	tierReason: DurabilityReason;
 	warnings?: string[];
 }
 
@@ -276,6 +298,64 @@ export interface GraphPathResult {
 	edges: GraphEdgeInput[];
 	totalWeight?: number;
 	totalCost?: number;
+}
+
+/**
+ * Input to a memory consolidation pass.
+ *
+ * Consolidation is a local, deterministic pass that merges duplicate entities
+ * and retires superseded facts — never deleting (the audit trail is preserved).
+ * It runs over the whole graph snapshot, so the input carries only optional
+ * knobs (an override for "now" and the edge type that expresses supersession).
+ *
+ * @public
+ */
+export interface ConsolidateMemoryInput {
+	workspaceId?: string;
+	projectId?: string;
+	/**
+	 * When `true` (default), the computed plan is persisted to the graph store
+	 * (merges applied, edges/nodes marked `deprecated`). When `false`, the pass
+	 * is read-only — useful for previewing what a consolidation would change.
+	 */
+	apply?: boolean;
+	/**
+	 * Override the `now` timestamp stamped onto every retirement, for
+	 * deterministic tests. Defaults to the current ISO time.
+	 */
+	now?: string;
+	/**
+	 * Edge type that expresses "A replaces B". Defaults to `"supersedes"` — the
+	 * type the rule-based extractor and the contradiction normalization in
+	 * `autoExtractGraph` both emit.
+	 */
+	supersedingEdgeType?: string;
+}
+
+/**
+ * Result of a memory consolidation pass.
+ *
+ * Carries both the computed {@link ConsolidationResult} plan (what *would*
+ * change) and the counts actually applied (which may be lower when `apply` is
+ * `false` or the store rejected individual operations).
+ *
+ * @public
+ */
+export interface ConsolidateMemoryResult {
+	/** The full plan: merges + retirements that consolidation proposed. */
+	plan: {
+		merges: number;
+		retiredEdges: number;
+		retiredNodes: number;
+		changed: boolean;
+		now: string;
+	};
+	/** How many merges were actually persisted (`0` when `apply` is `false`). */
+	mergesApplied: number;
+	/** How many retirements were actually persisted (`0` when `apply` is `false`). */
+	retirementsApplied: number;
+	/** Whether the plan was persisted. */
+	applied: boolean;
 }
 
 export interface TekMemoHealthResult {

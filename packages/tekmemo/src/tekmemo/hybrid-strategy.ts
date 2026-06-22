@@ -21,6 +21,8 @@ import type {
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
 	GraphEdgeInput,
 	GraphNeighborsInput,
 	GraphNodeInput,
@@ -257,6 +259,13 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<{ items: GraphEdgeInput[]; nextCursor?: string }> {
 			return local.listGraphEdges(input, signal);
+		},
+
+		async consolidateMemory(
+			input: ConsolidateMemoryInput,
+			signal?: AbortSignal,
+		): Promise<ConsolidateMemoryResult> {
+			return local.consolidateMemory(input, signal);
 		},
 
 		// --- Sync surface: the four file-replica methods (§7) ---------------

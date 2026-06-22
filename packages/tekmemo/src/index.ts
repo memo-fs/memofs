@@ -67,6 +67,10 @@ export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
+// Write intelligence (ADR 0009 Component 6): secret/PII blocklist gate +
+// durability tier classifier.
+export * from "./security/durability-tier";
+export * from "./security/secret-blocklist";
 export type { RecallResult } from "./tekmemo";
 export * from "./tekmemo";
 export * from "./testing";
