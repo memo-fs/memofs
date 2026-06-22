@@ -170,7 +170,9 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 					: { confidence: input.confidence }),
 				...(input.tier === undefined ? {} : { tier: input.tier }),
 			});
-			const id = `note_${notes.size + 1}`;
+			// Q3 (ADR 0002): honor a caller-supplied stable id so the in-memory fake
+			// stays honest with the local strategy's connector-write discipline.
+			const id = input.id ?? `note_${notes.size + 1}`;
 			notes.set(id, {
 				id,
 				content: input.content,

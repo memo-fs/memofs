@@ -50,5 +50,9 @@ examples/**/.tekmemo/
 # Sub-package runtime data (regenerable; root .tekmemo/ is the project's own store)
 packages/**/.tekmemo/
 
+# Connector secrets (ADR 0002): never synced, never committed. Tokens are resolved
+# at run time from an opaque secretRef; this local file is a dev convenience only.
+.tekmemo/secrets.json
+
 # Wrangler build cache
 .wrangler/

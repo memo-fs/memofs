@@ -188,6 +188,15 @@ export interface WriteMemoryInput {
 	confidence?: number;
 	source?: string;
 	/**
+	 * Optional caller-supplied stable memory id. When set, the strategy uses it
+	 * verbatim instead of computing the default `mem_<wall-clock:content>` hash.
+	 * This is the Q3 (ADR 0002) connector-write-discipline hook: connectors pass
+	 * a content-derived id with no wall-clock in the hashed bytes, so re-ingesting
+	 * unchanged external content reproduces identical bytes → the sync manifest
+	 * reports "no change". When omitted, the strategy's default id is computed.
+	 */
+	id?: string;
+	/**
 	 * Optional explicit durability tier override (ADR 0009 Component 6). When
 	 * set, the classifier returns it verbatim; when omitted, the deterministic
 	 * classifier decides from `kind` + `confidence` + content shape. `transient`

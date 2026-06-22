@@ -585,7 +585,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			});
 			const durable = tierDecision.tier === "durable";
 			const now = new Date().toISOString();
-			const id = `mem_${hash(`${now}:${input.content}`).slice(0, 16)}`;
+			// Q3 (ADR 0002): a caller-supplied stable id (e.g. a content-derived
+			// connector id) wins over the default wall-clock-seeded hash. Omitted →
+			// unchanged historical behavior.
+			const id =
+				input.id ?? `mem_${hash(`${now}:${input.content}`).slice(0, 16)}`;
 			await appendTimestampedNote(store, {
 				timestamp: now,
 				kind: input.kind ?? "note",
