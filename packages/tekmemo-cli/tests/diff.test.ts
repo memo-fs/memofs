@@ -6,6 +6,17 @@ import {
 import { describe, expect, it } from "vitest";
 import { runTekMemoCli } from "../src";
 
+/**
+ * Releases the Q28 advisory lock held by a direct Tekmemo so a subsequent CLI
+ * write call (e.g. `snapshot`) on the same root can acquire it. The local
+ * single-writer contract (Q28) forbids two live writers on one `.tekmemo/`
+ * root, so a direct memo must be disposed before interleaving CLI writes.
+ */
+async function releaseLock(memo: Tekmemo): Promise<void> {
+	const store = memo.store as { dispose?: () => Promise<void> };
+	await store.dispose?.();
+}
+
 describe("diff", () => {
 	it("compares two snapshots", async () => {
 		const temp = await createTempTekMemoDir();
@@ -19,14 +30,17 @@ describe("diff", () => {
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nFirst version.\n",
 			);
+			await releaseLock(memo);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v1"],
 			});
 
-			await memo.store.write(
+			const memo2 = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo2.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nSecond version.\n",
 			);
+			await releaseLock(memo2);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v2"],
 			});
@@ -79,14 +93,17 @@ describe("diff", () => {
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nAlpha.\n",
 			);
+			await releaseLock(memo);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "alpha"],
 			});
 
-			await memo.store.write(
+			const memo2 = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo2.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nBeta.\n",
 			);
+			await releaseLock(memo2);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "beta"],
 			});

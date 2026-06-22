@@ -159,6 +159,13 @@ export async function runTekMemoCli(
 	let currentCommand = "tekmemo";
 	let wantsJson = input.argv.includes("--json") || input.argv.includes("-j");
 
+	// Tracks the Tekmemo instance constructed per command action so we can
+	// release its underlying store (and the Q28 advisory lock) when the CLI
+	// invocation finishes. The local single-writer contract (Q28) holds the
+	// `.tekmemo/.lock` for the lifetime of a process; disposing here lets a
+	// subsequent CLI call — or a direct Tekmemo on the same root — acquire it.
+	let activeMemo: Tekmemo | undefined;
+
 	const program = new Command();
 	program
 		.name("tekmemo")
@@ -247,6 +254,7 @@ export async function runTekMemoCli(
 			readPolicy: opts.readPolicy,
 			writePolicy: opts.writePolicy,
 		});
+		activeMemo = memo;
 		return {
 			root,
 			json: Boolean(opts.json),
@@ -902,6 +910,16 @@ export async function runTekMemoCli(
 			else output.error(message);
 		}
 		return { exitCode, stdout: output.stdout, stderr: output.stderr };
+	} finally {
+		// Release the Q28 advisory lock held by this invocation's store so a
+		// subsequent CLI call or a direct Tekmemo on the same root can acquire
+		// it. `dispose` is only present on the concrete fs store (not the
+		// MemoryStore contract), so it is optional here.
+		const store = activeMemo?.store as
+			| { dispose?: () => Promise<void> }
+			| undefined;
+		await store?.dispose?.();
+		activeMemo = undefined;
 	}
 }
 
