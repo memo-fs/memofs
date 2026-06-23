@@ -131,61 +131,8 @@ Performs strict protocol validation. Useful for CI pipelines.
 npx tekmemo validate
 ```
 
+## See also
 
-
-# Agent Commands
-
-These commands manage local AgentFS sandboxes for AI coding agents.
-
-## `agent start`
-Starts a new tracked session for an agent.
-
-```bash
-npx tekmemo agent start --task "Refactor auth"
-```
-
-## `agent paths`
-Prints the standard file paths for the active session.
-
-```bash
-npx tekmemo agent paths
-```
-
-## `agent extract`
-Extracts summaries and durable memory from an active session.
-
-```bash
-npx tekmemo agent extract
-```
-
-## `agent complete`
-Completes the session and writes extracted memory back to the project.
-
-```bash
-npx tekmemo agent complete --extract
-```
-
-# Cloud Commands
-
-The `cloud` namespace allows you to execute commands directly against TekMemo Cloud or a self-hosted API.
-
-## Core Cloud Commands
-
-Many local commands have cloud equivalents:
-- `npx tekmemo cloud remember "Note"`
-- `npx tekmemo cloud read notes`
-- `npx tekmemo cloud context --query "schema"`
-- `npx tekmemo cloud recall --query "billing"`
-
-## Cloud Sync
-
-- `npx tekmemo cloud sync status` - Check sync status.
-- `npx tekmemo cloud sync pull` - Pull events.
-- `npx tekmemo cloud sync push` - Push local events.
-
-## Cloud Graph
-
-- `npx tekmemo cloud graph list-nodes`
-- `npx tekmemo cloud graph create-node`
-
-*(For a full list of cloud commands, run `npx tekmemo cloud --help`)*
+- [Agent workflow](./agent-workflow.md) — the `agent start` / `paths` / `extract` / `complete` commands for AgentFS-backed coding sessions.
+- [Cloud commands](./cloud-commands.md) — the `cloud` namespace (health, readiness, sync).
+- [Connectors](../tekmemo/connectors.md) — the `connectors add` / `remove` / `list` / `run` commands for external-source ingestion.
