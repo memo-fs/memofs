@@ -29,7 +29,7 @@
 		"lint:package": "publint"
 	},
 	"devDependencies": {
-		"@repo/tsdown-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*"
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*"
 	}
 }

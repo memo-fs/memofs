@@ -1,3 +1,9 @@
+/**
+ * Main entry point exporting all CLI command runner functions.
+ *
+ * @module commands
+ */
+
 export {
 	runAgentCompleteCommand,
 	runAgentExtractCommand,
@@ -6,55 +12,31 @@ export {
 } from "./agent";
 export { runChunksCommand } from "./chunks";
 export {
-	runCloudBenchmarksRunCommand,
-	runCloudContextCommand,
-	runCloudContextComposeCommand,
-	runCloudEvalsRunCommand,
-	runCloudExportsCreateCommand,
-	runCloudExportsDownloadCommand,
-	runCloudExtractionJobsCommand,
-	runCloudExtractionRunCommand,
-	runCloudGraphCreateEdgeCommand,
-	runCloudGraphCreateNodeCommand,
-	runCloudGraphListEdgesCommand,
-	runCloudGraphListNodesCommand,
-	runCloudGraphNeighborsCommand,
-	runCloudGraphPathCommand,
 	runCloudHealthCommand,
-	runCloudProvidersCreateCommand,
-	runCloudProvidersListCommand,
-	runCloudProvidersTestCommand,
-	runCloudReadCommand,
 	runCloudReadinessCommand,
-	runCloudRecallCommand,
-	runCloudRecallIndexCommand,
-	runCloudRecentCommand,
-	runCloudRememberCommand,
-	runCloudSnapshotCommand,
-	runCloudSnapshotsCreateCommand,
-	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-	runCloudSyncResolveCommand,
 	runCloudSyncStatusCommand,
-	runCloudUpdateCoreCommand,
-	runCloudValidateCommand,
 } from "./cloud";
+export {
+	runConnectorsAddCommand,
+	runConnectorsListCommand,
+	runConnectorsRemoveCommand,
+	runConnectorsRunCommand,
+} from "./connectors";
 export { runContextCommand } from "./context";
 export { runDiffCommand } from "./diff";
 export { runDoctorCommand } from "./doctor";
 export { runEventsCommand } from "./events";
+export {
+	AGENT_RULES_TARGETS,
+	MAX_AGENT_RULES_LINES,
+	runGenerateAgentRulesCommand,
+} from "./generate";
 export { runInitCommand } from "./init";
 export { runInspectCommand } from "./inspect";
 export { runReadCommand } from "./read";
 export { runRememberCommand } from "./remember";
-export {
-	runRuntimeContextCommand,
-	runRuntimeReadCommand,
-	runRuntimeRememberCommand,
-	runRuntimeSnapshotCommand,
-	runRuntimeValidateCommand,
-} from "./runtime";
 export { runSearchCommand } from "./search";
 export { runSnapshotCommand } from "./snapshot";
 export { runValidateCommand } from "./validate";

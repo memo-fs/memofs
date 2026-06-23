@@ -1,21 +1,13 @@
-export {
-	type CloudConnectionOptions,
-	cloudConnectionSummary,
-	createCliCloudClient,
-	formatCloudError,
-	type NormalizedCloudConnectionOptions,
-	normalizeCloudConnectionOptions,
-	toCloudClientOptions,
-} from "./cloud";
-export type {
-	CliRuntimeFlags,
-	ResolvedCliRuntimeConfig,
-	TekMemoConfigFile,
-	TekMemoReadPolicy,
-	TekMemoRuntimeMode,
-	TekMemoWritePolicy,
-} from "./config";
-export { resolveCliRuntimeConfig, writeDefaultCliConfig } from "./config";
+/**
+ * Main entry point exporting the public API for the TekMemo CLI library.
+ *
+ * @module index
+ */
+
+export type { CliTekmemoOptions } from "./cli/tekmemo";
+export { createTekmemoFromCli } from "./cli/tekmemo";
+export type { TekMemoConfigFile } from "./config";
+export { configSchemaUrl, writeDefaultCliConfig } from "./config";
 export type { CliErrorCode } from "./errors/cli-errors";
 export {
 	CliError,
@@ -25,8 +17,6 @@ export {
 	CliUsageError,
 	CliValidationError,
 } from "./errors/cli-errors";
-export type { TekMemoFileSystemOptions } from "./fs/tekmemo-fs";
-export { TekMemoFileSystem } from "./fs/tekmemo-fs";
 export type {
 	BufferedOutputOptions,
 	CliOutput,

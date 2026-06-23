@@ -1,144 +1,53 @@
+/**
+ * CLI config file writer for `.tekmemo/config.json`.
+ *
+ * Config resolution (env vars, flags, config file merging) is now handled by
+ * `Tekmemo`'s internal `resolveTekmemoConfig` — this module only retains the
+ * `writeDefaultCliConfig` function for the `tekmemo config init` command.
+ *
+ * @module runtime
+ */
+
 import fs from "node:fs/promises";
 import path from "node:path";
-import { CliUsageError } from "../errors/cli-errors";
-
-export type TekMemoRuntimeMode = "local" | "cloud" | "hybrid";
-export type TekMemoReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-export type TekMemoWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
+import pkg from "../../package.json" with { type: "json" };
 
 export interface TekMemoConfigFile {
-	runtime?: TekMemoRuntimeMode;
+	/** JSON Schema URL for editor validation of `.tekmemo/config.json`. */
+	$schema?: string;
+	runtime?: "local" | "hybrid" | "memory";
 	root?: string;
+	projectId?: string;
+	workspaceId?: string;
 	cloud?: {
 		baseUrl?: string;
-		workspaceId?: string;
-		projectId?: string;
-		timeoutMs?: number;
-	};
-	hybrid?: {
-		readPolicy?: TekMemoReadPolicy;
-		writePolicy?: TekMemoWritePolicy;
-	};
-}
-
-export interface CliRuntimeFlags {
-	root?: string;
-	runtime?: string;
-	cloudUrl?: string;
-	apiKey?: string;
-	workspaceId?: string;
-	projectId?: string;
-	timeoutMs?: string | number;
-	readPolicy?: string;
-	writePolicy?: string;
-}
-
-export interface ResolvedCliRuntimeConfig {
-	runtime: TekMemoRuntimeMode;
-	root: string;
-	configPath: string;
-	configLoaded: boolean;
-	cloud: {
-		cloudUrl?: string;
 		apiKey?: string;
 		workspaceId?: string;
 		projectId?: string;
 		timeoutMs?: number;
 	};
-	hybrid: {
-		readPolicy: TekMemoReadPolicy;
-		writePolicy: TekMemoWritePolicy;
+	hybrid?: {
+		readPolicy?: "local-first" | "cloud-first" | "local-only";
+		writePolicy?: "local-first" | "cloud-first" | "local-only";
 	};
 }
 
-export async function resolveCliRuntimeConfig(input: {
-	cwd: string;
-	flags?: CliRuntimeFlags;
-	env?: NodeJS.ProcessEnv;
-}): Promise<ResolvedCliRuntimeConfig> {
-	const flags = input.flags ?? {};
-	const env = input.env ?? process.env;
-	const initialRoot =
-		firstNonEmpty(flags.root, env.TEKMEMO_ROOT, input.cwd) ?? input.cwd;
-	const configPath = path.join(
-		path.resolve(input.cwd, initialRoot),
-		".tekmemo",
-		"config.json",
-	);
-	const config = await readOptionalConfig(configPath);
-	const configRoot = config.value?.root;
-	const root = path.resolve(
-		input.cwd,
-		firstNonEmpty(flags.root, env.TEKMEMO_ROOT, configRoot, initialRoot) ??
-			initialRoot,
-	);
-	const runtime = normalizeRuntime(
-		firstNonEmpty(
-			flags.runtime,
-			env.TEKMEMO_RUNTIME,
-			config.value?.runtime,
-			"local",
-		),
-	);
-	const readPolicy = normalizeReadPolicy(
-		firstNonEmpty(
-			flags.readPolicy,
-			env.TEKMEMO_READ_POLICY,
-			config.value?.hybrid?.readPolicy,
-			"local-first",
-		),
-	);
-	const writePolicy = normalizeWritePolicy(
-		firstNonEmpty(
-			flags.writePolicy,
-			env.TEKMEMO_WRITE_POLICY,
-			config.value?.hybrid?.writePolicy,
-			"local-first",
-		),
-	);
-	const timeoutValue = firstDefined(
-		flags.timeoutMs,
-		env.TEKMEMO_CLOUD_TIMEOUT_MS,
-		config.value?.cloud?.timeoutMs,
-	);
-	const timeoutMs = normalizeTimeoutMs(timeoutValue);
-	return {
-		runtime,
-		root,
-		configPath,
-		configLoaded: config.loaded,
-		cloud: compactCloud({
-			cloudUrl: firstNonEmpty(
-				flags.cloudUrl,
-				env.TEKMEMO_CLOUD_URL,
-				env.TEKMEMO_API_URL,
-				config.value?.cloud?.baseUrl,
-			),
-			apiKey: firstNonEmpty(flags.apiKey, env.TEKMEMO_API_KEY),
-			workspaceId: firstNonEmpty(
-				flags.workspaceId,
-				env.TEKMEMO_WORKSPACE_ID,
-				config.value?.cloud?.workspaceId,
-			),
-			projectId: firstNonEmpty(
-				flags.projectId,
-				env.TEKMEMO_PROJECT_ID,
-				config.value?.cloud?.projectId,
-			),
-			...(timeoutMs !== undefined ? { timeoutMs } : {}),
-		}),
-		hybrid: { readPolicy, writePolicy },
-	};
+/**
+ * Canonical JSON Schema URL for a given TekMemo version.
+ *
+ * Used as the `$schema` line in `.tekmemo/config.json` so editors validate
+ * against the version-appropriate schema.
+ */
+export function configSchemaUrl(version: string): string {
+	return `https://docs.memo.tekbreed.com/${version}/config.schema.json`;
 }
 
+/**
+ * Seeds or overrides a local workspace config file (`.tekmemo/config.json`) with defaults.
+ *
+ * @param input - Config write instructions.
+ * @returns Status object detailing paths and whether file was created/overwritten.
+ */
 export async function writeDefaultCliConfig(input: {
 	cwd: string;
 	root?: string;
@@ -152,6 +61,7 @@ export async function writeDefaultCliConfig(input: {
 	if (exists && !input.force)
 		return { path: configPath, created: false, overwritten: false };
 	const config = input.config ?? {
+		$schema: configSchemaUrl(pkg.version),
 		runtime: "local",
 		root: ".",
 	};
@@ -163,126 +73,13 @@ export async function writeDefaultCliConfig(input: {
 	return { path: configPath, created: !exists, overwritten: exists };
 }
 
-async function readOptionalConfig(
-	configPath: string,
-): Promise<{ loaded: boolean; value?: TekMemoConfigFile }> {
-	try {
-		const raw = await fs.readFile(configPath, "utf8");
-		const parsed = JSON.parse(raw) as unknown;
-		return { loaded: true, value: validateConfig(parsed, configPath) };
-	} catch (error) {
-		if (isNodeError(error) && error.code === "ENOENT") return { loaded: false };
-		if (error instanceof SyntaxError) {
-			throw new CliUsageError(
-				`Invalid TekMemo config JSON at ${configPath}: ${error.message}`,
-			);
-		}
-		throw error;
-	}
-}
-
-function validateConfig(value: unknown, configPath: string): TekMemoConfigFile {
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new CliUsageError(`TekMemo config must be an object: ${configPath}`);
-	}
-	const record = value as TekMemoConfigFile;
-	if (record.runtime !== undefined) normalizeRuntime(record.runtime);
-	if (record.hybrid?.readPolicy !== undefined)
-		normalizeReadPolicy(record.hybrid.readPolicy);
-	if (record.hybrid?.writePolicy !== undefined)
-		normalizeWritePolicy(record.hybrid.writePolicy);
-	if (record.cloud?.timeoutMs !== undefined)
-		normalizeTimeoutMs(record.cloud.timeoutMs);
-	return record;
-}
-
-function normalizeRuntime(value: unknown): TekMemoRuntimeMode {
-	if (value === "local" || value === "cloud" || value === "hybrid")
-		return value;
-	throw new CliUsageError("runtime must be local, cloud, or hybrid.");
-}
-
-function normalizeReadPolicy(value: unknown): TekMemoReadPolicy {
-	if (
-		value === "local-first" ||
-		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
-	)
-		return value;
-	throw new CliUsageError(
-		"read policy must be local-first, cloud-first, local-only, or cloud-only.",
-	);
-}
-
-function normalizeWritePolicy(value: unknown): TekMemoWritePolicy {
-	if (
-		value === "local-first" ||
-		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
-	)
-		return value;
-	throw new CliUsageError(
-		"write policy must be local-first, cloud-first, local-only, or cloud-only.",
-	);
-}
-
-function normalizeTimeoutMs(value: unknown): number | undefined {
-	if (value === undefined || value === null || value === "") return undefined;
-	const parsed = typeof value === "number" ? value : Number(value);
-	if (!Number.isInteger(parsed) || parsed < 1) {
-		throw new CliUsageError(
-			"cloud timeout must be a positive integer in milliseconds.",
-		);
-	}
-	return parsed;
-}
-
-function firstNonEmpty(...values: unknown[]): string | undefined {
-	for (const value of values) {
-		if (typeof value !== "string") continue;
-		const trimmed = value.trim();
-		if (trimmed) return trimmed;
-	}
-	return undefined;
-}
-
-function firstDefined(...values: unknown[]): unknown {
-	for (const value of values) {
-		if (value !== undefined) return value;
-	}
-	return undefined;
-}
-
-function compactCloud(input: {
-	cloudUrl?: string;
-	apiKey?: string;
-	workspaceId?: string;
-	projectId?: string;
-	timeoutMs?: number;
-}): ResolvedCliRuntimeConfig["cloud"] {
-	return {
-		...(input.cloudUrl !== undefined ? { cloudUrl: input.cloudUrl } : {}),
-		...(input.apiKey !== undefined ? { apiKey: input.apiKey } : {}),
-		...(input.workspaceId !== undefined
-			? { workspaceId: input.workspaceId }
-			: {}),
-		...(input.projectId !== undefined ? { projectId: input.projectId } : {}),
-		...(input.timeoutMs !== undefined ? { timeoutMs: input.timeoutMs } : {}),
-	};
-}
-
 async function fileExists(filePath: string): Promise<boolean> {
 	try {
 		await fs.stat(filePath);
 		return true;
 	} catch (error) {
-		if (isNodeError(error) && error.code === "ENOENT") return false;
+		if (error instanceof Error && "code" in error && error.code === "ENOENT")
+			return false;
 		throw error;
 	}
-}
-
-function isNodeError(error: unknown): error is NodeJS.ErrnoException {
-	return error instanceof Error && "code" in error;
 }

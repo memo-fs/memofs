@@ -1,14 +1,44 @@
+/**
+ * JSON Lines (JSONL) utility functions for reading and writing structured event data.
+ *
+ * @module jsonl
+ */
+
 import { CliJsonlError } from "../errors/cli-errors";
 
+/**
+ * Options configuration for parsing JSONL content.
+ */
 export interface JsonlParseOptions {
+	/**
+	 * If true, any parse error in a line will immediately throw a CliJsonlError.
+	 * If false, malformed lines will be silently ignored.
+	 */
 	strict?: boolean | undefined;
 }
 
+/**
+ * Represents a successfully parsed line from a JSONL file.
+ */
 export interface JsonlRecord {
+	/**
+	 * The 1-based line number in the original source text.
+	 */
 	line: number;
+	/**
+	 * The parsed JSON object representation.
+	 */
 	value: Record<string, unknown>;
 }
 
+/**
+ * Parses JSONL formatted content into an array of JsonlRecord objects.
+ *
+ * @param content - The raw JSONL file content.
+ * @param options - Configuration options controlling strict mode parsing.
+ * @returns Array of parsed JsonlRecord objects.
+ * @throws {CliJsonlError} If strict mode is enabled and a line is malformed or not a JSON object.
+ */
 export function parseJsonl(
 	content: string,
 	options?: JsonlParseOptions,
@@ -51,6 +81,12 @@ export function parseJsonl(
 	return records;
 }
 
+/**
+ * Stringifies an array of objects into a JSONL formatted text block, appending a trailing newline.
+ *
+ * @param records - Array of records/objects to stringify.
+ * @returns Standard newline-delimited JSON string.
+ */
 export function stringifyJsonl(
 	records: readonly Record<string, unknown>[],
 ): string {

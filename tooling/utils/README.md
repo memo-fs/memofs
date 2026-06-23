@@ -139,12 +139,12 @@ await lock.runExclusive("/path/to/file", async () => {
 
 **This package does NOT own:**
 - Package-specific logic
-- Build configuration (see `@repo/tsdown-config`)
-- TypeScript configuration (see `@repo/typescript-config`)
+- Build configuration (see `@repo/tsdown`)
+- TypeScript configuration (see `@repo/typescript`)
 
 ---
 
-## Related packages;
+## Related packages
 
-- `@repo/tsdown-config` — Shared tsdown build configuration
-- `@repo/typescript-config` — Shared TypeScript configurations
+- `@repo/tsdown` — Shared tsdown build configuration
+- `@repo/typescript` — Shared TypeScript configurations

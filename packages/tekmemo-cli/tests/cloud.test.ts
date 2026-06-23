@@ -1,3 +1,8 @@
+import {
+	createTempTekMemoDir,
+	type MemoryPath,
+	TEKMEMO_PATHS,
+} from "@tekbreed/tekmemo";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { runTekMemoCli } from "../src";
 
@@ -6,7 +11,7 @@ describe("cloud commands", () => {
 		vi.unstubAllGlobals();
 	});
 
-	it("builds cloud context through project-scoped @tekbreed/tekmemo/cloud routes", async () => {
+	it("reads cloud sync status (manifest, cursor, storage) through project-scoped sync API", async () => {
 		const calls: string[] = [];
 		const fetchMock = vi.fn(
 			async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -15,144 +20,24 @@ describe("cloud commands", () => {
 				expect((init?.headers as Record<string, string>).Authorization).toBe(
 					"Bearer tk_live_test_123",
 				);
-				if (url.endsWith("/memory/core")) {
-					return new Response(
-						JSON.stringify({
-							data: {
-								content: "# Core\n\nBilling webhooks verify signatures.",
-							},
-							meta: { requestId: "req_core" },
-						}),
-						{ status: 200, headers: { "content-type": "application/json" } },
-					);
-				}
-				if (url.includes("/memory/notes")) {
-					return new Response(
-						JSON.stringify({
-							data: {
-								items: [
-									{
-										id: "note_1",
-										kind: "decision",
-										content: "Use Polar webhook signature verification.",
-									},
-								],
-							},
-							meta: { requestId: "req_notes" },
-						}),
-						{ status: 200, headers: { "content-type": "application/json" } },
-					);
-				}
-				if (url.endsWith("/recall/query")) {
-					expect(JSON.parse(String(init?.body))).toMatchObject({
-						query: "billing",
-						topK: 5,
-					});
-					return new Response(
-						JSON.stringify({
-							data: {
-								items: [
-									{
-										id: "hit_1",
-										text: "Billing webhooks verify signatures.",
-										score: 0.95,
-									},
-								],
-							},
-							meta: { requestId: "req_recall" },
-						}),
-						{ status: 200, headers: { "content-type": "application/json" } },
-					);
-				}
-				throw new Error(`Unexpected URL ${url}`);
-			},
-		);
-		vi.stubGlobal("fetch", fetchMock);
-
-		const result = await runTekMemoCli({
-			argv: [
-				"--json",
-				"cloud",
-				"--cloud-url",
-				"https://memo.tekbreed.com/api/v1",
-				"--api-key",
-				"tk_live_test_123",
-				"--workspace-id",
-				"ws_123",
-				"--project-id",
-				"proj_123",
-				"context",
-				"--query",
-				"billing",
-				"--limit",
-				"5",
-			],
-		});
-
-		expect(result.exitCode).toBe(0);
-		const parsed = JSON.parse(result.stdout.join("\n"));
-		expect(parsed.ok).toBe(true);
-		expect(parsed.command).toBe("cloud.context");
-		expect(parsed.data.text).toContain("Billing webhooks");
-		expect(calls).toEqual([
-			"GET https://memo.tekbreed.com/api/v1/projects/proj_123/memory/core",
-			"GET https://memo.tekbreed.com/api/v1/projects/proj_123/memory/notes?limit=5",
-			"POST https://memo.tekbreed.com/api/v1/projects/proj_123/recall/query",
-		]);
-	});
-
-	it("refuses cloud remember content that looks like a secret before sending request", async () => {
-		const fetchMock = vi.fn();
-		vi.stubGlobal("fetch", fetchMock);
-		const result = await runTekMemoCli({
-			argv: [
-				"--json",
-				"cloud",
-				"--cloud-url",
-				"https://memo.tekbreed.com/api/v1",
-				"--api-key",
-				"tk_live_test_123",
-				"--project-id",
-				"proj_123",
-				"remember",
-				"OPENAI_API_KEY=sk-123456789012345678901234",
-			],
-		});
-
-		expect(result.exitCode).toBe(1);
-		const parsed = JSON.parse(result.stdout.join("\n"));
-		expect(parsed.ok).toBe(true);
-		expect(parsed.data.stored).toBe(false);
-		expect(parsed.data.secretFindings.length).toBeGreaterThan(0);
-		expect(fetchMock).not.toHaveBeenCalled();
-	});
-
-	it("pushes sync events through project-scoped sync API", async () => {
-		const fetchMock = vi.fn(
-			async (input: RequestInfo | URL, init?: RequestInit) => {
-				expect(String(input)).toBe(
-					"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push",
+				expect(url).toBe(
+					"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
 				);
-				expect(JSON.parse(String(init?.body))).toMatchObject({
-					clientId: "cli_test",
-					events: [{ clientEventId: "evt_local_1", type: "memory.write" }],
-				});
 				return new Response(
 					JSON.stringify({
 						data: {
-							accepted: [
-								{
-									clientEventId: "evt_local_1",
-									serverEventId: "srv_1",
-									serverVersion: 1,
+							manifest: {
+								".tekmemo/memory/core.md": {
+									path: ".tekmemo/memory/core.md",
+									sha256: "a".repeat(64),
+									sizeBytes: 42,
 								},
-							],
-							duplicates: [],
-							rejected: [],
-							conflicts: [],
-							serverVersion: 1,
+							},
+							cursor: "cursor_1",
+							storageBytes: 2048,
+							lastSyncAt: "2026-06-19T00:00:00.000Z",
 						},
-						meta: { requestId: "req_sync" },
+						meta: { requestId: "req_status" },
 					}),
 					{ status: 200, headers: { "content-type": "application/json" } },
 				);
@@ -171,18 +56,141 @@ describe("cloud commands", () => {
 				"--project-id",
 				"proj_123",
 				"sync",
-				"push",
-				"--client-id",
-				"cli_test",
-				"--events-json",
-				JSON.stringify([
-					{ clientEventId: "evt_local_1", type: "memory.write" },
-				]),
+				"status",
 			],
 		});
 
 		expect(result.exitCode).toBe(0);
 		const parsed = JSON.parse(result.stdout.join("\n"));
-		expect(parsed.data.serverVersion).toBe(1);
+		expect(parsed.ok).toBe(true);
+		expect(parsed.command).toBe("cloud.sync.status");
+		expect(parsed.data.cursor).toBe("cursor_1");
+		expect(parsed.data.storageBytes).toBe(2048);
+		expect(calls).toEqual([
+			"GET https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
+		]);
+	});
+
+	it("runs the two-phase push (push -> upload -> complete) against project-scoped sync API", async () => {
+		const temp = await createTempTekMemoDir();
+		try {
+			// Seed a canonical file so the local manifest is non-empty.
+			const { Tekmemo } = await import("@tekbreed/tekmemo");
+			const memo = new Tekmemo({
+				rootDir: temp.rootDir,
+				autoBootstrap: false,
+			});
+			await memo.store.write(
+				TEKMEMO_PATHS.memory.core as MemoryPath,
+				"# Core\n\nTwo-phase push smoke test.",
+			);
+
+			const calls: string[] = [];
+			const fetchMock = vi.fn(
+				async (input: RequestInfo | URL, init?: RequestInit) => {
+					const url = String(input);
+					calls.push(`${init?.method ?? "GET"} ${url}`);
+					expect((init?.headers as Record<string, string>).Authorization).toBe(
+						"Bearer tk_live_test_123",
+					);
+
+					if (url.endsWith("/sync/push")) {
+						// Phase 1: server returns presigned upload URLs for changed files.
+						const body = JSON.parse(String(init?.body));
+						expect(body.baseCursor).toBe("cursor_prev");
+						// The manifest must include the seeded core file, keyed by path.
+						expect(body.manifest).toHaveProperty(".tekmemo/memory/core.md");
+						return new Response(
+							JSON.stringify({
+								data: {
+									upload: [
+										{
+											path: ".tekmemo/memory/core.md",
+											sha256: body.manifest[".tekmemo/memory/core.md"],
+											sizeBytes: 37,
+											presignedPutUrl:
+												"https://r2.example.com/put/core.md?sig=abc",
+										},
+									],
+									cursor: "cursor_push",
+								},
+								meta: { requestId: "req_push" },
+							}),
+							{
+								status: 200,
+								headers: { "content-type": "application/json" },
+							},
+						);
+					}
+
+					if (url.endsWith("/sync/push/complete")) {
+						// Phase 3: server commits the manifest update.
+						const body = JSON.parse(String(init?.body));
+						expect(body.cursor).toBe("cursor_push");
+						expect(body.uploaded).toHaveLength(1);
+						expect(body.uploaded[0]).toMatchObject({
+							path: ".tekmemo/memory/core.md",
+						});
+						return new Response(
+							JSON.stringify({
+								data: {
+									cursor: "cursor_complete",
+									manifest: {
+										".tekmemo/memory/core.md": {
+											path: ".tekmemo/memory/core.md",
+											sha256: body.uploaded[0].sha256,
+											sizeBytes: 37,
+											r2Key: "projects/proj_123/core.md",
+											updatedAt: "2026-06-19T00:00:00.000Z",
+										},
+									},
+								},
+								meta: { requestId: "req_complete" },
+							}),
+							{
+								status: 200,
+								headers: { "content-type": "application/json" },
+							},
+						);
+					}
+
+					throw new Error(`Unexpected URL ${url}`);
+				},
+			);
+			vi.stubGlobal("fetch", fetchMock);
+
+			const result = await runTekMemoCli({
+				argv: [
+					"--json",
+					"--root",
+					temp.rootDir,
+					"cloud",
+					"--cloud-url",
+					"https://memo.tekbreed.com/api/v1",
+					"--api-key",
+					"tk_live_test_123",
+					"--project-id",
+					"proj_123",
+					"sync",
+					"push",
+					"--base-cursor",
+					"cursor_prev",
+				],
+			});
+
+			expect(result.exitCode).toBe(0);
+			const parsed = JSON.parse(result.stdout.join("\n"));
+			expect(parsed.ok).toBe(true);
+			expect(parsed.command).toBe("cloud.sync.push");
+			expect(parsed.data.upload).toHaveLength(1);
+			expect(parsed.data.complete.cursor).toBe("cursor_complete");
+			// Both phases of the two-phase push must hit the project-scoped sync API.
+			expect(calls).toEqual([
+				"POST https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push",
+				"POST https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push/complete",
+			]);
+		} finally {
+			await temp.cleanup();
+		}
 	});
 });

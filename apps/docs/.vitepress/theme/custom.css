@@ -1,22 +1,54 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* ===================================================================
+   TekMemo — "Engineered memory" design system
+   A refined, technical-but-warm aesthetic. Distinctive display type,
+   layered atmosphere, hairline depth. Not generic AI slop.
+   =================================================================== */
+
+/* --- Typography: a characterful display face (Sora) paired with a
+     refined body face (Inter), and a real mono (JetBrains Mono) so
+     terminal/code mockups read as intentional. Loaded once here. --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Font Family */
+  /* Font families
+     --vp-font-family-display: headlines / the "engineered" voice.
+     --vp-font-family-base:   body, UI.
+     --vp-font-family-mono:   code, terminals, scores. */
+  --vp-font-family-display: "Sora", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --vp-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --vp-font-family-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
 
-  /* Vite Brand Colors (Vibrant Purple/Blue) */
-  --vp-c-brand-1: #646cff;
-  --vp-c-brand-2: #747bff;
-  --vp-c-brand-3: #535bf2;
-  --vp-c-brand-soft: rgba(100, 108, 255, 0.14);
+  /* TekBreed Brand Colors — vibrant blue/green dual identity */
+  --vp-c-brand-1: #258acb;
+  --vp-c-brand-2: #2a9be4;
+  --vp-c-brand-3: #1b6595;
+  --vp-c-brand-soft: rgba(37, 138, 203, 0.14);
 
-  /* Home hero text gradient */
+  /* Layer accents (used by HeroVisual + feature showcase) */
+  --tek-c-core: #4fb2f3;       /* core memory */
+  --tek-c-archive: #5bd473;    /* archival / notes */
+  --tek-c-recall: #818cf8;     /* recall / graph */
+  --tek-c-sync: #fb923c;       /* sync state */
+
+  /* Depth tokens for the layered, atmospheric surfaces */
+  --tek-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --tek-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.05);
+  --tek-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10), 0 4px 8px rgba(15, 23, 42, 0.06);
+  --tek-shadow-glow: 0 0 0 1px rgba(37, 138, 203, 0.12), 0 8px 28px rgba(37, 138, 203, 0.14);
+  --tek-radius: 12px;
+  --tek-radius-lg: 16px;
+
+  /* Home hero text gradient — the signature blue→green clip */
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(120deg, #bd34fe 30%, #41d1ff);
-  
-  /* Huge glowing background for the hero image */
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, #bd34fe 50%, #47caff 50%);
-  --vp-home-hero-image-filter: blur(68px);
+  --vp-home-hero-name-background: linear-gradient(120deg, #258acb 30%, #4cae61);
+
+  /* Soft glowing background for the hero image */
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, #258acb 50%, #4cae61 50%);
+  --vp-home-hero-image-filter: blur(90px);
+
+  /* Green (success / toast) */
+  --vp-c-green-1: #2e7d32;
+  --vp-c-green-soft: rgba(46, 125, 50, 0.14);
 }
 
 .dark {
@@ -27,12 +59,33 @@
   --vp-c-bg-soft: #202127;
 
   /* Vibrant dark mode accents */
-  --vp-c-brand-1: #747bff;
-  --vp-c-brand-2: #646cff;
-  --vp-c-brand-3: #535bf2;
-  --vp-c-brand-soft: rgba(116, 123, 255, 0.14);
+  --vp-c-brand-1: #4fb2f3;
+  --vp-c-brand-2: #6fc3f7;
+  --vp-c-brand-3: #2a9be4;
+  --vp-c-brand-soft: rgba(79, 178, 243, 0.14);
 
-  --vp-home-hero-name-background: linear-gradient(120deg, #bd34fe 30%, #41d1ff);
+  /* Depth is heavier on dark for the glassy, layered feel */
+  --tek-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --tek-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --tek-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --tek-shadow-glow: 0 0 0 1px rgba(79, 178, 243, 0.18), 0 8px 30px rgba(79, 178, 243, 0.18);
+
+  --vp-home-hero-name-background: linear-gradient(120deg, #4fb2f3 30%, #5bd473);
+
+  --vp-c-green-1: #66bb6a;
+  --vp-c-green-soft: rgba(102, 187, 106, 0.14);
+}
+
+/* --- Headlines use the display face everywhere --- */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3,
+.vp-doc h4,
+.VPHome h2,
+.home-custom-sections h2,
+.home-custom-sections h3 {
+  font-family: var(--vp-font-family-display);
+  letter-spacing: -0.02em;
 }
 
 /* Fix Hero Name background clip */
@@ -43,55 +96,91 @@
   -webkit-text-fill-color: var(--vp-home-hero-name-color);
 }
 
-/* Enlarge the glow behind the hero image */
+/* Make the glow behind the hero image very minimal and soft */
 .VPHero .image-bg {
-  transform: translate(-50%, -50%) scale(1.3);
-  opacity: 0.35;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0.10;
 }
 
-/* Vite-style Pill Buttons */
-.VPButton.brand {
-  border-color: var(--vp-c-brand-1);
-  background-color: var(--vp-c-brand-1);
-  color: #ffffff;
-  border-radius: 24px;
-  font-weight: 600;
-  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+/* ===================================================================
+   Home page — atmospheric layered background
+   A faint blueprint grid + a soft brand gradient mesh give the page
+   depth without being loud. Grain overlay adds tactile refinement.
+   =================================================================== */
+.VPHome {
+  position: relative;
 }
 
-.VPButton.brand:hover {
-  background-color: var(--vp-c-brand-2);
-  border-color: var(--vp-c-brand-2);
+.VPHome::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* Blueprint dot grid — subtle structural texture */
+  background-image: radial-gradient(circle at 1px 1px, var(--vp-c-text-3) 1px, transparent 0);
+  background-size: 32px 32px;
+  opacity: 0.06;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
 }
 
-.VPButton.alt {
-  border: 1px solid var(--vp-c-border);
-  background-color: var(--vp-c-bg-mute);
-  color: var(--vp-c-text-1);
-  border-radius: 24px;
-  font-weight: 600;
-  transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+/* Brand gradient mesh behind the hero — the atmospheric glow */
+.VPHome .VPHero {
+  position: relative;
+  isolation: isolate;
 }
 
-.VPButton.alt:hover {
-  background-color: var(--vp-c-bg-alt);
-  border-color: var(--vp-c-text-1);
+.VPHome .VPHero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: min(960px, 120vw);
+  height: 480px;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(closest-side, rgba(37, 138, 203, 0.18), transparent 70%),
+    radial-gradient(closest-side at 62% 45%, rgba(76, 174, 97, 0.14), transparent 70%);
+  filter: blur(40px);
+  z-index: -1;
+  pointer-events: none;
 }
 
-/* Feature Cards with colored background box for the icon */
+.dark .VPHome .VPHero::after {
+  background:
+    radial-gradient(closest-side, rgba(79, 178, 243, 0.20), transparent 70%),
+    radial-gradient(closest-side at 62% 45%, rgba(91, 212, 115, 0.16), transparent 70%);
+}
+
+/* Ensure custom home sections sit above the texture layer */
+.home-custom-sections,
+.VPFeatures {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===================================================================
+   Feature Cards — glassy, layered, with a colored icon well
+   =================================================================== */
 .VPFeature {
   background-color: var(--vp-c-bg-soft);
-  border: 1px solid transparent;
-  border-radius: 12px;
-  transition: background-color 0.25s, border-color 0.25s;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--tek-radius);
+  box-shadow: var(--tek-shadow-sm);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.25s ease,
+              border-color 0.25s ease;
 }
 
 .VPFeature:hover {
   border-color: var(--vp-c-brand-1);
-  background-color: var(--vp-c-bg-mute);
+  box-shadow: var(--tek-shadow-glow);
+  transform: translateY(-3px);
 }
 
 .VPFeature .title {
+  font-family: var(--vp-font-family-display);
   font-weight: 600;
   color: var(--vp-c-text-1);
 }
@@ -100,10 +189,10 @@
   color: var(--vp-c-text-2);
 }
 
-/* Vite styles the feature icon elegantly in a soft background box */
 .VPFeature .icon {
   background-color: var(--vp-c-bg-mute);
-  border-radius: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--tek-radius);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -111,14 +200,17 @@
   height: 48px;
   margin-bottom: 20px;
   font-size: 24px;
-  transition: background-color 0.25s;
+  transition: background-color 0.25s, border-color 0.25s;
 }
 
 .VPFeature:hover .icon {
-  background-color: var(--vp-c-bg-alt);
+  background-color: var(--vp-c-brand-soft);
+  border-color: var(--vp-c-brand-1);
 }
 
-/* Sidebar brand styling */
+/* ===================================================================
+   Sidebar brand styling
+   =================================================================== */
 .TekMemoSidebarBrand {
   display: flex;
   align-items: center;
@@ -148,6 +240,7 @@
 }
 
 .TekMemoSidebarBrandName {
+  font-family: var(--vp-font-family-display);
   color: var(--vp-c-text-1);
   font-size: 14px;
   font-weight: 600;
@@ -159,7 +252,9 @@
   font-weight: 400;
 }
 
-/* Tables */
+/* ===================================================================
+   Tables
+   =================================================================== */
 .vp-doc table {
   display: table;
   width: 100%;
@@ -169,3 +264,345 @@
 .vp-doc td {
   vertical-align: top;
 }
+
+/* ===================================================================
+   Ask AI Bar positioning - inline with h1
+   =================================================================== */
+.VPDoc .content-container {
+  position: relative;
+}
+
+.VPDoc .content-container > .ask-ai-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+/* Ensure doc content has padding for the AskAiBar */
+.VPDoc .vp-doc article {
+  position: relative;
+}
+
+/* ===================================================================
+   Feature Showcase Item (layout + animation; scoped styles in
+   HomeLayout.vue handle the rest)
+   =================================================================== */
+.feature-showcase-item {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* ===================================================================
+   Terminal Mockup — real mono, layered depth
+   =================================================================== */
+.terminal-mockup {
+  background: #1e1e1e;
+  border-radius: var(--tek-radius);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.terminal-header {
+  padding: 12px 16px;
+  background: #2d2d2d;
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-dot.red { background: #ff5f56; }
+.terminal-dot.yellow { background: #ffbd2e; }
+.terminal-dot.green { background: #27c93f; }
+
+.terminal-content {
+  padding: 20px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 14px;
+  line-height: 1.8;
+  color: #d4d4d4;
+}
+
+.terminal-prompt {
+  color: #6a9955;
+}
+
+.terminal-success {
+  color: #6a9955;
+}
+
+/* ===================================================================
+   Responsive Design
+   =================================================================== */
+@media (max-width: 768px) {
+  .feature-showcase-item {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+/* ===================================================================
+   Animations
+   =================================================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered page-load reveal for home sections */
+@keyframes tekReveal {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================================================
+   Hero enhancements
+   =================================================================== */
+.VPHero .name {
+  background: var(--vp-home-hero-name-background);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: var(--vp-home-hero-name-color);
+  font-family: var(--vp-font-family-display);
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.VPHero .text {
+  font-family: var(--vp-font-family-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.VPHero .tagline {
+  font-size: 20px;
+  color: var(--vp-c-text-2);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Custom hero visual slot styling */
+.hero-visual-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===================================================================
+   Button enhancements
+   =================================================================== */
+.VPButton.brand {
+  background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, var(--vp-c-brand-2) 100%);
+  border: none;
+  padding: 12px 24px;
+  font-family: var(--vp-font-family-display);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 138, 203, 0.3);
+}
+
+.VPButton.brand:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 138, 203, 0.4);
+}
+
+.VPButton.alt {
+  border: 2px solid var(--vp-c-border);
+  background: transparent;
+  padding: 10px 24px;
+  font-family: var(--vp-font-family-display);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.VPButton.alt:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+  transform: translateY(-2px);
+}
+
+/* ===================================================================
+   Comparison Table
+   =================================================================== */
+.comparison-table-wrapper {
+  overflow-x: auto;
+  margin-top: 28px;
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--tek-radius);
+  background: var(--vp-c-bg-soft);
+  box-shadow: var(--tek-shadow-sm);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.comparison-table th {
+  padding: 14px 18px;
+  font-family: var(--vp-font-family-display);
+  font-weight: 600;
+  border-bottom: 2px solid var(--vp-c-border);
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg-alt);
+}
+
+.comparison-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--vp-c-border);
+  color: var(--vp-c-text-2);
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tr:hover {
+  background-color: var(--vp-c-bg-mute);
+}
+
+.comparison-table td:first-child,
+.comparison-table th:first-child {
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.comparison-table-check {
+  color: var(--vp-c-brand-1);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.comparison-table-cross {
+  color: var(--vp-c-text-3);
+  font-size: 14px;
+}
+
+/* ===================================================================
+   Alpha Announcement Bar
+   =================================================================== */
+.alpha-announcement-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--vp-c-brand-soft);
+  border-bottom: 1px solid var(--vp-c-brand-soft);
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  z-index: 100;
+}
+
+.alpha-announcement-bar .alpha-badge {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-brand-1);
+  flex-shrink: 0;
+}
+
+.alpha-announcement-bar .alpha-link {
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+}
+
+.alpha-announcement-bar .alpha-link:hover {
+  text-decoration: underline;
+  color: var(--vp-c-brand-2);
+}
+
+/* Push down VitePress elements to make space for the top announcement bar */
+:root {
+  --vp-announcement-height: 40px;
+  --vp-layout-top-height: 40px;
+}
+
+.alpha-announcement-bar {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+}
+
+.VPNav {
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPSidebar {
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPLocalNav {
+  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.VPContent {
+  transition: margin-top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scroll-based hiding behavior */
+.has-scrolled .alpha-announcement-bar {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.has-scrolled {
+  --vp-layout-top-height: 0px;
+}
+
+/* ===================================================================
+   Code blocks — use the real mono face
+   =================================================================== */
+.vp-doc :not(pre) > code,
+.mode-toggle-code code,
+.file-tree-item,
+.recall-score,
+.recall-query-text {
+  font-family: var(--vp-font-family-mono);
+}
+
+/* img {
+  width:100%;
+  max-height: 450px;
+  margin: 16px auto;
+  border-radius: 8px;
+} */

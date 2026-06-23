@@ -7,7 +7,7 @@ import { site } from "./config/site.mts";
 export default defineConfig({
 	lang: "en-US",
 	title: site.title,
-	titleTemplate: ":title | TekBreed OSS Docs",
+	titleTemplate: ":title | TekMemo",
 	description: site.description,
 	base: "/",
 	cleanUrls: true,
@@ -15,7 +15,7 @@ export default defineConfig({
 	ignoreDeadLinks: false,
 	head,
 	markdown: {
-		// lineNumbers: true,
+		lineNumbers: true,
 		theme: { light: "github-light", dark: "github-dark" },
 		container: {
 			tipLabel: "TIP",
@@ -24,15 +24,15 @@ export default defineConfig({
 		},
 	},
 	themeConfig: {
-		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "TekBreed OSS" },
-		siteTitle: "TekBreed OSS",
+		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "TekMemo" },
+		siteTitle: "TekMemo",
 		nav,
 		sidebar,
 		search: { provider: "local" },
 		outline: { level: [2, 3], label: "On this page" },
 		socialLinks: [
-			{ icon: "github", link: site.repo, ariaLabel: "TekBreed OSS on GitHub" },
-			{ icon: "npm", link: site.npm, ariaLabel: "TekBreed OSS on npm" },
+			{ icon: "github", link: site.repo, ariaLabel: "TekMemo on GitHub" },
+			{ icon: "npm", link: site.npm, ariaLabel: "TekMemo on npm" },
 			{ icon: "x", link: site.x, ariaLabel: "TekBreed on X" },
 		],
 		editLink: {
@@ -46,7 +46,7 @@ export default defineConfig({
 		docFooter: { prev: "Previous", next: "Next" },
 		footer: {
 			message: `Released under the ${site.license} License.`,
-			copyright: "Copyright © 2026-present TekBreed",
+			copyright: "Copyright © 2026-present TekMemo",
 		},
 	},
 });

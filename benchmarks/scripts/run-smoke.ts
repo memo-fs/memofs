@@ -1,18 +1,15 @@
+import { CORE_MEMORY_PATH, chunkText } from "@tekbreed/tekmemo";
 import {
-	CORE_MEMORY_PATH,
-	chunkText,
 	createBenchmarkSuite,
+	createFakeMemoryStore,
+	createFakeRecallStore,
+	createFakeReranker,
 	createMemoryReadBenchmarkCase,
 	createMemoryWriteBenchmarkCase,
 	createRecallQueryBenchmarkCase,
 	createRecallUpsertBenchmarkCase,
 	createRerankBenchmarkCase,
-} from "@tekbreed/tekmemo";
-import {
-	createFakeMemoryStore,
-	createFakeRecallStore,
-	createFakeReranker,
-} from "../../packages/tekmemo/src/benchmark-kit/testing/index.js";
+} from "@tekbreed/tekmemo-benchmark-kit";
 import {
 	createMemoryText,
 	createRecallDocuments,

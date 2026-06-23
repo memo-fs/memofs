@@ -1,3 +1,9 @@
+/**
+ * Validation utilities for MCP input schemas, graphs, payloads, and parameter types.
+ *
+ * @module validation
+ */
+
 import { McpValidationError } from "../errors";
 import type {
 	GraphEdgeInput,
@@ -11,6 +17,15 @@ const SAFE_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9._:@/-]{0,255}$/;
 const SAFE_TOKEN_RE = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$/;
 const HTTP_URL_RE = /^https?:\/\//i;
 
+/**
+ * Validates and trims an optional string, enforcing size constraints.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name for the error message.
+ * @param max - The maximum allowed string length.
+ * @returns The trimmed string, or `undefined` if not provided.
+ * @throws {McpValidationError} If the value is not a string or exceeds the maximum length.
+ */
 export function optionalString(
 	value: unknown,
 	name: string,
@@ -36,6 +51,14 @@ const MEMORY_KINDS = new Set<MemoryKind>([
 	"note",
 ]);
 
+/**
+ * Validates that a value is a valid TekMemo MemoryKind.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @returns The validated MemoryKind, or `undefined` if not provided.
+ * @throws {McpValidationError} If the value is not a valid MemoryKind string.
+ */
 export function validateMemoryKind(
 	value: unknown,
 	name = "kind",
@@ -49,6 +72,15 @@ export function validateMemoryKind(
 	return value as MemoryKind;
 }
 
+/**
+ * Validates and trims a required string, enforcing size constraints.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @param max - The maximum allowed string length.
+ * @returns The trimmed, validated string.
+ * @throws {McpValidationError} If the value is missing, not a string, or exceeds the maximum length.
+ */
 export function requiredString(
 	value: unknown,
 	name: string,
@@ -60,6 +92,14 @@ export function requiredString(
 	return result;
 }
 
+/**
+ * Validates that a value is an optional boolean.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @returns The boolean value, or `undefined` if not provided.
+ * @throws {McpValidationError} If the value is not a boolean.
+ */
 export function optionalBoolean(
 	value: unknown,
 	name: string,
@@ -70,6 +110,16 @@ export function optionalBoolean(
 	return value;
 }
 
+/**
+ * Validates that a value is an optional finite number within a range.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @param min - The minimum allowed value.
+ * @param max - The maximum allowed value.
+ * @returns The number, or `undefined` if not provided.
+ * @throws {McpValidationError} If the value is not a finite number or is out of range.
+ */
 export function optionalNumber(
 	value: unknown,
 	name: string,
@@ -84,6 +134,16 @@ export function optionalNumber(
 	return value;
 }
 
+/**
+ * Validates that a value is an optional integer within a range.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @param min - The minimum allowed value.
+ * @param max - The maximum allowed value.
+ * @returns The integer number, or `undefined` if not provided.
+ * @throws {McpValidationError} If the value is not an integer or is out of range.
+ */
 export function optionalInteger(
 	value: unknown,
 	name: string,
@@ -97,6 +157,16 @@ export function optionalInteger(
 	return number;
 }
 
+/**
+ * Validates an optional array of safe alphanumeric/token strings.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @param maxItems - The maximum number of items in the array.
+ * @param maxLength - The maximum allowed length for each item.
+ * @returns The unique strings list, or `undefined` if not provided.
+ * @throws {McpValidationError} If validation fails or items contain unsafe characters.
+ */
 export function optionalStringArray(
 	value: unknown,
 	name: string,
@@ -124,6 +194,14 @@ export function optionalStringArray(
 	return result;
 }
 
+/**
+ * Validates that a value is a safe alphanumeric ID string.
+ *
+ * @param value - The value to validate.
+ * @param name - The field name.
+ * @returns The validated ID string.
+ * @throws {McpValidationError} If validation fails, contains path traversal, or contains unsafe characters.
+ */
 export function validateId(value: unknown, name: string): string {
 	const id = requiredString(value, name, 256);
 	if (!SAFE_ID_RE.test(id))
@@ -133,6 +211,13 @@ export function validateId(value: unknown, name: string): string {
 	return id;
 }
 
+/**
+ * Validates that a file path is workspace-relative, forward-slashed, and doesn't escape the workspace.
+ *
+ * @param path - The path to check.
+ * @param name - The field name.
+ * @throws {McpValidationError} If path is absolute, uses backslashes, attempts traversal, or is a protocol URL.
+ */
 function validatePath(path: string, name: string): void {
 	if (path.startsWith("/") || path.startsWith("\\"))
 		throw new McpValidationError(`${name} must be workspace-relative.`);
@@ -144,6 +229,14 @@ function validatePath(path: string, name: string): void {
 		throw new McpValidationError(`${name} must not be a protocol URL.`);
 }
 
+/**
+ * Validates a list of source references.
+ *
+ * @param value - The input list.
+ * @param name - The field name.
+ * @returns The parsed SourceRef array, or `undefined` if not provided.
+ * @throws {McpValidationError} If source refs properties fail validation.
+ */
 export function validateSourceRefs(
 	value: unknown,
 	name = "sourceRefs",
@@ -189,6 +282,14 @@ export function validateSourceRefs(
 	});
 }
 
+/**
+ * Validates an input object against the GraphNode schema.
+ *
+ * @param value - The raw node input.
+ * @param index - Index in a list of nodes (for error reporting).
+ * @returns The validated GraphNodeInput object.
+ * @throws {McpValidationError} If properties are invalid.
+ */
 export function validateGraphNode(value: unknown, index = 0): GraphNodeInput {
 	if (!isPlainObject(value))
 		throw new McpValidationError(`nodes[${index}] must be an object.`);
@@ -238,6 +339,14 @@ export function validateGraphNode(value: unknown, index = 0): GraphNodeInput {
 	};
 }
 
+/**
+ * Validates an input object against the GraphEdge schema.
+ *
+ * @param value - The raw edge input.
+ * @param index - Index in a list of edges (for error reporting).
+ * @returns The validated GraphEdgeInput object.
+ * @throws {McpValidationError} If properties are invalid.
+ */
 export function validateGraphEdge(value: unknown, index = 0): GraphEdgeInput {
 	if (!isPlainObject(value))
 		throw new McpValidationError(`edges[${index}] must be an object.`);
@@ -279,6 +388,14 @@ export function validateGraphEdge(value: unknown, index = 0): GraphEdgeInput {
 	};
 }
 
+/**
+ * Validates that a payload fits within a given byte size limit.
+ *
+ * @param value - The payload value to test.
+ * @param maxBytes - Maximum allowed size in bytes.
+ * @param name - Payload context name for the error message.
+ * @throws {McpValidationError} If the payload stringified size exceeds maxBytes.
+ */
 export function ensurePayloadSize(
 	value: unknown,
 	maxBytes: number,

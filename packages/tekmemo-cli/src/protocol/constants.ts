@@ -1,3 +1,9 @@
+/**
+ * CLI protocol constants defining standard files, directory paths, and structures.
+ *
+ * @module constants
+ */
+
 import {
 	CANONICAL_TEKMEMO_FILES,
 	CHUNKS_INDEX_PATH,
@@ -33,8 +39,14 @@ export const TEKMEMO_PATHS = {
 	tmpDir: `${TEKMEMO_DIR}/tmp`,
 } as const;
 
+/**
+ * Canonical array of required files in a TekMemo workspace.
+ */
 export const REQUIRED_FILES = CANONICAL_TEKMEMO_FILES;
 
+/**
+ * Array of paths that must be initialized as directories inside a TekMemo workspace.
+ */
 export const REQUIRED_DIRS = [
 	TEKMEMO_DIR,
 	`${TEKMEMO_DIR}/memory`,

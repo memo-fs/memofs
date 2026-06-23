@@ -1,4 +1,4 @@
-import { defineRecallStoreContractTests } from "@repo/test-utils/contracts";
+import { defineRecallStoreContractTests } from "@tekbreed/tekmemo-testing/contracts";
 import { createInMemoryRecallStore } from "../../src/index";
 
 defineRecallStoreContractTests({

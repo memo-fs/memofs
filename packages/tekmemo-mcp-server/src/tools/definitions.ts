@@ -1,7 +1,25 @@
+/**
+ * MCP Tool definitions configuration mapping schemas and safety constraints.
+ *
+ * The model-facing surface is two namespaces and ten tools (ADR 0009 Component 1):
+ *
+ *  - 4 memory verbs: `tekmemo.context`, `tekmemo.recall`, `tekmemo.remember`,
+ *    `tekmemo.consolidate`. This is the entire memory lifecycle the model
+ *    drives. Graph/sync/health/snapshot/validation/core-memory-update ops were
+ *    demoted to runtime methods (`TekMemoMcpRuntime`) the developer/host calls
+ *    imperatively — capabilities are preserved, only the model-facing wrapper
+ *    was removed. The strategist (ADR 0009 Component 2) lives behind
+ *    `tekmemo.context`; the write gate (Component 6) lives behind
+ *    `tekmemo.remember`.
+ *  - 6 AgentFS session tools: `tekmemo_agent_session_*`. A separate axis (a
+ *    coding-agent scratch filesystem, not the memory store), kept model-facing
+ *    because agents drive their own sessions mid-work.
+ *
+ * @module definitions
+ */
+
 import {
 	booleanSchema,
-	graphEdgeSchema,
-	graphNodeSchema,
 	numberSchema,
 	objectSchema,
 	sourceRefSchema,
@@ -31,6 +49,16 @@ const kindSchema: JsonObject = {
 	description: "Memory kind. Defaults to note.",
 };
 
+/**
+ * Creates and returns all model-facing MCP tool definitions supported by TekMemo.
+ *
+ * The surface is the 4 memory verbs plus the 6 AgentFS session tools (ADR 0009
+ * Component 1). Developer-level operations (graph/sync/health/snapshot/validate/
+ * core-memory-update) are runtime methods on `TekMemoMcpRuntime`, not tools.
+ *
+ * @param maxPageSize - The maximum allowed page limit size constraint.
+ * @returns An array of all available McpToolDefinitions.
+ */
 export function createToolDefinitions(
 	maxPageSize: number,
 ): McpToolDefinition[] {
@@ -164,33 +192,10 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo.health",
-			title: "TekMemo Health",
-			description:
-				"Check TekMemo MCP runtime health, mode, and available capabilities.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({}),
-			outputSchema: objectSchema(
-				{
-					ok: { type: "boolean" },
-					name: { type: "string" },
-					version: { type: "string" },
-					mode: { type: "string" },
-					capabilities: { type: "array", items: { type: "string" } },
-				},
-				["ok", "name", "version", "capabilities"],
-			),
-		},
-		{
 			name: "tekmemo.context",
 			title: "Build TekMemo Agent Context",
 			description:
-				"Build task-ready memory context for an agent by combining core memory, recent memory, and recall results when supported.",
+				'REQUIRED at the start of every task: build task-ready memory context by combining core memory, recent memory, and recall. TekMemo is the single source of truth for project identity, architecture, constraints, and decisions — ALWAYS call this before planning or writing code so your work adheres to stored memory. The returned text already tells you how to act on it. Read-only.\n\nBy default returns a COMPACT briefing (~6kb): core memory in full, the top entities and a few recall fragments, plus an `expandable` list. Each expandable entry names a section (entities/recall/recent/notes), how many more items it holds, and an opaque cursor. To pull just one section in full, call tekmemo.context again with the same query plus `section` and `expand` (the cursor). Expand only the sections you need, then stop — do not expand everything. Pass `detail: "full"` to get the entire context in one call instead (larger; use when you want the whole dump).',
 			safety: "read",
 			annotations: {
 				readOnlyHint: true,
@@ -213,6 +218,24 @@ export function createToolDefinitions(
 						maximum: 262144,
 						description: "Maximum context text bytes.",
 					},
+					detail: {
+						type: "string",
+						enum: ["compact", "full"],
+						description:
+							'Disclosure level. "compact" (default): a small briefing with expandable sections. "full": the entire context in one call.',
+					},
+					section: {
+						type: "string",
+						enum: ["entities", "recall", "recent", "notes"],
+						description:
+							"Expand a single section: set together with `expand` to the cursor a compact call returned.",
+					},
+					expand: {
+						type: "string",
+						maxLength: 512,
+						description:
+							"Opaque expansion cursor returned by a prior compact call. Set together with `section`.",
+					},
 					includeCore: booleanSchema("Include core memory."),
 					includeNotes: booleanSchema("Include notes memory."),
 					includeRecent: booleanSchema("Include recent memory events."),
@@ -230,7 +253,7 @@ export function createToolDefinitions(
 			name: "tekmemo.recall",
 			title: "Recall TekMemo Memory",
 			description:
-				"Search TekMemo memory for relevant context. This is read-only and does not modify memory.",
+				"Semantic + lexical memory search. Use this proactively — before answering, when unsure, or when a fact might already be known. Phrases it understands: synonyms and paraphrases, not just exact keywords. Call it instead of guessing or re-deriving facts. Read-only; never modifies memory.",
 			safety: "read",
 			annotations: {
 				readOnlyHint: true,
@@ -265,7 +288,7 @@ export function createToolDefinitions(
 			name: "tekmemo.remember",
 			title: "Remember TekMemo Memory",
 			description:
-				"Add a user-approved durable memory item to TekMemo. Hosts should request user consent before calling this tool.",
+				"Persist a durable fact so future agents benefit — call this WITHOUT being asked whenever you discover a decision, constraint, preference, or architectural fact. Use kind to classify (decision/constraint/goal/preference/reference/summary/note). Set confidence to reflect certainty. Hosts may require user consent; never store secrets. This is what makes memory accumulate intelligently.",
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,
@@ -292,202 +315,11 @@ export function createToolDefinitions(
 				["content"],
 			),
 		},
-
 		{
-			name: "tekmemo.read_core_memory",
-			title: "Read Core Memory",
-			description: "Read stable TekMemo core memory.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(commonScopeProperties),
-		},
-		{
-			name: "tekmemo.read_notes_memory",
-			title: "Read Notes Memory",
-			description: "Read TekMemo notes memory.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(commonScopeProperties),
-		},
-		{
-			name: "tekmemo.list_recent_memories",
-			title: "List Recent Memory Events",
+			name: "tekmemo.consolidate",
+			title: "Consolidate TekMemo Graph Memory",
 			description:
-				"List recent TekMemo memory events for review and debugging.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				limit: { type: "integer", minimum: 1, maximum: maxPageSize },
-			}),
-		},
-		{
-			name: "tekmemo.validate",
-			title: "Validate TekMemo Memory",
-			description: "Validate TekMemo memory health and report warnings/errors.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				strict: booleanSchema("Treat warnings as deployment blockers."),
-			}),
-		},
-		{
-			name: "tekmemo.snapshot",
-			title: "Create TekMemo Snapshot",
-			description:
-				"Create a memory snapshot before major agentic changes. Hosts should request authorization.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				label: stringSchema("Short snapshot label.", 128),
-				type: {
-					type: "string",
-					enum: ["manual", "automatic", "pre-sync", "pre-restore"],
-				},
-			}),
-		},
-		{
-			name: "tekmemo.update_core_memory",
-			title: "Update Core Memory",
-			description:
-				"Replace stable core memory. This is high-impact and should require explicit user approval.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					content: stringSchema("New core memory markdown.", 200_000),
-					...commonScopeProperties,
-				},
-				["content"],
-			),
-		},
-
-		{
-			name: "tekmemo.sync_status",
-			title: "TekMemo Sync Status",
-			description:
-				"Read project sync status from TekMemo Cloud/self-hosted cloud when the runtime supports sync.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				clientId: stringSchema("Optional local sync client id.", 256),
-			}),
-		},
-		{
-			name: "tekmemo.sync_pull",
-			title: "TekMemo Sync Pull",
-			description:
-				"Pull accepted memory sync events from TekMemo Cloud/self-hosted cloud.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					clientId: stringSchema("Local sync client id.", 256),
-					sinceServerVersion: {
-						type: "integer",
-						minimum: 0,
-						description: "Server version cursor to pull from.",
-					},
-					limit: { type: "integer", minimum: 1, maximum: maxPageSize },
-				},
-				["clientId"],
-			),
-		},
-		{
-			name: "tekmemo.sync_push",
-			title: "TekMemo Sync Push",
-			description:
-				"Push local memory sync events to TekMemo Cloud/self-hosted cloud. Hosts should authorize this write operation.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					clientId: stringSchema("Local sync client id.", 256),
-					events: {
-						type: "array",
-						items: { type: "object" },
-						minItems: 1,
-						maxItems: 100,
-					},
-					checkpoint: { type: "object" },
-				},
-				["clientId", "events"],
-			),
-		},
-		{
-			name: "tekmemo.sync_resolve_conflict",
-			title: "Resolve TekMemo Sync Conflict",
-			description:
-				"Resolve a cloud sync conflict using keep_cloud, use_client, or ignore.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					conflictId: stringSchema("Sync conflict id.", 256),
-					resolution: {
-						type: "string",
-						enum: ["keep_cloud", "use_client", "ignore"],
-					},
-					content: { type: "object" },
-				},
-				["conflictId", "resolution"],
-			),
-		},
-		{
-			name: "tekmemo.graph_upsert_nodes",
-			title: "Upsert Graph Nodes",
-			description:
-				"Create or update graph memory nodes. This is a write operation and should require user authorization.",
+				"Run a memory consolidation pass over the local graph: merge duplicate entities and retire facts superseded by a `supersedes` edge. The audit trail is preserved — nothing is deleted, only marked `deprecated`. This is the second half of v1 intelligence (ADR 0004): extraction grows the graph, consolidation keeps it tidy. Pass apply=false to preview the plan without persisting. Hosts should authorize this write when apply is true.",
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,
@@ -495,450 +327,20 @@ export function createToolDefinitions(
 				idempotentHint: true,
 				openWorldHint: false,
 			},
-			inputSchema: objectSchema(
-				{
-					workspaceId: stringSchema("Workspace id.", 256),
-					nodes: {
-						type: "array",
-						items: graphNodeSchema,
-						minItems: 1,
-						maxItems: 100,
-					},
-				},
-				["nodes"],
-			),
-		},
-		{
-			name: "tekmemo.graph_upsert_edges",
-			title: "Upsert Graph Edges",
-			description:
-				"Create or update graph memory edges. This is a write operation and should require user authorization.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					workspaceId: stringSchema("Workspace id.", 256),
-					edges: {
-						type: "array",
-						items: graphEdgeSchema,
-						minItems: 1,
-						maxItems: 200,
-					},
-				},
-				["edges"],
-			),
-		},
-		{
-			name: "tekmemo.graph_neighbors",
-			title: "Find Graph Neighbors",
-			description:
-				"Read graph neighbors around a node with direction, edge type, weight, cursor, and limit controls.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					workspaceId: stringSchema("Workspace id.", 256),
-					nodeId: stringSchema("Seed node id.", 256),
-					direction: { type: "string", enum: ["in", "out", "both"] },
-					edgeTypes: {
-						type: "array",
-						items: stringSchema("Edge type", 128),
-						maxItems: 50,
-					},
-					minWeight: numberSchema("Minimum edge weight.", 0, 1),
-					limit: { type: "integer", minimum: 1, maximum: maxPageSize },
-					cursor: stringSchema(
-						"Opaque cursor returned by a previous call.",
-						512,
-					),
-				},
-				["nodeId"],
-			),
-		},
-		{
-			name: "tekmemo.graph_path",
-			title: "Find Graph Path",
-			description:
-				"Find a graph path between two nodes. Use weighted=true for strength-aware pathfinding when supported by the runtime.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					workspaceId: stringSchema("Workspace id.", 256),
-					from: stringSchema("Start node id.", 256),
-					to: stringSchema("Target node id.", 256),
-					weighted: booleanSchema("Prefer weighted pathfinding."),
-					maxDepth: { type: "integer", minimum: 1, maximum: 25 },
-					edgeTypes: {
-						type: "array",
-						items: stringSchema("Edge type", 128),
-						maxItems: 50,
-					},
-					minWeight: numberSchema("Minimum edge weight.", 0, 1),
-				},
-				["from", "to"],
-			),
-		},
-		{
-			name: "tekmemo.readiness",
-			title: "TekMemo Readiness",
-			description: "Check TekMemo Cloud production readiness.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({}),
-		},
-		{
-			name: "tekmemo.context_compose",
-			title: "Compose Context Package",
-			description:
-				"Compose full context using cloud API with core memory, recall results, and optional graph context.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					query: stringSchema(
-						"Natural language query for context composition.",
-						4096,
-					),
-					...commonScopeProperties,
-					topK: { type: "integer", minimum: 1, maximum: 20 },
-					strategy: { type: "string", enum: ["auto", "vector", "local"] },
-					rerank: booleanSchema("Request reranking."),
-					includeCoreMemory: booleanSchema("Include core memory."),
-					includeRecallResults: booleanSchema("Include recall results."),
-					includeGraphContext: booleanSchema("Include graph context."),
-					graphDepth: { type: "integer", minimum: 1, maximum: 3 },
-					graphLimit: { type: "integer", minimum: 1, maximum: 50 },
-					maxContextCharacters: {
-						type: "integer",
-						minimum: 1000,
-						maximum: 50000,
-					},
-					maxSourceCharacters: { type: "integer", minimum: 300, maximum: 8000 },
-				},
-				["query"],
-			),
-		},
-		{
-			name: "tekmemo.graph_list_nodes",
-			title: "List Graph Nodes",
-			description: "List graph nodes with pagination and status filters.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
 			inputSchema: objectSchema({
 				...commonScopeProperties,
-				limit: { type: "integer", minimum: 1, maximum: 100 },
-				cursor: stringSchema("Opaque cursor for pagination.", 512),
-				status: {
-					type: "string",
-					enum: ["active", "deprecated", "conflicted", "deleted"],
-				},
+				apply: booleanSchema(
+					"Persist the computed plan (merges + retirements). Defaults to true; pass false to preview.",
+				),
+				now: stringSchema(
+					"Override the `now` timestamp stamped on retirements (ISO 8601). Mainly for tests.",
+					64,
+				),
+				supersedingEdgeType: stringSchema(
+					"Edge type expressing 'A replaces B'. Defaults to 'supersedes'.",
+					128,
+				),
 			}),
-		},
-		{
-			name: "tekmemo.graph_create_node",
-			title: "Create Graph Node",
-			description: "Create or update a graph node.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					nodeId: stringSchema("Node id.", 256),
-					type: stringSchema("Node type.", 128),
-					label: stringSchema("Node label.", 256),
-					summary: stringSchema("Node summary.", 1024),
-					aliases: {
-						type: "array",
-						items: stringSchema("Alias", 128),
-						maxItems: 20,
-					},
-					metadata: { type: "object", description: "JSON metadata." },
-				},
-				["nodeId", "type", "label"],
-			),
-		},
-		{
-			name: "tekmemo.graph_list_edges",
-			title: "List Graph Edges",
-			description: "List graph edges with pagination and status filters.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				limit: { type: "integer", minimum: 1, maximum: 100 },
-				cursor: stringSchema("Opaque cursor for pagination.", 512),
-				status: {
-					type: "string",
-					enum: ["active", "deprecated", "conflicted", "deleted"],
-				},
-			}),
-		},
-		{
-			name: "tekmemo.graph_create_edge",
-			title: "Create Graph Edge",
-			description: "Create or update a graph edge.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					edgeId: stringSchema("Edge id (optional for create).", 256),
-					from: stringSchema("From node id.", 256),
-					to: stringSchema("To node id.", 256),
-					type: stringSchema("Edge type.", 128),
-					directed: booleanSchema("Directed edge."),
-					weight: numberSchema("Edge weight (0-1).", 0, 1),
-					metadata: { type: "object", description: "JSON metadata." },
-				},
-				["from", "to", "type"],
-			),
-		},
-		{
-			name: "tekmemo.extraction_run",
-			title: "Run Extraction",
-			description: "Run graph extraction for the project.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				mode: {
-					type: "string",
-					enum: ["full", "core", "notes", "sync", "connectors"],
-				},
-				force: booleanSchema("Force re-extraction."),
-			}),
-		},
-		{
-			name: "tekmemo.extraction_jobs",
-			title: "List Extraction Jobs",
-			description: "List graph extraction jobs.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				limit: { type: "integer", minimum: 1, maximum: 100 },
-			}),
-		},
-		{
-			name: "tekmemo.evals_run",
-			title: "Run Evaluations",
-			description: "Run context quality evaluations.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				fixtureIds: {
-					type: "array",
-					items: stringSchema("Fixture id", 256),
-					maxItems: 50,
-				},
-				iterations: { type: "integer", minimum: 1, maximum: 20 },
-				thresholds: { type: "object", description: "Evaluation thresholds." },
-			}),
-		},
-		{
-			name: "tekmemo.benchmarks_run",
-			title: "Run Benchmarks",
-			description: "Run context benchmarks.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				fixtureIds: {
-					type: "array",
-					items: stringSchema("Fixture id", 256),
-					maxItems: 50,
-				},
-				iterations: { type: "integer", minimum: 1, maximum: 20 },
-				warmupIterations: { type: "integer", minimum: 0, maximum: 5 },
-				thresholds: { type: "object", description: "Benchmark thresholds." },
-			}),
-		},
-		{
-			name: "tekmemo.exports_create",
-			title: "Create Export",
-			description: "Create a memory export archive.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				label: stringSchema("Export label (max 120 chars).", 120),
-			}),
-		},
-		{
-			name: "tekmemo.exports_download",
-			title: "Download Export",
-			description: "Get download URL for an export archive.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					exportId: stringSchema("Export id.", 256),
-				},
-				["exportId"],
-			),
-		},
-		{
-			name: "tekmemo.snapshots_create",
-			title: "Create Snapshot",
-			description: "Create a memory snapshot.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({
-				...commonScopeProperties,
-				label: stringSchema("Snapshot label (max 120 chars).", 120),
-				trigger: { type: "string", enum: ["manual", "sync", "system"] },
-			}),
-		},
-		{
-			name: "tekmemo.snapshots_download",
-			title: "Download Snapshot",
-			description: "Get download URL for a snapshot archive.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					snapshotId: stringSchema("Snapshot id.", 256),
-				},
-				["snapshotId"],
-			),
-		},
-		{
-			name: "tekmemo.providers_list",
-			title: "List Providers",
-			description: "List provider credentials.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema({ ...commonScopeProperties }),
-		},
-		{
-			name: "tekmemo.providers_create",
-			title: "Create Provider",
-			description: "Create a provider credential.",
-			safety: "write",
-			annotations: {
-				readOnlyHint: false,
-				destructiveHint: false,
-				idempotentHint: false,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					provider: {
-						type: "string",
-						enum: ["voyageai", "openai", "upstash-vector"],
-					},
-					keyName: stringSchema("Key name.", 256),
-					secret: stringSchema("Provider secret.", 4096),
-					restUrl: stringSchema(
-						"REST URL (required for upstash-vector).",
-						2048,
-					),
-					embeddingModel: stringSchema("Embedding model.", 256),
-					rerankModel: stringSchema("Rerank model.", 256),
-				},
-				["provider", "keyName", "secret"],
-			),
-		},
-		{
-			name: "tekmemo.providers_test",
-			title: "Test Provider",
-			description: "Test a provider credential.",
-			safety: "read",
-			annotations: {
-				readOnlyHint: true,
-				idempotentHint: true,
-				openWorldHint: false,
-			},
-			inputSchema: objectSchema(
-				{
-					...commonScopeProperties,
-					credentialId: stringSchema("Credential id.", 256),
-				},
-				["credentialId"],
-			),
 		},
 	];
 }

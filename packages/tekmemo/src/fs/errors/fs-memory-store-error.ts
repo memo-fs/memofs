@@ -11,10 +11,7 @@ import { MemoryStoreError } from "@tekbreed/tekmemo";
 export class FsMemoryStoreError extends MemoryStoreError {
 	/**
 	 * Creates a new FsMemoryStoreError.
-	 *
-	 * @param message - Human-readable error description.
-	 * @param details - Optional structured details.
-	 * @param cause - Optional original error.
+	 * @internal
 	 */
 	constructor(
 		message: string,
@@ -23,6 +20,59 @@ export class FsMemoryStoreError extends MemoryStoreError {
 	) {
 		super(message, details, cause);
 		this.name = "FsMemoryStoreError";
+	}
+}
+
+/**
+ * Shape of the `details` attached to a {@link LockHeldError}.
+ *
+ * @public
+ */
+export interface LockHeldDetails {
+	/** Absolute path to the `.lock` file. */
+	lockPath: string;
+	/** PID of the process holding the lock, if known. */
+	pid?: number;
+	/** ISO timestamp the lock was acquired, if known. */
+	startedAt?: string;
+	[key: string]: unknown;
+}
+
+/**
+ * Thrown when a second process attempts a mutating op on a `.tekmemo/` root
+ * that is already locked.
+ *
+ * @remarks
+ * Implements the local single-process contract (Q28 / decisions.md). A second
+ * Claude Code window on one repo is the canonical day-one scenario this
+ * guards. `details` carries the holder PID + startedAt so the caller can show
+ * "locked by pid 1234 since 2026-06-22T10:00Z." Releasing is via the holder
+ * exiting gracefully; a crashed holder leaves a stale lock the next process
+ * reclaims via the PID-liveness probe.
+ *
+ * @public
+ */
+export class LockHeldError extends FsMemoryStoreError {
+	/**
+	 * Creates a new LockHeldError.
+	 *
+	 * @param lockPath - Absolute path to the lock file.
+	 * @param holder - The holder's PID + startedAt, if recoverable from the lock.
+	 */
+	constructor(
+		lockPath: string,
+		holder?: { pid?: number; startedAt?: string } | null,
+	) {
+		const details: LockHeldDetails = { lockPath };
+		if (holder?.pid !== undefined) details.pid = holder.pid;
+		if (holder?.startedAt !== undefined) details.startedAt = holder.startedAt;
+		super(
+			`TekMemo store is locked by another process (lock: ${lockPath}${
+				holder?.pid ? `, pid ${holder.pid}` : ""
+			}). A second process cannot mutate this store. Exit the other process or remove the lock file.`,
+			details,
+		);
+		this.name = "LockHeldError";
 	}
 }
 

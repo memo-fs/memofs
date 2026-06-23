@@ -1,0 +1,45 @@
+/**
+ * Worker bindings — declared in `wrangler.jsonc` and typed by `wrangler types`
+ * (the `cf-typegen` script emits `.wrangler/types/worker-configuration.d.ts`).
+ *
+ * Runtime config comes from these bindings, NEVER from `process.env`. The only
+ * legitimate `process.env` reads in this app are in the drizzle-kit CLI path
+ * (`drizzle.config.ts`), which runs in Node at build time.
+ *
+ * @see docs/adr/0005-cloud-tech-stack.md — R2 (blobs) + Turso/libSQL (metadata).
+ */
+export interface CloudWorkerEnv {
+	/** R2 bucket holding content-addressed blobs at `tekmemo/blobs/{sha256}`. */
+	BLOBS: R2Bucket;
+
+	/** Turso/libSQL HTTPS endpoint (e.g. `https://...turso.io`). */
+	DATABASE_URL: string;
+	/** Turso auth token (optional for local/ephemeral DBs). */
+	DATABASE_AUTH_TOKEN?: string;
+
+	/** HMAC/lookup salt applied when hashing API keys. */
+	TEKMEMO_API_KEY_SALT?: string;
+
+	/** R2 S3-compatible API credentials for presigning PUT/GET URLs. */
+	R2_S3_ACCESS_KEY_ID: string;
+	R2_S3_SECRET_ACCESS_KEY: string;
+	/** e.g. `<accountId>.r2.cloudflarestorage.com`. */
+	R2_S3_ENDPOINT: string;
+	/** e.g. `tekmemo-blobs`. */
+	R2_BUCKET_NAME: string;
+
+	/** Public base used to build absolute presigned URLs (without trailing slash). */
+	CLOUD_PUBLIC_BASE_URL?: string;
+
+	/** Presigned URL lifetime in seconds (default 900 = 15 min). */
+	PRESIGN_TTL_SECONDS?: string;
+
+	/** Deployment environment label surfaced by `/v1/readiness`. */
+	ENVIRONMENT?: string;
+
+	// Dashboard session cookie secret (used by React Router session storage).
+	SESSION_SECRET: string;
+}
+
+/** Default presigned-URL lifetime when `PRESIGN_TTL_SECONDS` is unset. */
+export const DEFAULT_PRESIGN_TTL_SECONDS = 900;

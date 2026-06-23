@@ -10,17 +10,15 @@
 export * from "./agentfs";
 // Explicit re-export resolves TS2308 ambiguity: isNotFoundError appears in multiple export * sources.
 export { isNotFoundError } from "./agentfs";
-export * from "./ai-sdk";
-export * from "./benchmark-kit";
-// Explicit type exports to resolve ambiguities between cloud-client re-exports
-// and types of the same name from other sub-packages.
+// Framework-neutral AI-runtime contract (implemented by adapter packages).
+// Replaces the vendor-coupled ai-sdk re-export that moved to
+// @tekbreed/tekmemo-adapter-ai-sdk (ADR 0007).
+export * from "./ai-runtime";
+// The cloud is a file replica: its file-manifest sync types are the canonical
+// public surface and are re-exported explicitly to win over the legacy
+// event-based types still exported from "./tekmemo" (removed in a later batch).
+// See docs/architecture/cloud-sync-and-refactor.md §6.5.
 export type {
-	MemoryKind,
-	Page,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
-	SyncConflictResolution,
-	SyncEventInput,
 	SyncPullInput,
 	SyncPullResult,
 	SyncPushInput,
@@ -65,15 +63,14 @@ export * from "./fs";
 export * from "./graph";
 // Explicit re-export resolves TS2308 ambiguity: cloneAndValidateMetadata appears in multiple export * sources.
 export { cloneAndValidateMetadata } from "./graph";
-export * from "./openai";
-// Explicit re-export resolves TS2308 ambiguity: expectedVectorLength appears in multiple export * sources.
-export { expectedVectorLength } from "./openai";
-// Explicit re-exports resolve TS2308 ambiguities: RecallResult and assertNonEmptyString appear in multiple export * sources.
-export type { RecallResult } from "./recall";
+export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
-export * from "./rerank-voyage";
+// Write intelligence (ADR 0009 Component 6): secret/PII blocklist gate +
+// durability tier classifier.
+export * from "./security/durability-tier";
+export * from "./security/secret-blocklist";
+export type { RecallResult } from "./tekmemo";
+export * from "./tekmemo";
 export * from "./testing";
-export * from "./upstash-vector";
-export * from "./voyageai";

@@ -33,19 +33,22 @@ This guide gets you from zero to a working TekMemo memory setup.
 
 1. [Install TekMemo](./installation)
 2. [Initialize local memory](./getting-started)
-3. [Understand the filesystem](./filesystem-layout)
-4. [Add durable records](./memory-records)
-5. [Use the CLI in an agent workflow](../cli/)
-5. [Use the MCP in an agent workflow](../mcp/)
-6. [Connect cloud when you need sync or hosted APIs](./cloud-client)
+3. [Use the `Tekmemo` client](./client)
+4. [Understand the filesystem](./filesystem-layout)
+5. [Add durable records](./memory-records)
+6. [Use the CLI in an agent workflow](../cli/)
+7. [Use the MCP in an agent workflow](../mcp/)
+8. [Connect cloud when you need sync or hosted APIs](./cloud-client)
 
 ## Runtime choices
 
-All runtime modes are configured as options when initializing your memory store using `@tekbreed/tekmemo`:
+All runtime modes are selected when constructing a [`Tekmemo` client](./client) (or the equivalent CLI/MCP flag). The client is backed by a strategy per mode:
 
 | Runtime | Use when |
 | --- | --- |
 | Local | You want inspectable project memory stored in `.tekmemo/`. |
 | Cloud | You want hosted project memory, sync, API keys, recall, and graph endpoints. |
-| Hybrid | You want local files plus cloud recall/sync. |
-| In-memory | You are writing tests, demos, or examples. |
+| Hybrid | You want local files plus cloud recall/sync, routed by read/write policies. |
+| In-memory | You are writing tests, demos, or examples. Nothing persists. |
+
+See [Configuration](./configuration) for the resolution chain and [The `Tekmemo` client](./client) for the full API surface.

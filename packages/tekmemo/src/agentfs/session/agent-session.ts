@@ -17,6 +17,11 @@ import {
 	type MemoryPath,
 	NOTES_MEMORY_PATH,
 } from "@tekbreed/tekmemo";
+// Direct source import (not the package barrel) to avoid the index → agentfs →
+// agent-session → index cycle: assertWriteAllowed is exported from the barrel
+// *after* the agentfs block, so a barrel import would be `undefined` at module
+// evaluation time.
+import { assertWriteAllowed } from "../../security/secret-blocklist";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import { AgentfsClientError } from "../errors/agentfs-error";
 import type { SyncAfterSessionResult } from "../sync/sync-after-session";
@@ -469,15 +474,30 @@ export function createTekMemoAgentSession(
 			completeOptions: CompleteTekMemoAgentSessionOptions = {},
 		): Promise<CompleteTekMemoAgentSessionResult> => {
 			const extracted = await extractSessionMemory(options.client, paths);
-			const durableMemoryWritten =
+			const wantDurable =
 				(completeOptions.extractDurableMemory ?? false) &&
 				extracted.durableMemory.trim().length > 0;
 
-			if (durableMemoryWritten) {
-				await options.memory.append(
-					NOTES_MEMORY_PATH,
-					formatDurableMemoryNote(sessionId, extracted.durableMemory),
-				);
+			// Write intelligence gate (ADR 0009 Component 6): agent-extracted
+			// durable memory is the highest-risk path for a leaked secret (the
+			// agent scraped a .env and wrote it to "durable memory"). It lands in
+			// syncable notes.md via a raw store append, bypassing writeMemory — so
+			// the gate runs here too. If blocked, the extraction is dropped (not
+			// persisted) and the result reports durableMemoryWritten: false.
+			let durableMemoryWritten = false;
+			if (wantDurable) {
+				try {
+					assertWriteAllowed([extracted.durableMemory], NOTES_MEMORY_PATH);
+					await options.memory.append(
+						NOTES_MEMORY_PATH,
+						formatDurableMemoryNote(sessionId, extracted.durableMemory),
+					);
+					durableMemoryWritten = true;
+				} catch {
+					// Secret material detected — drop the write, do not surface the
+					// secret in the error path. The session still completes; the
+					// tainted durable memory simply isn't persisted.
+				}
 			}
 
 			const sync = await syncAfterSession(options.client, {

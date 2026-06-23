@@ -1,21 +1,55 @@
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+/**
+ * CLI command handler for performing text or regex searches across local memory files.
+ *
+ * @module search
+ */
+
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 
+/**
+ * Options configuration for the search command.
+ */
 export interface SearchCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
+	/**
+	 * The text query or regex pattern to search for.
+	 */
 	query: string;
+	/**
+	 * If true, treats the query string as a regular expression.
+	 */
 	regex?: boolean | undefined;
 }
 
+/**
+ * Represents a matched line with details on line number and parent file path.
+ */
 interface SearchMatch {
 	file: string;
 	line: number;
 	content: string;
 }
 
+/**
+ * Runs the search command, searching local memory database files for a pattern.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runSearchCommand(
 	options: SearchCommandOptions,
 ): Promise<number> {
@@ -44,7 +78,7 @@ export async function runSearchCommand(
 	}
 
 	for (const file of filesToSearch) {
-		const content = await options.fs.readTextIfExists(file);
+		const content = await readTextIfExists(options.memo.store, file);
 		if (!content) continue;
 
 		const lines = content.split(/\r?\n/);

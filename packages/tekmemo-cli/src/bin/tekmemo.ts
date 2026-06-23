@@ -1,6 +1,15 @@
 #!/usr/bin/env node
+/**
+ * Executable entry point for the TekMemo CLI tool.
+ *
+ * @module tekmemo-bin
+ */
+
 import { runTekMemoCli } from "../runner";
 
+/**
+ * Main execution function parsing process arguments, invoking CLI runner, and formatting stdout/stderr.
+ */
 async function main() {
 	const result = await runTekMemoCli({
 		argv: process.argv.slice(2),

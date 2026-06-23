@@ -1,0 +1,13 @@
+/**
+ * Framework-neutral AI-runtime contract for TekMemo.
+ *
+ * @remarks
+ * Re-exported from the package root so adapter packages can
+ * `import type { TekMemoMemoryRuntime } from "@tekbreed/tekmemo"`. The
+ * Vercel AI SDK adapter (`@tekbreed/tekmemo-adapter-ai-sdk`) and any future
+ * framework adapter implement this contract.
+ *
+ * @public
+ */
+
+export * from "./types";

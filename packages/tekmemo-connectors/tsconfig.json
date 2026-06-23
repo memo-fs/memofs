@@ -1,0 +1,13 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"types": ["node"],
+		"outDir": "dist",
+		"rootDir": ".",
+		"paths": {
+			"@tekbreed/tekmemo-connectors": ["./src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

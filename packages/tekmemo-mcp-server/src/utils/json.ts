@@ -1,8 +1,20 @@
+/**
+ * JSON utility functions for safe parsing, validation, and stringification.
+ *
+ * @module json
+ */
+
 import { McpValidationError } from "../errors";
 import type { JsonObject, JsonValue } from "../types";
 
 const BLOCKED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 
+/**
+ * Checks if a value is a plain JavaScript object (i.e. created with `{}` or `new Object()`).
+ *
+ * @param value - The value to inspect.
+ * @returns `true` if the value is a plain object, `false` otherwise.
+ */
 export function isPlainObject(
 	value: unknown,
 ): value is Record<string, unknown> {
@@ -11,6 +23,16 @@ export function isPlainObject(
 	return proto === Object.prototype || proto === null;
 }
 
+/**
+ * Asserts that a value is a valid JSON value.
+ * Validates against circular references, extreme depth, unsafe keys, and non-finite numbers.
+ *
+ * @param value - The value to check.
+ * @param path - The property path used for detailed error messages.
+ * @param depth - Current recursion depth.
+ * @param seen - Set of visited object references to detect circularity.
+ * @throws {McpValidationError} If the value is invalid or unsafe for JSON serialization.
+ */
 export function assertJsonValue(
 	value: unknown,
 	path = "value",
@@ -58,6 +80,14 @@ export function assertJsonValue(
 	throw new McpValidationError(`${path} must be JSON serializable.`);
 }
 
+/**
+ * Asserts that a value is a plain object and returns it.
+ *
+ * @param value - The value to assert.
+ * @param name - The field name for the error message.
+ * @returns The casted record object.
+ * @throws {McpValidationError} If the value is not a plain object.
+ */
 export function asObject(
 	value: unknown,
 	name = "value",
@@ -67,6 +97,14 @@ export function asObject(
 	return value;
 }
 
+/**
+ * Asserts that a value is a valid JSON object.
+ *
+ * @param value - The value to check.
+ * @param path - The property path for the error message.
+ * @returns The validated JsonObject.
+ * @throws {McpValidationError} If the value is not a valid JSON object.
+ */
 export function toJsonObject(value: unknown, path = "value"): JsonObject {
 	assertJsonValue(value, path);
 	if (!isPlainObject(value))
@@ -74,11 +112,25 @@ export function toJsonObject(value: unknown, path = "value"): JsonObject {
 	return value as JsonObject;
 }
 
+/**
+ * Safely stringifies a value to JSON, validating it first.
+ *
+ * @param value - The value to stringify.
+ * @param spacing - The spacing format count.
+ * @returns The JSON string representation.
+ * @throws {McpValidationError} If the value has serialization issues.
+ */
 export function safeJsonStringify(value: unknown, spacing = 2): string {
 	assertJsonValue(value, "result");
 	return JSON.stringify(value, null, spacing);
 }
 
+/**
+ * Returns the UTF-8 byte length of a string.
+ *
+ * @param value - The string to measure.
+ * @returns The length in bytes.
+ */
 export function byteLength(value: string): number {
 	return Buffer.byteLength(value, "utf8");
 }

@@ -1,27 +1,44 @@
-# TekMemo Project Notes
+# TekMemo Core Package Notes (`@tekbreed/tekmemo`)
 
-TekMemo is the first project family in TekBreed OSS. It is published as one npm package, `@tekbreed/tekmemo`, with all public APIs exported directly from the root entrypoint instead of separate adapter packages or public subpath imports.
+> **Scope:** this document covers the **core** `@tekbreed/tekmemo` package only.
+> For the full product architecture (9 published packages, cloud, adapters), see
+> [`docs/CONTEXT.md`](./CONTEXT.md).
 
-## Public Package Shape
+TekMemo ships as multiple focused packages under the `@tekbreed/` scope (see
+[`CONTEXT.md` → Key entry points](./CONTEXT.md#key-entry-points) and the
+[README packages table](../README.md#packages)). The **core** package is
+`@tekbreed/tekmemo`. Framework-specific integrations, embedder/reranker
+adapters, and connectors live in their own published packages following the
+adapter pattern (e.g. `@tekbreed/tekmemo-adapter-ai-sdk`,
+`@tekbreed/tekmemo-adapter-openai`).
 
-Install the package:
+## Core Package Shape
+
+Install the core package:
 
 ```bash
 pnpm add @tekbreed/tekmemo
 ```
 
-Import everything directly from the root entrypoint:
+Import core capabilities directly from the root entrypoint:
 
 ```ts
-import { 
-  bootstrapMemoryStore, 
-  createNodeFsMemoryStore, 
-  createOpenAIEmbedder,
-  InMemoryMemoryStore
+import {
+  bootstrapMemoryStore,
+  createNodeFsMemoryStore,
+  InMemoryMemoryStore,
+  Tekmemo
 } from "@tekbreed/tekmemo";
 ```
 
-Do not introduce public subpath imports (e.g., `@tekbreed/tekmemo/fs`, `@tekbreed/tekmemo/openai`). All public capabilities must be re-exported in `packages/tekmemo/src/index.ts`. Add new capabilities as internal modules under `packages/tekmemo/src/<module>/`.
+Do not introduce public subpath imports on core (e.g., `@tekbreed/tekmemo/fs`,
+`@tekbreed/tekmemo/graph`). All core public capabilities must be re-exported in
+`packages/tekmemo/src/index.ts`. Add new capabilities as internal modules under
+`packages/tekmemo/src/<module>/`.
+
+Provider-specific integrations (AI SDK, OpenAI embeddings, Voyage reranker, etc.)
+belong in **adapter packages**, not in core — per AGENTS.md ("Core protocol
+contracts must be provider-neutral") and ADR 0007.
 
 ## Canonical Local Protocol
 
@@ -30,6 +47,7 @@ The canonical local memory root is:
 ```txt
 .tekmemo/
   manifest.json
+  connectors.json
   memory/core.md
   memory/notes.md
   events/memory-events.jsonl
@@ -40,15 +58,30 @@ The canonical local memory root is:
   snapshots/snapshots.jsonl
 ```
 
-The root `@tekbreed/tekmemo` API owns the protocol constants, validation, document types, event types, chunk records, snapshot records, and provider-neutral contracts. Storage and provider modules implement those contracts without changing the protocol.
+The root `@tekbreed/tekmemo` API owns the protocol constants, validation,
+document types, event types, chunk records, snapshot records, and
+provider-neutral contracts. Storage and provider modules implement those
+contracts without changing the protocol.
 
 ## Boundary Rules
 
-- **Core Contracts**: The core protocol contracts must stay provider-neutral. They should not own filesystem persistence, model-provider API calls, vector-provider calls, billing, hosted product policy, or closed-source cloud infrastructure.
-- **Filesystem Storage (NodeFs)**: Owns Node.js filesystem persistence, safe root normalization, canonical path resolution, directory creation, atomic writes, append serialization, symlink policy, and missing-file behavior.
-- **Recall contracts & Vector Store**: Owns provider-neutral vector recall contracts, filter semantics, namespace semantics, recall result shape, and recall adapter contract tests.
-- **Reranking**: Owns provider-neutral reranking contracts, validation, deterministic fallback reranking, score normalization, and reranker contract tests.
-- **Provider Adapters**: Provider adapters (such as OpenAI, VoyageAI, Upstash Vector, and Voyage Rerank) translate TekMemo contracts to provider APIs. They should accept credentials from the host app and must not store secrets.
+- **Core Contracts**: The core protocol contracts must stay provider-neutral.
+  They should not own filesystem persistence, model-provider API calls,
+  vector-provider calls, billing, hosted product policy, or closed-source cloud
+  infrastructure.
+- **Filesystem Storage (NodeFs)**: Owns Node.js filesystem persistence, safe
+  root normalization, canonical path resolution, directory creation, atomic
+  writes, append serialization, symlink policy, and missing-file behavior.
+- **Recall contracts & Vector Store**: Owns provider-neutral vector recall
+  contracts, filter semantics, namespace semantics, recall result shape, and
+  recall adapter contract tests.
+- **Reranking**: Owns provider-neutral reranking contracts, validation,
+  deterministic fallback reranking, score normalization, and reranker contract
+  tests.
+- **Provider Adapters**: Provider adapters (such as OpenAI, VoyageAI, and Voyage
+  Rerank) translate TekMemo contracts to provider APIs. They live in their own
+  `@tekbreed/tekmemo-adapter-*` packages and should accept credentials from the
+  host app — must not store secrets.
 
 ## Release Layers
 
@@ -69,7 +102,9 @@ A TekMemo capability is not release-ready until:
 - Typecheck passes.
 - Unit tests pass.
 - Contract tests pass when the capability implements a shared contract.
-- Path safety, malformed input, provider failure, and secret-redaction edge cases are covered where relevant.
-- Public docs use `@tekbreed/tekmemo` root imports only.
+- Path safety, malformed input, provider failure, and secret-redaction edge
+  cases are covered where relevant.
+- Public docs use `@tekbreed/tekmemo` root imports only (for core APIs).
 - package.json exports expose only the root `.` entrypoint.
-- `pnpm --filter @tekbreed/tekmemo pack:dry-run` contains only publishable files.
+- `pnpm --filter @tekbreed/tekmemo pack:dry-run` contains only publishable
+  files.

@@ -1,0 +1,170 @@
+<p align="center">
+  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-transformers"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-adapter-transformers?label=%40tekbreed%2Ftekmemo-adapter-transformers&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-transformers"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-adapter-transformers?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+</p>
+
+# `@tekbreed/tekmemo-adapter-transformers`
+
+## What is this?
+
+**Zero-config local embedder adapter for TekMemo.** Runs a small
+sentence-embedding model **in process** via [Transformers.js](https://huggingface.co/docs/transformers.js)
+(ONNX runtime) — **no API key, no cloud, and no network after the first model
+download.**
+
+This is what powers TekMemo's *zero-API-key hybrid recall*: install it (or let
+the runtime lazy-load it) and `recall()` gains a semantic vector path on top of
+the default lexical (BM25 + fuzzy) path, with nothing leaving your machine.
+
+## Installation
+
+```bash
+npm install @tekbreed/tekmemo-adapter-transformers @tekbreed/tekmemo
+```
+
+This pulls in `@huggingface/transformers` and ships an ONNX-compatible embedder
+that implements TekMemo's provider-neutral `MemoryEmbedder` contract.
+
+## Quick Start
+
+### Standalone
+
+```ts
+import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+
+const embedder = createTransformersEmbedder({
+  model: "Xenova/all-MiniLM-L6-v2",
+});
+
+// Embed a batch of texts (mean-pooled + L2-normalized vectors)
+const { embeddings } = await embedder.embedTexts({
+  texts: ["TekMemo gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
+});
+
+console.log(embeddings[0].embedding.length); // 384
+console.log(embeddings[0].model);            // "Xenova/all-MiniLM-L6-v2"
+```
+
+The first call downloads the ONNX weights once and caches them; subsequent calls
+are fully offline.
+
+### With TekMemo core
+
+Plug the adapter straight into `Tekmemo` for hybrid recall with your own embedder:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+
+const memo = new Tekmemo({
+  rootDir: "./.tekmemo",
+  projectId: "my-app",
+  embedder: createTransformersEmbedder(),
+  recall: { engine: "auto" }, // upgrades to hybrid since an embedder is present
+});
+
+await memo.notes.record({ content: "User prefers TypeScript and strict mode." });
+const hits = await memo.recall("coding language preference"); // semantic match
+```
+
+### Zero-config (no code)
+
+You usually do **not** need to touch this package directly. The TekMemo runtime
+can lazy-load it for you — just enable local embeddings:
+
+```bash
+export TEKMEMO_LOCAL_EMBEDDINGS=true
+export TEKMEMO_RECALL_ENGINE=auto
+```
+
+or in `.tekmemo/config.json`:
+
+```json
+{
+  "$schema": "https://docs.memo.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+  "runtime": "local",
+  "recall": { "engine": "auto", "localEmbeddings": true }
+}
+```
+
+The runtime imports `@tekbreed/tekmemo-adapter-transformers` only when the first
+embedding is actually requested, so boot stays fast. If the adapter is missing or
+fails to load, TekMemo falls back to lexical (BM25 + fuzzy) recall — memory stays
+discoverable and writes are never broken.
+
+## Configuration
+
+### Embedder options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `model` | `string` | `"Xenova/all-MiniLM-L6-v2"` | Hugging Face model id (or local path under `cacheDir`) supported by Transformers.js. |
+| `cacheDir` | `string` | Transformers.js default | Directory used to cache downloaded ONNX weights. |
+| `device` | `"cpu" \| "gpu" \| "wasm"` | `"cpu"` | Inference device. Use `"gpu"` or `"wasm"` when the runtime supports it. |
+| `dtype` | `"fp32" \| "fp16" \| "q8" \| "int8"` | `"fp32"` | ONNX runtime data type. `"fp32"` is the safest across platforms. |
+| `batchSize` | `number` | `32` | Maximum texts per inference batch. Larger batches trade memory for throughput. |
+| `onProgress` | `(info) => void` | — | Callback for model download/load progress. Use it to show a one-time "warming up" notice. |
+
+### Default model
+
+`Xenova/all-MiniLM-L6-v2` is a 384-dimensional sentence-embedding model: small,
+fast, and good enough for local agent memory. To use a different Transformers.js
+model, pass its id:
+
+```ts
+createTransformersEmbedder({ model: "Xenova/all-MiniLM-L12-v2" });
+```
+
+## When to use this vs. a provider adapter
+
+| Need | Use |
+|------|-----|
+| Offline / private / zero-cost semantic recall | **This package** (local ONNX) |
+| Highest-quality embeddings, can call an API | [`@tekbreed/tekmemo-adapter-openai`](../tekmemo-adapter-openai) or [`-voyage`](../tekmemo-adapter-voyage) |
+| Persistent local vector recall | pair any embedder with `createFsRecallStore` from `@tekbreed/tekmemo` |
+
+The local embedder pairs with TekMemo's built-in filesystem recall store
+(`createFsRecallStore`, backed by `.tekmemo/indexes/embeddings.jsonl`) for a
+fully local vector memory. For large shared indices, prefer a provider embedder
+plus a managed vector store.
+
+## Testing
+
+The embedder accepts an injectable `pipelineFactory` (an internal type), so tests
+never need to download weights or run real inference. Within the monorepo, use
+the bundled fake factory from `src/testing`:
+
+```ts
+import { createFakePipelineFactory } from "./src/testing";
+import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+
+const embedder = createTransformersEmbedder({
+  pipelineFactory: createFakePipelineFactory({ dimensions: 384 }),
+});
+
+const { embeddings } = await embedder.embedTexts({ texts: ["hello"] });
+console.log(embeddings[0].embedding.length); // 384
+```
+
+The fake produces deterministic, hash-derived vectors — identical strings yield
+identical vectors, token-overlapping strings are partially similar — enough to
+exercise recall merging without the real model.
+
+## Boundary
+
+This package owns the Transformers.js local embedder adapter. It does **not** own
+the TekMemo core `MemoryEmbedder` contract, other provider adapters, or the
+Transformers.js runtime itself.
+
+## Contributing
+
+See our central [Contributing Guide](../../CONTRIBUTING.md) and development
+scripts for details on formatting, linting, and testing within the monorepo.
+
+## License
+
+MIT

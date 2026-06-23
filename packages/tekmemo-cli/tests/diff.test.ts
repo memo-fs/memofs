@@ -1,6 +1,21 @@
-import { createTempTekMemoDir, TEKMEMO_PATHS } from "@tekbreed/tekmemo";
+import {
+	createTempTekMemoDir,
+	TEKMEMO_PATHS,
+	Tekmemo,
+} from "@tekbreed/tekmemo";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, TekMemoFileSystem } from "../src";
+import { runTekMemoCli } from "../src";
+
+/**
+ * Releases the Q28 advisory lock held by a direct Tekmemo so a subsequent CLI
+ * write call (e.g. `snapshot`) on the same root can acquire it. The local
+ * single-writer contract (Q28) forbids two live writers on one `.tekmemo/`
+ * root, so a direct memo must be disposed before interleaving CLI writes.
+ */
+async function releaseLock(memo: Tekmemo): Promise<void> {
+	const store = memo.store as { dispose?: () => Promise<void> };
+	await store.dispose?.();
+}
 
 describe("diff", () => {
 	it("compares two snapshots", async () => {
@@ -10,19 +25,22 @@ describe("diff", () => {
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nFirst version.\n",
 			);
+			await releaseLock(memo);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v1"],
 			});
 
-			await fs.writeText(
+			const memo2 = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo2.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nSecond version.\n",
 			);
+			await releaseLock(memo2);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v2"],
 			});
@@ -70,16 +88,22 @@ describe("diff", () => {
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const fs = new TekMemoFileSystem({ rootDir: temp.rootDir });
-			await fs.writeText(
+			const memo = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo.store.write(
 				TEKMEMO_PATHS.memory.core,
 				"# Core Memory\n\nAlpha.\n",
 			);
+			await releaseLock(memo);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "alpha"],
 			});
 
-			await fs.writeText(TEKMEMO_PATHS.memory.core, "# Core Memory\n\nBeta.\n");
+			const memo2 = new Tekmemo({ rootDir: temp.rootDir, autoBootstrap: false });
+			await memo2.store.write(
+				TEKMEMO_PATHS.memory.core,
+				"# Core Memory\n\nBeta.\n",
+			);
+			await releaseLock(memo2);
 			await runTekMemoCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "beta"],
 			});

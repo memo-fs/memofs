@@ -1,12 +1,12 @@
 # TekMemo Workspace Runbook
 
-Welcome to the `@tekbreed/oss` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
+Welcome to the `@tekbreed/tekmemo` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
 
 ---
 
 ## Workspace Overview
 
-The TekBreed OSS repository is structured as a **pnpm monorepo** containing:
+The TekMemo repository is structured as a **pnpm monorepo** containing:
 1. **Public Package**: `@tekbreed/tekmemo` (located in [packages/tekmemo](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo)) — the unified file-first memory runtime.
 2. **Docs App**: `apps/docs` — the VitePress-based documentation site.
 3. **Tooling**: `@repo/*` packages in [tooling](file:///Users/codingsimba/Desktop/projects/oss/tooling) — private workspace support for builds, tests, and configuration.
@@ -14,7 +14,7 @@ The TekBreed OSS repository is structured as a **pnpm monorepo** containing:
 ### Workspace Layout
 
 ```txt
-tekbreed-oss/
+tekmemo/
 ├── apps/
 │   └── docs/                  # VitePress docs site
 ├── packages/
@@ -24,9 +24,9 @@ tekbreed-oss/
 │   ├── tekcode-cli/           # Future TekCode placeholder
 │   └── tekcode-desktop/       # Future TekCode placeholder
 ├── tooling/                   # Private `@repo/*` workspace tooling
-│   ├── test-utils/            # Contract tests, fakes, and fixtures
-│   ├── tsdown-config/         # Shared build configurations
-│   └── typescript-config/     # Shared TypeScript config base
+│   ├── tsdown/                # Shared build configurations (@repo/tsdown)
+│   ├── typescript/            # Shared TypeScript config base (@repo/typescript)
+│   └── utils/                 # Shared utility helpers (@repo/utils)
 ├── docs/                      # General repository and operational notes
 ├── projects/                  # Architectural notes and plans
 └── scripts/                   # Repository maintenance scripts
@@ -44,8 +44,7 @@ All TekMemo capabilities live as **internal modules** under `packages/tekmemo/sr
 | **`fs`** | Local filesystem storage implementation (`NodeFsMemoryStore`), safe paths, directories, atomic writes, and missing-file behavior. |
 | **`openai`** | OpenAI client and embeddings adapter (`OpenAIEmbedder`). |
 | **`voyageai`** | VoyageAI client and embeddings adapter (`VoyageEmbedder`). |
-| **`upstash-vector`**| Upstash Vector integration (`UpstashRecallStore`). |
-| **`recall`** | Vector recall abstractions, cosine similarity metrics, and filter evaluations. |
+| **`recall`** | Vector recall abstractions, in-memory + filesystem-backed recall stores, cosine similarity metrics, and filter evaluations. |
 | **`rerank`** | Reranking interfaces and deterministic fallback rerankers. |
 | **`rerank-voyage`** | VoyageAI-backed reranking adapter (`VoyageReranker`). |
 | **`agentfs`** | AgentFS workspace client and remote adapter capabilities. |

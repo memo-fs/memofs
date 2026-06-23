@@ -1,5 +1,5 @@
 {
-	"$id": "https://oss.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+	"$id": "https://docs.memo.tekbreed.com/1.0.0-alpha.0/config.schema.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "TekMemo CLI Configuration",
 	"type": "object",
@@ -10,7 +10,7 @@
 		},
 		"runtime": {
 			"type": "string",
-			"enum": ["local", "cloud", "hybrid"],
+			"enum": ["local", "hybrid", "memory"],
 			"description": "The runtime mode to use."
 		},
 		"root": {
@@ -47,13 +47,33 @@
 			"properties": {
 				"readPolicy": {
 					"type": "string",
-					"enum": ["local-first", "cloud-first", "local-only", "cloud-only"],
+					"enum": ["local-first", "cloud-first", "local-only"],
 					"description": "The read fallback policy."
 				},
 				"writePolicy": {
 					"type": "string",
-					"enum": ["local-first", "cloud-first", "local-only", "cloud-only"],
+					"enum": ["local-first", "cloud-first", "local-only"],
 					"description": "The write fallback policy."
+				}
+			},
+			"additionalProperties": false
+		},
+		"recall": {
+			"type": "object",
+			"description": "Local recall engine configuration for local and hybrid modes. Controls whether memory is retrieved by lexical match (BM25 + fuzzy, zero config), semantic embeddings, or a merged hybrid of both. In local mode, recall defaults to lexical-only unless an embedder is configured or local embeddings are enabled.",
+			"properties": {
+				"engine": {
+					"type": "string",
+					"enum": ["lexical", "vector", "hybrid", "auto"],
+					"description": "Retrieval strategy. \"lexical\" = BM25 + fuzzy only (no embedder, zero config). \"vector\" = semantic embeddings only (requires an embedder). \"hybrid\" = both paths merged and reranked (requires an embedder). \"auto\" (default) = \"hybrid\" when an embedder is available, else \"lexical\"."
+				},
+				"localEmbeddings": {
+					"type": "boolean",
+					"description": "When true, lazy-load a local ONNX embedder (via @tekbreed/tekmemo-adapter-transformers) so hybrid recall works with no API keys. The model is only loaded on the first recall. Disable to keep the runtime import-light. Defaults to false in the core runtime; the MCP server may default this on."
+				},
+				"embeddingModel": {
+					"type": "string",
+					"description": "Transformers.js-compatible local embedding model id. Only used when local embeddings are enabled. Defaults to \"Xenova/all-MiniLM-L6-v2\"."
 				}
 			},
 			"additionalProperties": false

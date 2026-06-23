@@ -1,7 +1,23 @@
+/**
+ * Output bytes and content size limit enforcement utilities for MCP responses.
+ *
+ * @module limits
+ */
+
 import { McpOutputLimitError } from "../errors";
 import type { McpToolResult } from "../types";
 import { byteLength } from "./json";
 
+/**
+ * Enforces a byte limit on a string, truncating it if it exceeds the limit.
+ * Adds a trailing truncation message indicating how many bytes were exceeded.
+ *
+ * @param text - The text to check and potentially truncate.
+ * @param maxBytes - The maximum allowed size in bytes.
+ * @param operation - The operation name for logs/errors.
+ * @returns The original string if it is within limits, or a truncated string with a notice.
+ * @throws {McpOutputLimitError} If the limit is too small to fit even the truncation suffix.
+ */
 export function enforceOutputLimit(
 	text: string,
 	maxBytes: number,
@@ -21,6 +37,14 @@ export function enforceOutputLimit(
 	return `${slice}${suffix}`;
 }
 
+/**
+ * Enforces output byte limits on all text items within an MCP tool result.
+ *
+ * @param result - The tool result object.
+ * @param maxBytes - The maximum allowed byte limit for text content.
+ * @param operation - The operation name.
+ * @returns The original tool result, or a copy with truncated text elements.
+ */
 export function enforceToolResultLimit(
 	result: McpToolResult,
 	maxBytes: number,

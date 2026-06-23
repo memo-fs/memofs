@@ -1,5 +1,14 @@
+/**
+ * CLI command handler for auditing and diagnosing TekMemo workspace repositories.
+ *
+ * @module doctor
+ */
+
+import { stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import type { Tekmemo } from "@tekbreed/tekmemo";
 import type { z } from "zod";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
 	REQUIRED_DIRS,
@@ -15,27 +24,63 @@ import {
 	SnapshotEntrySchema,
 } from "../protocol/schemas";
 
+/**
+ * Represents a validation problem (error or warning) detected by the doctor check.
+ */
 export interface DoctorIssue {
+	/**
+	 * Severity level of the issue.
+	 */
 	level: "error" | "warning";
+	/**
+	 * Machine-readable category code for the issue.
+	 */
 	code: string;
+	/**
+	 * Human-readable descriptive message.
+	 */
 	message: string;
 }
 
+/**
+ * Options configuration for the doctor command.
+ */
 export interface DoctorCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
+	/**
+	 * If true, throws errors on malformed lines during JSONL parsing.
+	 */
 	strict?: boolean | undefined;
 }
 
+/**
+ * Runs the doctor command, checking repository integrity, schema compliance, and formatting.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runDoctorCommand(
 	options: DoctorCommandOptions,
 ): Promise<number> {
 	const issues: DoctorIssue[] = [];
 
+	const rootDir = getRootDir(options.memo.store);
+
 	for (const dir of REQUIRED_DIRS) {
-		const exists = await options.fs.exists(dir);
-		if (!exists) {
+		try {
+			await stat(resolve(rootDir, dir));
+		} catch {
 			issues.push({
 				level: "error",
 				code: "missing_dir",
@@ -45,8 +90,8 @@ export async function runDoctorCommand(
 	}
 
 	for (const file of REQUIRED_FILES) {
-		const exists = await options.fs.exists(file);
-		if (!exists) {
+		const fileExists = await exists(options.memo.store, file);
+		if (!fileExists) {
 			issues.push({
 				level: "error",
 				code: "missing_file",
@@ -55,7 +100,8 @@ export async function runDoctorCommand(
 		}
 	}
 
-	const manifestContent = await options.fs.readTextIfExists(
+	const manifestContent = await readTextIfExists(
+		options.memo.store,
 		TEKMEMO_PATHS.manifest,
 	);
 	if (manifestContent) {
@@ -81,7 +127,7 @@ export async function runDoctorCommand(
 	const conversationIds = new Set<string>();
 
 	for (const [file, schema] of Object.entries(validationMap)) {
-		const content = await options.fs.readTextIfExists(file);
+		const content = await readTextIfExists(options.memo.store, file);
 		if (content === undefined) continue;
 
 		const records = parseJsonl(content, { strict: options.strict ?? false });
@@ -105,7 +151,8 @@ export async function runDoctorCommand(
 		}
 	}
 
-	const eventContent = await options.fs.readTextIfExists(
+	const eventContent = await readTextIfExists(
+		options.memo.store,
 		TEKMEMO_PATHS.memoryEvents,
 	);
 	if (eventContent) {

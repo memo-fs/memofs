@@ -4,17 +4,19 @@ import * as path from "node:path";
 import {
 	CORE_MEMORY_PATH,
 	chunkText,
-	createBenchmarkSuite,
 	createDeterministicFallbackReranker,
 	createInMemoryRecallStore,
-	createMemoryReadBenchmarkCase,
-	createMemoryWriteBenchmarkCase,
 	createNodeFsMemoryStore,
-	createRecallQueryBenchmarkCase,
 	NOTES_MEMORY_PATH,
 	readCoreMemory,
 	writeCoreMemory,
 } from "@tekbreed/tekmemo";
+import {
+	createBenchmarkSuite,
+	createMemoryReadBenchmarkCase,
+	createMemoryWriteBenchmarkCase,
+	createRecallQueryBenchmarkCase,
+} from "@tekbreed/tekmemo-benchmark-kit";
 import {
 	createMemoryText,
 	createRecallDocuments,

@@ -4,11 +4,10 @@ The filesystem store module provides the primary filesystem-backed memory store 
 
 ## Import
 
-All filesystem store APIs are imported directly from `@tekbreed/tekmemo`:
-
 ```ts
 import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
 ```
+
 ## Features
 
 - **Atomic Writes:** Prevents data corruption during sudden crashes.
@@ -16,11 +15,24 @@ import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
 - **Symlink Protection:** Ensures memory operations stay within the authorized root.
 - **Node.js Native:** Built on the standard `node:fs/promises` module.
 
+## Quick start with Tekmemo
+
+The [`Tekmemo`](./tekmemo) class creates a filesystem store automatically in local mode. You rarely need to use `createNodeFsMemoryStore` directly:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+
+const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
+
+// Under the hood, Tekmemo uses createNodeFsMemoryStore for local mode.
+// Access the store directly when needed:
+const store = memo.store;
+const core = await memo.core.read();
+```
+
 ## API Reference
 
 ### `NodeFsMemoryStore`
-
-The primary class for filesystem storage.
 
 | Method | Purpose |
 | --- | --- |
@@ -30,22 +42,18 @@ The primary class for filesystem storage.
 | `delete(path)` | Removes a file from the store. |
 | `list(kind)` | Lists files of a specific type (e.g. snapshots). |
 
-## Example: Setup
+## Direct usage (advanced)
+
+If you need a standalone store outside of `Tekmemo` (e.g. for custom tooling
+or tests):
 
 ```ts
 import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
-import { readCoreMemory } from "@tekbreed/tekmemo";
 
-// Initialize the store in the current directory
-const store = createNodeFsMemoryStore({
-  rootDir: process.cwd()
-});
-
-// Use it with core tekmemo helpers
-const core = await readCoreMemory(store);
-console.log(core.content);
+const store = createNodeFsMemoryStore({ rootDir: process.cwd() });
 ```
 
 ## When to use
 
-Use this package when you want to store TekMemo memory as plain text and JSON files on your local machine or a server with a persistent disk. This is the standard choice for **Local** and **Hybrid** runtime modes.
+- **Default:** Let [`Tekmemo`](./tekmemo) manage the store by specifying `rootDir` in the constructor.
+- **Advanced:** Use `createNodeFsMemoryStore` directly for custom tooling or tests. Note: the AI SDK runtime requires a `Tekmemo` instance (`createAiSdkRuntimeFromTekmemo(memo)`), not a raw store.

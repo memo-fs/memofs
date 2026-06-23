@@ -1,5 +1,5 @@
-import type { MinimalReranker } from "@repo/test-utils/contracts";
-import { defineRerankerContractTests } from "@repo/test-utils/contracts";
+import type { MinimalReranker } from "@tekbreed/tekmemo-testing/contracts";
+import { defineRerankerContractTests } from "@tekbreed/tekmemo-testing/contracts";
 import { FakeReranker } from "../../src/rerank/testing";
 
 function createReranker(): MinimalReranker {

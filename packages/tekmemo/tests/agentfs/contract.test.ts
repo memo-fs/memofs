@@ -1,4 +1,4 @@
-import { defineMemoryStoreContractTests } from "@repo/test-utils/contracts";
+import { defineMemoryStoreContractTests } from "@tekbreed/tekmemo-testing/contracts";
 import { createAgentfsMemoryStore } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";
 

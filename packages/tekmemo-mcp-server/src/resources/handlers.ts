@@ -1,8 +1,19 @@
+/**
+ * MCP Resource definitions and read operation handlers.
+ *
+ * @module handlers
+ */
+
 import { McpNotFoundError, McpValidationError, toSafeError } from "../errors";
 import type { McpResourceDefinition, TekMemoMcpOptions } from "../types";
 import { safeJsonStringify } from "../utils/json";
 import { normalizeLimit } from "../utils/pagination";
 
+/**
+ * Creates and returns all available MCP Resource definitions.
+ *
+ * @returns An array of McpResourceDefinitions.
+ */
 export function createResourceDefinitions(): McpResourceDefinition[] {
 	return [
 		{
@@ -67,6 +78,15 @@ export function createResourceDefinitions(): McpResourceDefinition[] {
 	];
 }
 
+/**
+ * Reads a TekMemo resource by URI, resolving parameters and queries.
+ *
+ * @param options - Configuration options for the MCP server.
+ * @param uri - The requested resource URI.
+ * @returns The resolved resource contents array.
+ * @throws {McpValidationError} If URI is invalid or query parameters fail validation.
+ * @throws {McpNotFoundError} If the resource cannot be found or matched.
+ */
 export async function readTekMemoResource(
 	options: TekMemoMcpOptions,
 	uri: string,
@@ -151,7 +171,11 @@ export async function readTekMemoResource(
 					),
 				);
 			}
-			case "graph/nodes":
+			case "graph/nodes": {
+				if (!options.runtime.listGraphNodes)
+					throw new McpNotFoundError(
+						"Runtime does not support graph node resources.",
+					);
 				return content(
 					uri,
 					"application/json",
@@ -169,7 +193,12 @@ export async function readTekMemoResource(
 						}),
 					),
 				);
-			case "graph/edges":
+			}
+			case "graph/edges": {
+				if (!options.runtime.listGraphEdges)
+					throw new McpNotFoundError(
+						"Runtime does not support graph edge resources.",
+					);
 				return content(
 					uri,
 					"application/json",
@@ -187,6 +216,7 @@ export async function readTekMemoResource(
 						}),
 					),
 				);
+			}
 			default:
 				if (parsed.pathname.startsWith("agent-sessions/")) {
 					return readAgentSessionResource(options, uri, parsed.pathname);

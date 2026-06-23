@@ -1,21 +1,99 @@
 # MCP client setup
 
-Add the TekMemo MCP server to your coding agent's MCP config. Choose local mode for file-first memory or cloud mode for TekMemo Cloud memory.
+Add TekMemo to your coding agent. There are two ways — the **hosted server** (cloud-only, no local process) or the **self-hosted stdio server** (local/cloud/hybrid).
 
-The binary name is `tekmemo-mcp` (from the `@tekbreed/tekmemo-mcp-server` package).
+- **Hosted:** point the client at `https://mcp.memo.tekbreed.com/` with a bearer token. See [Hosted MCP](./hosted).
+- **Stdio:** run `npx -y @tekbreed/tekmemo-mcp-server` as a subprocess. See [Runtime modes](./runtime-modes).
 
-## Claude Code
+Most clients accept both an HTTP `url` and a stdio `command`. Pick the block that matches your path.
 
-Claude Code relies on a global or project-level configuration and is configured directly through the terminal.
+## Hosted server
 
-**Via CLI:**
-Run the following command to add the TekMemo MCP server (for STDIO transport):
+### Claude Code
+
+```bash
+claude mcp add --transport http tekmemo https://mcp.memo.tekbreed.com/ \
+  --header "Authorization: Bearer $TEKMEMO_MCP_BEARER_TOKEN"
+```
+
+Or in `~/.config/claude/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "tekmemo": {
+      "url": "https://mcp.memo.tekbreed.com/",
+      "headers": {
+        "Authorization": "Bearer <your TEKMEMO_MCP_BEARER_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`, Windows: `%APPDATA%\Claude\`):
+
+```json
+{
+  "mcpServers": {
+    "tekmemo": {
+      "url": "https://mcp.memo.tekbreed.com/",
+      "headers": {
+        "Authorization": "Bearer <your TEKMEMO_MCP_BEARER_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+1. Go to **Settings > Features > MCP**.
+2. Click **+ Add new MCP server**.
+3. Choose **HTTP / Streamable HTTP**.
+4. URL: `https://mcp.memo.tekbreed.com/`
+5. Add header `Authorization: Bearer <your TEKMEMO_MCP_BEARER_TOKEN>`.
+6. Save and restart Cursor's agent panel.
+
+### Codex
+
+In `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.tekmemo]
+url = "https://mcp.memo.tekbreed.com/"
+headers = { Authorization = "Bearer <your TEKMEMO_MCP_BEARER_TOKEN>" }
+```
+
+### OpenCode
+
+In `open_code.json`:
+
+```json
+{
+  "mcpServers": {
+    "tekmemo": {
+      "url": "https://mcp.memo.tekbreed.com/",
+      "headers": {
+        "Authorization": "Bearer <your TEKMEMO_MCP_BEARER_TOKEN>"
+      }
+    }
+  }
+}
+```
+
+## Self-hosted stdio server
+
+The binary is `tekmemo-mcp` (from `@tekbreed/tekmemo-mcp-server`). Run it as a subprocess from your project root.
+
+### Claude Code
+
 ```bash
 claude mcp add tekmemo -- npx -y @tekbreed/tekmemo-mcp-server --runtime local --root .
 ```
 
-**Via Config:**
-You can also define them manually in your global `~/.config/claude/config.json` file:
 ```json
 {
   "mcpServers": {
@@ -26,19 +104,11 @@ You can also define them manually in your global `~/.config/claude/config.json` 
   }
 }
 ```
-*Note: For cloud mode, add the `--runtime cloud` flag and pass your `TEKMEMO_CLOUD_URL` and `TEKMEMO_API_KEY` into the `env` object.*
 
-Restart Claude Code after adding the config.
+For cloud mode, add `--runtime cloud` and pass `TEKMEMO_CLOUD_URL` + `TEKMEMO_API_KEY` in the `env` object.
 
-## Claude Desktop
+### Claude Desktop
 
-Claude Desktop (Pro or Free tier) uses a global `claude_desktop_config.json` file.
-
-**Config Locations:**
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\\Claude\\claude_desktop_config.json`
-
-Open this file in your editor and add your servers under the `mcpServers` key, defining the command, args, and any env variables:
 ```json
 {
   "mcpServers": {
@@ -49,36 +119,21 @@ Open this file in your editor and add your servers under the `mcpServers` key, d
   }
 }
 ```
-Restart the app to apply.
 
-## Codex
+### Codex
 
-Codex reads configuration via a `config.toml` file (usually located in `~/.codex/config.toml`) or via its desktop GUI settings.
-
-**Via CLI:**
 ```bash
 codex mcp add tekmemo -- npx -y @tekbreed/tekmemo-mcp-server --runtime local --root .
 ```
 
-**Via File:**
-Manually structure your `config.toml` using `[mcp_servers.<server-name>]` tables to specify commands, args, and headers:
 ```toml
 [mcp_servers.tekmemo]
 command = "npx"
 args = ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
 ```
 
-Prompt it with `use the tekmemo tools` to start querying memory.
+### OpenCode
 
-## OpenCode
-
-OpenCode makes MCP integration highly accessible through commands in the CLI and a project-specific JSON file.
-
-**Via CLI:**
-Use the command `open code mcp add` and follow the interactive prompts to define the server name (`tekmemo`) and transport type.
-
-**Via File:**
-You can also define your servers directly in a `open_code.json` file placed in your project's root folder:
 ```json
 {
   "mcpServers": {
@@ -90,39 +145,17 @@ You can also define your servers directly in a `open_code.json` file placed in y
 }
 ```
 
-OpenCode tools from MCP servers are available automatically. Prompt with `use the tekmemo tool to recall project decisions`.
-
-## Cursor
-
-Cursor has built-in MCP functionality. You can set them up directly in the IDE.
+### Cursor
 
 1. Go to **Settings > Features > MCP**.
 2. Click **+ Add new MCP server**.
-3. Select whether it is a **STDIO** or SSE/HTTP connection.
-4. Input the execution command: `npx -y @tekbreed/tekmemo-mcp-server --runtime local --root .`
-5. Save and restart Cursor's agent panel.
-
-## Antigravity IDE
-
-Antigravity utilizes a graphical dashboard to make MCP setup as seamless as clicking through menus.
-
-1. Open the MCP store via the `...` dropdown located at the top of the editor's agent panel.
-2. Click **Manage MCP Servers**.
-3. Select **View raw config** to directly edit the `mcp_config.json` file with your server arrays:
-```json
-{
-  "mcpServers": {
-    "tekmemo": {
-      "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", "."]
-    }
-  }
-}
-```
+3. Select **STDIO**.
+4. Command: `npx -y @tekbreed/tekmemo-mcp-server --runtime local --root .`
+5. Save and restart.
 
 ## Other MCP clients
 
-Most MCP clients follow the same `mcpServers` JSON pattern. The config file path varies:
+Most MCP clients follow the same patterns — either an HTTP `url` + `headers` block (hosted) or a `command` + `args` block (stdio). Config file locations:
 
 | Client | Config file |
 | --- | --- |
@@ -130,35 +163,26 @@ Most MCP clients follow the same `mcpServers` JSON pattern. The config file path
 | Cline | `.cline/mcp_settings.json` |
 | Windsurf | `.windsurf/mcp.json` |
 | Zed | `~/.config/zed/mcp.json` or `Cmd+,` → MCP |
-| GitHub Copilot | `.github/copilot-instructions.md` or VS Code `settings.json` |
+| Antigravity | MCP store → Manage MCP Servers → raw config |
 
 ## Read-only mode
 
-For untrusted clients or safety-first workflows, add `--read-only`:
+For untrusted clients or safety-first workflows, block all write tools:
 
-```json
-{
-  "mcpServers": {
-    "tekmemo": {
-      "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "local", "--root", ".", "--read-only"]
-    }
-  }
-}
-```
+- **Hosted:** read-only is the default (`TEKMEMO_MCP_READ_ONLY=true`). Ask TekMemo to enable writes if needed.
+- **Stdio:** add `--read-only` to the args.
 
-In read-only mode, all write tools (`tekmemo.remember`, `tekmemo.update_core_memory`, `tekmemo.snapshot`, etc.) are blocked. Read tools (`tekmemo.health`, `tekmemo.context`, `tekmemo.recall`, `tekmemo.read_core_memory`, etc.) remain available.
+In read-only mode, write tools (`tekmemo.remember`, `tekmemo.update_core_memory`, `tekmemo.snapshot`, `tekmemo.sync_push`, etc.) are blocked. Read tools (`tekmemo.health`, `tekmemo.context`, `tekmemo.recall`, `tekmemo.read_core_memory`, etc.) remain available.
 
-## Read policy
+## Read and write policies (stdio hybrid only)
 
-Control where reads come from with `--read-policy`:
+When running the stdio server in `hybrid` mode, control where reads and writes go with `--read-policy` and `--write-policy`:
 
 | Value | Behavior |
 | --- | --- |
-| `local-first` | Try local, fall back to cloud |
-| `cloud-first` | Try cloud, fall back to local |
+| `local-first` | Try local first, fall back to cloud |
+| `cloud-first` | Try cloud first, fall back to local |
 | `local-only` | Only local `.tekmemo/` |
-| `cloud-only` | Only TekMemo Cloud API |
 
 ```json
 {
@@ -171,24 +195,4 @@ Control where reads come from with `--read-policy`:
 }
 ```
 
-## Write policy
-
-Control where writes go with `--write-policy`:
-
-| Value | Behavior |
-| --- | --- |
-| `local-first` | Write local first, then cloud |
-| `cloud-first` | Write cloud first, then local |
-| `local-only` | Only write to local |
-| `cloud-only` | Only write to cloud |
-
-```json
-{
-  "mcpServers": {
-    "tekmemo": {
-      "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server", "--runtime", "hybrid", "--root", ".", "--write-policy", "local-first"]
-    }
-  }
-}
-```
+These policies do not apply to the hosted server — it is cloud-only.

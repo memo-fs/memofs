@@ -11,14 +11,15 @@ import fs from "node:fs/promises";
 
 import { PathLock } from "@repo/utils";
 import type { MemoryPath, MemoryStore } from "@tekbreed/tekmemo";
-import { MemoryNotFoundError } from "@tekbreed/tekmemo";
+import { MemoryNotFoundError, TEKMEMO_DIR } from "@tekbreed/tekmemo";
+import { assertString } from "../core/validation/assertions";
 import { isNotFoundError, wrapFsError } from "./errors/fs-memory-store-error";
 import type {
 	NodeFsMemoryStoreOptions,
 	NormalizedNodeFsMemoryStoreOptions,
 } from "./types/options";
+import { AdvisoryFileLock } from "./utils/advisory-lock";
 import { assertNoSymlinkPath } from "./utils/assert-no-symlink-path";
-import { assertString } from "./utils/assert-string";
 import { ensureParentDir } from "./utils/ensure-parent-dir";
 import { ensureRootDir } from "./utils/ensure-root-dir";
 import { normalizeOptions } from "./utils/normalize-options";
@@ -34,6 +35,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 	private readonly options: NormalizedNodeFsMemoryStoreOptions;
 	/** @internal */
 	private readonly locks = new PathLock();
+	private readonly lock: AdvisoryFileLock | null;
 
 	/**
 	 * Creates a new filesystem-backed memory store.
@@ -42,6 +44,12 @@ export class NodeFsMemoryStore implements MemoryStore {
 	 */
 	constructor(options: NodeFsMemoryStoreOptions) {
 		this.options = normalizeOptions(options);
+		this.lock = this.options.lock
+			? new AdvisoryFileLock(this.lockPath, {
+					fileMode: this.options.fileMode,
+					maxAgeMs: this.options.lockMaxAgeMs,
+				})
+			: null;
 	}
 
 	/**
@@ -53,6 +61,11 @@ export class NodeFsMemoryStore implements MemoryStore {
 		return this.options.rootDir;
 	}
 
+	/** Absolute path of the cross-process advisory lock file (`.tekmemo/.lock`). */
+	private get lockPath(): string {
+		return `${this.options.rootDir}/${TEKMEMO_DIR}/.lock`;
+	}
+
 	/**
 	 * Resolves a memory path to an absolute filesystem path.
 	 *
@@ -61,6 +74,43 @@ export class NodeFsMemoryStore implements MemoryStore {
 	 */
 	resolve(path: MemoryPath): string {
 		return resolveAbsoluteMemoryPath(this.options, path);
+	}
+
+	/**
+	 * Acquires the cross-process advisory lock (idempotent) before a mutating op.
+	 *
+	 * @remarks
+	 * Enforces the local single-process contract (Q28). Reads never acquire;
+	 * only write/append/delete do. Throws {@link LockHeldError} if another live
+	 * process holds the lock. No-op when the store was created with `lock: false`.
+	 *
+	 * The root directory is ensured *first* so that `createRoot: false` and
+	 * rootDir-is-a-file errors surface before the lock file is created. The
+	 * `.tekmemo/` parent of the lock is also ensured (it is a canonical path
+	 * that any write would create anyway; creating it here is a no-op for a
+	 * healthy store and lets the lock file land).
+	 *
+	 * @throws {LockHeldError} If another process holds the lock.
+	 */
+	private async ensureLock(): Promise<void> {
+		if (this.lock) {
+			await ensureRootDir(this.options);
+			await ensureParentDir(this.lockPath, this.options);
+			await this.lock.acquire();
+		}
+	}
+
+	/**
+	 * Releases the cross-process advisory lock, if held.
+	 *
+	 * @remarks
+	 * Idempotent. Safe to call in a `using`/`finally` block or as part of a
+	 * graceful teardown. The lock is also auto-released on `process.exit`, so
+	 * calling this is only required to free the lock *before* process exit
+	 * (e.g. a long-lived process that creates and discards stores).
+	 */
+	async dispose(): Promise<void> {
+		await this.lock?.release();
 	}
 
 	/**
@@ -111,6 +161,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 		assertString(content, "content");
 		const absolutePath = this.resolve(path);
 
+		await this.ensureLock();
 		await this.locks.runExclusive(absolutePath, async () => {
 			try {
 				await ensureRootDir(this.options);
@@ -143,6 +194,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 			return;
 		}
 
+		await this.ensureLock();
 		await this.locks.runExclusive(absolutePath, async () => {
 			try {
 				await ensureRootDir(this.options);
@@ -188,5 +240,35 @@ export class NodeFsMemoryStore implements MemoryStore {
 				error,
 			);
 		}
+	}
+
+	/**
+	 * Deletes a file from the filesystem store. Idempotent: a missing file is
+	 * treated as success. Used by file-replication sync to apply server-side
+	 * removals.
+	 *
+	 * @param path - The memory path to delete.
+	 * @throws {@link FsMemoryStoreError} If the delete fails for a non-ENOENT reason.
+	 */
+	async delete(path: MemoryPath): Promise<void> {
+		const absolutePath = this.resolve(path);
+
+		await this.ensureLock();
+		await this.locks.runExclusive(absolutePath, async () => {
+			try {
+				await ensureRootDir(this.options);
+				await assertNoSymlinkPath(absolutePath, this.options);
+				await fs.rm(absolutePath, { force: true });
+			} catch (error) {
+				if (isNotFoundError(error)) {
+					return;
+				}
+				throw wrapFsError(
+					"Failed to delete memory file.",
+					{ path, absolutePath },
+					error,
+				);
+			}
+		});
 	}
 }

@@ -1,32 +1,42 @@
 ---
 layout: home
+
 hero:
-  name: TekBreed OSS
-  text: Next-generation memory infrastructure for AI apps and agents.
+  name: "TekMemo"
+  text: "Your AI agents forget. TekMemo doesn’t."
   image: /logo.svg
-  # tagline: "Build smarter AI apps with TekMemo — a file-first memory runtime, unified API, and built-in MCP integration."
+  tagline: "Local-first memory for AI agents — versioned, portable, and always there when the next session starts."
   actions:
     - theme: brand
-      text: Explore TekMemo
-      link: /packages/tekmemo
+      text: "Get Started"
+      link: /packages/tekmemo/
     - theme: alt
-      text: View on GitHub 
-      link: https://github.com/tekbreed/tekbreed-oss
+      text: "Star on GitHub"
+      link: https://github.com/tekbreed/tekmemo
+
 features:
-  - title: TekMemo
-    icon: 🧠
-    link: "/packages/tekmemo/"
-    details: Start with TekBreed's file-first memory runtime for AI apps, agents, CLIs, MCP clients, and graph-aware recall.
-  - title: File-first local runtime
+  - title: Memory you can read
     icon: 📁
-    link: "/packages/tekmemo/file-first-memory"
-    details: Start with a .tekmemo folder, inspect memory as files, and keep durable context close to the project.
-  - title: TekMemo CLI
-    icon: ⬛️
-    link: "/packages/cli/"
-    details: The command-line interface for managing local, cloud, and hybrid memory workflows.
-  - title: TekMemo MCP
-    icon: ⚡️
-    link: "/packages/mcp/"
-    details: The Model Context Protocol (MCP) server for exposing TekMemo memory to coding agents and AI applications.
+    link: /packages/tekmemo/file-first-memory
+    details: Every memory is a markdown file in `.tekmemo/`. Read it in your editor, review it in PRs, track it in Git — alongside your source code.
+  - title: Local by default
+    icon: 🔒
+    link: /packages/tekmemo/configuration
+    details: Works offline with zero cloud setup. Your memory never leaves your repo unless you say so.
+  - title: Sync when you need it
+    icon: ☁️
+    link: /packages/tekmemo/cloud-client
+    details: Add a cloud replica so memory follows you across machines. Same engine, same files, same code — the cloud is a sync transport, not a separate system.
+  - title: Works with your coding agent
+    icon: 🧠
+    link: /packages/mcp/
+    details: One config block and Claude Code, Cursor, Codex, or any MCP-compatible agent remembers your project — every session, automatically.
+  - title: Ask, don't search
+    icon: 💬
+    link: /packages/tekmemo/architecture/indexing-recall
+    details: Semantic recall finds the right memory for each task. No keyword guessing. No re-reading old transcripts.
+  - title: Roll back any decision
+    icon: 🕸️
+    link: /packages/tekmemo/architecture/graph-memory
+    details: Versioned snapshots and a knowledge graph let you restore any state. One bad edit never erases a good decision.
 ---

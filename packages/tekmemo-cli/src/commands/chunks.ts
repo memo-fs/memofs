@@ -1,20 +1,54 @@
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+/**
+ * CLI command handler for viewing workspace memory chunks.
+ *
+ * @module chunks
+ */
+
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
+/**
+ * Options configuration for the chunks command.
+ */
 export interface ChunksCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
+	/**
+	 * Maximum number of chunk records to display.
+	 */
 	limit?: number | undefined;
+	/**
+	 * If true, throws errors on malformed lines during JSONL parsing.
+	 */
 	strict?: boolean | undefined;
 }
 
+/**
+ * Runs the chunks command, listing memory chunk index entries.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runChunksCommand(
 	options: ChunksCommandOptions,
 ): Promise<number> {
-	const content = await options.fs.readTextIfExists(TEKMEMO_PATHS.chunks);
+	const content = await readTextIfExists(
+		options.memo.store,
+		TEKMEMO_PATHS.chunks,
+	);
 	const records = content
 		? parseJsonl(content, { strict: options.strict ?? false })
 		: [];

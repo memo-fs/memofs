@@ -34,8 +34,10 @@ The CLI supports three runtime modes that control where memory is stored and rea
 | Mode | Description | Command example |
 | --- | --- | --- |
 | **Local** (default) | Reads and writes to your `.tekmemo/` folder | `npx tekmemo context --query "task"` |
-| **Cloud** | Uses TekMemo Cloud APIs | `npx tekmemo cloud context --query "task"` |
-| **Hybrid** | Local files with cloud sync and recall | Configure with `npx tekmemo config init --runtime hybrid` |
+| **Hybrid** | Local files plus cloud sync — the cloud mirrors your `.tekmemo/` files across machines | Configure with `npx tekmemo config init --runtime hybrid` |
+| **Memory** | In-memory only (no disk); for tests and ephemeral runs | `--runtime memory` |
+
+There is no standalone `cloud` mode — the cloud is a sync transport reached through `hybrid`, not a runtime mode. See [Cloud commands](./cloud-commands.md) for the sync surface (`health`, `readiness`, `sync status/pull/push`).
 
 ## Global flags
 
@@ -44,7 +46,7 @@ These flags work with any command:
 | Flag | Description | Default |
 | --- | --- | --- |
 | `-r, --root <path>` | Project root containing `.tekmemo/` | Current directory |
-| `--runtime <mode>` | Runtime mode: `local`, `cloud`, or `hybrid` | `local` |
+| `--runtime <mode>` | Runtime mode: `local`, `hybrid`, or `memory` | `local` |
 | `--cloud-url <url>` | TekMemo Cloud API URL | `TEKMEMO_CLOUD_URL` env var |
 | `--api-key <key>` | TekMemo Cloud API key | `TEKMEMO_API_KEY` env var |
 | `--workspace-id <id>` | Cloud workspace ID | `TEKMEMO_WORKSPACE_ID` env var |
@@ -63,11 +65,11 @@ The CLI reads an optional `config.json` file at `.tekmemo/config.json`. This all
 
 ```json
 {
-  "$schema": "https://oss.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+  "$schema": "https://docs.memo.tekbreed.com/1.0.0-alpha.0/config.schema.json",
   "runtime": "hybrid", 
   "root": ".",
   "cloud": {
-    "baseUrl": "https://api.tekbreed.com/memo/v1",
+    "baseUrl": "https://memo.tekbreed.com/api/v1",
     "projectId": "proj_123", 
     "workspaceId": "ws_456",
     "timeoutMs": 10000

@@ -90,6 +90,16 @@ export class InMemoryMemoryStore implements MemoryStore {
 	}
 
 	/**
+	 * Deletes a file from the in-memory store. Idempotent.
+	 *
+	 * @param path - Canonical memory path.
+	 */
+	async delete(path: MemoryPath): Promise<void> {
+		assertMemoryPath(path);
+		this.files.delete(path);
+	}
+
+	/**
 	 * Returns a frozen snapshot of all files in the store.
 	 *
 	 * @returns A read-only record of all file paths to their content.

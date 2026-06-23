@@ -1,9 +1,22 @@
 #!/usr/bin/env node
+
+/**
+ * Command Line Interface entrypoint executable for the Model Context Protocol (MCP) server.
+ * Parses process arguments, constructs the runtime, and starts the stdio server stream.
+ *
+ * @module tekmemo-mcp
+ */
+
 import {
 	createTekMemoMcpProtocolServer,
 	createTekMemoMcpRuntimeFromConfig,
 	runStdioServer,
 } from "../index";
+import type {
+	RuntimeReadPolicy,
+	RuntimeWritePolicy,
+	TekMemoRuntimeMode,
+} from "../types";
 
 main().catch((error) => {
 	console.error(
@@ -12,6 +25,12 @@ main().catch((error) => {
 	process.exit(2);
 });
 
+/**
+ * Main application entrypoint function.
+ * Initializes the runtime based on CLI parameters and starts the transport server.
+ *
+ * @returns A promise that resolves when server initialization and stream execution completes.
+ */
 async function main(): Promise<void> {
 	const args = parseArgs(process.argv.slice(2));
 	if (args.help) {
@@ -66,18 +85,12 @@ async function main(): Promise<void> {
 	await runStdioServer(server);
 }
 
-type TekMemoRuntimeMode = "local" | "memory" | "cloud" | "hybrid";
-type RuntimeReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-type RuntimeWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-
+/**
+ * Parses argv command line parameters into a structured record dictionary mapping option keys.
+ *
+ * @param argv - The process argv slice.
+ * @returns A parsed parameters record mapping flag values.
+ */
 function parseArgs(
 	argv: string[],
 ): Record<string, string | boolean | undefined> {
@@ -117,32 +130,30 @@ function parseArgs(
 
 	if (
 		out.runtime !== undefined &&
-		!["local", "memory", "cloud", "hybrid"].includes(out.runtime as string)
+		!["local", "memory", "hybrid"].includes(out.runtime as string)
 	) {
-		console.error(
-			`[tekmemo-mcp] --runtime must be local, memory, cloud, or hybrid.`,
-		);
+		console.error(`[tekmemo-mcp] --runtime must be local, memory, or hybrid.`);
 		process.exit(2);
 	}
 	if (
 		out.readPolicy !== undefined &&
-		!["local-first", "cloud-first", "local-only", "cloud-only"].includes(
+		!["local-first", "cloud-first", "local-only"].includes(
 			out.readPolicy as string,
 		)
 	) {
 		console.error(
-			`[tekmemo-mcp] --read-policy must be local-first, cloud-first, local-only, or cloud-only.`,
+			`[tekmemo-mcp] --read-policy must be local-first, cloud-first, or local-only.`,
 		);
 		process.exit(2);
 	}
 	if (
 		out.writePolicy !== undefined &&
-		!["local-first", "cloud-first", "local-only", "cloud-only"].includes(
+		!["local-first", "cloud-first", "local-only"].includes(
 			out.writePolicy as string,
 		)
 	) {
 		console.error(
-			`[tekmemo-mcp] --write-policy must be local-first, cloud-first, local-only, or cloud-only.`,
+			`[tekmemo-mcp] --write-policy must be local-first, cloud-first, or local-only.`,
 		);
 		process.exit(2);
 	}
@@ -150,6 +161,14 @@ function parseArgs(
 	return out;
 }
 
+/**
+ * Asserts that a value exists for a given command-line option flag and returns it.
+ *
+ * @param argv - The process arguments array.
+ * @param index - Index of the expected flag value.
+ * @param flag - The flag name.
+ * @returns The parsed option string value.
+ */
 function requireValue(argv: string[], index: number, flag: string): string {
 	const value = argv[index];
 	if (value === undefined || value.startsWith("--")) {
@@ -159,6 +178,13 @@ function requireValue(argv: string[], index: number, flag: string): string {
 	return value;
 }
 
+/**
+ * Parses and returns a numeric configuration option with fallback protection.
+ *
+ * @param value - The input flag value.
+ * @param fallback - The default fallback number.
+ * @returns The parsed number or the fallback.
+ */
 function numberArg(
 	value: string | undefined,
 	fallback: number | undefined,
@@ -168,6 +194,9 @@ function numberArg(
 	return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
+/**
+ * Outputs the helper command usage documentation block to standard output.
+ */
 function printHelp(): void {
 	console.log(`Usage: tekmemo-mcp-server [options]
 
@@ -188,7 +217,7 @@ Options:
   --request-timeout-ms <number>         Per-tool timeout. Defaults to 30000.
   --max-input-bytes <number>            Max tool argument bytes.
   --max-output-bytes <number>           Max tool result bytes.
-  -h, --help                            Show this help.
+  --help                                Show this help.
 
 Environment:
   TEKMEMO_RUNTIME                       local, memory, cloud, or hybrid.

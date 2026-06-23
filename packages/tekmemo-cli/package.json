@@ -6,12 +6,12 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekbreed-oss.git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/tekmemo-cli"
 	},
-	"homepage": "https://oss.tekbreed.com/tekmemo-cli",
+	"homepage": "https://docs.memo.tekbreed.com/packages/cli/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekbreed-oss/issues"
+		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -53,16 +53,18 @@
 		"clean": "rm -rf dist coverage .turbo",
 		"lint:package": "publint",
 		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
 		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
 	},
 	"dependencies": {
 		"@tekbreed/tekmemo": "workspace:^",
+		"@tekbreed/tekmemo-connectors": "workspace:^",
 		"commander": "^14.0.3"
 	},
 	"devDependencies": {
-		"@repo/test-utils": "workspace:*",
-		"@repo/tsdown-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*",
+		"@tekbreed/tekmemo-testing": "workspace:^",
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
 		"@types/node": "^25.9.2"
 	},

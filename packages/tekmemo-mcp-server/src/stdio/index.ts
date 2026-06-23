@@ -1,7 +1,21 @@
+/**
+ * MCP Server Stdio transport layer runner.
+ * Manages standard input/output streams and passes messages to the protocol server.
+ *
+ * @module index
+ */
+
 import { stdin as input, stdout as output, stderr } from "node:process";
 import { createInterface } from "node:readline/promises";
 import type { TekMemoMcpProtocolServer } from "../protocol/server";
 
+/**
+ * Runs a persistent JSON-RPC server reading from stdin and writing responses to stdout.
+ * Emits error traces to stderr.
+ *
+ * @param server - The protocol server implementation.
+ * @returns A promise that resolves when the stdin stream closes/ends.
+ */
 export async function runStdioServer(
 	server: TekMemoMcpProtocolServer,
 ): Promise<void> {

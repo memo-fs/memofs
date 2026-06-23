@@ -1,31 +1,89 @@
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+/**
+ * CLI command handler for retrieving localized workspace memory context.
+ *
+ * @module context
+ */
+
+import type { Tekmemo } from "@tekbreed/tekmemo";
+import { getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 import { parsePositiveInteger } from "../utils/numbers";
 
+/**
+ * Options configuration for the context command.
+ */
 export interface ContextCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
+	/**
+	 * Optional text query to filter matching memory files.
+	 */
 	query?: string | undefined;
+	/**
+	 * Maximum characters allowed in the formatted context output.
+	 */
 	maxChars?: number | string | undefined;
+	/**
+	 * If true, lists recent memory events.
+	 */
 	includeEvents?: boolean | undefined;
+	/**
+	 * If true, lists recent memory chunk index records.
+	 */
 	includeChunks?: boolean | undefined;
 }
 
+/**
+ * Represents a matching text line found during query lookup.
+ */
 interface ContextSearchMatch {
+	/**
+	 * Relative path of the file containing the match.
+	 */
 	file: string;
+	/**
+	 * Line number where the match was found.
+	 */
 	line: number;
+	/**
+	 * Matching line text content.
+	 */
 	content: string;
 }
 
+/**
+ * Truncates string content to a maximum number of characters, appending a truncated notice.
+ *
+ * @param value - Target string content.
+ * @param maxChars - Maximum character length.
+ * @returns The truncated or original string.
+ */
 function truncate(value: string, maxChars: number): string {
 	if (value.length <= maxChars) return value;
 	return `${value.slice(0, Math.max(0, maxChars - 20)).trimEnd()}\n\n[truncated]`;
 }
 
+/**
+ * Scans content lines for a target search query.
+ *
+ * @param file - Path descriptor of the source file.
+ * @param content - File contents to search.
+ * @param query - Case-insensitive string query.
+ * @returns Array of search match details.
+ */
 function searchText(
 	file: string,
 	content: string,
@@ -38,9 +96,16 @@ function searchText(
 		.filter((entry) => entry.content.toLowerCase().includes(lower));
 }
 
+/**
+ * Runs the context command, aggregating local memory context for LLMs.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runContextCommand(
 	options: ContextCommandOptions,
 ): Promise<number> {
+	const rootDir = getRootDir(options.memo.store);
 	const maxChars =
 		typeof options.maxChars === "number"
 			? options.maxChars
@@ -48,13 +113,16 @@ export async function runContextCommand(
 				? parsePositiveInteger(options.maxChars, "max chars")
 				: 12000;
 	const core =
-		(await options.fs.readTextIfExists(TEKMEMO_PATHS.coreMemory)) ?? "";
+		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.coreMemory)) ??
+		"";
 	const notes =
-		(await options.fs.readTextIfExists(TEKMEMO_PATHS.notesMemory)) ?? "";
+		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.notesMemory)) ??
+		"";
 	const eventContent =
-		(await options.fs.readTextIfExists(TEKMEMO_PATHS.memoryEvents)) ?? "";
+		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.memoryEvents)) ??
+		"";
 	const chunkContent =
-		(await options.fs.readTextIfExists(TEKMEMO_PATHS.chunks)) ?? "";
+		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.chunks)) ?? "";
 	const events = eventContent
 		? parseJsonl(eventContent)
 				.slice(-10)
@@ -73,7 +141,7 @@ export async function runContextCommand(
 		: [];
 
 	const data = {
-		rootDir: options.fs.rootDir,
+		rootDir,
 		query: options.query ?? null,
 		core: truncate(core.trim(), Math.floor(maxChars * 0.45)),
 		notes: truncate(notes.trim(), Math.floor(maxChars * 0.35)),
@@ -89,7 +157,7 @@ export async function runContextCommand(
 
 	const sections = [
 		"# TekMemo Context",
-		`Root: ${options.fs.rootDir}`,
+		`Root: ${rootDir}`,
 		options.query ? `Query: ${options.query}` : undefined,
 		"",
 		"## Core Memory",

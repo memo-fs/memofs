@@ -1,44 +1,31 @@
+/**
+ * Input validation for the sync-only cloud client surface.
+ *
+ * The cloud is a file replica: the only request bodies it accepts are the
+ * file-manifest sync payloads (`push`, `push/complete`, `pull`, `status`).
+ * Every engine validator (recall, memory, graph, extraction, providers,
+ * candidates, conflicts, agent sessions) has been removed — those operations
+ * run locally and never hit the cloud. See
+ * `docs/architecture/cloud-sync-and-refactor.md` §6.5–6.6.
+ *
+ * @public
+ */
 import {
 	TekMemoCloudConfigurationError,
 	TekMemoCloudValidationError,
 } from "./errors";
 import type {
-	ApproveAgentSessionMemoryInput,
-	CompleteAgentSessionInput,
-	CreateAgentSessionEventInput,
-	CreateAgentSessionInput,
-	CreateCandidateInput,
-	CreateNoteInput,
-	DeleteProviderInput,
-	DismissCandidateInput,
-	ExtractAgentSessionMemoryInput,
-	GetAgentSessionInput,
+	FileManifest,
 	JsonObject,
-	ListAgentSessionsInput,
-	ListCandidatesInput,
-	ListConflictsInput,
-	ListNotesInput,
-	PromoteCandidateInput,
-	RecallIndexInput,
-	RecallQueryInput,
-	ResolveConflictInput,
+	SyncCursor,
 	SyncPullInput,
+	SyncPushCompleteInput,
 	SyncPushInput,
 	SyncStatusInput,
-	TekMemoCloudBenchmarkRunInput,
-	TekMemoCloudContextComposeInput,
-	TekMemoCloudEvalRunInput,
-	TekMemoCloudExportInput,
-	TekMemoCloudExtractionJobsInput,
-	TekMemoCloudExtractionRunInput,
-	TekMemoCloudGraphEdge,
-	TekMemoCloudGraphListInput,
-	TekMemoCloudGraphNode,
-	TekMemoCloudProviderInput,
-	TekMemoCloudSnapshotInput,
-	UpdateCoreMemoryInput,
-	UpdateProviderInput,
 } from "./types";
+
+/** sha256 hex digest: 64 lowercase hexadecimal characters. */
+const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
 export function assertNonEmptyString(
 	value: unknown,
@@ -65,16 +52,6 @@ export function assertOptionalPositiveInteger(
 	}
 }
 
-export function assertOptionalBoolean(value: unknown, fieldName: string): void {
-	if (value === undefined || value === null) return;
-	if (typeof value !== "boolean") {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: `${fieldName} must be a boolean.`,
-		});
-	}
-}
-
 export function assertOptionalJsonObject(
 	value: unknown,
 	fieldName: string,
@@ -97,11 +74,133 @@ export function assertOptionalJsonObject(
 	}
 }
 
+/**
+ * Asserts an optional cursor. Cursors are opaque server-issued strings; we only
+ * require that, when present, they are non-empty. We do not parse their format.
+ */
+export function assertOptionalCursor(
+	value: unknown,
+	fieldName: string,
+): asserts value is SyncCursor | undefined {
+	if (value === undefined || value === null) return;
+	assertNonEmptyString(value, fieldName);
+}
+
+/** Asserts a value is a sha256 hex digest (64 lowercase hex chars). */
+export function assertSha256(
+	value: unknown,
+	fieldName: string,
+): asserts value is string {
+	if (typeof value !== "string" || !SHA256_PATTERN.test(value)) {
+		throw new TekMemoCloudValidationError({
+			code: "invalid_input",
+			message: `${fieldName} must be a sha256 hex digest (64 lowercase hex characters).`,
+		});
+	}
+}
+
 export function assertProjectId(value: unknown, fallback?: string): string {
 	const projectId =
 		typeof value === "string" && value.trim() ? value : fallback;
 	assertNonEmptyString(projectId, "projectId");
 	return projectId.trim();
+}
+
+/**
+ * Validates an optional local file manifest. When present, it must be a map of
+ * canonical `.tekmemo/` path → sha256; when absent, the server treats the
+ * request as "pull/push everything known" (see §4.5 of the refactor doc).
+ */
+export function assertOptionalFileManifest(
+	value: unknown,
+	fieldName: string,
+): asserts value is FileManifest | undefined {
+	if (value === undefined || value === null) return;
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		throw new TekMemoCloudValidationError({
+			code: "invalid_input",
+			message: `${fieldName} must be a JSON object mapping paths to sha256 digests.`,
+		});
+	}
+	for (const [path, sha] of Object.entries(value as Record<string, unknown>)) {
+		assertNonEmptyString(path, `${fieldName} key`);
+		assertSha256(sha, `${fieldName}["${path}"]`);
+	}
+}
+
+/**
+ * Validates a local file manifest: a map of canonical `.tekmemo/` path → sha256.
+ * Each path must be a non-empty string; each value must be a sha256 hex digest.
+ */
+export function assertFileManifest(
+	value: unknown,
+	fieldName: string,
+): asserts value is FileManifest {
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		throw new TekMemoCloudValidationError({
+			code: "invalid_input",
+			message: `${fieldName} must be a JSON object mapping paths to sha256 digests.`,
+		});
+	}
+	for (const [path, sha] of Object.entries(value as Record<string, unknown>)) {
+		assertNonEmptyString(path, `${fieldName} key`);
+		assertSha256(sha, `${fieldName}["${path}"]`);
+	}
+}
+
+/**
+ * Validates a `push` request: the local file manifest plus an optional base
+ * cursor the client last synced at.
+ */
+export function validateSyncPushInput(input: SyncPushInput): SyncPushInput {
+	assertFileManifest(input.manifest, "manifest");
+	assertOptionalCursor(input.baseCursor, "baseCursor");
+	return input;
+}
+
+/**
+ * Validates the two-phase push completion: the list of files the client
+ * uploaded (path + sha256) and the cursor returned by the preceding `push`.
+ */
+export function validateSyncPushCompleteInput(
+	input: SyncPushCompleteInput,
+): SyncPushCompleteInput {
+	if (!Array.isArray(input.uploaded)) {
+		throw new TekMemoCloudValidationError({
+			code: "invalid_input",
+			message: "uploaded must be an array of { path, sha256 } entries.",
+		});
+	}
+	for (const [index, entry] of input.uploaded.entries()) {
+		if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+			throw new TekMemoCloudValidationError({
+				code: "invalid_input",
+				message: `uploaded[${index}] must be an object.`,
+			});
+		}
+		assertNonEmptyString(entry.path, `uploaded[${index}].path`);
+		assertSha256(entry.sha256, `uploaded[${index}].sha256`);
+	}
+	assertNonEmptyString(input.cursor, "cursor");
+	return input;
+}
+
+/**
+ * Validates a `pull` request. The client may supply its local manifest (path →
+ * sha256) so the server can diff, a cursor to pull everything changed since,
+ * or omit both to pull every known file.
+ */
+export function validateSyncPullInput(input: SyncPullInput): SyncPullInput {
+	assertOptionalCursor(input.since, "since");
+	assertOptionalFileManifest(input.manifest, "manifest");
+	return input;
+}
+
+/** Validates a `status` request. The body carries only the project scope. */
+export function validateSyncStatusInput(
+	input: SyncStatusInput,
+): SyncStatusInput {
+	return input;
 }
 
 export function normalizeBaseUrl(baseUrl: string): string {
@@ -139,521 +238,6 @@ export function normalizeApiKey(
 	if (apiKey === undefined) return undefined;
 	const trimmed = apiKey.trim();
 	return trimmed.length > 0 ? trimmed : undefined;
-}
-
-export function validateUpdateCoreInput(
-	input: UpdateCoreMemoryInput,
-): UpdateCoreMemoryInput {
-	assertNonEmptyString(input.content, "content");
-	return input;
-}
-
-export function validateCreateNoteInput(
-	input: CreateNoteInput,
-): CreateNoteInput {
-	assertNonEmptyString(input.content, "content");
-	if (input.title !== undefined) assertNonEmptyString(input.title, "title");
-	if (input.source !== undefined) assertNonEmptyString(input.source, "source");
-	if (
-		input.confidence !== undefined &&
-		(typeof input.confidence !== "number" ||
-			input.confidence < 0 ||
-			input.confidence > 1)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "confidence must be between 0 and 1.",
-		});
-	}
-	if (
-		input.tags !== undefined &&
-		(!Array.isArray(input.tags) ||
-			input.tags.some(
-				(tag) => typeof tag !== "string" || tag.trim().length === 0,
-			))
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "tags must be an array of non-empty strings.",
-		});
-	}
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validateListNotesInput(input: ListNotesInput): ListNotesInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	return input;
-}
-
-export function validateRecallQueryInput(
-	input: RecallQueryInput,
-): RecallQueryInput {
-	assertNonEmptyString(input.query, "query");
-	assertOptionalPositiveInteger(input.topK, "topK");
-	assertOptionalBoolean(input.rerank, "rerank");
-	assertOptionalJsonObject(input.filters, "filters");
-	return input;
-}
-
-export function validateRecallIndexInput(
-	input: RecallIndexInput,
-): RecallIndexInput {
-	assertOptionalBoolean(input.force, "force");
-	return input;
-}
-
-export function validateSyncPushInput(input: SyncPushInput): SyncPushInput {
-	assertNonEmptyString(input.clientId, "clientId");
-	if (!Array.isArray(input.events)) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "events must be an array.",
-		});
-	}
-	for (const [index, event] of input.events.entries()) {
-		assertNonEmptyString(event.clientEventId, `events[${index}].clientEventId`);
-		assertNonEmptyString(event.type, `events[${index}].type`);
-		assertOptionalJsonObject(event.payload, `events[${index}].payload`);
-	}
-	return input;
-}
-
-export function validateSyncPullInput(input: SyncPullInput): SyncPullInput {
-	assertNonEmptyString(input.clientId, "clientId");
-	assertOptionalPositiveInteger(input.limit, "limit");
-	if (
-		input.sinceServerVersion !== undefined &&
-		(!Number.isInteger(input.sinceServerVersion) ||
-			input.sinceServerVersion < 0)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "sinceServerVersion must be a non-negative integer.",
-		});
-	}
-	return input;
-}
-
-export function validateSyncStatusInput(
-	input: SyncStatusInput,
-): SyncStatusInput {
-	return input;
-}
-
-export function validateContextComposeInput(
-	input: TekMemoCloudContextComposeInput,
-): TekMemoCloudContextComposeInput {
-	assertNonEmptyString(input.query, "query");
-	assertOptionalPositiveInteger(input.topK, "topK");
-	assertOptionalBoolean(input.rerank, "rerank");
-	assertOptionalBoolean(input.includeCoreMemory, "includeCoreMemory");
-	assertOptionalBoolean(input.includeRecallResults, "includeRecallResults");
-	assertOptionalBoolean(input.includeGraphContext, "includeGraphContext");
-	assertOptionalPositiveInteger(input.graphDepth, "graphDepth");
-	assertOptionalPositiveInteger(input.graphLimit, "graphLimit");
-	assertOptionalPositiveInteger(
-		input.maxContextCharacters,
-		"maxContextCharacters",
-	);
-	assertOptionalPositiveInteger(
-		input.maxSourceCharacters,
-		"maxSourceCharacters",
-	);
-	return input;
-}
-
-export function validateGraphNode(
-	input: TekMemoCloudGraphNode,
-): TekMemoCloudGraphNode {
-	assertNonEmptyString(input.nodeId, "nodeId");
-	assertNonEmptyString(input.type, "type");
-	assertNonEmptyString(input.label, "label");
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validateGraphEdge(
-	input: TekMemoCloudGraphEdge,
-): TekMemoCloudGraphEdge {
-	assertNonEmptyString(input.fromNodeId, "fromNodeId");
-	assertNonEmptyString(input.toNodeId, "toNodeId");
-	assertNonEmptyString(input.type, "type");
-	if (
-		input.weight !== undefined &&
-		(typeof input.weight !== "number" || input.weight < 0 || input.weight > 1)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "weight must be between 0 and 1.",
-		});
-	}
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validateExtractionRunInput(
-	input: TekMemoCloudExtractionRunInput,
-): TekMemoCloudExtractionRunInput {
-	assertOptionalBoolean(input.force, "force");
-	return input;
-}
-
-export function validateExtractionJobsInput(
-	input: TekMemoCloudExtractionJobsInput,
-): TekMemoCloudExtractionJobsInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	return input;
-}
-
-export function validateEvalRunInput(
-	input: TekMemoCloudEvalRunInput,
-): TekMemoCloudEvalRunInput {
-	assertOptionalPositiveInteger(input.graphDepth, "graphDepth");
-	assertOptionalPositiveInteger(input.graphLimit, "graphLimit");
-	assertOptionalPositiveInteger(
-		input.maxContextCharacters,
-		"maxContextCharacters",
-	);
-	assertOptionalPositiveInteger(
-		input.maxSourceCharacters,
-		"maxSourceCharacters",
-	);
-	assertOptionalBoolean(input.rerank, "rerank");
-	return input;
-}
-
-export function validateBenchmarkRunInput(
-	input: TekMemoCloudBenchmarkRunInput,
-): TekMemoCloudBenchmarkRunInput {
-	assertOptionalPositiveInteger(input.iterations, "iterations");
-	assertOptionalPositiveInteger(input.warmupIterations, "warmupIterations");
-	assertOptionalJsonObject(input.thresholds, "thresholds");
-	// Inherit all validation from EvalRunInput
-	return validateEvalRunInput(input);
-}
-
-export function validateExportInput(
-	input: TekMemoCloudExportInput,
-): TekMemoCloudExportInput {
-	return input;
-}
-
-export function validateSnapshotInput(
-	input: TekMemoCloudSnapshotInput,
-): TekMemoCloudSnapshotInput {
-	return input;
-}
-
-export function validateProviderInput(
-	input: TekMemoCloudProviderInput,
-): TekMemoCloudProviderInput {
-	assertNonEmptyString(input.keyName, "keyName");
-	assertNonEmptyString(input.secret, "secret");
-	if (!["voyageai", "openai", "upstash-vector"].includes(input.provider)) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "provider must be voyageai, openai, or upstash-vector.",
-		});
-	}
-	return input;
-}
-
-export function validateCreateAgentSessionInput(
-	input: CreateAgentSessionInput,
-): CreateAgentSessionInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	assertNonEmptyString(input.task, "task");
-	if (input.actorId !== undefined)
-		assertNonEmptyString(input.actorId, "actorId");
-	if (input.workspaceRoot !== undefined)
-		assertNonEmptyString(input.workspaceRoot, "workspaceRoot");
-	if (
-		input.workspaceProvider !== undefined &&
-		!["agentfs", "local", "hosted"].includes(input.workspaceProvider)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "workspaceProvider must be agentfs, local, or hosted.",
-		});
-	}
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validateCreateAgentSessionEventInput(
-	input: CreateAgentSessionEventInput,
-): CreateAgentSessionEventInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	assertNonEmptyString(input.type, "type");
-	assertNonEmptyString(input.message, "message");
-	if (input.occurredAt !== undefined)
-		assertNonEmptyString(input.occurredAt, "occurredAt");
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validateExtractAgentSessionMemoryInput(
-	input: ExtractAgentSessionMemoryInput,
-): ExtractAgentSessionMemoryInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	if (input.summary !== undefined && typeof input.summary !== "string") {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "summary must be a string.",
-		});
-	}
-	if (
-		input.durableMemory !== undefined &&
-		typeof input.durableMemory !== "string"
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "durableMemory must be a string.",
-		});
-	}
-	if (input.followUps !== undefined && typeof input.followUps !== "string") {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "followUps must be a string.",
-		});
-	}
-	if (input.errors !== undefined && typeof input.errors !== "string") {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "errors must be a string.",
-		});
-	}
-	if (input.changes !== undefined && typeof input.changes !== "string") {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "changes must be a string.",
-		});
-	}
-	if (input.checkpointLabel !== undefined)
-		assertNonEmptyString(input.checkpointLabel, "checkpointLabel");
-	return input;
-}
-
-export function validateApproveAgentSessionMemoryInput(
-	input: ApproveAgentSessionMemoryInput,
-): ApproveAgentSessionMemoryInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	assertNonEmptyString(input.extractionId, "extractionId");
-	if (input.content !== undefined)
-		assertNonEmptyString(input.content, "content");
-	if (input.title !== undefined) assertNonEmptyString(input.title, "title");
-	if (
-		input.tags !== undefined &&
-		(!Array.isArray(input.tags) ||
-			input.tags.some(
-				(tag) => typeof tag !== "string" || tag.trim().length === 0,
-			))
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "tags must be an array of non-empty strings.",
-		});
-	}
-	if (input.approvedBy !== undefined)
-		assertNonEmptyString(input.approvedBy, "approvedBy");
-	return input;
-}
-
-export function validateCompleteAgentSessionInput(
-	input: CompleteAgentSessionInput,
-): CompleteAgentSessionInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	if (
-		input.status !== undefined &&
-		!["active", "completed", "failed", "abandoned"].includes(input.status)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "status must be active, completed, failed, or abandoned.",
-		});
-	}
-	if (input.checkpointLabel !== undefined)
-		assertNonEmptyString(input.checkpointLabel, "checkpointLabel");
-	if (input.completedAt !== undefined)
-		assertNonEmptyString(input.completedAt, "completedAt");
-	return input;
-}
-
-export function validateGraphListInput(
-	input: TekMemoCloudGraphListInput,
-): TekMemoCloudGraphListInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	return input;
-}
-
-export function validateListCandidatesInput(
-	input: ListCandidatesInput,
-): ListCandidatesInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	if (
-		input.status !== undefined &&
-		!["pending", "promoted", "dismissed", "archived"].includes(input.status)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "status must be pending, promoted, dismissed, or archived.",
-		});
-	}
-	return input;
-}
-
-export function validateCreateCandidateInput(
-	input: CreateCandidateInput,
-): CreateCandidateInput {
-	assertNonEmptyString(input.content, "content");
-	if (input.title !== undefined) assertNonEmptyString(input.title, "title");
-	if (input.source !== undefined) assertNonEmptyString(input.source, "source");
-	if (
-		input.confidence !== undefined &&
-		(typeof input.confidence !== "number" ||
-			input.confidence < 0 ||
-			input.confidence > 1)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "confidence must be between 0 and 1.",
-		});
-	}
-	if (
-		input.tags !== undefined &&
-		(!Array.isArray(input.tags) ||
-			input.tags.some(
-				(tag) => typeof tag !== "string" || tag.trim().length === 0,
-			))
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "tags must be an array of non-empty strings.",
-		});
-	}
-	assertOptionalJsonObject(input.metadata, "metadata");
-	return input;
-}
-
-export function validatePromoteCandidateInput(
-	input: PromoteCandidateInput,
-): PromoteCandidateInput {
-	assertNonEmptyString(input.candidateId, "candidateId");
-	if (input.title !== undefined) assertNonEmptyString(input.title, "title");
-	if (
-		input.tags !== undefined &&
-		(!Array.isArray(input.tags) ||
-			input.tags.some(
-				(tag) => typeof tag !== "string" || tag.trim().length === 0,
-			))
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "tags must be an array of non-empty strings.",
-		});
-	}
-	return input;
-}
-
-export function validateDismissCandidateInput(
-	input: DismissCandidateInput,
-): DismissCandidateInput {
-	assertNonEmptyString(input.candidateId, "candidateId");
-	return input;
-}
-
-export function validateListConflictsInput(
-	input: ListConflictsInput,
-): ListConflictsInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	if (
-		input.status !== undefined &&
-		!["open", "resolved", "dismissed"].includes(input.status)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "status must be open, resolved, or dismissed.",
-		});
-	}
-	if (
-		input.severity !== undefined &&
-		!["low", "medium", "high"].includes(input.severity)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "severity must be low, medium, or high.",
-		});
-	}
-	return input;
-}
-
-export function validateResolveConflictInput(
-	input: ResolveConflictInput,
-): ResolveConflictInput {
-	assertNonEmptyString(input.conflictId, "conflictId");
-	if (
-		!["keep_existing", "use_incoming", "merge", "dismiss"].includes(
-			input.resolution,
-		)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message:
-				"resolution must be keep_existing, use_incoming, merge, or dismiss.",
-		});
-	}
-	if (input.mergedContent !== undefined)
-		assertOptionalJsonObject(input.mergedContent, "mergedContent");
-	return input;
-}
-
-export function validateUpdateProviderInput(
-	input: UpdateProviderInput,
-): UpdateProviderInput {
-	assertNonEmptyString(input.credentialId, "credentialId");
-	if (input.keyName !== undefined)
-		assertNonEmptyString(input.keyName, "keyName");
-	if (input.secret !== undefined) assertNonEmptyString(input.secret, "secret");
-	if (input.restUrl !== undefined)
-		assertNonEmptyString(input.restUrl, "restUrl");
-	if (input.embeddingModel !== undefined)
-		assertNonEmptyString(input.embeddingModel, "embeddingModel");
-	if (input.rerankModel !== undefined)
-		assertNonEmptyString(input.rerankModel, "rerankModel");
-	return input;
-}
-
-export function validateDeleteProviderInput(
-	input: DeleteProviderInput,
-): DeleteProviderInput {
-	assertNonEmptyString(input.credentialId, "credentialId");
-	return input;
-}
-
-export function validateListAgentSessionsInput(
-	input: ListAgentSessionsInput,
-): ListAgentSessionsInput {
-	assertOptionalPositiveInteger(input.limit, "limit");
-	if (
-		input.status !== undefined &&
-		!["active", "completed", "failed", "abandoned"].includes(input.status)
-	) {
-		throw new TekMemoCloudValidationError({
-			code: "invalid_input",
-			message: "status must be active, completed, failed, or abandoned.",
-		});
-	}
-	if (input.actorId !== undefined)
-		assertNonEmptyString(input.actorId, "actorId");
-	return input;
-}
-
-export function validateGetAgentSessionInput(
-	input: GetAgentSessionInput,
-): GetAgentSessionInput {
-	assertNonEmptyString(input.sessionId, "sessionId");
-	return input;
 }
 
 export function compactQuery(

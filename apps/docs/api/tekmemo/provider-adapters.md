@@ -1,63 +1,114 @@
-# Provider Adapters Module
+# Provider Adapters
 
-TekMemo provides official adapters for industry-leading embedding and AI models. These adapters implement the standard `MemoryEmbedder` contract.
+TekMemo provides official standalone adapter packages for industry-leading embedding and reranking models. Each adapter implements the standard `MemoryEmbedder` contract from `@tekbreed/tekmemo`.
 
-## Installation
-
-Install the provider's peer dependency alongside the main `@tekbreed/tekmemo` package. For example, for OpenAI:
-
-```bash
-npm install openai @tekbreed/tekmemo
-```
-
-## OpenAI Integration
+## OpenAI (`@tekbreed/tekmemo-adapter-openai`)
 
 Exposes embedding integration for OpenAI's `text-embedding-3-*` and `ada-002` models.
+
+### Installation
+
+```bash
+npm install @tekbreed/tekmemo-adapter-openai @tekbreed/tekmemo
+```
 
 ### Usage
 
 ```ts
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo";
+import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 
 const embedder = createOpenAIEmbedder({
   apiKey: process.env.OPENAI_API_KEY,
   model: "text-embedding-3-small",
-  dimensions: 1536 // Optional
+  dimensions: 1536,
 });
 
 const results = await embedder.embedTexts({
-  texts: ["This is a test document.", "Another piece of memory."]
+  texts: ["This is a test document.", "Another piece of memory."],
 });
+```
 
-console.log(results.embeddings[0].vector);
+Use with the [`Tekmemo`](./tekmemo) class:
+
+```ts
+import { Tekmemo } from "@tekbreed/tekmemo";
+import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+
+const memo = new Tekmemo({
+  rootDir: "./.tekmemo",
+  projectId: "my-app",
+  embedder: createOpenAIEmbedder({ apiKey: process.env.OPENAI_API_KEY! }),
+});
 ```
 
 ---
 
-## VoyageAI Integration
+## VoyageAI (`@tekbreed/tekmemo-adapter-voyage`)
 
-Provides high-performance embedding integration for Voyage's specialized models (e.g. `voyage-large-2`, `voyage-code-2`).
+High-performance embedding and reranking integration for Voyage's specialized models (e.g. `voyage-large-2`, `voyage-code-2`).
+
+### Installation
+
+```bash
+npm install @tekbreed/tekmemo-adapter-voyage @tekbreed/tekmemo
+```
 
 ### Usage
 
 ```ts
-import { createVoyageEmbedder } from "@tekbreed/tekmemo";
+import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
 
 const embedder = createVoyageEmbedder({
   apiKey: process.env.VOYAGE_API_KEY,
-  model: "voyage-2"
+  model: "voyage-2",
 });
 
 const results = await embedder.embedTexts({
-  texts: ["How does the billing system work?", "Explain the graph schema."]
+  texts: ["How does the billing system work?", "Explain the graph schema."],
 });
-
-console.log(results.embeddings[0].vector);
 ```
 
-## Shared Features
+---
+
+## Transformers.js — local (`@tekbreed/tekmemo-adapter-transformers`)
+
+A **zero-config local ONNX embedder** that runs in process via Transformers.js —
+**no API key, no cloud.** This is the adapter that powers TekMemo's zero-API-key
+hybrid recall: with `recall.localEmbeddings` enabled, the runtime lazy-loads it
+on the first recall and `recall.engine: "auto"` upgrades to hybrid retrieval.
+
+### Installation
+
+```bash
+npm install @tekbreed/tekmemo-adapter-transformers @tekbreed/tekmemo
+```
+
+### Usage
+
+```ts
+import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+
+// Defaults to Xenova/all-MiniLM-L6-v2 (384-dim); model downloads once then runs offline
+const embedder = createTransformersEmbedder();
+
+const { embeddings } = await embedder.embedTexts({
+  texts: ["User prefers TypeScript.", "Authentication uses bearer tokens."],
+});
+```
+
+You usually do not need to construct it yourself — set `recall.localEmbeddings`
+(see [Configuration](../../packages/tekmemo/configuration#recall-engine)) and the
+runtime wires it up lazily. If the adapter is missing or fails, recall falls
+back to the lexical (BM25 + fuzzy) path.
+
+Best for offline/private/single-machine agent memory; for large shared indices,
+prefer a provider embedder above plus a managed vector store.
+
+## Shared provider features
+
+The OpenAI and Voyage adapters share:
 
 - **Batching:** Automatically handles large text arrays by splitting them into batches that fit the provider's limits.
 - **Retries:** Configurable exponential backoff for network and rate-limit errors.
 - **Validation:** Strict validation of dimensions, model names, and input lengths.
-- **Error Mapping:** Converts raw API errors into typed TekMemo errors (e.g. `OpenAIAPIError`).
+- **Error Mapping:** Converts raw API errors into typed TekMemo errors.

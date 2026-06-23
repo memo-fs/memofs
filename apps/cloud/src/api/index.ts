@@ -1,0 +1,79 @@
+/**
+ * The Hono API app — single source of truth for the cloud JSON API.
+ *
+ * Mounted at the `/v1` prefix. Today this wires the public health endpoints +
+ * the request-wide middleware spine (requestId + envelope + error handling);
+ * authenticated sync routes (`/v1/projects/:projectId/sync/*`) land in P2 and
+ * compose in here as their own sub-apps.
+ *
+ * Consumed by TWO entrypoints, each responsible for its own dispatch:
+ *   - `workers/app.ts`       — production Worker (`/v1` → `api`, else SSR)
+ *   - `workers/dev-api.ts`   — dev-only Vite middleware (same split, dev env)
+ *
+ * Keeping the routing tree here means dev and prod serve identical routes;
+ * the entries only differ in HOW they receive requests + bindings.
+ *
+ * Middleware spine (order matters):
+ *   1. `requestId`     — stamp + echo `x-request-id` + set `c.var.requestId`.
+ *   2. route handlers   — health today; sync + auth compose in during P2.
+ *   3. `notFound`       — 404 for unmatched `/v1/*` paths, envelope-shaped.
+ *   4. `onError`        — catch every throw, serialize into `{ error, meta }`.
+ *
+ * The `Variables` type declares what middleware makes available on `c.var` so
+ * handlers + helpers stay type-safe instead of reaching into `any`.
+ */
+import { Hono } from "hono";
+import type { Database } from "../db/index.server";
+import type { CloudWorkerEnv } from "../server/env";
+import { isApiError } from "./errors";
+import { healthApp } from "./health";
+import { json, jsonError } from "./json";
+import type { AuthAccount } from "./middleware/auth";
+import { requestIdMiddleware } from "./middleware/request-id";
+import { syncApp } from "./sync";
+
+/** Per-request values set by middleware and read by handlers/helpers. */
+export interface ApiVariables {
+	requestId: string;
+	/** Authenticated account — set by `createAuthMiddleware` on protected routes. */
+	account?: AuthAccount;
+	/**
+	 * Per-request drizzle client bound to `c.env`'s Turso config. Set by the
+	 * sync router's `dbMiddleware` before any sync handler runs, so handlers
+	 * read `c.get("db")` instead of constructing their own client. Health/
+	 * readiness never touch the DB and don't pay the construction cost.
+	 */
+	db?: Database;
+}
+
+export type ApiEnv = { Bindings: CloudWorkerEnv; Variables: ApiVariables };
+
+export function createApiApp() {
+	return (
+		new Hono<ApiEnv>()
+			.use("*", requestIdMiddleware)
+			.route("/v1", healthApp)
+			// Sync routes carry their own auth + db middleware (both need `c.env`),
+			// mounted under the project-scoped path the frozen client contract uses.
+			.route("/v1/projects/:projectId/sync", syncApp)
+			.notFound((c) => jsonError(c, 404, "not_found", "Unknown API route."))
+			.onError((cause, c) => {
+				// Our own `ApiError` carries a stable `code`, status, and optional
+				// `details` — surface them verbatim. Anything else is an unexpected
+				// throw; log the real message server-side, return a generic 500 to
+				// the client (never leak internals/stacks).
+				if (isApiError(cause)) {
+					const message = cause.hideMessage
+						? "Internal server error."
+						: cause.message;
+					return jsonError(c, cause.status, cause.code, message, cause.details);
+				}
+				console.error("[api] unhandled error", cause);
+				return jsonError(c, 500, "internal_error", "Internal server error.");
+			})
+	);
+}
+
+// Re-exported so handlers can `import { json } from "../api"` without reaching
+// into the helper module path — keeps the envelope SSOT obvious.
+export { json, jsonError };

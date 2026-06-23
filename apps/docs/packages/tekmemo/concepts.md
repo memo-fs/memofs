@@ -26,9 +26,32 @@ A context package is the structured payload sent to an AI model or tool. It can 
 
 ## Package architecture
 
-TekMemo is published as three main packages:
-- `@tekbreed/tekmemo` (the core runtime containing the filesystem store, graph memory, vector adapters, and API modules)
-- `@tekbreed/tekmemo-cli` (the CLI distribution)
-- `@tekbreed/tekmemo-mcp-server` (the MCP server)
+TekMemo is published as a family of packages:
 
-When writing code to integrate TekMemo, you import everything directly from the core `@tekbreed/tekmemo` package. See the [API Reference](/api/tekmemo/) page for the list of modules and helper APIs.
+| Package | Purpose |
+| --- | --- |
+| `@tekbreed/tekmemo` | Core runtime — filesystem store, graph memory, recall, AI SDK helpers, and cloud client |
+| `@tekbreed/tekmemo-cli` | CLI distribution for local and cloud memory operations |
+| `@tekbreed/tekmemo-mcp-server` | MCP server for IDE/agent integration |
+| `@tekbreed/tekmemo-adapter-openai` | OpenAI embedding provider adapter |
+| `@tekbreed/tekmemo-adapter-voyage` | VoyageAI embedding and reranking adapter |
+| `@tekbreed/tekmemo-mcp-worker` | Cloudflare Worker hosted MCP server |
+| `@tekbreed/tekmemo-benchmark-cli` | CLI for running benchmark suites |
+
+For application code, import the [`Tekmemo`](/packages/tekmemo/client) class from `@tekbreed/tekmemo`. See the [API Reference](/api/tekmemo/) page for the full module listing.
+
+## Glossary
+
+| Term | Meaning |
+| --- | --- |
+| **Agent session** | A temporary coding workspace managed by AgentFS, tracking the lifecycle of an agent's task. |
+| **Cloud client** | The cloud client module of `@tekbreed/tekmemo`, handling API transport and auth. |
+| **Context package** | A structured payload combining core memory, notes, recall results, and graph data to be sent to an AI model. |
+| **Core memory** | The stable project briefing (`core.md`). Contains facts the agent must know every time it starts working. |
+| **Graph memory** | Nodes (entities, concepts, files) and edges (relationships) that help tools answer architectural questions. |
+| **Hybrid runtime** | A runtime mode that combines local and cloud, routing every read and write through read/write policies (`local-first`, `cloud-first`, `local-only`). |
+| **MCP** | Model Context Protocol. An open standard used to expose TekMemo memory to IDEs and agents. Available as a hosted cloud-only endpoint (`https://mcp.memo.tekbreed.com/`) or a self-hosted stdio server (`@tekbreed/tekmemo-mcp-server`) for local/cloud/hybrid memory. |
+| **Note** | A durable memory record (e.g., a decision, constraint, or summary) saved to `notes.md`. |
+| **Recall** | The process of retrieving relevant memory for a query. Can use keywords (local) or embeddings (cloud/provider). |
+| **Snapshot** | A point-in-time backup bundle of project memory, used for rollbacks or migrations. |
+| **Sync** | The mechanism of resolving memory state between the local `.tekmemo/` filesystem and the TekMemo Cloud database. |

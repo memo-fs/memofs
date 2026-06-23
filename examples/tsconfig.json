@@ -1,0 +1,11 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"allowImportingTsExtensions": false,
+		"declaration": false,
+		"declarationMap": false,
+		"noEmit": true,
+		"types": ["node"]
+	},
+	"include": ["ai-sdk/**/*.ts", "openai-agents-sdk/**/*.ts", "nextjs/**/*.ts"]
+}

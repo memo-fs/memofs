@@ -2,7 +2,7 @@
 
 ## Our commitment
 
-TekBreed OSS is an open-source project for developers building agent infrastructure, starting with TekMemo memory infrastructure for AI apps and agents.
+TekMemo is an open-source project for developers building agent infrastructure, starting with TekMemo memory infrastructure for AI apps and agents.
 
 We want this project to be a respectful, practical, and productive environment for everyone.
 
@@ -78,7 +78,7 @@ This also includes behavior outside project spaces when it directly affects the 
 
 Technical disagreement is welcome.
 
-TekBreed OSS deals with complex topics:
+TekMemo deals with complex topics:
 
 * memory architecture
 * AI provider adapters
@@ -195,7 +195,7 @@ This Code of Conduct applies in:
 * community chats
 * official project events
 * maintainer interactions
-* any official TekMemo OSS community space
+* any official TekMemo community space
 
 It may also apply outside official spaces when behavior directly affects the project or community.
 

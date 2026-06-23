@@ -1,14 +1,14 @@
 # Security Policy
 
-TekBreed takes security seriously.
+TekMemo takes security seriously.
 
-This document explains how to report vulnerabilities and what security practices apply to the public TekBreed OSS repository, starting with the TekMemo package family.
+This document explains how to report vulnerabilities and what security practices apply to the public TekMemo repository, starting with the TekMemo package family.
 
 ---
 
 ## Scope
 
-This policy applies to the public TekBreed OSS repository and the published TekMemo package surfaces, including:
+This policy applies to the public TekMemo repository and the published TekMemo package surfaces, including:
 
 ```txt
 @tekbreed/tekmemo
@@ -282,14 +282,6 @@ When appropriate, TekMemo may publish:
 
 ## Contact
 
-Security reports:
+Security reports: [security@tekbreed.com](mailto:security@tekbreed.com)
 
-```txt
-security@tekbreed.com
-```
-
-General issues:
-
-```txt
-https://github.com/tekbreed/oss/issues
-```
+General issues: [TekMemo](https://github.com/tekbreed/tekmemo/issues)

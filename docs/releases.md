@@ -1,6 +1,6 @@
 # Release Process
 
-TekBreed OSS uses Changesets for package versioning and publishing. TekMemo is published as one public package, `@tekbreed/tekmemo`, with all public APIs exported from the single root entrypoint.
+TekMemo uses Changesets for package versioning and publishing. TekMemo is published as one public package, `@tekbreed/tekmemo`, with all public APIs exported from the single root entrypoint.
 
 ## Validation
 

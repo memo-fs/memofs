@@ -1,5 +1,18 @@
+/**
+ * Utility functions for parsing and validating JSON metadata.
+ *
+ * @module metadata
+ */
+
 import { CliUsageError } from "../errors/cli-errors";
 
+/**
+ * Safely parses metadata input string to a plain JSON object record.
+ *
+ * @param value - The raw JSON string.
+ * @returns The parsed record object, or `undefined` if empty/undefined.
+ * @throws {CliUsageError} If the string is invalid JSON or is not a plain JSON object.
+ */
 export function parseMetadataJson(
 	value?: string,
 ): Record<string, unknown> | undefined {
@@ -22,6 +35,13 @@ export function parseMetadataJson(
 	return parsed as Record<string, unknown>;
 }
 
+/**
+ * Asserts that a value is JSON serializable.
+ *
+ * @param value - The value to test.
+ * @param name - The field name for the error message.
+ * @throws {CliUsageError} If the value contains circular references or cannot be stringified.
+ */
 export function assertJsonSerializable(value: unknown, name = "value"): void {
 	try {
 		JSON.stringify(value);

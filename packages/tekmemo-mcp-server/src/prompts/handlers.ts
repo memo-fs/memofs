@@ -1,3 +1,9 @@
+/**
+ * MCP Prompt definitions and retrieval handlers.
+ *
+ * @module handlers
+ */
+
 import { McpNotFoundError } from "../errors";
 import type { McpPromptDefinition, McpPromptResult } from "../types";
 import { asObject } from "../utils/json";
@@ -7,6 +13,11 @@ import {
 	requiredString,
 } from "../utils/validation";
 
+/**
+ * Creates and returns all available MCP Prompt definitions.
+ *
+ * @returns An array of McpPromptDefinitions.
+ */
 export function createPromptDefinitions(): McpPromptDefinition[] {
 	return [
 		{
@@ -53,6 +64,14 @@ export function createPromptDefinitions(): McpPromptDefinition[] {
 	];
 }
 
+/**
+ * Evaluates and constructs an MCP Prompt response payload.
+ *
+ * @param name - The name of the prompt.
+ * @param rawArgs - Raw arguments object mapping inputs.
+ * @returns The structured McpPromptResult container.
+ * @throws {McpNotFoundError} If the requested prompt name is unknown.
+ */
 export function getTekMemoPrompt(
 	name: string,
 	rawArgs: unknown,

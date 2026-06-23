@@ -1,0 +1,9 @@
+{
+  "runtime": "local",
+  "root": ".",
+  "cloud": {},
+  "hybrid": {
+    "readPolicy": "local-first",
+    "writePolicy": "local-first"
+  }
+}

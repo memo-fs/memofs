@@ -1,9 +1,8 @@
-export type {
-	CliRuntimeFlags,
-	ResolvedCliRuntimeConfig,
-	TekMemoConfigFile,
-	TekMemoReadPolicy,
-	TekMemoRuntimeMode,
-	TekMemoWritePolicy,
-} from "./runtime";
-export { resolveCliRuntimeConfig, writeDefaultCliConfig } from "./runtime";
+/**
+ * Config module barrel.
+ *
+ * @module config
+ */
+
+export type { TekMemoConfigFile } from "./runtime";
+export { configSchemaUrl, writeDefaultCliConfig } from "./runtime";

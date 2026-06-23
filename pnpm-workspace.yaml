@@ -1,7 +1,7 @@
 packages:
+  - "apps/cloud"
   - "apps/docs"
   - "benchmarks"
-  - "packages/tekmemo"
-  - "packages/tekmemo-cli"
-  - "packages/tekmemo-mcp-server"
+  - "examples"
+  - "packages/*"
   - "tooling/*"

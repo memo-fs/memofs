@@ -1,20 +1,18 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import type {
-	BenchmarkSuite,
-	BenchmarkSuiteResult,
-	BenchmarkThresholdFailure,
-	BenchmarkThresholdResult,
-	BenchmarkThresholds,
-	RecallDocument,
-} from "@tekbreed/tekmemo";
+import type { RecallDocument } from "@tekbreed/tekmemo";
 import {
 	BenchmarkRunner,
+	type BenchmarkSuite,
+	type BenchmarkSuiteResult,
+	type BenchmarkThresholdFailure,
+	type BenchmarkThresholdResult,
+	type BenchmarkThresholds,
 	evaluateBenchmarkThresholds,
 	jsonBenchmarkReport,
 	markdownBenchmarkReport,
-} from "@tekbreed/tekmemo";
+} from "@tekbreed/tekmemo-benchmark-kit";
 
 const BENCHMARK_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),

@@ -1,8 +1,8 @@
-# Contributing to TekBreed OSS
+# Contributing to TekMemo
 
-Thank you for your interest in contributing to TekBreed OSS.
+Thank you for your interest in contributing to TekMemo.
 
-This repository hosts TekBreed open-source work. TekMemo is the first product family: an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only TekMemo Cloud.
+This repository hosts TekMemo open-source work. TekMemo is the first product family: an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only TekMemo Cloud.
 
 This guide explains how to contribute code, docs, tests, and package improvements.
 
@@ -39,11 +39,7 @@ The public OSS repo should remain:
 
 All contributors must follow the project Code of Conduct.
 
-See:
-
-```txt
-CODE_OF_CONDUCT.md
-```
+See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 
 ---
 
@@ -51,11 +47,7 @@ CODE_OF_CONDUCT.md
 
 Do not open public issues for security vulnerabilities.
 
-See:
-
-```txt
-SECURITY.md
-```
+See [SECURITY.md](./SECURITY.md)
 
 ---
 
@@ -80,8 +72,8 @@ corepack prepare pnpm@9 --activate
 Clone the repo:
 
 ```bash
-git clone https://github.com/tekbreed/oss.git
-cd oss
+git clone https://github.com/tekbreed/tekmemo.git
+cd tekmemo
 ```
 
 Install dependencies:
@@ -133,6 +125,8 @@ pnpm build
 pnpm test
 pnpm typecheck
 pnpm format-and-lint
+pnpm lint:package
+pnpm validate:workspace
 ```
 
 Commit:
@@ -140,6 +134,10 @@ Commit:
 ```bash
 git add .
 git commit -m "fix: short description"
+
+# or
+
+git commit -m "fix(tekmemo-cli): short description"
 ```
 
 Push:
@@ -242,7 +240,7 @@ Packages in this OSS repo must not contain private TekMemo Cloud logic such as:
 
 ## Adding a new package or feature
 
-- **TekMemo features**: Add all new TekMemo capabilities as internal modules under `packages/tekmemo/src/<feature>/` and re-export them from the package root [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
+- **TekMemo features**: Add all new TekMemo capabilities as internal modules under `packages/tekmemo/src/<feature>/` and re-export them from the package root [index.ts](./packages/tekmemo/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
 - **New workspace packages**: Future workspace packages (such as TekCode components) should live beside `packages/tekmemo/` under `packages/<package-name>/` and conform to the following directory structure:
 
 ```txt
@@ -596,7 +594,7 @@ Use GitHub issues or discussions for:
 * package usage questions
 * documentation improvements
 
-For security issues, follow `SECURITY.md`.
+For security issues, follow [SECURITY.md](./SECURITY.md).
 
 ---
 

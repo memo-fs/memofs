@@ -1,9 +1,18 @@
+/**
+ * CLI Zod schemas for validating manifests, conversation logs, events, chunks, and snapshots.
+ *
+ * @module schemas
+ */
+
 import { z } from "zod";
 
 const JsonRecordSchema = z.record(z.string(), z.unknown());
 const IsoDateSchema = z.string().datetime();
 const NonEmptyStringSchema = z.string().min(1);
 
+/**
+ * Zod validation schema for the TekMemo manifest.json file.
+ */
 export const ManifestSchema = z.object({
 	version: NonEmptyStringSchema,
 	projectId: NonEmptyStringSchema.optional(),
@@ -29,6 +38,9 @@ export const ManifestSchema = z.object({
 	}),
 });
 
+/**
+ * Zod validation schema for a conversation log entry.
+ */
 export const ConversationEntrySchema = z.object({
 	timestamp: IsoDateSchema,
 	role: z.enum(["user", "assistant", "system", "tool"]),
@@ -37,6 +49,9 @@ export const ConversationEntrySchema = z.object({
 	metadata: JsonRecordSchema.optional(),
 });
 
+/**
+ * Zod validation schema for structured memory events.
+ */
 export const MemoryEventSchema = z.object({
 	id: NonEmptyStringSchema,
 	type: z.enum([
@@ -67,6 +82,9 @@ export const MemoryEventSchema = z.object({
 	metadata: JsonRecordSchema.optional(),
 });
 
+/**
+ * Zod validation schema for chunk index records.
+ */
 export const ChunkRecordSchema = z.object({
 	chunkId: NonEmptyStringSchema,
 	sourcePath: NonEmptyStringSchema,
@@ -99,6 +117,9 @@ export const ChunkRecordSchema = z.object({
 	metadata: JsonRecordSchema.optional(),
 });
 
+/**
+ * Zod validation schema for snapshot entry descriptors.
+ */
 export const SnapshotEntrySchema = z.object({
 	id: NonEmptyStringSchema,
 	path: NonEmptyStringSchema,
@@ -110,4 +131,7 @@ export const SnapshotEntrySchema = z.object({
 	metadata: JsonRecordSchema.optional(),
 });
 
+/**
+ * Alias of ChunkRecordSchema representing a memory chunk.
+ */
 export const MemoryChunkSchema = ChunkRecordSchema;

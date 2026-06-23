@@ -72,6 +72,15 @@ export interface AgentfsLikeClient {
 	exists?(path: string): Promise<boolean>;
 
 	/**
+	 * Deletes the file at the given remote path.
+	 * This is optional and idempotent; if not provided, deletes are not supported.
+	 *
+	 * @param path - The remote path to delete.
+	 * @returns A promise that resolves when the delete completes.
+	 */
+	deleteText?(path: string): Promise<void>;
+
+	/**
 	 * Optional sync capabilities for this client.
 	 */
 	sync?: AgentfsLikeSync;
@@ -118,6 +127,15 @@ export function assertAgentfsLikeClient(
 	) {
 		throw new TypeError(
 			"AgentFS client exists must be a function when provided.",
+		);
+	}
+
+	if (
+		candidate.deleteText !== undefined &&
+		typeof candidate.deleteText !== "function"
+	) {
+		throw new TypeError(
+			"AgentFS client deleteText must be a function when provided.",
 		);
 	}
 }

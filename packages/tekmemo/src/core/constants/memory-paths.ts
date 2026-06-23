@@ -33,6 +33,7 @@ export const TEKMEMO_PATHS = Object.freeze({
 	}),
 	indexes: Object.freeze({
 		chunks: `${TEKMEMO_DIR}/indexes/chunks.jsonl`,
+		embeddings: `${TEKMEMO_DIR}/indexes/embeddings.jsonl`,
 	}),
 	graph: Object.freeze({
 		nodes: `${TEKMEMO_DIR}/graph/nodes.jsonl`,
@@ -41,6 +42,8 @@ export const TEKMEMO_PATHS = Object.freeze({
 	snapshots: Object.freeze({
 		index: `${TEKMEMO_DIR}/snapshots/snapshots.jsonl`,
 	}),
+	/** Connector config — the 11th canonical file (ADR 0002 / decision Q2). No secrets. */
+	connectors: `${TEKMEMO_DIR}/connectors.json`,
 	tmpDir: `${TEKMEMO_DIR}/tmp`,
 } as const);
 
@@ -56,12 +59,16 @@ export const MEMORY_EVENTS_PATH = TEKMEMO_PATHS.events.memoryEvents;
 export const CONVERSATIONS_MEMORY_PATH = TEKMEMO_PATHS.events.conversations;
 /** Path to the chunks index JSONL file. */
 export const CHUNKS_INDEX_PATH = TEKMEMO_PATHS.indexes.chunks;
+/** Path to the persisted embeddings index JSONL file. */
+export const EMBEDDINGS_INDEX_PATH = TEKMEMO_PATHS.indexes.embeddings;
 /** Path to the graph nodes JSONL file. */
 export const GRAPH_NODES_PATH = TEKMEMO_PATHS.graph.nodes;
 /** Path to the graph edges JSONL file. */
 export const GRAPH_EDGES_PATH = TEKMEMO_PATHS.graph.edges;
 /** Path to the snapshots index JSONL file. */
 export const SNAPSHOTS_INDEX_PATH = TEKMEMO_PATHS.snapshots.index;
+/** Path to the connector-config JSON file (no secrets; `secretRef` only). */
+export const CONNECTORS_PATH = TEKMEMO_PATHS.connectors;
 
 export const CANONICAL_TEKMEMO_FILES = [
 	MANIFEST_PATH,
@@ -70,9 +77,11 @@ export const CANONICAL_TEKMEMO_FILES = [
 	MEMORY_EVENTS_PATH,
 	CONVERSATIONS_MEMORY_PATH,
 	CHUNKS_INDEX_PATH,
+	EMBEDDINGS_INDEX_PATH,
 	GRAPH_NODES_PATH,
 	GRAPH_EDGES_PATH,
 	SNAPSHOTS_INDEX_PATH,
+	CONNECTORS_PATH,
 ] as const;
 
 /**
@@ -180,9 +189,11 @@ export type PathKind =
 	| "memory-event"
 	| "conversation"
 	| "chunk"
+	| "embedding"
 	| "graph-node"
 	| "graph-edge"
 	| "snapshot-index"
+	| "connector"
 	| "snapshot";
 
 /**
@@ -207,12 +218,16 @@ export function memoryTypeFromPath(path: MemoryPath): PathKind {
 			return "conversation";
 		case CHUNKS_INDEX_PATH:
 			return "chunk";
+		case EMBEDDINGS_INDEX_PATH:
+			return "embedding";
 		case GRAPH_NODES_PATH:
 			return "graph-node";
 		case GRAPH_EDGES_PATH:
 			return "graph-edge";
 		case SNAPSHOTS_INDEX_PATH:
 			return "snapshot-index";
+		case CONNECTORS_PATH:
+			return "connector";
 		default:
 			return "snapshot";
 	}

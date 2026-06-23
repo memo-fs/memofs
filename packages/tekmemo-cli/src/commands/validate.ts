@@ -1,5 +1,14 @@
+/**
+ * CLI command handler for validating local workspace files and structures.
+ *
+ * @module validate
+ */
+
+import { stat } from "node:fs/promises";
+import { resolve } from "node:path";
+import type { Tekmemo } from "@tekbreed/tekmemo";
 import type { z } from "zod";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
 	REQUIRED_DIRS,
@@ -14,25 +23,54 @@ import {
 	SnapshotEntrySchema,
 } from "../protocol/schemas";
 
+/**
+ * Options configuration for the validate command.
+ */
 export interface ValidateCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
 }
 
+/**
+ * Represents a single protocol validation issue/error.
+ */
 interface ValidateIssue {
+	/**
+	 * Machine-readable code describing the validation failure type.
+	 */
 	code: string;
+	/**
+	 * Descriptive validation failure message.
+	 */
 	message: string;
 }
 
+/**
+ * Runs the validate command, performing strict schema and structure checkups.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runValidateCommand(
 	options: ValidateCommandOptions,
 ): Promise<number> {
+	const rootDir = getRootDir(options.memo.store);
 	const issues: ValidateIssue[] = [];
 
 	for (const dir of REQUIRED_DIRS) {
-		const exists = await options.fs.exists(dir);
-		if (!exists) {
+		try {
+			await stat(resolve(rootDir, dir));
+		} catch {
 			issues.push({
 				code: "missing_dir",
 				message: `Missing required directory: ${dir}`,
@@ -41,8 +79,8 @@ export async function runValidateCommand(
 	}
 
 	for (const file of REQUIRED_FILES) {
-		const exists = await options.fs.exists(file);
-		if (!exists) {
+		const fileExists = await exists(options.memo.store, file);
+		if (!fileExists) {
 			issues.push({
 				code: "missing_file",
 				message: `Missing required file: ${file}`,
@@ -50,7 +88,8 @@ export async function runValidateCommand(
 		}
 	}
 
-	const manifestContent = await options.fs.readTextIfExists(
+	const manifestContent = await readTextIfExists(
+		options.memo.store,
 		TEKMEMO_PATHS.manifest,
 	);
 	if (manifestContent === undefined) {
@@ -63,8 +102,8 @@ export async function runValidateCommand(
 			const manifest = parseManifest(manifestContent);
 			for (const key of ["core", "notes"] as const) {
 				const filePath = manifest.memory[key];
-				const exists = await options.fs.exists(filePath);
-				if (!exists) {
+				const refExists = await exists(options.memo.store, filePath);
+				if (!refExists) {
 					issues.push({
 						code: "manifest_ref_missing",
 						message: `Manifest references ${filePath} but file is missing`,
@@ -87,7 +126,7 @@ export async function runValidateCommand(
 	};
 
 	for (const [file, schema] of Object.entries(strictSchemas)) {
-		const content = await options.fs.readTextIfExists(file);
+		const content = await readTextIfExists(options.memo.store, file);
 		if (content === undefined) continue;
 
 		const lines = content.split(/\r?\n/);

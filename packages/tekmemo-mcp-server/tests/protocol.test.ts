@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-	createInMemoryTekMemoRuntime,
 	createTekMemoMcpProtocolServer,
+	createTekMemoMcpRuntimeFromConfig,
 } from "../src/index";
 
 function makeServer() {
 	return createTekMemoMcpProtocolServer({
-		runtime: createInMemoryTekMemoRuntime(),
+		runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }),
 		defaultPageSize: 2,
 		maxPageSize: 5,
 	});
@@ -163,46 +163,37 @@ describe("MCP protocol", () => {
 		expect(messages[0]?.content.text).toMatch(/TekMemo graph/);
 	});
 
-	it("graph neighbors can be read after node and edge upserts", async () => {
-		const server = makeServer();
-		await server.handleJsonRpcMessage({
+	it("graph neighbors can be read via runtime methods after node and edge upserts", async () => {
+		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
+		const server = createTekMemoMcpProtocolServer({ runtime });
+		// graph_upsert_nodes/edges and graph_neighbors were demoted to runtime
+		// methods (ADR 0009 Component 1). Seed + read the graph directly through
+		// the runtime to prove the capability is intact end-to-end.
+		// biome-ignore lint/style/noNonNullAssertion: local factory always wires graph methods
+		await runtime.upsertGraphNodes!({
+			nodes: [
+				{ id: "a", type: "concept", label: "A" },
+				{ id: "b", type: "concept", label: "B" },
+			],
+		});
+		// biome-ignore lint/style/noNonNullAssertion: local factory always wires graph methods
+		await runtime.upsertGraphEdges!({
+			edges: [{ from: "a", to: "b", type: "related_to", weight: 0.9 }],
+		});
+		// biome-ignore lint/style/noNonNullAssertion: local factory always wires graph methods
+		const result = await runtime.graphNeighbors!({
+			nodeId: "a",
+			direction: "out",
+			limit: 5,
+		});
+		expect(result.items[0]?.node.id).toBe("b");
+		// The protocol server still works alongside the runtime (smoke check).
+		const ping = (await server.handleJsonRpcMessage({
 			jsonrpc: "2.0",
 			id: 13,
-			method: "tools/call",
-			params: {
-				name: "tekmemo.graph_upsert_nodes",
-				arguments: {
-					nodes: [
-						{ id: "a", type: "concept", label: "A" },
-						{ id: "b", type: "concept", label: "B" },
-					],
-				},
-			},
-		});
-		await server.handleJsonRpcMessage({
-			jsonrpc: "2.0",
-			id: 14,
-			method: "tools/call",
-			params: {
-				name: "tekmemo.graph_upsert_edges",
-				arguments: {
-					edges: [{ from: "a", to: "b", type: "related_to", weight: 0.9 }],
-				},
-			},
-		});
-		const response = (await server.handleJsonRpcMessage({
-			jsonrpc: "2.0",
-			id: 15,
-			method: "tools/call",
-			params: {
-				name: "tekmemo.graph_neighbors",
-				arguments: { nodeId: "a", direction: "out", limit: 5 },
-			},
+			method: "ping",
+			params: {},
 		})) as unknown as Obj;
-		const result = response.result as Obj;
-		expect(result.isError).toBeUndefined();
-		const structured = result.structuredContent as Obj;
-		const items = structured.items as Array<{ node: { id: string } }>;
-		expect(items[0]?.node.id).toBe("b");
+		expect("result" in ping).toBe(true);
 	});
 });

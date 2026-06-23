@@ -1,9 +1,8 @@
+import { chunkText, createInMemoryRecallStore } from "@tekbreed/tekmemo";
 import {
-	chunkText,
 	createBenchmarkSuite,
-	createInMemoryRecallStore,
 	createRecallQueryBenchmarkCase,
-} from "@tekbreed/tekmemo";
+} from "@tekbreed/tekmemo-benchmark-kit";
 import {
 	createMemoryText,
 	createRecallDocuments,

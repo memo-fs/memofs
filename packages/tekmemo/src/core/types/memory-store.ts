@@ -48,6 +48,14 @@ export interface MemoryStore {
 	 * @returns `true` if the file exists, `false` otherwise.
 	 */
 	exists(path: MemoryPath): Promise<boolean>;
+	/**
+	 * Deletes a memory file. Idempotent: deleting a missing file resolves
+	 * without error. Used by file-replication sync to apply server-side
+	 * removals after a pull.
+	 *
+	 * @param path - Canonical memory path.
+	 */
+	delete(path: MemoryPath): Promise<void>;
 }
 
 /**

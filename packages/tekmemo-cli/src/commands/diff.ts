@@ -1,15 +1,40 @@
+/**
+ * CLI command handler for diffing two snapshots.
+ *
+ * @module diff
+ */
+
 import { createHash } from "node:crypto";
-import type { TekMemoFileSystem } from "../fs/tekmemo-fs";
+import type { MemoryStore, Tekmemo } from "@tekbreed/tekmemo";
+import { readText, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { TEKMEMO_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
+/**
+ * Options configuration for the diff command.
+ */
 export interface DiffCommandOptions {
-	fs: TekMemoFileSystem;
+	/**
+	 * The Tekmemo client instance.
+	 */
+	memo: Tekmemo;
+	/**
+	 * The CLI output console wrapper.
+	 */
 	output: CliOutput;
+	/**
+	 * If true, outputs results in structured JSON format.
+	 */
 	json?: boolean | undefined;
+	/**
+	 * The unique ID or label of the first snapshot (A).
+	 */
 	labelA: string;
+	/**
+	 * The unique ID or label of the second snapshot (B).
+	 */
 	labelB: string;
 }
 
@@ -40,10 +65,10 @@ function contentHash(content: string): string {
 }
 
 async function loadBundle(
-	fs: TekMemoFileSystem,
+	store: MemoryStore,
 	path: string,
 ): Promise<SnapshotBundle> {
-	const raw = await fs.readText(path);
+	const raw = await readText(store, path);
 	const parsed = JSON.parse(raw) as SnapshotBundle;
 	if (
 		typeof parsed !== "object" ||
@@ -72,10 +97,17 @@ function snapshotMatches(
 	return false;
 }
 
+/**
+ * Runs the diff command, comparing two snapshot states.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
 export async function runDiffCommand(
 	options: DiffCommandOptions,
 ): Promise<number> {
-	const snapshotContent = await options.fs.readTextIfExists(
+	const snapshotContent = await readTextIfExists(
+		options.memo.store,
 		TEKMEMO_PATHS.snapshots,
 	);
 	if (!snapshotContent) {
@@ -106,13 +138,13 @@ export async function runDiffCommand(
 	let bundleA: SnapshotBundle;
 	let bundleB: SnapshotBundle;
 	try {
-		bundleA = await loadBundle(options.fs, pathA);
+		bundleA = await loadBundle(options.memo.store, pathA);
 	} catch {
 		options.output.error(`Failed to load snapshot bundle: ${pathA}`);
 		return 1;
 	}
 	try {
-		bundleB = await loadBundle(options.fs, pathB);
+		bundleB = await loadBundle(options.memo.store, pathB);
 	} catch {
 		options.output.error(`Failed to load snapshot bundle: ${pathB}`);
 		return 1;

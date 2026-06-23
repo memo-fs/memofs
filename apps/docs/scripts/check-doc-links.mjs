@@ -55,13 +55,10 @@ for (const file of markdownFiles) {
 	}
 }
 
-const forbiddenDirs = ["blog", "changelog"];
-for (const dir of forbiddenDirs) {
-	if (fs.existsSync(path.join(docRoot, dir))) {
-		problems.push(`forbidden docs directory exists: ${dir}`);
-	}
-}
-
+// Blog + changelog ship from apps/docs (ADR 0008 / docs IA decision, 2026-06-20):
+// engineering content lives where developers already read it. Commercial pages
+// (pricing/billing/legal/roadmap/competitors) stay Cloud-side and must not
+// leak into the OSS docs — those are still forbidden below.
 const forbiddenFiles = [
 	"reference/changelog.md",
 	"reference/competitors.md",

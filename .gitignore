@@ -1,6 +1,6 @@
-projects
-explanation
-
+todosss
+social
+.opencode
 # Dependencies
 node_modules
 .pnp
@@ -38,6 +38,21 @@ yarn-error.log*
 *.pem
 
 # Editor / agent tool config (local-only, machine-specific)
-opencode.json
+# opencode.json
 # skills-lock.json
-css_guide.md
+
+# Agent runtime data
+agent-sessions/
+
+# Example agent runtime stores (demo memory created by examples/*)
+examples/**/.tekmemo/
+
+# Sub-package runtime data (regenerable; root .tekmemo/ is the project's own store)
+packages/**/.tekmemo/
+
+# Connector secrets (ADR 0002): never synced, never committed. Tokens are resolved
+# at run time from an opaque secretRef; this local file is a dev convenience only.
+.tekmemo/secrets.json
+
+# Wrangler build cache
+.wrangler/

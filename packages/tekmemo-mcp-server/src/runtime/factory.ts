@@ -1,280 +1,263 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+/**
+ * MCP Server runtime factory — thin adapter over the unified Tekmemo client.
+ *
+ * Creates a `new Tekmemo(config)` instance and wraps it as a `TekMemoMcpRuntime`
+ * for the MCP protocol server to consume.
+ *
+ * @module factory
+ */
+
 import {
-	createTekMemoCloudClient,
-	type TekMemoCloudClientOptions,
+	createLazyLocalEmbedder,
+	type RuntimeReadPolicy,
+	type RuntimeWritePolicy,
+	Tekmemo,
+	type TekmemoConfig,
 } from "@tekbreed/tekmemo";
 import type { TekMemoMcpRuntime, TekMemoRuntimeMode } from "../types";
-import type { TekMemoCloudClientLike } from "./cloud";
-import { createCloudTekMemoMcpRuntime } from "./cloud";
-import { createHybridTekMemoMcpRuntime } from "./hybrid";
-import { createInMemoryTekMemoRuntime } from "./in-memory";
-import { createLocalTekMemoMcpRuntime } from "./local";
 
+/**
+ * Options for creating an MCP runtime from Tekmemo configuration.
+ */
 export interface RuntimeFactoryOptions {
 	mode?: TekMemoRuntimeMode;
 	rootDir?: string;
 	projectId?: string;
 	workspaceId?: string;
-	cloudClient?: TekMemoCloudClientLike;
-	cloud?: CloudRuntimeFactoryOptions;
+	cloudClient?: TekmemoConfig["cloudClient"];
+	cloud?: {
+		baseUrl?: string;
+		apiKey?: string;
+		workspaceId?: string;
+		projectId?: string;
+		timeoutMs?: number;
+		userAgent?: string;
+		requireApiKey?: boolean;
+		retry?: NonNullable<NonNullable<TekmemoConfig["cloud"]>["retry"]>;
+	};
 	readPolicy?: RuntimeReadPolicy;
 	writePolicy?: RuntimeWritePolicy;
+	/**
+	 * Recall engine configuration. When `recall.localEmbeddings` is true (the
+	 * default for the MCP runtime), a local ONNX embedder is lazy-loaded so
+	 * hybrid (vector + lexical) recall works with zero API keys. Set
+	 * `localEmbeddings: false` to keep the runtime import-light (lexical-only).
+	 */
+	recall?: TekmemoConfig["recall"];
 }
 
-export interface CloudRuntimeFactoryOptions {
-	baseUrl?: string | undefined;
-	apiKey?: string | undefined;
-	workspaceId?: string | undefined;
-	projectId?: string | undefined;
-	timeoutMs?: number | undefined;
-	userAgent?: string | undefined;
-	requireApiKey?: boolean | undefined;
-	retry?: TekMemoCloudClientOptions["retry"] | undefined;
-}
-
-export type RuntimeReadPolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-export type RuntimeWritePolicy =
-	| "local-first"
-	| "cloud-first"
-	| "local-only"
-	| "cloud-only";
-
+/**
+ * Creates a TekMemoMcpRuntime by constructing a Tekmemo client and delegating
+ * all runtime methods to it.
+ *
+ * @param options - Factory configuration options.
+ * @returns The TekMemoMcpRuntime adapter.
+ */
 export function createTekMemoMcpRuntimeFromConfig(
 	options: RuntimeFactoryOptions = {},
 ): TekMemoMcpRuntime {
-	const rootDir = options.rootDir ?? process.env.TEKMEMO_ROOT ?? process.cwd();
-	const fileConfig = readLocalConfig(rootDir);
-	const mode = options.mode ?? envRuntimeMode() ?? fileConfig.mode ?? "local";
-	const projectId =
-		options.projectId ?? process.env.TEKMEMO_PROJECT_ID ?? fileConfig.projectId;
-	const workspaceId =
-		options.workspaceId ??
-		process.env.TEKMEMO_WORKSPACE_ID ??
-		fileConfig.workspaceId;
+	const localEmbeddings =
+		options.recall?.localEmbeddings ??
+		(process.env.TEKMEMO_LOCAL_EMBEDDINGS !== "0" &&
+			process.env.TEKMEMO_LOCAL_EMBEDDINGS?.toLowerCase() !== "false");
+	const embeddingModel =
+		options.recall?.embeddingModel ??
+		(typeof process.env.TEKMEMO_EMBEDDING_MODEL === "string" &&
+		process.env.TEKMEMO_EMBEDDING_MODEL.length > 0
+			? process.env.TEKMEMO_EMBEDDING_MODEL
+			: undefined);
 
-	if (mode === "memory") return createInMemoryTekMemoRuntime();
+	// Local ONNX embedder is lazy: constructing it is synchronous and cheap.
+	// The heavy runtime is imported on first recall. Memory mode is volatile and
+	// never persists vectors, so skip wiring the local embedder there.
+	const useLocalEmbedder = localEmbeddings && options.mode !== "memory";
+	const embedder = useLocalEmbedder
+		? createLazyLocalEmbedder({
+				...(embeddingModel === undefined ? {} : { model: embeddingModel }),
+			})
+		: undefined;
 
-	if (mode === "local") {
-		return createLocalTekMemoMcpRuntime({
-			rootDir,
-			...(projectId === undefined ? {} : { projectId }),
-		});
-	}
-
-	if (mode === "cloud") {
-		return createCloudTekMemoMcpRuntime({
-			client:
-				options.cloudClient ??
-				createCloudClientFromRuntimeOptions(
-					mergeCloudOptions(options.cloud, fileConfig.cloud, {
-						workspaceId,
-						projectId,
-					}),
-				),
-			...(projectId === undefined ? {} : { projectId }),
-		});
-	}
-
-	if (mode === "hybrid") {
-		const local = createLocalTekMemoMcpRuntime({
-			rootDir,
-			...(projectId === undefined ? {} : { projectId }),
-		});
-		const cloud = createCloudTekMemoMcpRuntime({
-			client:
-				options.cloudClient ??
-				createCloudClientFromRuntimeOptions(
-					mergeCloudOptions(options.cloud, fileConfig.cloud, {
-						workspaceId,
-						projectId,
-					}),
-				),
-			...(projectId === undefined ? {} : { projectId }),
-		});
-		return createHybridTekMemoMcpRuntime({
-			local,
-			cloud,
-			readPolicy:
-				options.readPolicy ??
-				envReadPolicy() ??
-				fileConfig.readPolicy ??
-				"local-first",
-			writePolicy:
-				options.writePolicy ??
-				envWritePolicy() ??
-				fileConfig.writePolicy ??
-				"local-first",
-		});
-	}
-
-	return createLocalTekMemoMcpRuntime({
-		rootDir,
-		...(projectId === undefined ? {} : { projectId }),
+	const memo = new Tekmemo({
+		...(options.rootDir !== undefined ? { rootDir: options.rootDir } : {}),
+		...(options.mode !== undefined ? { mode: options.mode } : {}),
+		...(options.projectId !== undefined
+			? { projectId: options.projectId }
+			: {}),
+		...(options.workspaceId !== undefined
+			? { workspaceId: options.workspaceId }
+			: {}),
+		...(options.readPolicy !== undefined
+			? { readPolicy: options.readPolicy }
+			: {}),
+		...(options.writePolicy !== undefined
+			? { writePolicy: options.writePolicy }
+			: {}),
+		...(options.cloudClient !== undefined
+			? { cloudClient: options.cloudClient }
+			: {}),
+		...(embedder !== undefined ? { embedder } : {}),
+		...(options.recall !== undefined ? { recall: options.recall } : {}),
+		...(options.cloud !== undefined
+			? {
+					cloud: {
+						...(options.cloud.baseUrl !== undefined
+							? { baseUrl: options.cloud.baseUrl }
+							: {}),
+						...(options.cloud.apiKey !== undefined
+							? { apiKey: options.cloud.apiKey }
+							: {}),
+						...(options.cloud.workspaceId !== undefined
+							? { workspaceId: options.cloud.workspaceId }
+							: {}),
+						...(options.cloud.projectId !== undefined
+							? { projectId: options.cloud.projectId }
+							: {}),
+						...(options.cloud.timeoutMs !== undefined
+							? { timeoutMs: options.cloud.timeoutMs }
+							: {}),
+						...(options.cloud.userAgent !== undefined
+							? { userAgent: options.cloud.userAgent }
+							: {}),
+						...(options.cloud.requireApiKey !== undefined
+							? { requireApiKey: options.cloud.requireApiKey }
+							: {}),
+						...(options.cloud.retry !== undefined
+							? { retry: options.cloud.retry }
+							: {}),
+					},
+				}
+			: {}),
 	});
+
+	return createTekMemoMcpRuntimeFromTekmemo(memo);
 }
 
-export function createCloudClientFromRuntimeOptions(
-	options: CloudRuntimeFactoryOptions = {},
-): TekMemoCloudClientLike {
-	const baseUrl =
-		options.baseUrl ??
-		process.env.TEKMEMO_CLOUD_URL ??
-		process.env.TEKMEMO_API_URL;
-
-	if (!baseUrl) {
-		throw new Error(
-			"Cloud runtime requires --cloud-url, TEKMEMO_CLOUD_URL, or TEKMEMO_API_URL.",
-		);
-	}
-
-	const apiKey = options.apiKey ?? process.env.TEKMEMO_API_KEY;
-	const timeoutMs =
-		options.timeoutMs ?? envPositiveNumber("TEKMEMO_CLOUD_TIMEOUT_MS");
-	const workspaceId = options.workspaceId ?? process.env.TEKMEMO_WORKSPACE_ID;
-	const projectId = options.projectId ?? process.env.TEKMEMO_PROJECT_ID;
-
-	return createTekMemoCloudClient({
-		baseUrl,
-		...(apiKey === undefined ? {} : { apiKey }),
-		...(timeoutMs === undefined ? {} : { timeoutMs }),
-		userAgent: options.userAgent ?? "@tekbreed/tekmemo/mcp/0.1.0",
-		...(workspaceId === undefined ? {} : { defaultWorkspaceId: workspaceId }),
-		...(projectId === undefined ? {} : { defaultProjectId: projectId }),
-		...(options.requireApiKey === undefined
-			? {}
-			: { requireApiKey: options.requireApiKey }),
-		...(options.retry === undefined ? {} : { retry: options.retry }),
-	});
-}
-
-function mergeCloudOptions(
-	first: CloudRuntimeFactoryOptions | undefined,
-	second: CloudRuntimeFactoryOptions | undefined,
-	scope: { workspaceId?: string | undefined; projectId?: string | undefined },
-): CloudRuntimeFactoryOptions {
+/**
+ * Wraps a Tekmemo instance as a TekMemoMcpRuntime adapter.
+ *
+ * @param memo - The Tekmemo client instance.
+ * @returns The TekMemoMcpRuntime adapter.
+ */
+export function createTekMemoMcpRuntimeFromTekmemo(
+	memo: Tekmemo,
+): TekMemoMcpRuntime {
 	return {
-		...(second ?? {}),
-		...(first ?? {}),
-		...(scope.workspaceId === undefined
-			? {}
-			: { workspaceId: scope.workspaceId }),
-		...(scope.projectId === undefined ? {} : { projectId: scope.projectId }),
-	};
-}
+		async health(signal) {
+			return memo.health(signal);
+		},
 
-function envRuntimeMode(): TekMemoRuntimeMode | undefined {
-	const value = process.env.TEKMEMO_RUNTIME;
-	return isRuntimeMode(value) ? value : undefined;
-}
+		async context(input, signal) {
+			return memo.context(input, signal);
+		},
 
-function isRuntimeMode(value: unknown): value is TekMemoRuntimeMode {
-	return (
-		value === "local" ||
-		value === "cloud" ||
-		value === "hybrid" ||
-		value === "memory"
-	);
-}
-
-function envPositiveNumber(name: string): number | undefined {
-	const value = process.env[name];
-	if (value === undefined) return undefined;
-	const parsed = Number(value);
-	return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
-}
-
-function envReadPolicy(): RuntimeReadPolicy | undefined {
-	return isReadPolicy(process.env.TEKMEMO_READ_POLICY)
-		? process.env.TEKMEMO_READ_POLICY
-		: undefined;
-}
-
-function envWritePolicy(): RuntimeWritePolicy | undefined {
-	return isWritePolicy(process.env.TEKMEMO_WRITE_POLICY)
-		? process.env.TEKMEMO_WRITE_POLICY
-		: undefined;
-}
-
-function isReadPolicy(value: unknown): value is RuntimeReadPolicy {
-	return (
-		value === "local-first" ||
-		value === "cloud-first" ||
-		value === "local-only" ||
-		value === "cloud-only"
-	);
-}
-
-function isWritePolicy(value: unknown): value is RuntimeWritePolicy {
-	return isReadPolicy(value);
-}
-
-function readLocalConfig(rootDir: string): {
-	mode?: TekMemoRuntimeMode;
-	projectId?: string;
-	workspaceId?: string;
-	readPolicy?: RuntimeReadPolicy;
-	writePolicy?: RuntimeWritePolicy;
-	cloud?: CloudRuntimeFactoryOptions;
-} {
-	try {
-		const path = resolve(rootDir, ".tekmemo", "config.json");
-		const parsed = JSON.parse(readFileSync(path, "utf8")) as Record<
-			string,
-			unknown
-		>;
-		const mcp = objectValue(parsed.mcp);
-		const cloud = objectValue(parsed.cloud);
-		const hybrid = objectValue(parsed.hybrid);
-		const mode = isRuntimeMode(parsed.runtime)
-			? parsed.runtime
-			: isRuntimeMode(mcp.runtime)
-				? mcp.runtime
-				: undefined;
-		const projectId =
-			stringValue(parsed.projectId) ?? stringValue(cloud.projectId);
-		const workspaceId = stringValue(cloud.workspaceId);
-		const readPolicy = isReadPolicy(hybrid.readPolicy)
-			? hybrid.readPolicy
-			: isReadPolicy(mcp.readPolicy)
-				? mcp.readPolicy
-				: undefined;
-		const writePolicy = isWritePolicy(hybrid.writePolicy)
-			? hybrid.writePolicy
-			: isWritePolicy(mcp.writePolicy)
-				? mcp.writePolicy
-				: undefined;
-		return {
-			...(mode === undefined ? {} : { mode }),
-			...(projectId === undefined ? {} : { projectId }),
-			...(workspaceId === undefined ? {} : { workspaceId }),
-			...(readPolicy === undefined ? {} : { readPolicy }),
-			...(writePolicy === undefined ? {} : { writePolicy }),
-			cloud: {
-				...(stringValue(cloud.baseUrl) === undefined
+		async recall(input, _signal) {
+			return memo.recall(input.query, {
+				...(input.limit === undefined ? {} : { limit: input.limit }),
+				...(input.workspaceId === undefined
 					? {}
-					: { baseUrl: stringValue(cloud.baseUrl) }),
-				...(workspaceId === undefined ? {} : { workspaceId }),
-				...(projectId === undefined ? {} : { projectId }),
-			},
-		};
-	} catch {
-		return {};
-	}
-}
+					: { workspaceId: input.workspaceId }),
+				...(input.projectId === undefined
+					? {}
+					: { projectId: input.projectId }),
+			});
+		},
 
-function objectValue(value: unknown): Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value)
-		? (value as Record<string, unknown>)
-		: {};
-}
+		async writeMemory(input, signal) {
+			return memo.writeMemory(input, signal);
+		},
 
-function stringValue(value: unknown): string | undefined {
-	return typeof value === "string" && value.trim().length > 0
-		? value.trim()
-		: undefined;
+		async readCoreMemory(_input, signal) {
+			return { content: await memo.core.read(signal) };
+		},
+
+		async readNotesMemory(_input, signal) {
+			return { content: await memo.notes.read(signal) };
+		},
+
+		async updateCoreMemory(input, signal) {
+			await memo.core.update(input.content, signal);
+			return { content: await memo.core.read(signal) };
+		},
+
+		async listRecentMemories(input, signal) {
+			return memo.listRecentMemories(input, signal);
+		},
+
+		async validate(input, signal) {
+			return memo.validate(input, signal);
+		},
+
+		async createSnapshot(input, signal) {
+			return memo.snapshots.create(input, signal);
+		},
+
+		async startAgentSession(input, signal) {
+			return memo.agentfs.startSession(input, signal);
+		},
+
+		async readAgentSessionFile(input, signal) {
+			return memo.agentfs.readFile(input, signal);
+		},
+
+		async writeAgentSessionFile(input, signal) {
+			return memo.agentfs.writeFile(input, signal);
+		},
+
+		async appendAgentSessionFile(input, signal) {
+			return memo.agentfs.appendFile(input, signal);
+		},
+
+		async extractAgentSession(input, signal) {
+			return memo.agentfs.extract(input, signal);
+		},
+
+		async completeAgentSession(input, signal) {
+			return memo.agentfs.complete(input, signal);
+		},
+
+		async syncPush(input, signal) {
+			return memo.sync.push(input, signal);
+		},
+
+		async syncPull(input, signal) {
+			return memo.sync.pull(input, signal);
+		},
+
+		async syncStatus(input, signal) {
+			return memo.sync.status(input, signal);
+		},
+
+		async upsertGraphNodes(input, signal) {
+			return memo.graph.upsertNodes(input, signal);
+		},
+
+		async upsertGraphEdges(input, signal) {
+			return memo.graph.upsertEdges(input, signal);
+		},
+
+		async graphNeighbors(input, signal) {
+			return memo.graph.neighbors(input, signal);
+		},
+
+		async graphPath(input, signal) {
+			return memo.graph.path(input, signal);
+		},
+
+		async listGraphNodes(input, signal) {
+			return memo.graph.listNodes(input, signal);
+		},
+
+		async listGraphEdges(input, signal) {
+			return memo.graph.listEdges(input, signal);
+		},
+
+		async consolidateMemory(input, signal) {
+			return memo.consolidate(input, signal);
+		},
+
+		async readiness(signal) {
+			if (memo.cloud) return memo.cloud.readiness(signal);
+			return { ok: true };
+		},
+	};
 }

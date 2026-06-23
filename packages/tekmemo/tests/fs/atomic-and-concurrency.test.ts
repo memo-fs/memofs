@@ -21,8 +21,12 @@ describe("atomic writes and append locking", () => {
 
 		await store.write(".tekmemo/memory/core.md", "clean\n");
 
+		// The .tekmemo dir now contains the advisory .lock (acquired by the
+		// write, Q28) plus the memory/ subtree. Critically: NO leftover .tmp
+		// temp files from the atomic write.
 		const entries = await fs.readdir(path.join(rootDir, ".tekmemo"));
-		expect(entries).toEqual(["memory"]);
+		expect(entries).toEqual([".lock", "memory"]);
+		expect(entries.some((e) => e.endsWith(".tmp"))).toBe(false);
 	});
 
 	test("concurrent appends from same instance do not drop content", async () => {

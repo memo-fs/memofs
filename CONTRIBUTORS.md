@@ -1,12 +1,12 @@
 # Contributors
 
-Thank you to everyone helping build TekBreed OSS.
+Thank you to everyone helping build TekMemo.
 
 ## Maintainers
 
 | Name | GitHub | Role | Focus |
 |---|---|---|---|
-| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder / Maintainer | TekBreed OSS architecture, TekMemo packages, docs, releases |
+| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder / Maintainer | TekMemo architecture, TekMemo packages, docs, releases |
 
 ## Contributors
 

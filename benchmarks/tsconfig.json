@@ -1,6 +1,7 @@
 {
-	"extends": "../tooling/typescript-config/base.json",
+	"extends": "@repo/typescript/base.json",
 	"compilerOptions": {
+		"types": ["node"],
 		"allowImportingTsExtensions": false,
 		"declaration": false,
 		"declarationMap": false,

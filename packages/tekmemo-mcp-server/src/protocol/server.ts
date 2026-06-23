@@ -1,3 +1,9 @@
+/**
+ * MCP Protocol Server implementation for handling JSON-RPC requests/notifications.
+ *
+ * @module server
+ */
+
 import {
 	McpNotFoundError,
 	McpValidationError,
@@ -26,7 +32,13 @@ import {
 	validateJsonRpcRequest,
 } from "./json-rpc";
 
+/**
+ * Interface defining the API of the TekMemo MCP Protocol Server.
+ */
 export interface TekMemoMcpProtocolServer {
+	/**
+	 * Configured options resolved and typed.
+	 */
 	readonly options: Required<
 		Pick<
 			TekMemoMcpOptions,
@@ -34,15 +46,35 @@ export interface TekMemoMcpProtocolServer {
 		>
 	> &
 		TekMemoMcpOptions;
+
+	/**
+	 * Processes a structured message object (which could be single or a batch array of JSON-RPC requests).
+	 *
+	 * @param message - The raw parsed request message payload.
+	 * @returns The JSON-RPC response, response batch array, or `undefined` for notifications.
+	 */
 	handleJsonRpcMessage(
 		message: unknown,
 	): Promise<JsonRpcResponse | JsonRpcResponse[] | undefined>;
+
+	/**
+	 * Processes a raw string text payload, parsing and dispatching it.
+	 *
+	 * @param text - The raw string input from stdio or other transport.
+	 * @returns The stringified JSON response, or `undefined` for notifications.
+	 */
 	handleJsonRpcText(text: string): Promise<string | undefined>;
 }
 
 const DEFAULT_INSTRUCTIONS =
-	"Use TekMemo MCP for grounded memory recall and explicitly authorized memory writes. Read-only tools may be used for context. Write tools should only be called after user approval from the host.";
+	"TekMemo exposes four memory verbs: tekmemo.context (task briefing), tekmemo.recall (semantic search), tekmemo.remember (write a durable fact), and tekmemo.consolidate (merge/retire graph memory). Call tekmemo.context first, then write tools (remember/consolidate) only after host approval. AgentFS session tools (tekmemo_agent_session_*) drive a coding-agent scratch filesystem.";
 
+/**
+ * Factory function to create a new TekMemoMcpProtocolServer instance.
+ *
+ * @param options - Configuration options for the MCP server.
+ * @returns An implementation of `TekMemoMcpProtocolServer`.
+ */
 export function createTekMemoMcpProtocolServer(
 	options: TekMemoMcpOptions,
 ): TekMemoMcpProtocolServer {
@@ -57,6 +89,12 @@ export function createTekMemoMcpProtocolServer(
 	return new DefaultTekMemoMcpProtocolServer(normalized);
 }
 
+/**
+ * Default implementation of the TekMemoMcpProtocolServer.
+ * Handles protocol lifecycle, ping, listing tools, invoking tools, listing resources, etc.
+ *
+ * @private
+ */
 class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 	readonly options: Required<
 		Pick<
@@ -66,6 +104,11 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 	> &
 		TekMemoMcpOptions;
 
+	/**
+	 * Creates a DefaultTekMemoMcpProtocolServer instance.
+	 *
+	 * @param options - Normalized options configuration.
+	 */
 	constructor(
 		options: Required<
 			Pick<
@@ -78,6 +121,12 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 		this.options = options;
 	}
 
+	/**
+	 * Processes raw string JSON-RPC text.
+	 *
+	 * @param text - JSON-RPC input text.
+	 * @returns Stringified response or undefined.
+	 */
 	async handleJsonRpcText(text: string): Promise<string | undefined> {
 		let payload: unknown;
 		try {
@@ -95,6 +144,13 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 		return JSON.stringify(response);
 	}
 
+	/**
+	 * Handles a parsed JSON-RPC message payload.
+	 * Supports single requests, notifications, and batch arrays.
+	 *
+	 * @param message - The parsed message.
+	 * @returns The JSON-RPC response, array of responses, or undefined.
+	 */
 	async handleJsonRpcMessage(
 		message: unknown,
 	): Promise<JsonRpcResponse | JsonRpcResponse[] | undefined> {
@@ -115,6 +171,9 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 		return this.handleSingle(message);
 	}
 
+	/**
+	 * Inner helper to process a single JSON-RPC request message.
+	 */
 	private async handleSingle(
 		message: unknown,
 	): Promise<JsonRpcResponse | undefined> {
@@ -150,6 +209,9 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 		}
 	}
 
+	/**
+	 * Processes standard JSON-RPC Notifications.
+	 */
 	private async handleNotification(request: JsonRpcRequest): Promise<void> {
 		switch (request.method) {
 			case "notifications/initialized":
@@ -161,6 +223,9 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 		}
 	}
 
+	/**
+	 * Dispatches a standard JSON-RPC method request to the appropriate tool, resource, or server capability.
+	 */
 	private async dispatch(request: JsonRpcRequest): Promise<JsonValue> {
 		const params = request.params ?? {};
 		switch (request.method) {
@@ -267,6 +332,13 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 	}
 }
 
+/**
+ * Validates and normalizes the cursor parameter.
+ *
+ * @param value - The raw input cursor.
+ * @returns The validated string cursor, or undefined.
+ * @throws {McpValidationError} If cursor is not a string.
+ */
 function optionalCursor(value: unknown): string | undefined {
 	if (value === undefined) return undefined;
 	if (typeof value !== "string")
@@ -274,6 +346,12 @@ function optionalCursor(value: unknown): string | undefined {
 	return value;
 }
 
+/**
+ * Maps standard TekMemo MCP exceptions to standard JSON-RPC 2.0 error codes.
+ *
+ * @param error - The thrown exception.
+ * @returns A JSON-RPC 2.0 compliant error code.
+ */
 function errorCodeFrom(error: unknown): number {
 	if (error instanceof McpValidationError) {
 		const maybe = error.details as { jsonRpcCode?: unknown } | undefined;
@@ -286,6 +364,12 @@ function errorCodeFrom(error: unknown): number {
 	return JSON_RPC_ERRORS.internalError;
 }
 
+/**
+ * Filters and cleans structured error details container payload.
+ *
+ * @param safe - Normalized error details structure.
+ * @returns Cleaned key-value record payload.
+ */
 function cleanErrorData(safe: {
 	code: string;
 	details?: unknown;

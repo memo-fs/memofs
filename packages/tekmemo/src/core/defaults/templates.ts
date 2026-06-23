@@ -34,6 +34,18 @@ Use this file for lower-confidence notes, observations, and working memory.
 
 export const DEFAULT_JSONL = "";
 
+/**
+ * Empty connector-config payload — the 11th canonical file (ADR 0002 / decision Q2).
+ *
+ * Connector config is a sync unit. It holds one entry per connector with its
+ * type, schedule, source mapping, enabled flag, and an opaque `secretRef` —
+ * **never** the token itself (tokens live server-side; see `secrets.ts`).
+ */
+export const DEFAULT_CONNECTORS_CONFIG = `{
+  "connectors": []
+}
+`;
+
 export interface MemoryTemplates {
 	manifest: string;
 	core: string;
@@ -41,9 +53,11 @@ export interface MemoryTemplates {
 	memoryEvents: string;
 	conversations: string;
 	chunks: string;
+	embeddings: string;
 	graphNodes: string;
 	graphEdges: string;
 	snapshots: string;
+	connectors: string;
 }
 
 /**
@@ -62,9 +76,11 @@ export function createDefaultMemoryTemplates(
 		memoryEvents: DEFAULT_JSONL,
 		conversations: DEFAULT_JSONL,
 		chunks: DEFAULT_JSONL,
+		embeddings: DEFAULT_JSONL,
 		graphNodes: DEFAULT_JSONL,
 		graphEdges: DEFAULT_JSONL,
 		snapshots: DEFAULT_JSONL,
+		connectors: DEFAULT_CONNECTORS_CONFIG,
 	};
 }
 

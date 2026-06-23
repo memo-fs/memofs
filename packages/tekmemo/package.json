@@ -6,12 +6,12 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekbreed-oss.git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/tekmemo"
 	},
-	"homepage": "https://oss.tekbreed.com/tekmemo",
+	"homepage": "https://docs.memo.tekbreed.com/packages/tekmemo/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekbreed-oss/issues"
+		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -27,6 +27,16 @@
 			"require": {
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
+			}
+		},
+		"./cloud-client": {
+			"import": {
+				"types": "./dist/cloud-client.d.mts",
+				"default": "./dist/cloud-client.mjs"
+			},
+			"require": {
+				"types": "./dist/cloud-client.d.cts",
+				"default": "./dist/cloud-client.cjs"
 			}
 		}
 	},
@@ -63,13 +73,11 @@
 		"typescript"
 	],
 	"devDependencies": {
-		"@repo/test-utils": "workspace:*",
-		"@repo/tsdown-config": "workspace:*",
-		"@repo/typescript-config": "workspace:*",
+		"@tekbreed/tekmemo-testing": "workspace:^",
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@types/pg": "^8.15.6",
-		"ai": "^6.0.174",
-		"openai": "^6.10.0"
+		"@types/node": "^25.9.2"
 	},
 	"engines": {
 		"node": ">=22"
@@ -79,27 +87,13 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"hono": "^4.0.0",
-		"pg": "^8.16.3",
 		"zod": "^4.4.2"
 	},
 	"peerDependencies": {
-		"@modelcontextprotocol/sdk": ">=1.29.0",
-		"@upstash/vector": ">=1.2.0",
-		"ai": ">=5.0.0 <7.0.0",
-		"openai": "^6.10.0"
+		"@modelcontextprotocol/sdk": ">=1.29.0"
 	},
 	"peerDependenciesMeta": {
 		"@modelcontextprotocol/sdk": {
-			"optional": true
-		},
-		"@upstash/vector": {
-			"optional": true
-		},
-		"ai": {
-			"optional": true
-		},
-		"openai": {
 			"optional": true
 		}
 	}

@@ -7,7 +7,8 @@ export type TekMemoErrorCode =
 	| "TEKMEMO_VALIDATION_ERROR"
 	| "TEKMEMO_PARSE_ERROR"
 	| "TEKMEMO_COMMAND_ERROR"
-	| "TEKMEMO_STORE_ERROR";
+	| "TEKMEMO_STORE_ERROR"
+	| "TEKMEMO_WRITE_BLOCKED";
 
 /**
  * Base error class for all TekMemo errors.
@@ -160,6 +161,36 @@ export class MemoryStoreError extends TekMemoError {
 	) {
 		super({ code: "TEKMEMO_STORE_ERROR", message, details, cause });
 		this.name = "MemoryStoreError";
+	}
+}
+
+/**
+ * Thrown when a write is hard-rejected by the secret/PII blocklist.
+ *
+ * @remarks
+ * This is the security gate of write intelligence (ADR 0009 Component 6,
+ * layer 1). The blocklist detects secrets/credentials in content before it can
+ * reach a syncable memory file (`notes.md`, core memory, agent-session durable
+ * memory). The write never persists — the caller (agent, SDK, CLI) must drop
+ * the content or redact it and retry.
+ *
+ * `details` carries the redacted violation list: each violation includes only
+ * a truncated preview, never the full secret. Error messages and logs must
+ * propagate the preview, not reconstruct the secret.
+ *
+ * @public
+ */
+export class MemoryWriteBlockedError extends TekMemoError {
+	/**
+	 * Creates a new MemoryWriteBlockedError.
+	 *
+	 * @param message - Human-readable error description.
+	 * @param details - Structured details; expected to carry `violations`
+	 * (redacted BlocklistViolation[]) and optionally the write `path`.
+	 */
+	constructor(message: string, details?: Record<string, unknown>) {
+		super({ code: "TEKMEMO_WRITE_BLOCKED", message, details });
+		this.name = "MemoryWriteBlockedError";
 	}
 }
 

@@ -14,10 +14,11 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@tekbreed/tekmemo": "workspace:*"
+		"@tekbreed/tekmemo": "workspace:*",
+		"@tekbreed/tekmemo-benchmark-kit": "workspace:*"
 	},
 	"devDependencies": {
-		"@repo/typescript-config": "workspace:*",
+		"@repo/typescript": "workspace:*",
 		"tsx": "^4.22.4",
 		"typescript": "6.0.3"
 	}

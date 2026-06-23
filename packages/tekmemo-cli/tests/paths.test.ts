@@ -1,22 +1,5 @@
-import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { normalizeRootDir, resolveInsideRoot } from "../src/fs/paths";
-
-describe("normalizeRootDir", () => {
-	it("resolves relative paths", () => {
-		const result = normalizeRootDir(".");
-		expect(path.isAbsolute(result)).toBe(true);
-	});
-
-	it("throws on empty string", () => {
-		expect(() => normalizeRootDir("")).toThrow();
-		expect(() => normalizeRootDir("   ")).toThrow();
-	});
-
-	it("throws on null bytes", () => {
-		expect(() => normalizeRootDir("/bad\0path")).toThrow();
-	});
-});
+import { resolveInsideRoot } from "../src/utils/content";
 
 describe("resolveInsideRoot", () => {
 	it("resolves a relative path inside root", () => {

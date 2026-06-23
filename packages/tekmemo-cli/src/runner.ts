@@ -1,64 +1,44 @@
+/**
+ * CLI runner orchestrating options parsing, command registration, and execution via Commander.
+ *
+ * @module runner
+ */
+
+import type { Tekmemo } from "@tekbreed/tekmemo";
 import { Command, CommanderError } from "commander";
 import pkg from "../package.json" with { type: "json" };
+import { createTekmemoFromCli } from "./cli/tekmemo";
 import {
 	runAgentCompleteCommand,
 	runAgentExtractCommand,
 	runAgentPathsCommand,
 	runAgentStartCommand,
 	runChunksCommand,
-	runCloudBenchmarksRunCommand,
-	runCloudContextCommand,
-	runCloudContextComposeCommand,
-	runCloudEvalsRunCommand,
-	runCloudExportsCreateCommand,
-	runCloudExportsDownloadCommand,
-	runCloudExtractionJobsCommand,
-	runCloudExtractionRunCommand,
-	runCloudGraphCreateEdgeCommand,
-	runCloudGraphCreateNodeCommand,
-	runCloudGraphListEdgesCommand,
-	runCloudGraphListNodesCommand,
-	runCloudGraphNeighborsCommand,
-	runCloudGraphPathCommand,
 	runCloudHealthCommand,
-	runCloudProvidersCreateCommand,
-	runCloudProvidersListCommand,
-	runCloudProvidersTestCommand,
-	runCloudReadCommand,
 	runCloudReadinessCommand,
-	runCloudRecallCommand,
-	runCloudRecallIndexCommand,
-	runCloudRecentCommand,
-	runCloudRememberCommand,
-	runCloudSnapshotCommand,
-	runCloudSnapshotsCreateCommand,
-	runCloudSnapshotsDownloadCommand,
 	runCloudSyncPullCommand,
 	runCloudSyncPushCommand,
-	runCloudSyncResolveCommand,
 	runCloudSyncStatusCommand,
-	runCloudUpdateCoreCommand,
-	runCloudValidateCommand,
+	runConnectorsAddCommand,
+	runConnectorsListCommand,
+	runConnectorsRemoveCommand,
+	runConnectorsRunCommand,
+	runContextCommand,
 	runDiffCommand,
 	runDoctorCommand,
 	runEventsCommand,
+	runGenerateAgentRulesCommand,
 	runInitCommand,
 	runInspectCommand,
-	runRuntimeContextCommand,
-	runRuntimeReadCommand,
-	runRuntimeRememberCommand,
-	runRuntimeSnapshotCommand,
-	runRuntimeValidateCommand,
+	runReadCommand,
+	runRememberCommand,
 	runSearchCommand,
+	runSnapshotCommand,
+	runValidateCommand,
 } from "./commands";
-import {
-	type ResolvedCliRuntimeConfig,
-	resolveCliRuntimeConfig,
-	type TekMemoConfigFile,
-	writeDefaultCliConfig,
-} from "./config";
-import { CliError } from "./errors/cli-errors";
-import { TekMemoFileSystem } from "./fs/tekmemo-fs";
+import type { TekMemoConfigFile } from "./config";
+import { configSchemaUrl, writeDefaultCliConfig } from "./config";
+import { CliError, CliUsageError } from "./errors/cli-errors";
 import {
 	type CliOutput,
 	createBufferedOutput,
@@ -67,35 +47,106 @@ import {
 } from "./output/output";
 import { parseNonNegativeInteger, parsePositiveInteger } from "./utils/numbers";
 
+/**
+ * Helper constant mapping positive integer parser.
+ */
 const parsePositiveOption = parsePositiveInteger as unknown as (
 	value: string,
 	previous: string | undefined,
 ) => string;
+
+/**
+ * Helper constant mapping non-negative integer parser.
+ */
 const parseNonNegativeOption = parseNonNegativeInteger as unknown as (
 	value: string,
 	previous: string | undefined,
 ) => string;
 
+/**
+ * Input configuration variables for invoking the CLI runner programmatically.
+ */
 export interface RunTekMemoCliInput {
+	/**
+	 * Raw command line arguments (e.g. process.argv.slice(2)).
+	 */
 	argv: string[];
+	/**
+	 * Current working directory to resolve relative paths from.
+	 */
 	cwd?: string;
+	/**
+	 * Custom CLI output console wrapper.
+	 */
 	output?: CliOutput;
+	/**
+	 * If true, enables verbose debugging output.
+	 */
 	verbose?: boolean;
+	/**
+	 * If true, silences non-error messages.
+	 */
 	quiet?: boolean;
+	/**
+	 * If true, disables ANSI colored text formats in stdout/stderr.
+	 */
 	noColor?: boolean;
+	/**
+	 * Optional prefetched stdin content, if available.
+	 */
 	stdinContent?: string;
 }
 
+/**
+ * Results returned by running the CLI runner.
+ */
 export interface RunTekMemoCliResult {
+	/**
+	 * Exit code status (0 for success, non-zero for failures).
+	 */
 	exitCode: number;
+	/**
+	 * Array of lines captured from standard output.
+	 */
 	stdout: string[];
+	/**
+	 * Array of lines captured from standard error.
+	 */
 	stderr: string[];
 }
 
-function createFs(root: string): TekMemoFileSystem {
-	return new TekMemoFileSystem({ rootDir: root });
+/**
+ * Instantiates a Tekmemo client from CLI flags and environment.
+ *
+ * @param root - Absolute path to workspace root.
+ * @param opts - CLI option flags.
+ * @returns Instantiated Tekmemo client.
+ */
+function createMemo(
+	root: string,
+	opts: {
+		runtime?: string;
+		cloudUrl?: string;
+		apiKey?: string;
+		workspaceId?: string;
+		projectId?: string;
+		timeoutMs?: number;
+		readPolicy?: string;
+		writePolicy?: string;
+	},
+): Tekmemo {
+	return createTekmemoFromCli({
+		root,
+		...opts,
+	});
 }
 
+/**
+ * Parses parameters and executes command line instructions.
+ *
+ * @param input - Setup inputs including command line argument vectors.
+ * @returns Executed command results stdout, stderr and exit code.
+ */
 export async function runTekMemoCli(
 	input: RunTekMemoCliInput,
 ): Promise<RunTekMemoCliResult> {
@@ -107,6 +158,13 @@ export async function runTekMemoCli(
 	let exitCode = 0;
 	let currentCommand = "tekmemo";
 	let wantsJson = input.argv.includes("--json") || input.argv.includes("-j");
+
+	// Tracks the Tekmemo instance constructed per command action so we can
+	// release its underlying store (and the Q28 advisory lock) when the CLI
+	// invocation finishes. The local single-writer contract (Q28) holds the
+	// `.tekmemo/.lock` for the lifetime of a process; disposing here lets a
+	// subsequent CLI call — or a direct Tekmemo on the same root — acquire it.
+	let activeMemo: Tekmemo | undefined;
 
 	const program = new Command();
 	program
@@ -120,7 +178,7 @@ export async function runTekMemoCli(
 			"project root containing .tekmemo/",
 			input.cwd ?? process.cwd(),
 		)
-		.option("--runtime <mode>", "runtime mode: local, cloud, or hybrid")
+		.option("--runtime <mode>", "runtime mode: local, hybrid, or memory")
 		.option(
 			"--cloud-url <url>",
 			"TekMemo Cloud API URL; defaults to config or TEKMEMO_CLOUD_URL",
@@ -138,11 +196,11 @@ export async function runTekMemoCli(
 		)
 		.option(
 			"--read-policy <policy>",
-			"hybrid read policy: local-first, cloud-first, local-only, cloud-only",
+			"hybrid read policy: local-first, cloud-first, or local-only",
 		)
 		.option(
 			"--write-policy <policy>",
-			"hybrid write policy: local-first, cloud-first, local-only, cloud-only",
+			"hybrid write policy: local-first, cloud-first, or local-only",
 		)
 		.option("-j, --json", "output machine-readable JSON", false)
 		.option("-v, --verbose", "show detailed output", input.verbose ?? false)
@@ -168,7 +226,7 @@ export async function runTekMemoCli(
 		json: boolean;
 		verbose: boolean;
 		quiet: boolean;
-		config: ResolvedCliRuntimeConfig;
+		memo: Tekmemo;
 	}> {
 		const opts = program.opts() as {
 			root?: string;
@@ -185,26 +243,24 @@ export async function runTekMemoCli(
 			writePolicy?: string;
 		};
 		wantsJson = Boolean(opts.json);
-		const config = await resolveCliRuntimeConfig({
-			cwd: input.cwd ?? process.cwd(),
-			flags: {
-				root: opts.root,
-				runtime: opts.runtime,
-				cloudUrl: opts.cloudUrl,
-				apiKey: opts.apiKey,
-				workspaceId: opts.workspaceId,
-				projectId: opts.projectId,
-				timeoutMs: opts.timeoutMs,
-				readPolicy: opts.readPolicy,
-				writePolicy: opts.writePolicy,
-			},
+		const root = opts.root ?? input.cwd ?? process.cwd();
+		const memo = createMemo(root, {
+			runtime: opts.runtime,
+			cloudUrl: opts.cloudUrl,
+			apiKey: opts.apiKey,
+			workspaceId: opts.workspaceId,
+			projectId: opts.projectId,
+			timeoutMs: opts.timeoutMs,
+			readPolicy: opts.readPolicy,
+			writePolicy: opts.writePolicy,
 		});
+		activeMemo = memo;
 		return {
-			root: config.root,
+			root,
 			json: Boolean(opts.json),
 			verbose: Boolean(opts.verbose),
 			quiet: Boolean(opts.quiet),
-			config,
+			memo,
 		};
 	}
 
@@ -218,7 +274,7 @@ export async function runTekMemoCli(
 			currentCommand = "init";
 			const g = await globals();
 			exitCode = await runInitCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				force: options.force,
@@ -234,7 +290,7 @@ export async function runTekMemoCli(
 			currentCommand = "inspect";
 			const g = await globals();
 			exitCode = await runInspectCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 			});
@@ -255,11 +311,10 @@ export async function runTekMemoCli(
 		.action(async (options) => {
 			currentCommand = "context";
 			const g = await globals();
-			exitCode = await runRuntimeContextCommand({
-				fs: createFs(g.root),
+			exitCode = await runContextCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				query: options.query,
 				maxChars: options.maxChars,
 				includeEvents: options.includeEvents,
@@ -299,11 +354,10 @@ export async function runTekMemoCli(
 		.action(async (content, options) => {
 			currentCommand = "remember";
 			const g = await globals();
-			exitCode = await runRuntimeRememberCommand({
-				fs: createFs(g.root),
+			exitCode = await runRememberCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				content,
 				stdin: options.stdin,
 				file: options.file,
@@ -331,11 +385,10 @@ export async function runTekMemoCli(
 				exitCode = 1;
 				return;
 			}
-			exitCode = await runRuntimeReadCommand({
-				fs: createFs(g.root),
+			exitCode = await runReadCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				target,
 			});
 		});
@@ -354,7 +407,7 @@ export async function runTekMemoCli(
 			currentCommand = "events";
 			const g = await globals();
 			exitCode = await runEventsCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				limit: options.limit,
@@ -376,7 +429,7 @@ export async function runTekMemoCli(
 			currentCommand = "chunks";
 			const g = await globals();
 			exitCode = await runChunksCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				limit: options.limit,
@@ -391,11 +444,10 @@ export async function runTekMemoCli(
 		.action(async (options) => {
 			currentCommand = "snapshot";
 			const g = await globals();
-			exitCode = await runRuntimeSnapshotCommand({
-				fs: createFs(g.root),
+			exitCode = await runSnapshotCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 				label: options.label,
 			});
 		});
@@ -408,7 +460,7 @@ export async function runTekMemoCli(
 			currentCommand = "doctor";
 			const g = await globals();
 			exitCode = await runDoctorCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				strict: options.strict,
@@ -421,11 +473,10 @@ export async function runTekMemoCli(
 		.action(async () => {
 			currentCommand = "validate";
 			const g = await globals();
-			exitCode = await runRuntimeValidateCommand({
-				fs: createFs(g.root),
+			exitCode = await runValidateCommand({
+				memo: g.memo,
 				output,
 				json: g.json,
-				config: g.config,
 			});
 		});
 
@@ -438,7 +489,7 @@ export async function runTekMemoCli(
 			currentCommand = "search";
 			const g = await globals();
 			exitCode = await runSearchCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				query,
@@ -455,11 +506,47 @@ export async function runTekMemoCli(
 			currentCommand = "diff";
 			const g = await globals();
 			exitCode = await runDiffCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				labelA,
 				labelB,
+			});
+		});
+
+	const generate = program
+		.command("generate")
+		.description(
+			"generate agent instruction files that enforce the TekMemo workflow",
+		);
+
+	generate
+		.command("agent-rules")
+		.description(
+			"emit a TekMemo-enforcing instructions file for an agent platform",
+		)
+		.argument(
+			"[target]",
+			"agents | claude | gemini | copilot | cursor (omit with --list)",
+		)
+		.option("--project-name <name>", "project name in the header")
+		.option("-f, --force", "overwrite an existing instructions file", false)
+		.option(
+			"--list",
+			"list supported targets and their MCP config locations",
+			false,
+		)
+		.action(async (target, options) => {
+			currentCommand = "generate.agent-rules";
+			const g = await globals();
+			exitCode = await runGenerateAgentRulesCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				target,
+				projectName: options.projectName,
+				force: options.force,
+				list: options.list,
 			});
 		});
 
@@ -480,11 +567,11 @@ export async function runTekMemoCli(
 			currentCommand = "agent.start";
 			const g = await globals();
 			exitCode = await runAgentStartCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				task: options.task,
-				projectId: options.project ?? g.config.cloud.projectId,
+				projectId: options.project ?? g.memo.projectId,
 				actorId: options.actor,
 				sessionId: options.session,
 			});
@@ -498,7 +585,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.paths";
 			const g = await globals();
 			exitCode = await runAgentPathsCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -515,7 +602,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.extract";
 			const g = await globals();
 			exitCode = await runAgentExtractCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -538,7 +625,7 @@ export async function runTekMemoCli(
 			currentCommand = "agent.complete";
 			const g = await globals();
 			exitCode = await runAgentCompleteCommand({
-				fs: createFs(g.root),
+				memo: g.memo,
 				output,
 				json: g.json,
 				session: options.session,
@@ -547,47 +634,110 @@ export async function runTekMemoCli(
 			});
 		});
 
+	const connectors = program
+		.command("connectors")
+		.description(
+			"manage local connectors: add, remove, list, run ingestion into .tekmemo/",
+		);
+
+	connectors
+		.command("list")
+		.description("list configured connectors from .tekmemo/connectors.json")
+		.action(async () => {
+			currentCommand = "connectors.list";
+			const g = await globals();
+			exitCode = await runConnectorsListCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+			});
+		});
+
+	connectors
+		.command("add")
+		.description(
+			"add a connector row to .tekmemo/connectors.json (never the token — use --secret-ref)",
+		)
+		.requiredOption("--type <type>", "connector type (github, notion, ...)")
+		.requiredOption(
+			"--secret-ref <ref>",
+			"opaque pointer to a token stored server-side (ADR 0002); never the token itself",
+		)
+		.option("--id <id>", "connector id (defaults to <type> or <type>-<n>)")
+		.option("--schedule <schedule>", "schedule hint (not enforced in v1)")
+		.option(
+			"--source-mapping <json>",
+			'source-specific config as JSON, e.g. \'{"repository":"owner/repo"}\'',
+		)
+		.option("--disabled", "add the connector in disabled state", false)
+		.action(async (options) => {
+			currentCommand = "connectors.add";
+			const g = await globals();
+			exitCode = await runConnectorsAddCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				type: options.type,
+				secretRef: options.secretRef,
+				...(options.id === undefined ? {} : { id: options.id }),
+				...(options.schedule === undefined
+					? {}
+					: { schedule: options.schedule }),
+				...(options.sourceMapping === undefined
+					? {}
+					: { sourceMapping: options.sourceMapping }),
+				enabled: !options.disabled,
+			});
+		});
+
+	connectors
+		.command("remove")
+		.description("remove a connector by id from .tekmemo/connectors.json")
+		.argument("<id>", "connector id to remove")
+		.action(async (id) => {
+			currentCommand = "connectors.remove";
+			const g = await globals();
+			exitCode = await runConnectorsRemoveCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				id,
+			});
+		});
+
+	connectors
+		.command("run")
+		.description(
+			"run enabled connectors, ingesting external sources into .tekmemo/ (secrets resolved at run time)",
+		)
+		.option("--type <type>", "run only connectors of this type")
+		.action(async (options) => {
+			currentCommand = "connectors.run";
+			const g = await globals();
+			exitCode = await runConnectorsRunCommand({
+				memo: g.memo,
+				output,
+				json: g.json,
+				...(options.type === undefined ? {} : { onlyType: options.type }),
+			});
+		});
+
 	const cloud = program
 		.command("cloud")
-		.description("use TekMemo Cloud through @tekbreed/tekmemo/cloud")
-		.option(
-			"--cloud-url <url>",
-			"TekMemo Cloud API URL; defaults to TEKMEMO_CLOUD_URL or TEKMEMO_API_URL",
-		)
-		.option(
-			"--api-key <key>",
-			"TekMemo Cloud API key; defaults to TEKMEMO_API_KEY",
-		)
-		.option(
-			"--workspace-id <id>",
-			"default cloud workspace ID; defaults to TEKMEMO_WORKSPACE_ID",
-		)
-		.option(
-			"--project-id <id>",
-			"default cloud project ID; defaults to TEKMEMO_PROJECT_ID",
-		)
-		.option(
-			"--timeout-ms <n>",
-			"cloud request timeout in milliseconds",
-			parsePositiveOption,
+		.description(
+			"use TekMemo Cloud file-replica sync through @tekbreed/tekmemo/cloud",
 		);
 
 	async function cloudGlobals() {
 		const g = await globals();
-		const opts = cloud.opts() as {
-			cloudUrl?: string;
-			apiKey?: string;
-			workspaceId?: string;
-			projectId?: string;
-			timeoutMs?: number;
-		};
+		if (!g.memo.cloud) {
+			throw new CliUsageError(
+				"Cloud sync requires --cloud-url and --api-key or TEKMEMO_CLOUD_URL/TEKMEMO_API_KEY",
+			);
+		}
 		return {
 			...g,
-			cloudUrl: opts.cloudUrl ?? g.config.cloud.cloudUrl,
-			apiKey: opts.apiKey ?? g.config.cloud.apiKey,
-			workspaceId: opts.workspaceId ?? g.config.cloud.workspaceId,
-			projectId: opts.projectId ?? g.config.cloud.projectId,
-			timeoutMs: opts.timeoutMs ?? g.config.cloud.timeoutMs,
+			client: g.memo.cloud,
 		};
 	}
 
@@ -600,368 +750,7 @@ export async function runTekMemoCli(
 			exitCode = await runCloudHealthCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-			});
-		});
-
-	cloud
-		.command("context")
-		.description("pack cloud memory into an agent-friendly context block")
-		.requiredOption("-q, --query <query>", "task/query used to build context")
-		.option("-l, --limit <n>", "maximum recall items", parsePositiveOption)
-		.option("--max-bytes <n>", "maximum response bytes", parsePositiveOption)
-		.option("--include-core", "include core memory", true)
-		.option("--include-notes", "include notes memory", true)
-		.option("--include-recent", "include recent memory", true)
-		.action(async (options) => {
-			currentCommand = "cloud.context";
-			const g = await cloudGlobals();
-			exitCode = await runCloudContextCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				query: options.query,
-				limit: options.limit,
-				maxBytes: options.maxBytes,
-				includeCore: options.includeCore,
-				includeNotes: options.includeNotes,
-				includeRecent: options.includeRecent,
-			});
-		});
-
-	cloud
-		.command("recall")
-		.description("search TekMemo Cloud memory")
-		.argument("<query>", "text to search for")
-		.option("-l, --limit <n>", "maximum recall items", parsePositiveOption)
-		.option("--strategy <strategy>", "local | vector | hybrid")
-		.option("--fallback <mode>", "none | local")
-		.option("--rerank", "request reranking", false)
-		.action(async (query, options) => {
-			currentCommand = "cloud.recall";
-			const g = await cloudGlobals();
-			exitCode = await runCloudRecallCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				query,
-				limit: options.limit,
-				strategy: options.strategy,
-				fallback: options.fallback,
-				rerank: options.rerank,
-			});
-		});
-
-	cloud
-		.command("index")
-		.description("request TekMemo Cloud recall indexing for the project")
-		.option("--mode <mode>", "all | changed | core | notes", "changed")
-		.option("--force", "force re-indexing", false)
-		.action(async (options) => {
-			currentCommand = "cloud.index";
-			const g = await cloudGlobals();
-			exitCode = await runCloudRecallIndexCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				mode: options.mode,
-				force: options.force,
-			});
-		});
-
-	cloud
-		.command("remember")
-		.description("store durable memory in TekMemo Cloud")
-		.argument("[content]", "memory content")
-		.option("--stdin", "read memory content from stdin", false)
-		.option(
-			"--file <path>",
-			"read memory content from a file inside the selected root",
-		)
-		.option(
-			"-k, --kind <kind>",
-			"decision | constraint | goal | preference | reference | summary | note",
-			"note",
-		)
-		.option("--title <title>", "optional note title")
-		.option("-t, --tag <tag>", "tag to attach; repeatable", collect, [])
-		.option("--confidence <n>", "confidence from 0 to 1")
-		.option("--source <source>", "source identifier, file, URL, or agent name")
-		.option("--metadata-json <json>", "metadata JSON object")
-		.option(
-			"--allow-secrets",
-			"allow content that looks like a secret after manual review",
-			false,
-		)
-		.action(async (content, options) => {
-			currentCommand = "cloud.remember";
-			const g = await cloudGlobals();
-			exitCode = await runCloudRememberCommand({
-				output,
-				json: g.json,
-				rootDir: g.root,
-				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				content,
-				stdin: options.stdin,
-				file: options.file,
-				kind: options.kind,
-				title: options.title,
-				tags: options.tag,
-				confidence: options.confidence,
-				source: options.source,
-				metadata: options.metadataJson,
-				allowSecrets: options.allowSecrets,
-			});
-		});
-
-	cloud
-		.command("read")
-		.description("read a TekMemo Cloud memory document")
-		.argument("<target>", "core | notes")
-		.option(
-			"-l, --limit <n>",
-			"maximum notes when target is notes",
-			parsePositiveOption,
-		)
-		.action(async (target, options) => {
-			currentCommand = "cloud.read";
-			const g = await cloudGlobals();
-			if (target !== "core" && target !== "notes") {
-				output.error("cloud read target must be core or notes");
-				exitCode = 1;
-				return;
-			}
-			exitCode = await runCloudReadCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				target,
-				limit: options.limit,
-			});
-		});
-
-	cloud
-		.command("update-core")
-		.description("replace TekMemo Cloud core memory")
-		.argument("[content]", "new core memory content")
-		.option("--stdin", "read core memory from stdin", false)
-		.option(
-			"--file <path>",
-			"read core memory from a file inside the selected root",
-		)
-		.option(
-			"--allow-secrets",
-			"allow content that looks like a secret after manual review",
-			false,
-		)
-		.action(async (content, options) => {
-			currentCommand = "cloud.update-core";
-			const g = await cloudGlobals();
-			exitCode = await runCloudUpdateCoreCommand({
-				output,
-				json: g.json,
-				rootDir: g.root,
-				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				content,
-				stdin: options.stdin,
-				file: options.file,
-				allowSecrets: options.allowSecrets,
-			});
-		});
-
-	cloud
-		.command("recent")
-		.description("list recent TekMemo Cloud memory events")
-		.option("-l, --limit <n>", "maximum recent items", parsePositiveOption)
-		.action(async (options) => {
-			currentCommand = "cloud.recent";
-			const g = await cloudGlobals();
-			exitCode = await runCloudRecentCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				limit: options.limit,
-			});
-		});
-
-	cloud
-		.command("validate")
-		.description("validate TekMemo Cloud memory")
-		.option("-s, --strict", "strict protocol validation", false)
-		.action(async (options) => {
-			currentCommand = "cloud.validate";
-			const g = await cloudGlobals();
-			exitCode = await runCloudValidateCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				strict: options.strict,
-			});
-		});
-
-	cloud
-		.command("snapshot")
-		.description("explain TekMemo Cloud snapshot availability")
-		.option("-l, --label <name>", "snapshot label", "manual")
-		.option(
-			"--type <type>",
-			"manual | automatic | pre-sync | pre-restore",
-			"manual",
-		)
-		.action(async (options) => {
-			currentCommand = "cloud.snapshot";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSnapshotCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				label: options.label,
-				type: options.type,
-			});
-		});
-
-	const sync = cloud
-		.command("sync")
-		.description("use TekMemo Cloud memory sync APIs");
-
-	sync
-		.command("status")
-		.description("read cloud sync status")
-		.option("--client-id <id>", "optional sync client ID")
-		.action(async (options) => {
-			currentCommand = "cloud.sync.status";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSyncStatusCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				clientId: options.clientId,
-			});
-		});
-
-	sync
-		.command("pull")
-		.description("pull cloud sync events")
-		.requiredOption("--client-id <id>", "sync client ID")
-		.option(
-			"--since-server-version <n>",
-			"pull events after this server version",
-			parseNonNegativeOption,
-		)
-		.option("-l, --limit <n>", "maximum events to return", parsePositiveOption)
-		.action(async (options) => {
-			currentCommand = "cloud.sync.pull";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSyncPullCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				clientId: options.clientId,
-				sinceServerVersion: options.sinceServerVersion,
-				limit: options.limit,
-			});
-		});
-
-	sync
-		.command("push")
-		.description("push local sync events to TekMemo Cloud")
-		.requiredOption("--client-id <id>", "sync client ID")
-		.option("--events-json <json>", "event array or object with events array")
-		.option("--checkpoint-json <json>", "optional checkpoint JSON object")
-		.option("--stdin", "read events JSON from stdin", false)
-		.option(
-			"--file <path>",
-			"read events JSON from a file inside the selected root",
-		)
-		.action(async (options) => {
-			currentCommand = "cloud.sync.push";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSyncPushCommand({
-				output,
-				json: g.json,
-				rootDir: g.root,
-				stdinContent: input.stdinContent,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				clientId: options.clientId,
-				eventsJson: options.eventsJson,
-				checkpointJson: options.checkpointJson,
-				stdin: options.stdin,
-				file: options.file,
-			});
-		});
-
-	sync
-		.command("resolve")
-		.description("resolve a cloud sync conflict")
-		.requiredOption("--conflict-id <id>", "conflict ID to resolve")
-		.requiredOption("--resolution <type>", "keep_cloud | use_client | ignore")
-		.action(async (options) => {
-			currentCommand = "cloud.sync.resolve";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSyncResolveCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				conflictId: options.conflictId,
-				resolution: options.resolution,
+				client: g.client,
 			});
 		});
 
@@ -974,447 +763,59 @@ export async function runTekMemoCli(
 			exitCode = await runCloudReadinessCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 			});
 		});
 
-	cloud
-		.command("context-compose")
-		.description("compose full context package from cloud")
-		.requiredOption("-q, --query <query>", "task/query used to build context")
-		.option("-l, --limit <n>", "maximum recall items", parsePositiveOption)
-		.option("--strategy <strategy>", "auto | vector | local")
-		.option("--rerank", "request reranking", false)
-		.option("--include-core-memory", "include core memory", true)
-		.option("--include-recall-results", "include recall results", true)
-		.option("--include-graph-context", "include graph context", true)
-		.action(async (options) => {
-			currentCommand = "cloud.context-compose";
-			const g = await cloudGlobals();
-			exitCode = await runCloudContextComposeCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				query: options.query,
-				topK: options.limit,
-				strategy: options.strategy,
-				rerank: options.rerank,
-				includeCoreMemory: options.includeCoreMemory,
-				includeRecallResults: options.includeRecallResults,
-				includeGraphContext: options.includeGraphContext,
-			});
-		});
+	const sync = cloud
+		.command("sync")
+		.description("use TekMemo Cloud file-replica sync APIs");
 
-	const graph = cloud.command("graph").description("graph memory operations");
-
-	graph
-		.command("list-nodes")
-		.description("list graph nodes")
-		.option("-l, --limit <n>", "maximum nodes to return", parsePositiveOption)
-		.option("--cursor <string>", "pagination cursor")
-		.option("--status <status>", "active | deprecated | conflicted | deleted")
-		.action(async (options) => {
-			currentCommand = "cloud.graph.list-nodes";
-			const g = await cloudGlobals();
-			exitCode = await runCloudGraphListNodesCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				limit: options.limit,
-				cursor: options.cursor,
-				status: options.status,
-			});
-		});
-
-	graph
-		.command("create-node")
-		.description("create a graph node")
-		.requiredOption("--node-id <id>", "node ID")
-		.requiredOption("--type <type>", "node type")
-		.requiredOption("--label <label>", "node label")
-		.option("--summary <summary>", "node summary")
-		.option("--aliases <aliases>", "comma-separated aliases")
-		.option("--metadata-json <json>", "metadata JSON object")
-		.action(async (options) => {
-			currentCommand = "cloud.graph.create-node";
-			const g = await cloudGlobals();
-			const aliases = options.aliases
-				? options.aliases.split(",").map((s: string) => s.trim())
-				: undefined;
-			exitCode = await runCloudGraphCreateNodeCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				nodeId: options.nodeId,
-				type: options.type,
-				label: options.label,
-				summary: options.summary,
-				aliases,
-				metadataJson: options.metadataJson,
-			});
-		});
-
-	graph
-		.command("list-edges")
-		.description("list graph edges")
-		.option("-l, --limit <n>", "maximum edges to return", parsePositiveOption)
-		.option("--cursor <string>", "pagination cursor")
-		.option("--status <status>", "active | deprecated | conflicted | deleted")
-		.action(async (options) => {
-			currentCommand = "cloud.graph.list-edges";
-			const g = await cloudGlobals();
-			exitCode = await runCloudGraphListEdgesCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				limit: options.limit,
-				cursor: options.cursor,
-				status: options.status,
-			});
-		});
-
-	graph
-		.command("create-edge")
-		.description("create a graph edge")
-		.option("--edge-id <id>", "edge ID")
-		.requiredOption("--from <id>", "from node ID")
-		.requiredOption("--to <id>", "to node ID")
-		.requiredOption("--type <type>", "edge type")
-		.option("--directed", "directed edge", true)
-		.option("--weight <n>", "edge weight (0-1)", parsePositiveOption)
-		.option("--metadata-json <json>", "metadata JSON object")
-		.action(async (options) => {
-			currentCommand = "cloud.graph.create-edge";
-			const g = await cloudGlobals();
-			exitCode = await runCloudGraphCreateEdgeCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				edgeId: options.edgeId,
-				fromNodeId: options.from,
-				toNodeId: options.to,
-				type: options.type,
-				directed: options.directed,
-				weight: options.weight,
-				metadataJson: options.metadataJson,
-			});
-		});
-
-	graph
-		.command("neighbors")
-		.description("find graph neighbors")
-		.requiredOption("--node-id <id>", "seed node ID")
-		.option("--direction <dir>", "in | out | both")
-		.option("--depth <n>", "search depth", parsePositiveOption)
-		.option("-l, --limit <n>", "maximum results", parsePositiveOption)
-		.action(async (options) => {
-			currentCommand = "cloud.graph.neighbors";
-			const g = await cloudGlobals();
-			exitCode = await runCloudGraphNeighborsCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				nodeId: options.nodeId,
-				direction: options.direction,
-				depth: options.depth,
-				limit: options.limit,
-			});
-		});
-
-	graph
-		.command("path")
-		.description("find graph path between nodes")
-		.requiredOption("--from <id>", "start node ID")
-		.requiredOption("--to <id>", "target node ID")
-		.option("--max-depth <n>", "maximum search depth", parsePositiveOption)
-		.action(async (options) => {
-			currentCommand = "cloud.graph.path";
-			const g = await cloudGlobals();
-			exitCode = await runCloudGraphPathCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				fromNodeId: options.from,
-				toNodeId: options.to,
-				maxDepth: options.maxDepth,
-			});
-		});
-
-	const extraction = cloud
-		.command("extraction")
-		.description("extraction operations");
-
-	extraction
-		.command("run")
-		.description("run graph extraction")
-		.option("--mode <mode>", "full | core | notes | sync | connectors")
-		.option("--force", "force re-extraction", false)
-		.action(async (options) => {
-			currentCommand = "cloud.extraction.run";
-			const g = await cloudGlobals();
-			exitCode = await runCloudExtractionRunCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				mode: options.mode,
-				force: options.force,
-			});
-		});
-
-	extraction
-		.command("jobs")
-		.description("list extraction jobs")
-		.option("-l, --limit <n>", "maximum jobs to return", parsePositiveOption)
-		.action(async (options) => {
-			currentCommand = "cloud.extraction.jobs";
-			const g = await cloudGlobals();
-			exitCode = await runCloudExtractionJobsCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				limit: options.limit,
-			});
-		});
-
-	cloud
-		.command("evals")
-		.description("run context quality evals")
-		.option("--fixture-ids <ids>", "comma-separated fixture IDs")
-		.option("--iterations <n>", "number of iterations", parsePositiveOption)
-		.option("--thresholds-json <json>", "thresholds JSON object")
-		.action(async (options) => {
-			currentCommand = "cloud.evals.run";
-			const g = await cloudGlobals();
-			exitCode = await runCloudEvalsRunCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				fixtureIds: options.fixtureIds,
-				iterations: options.iterations,
-				thresholdsJson: options.thresholdsJson,
-			});
-		});
-
-	cloud
-		.command("benchmarks")
-		.description("run context benchmarks")
-		.option("--fixture-ids <ids>", "comma-separated fixture IDs")
-		.option("--iterations <n>", "number of iterations", parsePositiveOption)
-		.option("--thresholds-json <json>", "thresholds JSON object")
-		.action(async (options) => {
-			currentCommand = "cloud.benchmarks.run";
-			const g = await cloudGlobals();
-			exitCode = await runCloudBenchmarksRunCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				fixtureIds: options.fixtureIds,
-				iterations: options.iterations,
-				thresholdsJson: options.thresholdsJson,
-			});
-		});
-
-	const exports = cloud.command("exports").description("export operations");
-
-	exports
-		.command("create")
-		.description("create memory export")
-		.option("--label <name>", "export label")
-		.action(async (options) => {
-			currentCommand = "cloud.exports.create";
-			const g = await cloudGlobals();
-			exitCode = await runCloudExportsCreateCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				label: options.label,
-			});
-		});
-
-	exports
-		.command("download")
-		.description("download export archive")
-		.requiredOption("--export-id <id>", "export ID")
-		.action(async (options) => {
-			currentCommand = "cloud.exports.download";
-			const g = await cloudGlobals();
-			exitCode = await runCloudExportsDownloadCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				exportId: options.exportId,
-			});
-		});
-
-	const snapshots = cloud
-		.command("snapshots")
-		.description("snapshot operations");
-
-	snapshots
-		.command("create")
-		.description("create memory snapshot")
-		.option("--label <name>", "snapshot label")
-		.option("--trigger <trigger>", "manual | sync | system")
-		.action(async (options) => {
-			currentCommand = "cloud.snapshots.create";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSnapshotsCreateCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				label: options.label,
-				trigger: options.trigger,
-			});
-		});
-
-	snapshots
-		.command("download")
-		.description("download snapshot archive")
-		.requiredOption("--snapshot-id <id>", "snapshot ID")
-		.action(async (options) => {
-			currentCommand = "cloud.snapshots.download";
-			const g = await cloudGlobals();
-			exitCode = await runCloudSnapshotsDownloadCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				snapshotId: options.snapshotId,
-			});
-		});
-
-	const providers = cloud
-		.command("providers")
-		.description("provider operations");
-
-	providers
-		.command("list")
-		.description("list provider credentials")
+	sync
+		.command("status")
+		.description("read cloud sync status (manifest, cursor, storage)")
 		.action(async () => {
-			currentCommand = "cloud.providers.list";
+			currentCommand = "cloud.sync.status";
 			const g = await cloudGlobals();
-			exitCode = await runCloudProvidersListCommand({
+			exitCode = await runCloudSyncStatusCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
+				client: g.client,
 			});
 		});
 
-	providers
-		.command("create")
-		.description("create provider credential")
-		.requiredOption(
-			"--provider <provider>",
-			"voyageai | openai | upstash-vector",
+	sync
+		.command("pull")
+		.description("pull file replicas from the cloud")
+		.option("--since <cursor>", "pull everything changed since this cursor")
+		.action(async (options) => {
+			currentCommand = "cloud.sync.pull";
+			const g = await cloudGlobals();
+			exitCode = await runCloudSyncPullCommand({
+				output,
+				json: g.json,
+				rootDir: g.root,
+				client: g.client,
+				since: options.since,
+			});
+		});
+
+	sync
+		.command("push")
+		.description(
+			"push local .tekmemo/ file replicas to the cloud (two-phase push→complete)",
 		)
-		.requiredOption("--key-name <name>", "key name")
-		.requiredOption("--secret <secret>", "provider secret")
-		.option("--rest-url <url>", "REST URL (required for upstash-vector)")
-		.option("--embedding-model <model>", "embedding model")
-		.option("--rerank-model <model>", "rerank model")
+		.option("--base-cursor <cursor>", "cursor the client last synced at")
 		.action(async (options) => {
-			currentCommand = "cloud.providers.create";
+			currentCommand = "cloud.sync.push";
 			const g = await cloudGlobals();
-			exitCode = await runCloudProvidersCreateCommand({
+			exitCode = await runCloudSyncPushCommand({
 				output,
 				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				provider: options.provider,
-				keyName: options.keyName,
-				secret: options.secret,
-				restUrl: options.restUrl,
-				embeddingModel: options.embeddingModel,
-				rerankModel: options.rerankModel,
-			});
-		});
-
-	providers
-		.command("test")
-		.description("test provider credential")
-		.requiredOption("--credential-id <id>", "credential ID")
-		.action(async (options) => {
-			currentCommand = "cloud.providers.test";
-			const g = await cloudGlobals();
-			exitCode = await runCloudProvidersTestCommand({
-				output,
-				json: g.json,
-				cloudUrl: g.cloudUrl,
-				apiKey: g.apiKey,
-				workspaceId: g.workspaceId,
-				projectId: g.projectId,
-				timeoutMs: g.timeoutMs,
-				credentialId: options.credentialId,
+				rootDir: g.root,
+				stdinContent: input.stdinContent,
+				client: g.client,
+				baseCursor: options.baseCursor,
 			});
 		});
 
@@ -1429,11 +830,16 @@ export async function runTekMemoCli(
 			currentCommand = "config.get";
 			const g = await globals();
 			const safeConfig = {
-				...g.config,
-				cloud: {
-					...g.config.cloud,
-					apiKey: g.config.cloud.apiKey ? "<redacted>" : undefined,
-				},
+				mode: g.memo.mode,
+				projectId: g.memo.projectId,
+				...(g.memo.workspaceId !== undefined
+					? { workspaceId: g.memo.workspaceId }
+					: {}),
+				readPolicy: g.memo.readPolicy,
+				writePolicy: g.memo.writePolicy,
+				...(g.memo.cloud
+					? { cloud: { configured: true } }
+					: { cloud: { configured: false } }),
 			};
 			if (g.json) printJsonEnvelope(output, "config.get", safeConfig);
 			else output.write(JSON.stringify(safeConfig, null, 2));
@@ -1445,7 +851,7 @@ export async function runTekMemoCli(
 		.option("-f, --force", "overwrite existing config", false)
 		.option(
 			"--runtime <mode>",
-			"runtime mode: local, cloud, or hybrid",
+			"runtime mode: local, hybrid, or memory",
 			"local",
 		)
 		.option("--cloud-url <url>", "TekMemo Cloud API URL")
@@ -1461,6 +867,7 @@ export async function runTekMemoCli(
 				root: g.root,
 				force: options.force,
 				config: {
+					$schema: configSchemaUrl(pkg.version),
 					runtime: options.runtime,
 					root: ".",
 					cloud: {
@@ -1503,14 +910,37 @@ export async function runTekMemoCli(
 			else output.error(message);
 		}
 		return { exitCode, stdout: output.stdout, stderr: output.stderr };
+	} finally {
+		// Release the Q28 advisory lock held by this invocation's store so a
+		// subsequent CLI call or a direct Tekmemo on the same root can acquire
+		// it. `dispose` is only present on the concrete fs store (not the
+		// MemoryStore contract), so it is optional here.
+		const store = activeMemo?.store as
+			| { dispose?: () => Promise<void> }
+			| undefined;
+		await store?.dispose?.();
+		activeMemo = undefined;
 	}
 }
 
+/**
+ * Accumulates string options into an array for multi-value CLI flags.
+ *
+ * @param value - Newly parsed option string value.
+ * @param previous - Cumulative array of parsed values.
+ * @returns Updated array containing all parsed values.
+ */
 function collect(value: string, previous: string[]): string[] {
 	previous.push(value);
 	return previous;
 }
 
+/**
+ * Normalizes command line arguments to ensure a valid node execution prefix is present.
+ *
+ * @param argv - Raw string arguments.
+ * @returns Normalized arguments array.
+ */
 function normalizeArgv(argv: string[]): string[] {
 	if (
 		argv.length > 0 &&
@@ -1524,6 +954,12 @@ function normalizeArgv(argv: string[]): string[] {
 	return [...argv];
 }
 
+/**
+ * Asserts whether a given error is a CommanderError instance.
+ *
+ * @param error - The caught error object.
+ * @returns True if error is a CommanderError.
+ */
 function isCommanderError(error: unknown): error is CommanderError {
 	return error instanceof CommanderError;
 }
