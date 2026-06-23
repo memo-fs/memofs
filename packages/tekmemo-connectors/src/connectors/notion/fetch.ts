@@ -28,17 +28,23 @@ const PAGE_SIZE = 25;
 /** Default `sourceMapping.limit` — max pages to ingest. */
 const DEFAULT_LIMIT = 50;
 
+/** Per-request timeout (ms). A stalled endpoint must not hang the whole run. */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 /**
  * Fetch Notion pages per the connector's `sourceMapping`.
  *
  * @internal
  * @param token resolved Notion integration token (in-memory only)
  * @param sourceMapping the connector's `sourceMapping`
+ * @param signal optional abort signal (caller cancellation); combined with a
+ *   per-request timeout so a stalled endpoint can't hang the run.
  * @returns the normalized pages, in source order
  */
 export async function fetchNotionPages(
 	token: string,
 	sourceMapping: NotionSourceMapping | undefined,
+	signal?: AbortSignal,
 ): Promise<NotionPage[]> {
 	const query = resolveQuery(sourceMapping);
 	const limit = resolveLimit(sourceMapping);
@@ -48,8 +54,9 @@ export async function fetchNotionPages(
 	let remaining = limit;
 
 	while (remaining > 0) {
+		if (signal?.aborted) throw new Error("Notion ingest aborted.");
 		const first = Math.min(PAGE_SIZE, remaining);
-		const page = await fetchPage(token, query, first, cursor);
+		const page = await fetchPage(token, query, first, cursor, signal);
 		for (const p of page.results) {
 			pages.push(p);
 		}
@@ -72,6 +79,7 @@ async function fetchPage(
 	query: ReturnType<typeof resolveQuery>,
 	pageSize: number,
 	cursor: string | null,
+	signal?: AbortSignal,
 ): Promise<NotionPageResponse> {
 	const url =
 		query.kind === "database"
@@ -86,34 +94,58 @@ async function fetchPage(
 		body.filter = { value: "page", property: "object" };
 	}
 
-	const response = await fetch(url, {
-		method: "POST",
-		headers: notionHeaders(token),
-		body: JSON.stringify(body),
-	});
+	const { signal: requestSignal, clearTimeout } = withRequestTimeout(signal);
+	try {
+		const response = await fetch(url, {
+			method: "POST",
+			headers: notionHeaders(token),
+			body: JSON.stringify(body),
+			signal: requestSignal,
+		});
 
-	if (response.status === 403 || response.status === 429) {
-		const retryAfter = response.headers.get("retry-after");
-		throw new NotionRateLimitError(
-			`Notion API rate limited (retry-after: ${retryAfter ?? "unknown"}).`,
-			retryAfter ?? undefined,
-		);
-	}
-	if (!response.ok) {
-		const text = await response.text().catch(() => "");
-		throw new Error(
-			`Notion API request failed: ${response.status} ${response.statusText}${text.length > 0 ? ` — ${text.slice(0, 200)}` : ""}`,
-		);
-	}
+		if (response.status === 429) {
+			const retryAfter = response.headers.get("retry-after");
+			throw new NotionRateLimitError(
+				`Notion API rate limited (retry-after: ${retryAfter ?? "unknown"}).`,
+				retryAfter ?? undefined,
+			);
+		}
+		if (response.status === 401 || response.status === 403) {
+			// 401/403 is an authorization/permission failure (bad/expired/revoked
+			// token, or an un-shared resource) — NOT throttling. A caller that
+			// retries on rate-limit must not loop here.
+			throw new NotionAuthError(
+				`Notion authorization failed (${response.status}). Check the integration token and that the page/database is shared with it.`,
+			);
+		}
+		if (!response.ok) {
+			// Do NOT inline the response body into the message — an API echoing
+			// request bytes back would leak material into the surfaced error.
+			throw new Error(
+				`Notion API request failed: ${response.status} ${response.statusText}`,
+			);
+		}
 
-	const payload = (await response.json()) as NotionQueryResponse;
-	return {
-		results: (payload.results ?? [])
-			.filter((r): r is RawNotionPage => r !== null && r.object === "page")
-			.map(mapPage),
-		hasMore: payload.has_more === true,
-		nextCursor: payload.next_cursor ?? null,
-	};
+		const payload = (await response.json()) as NotionQueryResponse;
+		return {
+			results: (payload.results ?? [])
+				.filter((r): r is RawNotionPage => r !== null && r.object === "page")
+				.map(mapPage),
+			hasMore: payload.has_more === true,
+			nextCursor: payload.next_cursor ?? null,
+		};
+	} catch (error) {
+		if (isAbortError(error)) {
+			throw signal?.aborted
+				? new Error("Notion ingest aborted.")
+				: new Error(
+						`Notion request timed out after ${REQUEST_TIMEOUT_MS}ms.`,
+					);
+		}
+		throw error;
+	} finally {
+		clearTimeout();
+	}
 }
 
 /** Map a raw REST page object into a {@link NotionPage}. */
@@ -225,7 +257,7 @@ function notionHeaders(token: string): Record<string, string> {
 	};
 }
 
-/** Thrown when Notion returns a 403/429. Carries the retry-after value. */
+/** Thrown when Notion returns a 429. Carries the retry-after value. */
 export class NotionRateLimitError extends Error {
 	readonly retryAfterSeconds?: number;
 
@@ -237,6 +269,53 @@ export class NotionRateLimitError extends Error {
 			if (Number.isFinite(seconds)) this.retryAfterSeconds = seconds;
 		}
 	}
+}
+
+/**
+ * Thrown when Notion returns 401/403 (bad/expired/revoked token, or an
+ * un-shared page/database). Distinct from {@link NotionRateLimitError} so a
+ * caller retrying on rate-limit does not loop forever on a permanently invalid
+ * token. The token value is never included in the message.
+ */
+export class NotionAuthError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "NotionAuthError";
+	}
+}
+
+// --- request timeout + abort helpers (shared with the github connector) ---
+
+/**
+ * Combine an optional caller signal with a per-request timeout so a stalled
+ * endpoint can't hang the run. Returns the composite signal and a cleanup fn
+ * the caller MUST invoke in its `finally`.
+ */
+function withRequestTimeout(signal?: AbortSignal): {
+	signal: AbortSignal;
+	clearTimeout: () => void;
+} {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	if (signal !== undefined) {
+		if (signal.aborted) controller.abort();
+		else signal.addEventListener("abort", () => controller.abort(), {
+			once: true,
+		});
+	}
+	return {
+		signal: controller.signal,
+		clearTimeout: () => clearTimeout(timer),
+	};
+}
+
+/** Whether an error is an abort (fetch throws DOMException "AbortError"). */
+function isAbortError(error: unknown): boolean {
+	return (
+		error instanceof Error &&
+		(error.name === "AbortError" ||
+			(error as NodeJS.ErrnoException)?.code === "ABORT_ERR")
+	);
 }
 
 // --- raw REST response shapes (subset) ---

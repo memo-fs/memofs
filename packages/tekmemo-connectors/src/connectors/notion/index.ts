@@ -37,7 +37,7 @@ export class NotionConnector implements Connector {
 		// fetchNotionPages throws on rate-limit / network / REST errors; the
 		// runner catches and records them so a single connector failure doesn't
 		// abort the whole run.
-		const pages = await fetchNotionPages(ctx.token, sourceMapping);
+		const pages = await fetchNotionPages(ctx.token, sourceMapping, ctx.signal);
 		return pages.map((page) => normalizeNotionPage(page));
 	}
 }

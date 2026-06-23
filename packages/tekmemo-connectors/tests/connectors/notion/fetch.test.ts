@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	fetchNotionPages,
+	NotionAuthError,
 	NotionRateLimitError,
 } from "../../../src/connectors/notion/fetch";
 import type { NotionSourceMapping } from "../../../src/connectors/notion/types";
@@ -168,23 +169,23 @@ describe("fetchNotionPages", () => {
 		expect(body.page_size).toBe(3);
 	});
 
-	it("surfaces a 403 as NotionRateLimitError", async () => {
-		const fetchMock = vi
-			.fn()
-			.mockResolvedValue(
-				restResponse(
-					{ message: "forbidden" },
-					{ status: 403, headers: { "retry-after": "2" } },
-				),
-			);
-		globalThis.fetch = fetchMock as unknown as typeof fetch;
+	it("surfaces a 401/403 as NotionAuthError (not a rate-limit)", async () => {
+		// 401/403 is an authorization/permission failure, NOT throttling. A
+		// caller that retries on rate-limit must not loop here.
+		for (const status of [401, 403]) {
+			const fetchMock = vi
+				.fn()
+				.mockResolvedValue(
+					restResponse({ message: "forbidden" }, { status }),
+				);
+			globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-		const sm: NotionSourceMapping = {
-			databaseId: "0123456789abcdef0123456789abcdef",
-		};
-		await expect(fetchNotionPages("token", sm)).rejects.toBeInstanceOf(
-			NotionRateLimitError,
-		);
+			const sm: NotionSourceMapping = {
+				databaseId: "0123456789abcdef0123456789abcdef",
+			};
+			const error = await fetchNotionPages("token", sm).catch((e) => e);
+			expect(error).toBeInstanceOf(NotionAuthError);
+		}
 	});
 
 	it("surfaces a 429 as NotionRateLimitError with retry-after seconds", async () => {

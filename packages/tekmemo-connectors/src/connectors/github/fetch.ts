@@ -24,32 +24,36 @@ const DEFAULT_LIMIT = 50;
 /** GraphQL endpoint. */
 const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
 
+/** Per-request timeout (ms). A stalled endpoint must not hang the whole run. */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 /**
  * Fetch GitHub nodes (issues / PRs / discussions) for a repository.
  *
  * @internal
  * @param token resolved GitHub token (in-memory only)
  * @param sourceMapping the connector's `sourceMapping`
+ * @param signal optional abort signal (caller cancellation); combined with a
+ *   per-request timeout so a stalled endpoint can't hang the run.
  * @returns the normalized nodes, in source order
  */
 export async function fetchGitHubNodes(
 	token: string,
 	sourceMapping: GitHubSourceMapping | undefined,
+	signal?: AbortSignal,
 ): Promise<GitHubNode[]> {
-	const { owner, repo, repository } = parseRepository(sourceMapping);
+	const { owner, repo } = parseRepository(sourceMapping);
 	const kinds = resolveKinds(sourceMapping);
 	const limit = resolveLimit(sourceMapping);
 
 	const nodes: GitHubNode[] = [];
 	for (const kind of kinds) {
-		const kindNodes = await fetchKind(token, owner, repo, kind, limit);
+		if (signal?.aborted) throw new Error("GitHub ingest aborted.");
+		const kindNodes = await fetchKind(token, owner, repo, kind, limit, signal);
 		for (const node of kindNodes) {
 			nodes.push(node);
 		}
 	}
-	// `repository` is used to validate parse even when kinds is empty — keep
-	// the reference so tree-shaking doesn't complain in edge cases.
-	void repository;
 	return nodes;
 }
 
@@ -60,14 +64,16 @@ async function fetchKind(
 	repo: string,
 	kind: "issues" | "prs" | "discussions",
 	limit: number,
+	signal?: AbortSignal,
 ): Promise<GitHubNode[]> {
 	const collected: GitHubNode[] = [];
 	let cursor: string | null = null;
 	let remaining = limit;
 
 	while (remaining > 0) {
+		if (signal?.aborted) throw new Error("GitHub ingest aborted.");
 		const first = Math.min(PAGE_SIZE, remaining);
-		const page = await fetchPage(token, owner, repo, kind, first, cursor);
+		const page = await fetchPage(token, owner, repo, kind, first, cursor, signal);
 		for (const node of page.nodes) {
 			collected.push(node);
 		}
@@ -92,47 +98,68 @@ async function fetchPage(
 	kind: "issues" | "prs" | "discussions",
 	first: number,
 	cursor: string | null,
+	signal?: AbortSignal,
 ): Promise<GitHubPage> {
 	const query = buildQuery(kind);
 	// The cursor is passed raw; the whole body is JSON-encoded below.
 	const variables = { owner, name: repo, first, after: cursor };
 
-	const response = await fetch(GITHUB_GRAPHQL_URL, {
-		method: "POST",
-		headers: graphqlHeaders(token),
-		body: JSON.stringify({ query, variables }),
-	});
+	const { signal: requestSignal, clearTimeout } = withRequestTimeout(signal);
+	try {
+		const response = await fetch(GITHUB_GRAPHQL_URL, {
+			method: "POST",
+			headers: graphqlHeaders(token),
+			body: JSON.stringify({ query, variables }),
+			signal: requestSignal,
+		});
 
-	if (response.status === 403 || response.status === 429) {
-		const reset = response.headers.get("x-ratelimit-reset");
-		throw new GitHubRateLimitError(
-			`GitHub API rate limited (reset: ${reset ?? "unknown"}).`,
-			reset ?? undefined,
-		);
-	}
-	if (!response.ok) {
-		throw new Error(
-			`GitHub GraphQL request failed: ${response.status} ${response.statusText}`,
-		);
-	}
-
-	const body = (await response.json()) as GraphQLResponse;
-	if (body.errors && body.errors.length > 0) {
-		// Discussions require the discussions field to exist on the repo; if the
-		// repo has none, GitHub returns a field error. Treat that as empty rather
-		// than a hard failure.
-		const fatal = body.errors.filter(
-			(e) => !e.message.toLowerCase().includes("discussions"),
-		);
-		if (fatal.length > 0) {
-			throw new Error(
-				`GitHub GraphQL errors: ${fatal.map((e) => e.message).join("; ")}`,
+		if (response.status === 403 || response.status === 429) {
+			const reset = response.headers.get("x-ratelimit-reset");
+			throw new GitHubRateLimitError(
+				`GitHub API rate limited (reset: ${reset ?? "unknown"}).`,
+				reset ?? undefined,
 			);
 		}
-		return { nodes: [], hasNextPage: false, endCursor: null };
-	}
+		if (response.status === 401) {
+			throw new Error(
+				"GitHub auth error: 401. The token is missing or invalid. Never logged.",
+			);
+		}
+		if (!response.ok) {
+			throw new Error(
+				`GitHub GraphQL request failed: ${response.status} ${response.statusText}`,
+			);
+		}
 
-	return extractPage(body.data, kind);
+		const body = (await response.json()) as GraphQLResponse;
+		if (body.errors && body.errors.length > 0) {
+			// Discussions require the discussions field to exist on the repo; if the
+			// repo has none, GitHub returns a field error. Treat that as empty rather
+			// than a hard failure.
+			const fatal = body.errors.filter(
+				(e) => !e.message.toLowerCase().includes("discussions"),
+			);
+			if (fatal.length > 0) {
+				throw new Error(
+					`GitHub GraphQL errors: ${fatal.map((e) => e.message).join("; ")}`,
+				);
+			}
+			return { nodes: [], hasNextPage: false, endCursor: null };
+		}
+
+		return extractPage(body.data, kind);
+	} catch (error) {
+		if (isAbortError(error)) {
+			throw signal?.aborted
+				? new Error("GitHub ingest aborted.")
+				: new Error(
+						`GitHub request timed out after ${REQUEST_TIMEOUT_MS}ms.`,
+					);
+		}
+		throw error;
+	} finally {
+		clearTimeout();
+	}
 }
 
 /** Build the GraphQL query string for a kind. */
@@ -243,6 +270,40 @@ export class GitHubRateLimitError extends Error {
 			if (Number.isFinite(epoch)) this.resetEpoch = epoch;
 		}
 	}
+}
+
+// --- request timeout + abort helpers (shared with the notion connector) ---
+
+/**
+ * Combine an optional caller signal with a per-request timeout so a stalled
+ * endpoint can't hang the run. Returns the composite signal and a cleanup fn
+ * the caller MUST invoke in its `finally`.
+ */
+function withRequestTimeout(signal?: AbortSignal): {
+	signal: AbortSignal;
+	clearTimeout: () => void;
+} {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	if (signal !== undefined) {
+		if (signal.aborted) controller.abort();
+		else signal.addEventListener("abort", () => controller.abort(), {
+			once: true,
+		});
+	}
+	return {
+		signal: controller.signal,
+		clearTimeout: () => clearTimeout(timer),
+	};
+}
+
+/** Whether an error is an abort (fetch throws DOMException "AbortError"). */
+function isAbortError(error: unknown): boolean {
+	return (
+		error instanceof Error &&
+		(error.name === "AbortError" ||
+			(error as NodeJS.ErrnoException)?.code === "ABORT_ERR")
+	);
 }
 
 // --- raw GraphQL response shapes (subset) ---

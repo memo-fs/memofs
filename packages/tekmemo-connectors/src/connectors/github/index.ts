@@ -36,7 +36,7 @@ export class GitHubConnector implements Connector {
 		// fetchGitHubNodes throws on rate-limit / network / GraphQL errors; the
 		// runner catches and records them so a single connector failure doesn't
 		// abort the whole run.
-		const nodes = await fetchGitHubNodes(ctx.token, sourceMapping);
+		const nodes = await fetchGitHubNodes(ctx.token, sourceMapping, ctx.signal);
 		const { repository } = parseRepoSafe(sourceMapping);
 		return nodes.map((node) => normalizeGitHubNode(node, repository));
 	}

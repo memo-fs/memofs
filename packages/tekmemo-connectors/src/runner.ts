@@ -17,6 +17,7 @@
  */
 
 import type { JsonObject, SourceRef, Tekmemo } from "@tekbreed/tekmemo";
+import { readMemoryEvents } from "@tekbreed/tekmemo";
 import { readConnectorsFile, selectConnectors } from "./config";
 import { connectorNoteId } from "./id";
 import {
@@ -212,22 +213,47 @@ async function writeConnectorRecord(
 }
 
 /**
- * Load the set of already-written memory note ids so re-runs skip unchanged
+ * Load the set of already-written connector note ids so re-runs skip unchanged
  * content. The connector note id is content-derived (no wall-clock), so an
- * identical external item reproduces the same id → skip. This is strategy-
- * agnostic: works on the in-memory fake, the filesystem local strategy, and the
- * hybrid cloud-replica strategy alike.
+ * identical external item reproduces the same id → skip.
+ *
+ * Scans the full `memory-events.jsonl` (via {@link readMemoryEvents}) for the
+ * note `id` recorded on each `memory.created` event, rather than
+ * `listRecentMemories` — which caps at the N most recent events and would let
+ * older connector notes fall out of the dedup window (producing duplicate
+ * writes once a project accumulates more than that many memories). Falling
+ * back to `listRecentMemories` keeps this working on hosts whose store does
+ * not expose the events log directly (e.g. a minimal in-memory fake).
  */
 async function loadExistingNoteIds(memo: Tekmemo): Promise<Set<string>> {
-	const recent = await memo.listRecentMemories({ limit: 500 });
 	const ids = new Set<string>();
+
+	// Primary path: the complete events log. The note id lands at
+	// `event.metadata.id` for every write (see local-strategy.writeMemory).
+	// Collecting every id here — not only `conn_` ones — is harmless: agent
+	// `mem_` ids never collide with content-derived `conn_` ids.
+	try {
+		const events = await readMemoryEvents(memo.store, {
+			malformedLineMode: "skip",
+		});
+		for (const event of events) {
+			const noteId = (event.metadata as Record<string, unknown> | undefined)
+				?.id;
+			if (typeof noteId === "string" && noteId.length > 0) {
+				ids.add(noteId);
+			}
+		}
+		if (ids.size > 0) return ids;
+	} catch {
+		// Events log unavailable (missing file, store without `.read`) — fall
+		// through to the recent-memory scan so dedup still works.
+	}
+
+	// Fallback: recent memory items. Bounded to the window the host returns, so
+	// it under-counts on large projects, but preserves behavior on hosts that
+	// don't expose the events log.
+	const recent = await memo.listRecentMemories({ limit: 500 });
 	for (const item of recent.items) {
-		// The note id location varies by strategy:
-		//  - memory-strategy (in-memory fake): `item.id` is the note id.
-		//  - local-strategy (filesystem): `item.id` is the event id (`evt_…`),
-		//    and the note id lives at `item.metadata.id`.
-		// Collect both — agent/event ids never collide with `conn_` ids, so the
-		// extra entries are harmless.
 		if (typeof item.id === "string" && item.id.length > 0) {
 			ids.add(item.id);
 		}
