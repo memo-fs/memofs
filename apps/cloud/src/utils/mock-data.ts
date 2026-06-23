@@ -29,10 +29,12 @@ export const MOCK_PROJECTS: Project[] = [
 	},
 ];
 
+export type ConnectorType = "github" | "notion" | "linear";
+
 export type Connector = {
 	id: string;
 	projectId: string;
-	type: "github" | "notion";
+	type: ConnectorType;
 	enabled: boolean;
 	schedule: string;
 	sourceMapping: string;
