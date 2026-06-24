@@ -64,6 +64,10 @@ export function createHttpError(
 }
 
 const SECRET_PATTERNS = [
+	// Current prefix: `tm_`. Legacy prefixes (`tk_live_`, `tm_live_`) are kept so
+	// error redaction stays safe for keys issued before the rename — redaction is
+	// additive and must never miss a real token shape in the wild.
+	/tm_[A-Za-z0-9._-]+/g,
 	/tk_live_[A-Za-z0-9._-]+/g,
 	/tm_live_[A-Za-z0-9._-]+/g,
 	/Bearer\s+[A-Za-z0-9._-]+/gi,

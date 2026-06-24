@@ -69,7 +69,7 @@ export interface TekMemoCloudRetryOptions {
 export interface TekMemoCloudClientOptions {
 	/** Base URL, usually https://memo.tekbreed.com/api/v1 or a self-hosted /api/v1 URL. */
 	baseUrl: string;
-	/** TekMemo API key, e.g. tk_live_... . Never pass provider keys here. */
+	/** TekMemo API key, e.g. tm_... . Never pass provider keys here. */
 	apiKey?: string;
 	/** Default project used by project-scoped API calls. */
 	defaultProjectId?: string;
