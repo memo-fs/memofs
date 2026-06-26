@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import { useData } from "vitepress";
 import DefaultTheme from "vitepress/theme";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import AskAiBar from "./AskAiBar.vue";
+import BlogPostFooter from "./BlogPostFooter.vue";
+import BlogPostHeader from "./BlogPostHeader.vue";
 import HeroVisual from "./HeroVisual.vue";
 import SidebarBrand from "./SidebarBrand.vue";
 
 const { Layout } = DefaultTheme;
+
+const { frontmatter } = useData();
+/** Blog posts opt in with `blog: post` frontmatter to get editorial chrome. */
+const isBlogPost = computed(() => frontmatter.value.blog === "post");
 
 /**
  * Deploys is the live mode-toggle shown in the feature showcase. It reflects
@@ -101,7 +108,12 @@ const memo = new Tekmemo({
     </template>
 
     <template #doc-before>
-      <AskAiBar />
+      <BlogPostHeader v-if="isBlogPost" />
+      <AskAiBar v-else />
+    </template>
+
+    <template #doc-after>
+      <BlogPostFooter v-if="isBlogPost" />
     </template>
 
     <template #home-hero-image>
@@ -123,7 +135,7 @@ const memo = new Tekmemo({
                 <span class="compat-sep">·</span>
                 <span class="compat-tool">Codex</span>
                 <span class="compat-sep">·</span>
-                <span class="compat-tool">Opencode</span>
+                <span class="compat-tool">OpenCode</span>
                 <span class="compat-sep">·</span>
                 <span class="compat-tool">any MCP client</span>
               </p>
@@ -218,7 +230,7 @@ const memo = new Tekmemo({
             <div class="feature-showcase-item">
               <div class="feature-showcase-content">
                 <span class="section-kicker">File-first</span>
-                <h3>Memory you can read</h3>
+                <h3>Open it. Diff it. Commit it.</h3>
                 <p>
                   Every decision, convention, and note sits in plain text under
                   <code>.tekmemo/</code>. Open it in your editor. Diff it in review. Commit it with
@@ -305,7 +317,7 @@ const memo = new Tekmemo({
 
             <div class="feature-showcase-item">
               <div class="feature-showcase-content">
-                <span class="section-kicker">Deploys</span>
+                <span class="section-kicker">Runtimes</span>
                 <h3>One engine, three ways to run it</h3>
                 <p>
                   Local mode works offline. Hybrid adds a cloud replica so your memory follows you

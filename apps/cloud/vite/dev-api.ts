@@ -2,18 +2,19 @@
  * Dev-only Vite plugin that mirrors the production Worker's request dispatch.
  *
  * PROBLEM: `react-router dev` runs the RR server-runtime as Vite middleware,
- * so EVERY request — including `/v1/*` — is handled by React Router. The
- * Worker `fetch` handler in `workers/app.ts` (which splits `/v1` → Hono API
- * vs everything else → SSR) never runs in dev; it only runs under
- * `wrangler dev`/deploy, where `workers/app.ts` is the entry.
+ * so EVERY request — including `/v1/*` and `/api/auth/*` — is handled by React
+ * Router. The Worker `fetch` handler in `workers/app.ts` (which splits `/v1` →
+ * Hono API, `/api/auth` → Better Auth, everything else → SSR) never runs in
+ * dev; it only runs under `wrangler dev`/deploy, where `workers/app.ts` is the
+ * entry.
  *
  * FIX: this plugin installs a `configureServer` hook that runs BEFORE RR's
- * middleware and routes `/v1/*` to the same Hono API the Worker uses, so dev
- * and prod routing stay identical. Non-`/v1` requests fall through to RR.
+ * middleware and routes `/v1/*` to the same Hono API and `/api/auth/*` to the
+ * same Better Auth handler the Worker uses, so dev and prod routing stay
+ * identical. Other requests fall through to RR.
  *
  * SSOT: it loads `workers/dev-api.ts`, which builds the SAME `createApiApp()`
- * routing tree the production Worker builds. The routing tree itself lives in
- * `src/api/index.ts` and is imported by both entries.
+ * routing tree and `createAuth()` instance the production Worker builds.
  */
 import type { Plugin } from "vite";
 
@@ -24,12 +25,17 @@ export function devApiPlugin(): Plugin {
 		configureServer(server) {
 			server.middlewares.use(async (req, res, next) => {
 				const url = req.url ?? "/";
-				if (url !== "/v1" && !url.startsWith("/v1/")) {
+				const isApi = url === "/v1" || url.startsWith("/v1/");
+				const isAuth = url === "/api/auth" || url.startsWith("/api/auth/");
+				if (!isApi && !isAuth) {
 					return next(); // hand off to React Router
 				}
 
 				try {
-					const { devApi } = await server.ssrLoadModule("/workers/dev-api.ts");
+					const { devApi, devAuth } = await server.ssrLoadModule(
+						"/workers/dev-api.ts",
+					);
+					const handler = isApi ? devApi : devAuth;
 
 					// Collect the Node request body into a Uint8Array, then build a web
 					// Request. (Health routes are GET-only today; the buffering cost
@@ -48,7 +54,7 @@ export function devApiPlugin(): Plugin {
 						headers: req.headers as HeadersInit,
 						body: body as BodyInit,
 					});
-					const response = await devApi.fetch(request);
+					const response = await handler.fetch(request);
 
 					res.statusCode = response.status;
 					response.headers.forEach((value: string, key: string) => {

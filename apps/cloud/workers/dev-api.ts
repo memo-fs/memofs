@@ -14,6 +14,9 @@
  * real Worker `env`.
  */
 import { createApiApp } from "../src/api";
+import { createDb } from "../src/db/index.server";
+import { createAuth } from "../src/server/auth";
+import { createMagicLinkMailer } from "../src/server/email";
 import type { CloudWorkerEnv } from "../src/server/env";
 
 // NOTE on R2 types: `wrangler types` emits `worker-configuration.d.ts`, which
@@ -70,6 +73,20 @@ function devEnv(): CloudWorkerEnv {
 		TEKMEMO_API_KEY_SALT: process.env.TEKMEMO_API_KEY_SALT,
 		R2_S3_ACCESS_KEY_ID: process.env.R2_S3_ACCESS_KEY_ID ?? "",
 		R2_S3_SECRET_ACCESS_KEY: process.env.R2_S3_SECRET_ACCESS_KEY ?? "",
+		// --- Auth (Better Auth) — SC4.1 ------------------------------------
+		BETTER_AUTH_SECRET:
+			process.env.BETTER_AUTH_SECRET ?? "dev-insecure-better-auth-secret",
+		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL ?? "http://localhost:5173",
+		GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+		GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+		GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+		GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+		// --- Email (Plunk) -------------------------------------------------
+		PLUNK_API_KEY: process.env.PLUNK_API_KEY,
+		PLUNK_FROM: process.env.PLUNK_FROM,
+		// --- Rate limiting (Upstash) --------------------------------------
+		UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+		UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 		SESSION_SECRET: process.env.SESSION_SECRET ?? "dev-insecure-session-secret",
 	};
 }
@@ -77,4 +94,19 @@ function devEnv(): CloudWorkerEnv {
 /** The Hono API as a standalone fetch handler — consumed by the dev plugin. */
 export const devApi = {
 	fetch: (request: Request) => createApiApp().fetch(request, devEnv()),
+};
+
+/**
+ * Better Auth as a standalone fetch handler — mirrors the production Worker's
+ * `/api/auth/*` branch. Builds a per-request auth instance from the same
+ * `devEnv()` so dev sign-in flows (magic-link request + verify) run identically
+ * to production. Consumed by the dev plugin for `/api/auth/*` requests.
+ */
+export const devAuth = {
+	fetch: (request: Request) =>
+		createAuth(
+			devEnv(),
+			createDb(devEnv()),
+			createMagicLinkMailer(devEnv()),
+		).handler(request),
 };

@@ -18,7 +18,7 @@ describe("cloud commands", () => {
 				const url = String(input);
 				calls.push(`${init?.method ?? "GET"} ${url}`);
 				expect((init?.headers as Record<string, string>).Authorization).toBe(
-					"Bearer tk_live_test_123",
+					"Bearer tm_test_123",
 				);
 				expect(url).toBe(
 					"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
@@ -52,7 +52,7 @@ describe("cloud commands", () => {
 				"--cloud-url",
 				"https://memo.tekbreed.com/api/v1",
 				"--api-key",
-				"tk_live_test_123",
+				"tm_test_123",
 				"--project-id",
 				"proj_123",
 				"sync",
@@ -91,7 +91,7 @@ describe("cloud commands", () => {
 					const url = String(input);
 					calls.push(`${init?.method ?? "GET"} ${url}`);
 					expect((init?.headers as Record<string, string>).Authorization).toBe(
-						"Bearer tk_live_test_123",
+						"Bearer tm_test_123",
 					);
 
 					if (url.endsWith("/sync/push")) {
@@ -168,7 +168,7 @@ describe("cloud commands", () => {
 					"--cloud-url",
 					"https://memo.tekbreed.com/api/v1",
 					"--api-key",
-					"tk_live_test_123",
+					"tm_test_123",
 					"--project-id",
 					"proj_123",
 					"sync",

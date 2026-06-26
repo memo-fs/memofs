@@ -28,8 +28,8 @@ export const nav: DefaultTheme.NavItem[] = [
 	},
 	{
 		text: "Changelog",
-		link: "/changelog/",
-		activeMatch: "/changelog/",
+		link: "/changelog",
+		activeMatch: "/changelog",
 	},
 	{
 		text: "Cloud",

@@ -66,7 +66,14 @@ export function createApiApp() {
 					const message = cause.hideMessage
 						? "Internal server error."
 						: cause.message;
-					return jsonError(c, cause.status, cause.code, message, cause.details);
+					return jsonError(
+						c,
+						cause.status,
+						cause.code,
+						message,
+						cause.details,
+						cause.headers,
+					);
 				}
 				console.error("[api] unhandled error", cause);
 				return jsonError(c, 500, "internal_error", "Internal server error.");

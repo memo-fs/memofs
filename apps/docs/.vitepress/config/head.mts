@@ -16,7 +16,9 @@ export const head: HeadConfig[] = [
 	["meta", { name: "twitter:title", content: "TekMemo" }],
 	["meta", { name: "twitter:description", content: site.description }],
 	["meta", { name: "twitter:image", content: "/logo.svg" }],
-	["link", { rel: "icon", href: "/logo.svg" }],
+	// Modern browsers prefer the crisp SVG; .ico is the multi-size fallback.
+	["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
+	["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
 
 	[
 		"script",

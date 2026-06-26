@@ -21,22 +21,35 @@ therefore a positioning + growth exercise, not cost-recovery.
 
 ## Decision
 
-**Three tiers: Free (generous) + Pro ($9/mo) + Teams ($24/mo, Coming Soon /
+**Three tiers: Free (generous) + Pro ($9/mo) + Teams ($24/seat/mo, Coming Soon /
 disabled). Enforced via numeric entitlement caps. Billed through Polar (Merchant
 of Record).**
 
+> **Revised 2026-06-23:** storage ladder tightened from ~1GB/~25GB/~100GB to
+> 500MB/10GB/50GB. A conservative base keeps ~97–98% gross margin while reserving
+> headroom for paid storage add-ons later. Teams billing model clarified as
+> **per-seat** ($24/seat/mo) throughout. Annual billing deferred to post-launch
+> (same "avoid premature billing complexity" principle).
+>
+> **Cross-ref (Q33, 2026-06-24):** the managed-runtime intelligence entitlements
+> (`maxConsolidationRuns` / `maxPreWarmPerDay`) follow this same numeric-cap
+> model and **do not change the prices below.** One margin guardrail locked at
+> Q33: **Free's 1 consolidation/day runs on the deterministic floor only (zero
+> LLM spend); Pro+ gets frontier extraction** — so the Free tier's hosted
+> compute is cost-safe. See decisions log Q33 + [ADR 0011](./0011-managed-runtime-sequencing.md).
+
 | Tier | Price | Storage | Connectors | Status |
 |---|---|---|---|---|
-| **Free** | $0 | ~1 GB hosted | 1 (GitHub *or* Notion) | Ships v1 |
-| **Pro** | $9/mo | ~25 GB hosted | up to 3 (GitHub, Notion, + whatever ships) | Ships v1 |
-| **Teams** | $24/mo (list, shown disabled) | ~100 GB + shared workspace | unlimited | "Coming Soon" button, disabled — no billing built |
+| **Free** | $0 | 500 MB hosted | 1 (GitHub *or* Notion) | Ships v1 |
+| **Pro** | $9/mo | 10 GB hosted | up to 3 (GitHub, Notion, + whatever ships) | Ships v1 |
+| **Teams** | $24/seat/mo (list, shown disabled) | 50 GB + shared workspace | unlimited | "Coming Soon" button, disabled — no billing built |
 
 ### Entitlement model (numeric caps, not named-feature allowlists)
 
 Following §12.3 ("no `plan === 'Pro'`" checks), entitlements are checked as
 numeric caps:
 
-- `entitlements.maxHostedStorageBytes` — Free ~1GB, Pro ~25GB, Teams ~100GB.
+- `entitlements.maxHostedStorageBytes` — Free 500MB, Pro 10GB, Teams 50GB.
   Enforced on push: `if bytesUsed + incoming > limit → 402 with upgrade payload`.
 - `entitlements.maxConnectors` *(new)* — Free=1, Pro=3, Teams=∞. Enforced as
   `connectors.length < maxConnectors`. **Not** a per-connector allowlist.
@@ -48,8 +61,9 @@ promise.
 
 ### Cost / margin (honest)
 
-R2 ≈ $0.015/GB → 25GB ≈ $0.38/mo cost at Pro (~96% margin at $9); 100GB ≈
-$1.50/mo at Teams (~94% margin at $24); Free at 1GB ≈ $0.015/mo (negligible).
+R2 ≈ $0.015/GB → 10GB ≈ $0.15/mo cost at Pro (~98% margin at $9); 50GB ≈
+$0.75/mo at Teams (~97% margin at $24/seat); Free at 500MB ≈ $0.008/mo
+(negligible).
 
 ### Billing provider: Polar (not Stripe)
 
@@ -68,13 +82,20 @@ Verified fit for the §12.3 model:
 
 ### Teams tier (Coming Soon)
 
-- **List price locked now: $24/mo** (3× Pro, deliberately not a round multiple).
-  Locked while it's cheap to change; implementation deferred.
-- **Intended billing model: $24/seat/mo** (the SaaS norm — Supabase, Linear,
+- **List price locked now: $24/seat/mo** (3× Pro, deliberately not a round
+  multiple). Locked while it's cheap to change; implementation deferred.
+- **Billing model: per-seat** ($24/seat/mo — the SaaS norm; Supabase, Linear,
   Vercel all bill per-seat). Implementation (seats, shared workspace, SCIM)
   deferred to when Teams ships, gated on Pro revenue or sponsorships (ADR 0003).
 - The "Coming Soon" button is **disabled** but **shows the price** — captures
   demand signal + anchors the value ladder without building billing prematurely.
+- **Add-ons (deferred):** the conservative base storage ladder (500MB/10GB/50GB)
+  is sized to leave a clean upsell ladder — paid storage packs (+10GB/+50GB) and
+  a future higher tier — to add once billing is live and demand is observable.
+  Do not build add-on SKUs at v1.
+- **Annual billing (deferred):** not at v1. The pricing FAQ already states "Not
+  yet, but we're planning to introduce one." Cheap fast-follower post-launch;
+  Polar supports annual natively.
 
 ## Consequences
 

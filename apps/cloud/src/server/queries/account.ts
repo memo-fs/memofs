@@ -1,0 +1,83 @@
+/**
+ * Account-scoped dashboard queries.
+ *
+ * Reads the billing identity + aggregated usage for the signed-in user. These
+ * are the SSOT reads the overview, billing, and sidebar cards derive from —
+ * pure `(db, …)` functions, no Hono/Worker coupling, so they unit-test with the
+ * in-memory `createTestDb()` harness.
+ *
+ * `getAccountForUser` is the extracted DRY counterpart of the inline join that
+ * lived in `session.server.ts` (now both call here): one `accounts.userId`
+ * lookup returning the entitlement snapshot. `getAccountUsage` aggregates the
+ * storage total across the account's projects — the same number the sync push
+ * path recomputes per-project, rolled up account-wide.
+ *
+ * @see docs/adr/0006-pricing-and-entitlements.md — entitlement caps.
+ * @see {@link ./projects} — per-project reads compose the same tables.
+ */
+import { eq, sql, sum } from "drizzle-orm";
+
+import type { Database } from "../../db/index.server";
+import { accounts, type PlanTier, projects } from "../../db/schema";
+
+/**
+ * The entitlement snapshot for a billing account, as the dashboard reads it.
+ * Mirrors the `accounts` row's entitlement columns (ADR 0006).
+ */
+export interface AccountView {
+	id: string;
+	plan: PlanTier;
+	maxHostedStorageBytes: number;
+	maxConnectors: number;
+}
+
+/**
+ * Looks up the billing account for `userId`, or `null` if none exists yet.
+ *
+ * An account can be absent only if provisioning raced or failed — normal
+ * signups create one via the `user.create.after` hook. Callers degrade
+ * gracefully (the layout falls back to a zeroed usage card) rather than
+ * blocking the user out of their dashboard.
+ */
+export async function getAccountForUser(
+	db: Database,
+	userId: string,
+): Promise<AccountView | null> {
+	const rows = await db
+		.select({
+			id: accounts.id,
+			plan: accounts.plan,
+			maxHostedStorageBytes: accounts.maxHostedStorageBytes,
+			maxConnectors: accounts.maxConnectors,
+		})
+		.from(accounts)
+		.where(eq(accounts.userId, userId))
+		.limit(1);
+	return rows[0] ?? null;
+}
+
+/**
+ * Aggregated usage for an account: total storage across all its projects.
+ *
+ * `connectorsUsed` is always 0 today — there is no `connectors` table (connectors
+ * run locally per ADR Q1; config is the synced `connectors.json` blob). The field
+ * is kept on the return type so the billing card can render the cap alongside a
+ * truthful "0 of N" without a second code path when a table lands later.
+ *
+ * Storage is `SUM(projects.total_storage_bytes)` — each project already carries
+ * a denormalised running total recomputed on every push (see `commitPush`), so
+ * this is a single indexed aggregation, not a scan of `project_files`.
+ */
+export async function getAccountUsage(
+	db: Database,
+	accountId: string,
+): Promise<{ storageBytes: number; connectorsUsed: number }> {
+	const rows = await db
+		.select({
+			total: sql<number>`coalesce(${sum(projects.totalStorageBytes)}, 0)`,
+		})
+		.from(projects)
+		.where(eq(projects.accountId, accountId));
+	const storageBytes = Number(rows[0]?.total ?? 0);
+	return { storageBytes, connectorsUsed: 0 };
+}

@@ -120,25 +120,11 @@ const tekMemoApi = [
 	},
 ];
 
-const blog = [
-	{ text: "Home", link: "/blog/" },
-	{
-		text: "Posts",
-		collapsed: true,
-		items: [{ text: "Introducing TekMemo", link: "/blog/introducing-tekmemo" }],
-	},
-];
-
-const changelog = [
-	{ text: "X", link: "https://x.com/tekbreed" },
-	{ text: "GitHub Repo", link: "https://github.com/tekbreed/tekmemo" },
-];
-
+// Blog and changelog opt out of the docs sidebar via `sidebar: false`
+// frontmatter — they use editorial / full-width layouts instead.
 export const sidebar: DefaultTheme.Sidebar = {
 	"/packages/tekmemo/": [{ text: "Core Runtime", items: tekmemo }],
 	"/packages/cli/": [{ text: "CLI", items: tekmemoCli }],
 	"/packages/mcp/": [{ text: "MCP", items: tekmemoMcp }],
 	"/api/tekmemo/": [{ text: "API", items: tekMemoApi }],
-	"/blog/": [{ text: "Blog", items: blog }],
-	"/changelog": [{ text: "Stay Updated", items: changelog }],
 };

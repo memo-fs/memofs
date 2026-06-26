@@ -14,6 +14,8 @@
  * @see docs/architecture/decisions.md Q13 — auto-provision on first push.
  * @see docs/architecture/decisions.md Q14 — cursor = `String(seq)`.
  */
+
+import type { Transaction } from "@libsql/client";
 import { createId } from "@paralleldrive/cuid2";
 import type {
 	CloudFileManifest,
@@ -258,11 +260,26 @@ export async function verifyUploaded(
 }
 
 /**
- * Commits a push: upserts every uploaded file into `project_files`, recomputes
- * `projects.total_storage_bytes` from the resulting file set, and advances the
- * sync cursor — all in one transaction so a partial commit never leaves the
- * manifest half-applied.
+ * Commits a push inside a caller-supplied libSQL write transaction (ADR 0010).
  *
+ * This is the serialized form: the caller wraps the call in
+ * `acquireWriteLock(db, projectId, (tx) => commitPushTx(tx, projectId, …))`, so
+ * every statement below runs against the SAME `BEGIN IMMEDIATE` transaction.
+ * The cursor bump + N upserts + SUM + projects update are atomic by
+ * construction — there is no window for a concurrent commit to interleave and
+ * lose a manifest entry or collide on `seq`.
+ *
+ * Statements run as raw SQL via `tx.execute()` because the raw libSQL
+ * `Transaction` (not a drizzle db handle) is what the `BEGIN IMMEDIATE` lock
+ * holds. Drizzle's query builder operates on `Database`/sessions, not raw
+ * transactions; mixing would either lose the lock or require drizzle's own
+ * (deferred-mode) transaction wrapper — see `concurrency.ts` for why deferred
+ * is wrong on the commit path. The SQL mirrors the drizzle queries the old
+ * `commitPush` emitted (same columns, same `ON CONFLICT(project_id, path)` upsert).
+ *
+ * @param tx         an open libSQL write transaction from `acquireWriteLock`.
+ * @param projectId  the project being committed.
+ * @param uploaded   the verified `{ path, sha256, r2Key, sizeBytes }` entries.
  * @returns `{ cursor, manifest }` — the new cursor and the full cloud manifest
  *          after the commit, shaped exactly as `SyncPushCompleteResult` expects.
  *
@@ -276,6 +293,152 @@ export async function verifyUploaded(
  * it, but also doesn't delete the row — deletion is explicit via a future
  * `DELETE /sync/file` (§13 out of v1 scope); v1 sync is append/replace by sha.
  */
+export async function commitPushTx(
+	tx: Transaction,
+	projectId: string,
+	uploaded: Array<{
+		path: string;
+		sha256: string;
+		r2Key: string;
+		sizeBytes: number;
+	}>,
+): Promise<{ cursor: string; manifest: CloudFileManifest }> {
+	// Bump the cursor INSIDE the tx (write lock held → no concurrent bump can
+	// read the same max(seq) and land the same value).
+	const nextSeq = await bumpCursorTx(tx, projectId, "push");
+
+	// Upsert every uploaded file. `(project_id, path)` is unique, so
+	// `ON CONFLICT DO UPDATE` turns an insert into a replace when the path
+	// already exists — exactly the "replace this path's blob" semantics a push
+	// needs. Mirrors the drizzle `onConflictDoUpdate({ target:
+	// [projectFiles.projectId, projectFiles.path], set })` from the legacy path.
+	for (const entry of uploaded) {
+		await tx.execute({
+			sql: `INSERT INTO project_files (id, project_id, path, sha256, r2_key, size_bytes)
+			      VALUES (?, ?, ?, ?, ?, ?)
+			      ON CONFLICT (project_id, path) DO UPDATE SET
+			        sha256 = excluded.sha256,
+			        r2_key = excluded.r2_key,
+			        size_bytes = excluded.size_bytes,
+			        updated_at = current_timestamp`,
+			args: [
+				newId(),
+				projectId,
+				entry.path,
+				entry.sha256,
+				entry.r2Key,
+				entry.sizeBytes,
+			],
+		});
+	}
+
+	// Recompute the project's total storage from the file set (see JSDoc above).
+	const totals = await tx.execute({
+		sql: `SELECT coalesce(sum(size_bytes), 0) AS total
+		      FROM project_files
+		      WHERE project_id = ?`,
+		args: [projectId],
+	});
+	const totalBytes = Number(totals.rows[0]?.total ?? 0);
+	await tx.execute({
+		sql: `UPDATE projects
+		      SET total_storage_bytes = ?, updated_at = current_timestamp
+		      WHERE id = ?`,
+		args: [totalBytes, projectId],
+	});
+
+	const manifest = await loadCloudManifestTx(tx, projectId);
+	return { cursor: String(nextSeq), manifest };
+}
+
+/**
+ * Reads the current cursor for a project INSIDE a write transaction, for the
+ * optimistic `baseCursor` gate (ADR 0010). Runs against `tx` so the read is
+ * serialized with the commit that's about to happen — no concurrent commit can
+ * sneak in between the gate check and the cursor bump.
+ */
+export async function currentCursorTx(
+	tx: Transaction,
+	projectId: string,
+): Promise<string> {
+	const rs = await tx.execute({
+		sql: `SELECT seq FROM sync_cursors
+		      WHERE project_id = ?
+		      ORDER BY seq DESC
+		      LIMIT 1`,
+		args: [projectId],
+	});
+	return rs.rows[0] ? String(rs.rows[0].seq) : INITIAL_CURSOR;
+}
+
+/**
+ * Advances the sync cursor INSIDE a caller-supplied transaction. The cursor
+ * bump is the critical section that concurrency control exists to protect
+ * (`max(seq)+1` read-then-write); running it inside `BEGIN IMMEDIATE` makes it
+ * atomic by definition.
+ */
+export async function bumpCursorTx(
+	tx: Transaction,
+	projectId: string,
+	kind: "push" | "pull" | "init",
+): Promise<number> {
+	const rs = await tx.execute({
+		sql: `SELECT coalesce(max(seq), 0) AS max_seq
+		      FROM sync_cursors
+		      WHERE project_id = ?`,
+		args: [projectId],
+	});
+	const nextSeq = Number(rs.rows[0]?.max_seq ?? 0) + 1;
+	await tx.execute({
+		sql: `INSERT INTO sync_cursors (id, project_id, seq, kind)
+		      VALUES (?, ?, ?, ?)`,
+		args: [newId(), projectId, nextSeq, kind],
+	});
+	return nextSeq;
+}
+
+/**
+ * Loads the cloud manifest INSIDE a transaction, so the manifest returned with
+ * a freshly-committed cursor reflects exactly the writes just applied (not a
+ * read from a different transaction's snapshot).
+ */
+export async function loadCloudManifestTx(
+	tx: Transaction,
+	projectId: string,
+): Promise<CloudFileManifest> {
+	const rs = await tx.execute({
+		sql: `SELECT path, sha256, r2_key, size_bytes, updated_at
+		      FROM project_files
+		      WHERE project_id = ?`,
+		args: [projectId],
+	});
+	const manifest: CloudFileManifest = {};
+	for (const row of rs.rows) {
+		const path = String(row.path);
+		manifest[path] = {
+			path,
+			sha256: String(row.sha256),
+			sizeBytes: Number(row.size_bytes),
+			r2Key: String(row.r2_key),
+			updatedAt: String(row.updated_at),
+		};
+	}
+	return manifest;
+}
+
+/**
+ * Commits a push WITHOUT concurrency control — the legacy single-writer path.
+ *
+ * Kept for callers that do not (yet) run under `acquireWriteLock` (existing
+ * tests, any non-sync ingestion). It composes the transactional pieces inside a
+ * single drizzle `db.transaction()` so the manifest is still applied atomically
+ * against the DB; the difference from `commitPushTx`+`acquireWriteLock` is that
+ * drizzle's transaction is deferred-mode (not `BEGIN IMMEDIATE`), so it does
+ * NOT serialize concurrent writers. New multi-writer call sites MUST use
+ * `acquireWriteLock` + `commitPushTx` instead.
+ *
+ * @returns `{ cursor, manifest }` — see `commitPushTx`.
+ */
 export async function commitPush(
 	db: Database,
 	projectId: string,
@@ -286,11 +449,11 @@ export async function commitPush(
 		sizeBytes: number;
 	}>,
 ): Promise<{ cursor: string; manifest: CloudFileManifest }> {
+	// Mirror `commitPushTx`'s logic against the drizzle builder (the deferred-
+	// mode transaction it runs in is the only difference). Keeping both paths
+	// avoids a hard dependency on raw-SQL correctness for the legacy caller.
 	const nextSeq = await bumpCursor(db, projectId, "push");
 
-	// Upsert every uploaded file. `(projectId, path)` is unique, so
-	// `onConflictDoUpdate` turns an insert into a replace when the path already
-	// exists — exactly the "replace this path's blob" semantics a push needs.
 	for (const entry of uploaded) {
 		await db
 			.insert(projectFiles)
@@ -313,7 +476,6 @@ export async function commitPush(
 			});
 	}
 
-	// Recompute the project's total storage from the file set (see JSDoc above).
 	const totals = await db
 		.select({ total: sql<number>`coalesce(sum(${projectFiles.sizeBytes}), 0)` })
 		.from(projectFiles)

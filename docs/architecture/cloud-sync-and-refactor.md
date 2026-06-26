@@ -414,7 +414,7 @@ This is the capability-check rule from TekBreed `pricing_global_rules.md` §2.3,
 
 ### 12.4 Auth
 
-API key: `Authorization: Bearer tk_live_...`. Validated for hash, revocation, ownership, scopes (`memory:sync`), entitlements, rate limits. Dashboard uses TekAuth session cookies.
+API key: `Authorization: Bearer tm_...`. Validated for hash, revocation, ownership, scopes (`memory:sync`), entitlements, rate limits. Dashboard uses TekAuth session cookies.
 
 ---
 

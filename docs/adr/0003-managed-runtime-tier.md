@@ -108,3 +108,18 @@ exist in the cloud before the cloud can run an engine over them.
 - v1 client surface: `packages/tekmemo/src/cloud-client/types.ts`
   (`TekMemoCloudClient` → health/readiness/sync)
 - Shelved worker: `apps/tekmemo-mcp-worker` (reopens as managed-tier instance)
+
+## Revision history
+
+- **2026-06-20** — Accepted. Two-phase foundation-first sequencing (v1 file
+  replica → v1.x/v2 managed runtime); "same engine, managed infra" thesis.
+- **2026-06-24** — **Sequencing revised by [ADR 0011](./0011-managed-runtime-sequencing.md).**
+  The two-phase hop (replica → managed runtime) is widened to **three phases:
+  concurrency layer → Teams → full managed runtime.** The forcing insight: D6
+  (last-writer-wins) makes Teams-on-replica a silent-data-loss bug, and the
+  concurrency layer ([ADR 0010](./0010-cloud-concurrency-control-for-b3.md)) is
+  strictly smaller than the full managed runtime — so it ships first and unblocks
+  Teams revenue safely. **This ADR's thesis is unchanged** (same runtime, managed
+  infra); only the *sequence* to get there is refined. The managed runtime is
+  now phase 3, gated on the R2-backed `MemoryStore` ([ADR 0012](./0012-r2-memory-store-adapter.md))
+  + a concrete extractor adapter. See decisions log Q32.

@@ -8,7 +8,15 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/mockServiceWorker.js", "!**/*.css", "!**/worker-configuration.d.ts"]
+		"includes": [
+			"**",
+			"!**/mockServiceWorker.js",
+			"!**/*.css",
+			"!**/worker-configuration.d.ts",
+			"!**/components/ui/**",
+			"!**/Initial design/**",
+			"!**/drizzle/meta/**"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -17,10 +25,23 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"suspicious": {
+				"useBiomeIgnoreFolder": "off"
+			}
 		}
 	},
 	"overrides": [
+		{
+			"includes": ["**/components/site/brand-icons.tsx"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"noSvgWithoutTitle": "off"
+					}
+				}
+			}
+		},
 		{
 			"includes": ["**/*.vue"],
 			"linter": {

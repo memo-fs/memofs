@@ -20,6 +20,11 @@
 	"vars": {
 		"ENVIRONMENT": "development",
 		"CLOUD_PUBLIC_BASE_URL": "http://localhost:8787",
+		// Better Auth base URL — the origin the auth app is served from. In dev
+		// this is the local Workers dev server; in prod it's memo.tekbreed.com.
+		"BETTER_AUTH_URL": "http://localhost:8787",
+		// Plunk From header (non-secret envelope; the key itself is a secret).
+		"PLUNK_FROM": "TekMemo Cloud <team@tekbreed.com>",
 		"PRESIGN_TTL_SECONDS": "900",
 		"R2_S3_ENDPOINT": "",
 		"R2_BUCKET_NAME": "tekmemo-blobs"
@@ -27,6 +32,11 @@
 	// Secrets (set via `wrangler secret put <NAME>`): DATABASE_URL,
 	// DATABASE_AUTH_TOKEN, R2_S3_ACCESS_KEY_ID, R2_S3_SECRET_ACCESS_KEY,
 	// TEKMEMO_API_KEY_SALT, SESSION_SECRET.
+	//
+	// Auth (SC4.1): BETTER_AUTH_SECRET, PLUNK_API_KEY. OAuth (A2, optional until
+	// apps are registered): GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
+	// GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. Rate-limit (SC4.1):
+	// UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN.
 	//
 	// NOTE: path aliases (e.g. `~/*` → `src/*`) are owned by Vite's
 	// `resolve.alias` (see vite.config.ts + tsconfig `paths`), NOT by the

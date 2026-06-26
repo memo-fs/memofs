@@ -42,10 +42,6 @@
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(120deg, #258acb 30%, #4cae61);
 
-  /* Soft glowing background for the hero image */
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, #258acb 50%, #4cae61 50%);
-  --vp-home-hero-image-filter: blur(90px);
-
   /* Green (success / toast) */
   --vp-c-green-1: #2e7d32;
   --vp-c-green-soft: rgba(46, 125, 50, 0.14);
@@ -88,24 +84,16 @@
   letter-spacing: -0.02em;
 }
 
-/* Fix Hero Name background clip */
-.VPHero .name {
-  background: var(--vp-home-hero-name-background);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: var(--vp-home-hero-name-color);
-}
-
-/* Make the glow behind the hero image very minimal and soft */
+/* The hero visual is a self-contained SVG diagram; suppress VitePress's
+   default blurred gradient backdrop so there's no glow behind it. */
 .VPHero .image-bg {
-  transform: translate(-50%, -50%) scale(0.8);
-  opacity: 0.10;
+  display: none;
 }
 
 /* ===================================================================
    Home page — atmospheric layered background
-   A faint blueprint grid + a soft brand gradient mesh give the page
-   depth without being loud. Grain overlay adds tactile refinement.
+   A faint blueprint grid gives the page subtle structural depth
+   without a loud colored glow.
    =================================================================== */
 .VPHome {
   position: relative;
@@ -123,34 +111,6 @@
   opacity: 0.06;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
-}
-
-/* Brand gradient mesh behind the hero — the atmospheric glow */
-.VPHome .VPHero {
-  position: relative;
-  isolation: isolate;
-}
-
-.VPHome .VPHero::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 38%;
-  width: min(960px, 120vw);
-  height: 480px;
-  transform: translate(-50%, -50%);
-  background:
-    radial-gradient(closest-side, rgba(37, 138, 203, 0.18), transparent 70%),
-    radial-gradient(closest-side at 62% 45%, rgba(76, 174, 97, 0.14), transparent 70%);
-  filter: blur(40px);
-  z-index: -1;
-  pointer-events: none;
-}
-
-.dark .VPHome .VPHero::after {
-  background:
-    radial-gradient(closest-side, rgba(79, 178, 243, 0.20), transparent 70%),
-    radial-gradient(closest-side at 62% 45%, rgba(91, 212, 115, 0.16), transparent 70%);
 }
 
 /* Ensure custom home sections sit above the texture layer */
@@ -600,9 +560,85 @@
   font-family: var(--vp-font-family-mono);
 }
 
-/* img {
-  width:100%;
-  max-height: 450px;
-  margin: 16px auto;
-  border-radius: 8px;
-} */
+/* ===================================================================
+   Changelog page — release-note styling
+   Each `## vX — date` becomes a release header with a brand accent;
+   change-type `#### Added/Fixed/Changed/Removed` headings get a colored,
+   uppercase label keyed off their slug id (e.g. id="added").
+   =================================================================== */
+.changelog-page .vp-doc h2 {
+  position: relative;
+  margin-top: 56px;
+  padding: 6px 0 10px 18px;
+  border-top: none;
+  border-left: 3px solid var(--vp-c-brand-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.changelog-page .vp-doc h2:first-of-type {
+  margin-top: 32px;
+}
+
+/* The "**Initial alpha release**" line that follows a version heading. */
+.changelog-page .vp-doc h2 + p {
+  margin-top: 6px;
+  color: var(--vp-c-text-2);
+  font-size: 15px;
+}
+
+.changelog-page .vp-doc h3 {
+  font-family: var(--vp-font-family-display);
+  font-size: 16px;
+  color: var(--vp-c-text-1);
+  margin-top: 28px;
+}
+
+/* Change-type labels — small, uppercase, color-coded by section slug. */
+.changelog-page .vp-doc h4 {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.changelog-page .vp-doc h4[id^="added"] {
+  color: var(--tek-c-archive);
+  background: rgba(91, 212, 115, 0.12);
+}
+
+.changelog-page .vp-doc h4[id^="changed"] {
+  color: var(--tek-c-core);
+  background: rgba(79, 178, 243, 0.12);
+}
+
+.changelog-page .vp-doc h4[id^="fixed"] {
+  color: var(--tek-c-sync);
+  background: rgba(251, 146, 60, 0.12);
+}
+
+.changelog-page .vp-doc h4[id^="removed"],
+.changelog-page .vp-doc h4[id^="deprecated"] {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+/* Hide the hover anchor "#" on these pill labels — it breaks the shape. */
+.changelog-page .vp-doc h4 .header-anchor {
+  display: none;
+}
+
+/* ===================================================================
+   Blog index — widen the doc content so the 3-up card grid has room.
+   VitePress caps a no-sidebar doc at ~688px; the card grid needs more.
+   =================================================================== */
+.blog-index-page .VPDoc .container,
+.blog-index-page .VPDoc:not(.has-sidebar) .content {
+  max-width: 1152px;
+}

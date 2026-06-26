@@ -18,6 +18,10 @@ import { renderToReadableStream } from "react-dom/server";
 import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 
+// if (process.env.MOCKS === "true") {
+// 	await import("../tests/mocks/index");
+// }
+
 export default function handleRequest(
 	request: Request,
 	responseStatusCode: number,

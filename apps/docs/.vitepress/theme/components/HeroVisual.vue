@@ -5,7 +5,7 @@ import { onMounted, ref } from "vue";
  * HeroVisual component displays an astonishing, interactive, high-tech SVG diagram
  * representing the TekMemo memory infrastructure (Core, Archival, Recall, and Sync).
  * Features:
- * - Central node containing the official TekBreed logo (brackets + helix).
+ * - Central node containing the TekMemo logo (brackets + layered memory stack).
  * - Concentric orbiting circular nodes representing the four memory layers.
  * - Flowing data pulse animations running along curved bezier connection paths.
  * - 3D parallax hover tilt effect reacting dynamically to the mouse cursor.
@@ -74,18 +74,6 @@ const handleMouseLeave = () => {
       :class="{ active: isActive }"
     >
       <defs>
-        <!-- Mask for Green Helix (Top overlay) -->
-        <mask id="mask-green">
-          <rect width="100" height="100" fill="white" />
-          <path d="M 35,10 C 35,30 65,30 65,50" stroke="black" stroke-width="12" stroke-linecap="round" fill="none" />
-        </mask>
-
-        <!-- Mask for Blue Helix (Bottom overlay) -->
-        <mask id="mask-blue">
-          <rect width="100" height="100" fill="white" />
-          <path d="M 35,50 C 35,70 65,70 65,90" stroke="black" stroke-width="12" stroke-linecap="round" fill="none" />
-        </mask>
-
         <!-- Glow Filters -->
         <filter id="glow-core" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="16" result="blur1" />
@@ -121,6 +109,12 @@ const handleMouseLeave = () => {
         <linearGradient id="grad-sync-state" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="#fb923c" />
           <stop offset="100%" stop-color="#f97316" />
+        </linearGradient>
+
+        <!-- Vertical blue -> green gradient for the embedded TekMemo layered stack -->
+        <linearGradient id="grad-mem-layers" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4fb2f3" />
+          <stop offset="100%" stop-color="#5bd473" />
         </linearGradient>
         
         <!-- Mask to cut connection lines at node boundaries -->
@@ -191,24 +185,19 @@ const handleMouseLeave = () => {
         <!-- Central Glass Disc -->
         <circle cx="250" cy="250" r="50" fill="none" stroke="url(#grad-core-mem)" stroke-width="2.5" class="core-center-disc" />
 
-        <!-- Brand Helix Logo Embedded inside the Core Node -->
+        <!-- Brand Logo Embedded inside the Core Node -->
         <!-- Translating the 100x100 logo so its center (50, 50) sits at (250, 250) -->
         <g transform="translate(212.5, 212.5) scale(0.75)">
-          <!-- Brackets -->
+          <!-- Brackets (TekBreed lineage) -->
           <polyline points="25,25 5,50 25,75" stroke="#4fb2f3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-left" />
           <polyline points="75,25 95,50 75,75" stroke="#5bd473" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-right" />
 
-          <!-- DNA Rungs -->
-          <g stroke="#5bd473" stroke-width="5" stroke-linecap="round">
-            <line x1="44" y1="22" x2="56" y2="22" class="rung r1" />
-            <line x1="41" y1="44" x2="59" y2="44" class="rung r2" />
-            <line x1="41" y1="56" x2="59" y2="56" class="rung r3" />
-            <line x1="44" y1="78" x2="56" y2="78" class="rung r4" />
+          <!-- Isometric layered stack (the TekMemo mark) -->
+          <g stroke="url(#grad-mem-layers)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <polygon points="50,28 66,37 50,46 34,37" class="mem-layer ml1" />
+            <polyline points="34,45 50,54 66,45" class="mem-layer ml2" />
+            <polyline points="34,53 50,62 66,53" class="mem-layer ml3" />
           </g>
-
-          <!-- DNA Helix Strands -->
-          <path d="M 65,10 C 65,30 35,30 35,50 C 35,70 65,70 65,90" stroke="#5bd473" stroke-width="7" stroke-linecap="round" fill="none" mask="url(#mask-green)" class="helix-strand hs1" />
-          <path d="M 35,10 C 35,30 65,30 65,50 C 65,70 35,70 35,90" stroke="#4fb2f3" stroke-width="7" stroke-linecap="round" fill="none" mask="url(#mask-blue)" class="helix-strand hs2" />
         </g>
       </g>
 
@@ -445,27 +434,24 @@ const handleMouseLeave = () => {
 	transform: translateX(3px);
 }
 
-.helix-strand {
-	transition: stroke-width 0.3s;
+.mem-layer {
+	opacity: 0.9;
+	transition: stroke-width 0.3s, opacity 0.3s;
 }
 
-.core-node:hover .helix-strand {
+.core-node:hover .mem-layer {
 	stroke-width: 8.5px;
+	opacity: 1;
 }
 
-/* Rungs animation */
-.rung {
-	opacity: 0.8;
-	animation: pulseRung 2s ease-in-out infinite alternate;
-}
-.r1 { animation-delay: 0s; }
-.r2 { animation-delay: 0.3s; }
-.r3 { animation-delay: 0.6s; }
-.r4 { animation-delay: 0.9s; }
+/* Layered-stack pulse — each layer breathes in sequence */
+.ml1 { animation: pulseLayer 2.4s ease-in-out infinite alternate; }
+.ml2 { animation: pulseLayer 2.4s ease-in-out infinite alternate 0.4s; }
+.ml3 { animation: pulseLayer 2.4s ease-in-out infinite alternate 0.8s; }
 
-@keyframes pulseRung {
-	0% { opacity: 0.3; stroke-width: 3.5px; }
-	100% { opacity: 1; stroke-width: 5.5px; }
+@keyframes pulseLayer {
+	0% { opacity: 0.55; }
+	100% { opacity: 1; }
 }
 
 /* Floating particles */

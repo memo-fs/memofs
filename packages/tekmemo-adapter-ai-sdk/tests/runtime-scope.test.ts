@@ -156,7 +156,7 @@ test("runtime tool blocks likely secrets by default", async () => {
 	await expect(
 		tool.execute({
 			command: "remember",
-			content: "TEKMEMO_API_KEY=tk_live_secret123456789",
+			content: "TEKMEMO_API_KEY=tm_secret123456789",
 		}),
 	).rejects.toThrow(/Potential secret/);
 });

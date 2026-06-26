@@ -12,7 +12,7 @@
 > session 2 (ai-sdk extraction, package review, docs IA) and session 3
 > (positioning, intelligence north star, cloud differentiators, pricing
 > extension, testing). Updated inline as each branch of the design tree is
-> resolved. **Q1–Q10 + S2-Q1 + Q11–Q28 are all locked.** Numbering is
+> resolved. **Q1–Q10 + S2-Q1 + Q11–Q28 + Q29–Q33 are all locked.** Numbering is
 > collision-free:
 > - **Q1–Q5** — original open questions (connectors, decay/conflict, cloud
 >   purpose, intelligence scope).
@@ -31,6 +31,11 @@
 >   staleness loop (Q24), writer-critic consolidation (Q25a), cloud concurrency
 >   control for B3 (Q25b), entity-centric recall output (Q26), progressive
 >   recall protocol (Q27), local concurrency enforcement (Q28).
+> - **Q29–Q33** — session 6: managed-runtime sequencing & prerequisites
+>   (grill-with-docs). Q29 corrects a recurring premise about connectors;
+>   Q30/Q33 reaffirm pricing; Q31 → ADR 0012 (R2 memory store adapter);
+>   Q32 → ADR 0011 (three-phase sequencing, revises ADR 0003). Projects into
+>   `screens-locked.md` SC7–SC9 (Teams, managed memory, pricing/billing deltas).
 >
 > **Relationship to other docs:**
 > - Governs and extends `docs/architecture/cloud-sync-and-refactor.md` (the
@@ -65,6 +70,12 @@
 >   - [ADR 0010](../adr/0010-cloud-concurrency-control-for-b3.md) — a Turso/libSQL
 >     concurrency-control layer for the cloud B3 multi-writer workload (from
 >     Q25b).
+>   - [ADR 0011](../adr/0011-managed-runtime-sequencing.md) — managed-runtime
+>     sequencing: concurrency layer → Teams → full managed runtime (from Q32;
+>     revises ADR 0003's two-phase sequence).
+>   - [ADR 0012](../adr/0012-r2-memory-store-adapter.md) — R2-backed MemoryStore
+>     as a new adapter `@tekbreed/tekmemo-adapter-r2` + provider-neutral
+>     remote-blob store contract in core (from Q31).
 >   Q10 (connector set) and the license decision (folded into Q8) are captured in
 >   this log; the provider-neutral `Connector` interface from Q10 folds into
 >   ADR 0002's extensibility coverage.
@@ -514,7 +525,7 @@
 | **Compute (API + dashboard)** | **Cloudflare Workers — ONE Worker** running Hono API + React Router **v8** framework-mode SSR dashboard, served via Static Assets | Hono + `@cloudflare/hono` adapter; RRv8 has first-class official support on Workers via the GA `@react-router/cloudflare` adapter + Cloudflare Vite plugin (verified: `@react-router/cloudflare@8.0.1` is `latest`). Free tier covers v1 (sync + dashboard are small). **Splittable to two Workers via service bindings** when the 3MB-free / 10MB-paid bundle cap bites or when the managed-runtime tier (ADR 0003) lands — no rewrite, just a seam. |
 | **Blob storage** | **Cloudflare R2** | Already locked (`cloud-sync-and-refactor.md` §12.2). ~$0.015/GB, **free egress** — critical for a sync product (downloads are the main traffic). |
 | **Metadata DB** | **Turso (libSQL) + Drizzle ORM** | Already locked (§12.2). libSQL/SQLite, free tier covers v1; Drizzle for type-safe DX matching the TS-everywhere stack. |
-| **Auth** | **Better Auth** *(pending capability check)* | Must cleanly handle: (a) `tk_live_…` API keys for machine-to-machine sync, (b) OAuth callbacks for Notion/GitHub connectors, (c) scoped tokens (`memory:sync`). **Verify before final commit**; if it can't do all three, pick an alternative. |
+| **Auth** | **Better Auth** *(pending capability check)* | Must cleanly handle: (a) `tm_…` API keys for machine-to-machine sync, (b) OAuth callbacks for Notion/GitHub connectors, (c) scoped tokens (`memory:sync`). **Verify before final commit**; if it can't do all three, pick an alternative. |
 | **Static assets / hosting** | **Workers + Static Assets** (NOT Pages) | Cloudflare has announced Pages ↔ Workers are **converging**; Workers + Static Assets is the recommended path for new projects. A single Worker serves SSR HTML + JS/CSS. |
 | **CSS** | **Tailwind CSS** | Standard, fast, zero cost. |
 | **Scheduling / queues / idempotency** | **Upstash QStash + Redis + Workflow** | Serverless, generous free tier (QStash ~10k msg/day free). QStash → connector schedules (Q1/Q2) + consolidation passes (Q5); Redis → rate limit/cursors/idempotency; Workflow → the managed-tier recall/extract pipelines later. **≠ the removed `tekmemo-adapter-upstash` vector adapter (Q6) — different product, no conflict.** |
@@ -620,9 +631,9 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
 
   | Tier | Price | Storage | Connectors | Status |
   |---|---|---|---|---|
-  | **Free** | $0 | ~1 GB hosted | **1** (GitHub *or* Notion) | Ships v1 |
-  | **Pro** | **$9/mo** | ~25 GB hosted | **up to 3** (GitHub, Notion, + whatever ships) | Ships v1 |
-  | **Teams** | **$24/mo** (list price, shown disabled) | ~100 GB + shared workspace (future) | **unlimited** | "Coming Soon" button, disabled — captures demand, no billing built |
+  | **Free** | $0 | 500 MB hosted | **1** (GitHub *or* Notion) | Ships v1 |
+  | **Pro** | **$9/mo** | 10 GB hosted | **up to 3** (GitHub, Notion, + whatever ships) | Ships v1 |
+  | **Teams** | **$24/seat/mo** (list price, shown disabled) | 50 GB + shared workspace (future) | **unlimited** | "Coming Soon" button, disabled — captures demand, no billing built |
 
 - **Rationale:**
   - **Generous Free tier** is non-negotiable for OSS dev-tool adoption (the
@@ -636,7 +647,10 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
     billing/seat-management prematurely.
 - **Entitlement model (numeric caps, not named-feature allowlists):**
   - Storage: `entitlements.maxHostedStorageBytes` (already locked, §12.3). Free
-    ~1GB, Pro ~25GB, Teams ~100GB.
+    500MB, Pro 10GB, Teams 50GB. *(Revised 2026-06-23 from the earlier
+    ~1GB/~25GB/~100GB placeholders: a tighter base ladder keeps ~97–98% gross
+    margin at current R2 pricing while reserving headroom for paid storage
+    add-ons later — see "Add-ons" below.)*
   - **Connectors: `entitlements.maxConnectors`** (new). Enforced as
     `connectors.length < maxConnectors` — Free=1, Pro=3, Teams=∞. **Not** a
     per-connector allowlist, per §12.3's "no `plan === 'Pro'`" principle.
@@ -645,9 +659,9 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
       GitHub+Notion ship at launch, Pro users get a 3-slot allowance that fills
       when connector #3 lands (Q10). **No phantom promise.**
     - Teams: unlimited, whatever the catalog holds when Teams ships.
-- **Cost/margin math (honest):** R2 ≈ $0.015/GB → 25GB ≈ $0.38/mo cost at Pro
-  (~96% margin at $9); 100GB ≈ $1.50/mo at Teams (~94% margin at $24). Free at
-  1GB ≈ $0.015/mo — negligible.
+- **Cost/margin math (honest):** R2 ≈ $0.015/GB → 10GB ≈ $0.15/mo cost at Pro
+  (~98% margin at $9); 50GB ≈ $0.75/mo at Teams (~97% margin at $24/seat). Free
+  at 500MB ≈ $0.008/mo — negligible.
 - **Billing provider (locked, corrects earlier Stripe assumption): Polar, not
   Stripe.** Verified fit:
   - **Merchant of Record** → handles global sales tax/VAT (Stripe Tax would be
@@ -668,6 +682,14 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
   - **Per-seat billing model (intended, for honest page copy): $24/seat/mo.**
     Implementation (seats, shared workspace, SCIM) deferred to when Teams ships,
     gated on Pro revenue or sponsorships (per ADR 0003).
+- **Add-ons (deferred, intentional headroom):** the conservative base storage
+  ladder (500MB / 10GB / 50GB) is deliberately sized to leave a clean upsell
+  ladder — paid storage packs (+10GB / +50GB) and a future higher tier — to add
+  once billing is live and demand is observable. Do not build add-on SKUs at v1.
+- **Annual billing (deferred):** not at v1 — same "avoid premature billing
+  complexity" principle as the one-paid-tier decision. The pricing FAQ already
+  states "Not yet, but we're planning to introduce one." Cheap fast-follower
+  post-launch; Polar supports annual natively, so no rewrite.
 - **Status:** **Locked.**
 - **Candidate for ADR:** yes — defines the commercial shape + the
   entitlement-based enforcement model. Promote at end of session.
@@ -1126,7 +1148,7 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
   |---|---|---|
   | **A1** | **Always-on consolidation** | The cloud's union-of-all-devices memory is continuously deduped/retired. You sleep; the cloud merges |
   | **A2** | **Cross-device conflict resolution** | Two devices edited the same fact; cloud resolves + records the supersedence |
-  | **B3** | **One memory, many agents** | IDE agent + CI agent + Slack bot address the *same* memory via `tk_live_…` keys |
+  | **B3** | **One memory, many agents** | IDE agent + CI agent + Slack bot address the *same* memory via `tm_…` keys |
   | **C5** | **Session pre-warming** | Cloud is always running; on session-start it pushes top-N likely memories before the agent queries. Directly attacks the north star (Q16) on the cloud's home turf |
 
   - **Deferred to v2:** B4 (memory webhooks/events), D6 (cross-project/org
@@ -1597,13 +1619,183 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
 
 ---
 
+## Session 6 — managed-runtime sequencing & prerequisites
+
+> **Scope note:** sessions 1–5 (Q1–Q28) are locked. This session continues the
+> grill at the seam ADR 0003 left open: *the sequence* between Teams revenue and
+> the managed-runtime moat, plus the concrete OSS prerequisites for hosting.
+> Triggered by a `grill-with-docs` pass on five questions: (a) do connectors
+> integrate at the hosting phase? (b) what are the subscription prices when we
+> host memory? (c) what OSS packages are required before hosting? (d) between
+> Teams and memory hosting, which first? (e) how do we differentiate hosting
+> users from sync-only users price-wise? Two answers (Q31, Q32) promote to new
+> ADRs (0011, 0012); three (Q29, Q30, Q33) reaffirm locked decisions and are
+> recorded here. Numbered **Q29–Q33** (collision-free continuation of Q1–Q28).
+> **All locked 2026-06-24.** Projects into `screens-locked.md` SC7–SC9.
+
+### Q29 — Do connectors integrate at the memory-hosting phase? (premise correction)
+
+- **Question:** the working assumption was "it is when we get to memory hosting
+  that we will integrate connector ingestion." Is that correct?
+- **Answer (locked 2026-06-24):** **No — that premise contradicts a locked
+  decision. Connectors never run in the cloud, at any tier.** ADR 0002 is
+  permanent: connectors run locally; the cloud only replicates the resulting
+  files. Server-side ingestion is **rejected, not deferred** — it would re-open
+  the cloud-as-engine door that D1/D2 closed. The managed-runtime tier changes
+  *nothing* about where/how connectors run.
+- **Grounding (verified 2026-06-24):**
+  - **Local ingestion is already fully built.** `packages/tekmemo-connectors`
+    ships a provider-neutral `Connector` interface + two real connectors
+    (GitHub GraphQL fetcher, Notion fetcher) with normalize + tests. Not a stub,
+    not waiting on anything.
+  - **The only unstarted connector work is the dashboard control-plane**: write
+    `.tekmemo/connectors.json` (the 11th canonical file) + the authenticated
+    `GET /v1/projects/:projectId/connectors/:connectorId/secret` endpoint (ADR
+    0002's contract additions). This needs **only the v1 file-replica cloud** —
+    *not* the managed runtime. It is currently an honest empty state
+    (`apps/cloud` connectors screen, post-B.6).
+- **Rationale:** separating control plane (dashboard stores config + credential
+  pointer) from data plane (local runtime executes) is the locked git/GitHub-
+  Actions model. Hosting the runtime does not make ingestion a cloud concern.
+- **Status:** **Locked.** Reaffirms ADR 0002; no change to any decision. Recorded
+  to head off a recurring misconception.
+- **Candidate for ADR:** no — a reaffirmation of ADR 0002, not a new decision.
+
+### Q30 — Subscription prices when we start hosting memory
+
+- **Question:** what will the subscription plans cost when memory hosting
+  (the managed-runtime tier) ships?
+- **Answer (locked 2026-06-24):** **Unchanged from ADR 0006 / Q9 / Q19.**
+  Free $0 · Pro $9/mo · Teams $24/seat/mo. The tier names and prices do not
+  move when the managed runtime lands. What changes is **what each tier
+  entitles** (intelligence-compute caps), not price.
+- **Grounding:** Q19 already locked the managed-tier entitlements —
+  `maxConsolidationRuns` (Free 1/day · Pro 24/day · Teams ∞) and
+  `maxPreWarmPerDay` (Free 0 · Pro >0 · Teams ∞), enforced as `count < cap`,
+  never `plan === "Pro"`. These are **zero until the managed runtime ships**
+  (there is nothing to gate on a file replica). At phase 3 (ADR 0011) they
+  become the active differentiator — *within the unchanged price ladder*.
+- **Rationale:** the per-user cost at v1 (file replica) is ≈$0; the managed
+  runtime introduces real per-user compute cost (Workers CPU + LLM tokens).
+  Rather than re-pricing the ladder, Q19 chose to meter the spiky/cost-driving
+  dimension (consolidation runs) as an entitlement cap, with v2 add-on packs for
+  overage. This keeps Free→Pro clean and bundled.
+- **Status:** **Locked.** Reaffirms ADR 0006 / Q19.
+- **Candidate for ADR:** no — ADR 0006 stands unchanged; the Free-tier
+  compute boundary nuance is captured in Q33 (below) as a pointer.
+
+### Q31 — OSS packages required before memory hosting + R2 store home
+
+- **Question:** what OSS packages are required before we can build memory
+  hosting in the cloud?
+- **Answer (locked 2026-06-24):** the runtime intelligence surface is already
+  real (audited 2026-06-24: the 4-stage strategist, deterministic
+  consolidation, progressive recall, the write gate blocklist + 2-level
+  durability tiers, and the local advisory lock are all implemented, not
+  stubbed). Hosting is gated on **three gaps, only two of which are "packages":**
+  1. **R2/cloud-backed `MemoryStore`** — the hard prerequisite. Cloudflare
+     Workers have no Node `fs`; `local-strategy` won't run there. Today only
+     `NodeFsMemoryStore` + an in-memory store exist. **This is a new adapter
+     package** (see sub-decision below).
+  2. **A concrete extractor adapter.** The provider-neutral `Extractor`
+     interface + the rule-based deterministic floor exist, but **no concrete
+     LLM extractor adapter ships yet** (`tekmemo-adapter-extractor-transformers`
+     for OSS zero-config per Q18; a frontier/API impl for the cloud's
+     monetization lever). Without it the hosted runtime is "a *worse* engine
+     than competitors'" (ADR 0004).
+  3. **The concurrency-control layer** (Q25b / ADR 0010) — a locked ADR with
+     **zero code** today. The first cloud-only capability; required for B3.
+     Sequenced as phase 1 by Q32.
+- **Sub-decision — R2 store home (locked): a new adapter package
+  `@tekbreed/tekmemo-adapter-r2` with a provider-neutral *remote-blob store*
+  contract in core.** Mirrors the `Embedder` / `Extractor` / `Connector` pattern
+  (interface-in-core, impl-in-adapter). Chosen because ADR 0003's "self-host the
+  same engine free" thesis genuinely needs the store reusable outside the cloud
+  Worker — an OSS user self-hosting on S3/GCS implements the same contract.
+  Rejected: in-core store (Cloudflare coupling in MIT core, violates
+  provider-neutral rule); cloud-internal store (breaks the self-host thesis).
+- **Rationale:** the adapter seam is the house style and keeps core
+  provider-neutral. A captive cloud-internal store would weaken the open-core
+  moat to a code path rather than operational excellence.
+- **Status:** **Locked.** Promoted to [ADR 0012](../adr/0012-r2-memory-store-adapter.md).
+- **Open sub-questions:** the exact `BlobClient` / `MetadataStore` contract
+  shape and the "reuse vs reinvent the replica's R2-blob + Turso-manifest
+  layout" detail are deferred to implementation inside ADR 0012 (not resolved
+  here).
+
+### Q32 — Between Teams and memory hosting, which to build first?
+
+- **Question:** of Teams (per-seat revenue) and the full managed runtime (the
+  intelligence moat), which builds first?
+- **Answer (locked 2026-06-24, Option A):** **a three-phase sequence —
+  concurrency layer → Teams → full managed runtime.**
+  1. **Phase 1 — concurrency layer (ADR 0010).** Turso project-lock →
+     validate-against-manifest → apply → release, in front of the existing file
+     replica. Greenfield (ADR locked, zero code). Makes multi-writer safe for
+     *both* B3 (agents) and Teams (humans) — same mechanism.
+  2. **Phase 2 — Teams tier.** Ships on the concurrency-safe file replica:
+     seats + per-seat billing (Polar) + shared workspace + the Owner/Admin/Member
+     role model (locked). Shared-project **write** access is the
+     concurrency-gated surface (read is safe under D6 regardless). The first
+     real per-seat revenue.
+  3. **Phase 3 — full managed runtime (ADR 0003 thesis).** R2-backed
+     MemoryStore (ADR 0012) + hosted recall/consolidation/extraction. Unlocks
+     the Q19 intelligence entitlements + the Q18 cloud differentiators (A1/A2/B3/C5).
+- **Rationale (the forcing insight):** **Teams-on-the-file-replica is a trust
+  bug.** A team is, by definition, multiple humans writing to shared memory.
+  Under D6 (last-writer-wins + pre-sync snapshot), two teammates editing
+  `core.md` concurrently means **one write silently loses** — the snapshot
+  rolls back but does not merge. That breaks the file-first *trust* thesis for
+  the exact audience that stresses it hardest. The concurrency layer is
+  strictly smaller than the full managed runtime and unblocks Teams revenue
+  safely; the moat stays the long-term work, funded by seats rather than
+  blocking revenue. Shipping Teams on the raw replica (Option B) would ship a
+  data-lossing product; building the full runtime first (Option C) defers the
+  biggest revenue lever behind the biggest lift for no benefit.
+- **Status:** **Locked.** Promoted to [ADR 0011](../adr/0011-managed-runtime-sequencing.md)
+  (revises ADR 0003's two-phase sequence; its *thesis* — same runtime, managed
+  infra — is unchanged).
+- **Candidate for ADR:** yes — see ADR 0011.
+
+### Q33 — How do we differentiate hosting users from sync-only users, price-wise?
+
+- **Question:** within the price ladder, how do we differentiate people hosting
+  memory from people only syncing?
+- **Answer (locked 2026-06-24):** **keep the Q19 model — same tiers, same
+  prices; intelligence-entitlement caps differentiate.** A sync-only Pro user
+  and a hosting Pro user both pay $9; the hosting user is bounded by
+  `maxConsolidationRuns` / `maxPreWarmPerDay` (enforced as `count < cap`). No
+  separate "Hosted Memory" product line (that would break Q9's single-tier-
+  ladder discipline and complicate Polar billing).
+- **Margin-protecting nuance (locked): Free's 1 consolidation/day runs on the
+  deterministic floor only (zero LLM spend); Pro+ gets frontier extraction.**
+  Q18 named the frontier extractor "the managed-tier monetization lever"; this
+  nails down the Free boundary so the Free tier's hosted compute is cost-safe:
+  Free feels the *mechanical* consolidation (the deterministic `consolidateGraph`
+  floor), Pro pays for *semantic* (frontier extraction + writer-critic). The
+  "1/day" cap is therefore honest and near-zero-cost, not a margin leak.
+- **Rationale:** Q19 already locked the architecture (caps, not plan-name
+  checks). This decision locks the one open nuance (the Free compute boundary)
+  that real per-user cost exposed. Rejected: hosting-as-Pro+-only (modifies
+  Q19's Free=1/day — kept); a separate Hosted product line (breaks tier
+  discipline).
+- **Status:** **Locked.** Reaffirms Q19; closes the Free-tier compute boundary.
+  Pointer added to ADR 0006 (no semantic change — ADR 0006 is already
+  consistent).
+- **Candidate for ADR:** no — reaffirms Q19/ADR 0006; the nuance is a margin
+  guardrail, recorded here + as an ADR 0006 cross-ref.
+
+---
+
 ## Locked screen IA
 
 The product/architecture decisions above are projected into a frozen screen
 map in [`screens-locked.md`](./screens-locked.md) — the locked information
 architecture for the Cloud app (`memo.tekbreed.com`) and the Docs app
 (`docs.tekbreed.com`). Screen-level decisions are numbered `SC-*` there and
-trace back to the decisions in this log and ADRs 0002–0008. The IA is frozen;
+trace back to the decisions in this log and ADRs 0002–0012. The IA is frozen;
 `copywriting` + `frontend-design` refine per-page prose and layout without
-re-opening a screen decision (ADR 0008 Rule 3).
+re-opening a screen decision (ADR 0008 Rule 3). SC1–SC6 are v1; SC7 (Teams),
+SC8 (managed memory), SC9 (pricing/billing deltas) are phase-gated additions
+projecting Q32/Q33 — see `screens-locked.md`.
 

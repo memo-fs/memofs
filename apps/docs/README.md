@@ -39,3 +39,9 @@ pnpm --filter @tekbreed/docs build
 pnpm --filter @tekbreed/docs preview
 pnpm --filter @tekbreed/docs check:links
 ```
+
+## Environment
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `VITE_PLUNK_PUBLIC_KEY` | optional | Plunk **public** key (`pk_…`) for the newsletter signup on the blog and changelog. Vite inlines it at build time. When unset, the signup form renders disabled. The public key is scoped to Plunk's `/v1/track` endpoint and is safe to ship in client code. |

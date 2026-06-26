@@ -10,7 +10,7 @@ Cloud sync needs credentials. Set these before running cloud commands:
 
 ```bash
 export TEKMEMO_CLOUD_URL="https://memo.tekbreed.com/api/v1"
-export TEKMEMO_API_KEY="tk_live_..."
+export TEKMEMO_API_KEY="tm_..."
 ```
 
 Alternatively, save them in `.tekmemo/config.json`:

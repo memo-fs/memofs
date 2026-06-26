@@ -82,6 +82,9 @@ export function json<T>(
  * Sends an error response in the envelope. Prefer throwing `ApiError` from
  * inside handlers (the global `onError` serializes it); use this helper only
  * for the rare case where you need to return an error Response directly.
+ *
+ * `headers` (e.g. `Retry-After` from `RateLimitError`/`ConcurrencyError`) is
+ * merged onto the response alongside the always-present `x-request-id`.
  */
 export function jsonError(
 	c: Context,
@@ -89,9 +92,11 @@ export function jsonError(
 	code: string,
 	message: string,
 	details?: JsonValue,
+	headers?: Record<string, string>,
 ) {
 	return c.json(errorBody(c, code, message, details), status, {
 		"x-request-id": requestIdFrom(c) ?? "",
+		...headers,
 	});
 }
 

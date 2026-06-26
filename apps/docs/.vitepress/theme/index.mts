@@ -2,14 +2,21 @@ import type { Theme } from "vitepress";
 import { inBrowser } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { watch } from "vue";
+import BlogIndex from "./components/BlogIndex.vue";
 import HomeLayout from "./components/HomeLayout.vue";
+import NewsletterSignup from "./components/NewsletterSignup.vue";
 import "./custom.css";
 import { GTAG_ID } from "../config/head.mts";
 
 export default {
 	extends: DefaultTheme,
 	Layout: HomeLayout,
-	enhanceApp({ router }) {
+	enhanceApp({ app, router }) {
+		// Used inside blog/index.md to render the data-driven post grid.
+		app.component("BlogIndex", BlogIndex);
+		// Newsletter signup (Plunk) — embedded in blog + changelog markdown.
+		app.component("NewsletterSignup", NewsletterSignup);
+
 		if (!inBrowser) return;
 
 		watch(

@@ -82,9 +82,12 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 
 - **Connector** — An ingestion source that fetches external data (Notion,
   GitHub, Slack, …) and writes it into `.tekmemo/` memory. **Runs locally**
-  (the cloud never ingests — D1/D2). Configured from the web dashboard (control
-  plane); executed by the local runtime (data plane). See
-  [Decisions log](./architecture/decisions.md) Q1–Q3.
+  (the cloud never ingests — D1/D2; this is permanent, not a v1 limitation —
+  see decisions log Q29). Configured from the web dashboard (control plane);
+  executed by the local runtime (data plane). The local connector framework is
+  already built (`packages/tekmemo-connectors`); only the dashboard
+  control-plane waits, and it needs just the v1 file replica, not the managed
+  tier. See [Decisions log](./architecture/decisions.md) Q1–Q3, Q29.
 
 - **Connector config (`connectors.json`)** — The 11th canonical `.tekmemo/`
   file (`.tekmemo/connectors.json`). A sync unit holding each connector's type,
@@ -281,7 +284,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 
 - **Entitlement model** — Cloud enforcement uses **numeric capability caps**,
   never `plan === "Pro"` checks (§12.3). Three entitlement dimensions (locked
-  Q19): `maxHostedStorageBytes` (Free ~1GB / Pro ~25GB / Teams ~100GB),
+  Q19): `maxHostedStorageBytes` (Free 500MB / Pro 10GB / Teams 50GB),
   `maxConnectors` (Free=1 / Pro=3 / Teams=∞), and **`maxConsolidationRuns`**
   (Free=1/day, Pro=24/day, Teams=∞ — the intelligence-compute cap, enforced
   once the managed-runtime tier lands). All checked as `count < cap`.
@@ -344,6 +347,69 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   before/after). Imports core only — zero AI-vendor coupling. The session
   equivalent of `sync/`, so it belongs in core, not an adapter package.
 
+### Managed-runtime sequencing & prerequisites (locked Q31–Q33)
+
+- **Managed-runtime phases** — The three-phase sequence (locked Q32 / ADR 0011,
+  revises ADR 0003's two-phase order) from v1 to the hosted runtime:
+  1. **Phase 1 — concurrency layer** ([ADR 0010](./adr/0010-cloud-concurrency-control-for-b3.md)):
+     a Turso/libSQL serialization layer in front of the file replica
+     (project-lock → validate-against-manifest → apply → release). Makes
+     multi-writer safe for *both* B3 (agents) and Teams (humans). Greenfield
+     (ADR locked, zero code at decision time).
+  2. **Phase 2 — Teams tier:** seats + per-seat billing (Polar) + shared
+     workspace, shipping on the concurrency-safe replica. Shared-project
+     **write** access is the concurrency-gated surface. The first real per-seat
+     revenue. Screen: `screens-locked.md` SC7.
+  3. **Phase 3 — full managed runtime** (the ADR 0003 moat): run the *same*
+     `Tekmemo` runtime on hosted infra against R2-resident files; exposes
+     recall/memory/graph via API. Unlocks Q19 intelligence entitlements +
+     the Q18 cloud differentiators (A1/A2/B3/C5). Screen: `screens-locked.md`
+     SC8.
+  - **Forcing insight:** D6 (last-writer-wins) makes Teams-on-replica a
+    silent-data-loss bug; the concurrency layer is strictly smaller than the
+    full managed runtime, so it ships first and unblocks Teams revenue safely.
+
+- **Remote-blob memory store contract** — The provider-neutral contract (locked
+  Q31 / [ADR 0012](./adr/0012-r2-memory-store-adapter.md)) that lets the
+  `Tekmemo` runtime read/write its canonical `.tekmemo/` files against a
+  remote-blob backend instead of a POSIX filesystem. Defined in **core** as
+  `RemoteBlobMemoryStore({ blobClient, metadata, rootKey })` over two injected
+  interfaces — `BlobClient` (get/put/delete, opaque-keyed) and `MetadataStore`
+  (the canonical-file manifest: path → blob id + size + sha256). Mirrors the
+  `Embedder`/`Extractor`/`Connector` interface-in-core + impl-in-adapter seam.
+  Required because Cloudflare Workers have no Node `fs` — `local-strategy`
+  can't run there unmodified. The cloud reuses its **existing** R2-blob +
+  Turso-manifest layout (the file-replica sync infra) rather than inventing a
+  parallel store — one set of files, the runtime is a new reader/writer over
+  them.
+
+- **R2 memory store adapter (`@tekbreed/tekmemo-adapter-r2`)** — The concrete
+  published adapter (locked Q31 / ADR 0012) implementing the remote-blob
+  contract for Cloudflare R2: `createR2BlobClient(binding: R2Bucket)` + a
+  Turso-backed `MetadataStore` (reusing the cloud's `project_files` /
+  `sync_cursors` tables). The `R2Bucket` coupling lives in the adapter, never in
+  core. Chosen over an in-core store (Cloudflare coupling in MIT core) and a
+  cloud-internal store (would break ADR 0003's "self-host the same engine free"
+  thesis). A future `tekmemo-adapter-s3`/`-gcs` implements the same contract.
+
+- **Teams role model** — The locked permission model for the Teams tier (phase
+  2, Q32 / `screens-locked.md` SC7): **Owner** (billing + delete team + role
+  management), **Admin** (invite/remove members + manage shared projects),
+  **Member** (read + write shared projects). Joining a team augments a member's
+  workspace (shared projects appear alongside personal ones, Linear/Vercel
+  style) — it does not replace it.
+
+- **Hosting differentiation** — How hosted-memory users differ from sync-only
+  users, price-wise (locked Q33, reaffirms Q19): **same tiers/prices;
+  intelligence-entitlement caps differentiate.** A sync-only Pro user and a
+  hosting Pro user both pay $9; the hosting user is bounded by
+  `maxConsolidationRuns` / `maxPreWarmPerDay` (`count < cap`). No separate
+  "Hosted Memory" product line (would break Q9's single-tier-ladder
+  discipline). **Margin guardrail:** Free's 1 consolidation/day runs on the
+  **deterministic floor only** (zero LLM spend); Pro+ gets **frontier**
+  extraction (the Q18 monetization lever) — so the Free tier's hosted compute
+  is cost-safe.
+
 ## Key entry points
 
 - AI SDK runtime: `packages/tekmemo-adapter-ai-sdk/` *(was
@@ -399,16 +465,27 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   memory, many agents", Q18) safe. The first cloud-only capability; revises
   ADR 0003 (cloud = same engine + managed infra **+ concurrency control**).
   Captures Q25b.
+- [ADR 0011](./adr/0011-managed-runtime-sequencing.md) — Managed-runtime
+  sequencing: **concurrency layer → Teams → full managed runtime** (three
+  phases, revises ADR 0003's two-phase order). D6 makes Teams-on-replica a
+  silent-data-loss bug; the concurrency layer is smaller than the full runtime
+  and ships first, unblocking Teams revenue safely. Captures Q32.
+- [ADR 0012](./adr/0012-r2-memory-store-adapter.md) — R2-backed `MemoryStore`
+  as a new adapter `@tekbreed/tekmemo-adapter-r2` + a provider-neutral
+  remote-blob store contract (`RemoteBlobMemoryStore`) in core. The hard OSS
+  prerequisite for phase 3 (Workers have no Node `fs`). Captures Q31.
 - [ADR 0004](./adr/0004-v1-intelligence-extraction-and-consolidation.md)
   *(revised 2026-06-22)* — v1.x extensions appended: the `unverified` node
   status (Q24 v1.x re-verification) and writer-critic consolidation (Q25a).
 - [Decisions log](./architecture/decisions.md) — Full new-architecture design
-  sessions (Q1–Q10 + S2-Q1 + Q11–Q20 + Q21–Q28 all locked): the above ADRs
-  plus package triage (remove upstash, consolidate benchmarks, shelve
+  sessions (Q1–Q10 + S2-Q1 + Q11–Q20 + Q21–Q28 + Q29–Q33 all locked): the above
+  ADRs plus package triage (remove upstash, consolidate benchmarks, shelve
   mcp-worker for v1, add `tekmemo-connectors` package, defer extractor adapter
   package), the connector set (GitHub + Notion at v1, Linear queued), the
-  license decision (MIT), and the full retrieval-model session (Q22 write
+  license decision (MIT), the full retrieval-model session (Q22 write
   intelligence, Q23 strategist, Q24 staleness loop, Q25a writer-critic,
   Q25b cloud concurrency, Q26 entity-centric, Q27 progressive recall, Q28
-  local concurrency).
+  local concurrency), and the managed-runtime sequencing session (Q29
+  connectors-never-cloud, Q30/Q33 pricing reaffirmed, Q31 R2 store, Q32
+  three-phase sequence). Projects into `screens-locked.md` SC1–SC9.
 

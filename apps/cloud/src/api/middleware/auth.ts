@@ -2,7 +2,7 @@
  * Bearer-token authentication middleware.
  *
  * Authenticates `/v1/projects/:projectId/sync/*` requests (§12.4) against the
- * `api_keys` table: the raw `tk_live_…` key is salted-hashed to
+ * `api_keys` table: the raw `tm_…` key is salted-hashed to
  * `sha256(salt + ":" + rawKey)` and looked up. The cloud NEVER stores raw keys —
  * only the hash (`api_keys.key_hash`, ADR 0006). On a hit, the middleware loads
  * the owning account and stamps it on `c.var.account` so downstream handlers
@@ -10,7 +10,7 @@
  *
  * Validation chain (§12.4 "Validated for hash, revocation, ownership, scopes,
  * entitlements, rate limits"):
- *   1. **Present + well-formed** — `Authorization: Bearer tk_live_…`, else 401.
+ *   1. **Present + well-formed** — `Authorization: Bearer tm_…`, else 401.
  *   2. **Hash lookup** — a row exists in `api_keys` with matching `key_hash`,
  *      else 401 (same error code as missing — never reveal key-vs-format).
  *   3. **Not revoked** — `revoked_at IS NULL`, else 401.
@@ -37,7 +37,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
 import type { Database } from "../../db/index.server";
-import { accounts, apiKeys } from "../../db/schema";
+import { accounts, apiKeys, type PlanTier } from "../../db/schema";
 import { hashApiKey } from "../../server/sha256";
 import { AuthError } from "../errors";
 import type { ApiEnv } from "../index";
@@ -50,7 +50,7 @@ import type { ApiEnv } from "../index";
  */
 export interface AuthAccount {
 	id: string;
-	plan: "free" | "pro" | "teams";
+	plan: PlanTier;
 	maxHostedStorageBytes: number;
 	maxConnectors: number;
 }
@@ -128,15 +128,15 @@ export async function resolveAccount(
 }
 
 /**
- * The live `tk_live_…` token from an `Authorization: Bearer …` header, or
+ * The live `tm_…` token from an `Authorization: Bearer …` header, or
  * `null` if the header is absent, not a Bearer scheme, or the token doesn't
  * match the published format. Does NOT verify the token against the DB — that's
  * the middleware's job after hashing; this is pure shape validation.
  *
  * Format (frozen in the client transport, `cloud-client/errors.ts` SECRET_PATTERNS):
- *   tk_live_[A-Za-z0-9._-]+
+ *   tm_[A-Za-z0-9._-]+
  */
-const TOKEN_PATTERN = /^tk_live_[A-Za-z0-9._-]+$/;
+const TOKEN_PATTERN = /^tm_[A-Za-z0-9._-]+$/;
 
 export function extractBearer(header: string | undefined): string | null {
 	if (!header) return null;

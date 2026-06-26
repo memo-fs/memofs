@@ -4,18 +4,10 @@ description: The launch of TekMemo — a memory layer built for AI agents that n
 date: 2026-01-15
 author: Christopher S. Aondona
 tags: [product, launch, memory, ai-agents]
+blog: post
+sidebar: false
 outline: deep
 ---
-
-# Introducing TekMemo: File-first Memory for AI Agents
-
-<img  src="/images/test.jpeg" style="width:100%; max-height: 450px; margin: 16px auto; border-radius: 8px;" />
-
-::: info Published
-Date: **15 January, 2026**
-
-Author: **[Christopher S. Aondona](https://x.com/codingsimba_)**
-:::
 
 Today we're launching **TekMemo** — a memory layer designed specifically for AI agents that need durable, queryable context across sessions.
 
@@ -34,9 +26,9 @@ TekMemo gives agents a **persistent memory layer** with:
 
 | Capability | What It Means |
 |------------|---------------|
-| **Core Memory** | Stable facts, preferences, goals — survives across sessions |
-| **Notes Memory** | Scratchpad for transient context, working notes |
-| **Recent Memory** | Rolling window of recent interactions |
+| **Core Memory** | Stable project briefing — facts the agent must know every time |
+| **Notes Memory** | Durable records — decisions, constraints, preferences, summaries |
+| **Recall** | Semantic retrieval over indexed memory fragments |
 | **Graph Memory** | Entities, relationships, and semantic connections |
 | **Cloud Sync** | Multi-device, multi-agent shared memory with conflict resolution |
 | **Vector Search** | Semantic recall across all memory types |

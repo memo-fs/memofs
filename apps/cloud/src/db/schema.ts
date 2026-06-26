@@ -8,11 +8,21 @@
  *
  * Table map (locked by cloud-sync-and-refactor.md §4 + ADR 0006):
  *
- *   Spine (auth + entitlement):
- *     accounts     — one per billing identity (Polar customer). Owns projects.
- *     api_keys     — hashed bearer credentials; authenticates sync requests.
- *                    The cloud NEVER stores raw keys — only a salted sha256
- *                    lookup hash (ADR 0006 §entitlement model).
+ *   Auth (Better Auth core tables — SC4.1 passwordless):
+ *     user           — the authenticated human. Login identity (email).
+ *     session        — a Better Auth session (cookie token → user).
+ *     account        — an OAuth credential link (GitHub/Google). Distinct from
+ *                      the billing `accounts` table.
+ *     verification   — single-use magic-link tokens.
+ *
+ *   Spine (entitlement):
+ *     accounts       — one per BILLING identity (Polar customer). Owns projects.
+ *                      FK-linked to Better Auth `user` via `user_id` (separate
+ *                      tables, per the Q user/account decision). NOT the same as
+ *                      Better Auth's `account` (OAuth credential).
+ *     api_keys       — hashed bearer credentials; authenticates sync requests.
+ *                      The cloud NEVER stores raw keys — only a salted sha256
+ *                      lookup hash (ADR 0006 §entitlement model).
  *
  *   Sync core (the cloud manifest, relationalised per §4.3):
  *     projects       — one per synced `.tekmemo/` workspace. Belongs to an
@@ -40,6 +50,7 @@
  *   the variable name is TS-only. So `apiKeys` the const maps to `api_keys` the
  *   table — idiomatic JS `account.apiKey` with a `snake_case` column.
  */
+import { createId } from "@paralleldrive/cuid2";
 import { sql } from "drizzle-orm";
 import {
 	integer,
@@ -49,8 +60,139 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+/**
+ * Auto-generates a row id at insert time when the caller omits it.
+ *
+ * Our id columns are `text("id").primaryKey()` (cuid2, not a SQLite autoincrement).
+ * Without a default, every insert site had to call `createId()` manually — noise
+ * this helper removes. `.$defaultFn` runs in JS at insert time (no DDL, no
+ * migration): an explicit id still wins, an omitted one is filled. Applied to the
+ * tables we own + insert into; NOT to Better Auth's four tables (it always
+ * supplies its own ids).
+ */
+const idColumn = () => text("id").primaryKey().$defaultFn(createId);
+
 // ---------------------------------------------------------------------------
-// Spine: accounts + api_keys
+// Better Auth core tables: user, session, account, verification
+//
+// These match the field set Better Auth's drizzleAdapter expects (core schema
+// in @better-auth/core/db/schema/*). The Drizzle const names MUST be singular
+// (`user`, `session`, `account`, `verification`) to match Better Auth's model
+// names — the adapter looks them up as `schema[model]`.
+//
+// Dates use `integer({ mode: "timestamp" })`: Better Auth's drizzle adapter
+// sets supportsDates implicitly true and wraps reads in `new Date()`; booleans
+// use `integer({ mode: "boolean" })` (supportsBooleans default true).
+//
+// NOTE: Better Auth's `account` (OAuth credential) is DISTINCT from our billing
+// `accounts` table below. Naming is unfortunate but both are the ecosystem
+// default — see `accounts` doc for the distinction.
+// ---------------------------------------------------------------------------
+
+/**
+ * The authenticated human. Owned by Better Auth (core `user` model). The
+ * billing `accounts` row (below) is FK-linked to this via `accounts.userId`.
+ *
+ * `email` is unique (login identity) and lower-cased by Better Auth before
+ * storage. `emailVerified` flips true when the magic link is consumed.
+ */
+export const user = sqliteTable("user", {
+	id: text("id").primaryKey(),
+	/** Display name; seeded from the email local-part at signup. */
+	name: text("name").notNull(),
+	/** Login identity, unique, lower-cased by Better Auth. */
+	email: text("email").notNull().unique(),
+	/** True once the user has clicked a magic link (or OAuth completed). */
+	emailVerified: integer("email_verified", { mode: "boolean" })
+		.notNull()
+		.default(false),
+	/** Avatar URL (OAuth providers supply this; null for magic-link users). */
+	image: text("image"),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+/**
+ * A Better Auth session (core `session` model). The `token` is the cookie
+ * value; `expiresAt` governs validity. We read this to resolve the dashboard
+ * loader's current user.
+ */
+export const session = sqliteTable("session", {
+	id: text("id").primaryKey(),
+	/** Same value carried in the `better-auth.session_token` cookie. */
+	token: text("token").notNull().unique(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+	/** Best-effort IP of the session-creating request. */
+	ipAddress: text("ip_address"),
+	/** User-Agent of the session-creating request. */
+	userAgent: text("user_agent"),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+/**
+ * An OAuth credential link (core `account` model). `providerId` is "github" /
+ * "google"; `accountId` is the provider's user id. Magic-link users have NO
+ * row here — magic-link verification uses the `verification` table instead.
+ * Fields like `accessToken` are nullable because they may not apply to every
+ * provider/flow.
+ *
+ * DO NOT confuse with the billing `accounts` table.
+ */
+export const account = sqliteTable("account", {
+	id: text("id").primaryKey(),
+	/** The owning authenticated user. */
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	/** OAuth provider id ("github", "google", …). */
+	providerId: text("provider_id").notNull(),
+	/** The provider's id for this user. */
+	accountId: text("account_id").notNull(),
+	/** OAuth access token (nullable — not all flows issue one we keep). */
+	accessToken: text("access_token"),
+	/** OAuth refresh token. */
+	refreshToken: text("refresh_token"),
+	/** OIDC id token, when the provider returns one. */
+	idToken: text("id_token"),
+	/** When the access token expires. */
+	accessTokenExpiresAt: integer("access_token_expires_at", {
+		mode: "timestamp",
+	}),
+	/** When the refresh token expires. */
+	refreshTokenExpiresAt: integer("refresh_token_expires_at", {
+		mode: "timestamp",
+	}),
+	/** OAuth scopes granted, space-delimited. */
+	scope: text("scope"),
+	/** Password hash — unused under SC4.1 (passwordless) but kept for parity. */
+	password: text("password"),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+/**
+ * A single-use verification token (core `verification` model). Magic-link
+ * flows write a row here; consuming it (one-shot) marks the user verified and
+ * creates the session. `expiresAt` governs the link lifetime.
+ */
+export const verification = sqliteTable("verification", {
+	id: text("id").primaryKey(),
+	/** The opaque token embedded in the magic link. */
+	value: text("value").notNull(),
+	/** What this verification is for (typically the user's email). */
+	identifier: text("identifier").notNull(),
+	/** When the token stops being valid. */
+	expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+	createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+	updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// Spine: accounts (billing) + api_keys
 // ---------------------------------------------------------------------------
 
 /**
@@ -59,9 +201,18 @@ import {
  *
  * `polarCustomerId` is nullable because the local-first model lets an account
  * exist before billing is ever attached (e.g. CLI-created, pre-Polar).
+ *
+ * `userId` FK-links this billing identity to the Better Auth `user` that owns
+ * it (Q decision: separate tables, FK-linked). Nullable for pre-auth rows
+ * created via the sync auto-provision path (Q13); new signups always set it
+ * via the `user.create.after` hook. onDelete: set null so deleting the user
+ * retains the (now orphaned) billing record for reconciliation.
  */
 export const accounts = sqliteTable("accounts", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
+	/** The authenticated user who owns this billing identity. Nullable for
+	 * CLI/sync-auto-provisioned rows that predate signup. */
+	userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
 	/** Polar customer ID once billing is wired; null for pre-billing accounts. */
 	polarCustomerId: text("polar_customer_id"),
 	/** Entitlement snapshot for this account (see ADR 0006 §entitlement model). */
@@ -79,6 +230,17 @@ export const accounts = sqliteTable("accounts", {
 });
 
 /**
+ * The entitlement plan tier — the single source of truth for the plan union.
+ * Derived from the `accounts.plan` column enum so the schema is the only place
+ * the values are listed; every consumer imports this type instead of repeating
+ * `"free" | "pro" | "teams"`. Named `PlanTier` to avoid collision with the
+ * pricing-catalog `Plan` type in `routes/_home/+utils/plans.ts` (a distinct
+ * marketing concept). Nullable variants (`PlanTier | null`) are derived at the
+ * call site (e.g. a session user whose account is not yet provisioned).
+ */
+export type PlanTier = (typeof accounts.plan.enumValues)[number];
+
+/**
  * A hashed API key. The cloud authenticates sync requests by Bearer token;
  * the raw key is shown ONCE at provisioning and never persisted. We store a
  * salted sha256 of the raw key for lookup (ADR 0006 §entitlement model).
@@ -87,7 +249,7 @@ export const accounts = sqliteTable("accounts", {
  * here is `sha256(salt + ":" + rawKey)`.
  */
 export const apiKeys = sqliteTable("api_keys", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	/** Owning account — the key authenticates AS this account. */
 	accountId: text("account_id")
 		.notNull()
@@ -116,7 +278,7 @@ export const apiKeys = sqliteTable("api_keys", {
  * owning account without an extra join in the hot path.
  */
 export const projects = sqliteTable("projects", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	accountId: text("account_id")
 		.notNull()
 		.references(() => accounts.id, { onDelete: "cascade" }),
@@ -147,7 +309,7 @@ export const projects = sqliteTable("projects", {
 export const projectFiles = sqliteTable(
 	"project_files",
 	{
-		id: text("id").primaryKey(),
+		id: idColumn(),
 		projectId: text("project_id")
 			.notNull()
 			.references(() => projects.id, { onDelete: "cascade" }),
@@ -183,7 +345,7 @@ export const projectFiles = sqliteTable(
  * across replays.
  */
 export const syncCursors = sqliteTable("sync_cursors", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	projectId: text("project_id")
 		.notNull()
 		.references(() => projects.id, { onDelete: "cascade" }),

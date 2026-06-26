@@ -110,7 +110,7 @@ publish pre-launch). It must implement 31 exported types from
   designated "Worker 2" / Railway candidate.
 - Polar Starter fee is **5% + 50¢/txn** (higher than Stripe on small txns) —
   accepted for the MoR + tax-handling trade.
-- Better Auth must handle (a) `tk_live_…` API keys, (b) OAuth for connectors,
+- Better Auth must handle (a) `tm_…` API keys, (b) OAuth for connectors,
   (c) scoped tokens (`memory:sync`). **Verify before final commit.**
 
 ## Alternatives considered

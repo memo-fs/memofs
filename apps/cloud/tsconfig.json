@@ -6,6 +6,7 @@
 		".react-router/types/**/*"
 	],
 	"exclude": [
+		"Initial design",
 		// Dead Node-era scaffolding that references packages not installed in
 		// this Worker app (`pino`, `@t3-oss/env-core`, `next-themes`, `msw`,
 		// `remix-utils`, etc.) and is not imported by any live route, loader,

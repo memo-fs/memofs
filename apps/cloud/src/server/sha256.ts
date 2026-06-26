@@ -36,7 +36,7 @@ export async function sha256Hex(value: string): Promise<string> {
  * Computes the salted API-key lookup hash: `sha256(salt + ":" + rawKey)`.
  *
  * `salt` is the `TEKMEMO_API_KEY_SALT` Worker binding (empty string when unset —
- * dev only; production MUST set it). The raw key is the full `tk_live_…` token.
+ * dev only; production MUST set it). The raw key is the full `tm_…` token.
  * The result is stored in `api_keys.key_hash` at provisioning time and looked up
  * here on every authenticated request.
  *

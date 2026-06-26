@@ -10,8 +10,8 @@ TekMemo uses four memory layers:
 | --- | --- | --- |
 | **Core** | `core.md` | Stable project briefing — facts the agent must know every time |
 | **Notes** | `notes.md` | Durable records: decisions, constraints, summaries |
-| **Recall** | `conversations.jsonl` | Indexed fragments for semantic retrieval |
-| **Graph** | Runtime | Entities and relationships for architectural queries |
+| **Recall** | `chunks.jsonl` | Indexed fragments for semantic retrieval |
+| **Graph** | `nodes.jsonl` · `edges.jsonl` | Entities and relationships for architectural queries |
 
 See [Core concepts](/packages/tekmemo/concepts) for details.
 

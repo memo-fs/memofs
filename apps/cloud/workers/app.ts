@@ -1,15 +1,17 @@
 /**
  * TekMemo Cloud Worker entry.
  *
- * One Cloudflare Worker serves two concerns (ADR 0005):
+ * One Cloudflare Worker serves three concerns (ADR 0005):
  *   1. the JSON API at `/v1/*` (Hono) — health, readiness, sync;
- *   2. the React Router v8 SSR dashboard + static assets for everything else.
+ *   2. Better Auth at `/api/auth/*` — passwordless sign-in/session endpoints;
+ *   3. the React Router v8 SSR dashboard + static assets for everything else.
  *
  * Routing is decided in the fetch handler before any framework runs: requests
- * under `/v1` go to the Hono API app; everything else (HTML dashboard pages,
- * JS/CSS, favicons) goes to the React Router handler, which itself falls
- * through to the Static Assets (`ASSETS`) binding for built files. The
- * dashboard therefore owns the root URL space; the API owns only `/v1`.
+ * under `/v1` go to the Hono API app; requests under `/api/auth` go to the
+ * Better Auth handler; everything else (HTML dashboard pages, JS/CSS,
+ * favicons) goes to the React Router handler, which itself falls through to
+ * the Static Assets (`ASSETS`) binding for built files. The dashboard
+ * therefore owns the root URL space; the API and auth each own their prefix.
  *
  * The Worker `env` (bindings declared in `wrangler.jsonc`) is threaded into
  * the React Router load context as `context.cloudflare.env`, so loaders and
@@ -24,6 +26,9 @@
 import * as build from "virtual:react-router/server-build";
 import { createRequestHandler } from "@react-router/cloudflare";
 import { createApiApp } from "../src/api";
+import { createDb } from "../src/db/index.server";
+import { createAuth } from "../src/server/auth";
+import { createMagicLinkMailer } from "../src/server/email";
 import type { CloudWorkerEnv } from "../src/server/env";
 
 /**
@@ -56,8 +61,15 @@ const handleSsr = createRequestHandler<CloudWorkerEnv>({
 
 export default {
 	/**
-	 * Fetch dispatcher: `/v1` → Hono API, everything else → React Router SSR
-	 * (which itself serves built static assets via the `ASSETS` binding).
+	 * Fetch dispatcher:
+	 *   - `/v1`      → Hono API (health, readiness, sync);
+	 *   - `/api/auth`→ Better Auth (magic-link sign-in/session endpoints);
+	 *   - anything else → React Router SSR (dashboard + static assets).
+	 *
+	 * The auth branch builds a per-request Better Auth instance (`createAuth`
+	 * owns the drizzle adapter + magic-link plugin + provisioning hook), then
+	 * hands the raw request to `auth.handler`. Better Auth owns the full
+	 * `/api/auth/*` path tree from there (its `basePath` is `/api/auth`).
 	 */
 	async fetch(
 		request: Request,
@@ -67,6 +79,11 @@ export default {
 		const { pathname } = new URL(request.url);
 		if (pathname === "/v1" || pathname.startsWith("/v1/")) {
 			return api.fetch(request, env, ctx);
+		}
+		if (pathname === "/api/auth" || pathname.startsWith("/api/auth/")) {
+			const db = createDb(env);
+			const auth = createAuth(env, db, createMagicLinkMailer(env));
+			return auth.handler(request);
 		}
 		return handleSsr({ request, env, ctx } as never);
 	},

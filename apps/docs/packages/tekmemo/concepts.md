@@ -30,13 +30,16 @@ TekMemo is published as a family of packages:
 
 | Package | Purpose |
 | --- | --- |
-| `@tekbreed/tekmemo` | Core runtime — filesystem store, graph memory, recall, AI SDK helpers, and cloud client |
-| `@tekbreed/tekmemo-cli` | CLI distribution for local and cloud memory operations |
-| `@tekbreed/tekmemo-mcp-server` | MCP server for IDE/agent integration |
+| `@tekbreed/tekmemo` | Core runtime — filesystem store, graph memory, recall, and cloud client |
+| `@tekbreed/tekmemo-cli` | CLI for local, cloud, and hybrid memory operations |
+| `@tekbreed/tekmemo-mcp-server` | Self-hosted MCP (stdio) server for IDE/agent integration |
+| `@tekbreed/tekmemo-connectors` | Connector framework — ingest external sources (GitHub, Notion, …) into `.tekmemo/` |
+| `@tekbreed/tekmemo-adapter-ai-sdk` | Vercel AI SDK adapter — memory tool, runtime bridge, and context builders |
 | `@tekbreed/tekmemo-adapter-openai` | OpenAI embedding provider adapter |
-| `@tekbreed/tekmemo-adapter-voyage` | VoyageAI embedding and reranking adapter |
-| `@tekbreed/tekmemo-mcp-worker` | Cloudflare Worker hosted MCP server |
-| `@tekbreed/tekmemo-benchmark-cli` | CLI for running benchmark suites |
+| `@tekbreed/tekmemo-adapter-voyage` | Voyage AI embedding and reranking adapter |
+| `@tekbreed/tekmemo-adapter-transformers` | Local, zero-API-key embedding adapter |
+| `@tekbreed/tekmemo-benchmark-kit` | Benchmark kit, workloads, and runners |
+| `@tekbreed/tekmemo-testing` | Shared contract tests, fixtures, and fakes (internal/contributor use) |
 
 For application code, import the [`Tekmemo`](/packages/tekmemo/client) class from `@tekbreed/tekmemo`. See the [API Reference](/api/tekmemo/) page for the full module listing.
 

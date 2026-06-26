@@ -15,7 +15,7 @@ the *same* local `Tekmemo` engine on hosted infra against the user's
 R2-resident `.tekmemo/` files. Decisions log Q18 then locked four cloud
 differentiators that only centralization enables, including **B3: "one memory,
 many agents"** — the IDE agent, the CI agent, and a Slack bot addressing the
-*same* memory via `tk_live_…` API keys.
+*same* memory via `tm_…` API keys.
 
 An industry review (2026-06-22) flagged the structural problem with B3 that the
 file-first thesis walks directly into:

@@ -20,6 +20,27 @@ export interface CloudWorkerEnv {
 	/** HMAC/lookup salt applied when hashing API keys. */
 	TEKMEMO_API_KEY_SALT?: string;
 
+	// --- Auth (Better Auth) — SC4.1 passwordless ----------------------------
+	/** Session/JWT signing secret for Better Auth. */
+	BETTER_AUTH_SECRET: string;
+	/** Base URL the auth app is served from (for callbacks/links). */
+	BETTER_AUTH_URL: string;
+
+	// --- OAuth providers (configured in A2; bindings land in A1) ------------
+	GITHUB_CLIENT_ID?: string;
+	GITHUB_CLIENT_SECRET?: string;
+	GOOGLE_CLIENT_ID?: string;
+	GOOGLE_CLIENT_SECRET?: string;
+
+	// --- Email (Plunk, plain HTTP transport) --------------------------------
+	PLUNK_API_KEY?: string;
+	/** RFC 5322 From header, e.g. `TekMemo Cloud <noreply@tekbreed.com>`. */
+	PLUNK_FROM?: string;
+
+	// --- Rate limiting (Upstash REST — SC4.1 magic-link defense) ------------
+	UPSTASH_REDIS_REST_URL?: string;
+	UPSTASH_REDIS_REST_TOKEN?: string;
+
 	/** R2 S3-compatible API credentials for presigning PUT/GET URLs. */
 	R2_S3_ACCESS_KEY_ID: string;
 	R2_S3_SECRET_ACCESS_KEY: string;

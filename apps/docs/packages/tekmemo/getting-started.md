@@ -72,7 +72,7 @@ There are two ways to expose TekMemo to MCP-compatible agents (Claude Code, Curs
 
 The hosted server can't read your local files, so use the stdio server when you want file-first `local` or `hybrid` memory with an agent. See the [MCP guide](../mcp/) and [Client setup](../mcp/client-setup) for per-client instructions.
 
-## 6. Move to cloud when needed
+## 7. Move to cloud when needed
 
 Configure the CLI or MCP server with your TekMemo Cloud credentials:
 

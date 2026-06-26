@@ -20,15 +20,29 @@
  * envelope stays the SSOT; errors throw `ApiError` subclasses serialized by the
  * global `onError`.
  *
- * ## Two-phase push cursor note
+ * ## Two-phase push + concurrency (ADR 0010)
  * `push` returns the CURRENT cursor (pre-commit); `complete` is what bumps it.
- * We do NOT enforce a strict cursor match on `complete` — the commit is an
- * idempotent per-path upsert, so a concurrent push between the two phases
- * doesn't corrupt anything (last-writer-wins per path, the D6 model). If state
- * is genuinely wrong (e.g. `complete` with no prior `push`), the verify step
- * fails closed: `verifyUploaded` 409s on a missing/mismatched R2 object.
+ *
+ * `complete` now serializes the commit: it acquires the project's libSQL
+ * `BEGIN IMMEDIATE` write lock (via `acquireWriteLock`) and runs the whole
+ * commit — cursor bump, manifest upserts, storage total — inside it, so two
+ * concurrent multi-agent pushes to one project can never interleave or lose a
+ * manifest entry. The lock is project-scoped; unrelated projects commit in
+ * parallel. If the lock can't be acquired within the libSQL timeout, the client
+ * gets a 503 `concurrency_locked` + `Retry-After` and retries the same
+ * `push/complete` idempotently.
+ *
+ * The optimistic `baseCursor` gate runs INSIDE the lock: if the client supplied
+ * a `baseCursor` that is now stale (another agent committed since `push`), we
+ * reject with 409 carrying the current cursor so the client re-diffs and
+ * retries. A client that omits `baseCursor` (or sends the current one) passes
+ * straight through — single-user, single-device sync is unaffected. This keeps
+ * D6 (last-writer-wins) for the uncontended case while making B3 (one memory,
+ * many agents) safe: a contended commit is either retried cleanly (503) or
+ * resolved with a fresh diff (409), never silently dropped.
  *
  * @see docs/architecture/cloud-sync-and-refactor.md §4.4/§4.5/§4.6
+ * @see docs/adr/0010-cloud-concurrency-control-for-b3.md
  * @see docs/architecture/decisions.md Q13 (auto-provision), Q14 (cursor = String(seq))
  */
 
@@ -46,11 +60,13 @@ import type { ApiEnv, ApiVariables } from "../index";
 import { json } from "../json";
 import { resolveAccount } from "../middleware/auth";
 import { presignConfigFromEnv, presignMany } from "../r2-presign";
+import { acquireWriteLock } from "./concurrency";
 import {
 	assertOwns,
 	cloudManifestToLocal,
-	commitPush,
+	commitPushTx,
 	currentCursor,
+	currentCursorTx,
 	diffPullTargets,
 	diffPushTargets,
 	diffRemoved,
@@ -156,11 +172,12 @@ export const syncApp = new Hono<ApiEnv>()
 
 		const body = await readJsonObject<PushBody>(c);
 		const manifest = parseManifest(body.manifest, "manifest");
-		// baseCursor is accepted but not gated at v1 (no optimistic-concurrency
-		// check yet); parsed leniently to honour the opaque-string contract.
-		void parseCursor(
-			typeof body.baseCursor === "string" ? body.baseCursor : undefined,
-		);
+		// Parse `baseCursor` leniently (opaque-string contract); it is echoed
+		// back unchanged so the client includes it on `push/complete`, where the
+		// optimistic gate (ADR 0010) checks it inside the write lock.
+		const baseCursor =
+			typeof body.baseCursor === "string" ? body.baseCursor : undefined;
+		void parseCursor(baseCursor);
 
 		// First push auto-provisions the project owned by this account (Q13).
 		const project = await ensureProject(db, account.id, projectId);
@@ -192,6 +209,8 @@ export const syncApp = new Hono<ApiEnv>()
 				presignedPutUrl: urls.get(t.sha256) ?? "",
 				expiresAt,
 			})),
+			// The client echoes this back as `cursor` on `push/complete`, where the
+			// optimistic gate (ADR 0010) checks it inside the write lock.
 			cursor,
 		});
 	})
@@ -204,9 +223,13 @@ export const syncApp = new Hono<ApiEnv>()
 
 		const body = await readJsonObject<PushCompleteBody>(c);
 		const uploaded = parseUploaded(body.uploaded);
-		// Cursor is accepted (opaque) but not strictly enforced — see the file
-		// header note on two-phase push.
-		void parseCursor(typeof body.cursor === "string" ? body.cursor : undefined);
+		// The client's last-seen cursor, used by the optimistic gate. Parsed
+		// leniently; `null` means "client supplied none" → no gate, commit freely
+		// (single-user path). A present-but-stale value is rejected inside the
+		// lock (ADR 0010).
+		const baseCursorSeq = parseCursor(
+			typeof body.cursor === "string" ? body.cursor : undefined,
+		);
 
 		// A `complete` with no prior `push` means the project doesn't exist yet;
 		// there is nothing to complete. The client should have called push first.
@@ -258,7 +281,29 @@ export const syncApp = new Hono<ApiEnv>()
 			});
 		}
 
-		const { cursor, manifest } = await commitPush(db, projectId, verified);
+		// Serialize the commit (ADR 0010): acquire the project's BEGIN IMMEDIATE
+		// write lock, run the optimistic-cursor gate + the full commit inside it,
+		// then commit. Two concurrent multi-agent pushes to one project cannot
+		// interleave; a contended lock surfaces as 503 concurrency_locked.
+		const { cursor, manifest } = await acquireWriteLock(
+			db,
+			projectId,
+			async (tx) => {
+				// Optimistic gate: if the client supplied a baseCursor that is now
+				// stale (another agent committed since its `push`), reject with 409
+				// carrying the current cursor. Omitted/ current → commit freely.
+				if (baseCursorSeq !== null) {
+					const current = await currentCursorTx(tx, projectId);
+					if (current !== String(baseCursorSeq)) {
+						throw new ConflictError(
+							"Stale base cursor: another agent committed since your push. Re-diff and retry.",
+							{ baseCursor: String(baseCursorSeq), currentCursor: current },
+						);
+					}
+				}
+				return commitPushTx(tx, projectId, verified);
+			},
+		);
 		return json(c, { cursor, manifest });
 	})
 
