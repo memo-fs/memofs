@@ -37,7 +37,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
 import type { Database } from "../../db/index.server";
-import { accounts, apiKeys } from "../../db/schema";
+import { accounts, apiKeys, type PlanTier } from "../../db/schema";
 import { hashApiKey } from "../../server/sha256";
 import { AuthError } from "../errors";
 import type { ApiEnv } from "../index";
@@ -50,7 +50,7 @@ import type { ApiEnv } from "../index";
  */
 export interface AuthAccount {
 	id: string;
-	plan: "free" | "pro" | "teams";
+	plan: PlanTier;
 	maxHostedStorageBytes: number;
 	maxConnectors: number;
 }

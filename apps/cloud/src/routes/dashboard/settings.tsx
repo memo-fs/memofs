@@ -16,10 +16,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { createDb } from "~/db/index.server";
-import { createAuth } from "~/server/auth";
 import { getEnv } from "~/server/context.server";
-import { createMagicLinkMailer } from "~/server/email";
-import { requireUser } from "~/server/session.server";
+import { createAuthFromEnv, requireUser } from "~/server/session.server";
 import { formatRelative, userInitials } from "~/utils/format";
 import { PageHeader } from "./+components/page-header";
 import type { Route as DashboardRoute } from "./+types/_layout";
@@ -73,7 +71,7 @@ export async function loader({
 	const user = await requireUser(request, getEnv(context));
 	const env = getEnv(context);
 	const db = createDb(env);
-	const auth = createAuth(env, db, createMagicLinkMailer(env));
+	const auth = createAuthFromEnv(env, db);
 
 	// The active session's token (from the cookie) identifies the current row.
 	const cookieToken = parseSessionToken(request);
@@ -112,7 +110,7 @@ export async function action({
 	await requireUser(request, getEnv(context));
 	const env = getEnv(context);
 	const db = createDb(env);
-	const auth = createAuth(env, db, createMagicLinkMailer(env));
+	const auth = createAuthFromEnv(env, db);
 	const form = await request.formData();
 	const token = String(form.get("token") ?? "");
 	if (!token) return { ok: false };

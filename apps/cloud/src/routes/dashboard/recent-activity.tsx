@@ -1,11 +1,6 @@
-import { createDb } from "~/db/index.server";
 import { getEnv } from "~/server/context.server";
-import {
-	getAccountForUser,
-	listProjectsForAccount,
-	recentSyncActivity,
-} from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { listProjectsForAccount, recentSyncActivity } from "~/server/queries";
+import { requireUserWithAccount } from "~/server/session.server";
 import type { Route } from "./+types/recent-activity";
 
 /**
@@ -29,8 +24,10 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<Response> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 
 	const url = new URL(request.url);
 	const projectId = url.searchParams.get("projectId");
@@ -39,9 +36,8 @@ export async function loader({
 	}
 
 	// Ownership gate: only return activity for a project the signed-in account
-	// owns. `getAccountForUser` resolves the billing account; if there's none or
-	// it doesn't own the project, return an empty feed (no cross-account leak).
-	const account = await getAccountForUser(db, user.id);
+	// owns. If there's no account or it doesn't own the project, return an empty
+	// feed (no cross-account leak).
 	if (!account) return Response.json({ activity: [] });
 
 	const owned = await listProjectsForAccount(db, account.id);

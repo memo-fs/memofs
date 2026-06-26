@@ -11,15 +11,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import { createDb } from "~/db/index.server";
 import { getEnv } from "~/server/context.server";
 import type { ProjectSummary } from "~/server/queries";
-import {
-	deleteProject,
-	getAccountForUser,
-	listProjectsForAccount,
-} from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { deleteProject, listProjectsForAccount } from "~/server/queries";
+import { requireUserWithAccount } from "~/server/session.server";
 import { formatBytes, formatRelative } from "~/utils/format";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { NewProjectDialog } from "./+components/new-project-dialog";
@@ -49,9 +44,10 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<ProjectsLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
-	const account = await getAccountForUser(db, user.id);
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const projects = account ? await listProjectsForAccount(db, account.id) : [];
 	return { projects };
 }
@@ -66,13 +62,14 @@ export async function action({
 	request,
 	context,
 }: Route.ActionArgs): Promise<{ ok: boolean }> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const form = await request.formData();
 	const projectId = String(form.get("projectId") ?? "");
 	if (!projectId) return { ok: false };
 
-	const account = await getAccountForUser(db, user.id);
 	if (!account) return { ok: false };
 
 	await deleteProject(db, account.id, projectId);

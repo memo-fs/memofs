@@ -11,12 +11,17 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { createDb } from "~/db/index.server";
-import { createAuth } from "~/server/auth";
 import { getCtx, getEnv } from "~/server/context.server";
-import { createMagicLinkMailer } from "~/server/email";
 import { hasMxRecord } from "~/server/mx-check.server";
 import { enabledOAuthProviders } from "~/server/oauth-providers.server";
-import { consumeMagicLinkToken } from "~/server/rate-limit.server";
+import {
+	consumeMagicLinkToken,
+	rateLimitMessage,
+} from "~/server/rate-limit.server";
+import {
+	createAuthFromEnv,
+	safeRelativeRedirect,
+} from "~/server/session.server";
 import {
 	AuthSwitchLink,
 	EmailField,
@@ -63,7 +68,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const formData = await request.formData();
 	const name = String(formData.get("name")).trim();
 	const email = String(formData.get("email")).trim();
-	const callbackURL = String(formData.get("callbackURL") ?? "/dashboard");
+	const callbackURL = safeRelativeRedirect(formData.get("callbackURL"));
 
 	if (!name) {
 		return data(
@@ -78,15 +83,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	// DNS resolver. 429-style outcome surfaces the same as a validation error
 	// (inline, no navigation) — the message tells the user when to retry.
 	const limited = await consumeMagicLinkToken(env, request, getCtx(context));
-	if (!limited.ok) {
-		const secs = Math.ceil((limited.reset - Date.now()) / 1000);
-		return data(
-			{
-				ok: false,
-				error: `Too many requests. Try again in ${Math.max(secs, 0)}s.`,
-			},
-			{ status: 429 },
-		);
+	const limitedMessage = rateLimitMessage(limited);
+	if (limitedMessage) {
+		return data({ ok: false, error: limitedMessage.error }, { status: 429 });
 	}
 
 	const validation = validateEmail(email);
@@ -112,7 +111,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const db = createDb(env);
-	const auth = createAuth(env, db, createMagicLinkMailer(env));
+	const auth = createAuthFromEnv(env, db);
 
 	await auth.api.signInMagicLink({
 		body: { email, name, callbackURL },

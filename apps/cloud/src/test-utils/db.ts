@@ -29,8 +29,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type Client, createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
-import type { Database } from "../../src/db/index.server";
-import * as schema from "../../src/db/schema";
+import type { Database } from "../db/index.server";
+import * as schema from "../db/schema";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = join(here, "..", "..", "drizzle");

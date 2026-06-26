@@ -1,15 +1,10 @@
 import { Menu, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Outlet } from "react-router";
-import { createDb } from "~/db/index.server";
 import { getEnv } from "~/server/context.server";
 import type { AccountView, ProjectSummary } from "~/server/queries";
-import {
-	getAccountForUser,
-	getAccountUsage,
-	listProjectsForAccount,
-} from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { getAccountUsage, listProjectsForAccount } from "~/server/queries";
+import { requireUserWithAccount } from "~/server/session.server";
 import { DashboardSidebar } from "./+components/dashboard-sidebar";
 import type { Route } from "./+types/_layout";
 
@@ -55,13 +50,14 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<DashboardLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
+	const { user, db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 
 	// Provisioning is best-effort: an account may be missing only if signup
 	// provisioning raced. Degrade gracefully (null account → zeroed usage) rather
 	// than blocking the user out of their dashboard.
-	const account = await getAccountForUser(db, user.id);
 	const [projects, usage] = await Promise.all([
 		account
 			? listProjectsForAccount(db, account.id)

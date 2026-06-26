@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { hasMxRecord } from "../src/server/mx-check.server";
+import { hasMxRecord } from "../mx-check.server";
 
 /** Build a JSON Response shaped like Cloudflare DoH. */
 function dohResponse(body: unknown, ok = true): Response {

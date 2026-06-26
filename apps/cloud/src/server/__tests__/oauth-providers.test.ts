@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { CloudWorkerEnv } from "../src/server/env";
-import { enabledOAuthProviders } from "../src/server/oauth-providers.server";
+import type { CloudWorkerEnv } from "../env";
+import { enabledOAuthProviders } from "../oauth-providers.server";
 
 /**
  * Minimal env stub — only the OAuth bindings matter here. Cast through `as`

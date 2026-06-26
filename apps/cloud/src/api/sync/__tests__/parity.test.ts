@@ -2,12 +2,12 @@ import type { TekMemoCloudFetch } from "@tekbreed/tekmemo/cloud-client";
 import { createTekMemoCloudClient } from "@tekbreed/tekmemo/cloud-client";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { type ApiEnv, createApiApp } from "../src/api";
-import type { Database } from "../src/db/index.server";
-import { accounts, apiKeys } from "../src/db/schema";
-import type { CloudWorkerEnv } from "../src/server/env";
-import { hashApiKey, sha256Hex } from "../src/server/sha256";
-import { createTestDb } from "./helpers/db";
+import type { Database } from "../../../db/index.server";
+import { accounts, apiKeys } from "../../../db/schema";
+import type { CloudWorkerEnv } from "../../../server/env";
+import { hashApiKey, sha256Hex } from "../../../server/sha256";
+import { createTestDb } from "../../../test-utils/db";
+import { type ApiEnv, createApiApp } from "../..";
 
 /**
  * @file Client ↔ server wire-parity round-trip.

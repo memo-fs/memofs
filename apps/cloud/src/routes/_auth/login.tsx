@@ -9,11 +9,16 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { createDb } from "~/db/index.server";
-import { createAuth } from "~/server/auth";
 import { getCtx, getEnv } from "~/server/context.server";
-import { createMagicLinkMailer } from "~/server/email";
 import { enabledOAuthProviders } from "~/server/oauth-providers.server";
-import { consumeMagicLinkToken } from "~/server/rate-limit.server";
+import {
+	consumeMagicLinkToken,
+	rateLimitMessage,
+} from "~/server/rate-limit.server";
+import {
+	createAuthFromEnv,
+	safeRelativeRedirect,
+} from "~/server/session.server";
 import {
 	AuthSwitchLink,
 	EmailField,
@@ -54,7 +59,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const formData = await request.formData();
 
 	const email = String(formData.get("email")).trim();
-	const callbackURL = String(formData.get("callbackURL") ?? "/dashboard");
+	const callbackURL = safeRelativeRedirect(formData.get("callbackURL"));
 
 	const env = getEnv(context);
 
@@ -62,15 +67,9 @@ export async function action({ request, context }: Route.ActionArgs) {
 	// omits the MX check (unlike signup) so a transient DoH failure can't lock a
 	// returning user out of their account.
 	const limited = await consumeMagicLinkToken(env, request, getCtx(context));
-	if (!limited.ok) {
-		const secs = Math.ceil((limited.reset - Date.now()) / 1000);
-		return data(
-			{
-				ok: false,
-				error: `Too many requests. Try again in ${Math.max(secs, 0)}s.`,
-			},
-			{ status: 429 },
-		);
+	const limitedMessage = rateLimitMessage(limited);
+	if (limitedMessage) {
+		return data({ ok: false, error: limitedMessage.error }, { status: 429 });
 	}
 
 	const validation = validateEmail(email);
@@ -83,7 +82,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	}
 
 	const db = createDb(env);
-	const auth = createAuth(env, db, createMagicLinkMailer(env));
+	const auth = createAuthFromEnv(env, db);
 
 	await auth.api.signInMagicLink({
 		body: { email, callbackURL },

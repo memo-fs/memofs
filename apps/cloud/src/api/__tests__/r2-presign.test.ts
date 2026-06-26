@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-
+import type { CloudWorkerEnv } from "../../server/env";
 import {
 	PresignConfigError,
 	presign,
 	presignConfigFromEnv,
 	presignMany,
-} from "../src/api/r2-presign";
-import type { CloudWorkerEnv } from "../src/server/env";
+} from "../r2-presign";
 
 /**
  * R2 presign helper tests.

@@ -1,12 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { Database } from "../src/db/index.server";
-import { accounts, projects, user } from "../src/db/schema";
-import {
-	getAccountForUser,
-	getAccountUsage,
-} from "../src/server/queries/account";
-import { createTestDb } from "./helpers/db";
+import type { Database } from "../../../db/index.server";
+import { accounts, projects, user } from "../../../db/schema";
+import { createTestDb } from "../../../test-utils/db";
+import { getAccountForUser, getAccountUsage } from "../account";
 
 /**
  * Account query-layer tests.

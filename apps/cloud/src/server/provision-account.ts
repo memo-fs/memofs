@@ -22,10 +22,10 @@
  * @see docs/adr/0006-pricing-and-entitlements.md — free-tier default caps.
  */
 import { createId } from "@paralleldrive/cuid2";
-import { eq } from "drizzle-orm";
 
 import type { Database } from "../db/index.server";
-import { accounts, projects } from "../db/schema";
+import { accounts, type PlanTier, projects } from "../db/schema";
+import { getAccountForUser } from "./queries/account";
 
 /**
  * Provisions a billing account + default project for a newly-created user.
@@ -37,15 +37,12 @@ import { accounts, projects } from "../db/schema";
 export async function provisionAccount(
 	db: Database,
 	userId: string,
-): Promise<{ id: string; plan: "free" | "pro" | "teams" }> {
+): Promise<{ id: string; plan: PlanTier }> {
 	// Idempotency guard: a retried hook (or an OAuth-link to an existing user
-	// that already provisioned) must not create a second account.
-	const existing = await db
-		.select({ id: accounts.id, plan: accounts.plan })
-		.from(accounts)
-		.where(eq(accounts.userId, userId))
-		.limit(1);
-	if (existing[0]) return existing[0];
+	// that already provisioned) must not create a second account. Delegates to
+	// the SSOT `getAccountForUser` so the `accounts.userId` lookup lives once.
+	const existing = await getAccountForUser(db, userId);
+	if (existing) return existing;
 
 	const accountId = createId();
 	await db.insert(accounts).values({ id: accountId, userId });

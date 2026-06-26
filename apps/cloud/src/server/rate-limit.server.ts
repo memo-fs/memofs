@@ -82,6 +82,21 @@ export function getClientIp(request: Request): string {
 export type RateLimitResult = { ok: true } | { ok: false; reset: number };
 
 /**
+ * Formats a denied {@link RateLimitResult} into the user-facing retry message +
+ * whole-second delay — the single source of truth for this conversion so login
+ * and signup render an identical 429. Returns `null` when the result is NOT a
+ * denial (callers guard with this before building a 429 response).
+ */
+export function rateLimitMessage(result: RateLimitResult): {
+	seconds: number;
+	error: string;
+} | null {
+	if (result.ok) return null;
+	const seconds = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 0);
+	return { seconds, error: `Too many requests. Try again in ${seconds}s.` };
+}
+
+/**
  * Consume one magic-link request slot for the requesting IP.
  *
  * Returns `{ ok: true }` when the request may proceed, or `{ ok: false, reset }`

@@ -1,13 +1,14 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { Database } from "../src/db/index.server";
+import type { Database } from "../../../db/index.server";
 import {
 	accounts,
 	projectFiles,
 	projects,
 	syncCursors,
-} from "../src/db/schema";
+} from "../../../db/schema";
+import { createTestDb } from "../../../test-utils/db";
 import {
 	deleteProject,
 	getProjectForAccount,
@@ -15,8 +16,7 @@ import {
 	listProjectFiles,
 	listProjectsForAccount,
 	recentSyncActivity,
-} from "../src/server/queries/projects";
-import { createTestDb } from "./helpers/db";
+} from "../projects";
 
 /**
  * Project query-layer tests.

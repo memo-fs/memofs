@@ -1,27 +1,9 @@
-import {
-	AlertTriangle,
-	CheckCircle2,
-	Copy,
-	Eye,
-	EyeOff,
-	KeyRound,
-	Plus,
-} from "lucide-react";
+import { AlertTriangle, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
 	Table,
 	TableBody,
@@ -30,18 +12,19 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import { createDb } from "~/db/index.server";
 import { getEnv } from "~/server/context.server";
 import type { ApiKeyView } from "~/server/queries";
 import {
 	createApiKey,
-	getAccountForUser,
 	listApiKeysForAccount,
 	revokeApiKey,
 } from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { requireUserWithAccount } from "~/server/session.server";
 import { formatDate } from "~/utils/format";
+import { CreateKeyDialog } from "./+components/create-key-dialog";
 import { PageHeader } from "./+components/page-header";
+import { RevealKeyDialog } from "./+components/reveal-key-dialog";
+import { RevokeKeyDialog } from "./+components/revoke-key-dialog";
 import type { Route } from "./+types/api-keys";
 
 /**
@@ -75,9 +58,10 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<ApiKeysLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
-	const account = await getAccountForUser(db, user.id);
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const keys = account ? await listApiKeysForAccount(db, account.id) : [];
 	return { keys };
 }
@@ -92,12 +76,11 @@ export async function action({
 	request,
 	context,
 }: Route.ActionArgs): Promise<ApiKeyActionData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
+	const env = getEnv(context);
+	const { db, account } = await requireUserWithAccount(request, env);
 	const form = await request.formData();
 	const intent = String(form.get("intent") ?? "");
 
-	const account = await getAccountForUser(db, user.id);
 	if (!account) {
 		return { intent: "error", ok: false };
 	}
@@ -107,7 +90,7 @@ export async function action({
 		const { rawKey, row } = await createApiKey(db, {
 			accountId: account.id,
 			label,
-			salt: getEnv(context).TEKMEMO_API_KEY_SALT ?? "",
+			salt: env.TEKMEMO_API_KEY_SALT ?? "",
 		});
 		return { intent: "create", rawKey, row };
 	}
@@ -128,27 +111,21 @@ export default function ApiKeysPage({ loaderData }: Route.ComponentProps) {
 	const createFetcher = useFetcher<ApiKeyActionData>();
 	const revokeFetcher = useFetcher<ApiKeyActionData>();
 
-	const [showCreate, setShowCreate] = useState(false);
-	const [label, setLabel] = useState("");
+	// The one-time raw key lifted out of the create result to drive the reveal
+	// dialog. `null` outside the reveal moment. The useEffect is the bridge from
+	// the fetcher's async result to the reveal dialog's open state.
 	const [createdKey, setCreatedKey] = useState<{
 		rawKey: string;
 		label: string;
 	} | null>(null);
-	const [copied, setCopied] = useState(false);
-	const [showKey, setShowKey] = useState(false);
 	const [revokeId, setRevokeId] = useState<string | null>(null);
 
-	// The raw key is shown exactly once: when the create action lands, capture it
-	// into local state to drive the reveal dialog, and tear down the create form.
-	// Once dismissed, the key is gone forever — only its hash is persisted.
 	useEffect(() => {
 		if (createFetcher.data?.intent === "create") {
 			setCreatedKey({
 				rawKey: createFetcher.data.rawKey,
 				label: createFetcher.data.row.label ?? "Unlabeled",
 			});
-			setShowCreate(false);
-			setLabel("");
 		}
 	}, [createFetcher]);
 
@@ -158,26 +135,12 @@ export default function ApiKeysPage({ loaderData }: Route.ComponentProps) {
 	const isRevoking = (id: string) =>
 		revokingId != null && String(revokingId) === id;
 
-	const copy = (text: string) => {
-		navigator.clipboard.writeText(text).catch(() => {});
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
-	};
-
 	return (
 		<div className="p-6">
 			<PageHeader
 				title="API Keys"
 				subtitle="Account-wide. Keys authenticate all sync operations."
-				action={
-					<Button
-						size="sm"
-						onClick={() => setShowCreate(true)}
-						className="h-9 text-xs"
-					>
-						<Plus className="mr-1.5 h-4 w-4" /> New key
-					</Button>
-				}
+				action={<CreateKeyDialog createFetcher={createFetcher} />}
 			/>
 
 			<div className="mb-6 flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
@@ -281,174 +244,15 @@ export default function ApiKeysPage({ loaderData }: Route.ComponentProps) {
 				</CardContent>
 			</Card>
 
-			{/* Create key dialog */}
-			<Dialog open={showCreate} onOpenChange={setShowCreate}>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle className="text-base font-semibold">
-							Create API key
-						</DialogTitle>
-						<DialogDescription className="text-xs">
-							Give this key a label so you know which machine it belongs to.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-3 py-2">
-						<div className="space-y-1.5">
-							<Label htmlFor="key-label" className="text-xs">
-								Label
-							</Label>
-							<Input
-								id="key-label"
-								placeholder="e.g. laptop, ci, work-desktop"
-								value={label}
-								onChange={(e) => setLabel(e.target.value)}
-								className="h-9 text-xs"
-							/>
-						</div>
-					</div>
-					<DialogFooter className="gap-2 sm:gap-0">
-						<Button
-							variant="outline"
-							size="sm"
-							className="h-9 text-xs"
-							onClick={() => setShowCreate(false)}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={() =>
-								createFetcher.submit(
-									{ intent: "create", label },
-									{ method: "post" },
-								)
-							}
-							disabled={!label || createFetcher.state !== "idle"}
-							size="sm"
-							className="h-9 text-xs"
-						>
-							{createFetcher.state !== "idle" ? "Creating…" : "Create key"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-
-			{/* One-time reveal dialog */}
-			<Dialog
-				open={!!createdKey}
-				onOpenChange={() => {
-					setCreatedKey(null);
-					setShowKey(false);
-				}}
-			>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle className="text-base font-semibold">
-							Your new API key — save it now
-						</DialogTitle>
-						<DialogDescription className="text-xs">
-							This is the only time you'll see the full key. Copy it before
-							closing.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-3 py-2">
-						<div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-							<AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-							<p className="text-[11px] leading-normal text-primary/95">
-								You won't see this key again after closing this dialog.
-							</p>
-						</div>
-						<div className="rounded-lg border border-border/40 bg-muted/40 p-3">
-							<p className="mb-1.5 text-[10px] text-muted-foreground">
-								Label:{" "}
-								<strong className="text-foreground">{createdKey?.label}</strong>
-							</p>
-							<div className="flex items-center gap-2">
-								<code className="flex-1 break-all rounded border border-border/40 bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-									{showKey ? createdKey?.rawKey : `tm_${"•".repeat(42)}`}
-								</code>
-								<div className="flex shrink-0 gap-1">
-									<button
-										type="button"
-										onClick={() => setShowKey((v) => !v)}
-										className="cursor-pointer rounded p-1 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-										title={showKey ? "Hide key" : "Show key"}
-									>
-										{showKey ? (
-											<EyeOff className="h-4 w-4" />
-										) : (
-											<Eye className="h-4 w-4" />
-										)}
-									</button>
-									<button
-										type="button"
-										onClick={() => copy(createdKey?.rawKey ?? "")}
-										className="cursor-pointer rounded p-1 text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-										title="Copy key"
-									>
-										{copied ? (
-											<CheckCircle2 className="h-4 w-4 text-primary" />
-										) : (
-											<Copy className="h-4 w-4" />
-										)}
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<DialogFooter>
-						<Button
-							className="h-9 w-full text-xs"
-							onClick={() => {
-								setCreatedKey(null);
-								setShowKey(false);
-							}}
-						>
-							I've copied it — close
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-
-			{/* Revoke confirm dialog */}
-			<Dialog open={!!revokeId} onOpenChange={() => setRevokeId(null)}>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle className="text-base font-semibold">
-							Revoke this key?
-						</DialogTitle>
-						<DialogDescription className="text-xs">
-							Any machine using this key will get 401 errors on next sync. This
-							cannot be undone.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter className="gap-2 sm:gap-0">
-						<Button
-							variant="outline"
-							size="sm"
-							className="h-9 text-xs"
-							onClick={() => setRevokeId(null)}
-						>
-							Cancel
-						</Button>
-						<Button
-							variant="destructive"
-							size="sm"
-							className="h-9 text-xs"
-							disabled={revokeFetcher.state !== "idle"}
-							onClick={() => {
-								if (!revokeId) return;
-								revokeFetcher.submit(
-									{ intent: "revoke", keyId: revokeId },
-									{ method: "post" },
-								);
-								setRevokeId(null);
-							}}
-						>
-							{revokeFetcher.state !== "idle" ? "Revoking…" : "Revoke key"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<RevealKeyDialog
+				createdKey={createdKey}
+				onClose={() => setCreatedKey(null)}
+			/>
+			<RevokeKeyDialog
+				revokeId={revokeId}
+				onClose={() => setRevokeId(null)}
+				revokeFetcher={revokeFetcher}
+			/>
 		</div>
 	);
 }

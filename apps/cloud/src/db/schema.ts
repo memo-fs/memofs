@@ -230,6 +230,17 @@ export const accounts = sqliteTable("accounts", {
 });
 
 /**
+ * The entitlement plan tier — the single source of truth for the plan union.
+ * Derived from the `accounts.plan` column enum so the schema is the only place
+ * the values are listed; every consumer imports this type instead of repeating
+ * `"free" | "pro" | "teams"`. Named `PlanTier` to avoid collision with the
+ * pricing-catalog `Plan` type in `routes/_home/+utils/plans.ts` (a distinct
+ * marketing concept). Nullable variants (`PlanTier | null`) are derived at the
+ * call site (e.g. a session user whose account is not yet provisioned).
+ */
+export type PlanTier = (typeof accounts.plan.enumValues)[number];
+
+/**
  * A hashed API key. The cloud authenticates sync requests by Bearer token;
  * the raw key is shown ONCE at provisioning and never persisted. We store a
  * salted sha256 of the raw key for lookup (ADR 0006 §entitlement model).

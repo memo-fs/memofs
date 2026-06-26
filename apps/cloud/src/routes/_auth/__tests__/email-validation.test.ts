@@ -4,7 +4,7 @@ import {
 	emailDomain,
 	emailIssueMessage,
 	validateEmail,
-} from "../src/routes/_auth/+utils/email-validation";
+} from "../+utils/email-validation";
 
 describe("validateEmail", () => {
 	it("accepts a well-formed address", () => {

@@ -9,7 +9,6 @@ import {
 	CardDescription,
 	CardHeader,
 } from "~/components/ui/card";
-import { createDb } from "~/db/index.server";
 import { cn } from "~/lib/utils";
 import { getEnv } from "~/server/context.server";
 import type {
@@ -19,12 +18,11 @@ import type {
 } from "~/server/queries";
 import {
 	deleteProject,
-	getAccountForUser,
 	getProjectForAccount,
 	listProjectCursorHistory,
 	listProjectFiles,
 } from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { requireUserWithAccount } from "~/server/session.server";
 import { formatBytes, formatRelative } from "~/utils/format";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { ProjectManifest } from "./+components/project-manifest";
@@ -57,9 +55,10 @@ export async function loader({
 	context,
 	params,
 }: Route.LoaderArgs): Promise<ProjectDetailLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
-	const account = await getAccountForUser(db, user.id);
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const projectId = params.projectId ?? "";
 
 	// Ownership gate: a project id from the URL that isn't owned by the signed-in
@@ -90,9 +89,10 @@ export async function action({
 	context,
 	params,
 }: Route.ActionArgs): Promise<{ ok: true }> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
-	const account = await getAccountForUser(db, user.id);
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const projectId = params.projectId ?? "";
 	if (account) {
 		await deleteProject(db, account.id, projectId);

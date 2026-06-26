@@ -30,34 +30,51 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import type { Database } from "../db/index.server";
 import * as schema from "../db/schema";
 import type { CloudWorkerEnv } from "./env";
+import {
+	isProviderConfigured,
+	OAUTH_PROVIDER_IDS,
+	type OAuthProviderId,
+} from "./oauth-providers.server";
 import { provisionAccount } from "./provision-account";
 
 /**
  * Build the `socialProviders` map from env, including only providers whose
  * client id + secret are both set. Returns `undefined` when none are wired so
  * Better Auth skips social auth entirely (no dangling `/sign-in/social` route
- * that 404s). The UI checks the same env presence to decide whether to render
- * each button — see `oauth-buttons.tsx` + `oauth-providers.server.ts`.
+ * that 404s). Provider availability is decided by the SSOT predicate in
+ * `oauth-providers.server` (the same one the UI uses to render buttons), so the
+ * auth side and the UI side can never disagree.
  */
 function resolveSocialProviders(env: CloudWorkerEnv) {
-	const github =
-		env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
-			? {
-					clientId: env.GITHUB_CLIENT_ID,
-					clientSecret: env.GITHUB_CLIENT_SECRET,
-				}
-			: undefined;
+	const map: Partial<
+		Record<OAuthProviderId, { clientId: string; clientSecret: string }>
+	> = {};
+	for (const provider of OAUTH_PROVIDER_IDS) {
+		const credentials = providerCredentials(env, provider);
+		if (credentials) map[provider] = credentials;
+	}
+	return Object.keys(map).length > 0 ? map : undefined;
+}
 
-	const google =
-		env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
-			? {
-					clientId: env.GOOGLE_CLIENT_ID,
-					clientSecret: env.GOOGLE_CLIENT_SECRET,
-				}
-			: undefined;
-
-	if (!github && !google) return undefined;
-	return { github, google };
+/** Reads a provider's client id + secret from env, or `null` if either is unset. */
+function providerCredentials(
+	env: CloudWorkerEnv,
+	provider: OAuthProviderId,
+): { clientId: string; clientSecret: string } | null {
+	if (!isProviderConfigured(env, provider)) return null;
+	// `isProviderConfigured` guarantees both are truthy; the `?? ""` only appeases TS.
+	switch (provider) {
+		case "github":
+			return {
+				clientId: env.GITHUB_CLIENT_ID ?? "",
+				clientSecret: env.GITHUB_CLIENT_SECRET ?? "",
+			};
+		case "google":
+			return {
+				clientId: env.GOOGLE_CLIENT_ID ?? "",
+				clientSecret: env.GOOGLE_CLIENT_SECRET ?? "",
+			};
+	}
 }
 
 /**

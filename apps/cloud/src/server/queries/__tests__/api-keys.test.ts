@@ -1,16 +1,16 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { Database } from "../src/db/index.server";
-import { accounts, apiKeys } from "../src/db/schema";
+import type { Database } from "../../../db/index.server";
+import { accounts, apiKeys } from "../../../db/schema";
+import { createTestDb } from "../../../test-utils/db";
+import { hashApiKey } from "../../sha256";
 import {
 	createApiKey,
 	generateRawKey,
 	listApiKeysForAccount,
 	revokeApiKey,
-} from "../src/server/queries/api-keys";
-import { hashApiKey } from "../src/server/sha256";
-import { createTestDb } from "./helpers/db";
+} from "../api-keys";
 
 /**
  * API-key query-layer tests.

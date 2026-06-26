@@ -11,13 +11,12 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import { createDb } from "~/db/index.server";
 import { SITE_LINKS } from "~/lib/site";
 import { cn } from "~/lib/utils";
 import { getEnv } from "~/server/context.server";
 import type { AccountView } from "~/server/queries";
-import { getAccountForUser, getAccountUsage } from "~/server/queries";
-import { requireUser } from "~/server/session.server";
+import { getAccountUsage } from "~/server/queries";
+import { requireUserWithAccount } from "~/server/session.server";
 import { formatBytes } from "~/utils/format";
 import { PLANS } from "../_home/+utils/plans";
 import { PageHeader } from "./+components/page-header";
@@ -48,9 +47,10 @@ export async function loader({
 	request,
 	context,
 }: Route.LoaderArgs): Promise<BillingLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const db = createDb(getEnv(context));
-	const account = await getAccountForUser(db, user.id);
+	const { db, account } = await requireUserWithAccount(
+		request,
+		getEnv(context),
+	);
 	const usage = account
 		? await getAccountUsage(db, account.id)
 		: { storageBytes: 0, connectorsUsed: 0 };

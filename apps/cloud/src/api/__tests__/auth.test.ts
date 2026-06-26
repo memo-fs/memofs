@@ -1,14 +1,13 @@
 import { eq } from "drizzle-orm";
 import type { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-
-import { type ApiEnv, createApiApp, json } from "../src/api";
-import { createAuthMiddleware } from "../src/api/middleware/auth";
-import type { Database } from "../src/db/index.server";
-import { accounts, apiKeys } from "../src/db/schema";
-import type { CloudWorkerEnv } from "../src/server/env";
-import { hashApiKey } from "../src/server/sha256";
-import { createTestDb } from "./helpers/db";
+import type { Database } from "../../db/index.server";
+import { accounts, apiKeys } from "../../db/schema";
+import type { CloudWorkerEnv } from "../../server/env";
+import { hashApiKey } from "../../server/sha256";
+import { createTestDb } from "../../test-utils/db";
+import { type ApiEnv, createApiApp, json } from "..";
+import { createAuthMiddleware } from "../middleware/auth";
 
 /**
  * Bearer-auth middleware tests.

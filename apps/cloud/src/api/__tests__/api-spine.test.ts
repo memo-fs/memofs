@@ -1,9 +1,9 @@
 import type { Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { type ApiEnv, createApiApp } from "../src/api";
-import { ApiError, EntitlementError, NotFoundError } from "../src/api/errors";
-import { json, jsonError } from "../src/api/json";
-import type { CloudWorkerEnv } from "../src/server/env";
+import type { CloudWorkerEnv } from "../../server/env";
+import { type ApiEnv, createApiApp } from "..";
+import { ApiError, EntitlementError, NotFoundError } from "../errors";
+import { json, jsonError } from "../json";
 
 /**
  * Tests for the cloud API spine: requestId middleware, the `{ data, meta }` /

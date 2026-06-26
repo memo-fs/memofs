@@ -25,6 +25,7 @@
  */
 import type { JsonValue } from "@tekbreed/tekmemo/cloud-client";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import type { PlanTier } from "../db/schema";
 
 /**
  * HTTP response headers an `ApiError` wants attached to its serialized
@@ -114,7 +115,7 @@ export class EntitlementError extends ApiError {
 			used: number;
 			requested: number;
 			max: number;
-			plan: "free" | "pro" | "teams";
+			plan: PlanTier;
 		},
 	) {
 		super({

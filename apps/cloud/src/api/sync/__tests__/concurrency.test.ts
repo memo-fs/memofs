@@ -1,14 +1,19 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { type ApiEnv, createApiApp } from "../src/api";
-import { ConcurrencyError, isApiError } from "../src/api/errors";
-import { classify, isLockTimeout } from "../src/api/sync/concurrency";
-import type { Database } from "../src/db/index.server";
-import { accounts, apiKeys, projectFiles, syncCursors } from "../src/db/schema";
-import type { CloudWorkerEnv } from "../src/server/env";
-import { hashApiKey, sha256Hex } from "../src/server/sha256";
-import { createTestDb } from "./helpers/db";
+import type { Database } from "../../../db/index.server";
+import {
+	accounts,
+	apiKeys,
+	projectFiles,
+	syncCursors,
+} from "../../../db/schema";
+import type { CloudWorkerEnv } from "../../../server/env";
+import { hashApiKey, sha256Hex } from "../../../server/sha256";
+import { createTestDb } from "../../../test-utils/db";
+import { type ApiEnv, createApiApp } from "../..";
+import { ConcurrencyError, isApiError } from "../../errors";
+import { classify, isLockTimeout } from "../concurrency";
 
 /**
  * Cloud concurrency-control tests — ADR 0010 (Phase 1).

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { CloudWorkerEnv } from "../src/server/env";
+import type { CloudWorkerEnv } from "../env";
 import {
 	consumeMagicLinkToken,
 	createMagicLinkLimiter,
 	getClientIp,
-} from "../src/server/rate-limit.server";
+} from "../rate-limit.server";
 
 /**
  * Minimal env stub. Only the Upstash fields matter for these tests; the rest

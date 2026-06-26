@@ -18,7 +18,7 @@
 import { eq, sql, sum } from "drizzle-orm";
 
 import type { Database } from "../../db/index.server";
-import { accounts, projects } from "../../db/schema";
+import { accounts, type PlanTier, projects } from "../../db/schema";
 
 /**
  * The entitlement snapshot for a billing account, as the dashboard reads it.
@@ -26,7 +26,7 @@ import { accounts, projects } from "../../db/schema";
  */
 export interface AccountView {
 	id: string;
-	plan: "free" | "pro" | "teams";
+	plan: PlanTier;
 	maxHostedStorageBytes: number;
 	maxConnectors: number;
 }
