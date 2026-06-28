@@ -181,7 +181,7 @@ export const syncApp = new Hono<ApiEnv>()
 
 		// First push auto-provisions the project owned by this account (Q13).
 		const project = await ensureProject(db, account.id, projectId);
-		assertOwns(project, account.id);
+		await assertOwns(db, project, account.id);
 
 		const cloud = await loadCloudManifest(db, projectId);
 		const targets = diffPushTargets(manifest, cloudManifestToLocal(cloud));
@@ -241,7 +241,7 @@ export const syncApp = new Hono<ApiEnv>()
 				{ projectId },
 			);
 		}
-		assertOwns(project, account.id);
+		await assertOwns(db, project, account.id);
 
 		// Verify each uploaded object against R2 (existence + sha256 match) and
 		// capture its size. This is the content-addressing gate: the bytes the
@@ -324,7 +324,7 @@ export const syncApp = new Hono<ApiEnv>()
 		// first pull is a clean no-op, not a 404.
 		const project = await loadProject(db, projectId);
 		if (!project) return json(c, emptyPull());
-		assertOwns(project, account.id);
+		await assertOwns(db, project, account.id);
 
 		const cloud = await loadCloudManifest(db, projectId);
 		// No client manifest ⇒ the client wants everything it doesn't already
@@ -374,7 +374,7 @@ export const syncApp = new Hono<ApiEnv>()
 				storageBytes: 0,
 			});
 		}
-		assertOwns(project, account.id);
+		await assertOwns(db, project, account.id);
 
 		const [manifest, cursor, lastAt] = await Promise.all([
 			loadCloudManifest(db, projectId),

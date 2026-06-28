@@ -6,8 +6,16 @@
  * `PLANS` below. Do not duplicate plan names, prices, storage caps, connector
  * caps, or feature copy anywhere else — edit them here.
  *
+ * The numeric storage/connector caps are NOT re-typed here: they come from
+ * `PLAN_ENTITLEMENTS` (`server/entitlements.ts`), the one source the data path
+ * (provisioning, Polar webhook) and this catalog both read — so marketing copy
+ * and the enforced limits can never drift (AGENTS.md DRY/SSOT).
+ *
  * Reference: docs/architecture/decisions.md (pricing tiers).
  */
+
+import type { PlanTier } from "~/db/schema";
+import { type EntitlementCaps, PLAN_ENTITLEMENTS } from "~/server/entitlements";
 
 export type PlanFeature = { text: string; included: boolean };
 
@@ -25,6 +33,24 @@ export type Plan = {
 	features: PlanFeature[];
 };
 
+/** Human-readable byte size for the storage feature line (512MB+ → MB/GB). */
+function formatStorage(bytes: number): string {
+	if (bytes >= 1024 ** 3) return `${Math.round(bytes / 1024 ** 3)} GB`;
+	return `${Math.round(bytes / 1024 ** 2)} MB`;
+}
+
+/** The connector feature line: "N connectors" or "Unlimited connectors". */
+function formatConnectors(caps: EntitlementCaps): string {
+	return Number.isFinite(caps.maxConnectors)
+		? `${caps.maxConnectors} connector${caps.maxConnectors === 1 ? "" : "s"}`
+		: "Unlimited connectors";
+}
+
+/** The tier key for each catalog entry — links the marketing plan to the caps. */
+const FREE_TIER: PlanTier = "free";
+const PRO_TIER: PlanTier = "pro";
+const TEAMS_TIER: PlanTier = "teams";
+
 export const PLANS: Plan[] = [
 	{
 		name: "Free",
@@ -35,9 +61,12 @@ export const PLANS: Plan[] = [
 		highlight: false,
 		soon: false,
 		features: [
-			{ text: "500 MB storage", included: true },
+			{
+				text: `${formatStorage(PLAN_ENTITLEMENTS[FREE_TIER].maxHostedStorageBytes)} storage`,
+				included: true,
+			},
 			{ text: "1 project", included: true },
-			{ text: "1 connector", included: true },
+			{ text: formatConnectors(PLAN_ENTITLEMENTS[FREE_TIER]), included: true },
 			{ text: "API key auth", included: true },
 			{ text: "Pre-sync snapshots", included: false },
 			{ text: "Rollback history", included: false },
@@ -54,9 +83,12 @@ export const PLANS: Plan[] = [
 		highlight: true,
 		soon: false,
 		features: [
-			{ text: "10 GB storage", included: true },
+			{
+				text: `${formatStorage(PLAN_ENTITLEMENTS[PRO_TIER].maxHostedStorageBytes)} storage`,
+				included: true,
+			},
 			{ text: "Unlimited projects", included: true },
-			{ text: "3 connectors", included: true },
+			{ text: formatConnectors(PLAN_ENTITLEMENTS[PRO_TIER]), included: true },
 			{ text: "API key auth", included: true },
 			{ text: "Pre-sync snapshots", included: true },
 			{ text: "30-day rollback history", included: true },
@@ -76,9 +108,12 @@ export const PLANS: Plan[] = [
 		highlight: false,
 		soon: true,
 		features: [
-			{ text: "50 GB storage", included: true },
+			{
+				text: `${formatStorage(PLAN_ENTITLEMENTS[TEAMS_TIER].maxHostedStorageBytes)} storage`,
+				included: true,
+			},
 			{ text: "Unlimited projects", included: true },
-			{ text: "Unlimited connectors", included: true },
+			{ text: formatConnectors(PLAN_ENTITLEMENTS[TEAMS_TIER]), included: true },
 			{ text: "API key auth", included: true },
 			{ text: "Pre-sync snapshots", included: true },
 			{ text: "90-day rollback history", included: true },

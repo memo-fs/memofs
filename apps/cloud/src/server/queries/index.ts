@@ -22,6 +22,14 @@ export {
 	revokeApiKey,
 } from "./api-keys";
 export {
+	applyPlanToAccount,
+	getAccountById,
+	getAccountByPolarCustomerId,
+	isPlanMetadataValue,
+	PLAN_METADATA_VALUES,
+	setPolarCustomerId,
+} from "./billing";
+export {
 	deleteProject,
 	getProjectForAccount,
 	listProjectCursorHistory,
@@ -29,6 +37,15 @@ export {
 	listProjectsForAccount,
 	recentSyncActivity,
 } from "./projects";
+export type { TeamMembership } from "./teams";
+export {
+	accessibleTeamIds,
+	canWriteProject,
+	getAccountIdByPolarCustomerId,
+	getMembership,
+	getPersonalTeam,
+	isAcceptedMember,
+} from "./teams";
 export type {
 	ApiKeyView,
 	CursorHistoryView,

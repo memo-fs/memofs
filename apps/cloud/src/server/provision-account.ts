@@ -24,7 +24,14 @@
 import { createId } from "@paralleldrive/cuid2";
 
 import type { Database } from "../db/index.server";
-import { accounts, type PlanTier, projects } from "../db/schema";
+import {
+	accounts,
+	type PlanTier,
+	projects,
+	teamMembers,
+	teams,
+} from "../db/schema";
+import { resolveCaps } from "./entitlements";
 import { getAccountForUser } from "./queries/account";
 
 /**
@@ -44,15 +51,43 @@ export async function provisionAccount(
 	const existing = await getAccountForUser(db, userId);
 	if (existing) return existing;
 
+	// Free-tier caps come from the SSOT resolver, NOT the schema default (which
+	// is 1 GB and contradicts the catalog's 500 MB). Writing them explicitly at
+	// provisioning keeps the denormalised columns honest from row one.
+	const freeCaps = resolveCaps("free");
 	const accountId = createId();
-	await db.insert(accounts).values({ id: accountId, userId });
+	await db.insert(accounts).values({
+		id: accountId,
+		userId,
+		plan: "free",
+		maxHostedStorageBytes: freeCaps.maxHostedStorageBytes,
+		maxConnectors: freeCaps.maxConnectors,
+	});
 
-	// One default project so the dashboard has a workspace on first visit. The
-	// free-tier default name is generic; the user renames it from the dashboard.
-	// `isDefault` is true here and only here — every account gets exactly one.
+	// Every account owns exactly one personal team (ADR 0011 Phase 2): the
+	// team-scoped project path is universal, so a solo user is a one-member
+	// team they own. The default project is created under this team.
+	const teamId = createId();
+	await db.insert(teams).values({
+		id: teamId,
+		name: "My Workspace",
+		ownerAccountId: accountId,
+	});
+	await db.insert(teamMembers).values({
+		teamId,
+		accountId,
+		role: "owner",
+		// The owner didn't get an invite — mark accepted at creation.
+		acceptedAt: new Date().toISOString(),
+	});
+
+	// One default project so the dashboard has a workspace on first visit. It
+	// belongs to the personal team (the access boundary); accountId records the
+	// creator. `isDefault` is true here and only here.
 	await db.insert(projects).values({
 		id: createId(),
 		accountId,
+		teamId,
 		name: "My Workspace",
 		isDefault: true,
 	});

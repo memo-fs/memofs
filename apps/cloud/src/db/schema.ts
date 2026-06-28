@@ -266,12 +266,109 @@ export const apiKeys = sqliteTable("api_keys", {
 });
 
 // ---------------------------------------------------------------------------
+// Teams (collaboration): teams + team_members — ADR 0006 Teams tier / ADR 0011 Phase 2.
+//
+// A team is the unit of shared memory: projects belong to a team, and accounts
+// access them via `team_members` (Owner / Admin / Member). Every account gets a
+// personal team at signup (so the team path is universal — solo users are just a
+// one-member team they own), and may create or join additional teams. Shared-
+// project WRITE access is the concurrency-gated surface (ADR 0011 Phase 1); the
+// roles here gate dashboard/admin actions, not the sync write path (any member
+// writes — the concurrency layer serializes them safely).
+// ---------------------------------------------------------------------------
+
+/**
+ * A team — the unit of shared memory (ADR 0006 Teams tier).
+ *
+ * Every account owns exactly one **personal team** (created at provisioning) so
+ * the team-scoped project path is universal: a solo user is a one-member team
+ * they own. Additional teams are real collaborative workspaces. `ownerAccountId`
+ * is the initial owner; ownership is transferable (nullable + `set null` so the
+ * team survives an owner leaving before a transfer — the membership rows remain
+ * the source of who can act).
+ *
+ * `polarSubscriptionId` links a Teams-plan team to its Polar seat-pool
+ * subscription; null for personal/free teams.
+ */
+export const teams = sqliteTable("teams", {
+	id: idColumn(),
+	/** Human name. Personal teams are seeded as "{Name}'s Workspace". */
+	name: text("name").notNull(),
+	/**
+	 * The account that created the team / its current owner. Nullable: an owner
+	 * leaving before transferring ownership orphans the team (members still act
+	 * via `team_members`); onDelete set null avoids cascading a team away when a
+	 * single member account is deleted.
+	 */
+	ownerAccountId: text("owner_account_id").references(() => accounts.id, {
+		onDelete: "set null",
+	}),
+	/**
+	 * Polar subscription id for the seat pool (Teams tier). Null for personal
+	 * teams and any team not billed per-seat.
+	 */
+	polarSubscriptionId: text("polar_subscription_id"),
+	createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+	updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
+});
+
+/**
+ * Membership row: an account's role on a team. `(teamId, accountId)` is unique.
+ *
+ * `role` is `owner|admin|member`. All roles can sync-write to the team's
+ * projects (the concurrency layer serializes them); the role gates invite /
+ * remove / role-change / billing admin actions in the dashboard.
+ *
+ * `acceptedAt` is null until an invitee accepts — null members are pending
+ * invites (counted for seat entitlement but cannot auth until they accept).
+ */
+export const teamMembers = sqliteTable(
+	"team_members",
+	{
+		id: idColumn(),
+		teamId: text("team_id")
+			.notNull()
+			.references(() => teams.id, { onDelete: "cascade" }),
+		accountId: text("account_id")
+			.notNull()
+			.references(() => accounts.id, { onDelete: "cascade" }),
+		role: text("role", { enum: ["owner", "admin", "member"] }).notNull(),
+		/** Email the invite was sent to (null for the auto-created owner row). */
+		invitedByEmail: text("invited_by_email"),
+		/** Null until the invitee accepts; null = pending invite. */
+		acceptedAt: text("accepted_at"),
+		createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+		updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
+	},
+	(table) => [
+		// One membership per (team, account).
+		uniqueIndex("team_members_team_account_uq").on(
+			table.teamId,
+			table.accountId,
+		),
+	],
+);
+
+/** The role an account holds on a team — gates dashboard/admin actions. */
+export type TeamRole = (typeof teamMembers.role.enumValues)[number];
+
+// ---------------------------------------------------------------------------
 // Sync core: projects + project_files + sync_cursors
 // ---------------------------------------------------------------------------
 
 /**
- * One synced `.tekmemo/` workspace. Belongs to an account. The `id` is the
- * `:projectId` in `/v1/projects/:projectId/sync/*`.
+ * One synced `.tekmemo/` workspace. The `id` is the `:projectId` in
+ * `/v1/projects/:projectId/sync/*`.
+ *
+ * Ownership is team-scoped (ADR 0011 Phase 2): a project belongs to a **team**
+ * (`teamId`), and any member of that team can sync-write to it (serialized by
+ * the concurrency layer). `accountId` records the **creator** (the account that
+ * first pushed this id) for attribution + the auto-provision path; it is NOT the
+ * access-control boundary anymore — `teamId` membership is.
+ *
+ * `teamId` is nullable only for the migration window; the `0002_*` migration
+ * backfills every existing project onto its creator's personal team, after which
+ * it is effectively non-null.
  *
  * The account-scoped entitlement snapshot is denormalised here so a sync
  * request can run a 402 entitlement check (ADR 0006) against the project's
@@ -279,9 +376,16 @@ export const apiKeys = sqliteTable("api_keys", {
  */
 export const projects = sqliteTable("projects", {
 	id: idColumn(),
+	/** The account that first created/pushed this project (attribution). */
 	accountId: text("account_id")
 		.notNull()
 		.references(() => accounts.id, { onDelete: "cascade" }),
+	/**
+	 * The team this project belongs to — the access-control boundary. Nullable
+	 * only during the migration window (backfilled to the creator's personal
+	 * team). A null here after migration is treated as inaccessible.
+	 */
+	teamId: text("team_id").references(() => teams.id, { onDelete: "cascade" }),
 	/** Human name shown in the dashboard. */
 	name: text("name").notNull(),
 	/** Default project for this account (one per account). */

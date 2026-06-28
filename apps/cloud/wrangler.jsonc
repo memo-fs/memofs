@@ -27,7 +27,10 @@
 		"PLUNK_FROM": "TekMemo Cloud <team@tekbreed.com>",
 		"PRESIGN_TTL_SECONDS": "900",
 		"R2_S3_ENDPOINT": "",
-		"R2_BUCKET_NAME": "tekmemo-blobs"
+		"R2_BUCKET_NAME": "tekmemo-blobs",
+		// Polar API server (ADR 0006). "sandbox" for test, "production" for live.
+		// The token + webhook secret are secrets (below); this is a non-secret var.
+		"POLAR_ENV": "sandbox"
 	}
 	// Secrets (set via `wrangler secret put <NAME>`): DATABASE_URL,
 	// DATABASE_AUTH_TOKEN, R2_S3_ACCESS_KEY_ID, R2_S3_SECRET_ACCESS_KEY,
@@ -37,6 +40,8 @@
 	// apps are registered): GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET,
 	// GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. Rate-limit (SC4.1):
 	// UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN.
+	//
+	// Billing (Polar, ADR 0006 Phase 2): POLAR_ACCESS_TOKEN, POLAR_WEBHOOK_SECRET.
 	//
 	// NOTE: path aliases (e.g. `~/*` → `src/*`) are owned by Vite's
 	// `resolve.alias` (see vite.config.ts + tsconfig `paths`), NOT by the

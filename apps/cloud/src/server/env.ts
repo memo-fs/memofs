@@ -58,6 +58,22 @@ export interface CloudWorkerEnv {
 	/** Deployment environment label surfaced by `/v1/readiness`. */
 	ENVIRONMENT?: string;
 
+	// --- Billing (Polar, Merchant of Record — ADR 0006) ---------------------
+	/**
+	 * Polar access token (org-scoped). The webhook + checkout/portal calls use it
+	 * to talk to the Polar API. Secret — set via `wrangler secret put`.
+	 */
+	POLAR_ACCESS_TOKEN?: string;
+	/**
+	 * Webhook signing secret (from the Polar webhook endpoint config). The
+	 * `@polar-sh/hono` `Webhooks` verifier signs every incoming payload against it
+	 * — a mismatch yields 403, so spoofed events are rejected before any handler.
+	 * Secret — set via `wrangler secret put`.
+	 */
+	POLAR_WEBHOOK_SECRET?: string;
+	/** Polar API server: `"sandbox"` for test, `"production"` for live. */
+	POLAR_ENV?: "sandbox" | "production";
+
 	// Dashboard session cookie secret (used by React Router session storage).
 	SESSION_SECRET: string;
 }

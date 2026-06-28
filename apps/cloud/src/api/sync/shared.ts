@@ -24,16 +24,19 @@ import type {
 import { desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/index.server";
 import { projectFiles, projects, syncCursors } from "../../db/schema";
+import { canWriteProject, getPersonalTeam } from "../../server/queries/teams";
 import { ConflictError, PermissionError } from "../errors";
 
 /**
  * A loaded project row, narrowed to the fields sync handlers read. Returned by
  * `loadProject` / `ensureProject` so handlers don't reach back into the table
- * consts.
+ * consts. `teamId` is the access-control boundary (ADR 0011 Phase 2); null for a
+ * pre-migration row not yet backfilled onto a team.
  */
 export interface SyncProject {
 	id: string;
 	accountId: string;
+	teamId: string | null;
 	totalStorageBytes: number;
 }
 
@@ -54,6 +57,7 @@ export async function loadProject(
 		.select({
 			id: projects.id,
 			accountId: projects.accountId,
+			teamId: projects.teamId,
 			totalStorageBytes: projects.totalStorageBytes,
 		})
 		.from(projects)
@@ -81,12 +85,23 @@ export async function ensureProject(
 ): Promise<SyncProject> {
 	const existing = await loadProject(db, projectId);
 	if (existing) return existing;
+	// Assign the new project to the creator's personal team (ADR 0011 Phase 2):
+	// the team is the access boundary. If the account has no personal team yet
+	// (a pre-backfill account), the project is created teamless and the backfill
+	// migration will link it later; only the creator may write until then.
+	const personalTeam = await getPersonalTeam(db, accountId);
 	await db.insert(projects).values({
 		id: projectId,
 		accountId,
+		teamId: personalTeam?.id ?? null,
 		name: projectId,
 	});
-	return { id: projectId, accountId, totalStorageBytes: 0 };
+	return {
+		id: projectId,
+		accountId,
+		teamId: personalTeam?.id ?? null,
+		totalStorageBytes: 0,
+	};
 }
 
 /**
@@ -518,16 +533,28 @@ export async function bumpCursor(
 }
 
 /**
- * Confirms the authenticated account owns `project`, else throws 403. Called by
- * every sync handler after `ensureProject`/`loadProject` so a key that does not
- * own an existing project is rejected before any sync logic runs (§12.4 step 4).
+ * Confirms the authenticated account may sync-write to `project`, else throws
+ * 403. Called by every sync handler after `ensureProject`/`loadProject` (§12.4
+ * step 4).
  *
- * `ensureProject` establishes ownership on first push (Q13); this check guards
- * every subsequent access. The two together mean: a brand-new id has no owner,
- * so the first pusher becomes the owner; a later pusher to the same id gets 403.
+ * ADR 0011 Phase 2 team-scoped access: the account may write iff it created the
+ * project OR is an accepted member of the project's team. `ensureProject`
+ * establishes access on first push (Q13); this check guards every subsequent
+ * access. A team-scoped project is therefore writable by every teammate — the
+ * concurrency layer (ADR 0010) serializes their concurrent writes safely.
  */
-export function assertOwns(project: SyncProject, accountId: string): void {
-	if (project.accountId !== accountId) {
+export async function assertOwns(
+	db: Database,
+	project: SyncProject,
+	accountId: string,
+): Promise<void> {
+	const allowed = await canWriteProject(
+		db,
+		project.teamId,
+		project.accountId,
+		accountId,
+	);
+	if (!allowed) {
 		throw new PermissionError("Project is owned by another account.");
 	}
 }

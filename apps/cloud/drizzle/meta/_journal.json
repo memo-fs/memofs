@@ -15,6 +15,13 @@
       "when": 1782260661079,
       "tag": "0001_true_expediter",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782604787629,
+      "tag": "0002_brief_mandrill",
+      "breakpoints": true
     }
   ]
 }

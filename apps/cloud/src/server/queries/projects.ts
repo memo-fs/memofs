@@ -13,10 +13,11 @@
  * @see {@link ../../api/sync/shared} — `currentCursor` / `lastSyncAt` reused here.
  * @see docs/architecture/cloud-sync-and-refactor.md §4 — the sync tables.
  */
-import { and, count, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, or } from "drizzle-orm";
 import { currentCursor, lastSyncAt } from "../../api/sync/shared";
 import type { Database } from "../../db/index.server";
 import { projectFiles, projects, syncCursors } from "../../db/schema";
+import { accessibleTeamIds } from "./teams";
 import type {
 	CursorHistoryView,
 	ProjectFileView,
@@ -42,6 +43,16 @@ export async function listProjectsForAccount(
 	db: Database,
 	accountId: string,
 ): Promise<ProjectSummary[]> {
+	// Team-scoped access (ADR 0011 Phase 2): an account sees projects it created
+	// (accountId) OR that belong to a team it has joined. accessibleTeamIds
+	// returns the personal team + every joined team; projects on any of those,
+	// plus projects the account authored directly, are visible.
+	const teamIds = await accessibleTeamIds(db, accountId);
+	const teamClause =
+		teamIds.length > 0 ? inArray(projects.teamId, teamIds) : undefined;
+	const where = teamClause
+		? or(eq(projects.accountId, accountId), teamClause)
+		: eq(projects.accountId, accountId);
 	const projectRows = await db
 		.select({
 			id: projects.id,
@@ -51,7 +62,7 @@ export async function listProjectsForAccount(
 			updatedAt: projects.updatedAt,
 		})
 		.from(projects)
-		.where(eq(projects.accountId, accountId))
+		.where(where)
 		.orderBy(desc(projects.updatedAt));
 
 	if (projectRows.length === 0) return [];
@@ -90,10 +101,11 @@ export async function listProjectsForAccount(
 }
 
 /**
- * Loads a single project owned by `accountId`, or `null` if it does not exist
- * or belongs to another account. The ownership filter is the guard: a project
- * id from the URL that isn't owned by the signed-in account resolves to `null`,
- * which the route renders as a 404 — never a cross-account leak.
+ * Loads a single project the account may access (created OR on a team it
+ * joined), or `null` if it does not exist / is inaccessible. The access filter
+ * is the guard: a project id from the URL the signed-in account cannot reach
+ * resolves to `null`, which the route renders as a 404 — never a cross-account
+ * leak. Team-scoped per ADR 0011 Phase 2.
  *
  * Aggregates file count + cursor + last-sync the same way `listProjectsForAccount`
  * does, just for one project.
@@ -103,6 +115,12 @@ export async function getProjectForAccount(
 	accountId: string,
 	projectId: string,
 ): Promise<ProjectSummary | null> {
+	const teamIds = await accessibleTeamIds(db, accountId);
+	const teamClause =
+		teamIds.length > 0 ? inArray(projects.teamId, teamIds) : undefined;
+	const access = teamClause
+		? or(eq(projects.accountId, accountId), teamClause)
+		: eq(projects.accountId, accountId);
 	const rows = await db
 		.select({
 			id: projects.id,
@@ -111,7 +129,7 @@ export async function getProjectForAccount(
 			isDefault: projects.isDefault,
 		})
 		.from(projects)
-		.where(and(eq(projects.id, projectId), eq(projects.accountId, accountId)))
+		.where(and(eq(projects.id, projectId), access))
 		.limit(1);
 	const row = rows[0];
 	if (!row) return null;
@@ -247,6 +265,11 @@ export async function listProjectCursorHistory(
  * may be shared across projects (same sha256), so a safe GC pass — not a
  * per-delete sweep — reclaims them. This matches the sync layer's append/replace
  * model (see `commitPush` JSDoc).
+ *
+ * Delete is gated to the project **creator** (`accountId`), not any team
+ * member — deletion is irreversible and team-scoped *write* access (ADR 0011
+ * Phase 2) does not extend to destroying another teammate's project. A team
+ * owner removes projects via team-admin actions, not this call.
  */
 export async function deleteProject(
 	db: Database,

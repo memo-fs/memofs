@@ -1,0 +1,119 @@
+/**
+ * Billing (Polar) account-lookup + entitlement-sync queries.
+ *
+ * The Polar webhook (`src/api/billing/`) resolves an incoming subscription
+ * event to a TekMemo account, then re-applies that account's entitlement caps.
+ * These are the pure `(db, …)` helpers that do both — no Hono/Worker coupling,
+ * so they unit-test with the in-memory `createTestDb()` harness like every
+ * other query module.
+ *
+ * ## How a Polar subscription maps to a TekMemo account
+ * The plan tier is carried in **subscription `metadata`** (set at checkout by
+ * the billing route), not inferred from Polar product ids (which differ per
+ * environment). The checkout stamps `metadata.tekmemo_plan` (`free|pro|teams`)
+ * and `metadata.tekmemo_account_id`; the webhook reads them here. The Polar
+ * `customerId` is also persisted on the account so we can resolve by either
+ * key (the subscription carries `customerId`; the metadata carries our id).
+ *
+ * @see docs/adr/0006-pricing-and-entitlements.md — tiers, the numeric-cap model.
+ * @see {@link ../entitlements} — `resolveCaps`, the SSOT the webhook writes from.
+ */
+
+import { and, eq, isNull } from "drizzle-orm";
+
+import type { Database } from "../../db/index.server";
+import { accounts, type PlanTier } from "../../db/schema";
+import { resolveCaps } from "../entitlements";
+
+/**
+ * TekMemo plan tier as carried in Polar subscription metadata. Mirror of
+ * {@link PlanTier} so the webhook validates the metadata value before writing.
+ */
+export const PLAN_METADATA_VALUES = ["free", "pro", "teams"] as const;
+export type PlanMetadataValue = (typeof PLAN_METADATA_VALUES)[number];
+
+/** True if `value` is a valid plan tier carried in Polar metadata. */
+export function isPlanMetadataValue(
+	value: unknown,
+): value is PlanMetadataValue {
+	return (
+		typeof value === "string" &&
+		PLAN_METADATA_VALUES.includes(value as PlanMetadataValue)
+	);
+}
+
+/**
+ * Looks up the TekMemo account linked to a Polar customer id, or null.
+ *
+ * Set once when the customer first subscribes (or, for pre-existing accounts,
+ * backfilled). The webhook resolves the account for a subscription event via
+ * this; if the checkout also stamped `tekmemo_account_id` in metadata, prefer
+ * {@link getAccountById} for the direct lookup.
+ */
+export async function getAccountByPolarCustomerId(
+	db: Database,
+	polarCustomerId: string,
+): Promise<{ id: string; plan: PlanTier } | null> {
+	const rows = await db
+		.select({ id: accounts.id, plan: accounts.plan })
+		.from(accounts)
+		.where(eq(accounts.polarCustomerId, polarCustomerId))
+		.limit(1);
+	return rows[0] ?? null;
+}
+
+/** Looks up a TekMemo account by its own id (the `tekmemo_account_id` metadata). */
+export async function getAccountById(
+	db: Database,
+	accountId: string,
+): Promise<{ id: string; plan: PlanTier } | null> {
+	const rows = await db
+		.select({ id: accounts.id, plan: accounts.plan })
+		.from(accounts)
+		.where(eq(accounts.id, accountId))
+		.limit(1);
+	return rows[0] ?? null;
+}
+
+/**
+ * Record the Polar customer id on an account (the customer↔account link).
+ * Idempotent: only sets it if absent, so a re-delivered `customer.created` or
+ * `subscription.created` never clobbers a recorded id.
+ */
+export async function setPolarCustomerId(
+	db: Database,
+	accountId: string,
+	polarCustomerId: string,
+): Promise<void> {
+	await db
+		.update(accounts)
+		.set({ polarCustomerId, updatedAt: new Date().toISOString() })
+		.where(and(eq(accounts.id, accountId), isNull(accounts.polarCustomerId)));
+}
+
+/**
+ * Apply a plan change to an account: set `plan` AND the matching entitlement
+ * caps from {@link resolveCaps}. This is the **single** entitlement-mutation
+ * path — provisioning (Free default) and the Polar webhook both call it, so the
+ * denormalised cap columns can never drift from the plan (ADR 0006 §12.3:
+ * numeric caps, never `plan ===` checks at enforcement time).
+ *
+ * @returns the updated account, or null if no such account.
+ */
+export async function applyPlanToAccount(
+	db: Database,
+	accountId: string,
+	plan: PlanTier,
+): Promise<{ id: string; plan: PlanTier } | null> {
+	const caps = resolveCaps(plan);
+	await db
+		.update(accounts)
+		.set({
+			plan,
+			maxHostedStorageBytes: caps.maxHostedStorageBytes,
+			maxConnectors: caps.maxConnectors,
+			updatedAt: new Date().toISOString(),
+		})
+		.where(eq(accounts.id, accountId));
+	return getAccountById(db, accountId);
+}

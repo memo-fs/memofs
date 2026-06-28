@@ -10,6 +10,15 @@
 > only where code literally names something. See `docs/CONTEXT.md` → Canonical
 > product nouns.
 
+> **Revision history (2026-06-28):** **Phase 1 is now implemented** (commit
+> `73d2cef`, "feat(cloud): serialize multi-agent writes with libSQL BEGIN
+> IMMEDIATE"). The original body below was written against the pre-`73d2cef`
+> tree and described Phase 1 as "greenfield with zero code" and quoted a
+> "not gated at v1" sync-handler comment that no longer exists — both stale.
+> The implementation-status corrections are inlined where the stale claims
+> appeared; the ADR's *thesis* (concurrency must precede Teams + the managed
+> runtime) is unchanged. Phases 2 and 3 remain unimplemented as of this revision.
+
 ## Context
 
 ADR 0003 locked the cloud's long-term purpose as a **managed-runtime tier** and
@@ -32,8 +41,9 @@ to revenue cannot leave open:
   locked a Turso/libSQL concurrency-control layer for **B3 ("one memory, many
   agents")**, and was explicit that **D6 (last-writer-wins + pre-sync snapshot)
   is insufficient for concurrent multi-writer access** — the loser of two
-  simultaneous pushes *silently vanishes*. The ADR even noted the live sync
-  handler admits `baseCursor` is "not gated at v1."
+  simultaneous pushes *silently vanishes*. *(At the time this ADR was written,
+  the live sync handler admitted `baseCursor` was "not gated at v1"; that gap was
+  closed by commit `73d2cef` — see Phase 1 below.)*
 
 Grilling both surfaced a sharp, decision-forcing contradiction:
 
@@ -61,8 +71,8 @@ This ADR resolves the sequencing gap ADR 0003 left open.
 managed runtime, because both depend on it for safety:**
 
 ```
-Phase 1 — Concurrency layer (ADR 0010, greenfield)
-   Turso project-lock → validate-against-manifest → apply → release,
+Phase 1 — Concurrency layer (ADR 0010, ✅ implemented in 73d2cef)
+   libSQL BEGIN IMMEDIATE → optimistic baseCursor gate → commit → release,
    in front of the existing file replica. No hosted recall/consolidation.
             │
             │ makes safe multi-writer (humans AND agents)
@@ -80,18 +90,38 @@ Phase 3 — Full managed runtime (the ADR 0003 moat)
    (maxConsolidationRuns / maxPreWarmPerDay). The intelligence differentiator.
 ```
 
-### Phase 1 — Concurrency layer (prerequisite)
+### Phase 1 — Concurrency layer (prerequisite) — ✅ IMPLEMENTED (commit `73d2cef`)
 
-Build [ADR 0010](./0010-cloud-concurrency-control-for-b3.md) for real. Today it
-is an Accepted ADR with **zero code** (the sync handler literally comments that
-`baseCursor` is "not gated at v1"). The layer:
+> **Status update (2026-06-28):** Phase 1 shipped in commit `73d2cef` ("feat(cloud):
+> serialize multi-agent writes with libSQL BEGIN IMMEDIATE (ADR 0010)"). The prose
+> below described the greenfield intent at decision time; the implementation notes
+> that follow reflect what landed.
+
+**What shipped** (`apps/cloud/src/api/sync/concurrency.ts` + `index.ts` + `shared.ts`):
 
 - Reuses the **existing Turso instance** (ADR 0005) — no new infra.
-- Serializes at the **manifest-commit boundary** (`project lock → validate
-  against current manifest → apply → release`), not the blob layer.
-- Engages on multi-writer contention (distinct API keys, or a stale `baseCursor`
-  that indicates a concurrent commit). Single-user multi-device stays on D6
-  (last-writer-wins + snapshot) — unchanged.
+- Serializes at the **manifest-commit boundary** via `acquireWriteLock`, which
+  runs every `push/complete` mutation in a raw libSQL **`BEGIN IMMEDIATE`**
+  transaction (`db.$client.transaction("write")`) — reaching below drizzle,
+  whose deferred transaction mode would reintroduce the upgrade race. libSQL
+  *queues* concurrent write transactions, so per-project commits are strictly
+  serial with no application-level lock table.
+- The **optimistic `baseCursor` gate** runs inside that lock: if the supplied
+  `baseCursorSeq` no longer matches `currentCursorTx(projectId)` (a concurrent
+  commit landed first), the commit is rejected with `409` carrying both cursors;
+  the client retries against the fresh cursor. The old "not gated at v1" comment
+  was removed by `73d2cef`.
+- Lock-acquisition timeout (≈5s) surfaces as `ConcurrencyError` (`503` +
+  `Retry-After`); the OSS client (`packages/tekmemo/src/cloud-client/transport.ts`)
+  retries 503 and honors `retry-after` idempotently — `push/complete` is safe to
+  retry because it re-verifies R2 blobs and the optimistic gate rejects a stale base.
+- Single-user multi-device stays on D6 (last-writer-wins + pre-sync snapshot on
+  the OSS client) — unchanged; contention resolution for the *same path* is still
+  last-writer-wins (rollback, not merge). Multi-writer *safety* here is about
+  never losing a commit or a cursor bump, not semantic merge.
+- Covered by `apps/cloud/src/api/sync/__tests__/concurrency.test.ts` (sequential
+  monotonicity, 5-way concurrent no-collision, stale-`baseCursor` 409, current/
+  omitted-cursor passes, lock-timeout → 503).
 
 **Why first:** it is the smallest of the three phases and *both* downstream
 phases depend on it — Teams for safe human collaboration, B3 for safe
@@ -202,9 +232,11 @@ work rather than the moat blocking revenue.
   ([ADR 0010](./0010-cloud-concurrency-control-for-b3.md) Validation):
   `file-replication.ts` snapshots before mutating push/pull (rollback, not
   merge); two simultaneous pushes pick one winner. Confirmed in code.
-- **ADR 0010 is Accepted with zero implementation** — the sync handler at
-  `apps/cloud/src/api/sync/index.ts` comments that `baseCursor` is "not gated at
-  v1 (no optimistic-concurrency check yet)." Phase 1 is greenfield, as stated.
+- **ADR 0010 is now implemented** (commit `73d2cef`, 2026-06-25) — `push/complete`
+  serializes in a libSQL `BEGIN IMMEDIATE` transaction with the optimistic
+  `baseCursor` gate inside it (`apps/cloud/src/api/sync/concurrency.ts` +
+  `api/sync/index.ts`). The pre-`73d2cef` "not gated at v1" handler comment no
+  longer exists. Phase 1 is no longer greenfield.
 - **Teams is a locked revenue milestone** (ADR 0006: $24/seat/mo, "Coming Soon",
   implementation gated on Pro revenue or sponsorships). This ADR sequences *when*
   it ships, not *whether*.

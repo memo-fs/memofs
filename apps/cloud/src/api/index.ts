@@ -25,6 +25,7 @@
 import { Hono } from "hono";
 import type { Database } from "../db/index.server";
 import type { CloudWorkerEnv } from "../server/env";
+import { billingApp } from "./billing";
 import { isApiError } from "./errors";
 import { healthApp } from "./health";
 import { json, jsonError } from "./json";
@@ -56,6 +57,10 @@ export function createApiApp() {
 			// Sync routes carry their own auth + db middleware (both need `c.env`),
 			// mounted under the project-scoped path the frozen client contract uses.
 			.route("/v1/projects/:projectId/sync", syncApp)
+			// Billing routes (ADR 0006 / ADR 0011 Phase 2): Polar webhook
+			// (signature-authenticated), checkout, and customer portal. Carry their
+			// own db middleware; the webhook is NOT bearer-authenticated (Polar signs).
+			.route("/v1/billing", billingApp)
 			.notFound((c) => jsonError(c, 404, "not_found", "Unknown API route."))
 			.onError((cause, c) => {
 				// Our own `ApiError` carries a stable `code`, status, and optional
