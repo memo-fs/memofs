@@ -1,7 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 import "dotenv/config";
 
-const PORT = process.env.PORT || "5173";
+const PORT = "8787";
+const BASE_URL = "http://127.0.0";
 
 export default defineConfig({
 	testDir: "./tests/e2e",
@@ -15,10 +16,10 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: "html",
 	use: {
-		baseURL: `http://localhost:${PORT}/`,
+		baseURL: `${BASE_URL}.1:${PORT}`,
 		trace: "on-first-retry",
+		screenshot: "only-on-failure",
 	},
-
 	projects: [
 		{
 			name: "chromium",
@@ -29,14 +30,12 @@ export default defineConfig({
 	],
 
 	webServer: {
-		command: "npm run dev",
+		command: `npx miniflare --port ${PORT}`,
 		port: Number(PORT),
+		url: BASE_URL,
 		reuseExistingServer: true,
 		stdout: "pipe",
 		stderr: "pipe",
-		env: {
-			PORT,
-			NODE_ENV: "test",
-		},
+		env: { PORT },
 	},
 });
