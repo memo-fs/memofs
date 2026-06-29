@@ -7,9 +7,16 @@
  * @internal
  */
 
+// `node:crypto` stays a top-level import: it is called on the synchronous recall
+// hot path (lexical `hash()`), and the cloud Worker has `nodejs_compat` enabled
+// (wrangler.jsonc) so it resolves there. `node:fs` / `node:path`, by contrast,
+// are used ONLY by the default node agentfs client below — so they are loaded
+// lazily inside that client's methods. That keeps `local-strategy.ts` Worker-
+// loadable: a Worker injects its own `createAgentfsClient` (or never creates an
+// agent session) and never touches the lazy `node:fs` imports, which the
+// bundler tree-shakes out of the Worker bundle. `node:crypto` (sync, hot path)
+// is covered by `nodejs_compat` and intentionally not lazy.
 import { createHash } from "node:crypto";
-import fs from "node:fs/promises";
-import path, { resolve } from "node:path";
 import { chunkText } from "../core/chunking/chunk-text";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type {
@@ -45,6 +52,7 @@ import {
 	type InMemoryGraphStore,
 	mergeHybridCandidates,
 	NOTES_MEMORY_PATH,
+	type Reranker,
 	readCoreMemory,
 	readManifest,
 	readMemoryEventsWithIssues,
@@ -137,6 +145,14 @@ export interface LocalStrategyOptions {
 	name: string;
 	version: string;
 	/**
+	 * Optional injected reranker for hybrid recall. When omitted, the
+	 * zero-config lexical token-overlap {@link DeterministicFallbackReranker}
+	 * runs. Inject a provider reranker (e.g. Voyage) so hybrid recall reorders
+	 * candidates by semantic relevance. Local OSS users see no behavior change
+	 * when this is absent.
+	 */
+	reranker?: Reranker;
+	/**
 	 * Optional injected graph store. When omitted, a persistent
 	 * {@link createFsGraphStore} is created so the local graph survives
 	 * restarts. Pass an in-memory store for tests.
@@ -155,6 +171,18 @@ export interface LocalStrategyOptions {
 	 * the hooks stay no-ops (see §6.7).
 	 */
 	syncLayer?: FileSyncLayer;
+	/**
+	 * Optional factory for the agent-session I/O client. When omitted, the
+	 * default node `fs`-backed client is used (lazy-loads `node:fs`/
+	 * `node:path` on first session). Inject a Worker-safe client so the runtime
+	 * can host agent sessions on infra with no Node `fs` (ADR 0011 Phase 3).
+	 */
+	createAgentfsClient?: (opts: {
+		store: MemoryStore;
+		projectId: string;
+		syncLayer?: FileSyncLayer;
+		createSnapshot?(input?: SnapshotMemoryInput): Promise<SnapshotMemoryResult>;
+	}) => AgentfsLikeClient;
 }
 
 export function createLocalStrategy(options: LocalStrategyOptions) {
@@ -174,7 +202,12 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	// (which return only id + score) can be resolved back to their content for
 	// reranking and display.
 	const lexicalTextById = new Map<string, string>();
-	const reranker = new DeterministicFallbackReranker();
+	// The reranker that reorders hybrid-recall candidates. When none is
+	// configured, fall back to the zero-config lexical token-overlap reranker so
+	// hybrid recall still works with no API key. A provider reranker (e.g.
+	// Voyage) layers on top only when injected.
+	const reranker: Reranker =
+		options.reranker ?? new DeterministicFallbackReranker();
 
 	/**
 	 * Index a document into the lexical store and remember its text so BM25
@@ -314,7 +347,12 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		return { id, path: snapshotPath, created: true };
 	}
 
-	const agentfsClient = createLocalAgentfsClient({
+	// Agent-session I/O client. Defaults to the node `fs`-backed client; a Worker
+	// runtime injects its own (`createAgentfsClient`) so agent sessions can run on
+	// infra with no Node `fs` (ADR 0011 Phase 3). The default client lazily loads
+	// `node:fs`/`node:path` on first use, so a Worker that injects its own (or
+	// never opens a session) never touches the lazy node imports.
+	const agentfsClient = (options.createAgentfsClient ?? createLocalAgentfsClient)({
 		store: options.store,
 		projectId: options.projectId,
 		syncLayer: options.syncLayer,
@@ -1481,6 +1519,24 @@ function message(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
 }
 
+/**
+ * Lazily-loaded Node `fs`/`path` modules for the default agentfs client. These
+ * are imported on first agent-session use (not at module load), so importing
+ * `local-strategy.ts` in a Worker never pulls `node:fs`. `nodejs_compat`
+ * resolves them when a Node runtime actually creates a session; a Worker
+ * injects its own `createAgentfsClient` and never reaches this cache.
+ */
+type NodeFs = typeof import("node:fs/promises");
+type NodePath = typeof import("node:path");
+let nodeFsPromise: Promise<NodeFs> | undefined;
+let nodePathPromise: Promise<NodePath> | undefined;
+function loadNodeFs(): Promise<NodeFs> {
+	return (nodeFsPromise ??= import("node:fs/promises"));
+}
+function loadNodePath(): Promise<NodePath> {
+	return (nodePathPromise ??= import("node:path"));
+}
+
 function createLocalAgentfsClient(opts: {
 	store: MemoryStore;
 	projectId: string;
@@ -1488,7 +1544,7 @@ function createLocalAgentfsClient(opts: {
 	 * File-replication sync layer. In `hybrid` mode the agentfs session hooks
 	 * drive it: `pull`/`push` mirror file replicas of `.tekmemo/` (§6.7), and
 	 * `push` runs the full two-phase flow. Omitted in `local`/`memory` modes,
-	 * where the hooks stay no-ops.
+	 * where the hooks stay no-op.
 	 */
 	syncLayer?: FileSyncLayer;
 	/**
@@ -1497,6 +1553,9 @@ function createLocalAgentfsClient(opts: {
 	 */
 	createSnapshot?(input?: SnapshotMemoryInput): Promise<SnapshotMemoryResult>;
 }): AgentfsLikeClient {
+	// `process.cwd()` only fires for the Node OSS path where the store exposes no
+	// `rootDir` (e.g. a custom store). Workers inject their own client, so this
+	// branch is never reached there.
 	const rootDir =
 		opts.store instanceof Object &&
 		"rootDir" in opts.store &&
@@ -1507,28 +1566,38 @@ function createLocalAgentfsClient(opts: {
 
 	return {
 		async readText(remotePath: string) {
-			return fs.readFile(resolveAgentPath(rootDir, remotePath), "utf8");
+			const fs = await loadNodeFs();
+			const path = await loadNodePath();
+			return fs.readFile(resolveAgentPath(path, rootDir, remotePath), "utf8");
 		},
 		async writeText(remotePath: string, content: string) {
-			const target = resolveAgentPath(rootDir, remotePath);
+			const fs = await loadNodeFs();
+			const path = await loadNodePath();
+			const target = resolveAgentPath(path, rootDir, remotePath);
 			await fs.mkdir(path.dirname(target), { recursive: true });
 			await fs.writeFile(target, content, "utf8");
 		},
 		async appendText(remotePath: string, content: string) {
-			const target = resolveAgentPath(rootDir, remotePath);
+			const fs = await loadNodeFs();
+			const path = await loadNodePath();
+			const target = resolveAgentPath(path, rootDir, remotePath);
 			await fs.mkdir(path.dirname(target), { recursive: true });
 			await fs.appendFile(target, content, "utf8");
 		},
 		async exists(remotePath: string) {
+			const fs = await loadNodeFs();
+			const path = await loadNodePath();
 			try {
-				await fs.stat(resolveAgentPath(rootDir, remotePath));
+				await fs.stat(resolveAgentPath(path, rootDir, remotePath));
 				return true;
 			} catch {
 				return false;
 			}
 		},
 		async deleteText(remotePath: string) {
-			const target = resolveAgentPath(rootDir, remotePath);
+			const fs = await loadNodeFs();
+			const path = await loadNodePath();
+			const target = resolveAgentPath(path, rootDir, remotePath);
 			await fs.rm(target, { force: true });
 		},
 		sync: {
@@ -1561,12 +1630,16 @@ function createLocalAgentfsClient(opts: {
 	};
 }
 
-function resolveAgentPath(rootDir: string, remotePath: string): string {
+function resolveAgentPath(
+	path: NodePath,
+	rootDir: string,
+	remotePath: string,
+): string {
 	if (remotePath.includes("\0")) {
 		throw new Error("Agent session path contains invalid characters.");
 	}
 	const relative = remotePath.replace(/^\/+/, "");
-	const resolved = resolve(rootDir, relative);
+	const resolved = path.resolve(rootDir, relative);
 	const normalizedRoot = rootDir.endsWith(path.sep)
 		? rootDir
 		: rootDir + path.sep;

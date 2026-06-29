@@ -17,6 +17,7 @@ import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
 import type { Extractor } from "../graph/extraction/extractor";
 import type { RecallStore } from "../recall/types";
+import type { Reranker } from "../rerank/types";
 import type {
 	RuntimeReadPolicy,
 	RuntimeWritePolicy,
@@ -45,6 +46,12 @@ export interface TekmemoConfig {
 	 * extraction + consolidation can grow the graph from natural prose.
 	 */
 	extractor?: Extractor;
+	/**
+	 * Optional reranker for hybrid recall. When omitted, the zero-config
+	 * lexical token-overlap reranker runs. Inject a provider reranker (e.g.
+	 * Voyage) so hybrid recall reorders candidates by semantic relevance.
+	 */
+	reranker?: Reranker;
 	projectId?: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -97,6 +104,7 @@ export interface ResolvedTekmemoConfig {
 	embedder?: MemoryEmbedder;
 	recallStore?: RecallStore;
 	extractor?: Extractor;
+	reranker?: Reranker;
 	projectId: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -194,6 +202,7 @@ export function resolveTekmemoConfig(input: {
 		...(config.store !== undefined ? { store: config.store } : {}),
 		...(config.embedder !== undefined ? { embedder: config.embedder } : {}),
 		...(config.extractor !== undefined ? { extractor: config.extractor } : {}),
+		...(config.reranker !== undefined ? { reranker: config.reranker } : {}),
 		...(config.recallStore !== undefined
 			? { recallStore: config.recallStore }
 			: {}),

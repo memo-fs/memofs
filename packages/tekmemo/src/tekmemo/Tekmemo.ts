@@ -56,6 +56,7 @@ import {
 } from "../index";
 import { createFsRecallStore } from "../recall/stores/fs-recall-store";
 import type { RecallFilter, RecallStore } from "../recall/types";
+import type { Reranker } from "../rerank/types";
 import {
 	type ResolvedTekmemoConfig,
 	resolveTekmemoConfig,
@@ -118,6 +119,7 @@ export class Tekmemo {
 	readonly store: MemoryStore;
 	readonly embedder?: MemoryEmbedder;
 	readonly extractor?: Extractor;
+	readonly reranker?: Reranker;
 	readonly recallStore?: RecallStore;
 	readonly cloud?: TekMemoCloudClient;
 	readonly readPolicy: RuntimeReadPolicy;
@@ -416,6 +418,7 @@ export class Tekmemo {
 
 		this.embedder = this.resolved.embedder;
 		this.extractor = this.resolved.extractor;
+		this.reranker = this.resolved.reranker;
 		if (this.embedder) {
 			// When an embedder is configured, a recall store is needed to persist
 			// embeddings. Default to the file-backed store so embeddings survive
@@ -475,6 +478,7 @@ export class Tekmemo {
 				store: this.store,
 				embedder: this.embedder,
 				extractor: this.extractor,
+				reranker: this.reranker,
 				recallStore: this.recallStore,
 				projectId: this.projectId,
 				tenantId: this.tenantId,
@@ -495,6 +499,7 @@ export class Tekmemo {
 			store: this.store,
 			embedder: this.embedder,
 			extractor: this.extractor,
+			reranker: this.reranker,
 			recallStore: this.recallStore,
 			projectId: this.projectId,
 			tenantId: this.tenantId,
