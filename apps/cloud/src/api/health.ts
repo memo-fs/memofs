@@ -18,11 +18,11 @@ import type { CloudWorkerEnv } from "../server/env";
 import type { ApiEnv } from "./index";
 import { json } from "./json";
 
-/** Cloud name + version surfaced in health output. */
-const CLOUD_NAME = "tekmemo-cloud";
+/** Cloud name + version surfaced in health output + the hosted runtime. */
+export const CLOUD_NAME = "tekmemo-cloud";
 // `process.env` is legitimate here only for the build-time npm package version;
 // at runtime on the Worker this resolves to the bundler-inlined value.
-const CLOUD_VERSION = process.env.npm_package_version ?? "0.0.0";
+export const CLOUD_VERSION = process.env.npm_package_version ?? "0.0.0";
 const CAPABILITIES = ["sync.file-replication"];
 
 export const healthApp = new Hono<ApiEnv>()

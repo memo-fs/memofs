@@ -55,6 +55,21 @@ const stubBlobs: R2Bucket = {
 };
 
 /**
+ * Dev stub for the Workers AI `AI` binding. `react-router dev` doesn't provide
+ * the `ai` binding (only `wrangler dev`/`preview` does), so a hosted-memory
+ * extraction call throws in dev. Use `pnpm preview` to exercise the real
+ * Workers AI binding. Casts `never` because the `Ai` surface is large and only
+ * the unimplemented `run` path is reachable from the hosted runtime in dev.
+ */
+const stubAi = {
+	async run() {
+		throw new Error(
+			"Workers AI is not available in `react-router dev`; use `pnpm preview` (wrangler dev) to exercise AI.",
+		);
+	},
+} as unknown as Ai;
+
+/**
  * Synthesize a dev `CloudWorkerEnv` from `process.env`. Only the public vars
  * are read here; secrets (DATABASE_*, R2 S3 creds) are picked up the same way
  * when present in the dev environment.
@@ -88,6 +103,9 @@ function devEnv(): CloudWorkerEnv {
 		UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
 		UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
 		SESSION_SECRET: process.env.SESSION_SECRET ?? "dev-insecure-session-secret",
+		// --- Hosted-memory intelligence (ADR 0011 Phase 3) -------------------
+		AI: stubAi,
+		VOYAGE_API_KEY: process.env.VOYAGE_API_KEY ?? "",
 	};
 }
 

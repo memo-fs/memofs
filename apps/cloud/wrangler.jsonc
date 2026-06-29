@@ -17,12 +17,19 @@
 			"bucket_name": "tekmemo-blobs"
 		}
 	],
+	// Hosted-memory intelligence (ADR 0011 Phase 3): the frontier extractor for
+	// graph extraction. Reuses the existing `BLOBS` R2 bucket + Turso manifest
+	// (ADR 0012 reuse sub-decision) — no new bucket. Voyage API key is a secret
+	// (VOYAGE_API_KEY, set via `wrangler secret put`).
+	"ai": {
+		"binding": "AI"
+	},
 	"vars": {
 		"ENVIRONMENT": "development",
-		"CLOUD_PUBLIC_BASE_URL": "http://localhost:8787",
+		"CLOUD_PUBLIC_BASE_URL": "http://localhost:5173",
 		// Better Auth base URL — the origin the auth app is served from. In dev
 		// this is the local Workers dev server; in prod it's memo.tekbreed.com.
-		"BETTER_AUTH_URL": "http://localhost:8787",
+		"BETTER_AUTH_URL": "http://localhost:5173",
 		// Plunk From header (non-secret envelope; the key itself is a secret).
 		"PLUNK_FROM": "TekMemo Cloud <team@tekbreed.com>",
 		"PRESIGN_TTL_SECONDS": "900",

@@ -12,6 +12,13 @@ export interface CloudWorkerEnv {
 	/** R2 bucket holding content-addressed blobs at `tekmemo/blobs/{sha256}`. */
 	BLOBS: R2Bucket;
 
+	/**
+	 * Cloudflare Workers AI binding — the frontier extractor for hosted-memory
+	 * graph extraction (ADR 0011 Phase 3, Q18). The hosted `Tekmemo` runtime
+	 * uses it as the Pro+ extractor; the Free tier runs the rule-based floor.
+	 */
+	AI: Ai;
+
 	/** Turso/libSQL HTTPS endpoint (e.g. `https://...turso.io`). */
 	DATABASE_URL: string;
 	/** Turso auth token (optional for local/ephemeral DBs). */
@@ -76,6 +83,14 @@ export interface CloudWorkerEnv {
 
 	// Dashboard session cookie secret (used by React Router session storage).
 	SESSION_SECRET: string;
+
+	// --- Hosted-memory intelligence (ADR 0011 Phase 3) ----------------------
+	/**
+	 * Voyage AI API key — the hosted-memory embedder + reranker provider. Used
+	 * by the hosted `Tekmemo` runtime for semantic recall + hybrid reranking
+	 * against R2-resident files. Secret — set via `wrangler secret put`.
+	 */
+	VOYAGE_API_KEY: string;
 }
 
 /** Default presigned-URL lifetime when `PRESIGN_TTL_SECONDS` is unset. */
