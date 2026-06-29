@@ -223,7 +223,14 @@ export const accounts = sqliteTable("accounts", {
 	maxHostedStorageBytes: real("max_hosted_storage_bytes")
 		.notNull()
 		.default(1e9),
-	/** Connector cap (ADR 0006 §maxConnectors). */
+	/**
+	 * Connector cap (ADR 0006 §maxConnectors). The "unlimited" sentinel (Teams
+	 * tier) is stored as a large finite integer (`UNLIMITED_CONNECTORS`) because
+	 * `integer` can't hold `Infinity` and SQLite column-nullability changes are
+	 * expensive table rebuilds. The read model (`entitlements.ts` `normalizeCaps`)
+	 * rehydrates the sentinel back to `Infinity` for the
+	 * `connectorsUsed < maxConnectors` check, so consumers never see the sentinel.
+	 */
 	maxConnectors: integer("max_connectors").notNull().default(1),
 	createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
 	updatedAt: text("updated_at").notNull().default(sql`(current_timestamp)`),
@@ -351,6 +358,61 @@ export const teamMembers = sqliteTable(
 
 /** The role an account holds on a team — gates dashboard/admin actions. */
 export type TeamRole = (typeof teamMembers.role.enumValues)[number];
+
+/**
+ * A pending team invitation — a single-use, expiring email-token join offer.
+ *
+ * The membership table's invariants are deliberately kept strict
+ * (`team_members.account_id` is NOT NULL + unique per team): an invitee who has
+ * not yet joined cannot occupy a membership row. Instead the invitation lives
+ * here, carrying the **invitee email** (not an account — the person may not have
+ * signed up yet) plus a **hashed** single-use token, the role they'll get on
+ * accept, and the inviter. On accept (in `routes/team/accept.tsx`) the row is
+ * resolved into a `team_members` row and `accepted_at` is stamped.
+ *
+ * This mirrors Better Auth's own `verification` table (token-based, single-use,
+ * expiring) — the established token-join pattern in this codebase. The raw token
+ * is stored NOWHERE: only `token_hash` (sha256, via `server/sha256.ts`, the same
+ * discipline as API keys). The raw token appears only in the emailed accept link
+ * and is looked up by hashing it on accept.
+ *
+ * `(teamId, email)` is unique so there is at most one pending invite per email
+ * per team; re-inviting a pending email replaces the token (see `createInvitation`
+ * in `queries/teams.ts`). `expiresAt` governs the link lifetime; `acceptedAt`
+ * null = pending, set once on the single accepted transition.
+ */
+export const teamInvitations = sqliteTable(
+	"team_invitations",
+	{
+		id: idColumn(),
+		/** The team this invite opens membership on. */
+		teamId: text("team_id")
+			.notNull()
+			.references(() => teams.id, { onDelete: "cascade" }),
+		/** The invitee's email — matched against the accepter's `user.email`. */
+		email: text("email").notNull(),
+		/** sha256 of the raw accept token (salted like API keys); never the raw token. */
+		tokenHash: text("token_hash").notNull().unique(),
+		/** The role the invitee receives on accept (owner is never offered here). */
+		role: text("role", { enum: ["admin", "member"] }).notNull(),
+		/** The account that issued the invite (for attribution + revocation UI). */
+		invitedByAccountId: text("invited_by_account_id")
+			.notNull()
+			.references(() => accounts.id, { onDelete: "cascade" }),
+		/** When the accept link stops being valid. */
+		expiresAt: text("expires_at").notNull(),
+		/** Null until the invitee accepts; null = pending, set once on accept. */
+		acceptedAt: text("accepted_at"),
+		createdAt: text("created_at").notNull().default(sql`(current_timestamp)`),
+	},
+	(table) => [
+		// One pending invite per email per team.
+		uniqueIndex("team_invitations_team_email_uq").on(table.teamId, table.email),
+	],
+);
+
+/** The role an invitation confers on accept (owner can't be offered via invite). */
+export type InvitationRole = (typeof teamInvitations.role.enumValues)[number];
 
 // ---------------------------------------------------------------------------
 // Sync core: projects + project_files + sync_cursors

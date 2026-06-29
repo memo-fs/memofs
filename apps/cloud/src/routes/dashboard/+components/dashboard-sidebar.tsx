@@ -8,6 +8,7 @@ import {
 	Plug,
 	Plus,
 	Settings,
+	Users,
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router";
 import { Logo } from "~/components/site/logo";
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
 		end: false,
 	},
 	{ to: "/dashboard/connectors", label: "Connectors", icon: Plug, end: false },
+	{ to: "/dashboard/team", label: "Team", icon: Users, end: false },
 	{ to: "/dashboard/api-keys", label: "API Keys", icon: Key, end: false },
 	{ to: "/dashboard/billing", label: "Billing", icon: CreditCard, end: false },
 	{ to: "/dashboard/settings", label: "Settings", icon: Settings, end: false },

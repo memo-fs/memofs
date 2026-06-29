@@ -22,6 +22,13 @@
       "when": 1782604787629,
       "tag": "0002_brief_mandrill",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782614646473,
+      "tag": "0003_gigantic_killer_shrike",
+      "breakpoints": true
     }
   ]
 }

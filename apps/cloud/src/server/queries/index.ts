@@ -9,6 +9,10 @@
  * in-memory `createTestDb()` harness.
  */
 
+// Role enums are the SSOT for the plan/membership/invitation unions, declared on
+// the schema tables. Re-exported here so dashboard routes import everything from
+// one barrel (`~/server/queries`) rather than reaching into `~/db/schema`.
+export type { InvitationRole } from "../../db/schema";
 export type { AccountView } from "./account";
 export {
 	getAccountForUser,
@@ -37,14 +41,34 @@ export {
 	listProjectsForAccount,
 	recentSyncActivity,
 } from "./projects";
-export type { TeamMembership } from "./teams";
+export type {
+	CreatedInvitation,
+	PendingInvitationView,
+	TeamMembership,
+	TeamMemberView,
+	TeamMutationErrorCode,
+	TeamSummary,
+} from "./teams";
 export {
+	acceptInvitation,
 	accessibleTeamIds,
+	assertCanAdmin,
 	canWriteProject,
+	createInvitation,
 	getAccountIdByPolarCustomerId,
+	getInvitationByToken,
 	getMembership,
 	getPersonalTeam,
+	hashToken,
 	isAcceptedMember,
+	listPendingInvitations,
+	listTeamMembers,
+	listTeamsForAccount,
+	removeTeamMember,
+	resolveSeatsUsed,
+	revokeInvitation,
+	TeamMutationError,
+	updateMemberRole,
 } from "./teams";
 export type {
 	ApiKeyView,
