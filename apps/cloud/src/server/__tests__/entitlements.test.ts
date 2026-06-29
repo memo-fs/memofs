@@ -14,19 +14,25 @@ describe("PLAN_ENTITLEMENTS (SSOT)", () => {
 		}
 	});
 
-	it("free = 500 MB / 1 connector (NOT the old 1 GB default)", () => {
+	it("free = 500 MB / 1 connector / 1 seat (NOT the old 1 GB default)", () => {
 		expect(PLAN_ENTITLEMENTS.free.maxHostedStorageBytes).toBe(500 * 1024 ** 2);
 		expect(PLAN_ENTITLEMENTS.free.maxConnectors).toBe(1);
+		// Collaboration is Teams-only: free is solo (owner only).
+		expect(PLAN_ENTITLEMENTS.free.maxSeats).toBe(1);
 	});
 
-	it("pro = 10 GB / 3 connectors", () => {
+	it("pro = 10 GB / 3 connectors / 1 seat", () => {
 		expect(PLAN_ENTITLEMENTS.pro.maxHostedStorageBytes).toBe(10 * 1024 ** 3);
 		expect(PLAN_ENTITLEMENTS.pro.maxConnectors).toBe(3);
+		// Pro is still an individual tier — team sharing is excluded (catalog).
+		expect(PLAN_ENTITLEMENTS.pro.maxSeats).toBe(1);
 	});
 
-	it("teams = 50 GB / unlimited connectors", () => {
+	it("teams = 50 GB / unlimited connectors / 10 seats", () => {
 		expect(PLAN_ENTITLEMENTS.teams.maxHostedStorageBytes).toBe(50 * 1024 ** 3);
 		expect(PLAN_ENTITLEMENTS.teams.maxConnectors).toBe(Infinity);
+		// Teams is the first tier that unlocks collaboration (multi-seat).
+		expect(PLAN_ENTITLEMENTS.teams.maxSeats).toBe(10);
 	});
 
 	it("storage caps are strictly ordered free < pro < teams", () => {

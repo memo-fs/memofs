@@ -19,10 +19,14 @@ import { eq, sql, sum } from "drizzle-orm";
 
 import type { Database } from "../../db/index.server";
 import { accounts, type PlanTier, projects } from "../../db/schema";
+import { normalizeCaps } from "../entitlements";
 
 /**
  * The entitlement snapshot for a billing account, as the dashboard reads it.
- * Mirrors the `accounts` row's entitlement columns (ADR 0006).
+ * Mirrors the `accounts` row's entitlement columns (ADR 0006). `maxConnectors`
+ * is rehydrated to `Infinity` for the Teams "unlimited" sentinel (stored as a
+ * large finite integer in the column) via `normalizeCaps`, so consumers compare
+ * `connectorsUsed < maxConnectors` against a finite-or-Infinity number.
  */
 export interface AccountView {
 	id: string;
@@ -53,7 +57,17 @@ export async function getAccountForUser(
 		.from(accounts)
 		.where(eq(accounts.userId, userId))
 		.limit(1);
-	return rows[0] ?? null;
+	const row = rows[0];
+	if (!row) return null;
+	// Rehydrate the stored unlimited sentinel (Teams — a large finite integer)
+	// back to Infinity so the `connectorsUsed < maxConnectors` check works.
+	const caps = normalizeCaps(row);
+	return {
+		id: row.id,
+		plan: row.plan,
+		maxHostedStorageBytes: caps.maxHostedStorageBytes,
+		maxConnectors: caps.maxConnectors,
+	};
 }
 
 /**

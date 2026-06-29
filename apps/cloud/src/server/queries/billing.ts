@@ -23,7 +23,7 @@ import { and, eq, isNull } from "drizzle-orm";
 
 import type { Database } from "../../db/index.server";
 import { accounts, type PlanTier } from "../../db/schema";
-import { resolveCaps } from "../entitlements";
+import { capsForStorage, resolveCaps } from "../entitlements";
 
 /**
  * TekMemo plan tier as carried in Polar subscription metadata. Mirror of
@@ -98,22 +98,49 @@ export async function setPolarCustomerId(
  * denormalised cap columns can never drift from the plan (ADR 0006 §12.3:
  * numeric caps, never `plan ===` checks at enforcement time).
  *
- * @returns the updated account, or null if no such account.
+ * @returns the updated account with its caps, or null if no such account. The
+ *          caps are the ones just written (from {@link resolveCaps}), returned
+ *          directly rather than via a second DB read.
  */
 export async function applyPlanToAccount(
 	db: Database,
 	accountId: string,
 	plan: PlanTier,
-): Promise<{ id: string; plan: PlanTier } | null> {
+): Promise<AppliedAccount | null> {
 	const caps = resolveCaps(plan);
-	await db
+	const stored = capsForStorage(plan);
+	const result = await db
 		.update(accounts)
 		.set({
 			plan,
-			maxHostedStorageBytes: caps.maxHostedStorageBytes,
-			maxConnectors: caps.maxConnectors,
+			maxHostedStorageBytes: stored.maxHostedStorageBytes,
+			// `Infinity` (Teams) is stored as the finite `UNLIMITED_CONNECTORS_SENTINEL`
+			// — the integer column can't hold `Infinity`. `capsForStorage` owns this
+			// translation; `normalizeCaps` rehydrates it to `Infinity` on read.
+			maxConnectors: stored.maxConnectors,
 			updatedAt: new Date().toISOString(),
 		})
-		.where(eq(accounts.id, accountId));
-	return getAccountById(db, accountId);
+		.where(eq(accounts.id, accountId))
+		.returning({ id: accounts.id });
+	// `.returning()` is empty when no row matched (unknown account) — no need for
+	// a second lookup; the caps are the ones we just wrote.
+	if (result.length === 0) return null;
+	return {
+		id: result[0].id,
+		plan,
+		maxHostedStorageBytes: caps.maxHostedStorageBytes,
+		maxConnectors: caps.maxConnectors,
+	};
+}
+
+/**
+ * The account shape {@link applyPlanToAccount} returns — the {@link AccountView}
+ * fields (id, plan, caps). Declared here so the webhook + tests import it from
+ * the billing module that owns it, without a circular dep on `./account`.
+ */
+export interface AppliedAccount {
+	id: string;
+	plan: PlanTier;
+	maxHostedStorageBytes: number;
+	maxConnectors: number;
 }

@@ -38,6 +38,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
 import type { Database } from "../../db/index.server";
 import { accounts, apiKeys, type PlanTier } from "../../db/schema";
+import { normalizeCaps } from "../../server/entitlements";
 import { hashApiKey } from "../../server/sha256";
 import { AuthError } from "../errors";
 import type { ApiEnv } from "../index";
@@ -124,7 +125,16 @@ export async function resolveAccount(
 		// key is well-formed-but-unknown vs revoked vs absent. Reduces probing.
 		throw new AuthError("Invalid or revoked API key.");
 	}
-	return account satisfies AuthAccount;
+	// Rehydrate the stored unlimited sentinel (Teams — a large finite integer)
+	// back to Infinity so the 402 entitlement check
+	// (`connectorsUsed < maxConnectors`) works.
+	const caps = normalizeCaps(account);
+	return {
+		id: account.id,
+		plan: account.plan,
+		maxHostedStorageBytes: caps.maxHostedStorageBytes,
+		maxConnectors: caps.maxConnectors,
+	} satisfies AuthAccount;
 }
 
 /**

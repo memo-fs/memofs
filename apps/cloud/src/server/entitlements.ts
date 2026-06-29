@@ -10,8 +10,8 @@
  *
  * This module is the one place the numeric caps live. Both the catalog (renders
  * them as copy) and the data path (`provision-account` defaults, the Polar
- * webhook re-applier) import from here, so a cap change is one edit — never a
- * schema-default-vs-marketing drift again. AGENTS.md DRY/SSOT.
+ * webhook re-applier, the team seat gate) import from here, so a cap change is
+ * one edit — never a schema-default-vs-marketing drift again. AGENTS.md DRY/SSOT.
  *
  * Entitlement enforcement itself stays numeric (ADR 0006 §12.3: "no
  * `plan === 'Pro'` checks"). The sync push path compares
@@ -33,12 +33,20 @@ const GB = 1024 ** 3;
  *
  * `maxConnectors` is `Infinity` for unlimited (Teams). The entitlement check is
  * `connectorsUsed < maxConnectors`; `Infinity` is always satisfied.
+ *
+ * `maxSeats` is the team-member cap (ADR 0011 Phase 2): how many accounts may
+ * be members of a team on this plan. It is always a finite number (collaboration
+ * is a paid feature), gated by `seatsUsed >= maxSeats`. Free/Pro allow only the
+ * solo owner (1 seat) — matching the pricing catalog where "Team sharing" is
+ * excluded on individual tiers — so inviting is upgrade-gated for those plans.
  */
 export interface EntitlementCaps {
 	/** Maximum hosted storage across the account/team's projects, in bytes. */
 	maxHostedStorageBytes: number;
 	/** Maximum configured connectors. */
 	maxConnectors: number;
+	/** Maximum team members (seats) — collaboration cap. */
+	maxSeats: number;
 }
 
 /**
@@ -47,9 +55,13 @@ export interface EntitlementCaps {
  * becomes a compile error here until it gets caps).
  */
 export const PLAN_ENTITLEMENTS = {
-	free: { maxHostedStorageBytes: 500 * MB, maxConnectors: 1 },
-	pro: { maxHostedStorageBytes: 10 * GB, maxConnectors: 3 },
-	teams: { maxHostedStorageBytes: 50 * GB, maxConnectors: Infinity },
+	free: { maxHostedStorageBytes: 500 * MB, maxConnectors: 1, maxSeats: 1 },
+	pro: { maxHostedStorageBytes: 10 * GB, maxConnectors: 3, maxSeats: 1 },
+	teams: {
+		maxHostedStorageBytes: 50 * GB,
+		maxConnectors: Infinity,
+		maxSeats: 10,
+	},
 } as const satisfies Record<PlanTier, EntitlementCaps>;
 
 /**
@@ -59,4 +71,66 @@ export const PLAN_ENTITLEMENTS = {
  */
 export function resolveCaps(plan: PlanTier): EntitlementCaps {
 	return PLAN_ENTITLEMENTS[plan];
+}
+
+/**
+ * The integer sentinel stored in `accounts.max_connectors` to mean "unlimited"
+ * (Teams tier). The column is `integer NOT NULL` — it can't hold `Infinity`,
+ * and SQLite doesn't support cheap column-nullability changes. This sentinel is
+ * finite (so libSQL accepts it) yet large enough that the
+ * `connectorsUsed < maxConnectors` check is always satisfied in practice.
+ * {@link normalizeCaps} rehydrates it to `Infinity` on read so consumers never
+ * see the raw sentinel.
+ */
+export const UNLIMITED_CONNECTORS_SENTINEL = Number.MAX_SAFE_INTEGER;
+
+/**
+ * The caps as they are STORED in the `accounts` columns. `maxConnectors` is
+ * `number` (never `Infinity`): the "unlimited" sentinel (Teams) is stored as
+ * {@link UNLIMITED_CONNECTORS_SENTINEL} and rehydrated to `Infinity` by
+ * {@link normalizeCaps} on read. Everything else is identical to
+ * {@link EntitlementCaps}.
+ */
+export interface StoredEntitlementCaps {
+	maxHostedStorageBytes: number;
+	maxConnectors: number;
+	maxSeats: number;
+}
+
+/**
+ * The caps prepared for PERSISTENCE: `Infinity` connectors (Teams) → the finite
+ * sentinel, the single write-side translation. Called by the entitlement-mutation
+ * paths (`applyPlanToAccount`, `provisionAccount`) so a plan change never tries
+ * to bind `Infinity` to the integer column (which libSQL rejects with a
+ * RangeError).
+ */
+export function capsForStorage(plan: PlanTier): StoredEntitlementCaps {
+	const caps = resolveCaps(plan);
+	return {
+		maxHostedStorageBytes: caps.maxHostedStorageBytes,
+		maxConnectors: Number.isFinite(caps.maxConnectors)
+			? caps.maxConnectors
+			: UNLIMITED_CONNECTORS_SENTINEL,
+		maxSeats: caps.maxSeats,
+	};
+}
+
+/**
+ * The caps REHYDRATED from the stored columns: the unlimited sentinel →
+ * `Infinity`, the single read-side translation. Called wherever the `accounts`
+ * caps are read for enforcement (sync push, dashboard), so the in-memory value
+ * is always the conceptual `Infinity`-for-unlimited the
+ * `connectorsUsed < maxConnectors` check expects.
+ */
+export function normalizeCaps(caps: {
+	maxHostedStorageBytes: number;
+	maxConnectors: number;
+}): { maxHostedStorageBytes: number; maxConnectors: number } {
+	return {
+		maxHostedStorageBytes: caps.maxHostedStorageBytes,
+		maxConnectors:
+			caps.maxConnectors >= UNLIMITED_CONNECTORS_SENTINEL
+				? Infinity
+				: caps.maxConnectors,
+	};
 }

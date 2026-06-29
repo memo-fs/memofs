@@ -31,7 +31,7 @@ import {
 	teamMembers,
 	teams,
 } from "../db/schema";
-import { resolveCaps } from "./entitlements";
+import { capsForStorage } from "./entitlements";
 import { getAccountForUser } from "./queries/account";
 
 /**
@@ -54,7 +54,10 @@ export async function provisionAccount(
 	// Free-tier caps come from the SSOT resolver, NOT the schema default (which
 	// is 1 GB and contradicts the catalog's 500 MB). Writing them explicitly at
 	// provisioning keeps the denormalised columns honest from row one.
-	const freeCaps = resolveCaps("free");
+	// `capsForStorage` translates `Infinity` (Teams) to the finite
+	// `UNLIMITED_CONNECTORS_SENTINEL` so the integer column never receives
+	// `Infinity` (free is finite today, but the write path stays uniform).
+	const freeCaps = capsForStorage("free");
 	const accountId = createId();
 	await db.insert(accounts).values({
 		id: accountId,
