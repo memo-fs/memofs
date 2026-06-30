@@ -12,6 +12,7 @@
 
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import type { LlmClient } from "../ai-runtime/llm-client";
 import type { TekMemoCloudClientOptions } from "../cloud-client/types";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
@@ -52,6 +53,17 @@ export interface TekmemoConfig {
 	 * Voyage) so hybrid recall reorders candidates by semantic relevance.
 	 */
 	reranker?: Reranker;
+	/**
+	 * Optional LLM transport (the 4th contract member, ADR 0014) powering the
+	 * LLM-enhanced intelligence tier — the retrieval strategist (Q23),
+	 * writer-critic consolidation (Q25a), staleness re-verification (Q24 v1.x),
+	 * and semantic consolidation (Q25a). When omitted, every feature runs its
+	 * deterministic default (regex rewrite, the deterministic `consolidateGraph`,
+	 * etc.) — the absence of an `LlmClient` *is* the deterministic default, not a
+	 * parallel built-in impl. Inject a provider client (OpenAI today,
+	 * Anthropic/local later) to upgrade those features.
+	 */
+	llmClient?: LlmClient;
 	projectId?: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -105,6 +117,7 @@ export interface ResolvedTekmemoConfig {
 	recallStore?: RecallStore;
 	extractor?: Extractor;
 	reranker?: Reranker;
+	llmClient?: LlmClient;
 	projectId: string;
 	tenantId?: string;
 	workspaceId?: string;
@@ -203,6 +216,7 @@ export function resolveTekmemoConfig(input: {
 		...(config.embedder !== undefined ? { embedder: config.embedder } : {}),
 		...(config.extractor !== undefined ? { extractor: config.extractor } : {}),
 		...(config.reranker !== undefined ? { reranker: config.reranker } : {}),
+		...(config.llmClient !== undefined ? { llmClient: config.llmClient } : {}),
 		...(config.recallStore !== undefined
 			? { recallStore: config.recallStore }
 			: {}),

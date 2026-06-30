@@ -50,6 +50,7 @@ import {
 	type GraphEdge,
 	type GraphNode,
 	type InMemoryGraphStore,
+	type LlmClient,
 	mergeHybridCandidates,
 	NOTES_MEMORY_PATH,
 	type Reranker,
@@ -152,6 +153,15 @@ export interface LocalStrategyOptions {
 	 * when this is absent.
 	 */
 	reranker?: Reranker;
+	/**
+	 * Optional injected LLM transport (the 4th contract member, ADR 0014). When
+	 * omitted, every LLM-enhanced intelligence feature runs its deterministic
+	 * default — the absence of an `LlmClient` *is* the deterministic default.
+	 * Slice 0 only threads the seam; the strategist (Q23) and consolidation
+	 * (Q25a) consume it in later slices. Local OSS users see no behavior change
+	 * when this is absent.
+	 */
+	llmClient?: LlmClient;
 	/**
 	 * Optional injected graph store. When omitted, a persistent
 	 * {@link createFsGraphStore} is created so the local graph survives

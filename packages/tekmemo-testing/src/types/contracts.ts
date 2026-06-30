@@ -182,3 +182,46 @@ export interface MinimalExtractor {
 	readonly name: string;
 	extract(input: MinimalExtractionInput): Promise<MinimalExtractionResult>;
 }
+
+/**
+ * A JSON Schema describing the desired structured output of an LLM completion.
+ * Provider-neutral — typed as a plain object so the contract carries no
+ * schema-library dependency. Any concrete `LlmStructuredSchema` from
+ * `@tekbreed/tekmemo` is assignable to this.
+ */
+export interface MinimalLlmStructuredSchema {
+	[key: string]: unknown;
+}
+
+/** Input to a {@link MinimalLlmClient.complete} call. */
+export interface MinimalLlmCompletionInput {
+	system?: string;
+	user: string;
+	schema?: MinimalLlmStructuredSchema;
+	mode?: "fast" | "balanced" | "quality";
+}
+
+/** Output of a {@link MinimalLlmClient.complete} call. */
+export interface MinimalLlmCompletionResult {
+	text: string;
+	structured?: Record<string, unknown>;
+	model?: string;
+	usage?: {
+		promptTokens?: number;
+		totalTokens?: number;
+	};
+}
+
+/**
+ * Provider-neutral LLM transport contract — the minimal surface adapter
+ * packages must satisfy (the fourth member of the embedder/reranker/extractor
+ * family). Any concrete `LlmClient` from `@tekbreed/tekmemo` is assignable to
+ * this. Has no core default impl: the deterministic-default seam is "field
+ * absent → feature runs its deterministic path" (ADR 0014).
+ */
+export interface MinimalLlmClient {
+	readonly name: string;
+	complete(
+		input: MinimalLlmCompletionInput,
+	): Promise<MinimalLlmCompletionResult>;
+}

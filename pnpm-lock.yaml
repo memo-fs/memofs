@@ -561,6 +561,22 @@ importers:
         specifier: ^25.9.2
         version: 25.9.3
 
+  packages/tekmemo-server:
+    dependencies:
+      '@tekbreed/tekmemo':
+        specifier: workspace:^
+        version: link:../tekmemo
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekbreed/tekmemo-testing':
+        specifier: workspace:^
+        version: link:../tekmemo-testing
+
   packages/tekmemo-testing:
     dependencies:
       vitest:

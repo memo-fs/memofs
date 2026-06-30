@@ -19,6 +19,7 @@
  */
 
 import { assertString } from "@repo/utils";
+import type { LlmClient } from "../ai-runtime/llm-client";
 import type { BootstrapMemoryStoreOptions } from "../core/bootstrap/bootstrap-memory-store";
 import type { ReadConversationHistoryOptions } from "../core/documents/conversations-memory";
 import { writeCoreMemory } from "../core/documents/core-memory";
@@ -120,6 +121,7 @@ export class Tekmemo {
 	readonly embedder?: MemoryEmbedder;
 	readonly extractor?: Extractor;
 	readonly reranker?: Reranker;
+	readonly llmClient?: LlmClient;
 	readonly recallStore?: RecallStore;
 	readonly cloud?: TekMemoCloudClient;
 	readonly readPolicy: RuntimeReadPolicy;
@@ -419,6 +421,7 @@ export class Tekmemo {
 		this.embedder = this.resolved.embedder;
 		this.extractor = this.resolved.extractor;
 		this.reranker = this.resolved.reranker;
+		this.llmClient = this.resolved.llmClient;
 		if (this.embedder) {
 			// When an embedder is configured, a recall store is needed to persist
 			// embeddings. Default to the file-backed store so embeddings survive
@@ -479,6 +482,7 @@ export class Tekmemo {
 				embedder: this.embedder,
 				extractor: this.extractor,
 				reranker: this.reranker,
+				llmClient: this.llmClient,
 				recallStore: this.recallStore,
 				projectId: this.projectId,
 				tenantId: this.tenantId,
@@ -500,6 +504,7 @@ export class Tekmemo {
 			embedder: this.embedder,
 			extractor: this.extractor,
 			reranker: this.reranker,
+			llmClient: this.llmClient,
 			recallStore: this.recallStore,
 			projectId: this.projectId,
 			tenantId: this.tenantId,

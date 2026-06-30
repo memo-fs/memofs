@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	createFakeEmbedder,
 	createFakeExtractor,
+	createFakeLlmClient,
 	createFakeMemoryStore,
 	createFakeRecallStore,
 	createFakeReranker,
@@ -75,5 +76,49 @@ describe("fakes", () => {
 	it("fake extractor rejects empty text", async () => {
 		const extractor = createFakeExtractor();
 		await expect(extractor.extract({ text: "" })).rejects.toThrow();
+	});
+
+	it("fake llm client echoes the user turn and records the call", async () => {
+		const client = createFakeLlmClient();
+		const result = await client.complete({
+			system: "rewrite queries",
+			user: "how do I rotate logs",
+		});
+		expect(result.text).toBe("how do I rotate logs");
+		expect(result.model).toBe("fake-llm-client");
+		expect(result.structured).toBeUndefined();
+		expect(client.calls[0]).toMatchObject({
+			system: "rewrite queries",
+			user: "how do I rotate logs",
+		});
+	});
+
+	it("fake llm client surfaces a structured object for JSON-shaped responses", async () => {
+		const client = createFakeLlmClient({
+			resolveText: () => JSON.stringify({ query: "rotate logs" }),
+		});
+		const result = await client.complete({
+			user: "rotate logs",
+			schema: { type: "object", properties: { query: { type: "string" } } },
+		});
+		expect(result.structured).toEqual({ query: "rotate logs" });
+		// Text stays present even when structured is returned.
+		expect(typeof result.text).toBe("string");
+	});
+
+	// Defensive-parse parity (s3-execution-plan.md universal bar): a resolver that
+	// throws never escapes the client — it surfaces a text-only empty result, the
+	// same contract a real adapter must satisfy so the deterministic fallback
+	// stays reachable on malformed provider output.
+	it("fake llm client never throws when the resolver fails", async () => {
+		const client = createFakeLlmClient({
+			resolveText: () => {
+				throw new Error("provider 500");
+			},
+		});
+		const result = await client.complete({ user: "anything" });
+		expect(result.text).toBe("");
+		expect(result.structured).toBeUndefined();
+		expect(result.model).toBe("fake-llm-client");
 	});
 });

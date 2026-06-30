@@ -7,6 +7,10 @@ export type {
 	MinimalGraphEdge,
 	MinimalGraphNode,
 	MinimalGraphSourceRef,
+	MinimalLlmClient,
+	MinimalLlmCompletionInput,
+	MinimalLlmCompletionResult,
+	MinimalLlmStructuredSchema,
 	MinimalMemoryStore,
 	MinimalRecallDocument,
 	MinimalRecallQuery,
@@ -20,6 +24,8 @@ export type { EmbedderContractOptions } from "./embedder-contract";
 export { defineEmbedderContractTests } from "./embedder-contract";
 export type { ExtractorContractOptions } from "./extractor-contract";
 export { defineExtractorContractTests } from "./extractor-contract";
+export type { LlmClientContractOptions } from "./llm-client-contract";
+export { defineLlmClientContractTests } from "./llm-client-contract";
 export type { MemoryStoreContractOptions } from "./memory-store-contract";
 export { defineMemoryStoreContractTests } from "./memory-store-contract";
 export type { RecallStoreContractOptions } from "./recall-store-contract";
