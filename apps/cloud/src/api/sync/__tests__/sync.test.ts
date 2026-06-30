@@ -4,6 +4,7 @@ import type { Database } from "../../../db/index.server";
 import { accounts, apiKeys } from "../../../db/schema";
 import type { CloudWorkerEnv } from "../../../server/env";
 import { hashApiKey, sha256Hex } from "../../../server/sha256";
+import { createFakeR2Bucket } from "../../../test-utils/env";
 import { createTestDb } from "../../../test-utils/db";
 import { type ApiEnv, createApiApp } from "../..";
 
@@ -34,40 +35,18 @@ const OTHER_KEY = "tm_otheraccount0000";
 const STORAGE_CAP = 1_000; // bytes
 
 let db: Database;
-/** Fake R2 bucket: `{ sha256 → { body: Uint8Array, size } }`. */
-let blobs: Map<string, { body: Uint8Array; size: number }>;
-
 /**
- * A minimal R2Bucket stub satisfying the two calls the handlers make:
- *   - `get(key)` → the stored object (for verify), with `.arrayBuffer()` + `.size`
- *   - `head(key)` → readiness probe (unused by sync, but env requires a binding)
+ * The fake R2 bucket + its backing blob store. The test seeds `blobs.set(...)`
+ * directly to simulate a client having PUT bytes to R2; `complete` then verifies
+ * them via `bucket.get(key)`, so the two MUST share the same Map reference.
  */
-function fakeR2Bucket(): CloudWorkerEnv["BLOBS"] {
-	const store = blobs;
-	return {
-		async get(key: string) {
-			const entry = store.get(key);
-			if (!entry) return null;
-			return {
-				size: entry.size,
-				async arrayBuffer() {
-					return entry.body.buffer.slice(
-						entry.body.byteOffset,
-						entry.body.byteOffset + entry.body.byteLength,
-					);
-				},
-			};
-		},
-		async head() {
-			return null;
-		},
-	} as unknown as CloudWorkerEnv["BLOBS"];
-}
+let bucket: ReturnType<typeof createFakeR2Bucket>["bucket"];
+let blobs: ReturnType<typeof createFakeR2Bucket>["blobs"];
 
 /** Test env with throwaway R2 creds + the fake bucket. */
 function testEnv(): CloudWorkerEnv {
 	return {
-		BLOBS: fakeR2Bucket(),
+		BLOBS: bucket,
 		DATABASE_URL: "memory:",
 		TEKMEMO_API_KEY_SALT: SALT,
 		R2_S3_ACCESS_KEY_ID: "AKIA_TEST_KEY_ID",
@@ -80,7 +59,9 @@ function testEnv(): CloudWorkerEnv {
 
 beforeEach(async () => {
 	db = await createTestDb();
-	blobs = new Map();
+	const fake = createFakeR2Bucket();
+	bucket = fake.bucket;
+	blobs = fake.blobs;
 });
 
 afterEach(async () => {

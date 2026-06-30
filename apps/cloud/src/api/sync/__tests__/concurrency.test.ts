@@ -10,6 +10,7 @@ import {
 } from "../../../db/schema";
 import type { CloudWorkerEnv } from "../../../server/env";
 import { hashApiKey, sha256Hex } from "../../../server/sha256";
+import { createFakeR2Bucket } from "../../../test-utils/env";
 import { createTestDb } from "../../../test-utils/db";
 import { type ApiEnv, createApiApp } from "../..";
 import { ConcurrencyError, isApiError } from "../../errors";
@@ -47,35 +48,17 @@ const RAW_KEY = "tm_concowner0000000";
 const STORAGE_CAP = 10_000_000; // bytes
 
 let db: Database;
-/** Fake R2 bucket: `{ sha256 → { body: Uint8Array, size } }`. */
-let blobs: Map<string, { body: Uint8Array; size: number }>;
-
-/** Minimal R2Bucket stub: `get()` returns the stored object for verify. */
-function fakeR2Bucket(): CloudWorkerEnv["BLOBS"] {
-	const store = blobs;
-	return {
-		async get(key: string) {
-			const entry = store.get(key);
-			if (!entry) return null;
-			return {
-				size: entry.size,
-				async arrayBuffer() {
-					return entry.body.buffer.slice(
-						entry.body.byteOffset,
-						entry.body.byteOffset + entry.body.byteLength,
-					);
-				},
-			};
-		},
-		async head() {
-			return null;
-		},
-	} as unknown as CloudWorkerEnv["BLOBS"];
-}
+/**
+ * The fake R2 bucket + its backing blob store. `blobs.set(...)` simulates a
+ * client PUT so `complete`'s `bucket.get(key)` verify reads real bytes — the two
+ * MUST share the same Map reference (see sync.test.ts for the full rationale).
+ */
+let bucket: ReturnType<typeof createFakeR2Bucket>["bucket"];
+let blobs: ReturnType<typeof createFakeR2Bucket>["blobs"];
 
 function testEnv(): CloudWorkerEnv {
 	return {
-		BLOBS: fakeR2Bucket(),
+		BLOBS: bucket,
 		DATABASE_URL: "memory:",
 		TEKMEMO_API_KEY_SALT: SALT,
 		R2_S3_ACCESS_KEY_ID: "AKIA_TEST_KEY_ID",
@@ -88,7 +71,9 @@ function testEnv(): CloudWorkerEnv {
 
 beforeEach(async () => {
 	db = await createTestDb();
-	blobs = new Map();
+	const fake = createFakeR2Bucket();
+	bucket = fake.bucket;
+	blobs = fake.blobs;
 });
 
 afterEach(async () => {

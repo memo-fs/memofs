@@ -1,8 +1,8 @@
 import type { MemoryEmbedder } from "@tekbreed/tekmemo";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Database } from "../../db/index.server";
+import { createFakeR2Bucket, createTestEnv } from "../../test-utils/env";
 import { createTestDb } from "../../test-utils/db";
-import type { CloudWorkerEnv } from "../env";
 import { createHostedRuntime } from "../hosted-runtime";
 
 /**
@@ -71,67 +71,6 @@ function fakeEmbedder(): MemoryEmbedder {
 	};
 }
 
-/** A fake R2 bucket backed by a Map (key === sha256, content-addressed). */
-function fakeR2Bucket() {
-	const blobs = new Map<string, ArrayBuffer>();
-	const bucket = {
-		async get(key: string) {
-			const body = blobs.get(key);
-			return body === undefined
-				? null
-				: {
-						async arrayBuffer() {
-							return body;
-						},
-					};
-		},
-		async put(key: string, body: BodyInit) {
-			blobs.set(key, await toArrayBuffer(body));
-		},
-		async delete(key: string) {
-			blobs.delete(key);
-		},
-		async head() {
-			return null;
-		},
-	};
-	return { bucket, blobs };
-}
-
-async function toArrayBuffer(body: BodyInit): Promise<ArrayBuffer> {
-	if (body instanceof ArrayBuffer) return body;
-	if (ArrayBuffer.isView(body)) {
-		const view = body as Uint8Array;
-		const copy = new ArrayBuffer(view.byteLength);
-		new Uint8Array(copy).set(view);
-		return copy;
-	}
-	if (typeof Blob !== "undefined" && body instanceof Blob)
-		return body.arrayBuffer();
-	throw new Error("unsupported body");
-}
-
-/** A no-op `Ai` stub — the extractor override means it's never called here. */
-const stubAi = {
-	async run() {
-		return { response: '{"facts":[]}' };
-	},
-} as unknown as Ai;
-
-function testEnv(bucket: CloudWorkerEnv["BLOBS"]): CloudWorkerEnv {
-	return {
-		BLOBS: bucket,
-		AI: stubAi,
-		VOYAGE_API_KEY: "test-voyage-key",
-		DATABASE_URL: "memory:",
-		R2_S3_ACCESS_KEY_ID: "AKIA_TEST",
-		R2_S3_SECRET_ACCESS_KEY: "test-secret",
-		R2_S3_ENDPOINT: "test.r2.cloudflarestorage.com",
-		R2_BUCKET_NAME: "tekmemo-blobs",
-		SESSION_SECRET: "test-session-secret",
-	} as CloudWorkerEnv;
-}
-
 beforeEach(async () => {
 	db = await createTestDb();
 });
@@ -144,10 +83,11 @@ afterEach(async () => {
 
 describe("createHostedRuntime — ADR 0012 reuse", () => {
 	it("bootstraps the canonical files into R2 + project_files", async () => {
-		const { bucket, blobs } = fakeR2Bucket();
+		// Hold the fake bucket's backing Map so we can assert blobs landed.
+		const { bucket, blobs } = createFakeR2Bucket();
 		await seedProject("proj_1");
 		const tek = createHostedRuntime({
-			env: testEnv(bucket as unknown as CloudWorkerEnv["BLOBS"]),
+			env: createTestEnv({ BLOBS: bucket }),
 			db,
 			projectId: "proj_1",
 			overrides: { embedder: fakeEmbedder() },
@@ -174,10 +114,9 @@ describe("createHostedRuntime — ADR 0012 reuse", () => {
 	});
 
 	it("writes a memory that is then recallable through the hosted runtime", async () => {
-		const { bucket } = fakeR2Bucket();
 		await seedProject("proj_1");
 		const tek = createHostedRuntime({
-			env: testEnv(bucket as unknown as CloudWorkerEnv["BLOBS"]),
+			env: createTestEnv(),
 			db,
 			projectId: "proj_1",
 			overrides: { embedder: fakeEmbedder() },
@@ -196,10 +135,9 @@ describe("createHostedRuntime — ADR 0012 reuse", () => {
 	});
 
 	it("shares the project_files layout the sync handler writes (r2_key === sha256)", async () => {
-		const { bucket } = fakeR2Bucket();
 		await seedProject("proj_1");
 		const tek = createHostedRuntime({
-			env: testEnv(bucket as unknown as CloudWorkerEnv["BLOBS"]),
+			env: createTestEnv(),
 			db,
 			projectId: "proj_1",
 			overrides: { embedder: fakeEmbedder() },
@@ -221,8 +159,7 @@ describe("createHostedRuntime — ADR 0012 reuse", () => {
 	});
 
 	it("isolates two projects by projectId", async () => {
-		const { bucket } = fakeR2Bucket();
-		const env = testEnv(bucket as unknown as CloudWorkerEnv["BLOBS"]);
+		const env = createTestEnv();
 		await seedProject("proj_a");
 		await db.insert(projects).values({
 			id: "proj_b",
