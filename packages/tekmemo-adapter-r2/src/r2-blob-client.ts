@@ -38,7 +38,9 @@ export interface CreateR2BlobClientOptions {
  *
  * @public
  */
-export function createR2BlobClient(options: CreateR2BlobClientOptions): BlobClient {
+export function createR2BlobClient(
+	options: CreateR2BlobClientOptions,
+): BlobClient {
 	const { binding } = options;
 
 	return {

@@ -27,8 +27,8 @@
  * @public
  */
 
-import { MemoryNotFoundError } from "../core/errors/errors";
 import { assertMemoryPath } from "../core/constants/memory-paths";
+import { MemoryNotFoundError } from "../core/errors/errors";
 import type { MemoryPath, MemoryStore } from "../core/types/memory-store";
 import { assertString } from "../core/validation/assertions";
 
@@ -223,7 +223,9 @@ export class RemoteBlobMemoryStore implements MemoryStore {
  *
  * @public
  */
-export async function hashBytesHex(bytes: Uint8Array<ArrayBuffer>): Promise<string> {
+export async function hashBytesHex(
+	bytes: Uint8Array<ArrayBuffer>,
+): Promise<string> {
 	const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
 	const view = new Uint8Array(digest);
 	let hex = "";

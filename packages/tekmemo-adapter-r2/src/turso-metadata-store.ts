@@ -17,8 +17,8 @@
  * @public
  */
 
-import type { BlobEntry, MetadataStore } from "@tekbreed/tekmemo";
 import type { Client } from "@libsql/client";
+import type { BlobEntry, MetadataStore } from "@tekbreed/tekmemo";
 
 /** Column names on the `project_files` table (the documented layout contract). */
 const TABLE = "project_files";

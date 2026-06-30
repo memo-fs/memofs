@@ -22,24 +22,26 @@
  * @see docs/adr/0012-r2-memory-store-adapter.md — the remote-blob store contract.
  */
 
-import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
-import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
 import {
-	createR2BlobClient,
-	createTursoMetadataStore,
-} from "@tekbreed/tekmemo-adapter-r2";
-import { createWorkersAiExtractor } from "@tekbreed/tekmemo-adapter-workers-ai";
-import {
-	type Extractor,
 	createFsRecallStore,
+	type Extractor,
 	type MemoryEmbedder,
 	RemoteBlobMemoryStore,
 	type Reranker,
 	Tekmemo,
 } from "@tekbreed/tekmemo";
-import type { CloudWorkerEnv } from "./env";
+import {
+	createR2BlobClient,
+	createTursoMetadataStore,
+} from "@tekbreed/tekmemo-adapter-r2";
+import {
+	createVoyageEmbedder,
+	createVoyageReranker,
+} from "@tekbreed/tekmemo-adapter-voyage";
+import { createWorkersAiExtractor } from "@tekbreed/tekmemo-adapter-workers-ai";
 import { CLOUD_NAME, CLOUD_VERSION } from "../api/health";
 import type { Database } from "../db/index.server";
+import type { CloudWorkerEnv } from "./env";
 
 /**
  * Default Voyage models for the hosted intelligence layer. The embedder writes
@@ -89,7 +91,9 @@ export interface CreateHostedRuntimeOptions {
  *
  * @returns a ready {@link Tekmemo} instance for the project.
  */
-export function createHostedRuntime(options: CreateHostedRuntimeOptions): Tekmemo {
+export function createHostedRuntime(
+	options: CreateHostedRuntimeOptions,
+): Tekmemo {
 	const { env, db, projectId, overrides } = options;
 
 	const store = new RemoteBlobMemoryStore({

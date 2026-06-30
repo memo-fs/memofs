@@ -4,9 +4,9 @@ import {
 	type BlobEntry,
 	CORE_MEMORY_PATH,
 	hashBytesHex,
-	type MetadataStore,
 	MemoryNotFoundError,
 	MemoryPathError,
+	type MetadataStore,
 	NOTES_MEMORY_PATH,
 	RemoteBlobMemoryStore,
 } from "../../src/index";
@@ -54,7 +54,9 @@ function createFakeMetadataStore(): MetadataStore & {
 }
 
 /** Resolves a BufferSource (ArrayBuffer / typed-array view) or stream to an ArrayBuffer. */
-async function toBuffer(body: BufferSource | ReadableStream<Uint8Array>): Promise<ArrayBuffer> {
+async function toBuffer(
+	body: BufferSource | ReadableStream<Uint8Array>,
+): Promise<ArrayBuffer> {
 	if (body instanceof ArrayBuffer) return body;
 	if (ArrayBuffer.isView(body)) {
 		const view = body as Uint8Array;

@@ -10,10 +10,13 @@ import { createWorkersAiExtractor } from "../src";
 function createFakeAi(responseText: string | ((input: string) => string)): Ai {
 	return {
 		async run(_model: string, inputs: unknown) {
-			const messages = (inputs as { messages: Array<{ content: string }> }).messages;
+			const messages = (inputs as { messages: Array<{ content: string }> })
+				.messages;
 			const userText = messages[messages.length - 1]?.content ?? "";
 			const body =
-				typeof responseText === "function" ? responseText(userText) : responseText;
+				typeof responseText === "function"
+					? responseText(userText)
+					: responseText;
 			return { response: body } as unknown as Awaited<ReturnType<Ai["run"]>>;
 		},
 	} as unknown as Ai;

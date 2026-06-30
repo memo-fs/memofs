@@ -224,7 +224,9 @@ function extractContent(response: Record<string, unknown>): string | null {
 	if (typeof response.response === "string") return response.response;
 	const result = response.result as Record<string, unknown> | undefined;
 	if (result && typeof result.response === "string") return result.response;
-	const choices = response.choices as Array<{ message?: { content?: string } }> | undefined;
+	const choices = response.choices as
+		| Array<{ message?: { content?: string } }>
+		| undefined;
 	if (Array.isArray(choices)) {
 		const content = choices[0]?.message?.content;
 		if (typeof content === "string") return content;

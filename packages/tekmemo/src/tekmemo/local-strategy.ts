@@ -352,7 +352,9 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	// infra with no Node `fs` (ADR 0011 Phase 3). The default client lazily loads
 	// `node:fs`/`node:path` on first use, so a Worker that injects its own (or
 	// never opens a session) never touches the lazy node imports.
-	const agentfsClient = (options.createAgentfsClient ?? createLocalAgentfsClient)({
+	const agentfsClient = (
+		options.createAgentfsClient ?? createLocalAgentfsClient
+	)({
 		store: options.store,
 		projectId: options.projectId,
 		syncLayer: options.syncLayer,

@@ -6,10 +6,7 @@ import {
 	RemoteBlobMemoryStore,
 } from "@tekbreed/tekmemo";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
-import {
-	createR2BlobClient,
-	createTursoMetadataStore,
-} from "../src/index";
+import { createR2BlobClient, createTursoMetadataStore } from "../src/index";
 
 /**
  * Fake R2 bucket: content-addressed by key (=== sha256), mirrors the real

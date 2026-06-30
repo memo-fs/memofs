@@ -1,9 +1,9 @@
 import type { MemoryEmbedder } from "@tekbreed/tekmemo";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { Database } from "../../db/index.server";
+import { createTestDb } from "../../test-utils/db";
 import type { CloudWorkerEnv } from "../env";
 import { createHostedRuntime } from "../hosted-runtime";
-import { createTestDb } from "../../test-utils/db";
-import type { Database } from "../../db/index.server";
 
 /**
  * Integration test: the hosted `Tekmemo` runtime reads/writes the *same* R2
@@ -77,7 +77,13 @@ function fakeR2Bucket() {
 	const bucket = {
 		async get(key: string) {
 			const body = blobs.get(key);
-			return body === undefined ? null : { async arrayBuffer() { return body; } };
+			return body === undefined
+				? null
+				: {
+						async arrayBuffer() {
+							return body;
+						},
+					};
 		},
 		async put(key: string, body: BodyInit) {
 			blobs.set(key, await toArrayBuffer(body));
@@ -100,12 +106,17 @@ async function toArrayBuffer(body: BodyInit): Promise<ArrayBuffer> {
 		new Uint8Array(copy).set(view);
 		return copy;
 	}
-	if (typeof Blob !== "undefined" && body instanceof Blob) return body.arrayBuffer();
+	if (typeof Blob !== "undefined" && body instanceof Blob)
+		return body.arrayBuffer();
 	throw new Error("unsupported body");
 }
 
 /** A no-op `Ai` stub — the extractor override means it's never called here. */
-const stubAi = { async run() { return { response: '{"facts":[]}' }; } } as unknown as Ai;
+const stubAi = {
+	async run() {
+		return { response: '{"facts":[]}' };
+	},
+} as unknown as Ai;
 
 function testEnv(bucket: CloudWorkerEnv["BLOBS"]): CloudWorkerEnv {
 	return {
@@ -126,7 +137,9 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-	await (db as unknown as { $client: { close(): Promise<void> } }).$client.close();
+	await (
+		db as unknown as { $client: { close(): Promise<void> } }
+	).$client.close();
 });
 
 describe("createHostedRuntime — ADR 0012 reuse", () => {
@@ -171,7 +184,8 @@ describe("createHostedRuntime — ADR 0012 reuse", () => {
 		});
 
 		await tek.writeMemory({
-			content: "The hosted runtime runs the same engine against R2-resident files.",
+			content:
+				"The hosted runtime runs the same engine against R2-resident files.",
 			title: "hosted-memory",
 		});
 
@@ -191,7 +205,9 @@ describe("createHostedRuntime — ADR 0012 reuse", () => {
 			overrides: { embedder: fakeEmbedder() },
 		});
 
-		await tek.writeMemory({ content: "a memory written through the hosted runtime" });
+		await tek.writeMemory({
+			content: "a memory written through the hosted runtime",
+		});
 
 		const rows = await db.$client.execute({
 			sql: "SELECT sha256, r2_key FROM project_files WHERE project_id = ?",
