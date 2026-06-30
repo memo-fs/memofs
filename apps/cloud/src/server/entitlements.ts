@@ -39,6 +39,18 @@ const GB = 1024 ** 3;
  * is a paid feature), gated by `seatsUsed >= maxSeats`. Free/Pro allow only the
  * solo owner (1 seat) — matching the pricing catalog where "Team sharing" is
  * excluded on individual tiers — so inviting is upgrade-gated for those plans.
+ *
+ * The two intelligence caps (Q19, ADR 0011 Phase 3) meter the managed-runtime
+ * compute that has real per-user cost (Workers CPU + LLM tokens), unlike the
+ * cheap/smooth storage dimension. Both are checked as `count < cap`, identical
+ * to the storage/connector pattern (ADR 0006 §12.3):
+ *   - `maxConsolidationRuns` — consolidation runs per UTC day (the
+ *     always-on-consolidation differentiator A1). Free's single run is the
+ *     deterministic floor only (zero LLM spend, Q33 margin guardrail); Pro+ runs
+ *     frontier extraction. Teams is `Infinity` (true always-on).
+ *   - `maxPreWarmPerDay` — session pre-warms per UTC day (the cold-start
+ *     differentiator C5). Free is 0 (pre-warming is Pro+); Teams is `Infinity`.
+ *     `Infinity` is stored as {@link UNLIMITED_INT_SENTINEL} like `maxConnectors`.
  */
 export interface EntitlementCaps {
 	/** Maximum hosted storage across the account/team's projects, in bytes. */
@@ -47,20 +59,54 @@ export interface EntitlementCaps {
 	maxConnectors: number;
 	/** Maximum team members (seats) — collaboration cap. */
 	maxSeats: number;
+	/**
+	 * Maximum consolidation runs per UTC day (managed-runtime intelligence cap,
+	 * Q19). `Infinity` for unlimited (Teams). `Infinity`-for-unlimited is stored
+	 * as {@link UNLIMITED_INT_SENTINEL} (same encoding as `maxConnectors`).
+	 */
+	maxConsolidationRuns: number;
+	/**
+	 * Maximum session pre-warms per UTC day (Q19/C5). `Infinity` for unlimited
+	 * (Teams); `Infinity`-for-unlimited is stored as
+	 * {@link UNLIMITED_INT_SENTINEL}.
+	 */
+	maxPreWarmPerDay: number;
 }
 
 /**
  * The single source of truth for plan → caps. `satisfies Record<PlanTier, …>`
  * guarantees every plan tier is covered (a new tier added to the schema enum
  * becomes a compile error here until it gets caps).
+ *
+ * Intelligence caps (Q19, locked 2026-06-21):
+ *   - `maxConsolidationRuns`: Free 1/day (deterministic floor only — Q33), Pro
+ *     24/day (hourly frontier extraction), Teams ∞ (true always-on).
+ *   - `maxPreWarmPerDay`: Free 0 (pre-warming is Pro+), Pro 48/day, Teams ∞.
+ *     (Q19 locks Free 0 / Pro >0 / Teams ∞; the precise Pro figure is an
+ *     implementation default pending a locked number — hourly cadence, the same
+ *     rhythm as Pro consolidation, doubled to cover morning + evening sessions.)
  */
 export const PLAN_ENTITLEMENTS = {
-	free: { maxHostedStorageBytes: 500 * MB, maxConnectors: 1, maxSeats: 1 },
-	pro: { maxHostedStorageBytes: 10 * GB, maxConnectors: 3, maxSeats: 1 },
+	free: {
+		maxHostedStorageBytes: 500 * MB,
+		maxConnectors: 1,
+		maxSeats: 1,
+		maxConsolidationRuns: 1,
+		maxPreWarmPerDay: 0,
+	},
+	pro: {
+		maxHostedStorageBytes: 10 * GB,
+		maxConnectors: 3,
+		maxSeats: 1,
+		maxConsolidationRuns: 24,
+		maxPreWarmPerDay: 48,
+	},
 	teams: {
 		maxHostedStorageBytes: 50 * GB,
 		maxConnectors: Infinity,
 		maxSeats: 10,
+		maxConsolidationRuns: Infinity,
+		maxPreWarmPerDay: Infinity,
 	},
 } as const satisfies Record<PlanTier, EntitlementCaps>;
 
@@ -74,20 +120,28 @@ export function resolveCaps(plan: PlanTier): EntitlementCaps {
 }
 
 /**
- * The integer sentinel stored in `accounts.max_connectors` to mean "unlimited"
- * (Teams tier). The column is `integer NOT NULL` — it can't hold `Infinity`,
- * and SQLite doesn't support cheap column-nullability changes. This sentinel is
- * finite (so libSQL accepts it) yet large enough that the
- * `connectorsUsed < maxConnectors` check is always satisfied in practice.
+ * The integer sentinel stored in a `NOT NULL integer` entitlement column to mean
+ * "unlimited" (Teams tier). The column can't hold `Infinity`, and SQLite doesn't
+ * support cheap column-nullability changes. This sentinel is finite (so libSQL
+ * accepts it) yet large enough that the `count < cap` check is always satisfied
+ * in practice. Used by `maxConnectors`, `maxConsolidationRuns`, and
+ * `maxPreWarmPerDay` — every `Infinity`-for-unlimited integer cap.
  * {@link normalizeCaps} rehydrates it to `Infinity` on read so consumers never
  * see the raw sentinel.
  */
-export const UNLIMITED_CONNECTORS_SENTINEL = Number.MAX_SAFE_INTEGER;
+export const UNLIMITED_INT_SENTINEL = Number.MAX_SAFE_INTEGER;
 
 /**
- * The caps as they are STORED in the `accounts` columns. `maxConnectors` is
- * `number` (never `Infinity`): the "unlimited" sentinel (Teams) is stored as
- * {@link UNLIMITED_CONNECTORS_SENTINEL} and rehydrated to `Infinity` by
+ * Legacy alias for {@link UNLIMITED_INT_SENTINEL}. Kept because early call sites
+ * name it after the connectors column; new call sites should use the generic
+ * {@link UNLIMITED_INT_SENTINEL} (the sentinel now backs several integer caps).
+ */
+export const UNLIMITED_CONNECTORS_SENTINEL = UNLIMITED_INT_SENTINEL;
+
+/**
+ * The caps as they are STORED in the `accounts` columns. Every `Infinity`-capable
+ * field is `number` (never `Infinity`): "unlimited" (Teams) is stored as
+ * {@link UNLIMITED_INT_SENTINEL} and rehydrated to `Infinity` by
  * {@link normalizeCaps} on read. Everything else is identical to
  * {@link EntitlementCaps}.
  */
@@ -95,42 +149,58 @@ export interface StoredEntitlementCaps {
 	maxHostedStorageBytes: number;
 	maxConnectors: number;
 	maxSeats: number;
+	maxConsolidationRuns: number;
+	maxPreWarmPerDay: number;
 }
 
 /**
- * The caps prepared for PERSISTENCE: `Infinity` connectors (Teams) → the finite
+ * The caps prepared for PERSISTENCE: every `Infinity` cap (Teams) → the finite
  * sentinel, the single write-side translation. Called by the entitlement-mutation
  * paths (`applyPlanToAccount`, `provisionAccount`) so a plan change never tries
- * to bind `Infinity` to the integer column (which libSQL rejects with a
+ * to bind `Infinity` to an integer column (which libSQL rejects with a
  * RangeError).
  */
 export function capsForStorage(plan: PlanTier): StoredEntitlementCaps {
 	const caps = resolveCaps(plan);
 	return {
 		maxHostedStorageBytes: caps.maxHostedStorageBytes,
-		maxConnectors: Number.isFinite(caps.maxConnectors)
-			? caps.maxConnectors
-			: UNLIMITED_CONNECTORS_SENTINEL,
+		maxConnectors: toStored(caps.maxConnectors),
 		maxSeats: caps.maxSeats,
+		maxConsolidationRuns: toStored(caps.maxConsolidationRuns),
+		maxPreWarmPerDay: toStored(caps.maxPreWarmPerDay),
 	};
+}
+
+/**
+ * `Infinity` → {@link UNLIMITED_INT_SENTINEL}; finite passes through. The
+ * single translation both `Infinity`-capable integer caps use, so the
+ * write-side can't drift between them.
+ */
+function toStored(cap: number): number {
+	return Number.isFinite(cap) ? cap : UNLIMITED_INT_SENTINEL;
 }
 
 /**
  * The caps REHYDRATED from the stored columns: the unlimited sentinel →
  * `Infinity`, the single read-side translation. Called wherever the `accounts`
  * caps are read for enforcement (sync push, dashboard), so the in-memory value
- * is always the conceptual `Infinity`-for-unlimited the
- * `connectorsUsed < maxConnectors` check expects.
+ * is always the conceptual `Infinity`-for-unlimited the `count < cap` check
+ * expects.
+ *
+ * Accepts the stored shape (one or more of the `Infinity`-capable integer
+ * caps); fields it isn't handed pass through untouched. This keeps the
+ * per-partial-shape call sites (auth reads only connectors; the dashboard reads
+ * all four) sharing one rehydrator.
  */
-export function normalizeCaps(caps: {
-	maxHostedStorageBytes: number;
-	maxConnectors: number;
-}): { maxHostedStorageBytes: number; maxConnectors: number } {
-	return {
-		maxHostedStorageBytes: caps.maxHostedStorageBytes,
-		maxConnectors:
-			caps.maxConnectors >= UNLIMITED_CONNECTORS_SENTINEL
-				? Infinity
-				: caps.maxConnectors,
-	};
+export function normalizeCaps<T extends object>(caps: T): T {
+	const rehydrate = (v: number): number =>
+		v >= UNLIMITED_INT_SENTINEL ? Infinity : v;
+	const out = { ...caps } as Record<string, unknown>;
+	if (typeof out.maxConnectors === "number")
+		out.maxConnectors = rehydrate(out.maxConnectors);
+	if (typeof out.maxConsolidationRuns === "number")
+		out.maxConsolidationRuns = rehydrate(out.maxConsolidationRuns);
+	if (typeof out.maxPreWarmPerDay === "number")
+		out.maxPreWarmPerDay = rehydrate(out.maxPreWarmPerDay);
+	return out as T;
 }
