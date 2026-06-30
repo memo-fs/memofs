@@ -14,34 +14,53 @@ TekMemo ships when it's right, not when a date says so.
 
 Active focus — the work in flight toward a stable 1.0.
 
+- **Self-hostable runtime — `tekmemo-server`.** Ship a deployable OSS server
+  that runs the *same* hosted-runtime engine the cloud runs, with
+  **provider-neutral adapters** (bring your own embedder / reranker / extractor /
+  LLM client / blob store / metadata store). The fulfillment of the "self-host
+  the same engine free" thesis ([ADR 0003](docs/adr/0003-managed-runtime-tier.md)).
+  Deploys as a single Node process for OSS self-hosters, and as the cloud's
+  **runtime Worker** behind a Service Binding.
+- **Two-Worker cloud topology.** TekMemo Cloud runs as **two** Cloudflare Workers
+  (commercial + runtime) joined by a Service Binding — a 3 MB free-plan
+  constraint forces it, and the runtime-API boundary makes it architecturally
+  clean ([ADR 0013](docs/adr/0013-two-worker-split.md)).
+- **The `LlmClient` contract + intelligence tier.** A provider-neutral LLM
+  transport in core (the 4th member of the embedder/reranker/extractor family,
+  [ADR 0014](docs/adr/0014-llm-client-core-interface.md)), powering the
+  LLM-enhanced strategist / writer-critic consolidation / staleness re-
+  verification. The deterministic defaults run zero-config; the adapter upgrades
+  layer on.
 - **API freeze on the `Tekmemo` client** — lock the public surface
   (`core`, `notes`, `conversations`, `graph`, `snapshots`, `agentfs`, `sync`,
   `rerank` namespaces + `recall`, `context`, `writeMemory`,
-  `listRecentMemories`, `validate`, `health`). After 1.0, changes follow
-  semver.
-- **Freeze the AI SDK helpers** — `buildRuntimeMemoryContext`,
-  `buildRuntimeMemoryToolDefinition`, `runRuntimeMemoryTool`,
-  `createAiSdkRuntimeFromTekmemo`, `TekMemoMemoryRuntime`. These ship in
-  [`@tekbreed/tekmemo-adapter-ai-sdk`](packages/tekmemo-adapter-ai-sdk); the
-  framework-neutral `TekMemoMemoryRuntime` interface is frozen in core.
-- **Lock the recall configuration schema** — `engine`, `localEmbeddings`,
-  `embeddingModel` + the `TEKMEMO_RECALL_*` env vars.
-- **TekMemo Cloud launch** — ship the hosted layer alongside the OSS 1.0:
-  hosted sync (keep memory in sync across devices) and the hosted managed MCP
-  endpoint. The cloud runs as one Cloudflare Worker (Hono API + React Router v8
-  dashboard) per [ADR 0005](docs/adr/0005-cloud-tech-stack.md).
+  `listRecentMemories`, `validate`, `health`). Two modes (`local` | `hybrid`),
+  no read/write policies — the cloud is a file replica reached via explicit
+  sync verbs, never an implicit read policy. After 1.0, changes follow semver.
+- **TekMemo Cloud launch — full managed runtime at v1.** Hosted sync (memory in
+  sync across devices), Teams (shared projects with concurrency-safe writes),
+  and the managed runtime (hosted recall / consolidation / pre-warming / memory
+  explorer). Ships as the two-Worker topology above. The full managed runtime
+  lands in one release, but its concurrent-write surfaces (Teams shared-project
+  writes, hosted-memory writes) **ship only after the concurrency layer
+  ([ADR 0010](docs/adr/0010-cloud-concurrency-control-for-b3.md)) that makes
+  them safe** — no multi-writer path goes live before its serialization. See
+  [ADR 0011](docs/adr/0011-managed-runtime-sequencing.md) and the execution
+  plan's Hard ordering rule.
 - **Docs & contributor readiness** — runnable examples across the primary
-  agent frameworks; a complete, honest contributor funnel.
+  agent frameworks; a complete, honest contributor funnel; the reprojected docs
+  IA ([ADR 0015](docs/adr/0015-docs-blueprint-reprojection.md)).
 
 ## Next
 
-In flight after 1.0 — team features and the managed-runtime tier.
+In flight after 1.0 — the adapters and surfaces that were deliberately deferred
+to keep the launch focused.
 
-- **Managed-runtime tier** — run the *same* local `Tekmemo` memory runtime + an embedder
-  on hosted infra against the user's R2-resident files; expose hosted recall /
-  graph / evals by API. The long-term purpose of the cloud ([ADR 0003](docs/adr/0003-managed-runtime-tier.md));
-  v1's file-replica sync is the foundation for it.
-- **Workspaces** — shared memory across a team, with access controls.
+- **Native self-host store adapters** — `tekmemo-adapter-s3` (blob) and
+  `tekmemo-adapter-postgres` (metadata). OSS self-hosting launches against the
+  cloud's R2 + Turso bundle (R2 is S3-compatible, Turso/libSQL is free); the
+  native adapters are the first post-launch widen.
+- **More store backends** — GCS (blob), D1 + SQLite (metadata).
 - **Observability** — recall quality, latency, and usage analytics.
 - **Audit logs** — append-only history of memory reads/writes for compliance.
 
