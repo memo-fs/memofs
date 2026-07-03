@@ -1,0 +1,12 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": ".",
+		"paths": {
+			"@tekmemo/adapter-openai": ["./src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

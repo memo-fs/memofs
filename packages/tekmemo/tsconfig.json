@@ -3,11 +3,8 @@
 	"compilerOptions": {
 		"types": ["node"],
 		"outDir": "dist",
-		"rootDir": ".",
-		"paths": {
-			"@tekbreed/tekmemo": ["./src/index.ts"]
-		}
+		"rootDir": "."
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
 	"exclude": ["node_modules", "dist"]
 }

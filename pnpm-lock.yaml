@@ -20,12 +20,9 @@ importers:
       '@changesets/types':
         specifier: ^6.1.0
         version: 6.1.0
-      '@tekbreed/tekmemo-cli':
-        specifier: 1.0.0-alpha.0
-        version: 1.0.0-alpha.0
-      '@tekbreed/tekmemo-mcp-server':
-        specifier: 1.0.0-alpha.0
-        version: 1.0.0-alpha.0(zod@4.4.3)
+      '@tekmemo/mcp-server':
+        specifier: workspace:^
+        version: link:packages/mcp-server
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
@@ -38,6 +35,9 @@ importers:
       publint:
         specifier: ^0.3.21
         version: 0.3.21
+      tekmemo:
+        specifier: workspace:^
+        version: link:packages/tekmemo
       tsdown:
         specifier: ^0.22.2
         version: 0.22.2(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)
@@ -77,9 +77,6 @@ importers:
       '@fontsource-variable/sora':
         specifier: ^5.2.8
         version: 5.2.8
-      '@libsql/client':
-        specifier: ^0.17.4
-        version: 0.17.4
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -89,30 +86,12 @@ importers:
       '@polar-sh/sdk':
         specifier: ^0.48.1
         version: 0.48.1
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../../packages/tekmemo
-      '@tekbreed/tekmemo-adapter-r2':
-        specifier: workspace:^
-        version: link:../../packages/tekmemo-adapter-r2
-      '@tekbreed/tekmemo-adapter-voyage':
-        specifier: workspace:^
-        version: link:../../packages/tekmemo-adapter-voyage
-      '@tekbreed/tekmemo-adapter-workers-ai':
-        specifier: workspace:^
-        version: link:../../packages/tekmemo-adapter-workers-ai
-      '@upstash/ratelimit':
-        specifier: ^2.0.8
-        version: 2.0.8(@upstash/redis@1.38.0)
-      '@upstash/redis':
-        specifier: ^1.38.0
-        version: 1.38.0
       aws4fetch:
         specifier: ^1.0.20
         version: 1.0.20
       better-auth:
         specifier: ^1.6.20
-        version: 1.6.20(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.9)(vue@3.5.38(typescript@5.9.3))
+        version: 1.6.20(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.9)(vue@3.5.38(typescript@5.9.3))
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -127,7 +106,7 @@ importers:
         version: 4.4.0
       drizzle-orm:
         specifier: ^0.45.2
-        version: 0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
+        version: 0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.7)
@@ -168,8 +147,8 @@ importers:
         specifier: ^4.11.2
         version: 4.11.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-router:
-        specifier: 8.0.1
-        version: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        specifier: 8.1.0
+        version: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-router-auto-routes:
         specifier: ^0.8.4
         version: 0.8.4(typescript@5.9.3)
@@ -178,10 +157,10 @@ importers:
         version: 3.8.0(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react-is@19.2.7)(react@19.2.7)(redux@5.0.1)
       remix-themes:
         specifier: ^2.0.4
-        version: 2.0.4(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
+        version: 2.0.4(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       remix-utils:
         specifier: ^10.0.0
-        version: 10.0.0(@standard-schema/spec@1.1.0)(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+        version: 10.0.0(@standard-schema/spec@1.1.0)(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -200,19 +179,22 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: ^1.42.1
-        version: 1.42.1(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(workerd@1.20260617.1)(wrangler@4.103.0(@cloudflare/workers-types@4.20260620.1))
+        version: 1.42.1(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(workerd@1.20260630.1)(wrangler@4.106.0(@cloudflare/workers-types@4.20260630.1))
+      '@cloudflare/vitest-pool-workers':
+        specifier: ^0.17.0
+        version: 0.17.0(@cloudflare/workers-types@4.20260630.1)(@vitest/runner@4.1.9)(@vitest/snapshot@4.1.9)(vitest@4.1.9)
       '@cloudflare/workers-types':
-        specifier: ^4.20250617.0
-        version: 4.20260620.1
+        specifier: ^4.20260630.1
+        version: 4.20260630.1
       '@playwright/test':
         specifier: ^1.61.0
         version: 1.61.0
       '@react-router/cloudflare':
-        specifier: 8.0.1
-        version: 8.0.1(@cloudflare/workers-types@4.20260620.1)(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)
+        specifier: 8.1.0
+        version: 8.1.0(@cloudflare/workers-types@4.20260630.1)(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)
       '@react-router/dev':
-        specifier: 8.0.1
-        version: 8.0.1(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(wrangler@4.103.0(@cloudflare/workers-types@4.20260620.1))
+        specifier: 8.1.0
+        version: 8.1.0(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(wrangler@4.106.0(@cloudflare/workers-types@4.20260630.1))
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.3.1(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
@@ -231,9 +213,6 @@ importers:
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
-      miniflare:
-        specifier: ^4.20260625.0
-        version: 4.20260625.0
       tailwindcss:
         specifier: ^4.2.2
         version: 4.3.1
@@ -243,12 +222,15 @@ importers:
       vite:
         specifier: ^8.0.3
         version: 8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
+      vite-tsconfig-paths:
+        specifier: 5.1.4
+        version: 5.1.4(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
       vitest:
         specifier: ^4.1.8
         version: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@22.20.0)(@vitest/coverage-v8@4.1.9)(msw@2.14.6(@types/node@22.20.0)(typescript@5.9.3))(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
       wrangler:
-        specifier: ^4.103.0
-        version: 4.103.0(@cloudflare/workers-types@4.20260620.1)
+        specifier: ^4.106.0
+        version: 4.106.0(@cloudflare/workers-types@4.20260630.1)
 
   apps/docs:
     devDependencies:
@@ -264,12 +246,12 @@ importers:
 
   benchmarks:
     dependencies:
-      '@tekbreed/tekmemo':
+      '@tekmemo/benchmark-kit':
         specifier: workspace:*
-        version: link:../packages/tekmemo
-      '@tekbreed/tekmemo-benchmark-kit':
+        version: link:../packages/benchmark-kit
+      '@tekmemo/core':
         specifier: workspace:*
-        version: link:../packages/tekmemo-benchmark-kit
+        version: link:../packages/core
     devDependencies:
       '@repo/typescript':
         specifier: workspace:*
@@ -289,12 +271,12 @@ importers:
       '@openai/agents':
         specifier: ^0.11.0
         version: 0.11.8(ws@8.21.0)(zod@3.25.76)
-      '@tekbreed/tekmemo':
+      '@tekmemo/adapter-ai-sdk':
         specifier: workspace:*
-        version: link:../packages/tekmemo
-      '@tekbreed/tekmemo-adapter-ai-sdk':
+        version: link:../packages/adapter-ai-sdk
+      '@tekmemo/core':
         specifier: workspace:*
-        version: link:../packages/tekmemo-adapter-ai-sdk
+        version: link:../packages/core
       ai:
         specifier: ^6.0.0
         version: 6.0.174(zod@3.25.76)
@@ -315,36 +297,11 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
 
-  packages/tekmemo:
+  packages/adapter-ai-sdk:
     dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: '>=1.29.0'
-        version: 1.29.0(zod@4.4.2)
-      zod:
-        specifier: ^4.4.2
-        version: 4.4.2
-    devDependencies:
-      '@repo/tsdown':
-        specifier: workspace:*
-        version: link:../../tooling/tsdown
-      '@repo/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo-testing
-      '@types/node':
-        specifier: ^25.9.2
-        version: 25.9.3
-
-  packages/tekmemo-adapter-ai-sdk:
-    dependencies:
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
       ai:
         specifier: '>=5.0.0 <7.0.0'
         version: 6.0.174(zod@4.4.3)
@@ -358,18 +315,18 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-adapter-openai:
+  packages/adapter-openai:
     dependencies:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
       openai:
         specifier: ^6.10.0
         version: 6.36.0(ws@8.21.0)(zod@4.4.3)
@@ -380,22 +337,22 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-adapter-r2:
+  packages/adapter-r2:
     dependencies:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250617.0
-        version: 4.20260620.1
+        version: 4.20260630.1
       '@libsql/client':
         specifier: ^0.17.4
         version: 0.17.4
@@ -405,18 +362,18 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-adapter-transformers:
+  packages/adapter-transformers:
     dependencies:
       '@huggingface/transformers':
         specifier: ^3.7.6
         version: 3.8.1
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
     devDependencies:
       '@repo/tsdown':
         specifier: workspace:*
@@ -424,18 +381,18 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-adapter-voyage:
+  packages/adapter-voyage:
     dependencies:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
     devDependencies:
       '@repo/tsdown':
         specifier: workspace:*
@@ -443,40 +400,40 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-adapter-workers-ai:
+  packages/adapter-workers-ai:
     dependencies:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
+        version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250617.0
-        version: 4.20260620.1
+        version: 4.20260630.1
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
 
-  packages/tekmemo-benchmark-kit:
+  packages/benchmark-kit:
     dependencies:
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
-      '@tekbreed/tekmemo-testing':
+        version: link:../core
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
     devDependencies:
       '@repo/tsdown':
         specifier: workspace:*
@@ -485,14 +442,127 @@ importers:
         specifier: workspace:*
         version: link:../../tooling/typescript
 
-  packages/tekmemo-cli:
+  packages/connectors:
     dependencies:
-      '@tekbreed/tekmemo':
+      '@tekmemo/core':
         specifier: workspace:^
-        version: link:../tekmemo
-      '@tekbreed/tekmemo-connectors':
+        version: link:../core
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-connectors
+        version: link:../testing
+      '@types/node':
+        specifier: ^22.20.0
+        version: 22.20.0
+
+  packages/core:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: '>=1.29.0'
+        version: 1.29.0(zod@4.4.3)
+      zod:
+        specifier: ^4.4.2
+        version: 4.4.3
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@tekmemo/testing':
+        specifier: workspace:^
+        version: link:../testing
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
+
+  packages/json-rpc:
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+
+  packages/mcp-server:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: '>=1.29.0'
+        version: 1.29.0(zod@4.4.3)
+      '@tekmemo/core':
+        specifier: workspace:^
+        version: link:../core
+      '@tekmemo/json-rpc':
+        specifier: workspace:^
+        version: link:../json-rpc
+    optionalDependencies:
+      '@tekmemo/adapter-transformers':
+        specifier: workspace:^
+        version: link:../adapter-transformers
+    devDependencies:
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@tekmemo/testing':
+        specifier: workspace:^
+        version: link:../testing
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
+
+  packages/server:
+    dependencies:
+      '@tekmemo/core':
+        specifier: workspace:^
+        version: link:../core
+      '@tekmemo/json-rpc':
+        specifier: workspace:^
+        version: link:../json-rpc
+    devDependencies:
+      '@cloudflare/vitest-pool-workers':
+        specifier: ^0.17.0
+        version: 0.17.0(@cloudflare/workers-types@4.20260630.1)(@vitest/runner@4.1.9)(@vitest/snapshot@4.1.9)(vitest@4.1.9)
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@tekmemo/testing':
+        specifier: workspace:^
+        version: link:../testing
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
+      vitest:
+        specifier: ^4.1.8
+        version: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@25.9.3)(@vitest/coverage-v8@4.1.9)(msw@2.14.6(@types/node@25.9.3)(typescript@6.0.3))(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+
+  packages/tekmemo:
+    dependencies:
+      '@tekmemo/connectors':
+        specifier: workspace:^
+        version: link:../connectors
+      '@tekmemo/core':
+        specifier: workspace:^
+        version: link:../core
       commander:
         specifier: ^14.0.3
         version: 14.0.3
@@ -506,78 +576,14 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekbreed/tekmemo-testing':
+      '@tekmemo/testing':
         specifier: workspace:^
-        version: link:../tekmemo-testing
+        version: link:../testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
 
-  packages/tekmemo-connectors:
-    dependencies:
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../tekmemo
-    devDependencies:
-      '@repo/tsdown':
-        specifier: workspace:*
-        version: link:../../tooling/tsdown
-      '@repo/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
-        specifier: workspace:^
-        version: link:../tekmemo-testing
-      '@types/node':
-        specifier: ^22.20.0
-        version: 22.20.0
-
-  packages/tekmemo-mcp-server:
-    dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: '>=1.29.0'
-        version: 1.29.0(zod@4.4.3)
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../tekmemo
-    optionalDependencies:
-      '@tekbreed/tekmemo-adapter-transformers':
-        specifier: workspace:^
-        version: link:../tekmemo-adapter-transformers
-    devDependencies:
-      '@repo/tsdown':
-        specifier: workspace:*
-        version: link:../../tooling/tsdown
-      '@repo/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
-      '@tekbreed/tekmemo-testing':
-        specifier: workspace:^
-        version: link:../tekmemo-testing
-      '@types/node':
-        specifier: ^25.9.2
-        version: 25.9.3
-
-  packages/tekmemo-server:
-    dependencies:
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../tekmemo
-    devDependencies:
-      '@repo/tsdown':
-        specifier: workspace:*
-        version: link:../../tooling/tsdown
-      '@repo/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@tekbreed/tekmemo-testing':
-        specifier: workspace:^
-        version: link:../tekmemo-testing
-
-  packages/tekmemo-testing:
+  packages/testing:
     dependencies:
       vitest:
         specifier: ^4.1.5
@@ -589,9 +595,6 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekbreed/tekmemo':
-        specifier: workspace:^
-        version: link:../tekmemo
 
   tooling/tsdown: {}
 
@@ -1064,14 +1067,21 @@ packages:
       vite: ^6.1.0 || ^7.0.0 || ^8.0.0
       wrangler: ^4.103.0
 
+  '@cloudflare/vitest-pool-workers@0.17.0':
+    resolution: {integrity: sha512-fNNXG11SLN+wjjYq9HWxBVtkZwAjbGJeAEz2vU55bsAizJihUXd8FYa7RS2G5PRy4u7JQpK11Qgm9Ubfp2oQ1Q==}
+    peerDependencies:
+      '@vitest/runner': ^4.1.0
+      '@vitest/snapshot': ^4.1.0
+      vitest: ^4.1.0
+
   '@cloudflare/workerd-darwin-64@1.20260617.1':
     resolution: {integrity: sha512-jWwmgEVVWbsHNrLSNXzwjJaH90VzRxq1cWkQFUidxyeUPnMxemeNE8I9qFAfrpzGgE11e9sKDcE3ettJW08swQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-64@1.20260625.1':
-    resolution: {integrity: sha512-naCfBv0WnnTQIQPTniqMoUlklOIFjrAcSn1X+IAOhY8aFLF/xGYtFjs1eEE8sFib3ZuChGGpU23FFORVczqr0A==}
+  '@cloudflare/workerd-darwin-64@1.20260630.1':
+    resolution: {integrity: sha512-oEVsD2NZtPAMaEvFeH2Y6N63yiFuOnPDKeAM+l8AkRbLAbFk462uWOq6/ZLn8ouY4P4coMkgsOPqcT1mkuzvzg==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [darwin]
@@ -1082,8 +1092,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@cloudflare/workerd-darwin-arm64@1.20260625.1':
-    resolution: {integrity: sha512-jmH6zjp6Wrux46+qtFwDwrj+vd7s5bdwEqeGvdnwE0a4IEeAhKs0L42HQOyID+g5lkrHq9m55+AbhtmRAm63Pw==}
+  '@cloudflare/workerd-darwin-arm64@1.20260630.1':
+    resolution: {integrity: sha512-tar1vcQSzM+27Agrlv28BhtN1tIFKw2YHrzldEMyQJOJB/885TU8Z3oO1c/a9YOmsKABhD6I4dGFhsmXyrbK1g==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [darwin]
@@ -1094,8 +1104,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-64@1.20260625.1':
-    resolution: {integrity: sha512-MiQkpA/dX8d83Zp64pzHUKfd6ca4cvwxnNobSP6CnXvfESvnNI9pfa+nfwnParla36sPmnYntNkjR7NjRuDeKQ==}
+  '@cloudflare/workerd-linux-64@1.20260630.1':
+    resolution: {integrity: sha512-mhjIg91+ikWw5v9tY4BYO7N9vLOZBhn7EnVFvxCdxcpuUUFBKATxUYHUy1kkgYxnmiI6s93PRNbzBz1NpYQ3IQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [linux]
@@ -1106,8 +1116,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@cloudflare/workerd-linux-arm64@1.20260625.1':
-    resolution: {integrity: sha512-LxxW7Qv60Xvv37+w6gUSDpYZziyqMy+cZWd9IvSA5ehVgKAxmzEaYPMiSZlxk32nbIWL9u/tfjXYCOKJ4Lo+XQ==}
+  '@cloudflare/workerd-linux-arm64@1.20260630.1':
+    resolution: {integrity: sha512-7g0iGvMCwGct+vE3FOKXtFWMAIGHzK2Ei9oALp44gXuL4lBcs3PPJISeTp5itquW2JwS1fw4Hnq7zrT7N/dgPw==}
     engines: {node: '>=16'}
     cpu: [arm64]
     os: [linux]
@@ -1118,14 +1128,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workerd-windows-64@1.20260625.1':
-    resolution: {integrity: sha512-LH6iIX1HHaTwVKV5VokDxxUErXJzQoNZFRwVm7Vx/3fB/ApcTcRCUaMqcxI4as94jEUqg+pmX5czOndiveohow==}
+  '@cloudflare/workerd-windows-64@1.20260630.1':
+    resolution: {integrity: sha512-J5KF9VF8yRpRBib/cPSuEp6iR9q3/cKgeDVhg1ZtuwpkzwnmCb+rxMF5WFLxAN8bI2x2FMG1v6o4vVFOGZ0fOQ==}
     engines: {node: '>=16'}
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260620.1':
-    resolution: {integrity: sha512-WB81w9u1bAS7KcekpC7/nYhLpIXAEtgybso7XgGJV8CQKNkNPYcyjvICLdghOlDBi/9Ivk+f7NRckV2Bkq1bDg==}
+  '@cloudflare/workers-types@4.20260630.1':
+    resolution: {integrity: sha512-yl+c9vwvko9UZ0frmtsHuwOh3BRHvNjLrfelAp5Akpqe1+Ho1UWekr3nmjJ1D64CH0Yb0K0oRMV4i7npOFzsog==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -2941,25 +2951,25 @@ packages:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
       react-dom: ^18.0 || ^19.0 || ^19.0.0-rc
 
-  '@react-router/cloudflare@8.0.1':
-    resolution: {integrity: sha512-qg5XW3eazprLoL/fkFudPpPFDb81PtG6QwevHC/qv3HpAzwUq6qghw97Wqj5qQS6SjkJWXcEiiav8Q510n+wfQ==}
+  '@react-router/cloudflare@8.1.0':
+    resolution: {integrity: sha512-CFelM3QT02j1SdCWWhj/wTqiyr4GCYAl/YQZfz0l/YBivXHpHueR7DN8fchJ5BA1++3vstrGtHl9fJO42F+Tlw==}
     engines: {node: '>=22.22.0'}
     peerDependencies:
       '@cloudflare/workers-types': ^4.0.0
-      react-router: ^8.0.1
+      react-router: ^8.1.0
       typescript: ^5.1.0 || ^6.0.0
     peerDependenciesMeta:
       typescript:
         optional: true
 
-  '@react-router/dev@8.0.1':
-    resolution: {integrity: sha512-Xc1WfN4Ql9j271iJnvIJqxLvN5cyjUW/X4JsGw2j/0lET12UFnpNTpBLYXmLNci8vfpmfKI06KSixZ4pjIT4Bw==}
+  '@react-router/dev@8.1.0':
+    resolution: {integrity: sha512-0R7g3hPm+vXjfOzA6oInZ3KI/N9hxrtibtue3s1pdHcSPrfRFU2jgmC5I/W0gCJ9wtszLKqisHRet2vzY8USoA==}
     engines: {node: '>=22.22.0'}
     hasBin: true
     peerDependencies:
-      '@react-router/serve': ^8.0.1
+      '@react-router/serve': ^8.1.0
       '@vitejs/plugin-rsc': ~0.5.26
-      react-router: ^8.0.1
+      react-router: ^8.1.0
       react-server-dom-webpack: ^19.2.7
       typescript: ^5.1.0 || ^6.0.0
       vite: ^7.0.0 || ^8.0.0
@@ -2976,11 +2986,11 @@ packages:
       wrangler:
         optional: true
 
-  '@react-router/node@8.0.1':
-    resolution: {integrity: sha512-XUtOdjgOtFXe4XxkO28km51l++AYL7A3mk4Sozm7hr3ROY/9qE+9EoPHw0gEv4FQEgY7a/6XnzDL5dB+zNt7GA==}
+  '@react-router/node@8.1.0':
+    resolution: {integrity: sha512-KgdcDTp+rDFybx4qBaGxBpKEBCSjBT+bmRXRziD3A9TOlQ1AlaqK1sSttYtgA/t4HEgoDsKVa7OO9jaZAacLgg==}
     engines: {node: '>=22.22.0'}
     peerDependencies:
-      react-router: 8.0.1
+      react-router: 8.1.0
       typescript: ^5.1.0 || ^6.0.0
     peerDependenciesMeta:
       typescript:
@@ -3445,16 +3455,6 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tekbreed/tekmemo-cli@1.0.0-alpha.0':
-    resolution: {integrity: sha512-1M8XNojhh3BYFguHLIjjoPpEvmRj90BGe/q/A5xWE7+opTIReANIqbAfmNylRiG3fXSvKFTdc9noyzW95iORrw==}
-    engines: {node: '>=22'}
-    hasBin: true
-
-  '@tekbreed/tekmemo-mcp-server@1.0.0-alpha.0':
-    resolution: {integrity: sha512-vKKezMyayUr8fDuSPckM13SsVMGNvSJ5dcDzgFKxrVTuL3YP6Nh9I0gixSbfc7gfHVBPv4vltx6PutgIrygG7w==}
-    engines: {node: '>=22'}
-    hasBin: true
-
   '@turbo/darwin-64@2.9.18':
     resolution: {integrity: sha512-9f27peFu16ur8c0v9nUFUEyBnbKuuFsUTjHFWfmwGfzySBXbHwzU44QhZon6Mznz0cHsIr3984NQj/bVrnGSRw==}
     cpu: [x64]
@@ -3583,15 +3583,6 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
     deprecated: Potential CWE-502 - Update to 1.3.1 or higher
-
-  '@upstash/core-analytics@0.0.10':
-    resolution: {integrity: sha512-7qJHGxpQgQr9/vmeS1PktEwvNAF7TI4iJDi8Pu2CFZ9YUGHZH4fOP5TfYlZ4aVxfopnELiE4BS4FBjyK7V1/xQ==}
-    engines: {node: '>=16.0.0'}
-
-  '@upstash/ratelimit@2.0.8':
-    resolution: {integrity: sha512-YSTMBJ1YIxsoPkUMX/P4DDks/xV5YYCswWMamU8ZIfK9ly6ppjRnVOyBhMDXBmzjODm4UQKcxsJPvaeFAijp5w==}
-    peerDependencies:
-      '@upstash/redis': ^1.34.3
 
   '@upstash/redis@1.38.0':
     resolution: {integrity: sha512-wu+dZBptlLy0+MCUEoHmzrY/TnmgDey3+c7EbIGwrLqAvkP8yi5MWZHYGIFtAygmL4Bkz2TdFu+eU0vFPncIcg==}
@@ -3781,9 +3772,6 @@ packages:
   ansis@4.3.1:
     resolution: {integrity: sha512-BJ8/l4R5LRE7hW9WdSuGYrLSHi2ynxeFpDFbH0K/CgNeY/tyhk+vO6TYxXC5r5CpUhNVX310xzPsN/H9lCdfOA==}
     engines: {node: '>=14'}
-
-  arg@5.0.2:
-    resolution: {integrity: sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==}
 
   argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
@@ -3991,6 +3979,9 @@ packages:
 
   citty@0.2.2:
     resolution: {integrity: sha512-+6vJA3L98yv+IdfKGZHBNiGW5KHn22e/JwID0Strsz8h4S/csAu/OuICwxrg44k5MRiZHWIo8XXuJgQTriRP4w==}
+
+  cjs-module-lexer@1.2.3:
+    resolution: {integrity: sha512-0TNiGstbQmCFwt4akjjBg5pLRTSyj/PkWQ1ZoO2zntmg9yLqSRxwEa4iCfQLGjqhiqBfOJa7W/E8wfGrTDmlZQ==}
 
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
@@ -4641,6 +4632,9 @@ packages:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
 
+  globrex@0.1.2:
+    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
+
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -5069,8 +5063,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  miniflare@4.20260625.0:
-    resolution: {integrity: sha512-3kKXwRUObJsnBYPBgR0NiNZYKF/yv8GFyha1cx2EeAEraxNODgRVcyeRo+F1ok1tg5Mg7iUpOWSkknQTHuFhwA==}
+  miniflare@4.20260630.0:
+    resolution: {integrity: sha512-lyRplDrSJJWVpzSSQPBSQtNmUuxScCZyOOkXFs37uSbdTfWRDDmw6DyFKVS2s1eYtA/i4u2xR/0FyPIsTl/HJw==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -5478,8 +5472,8 @@ packages:
     peerDependencies:
       typescript: '>=5.0'
 
-  react-router@8.0.1:
-    resolution: {integrity: sha512-5EL/fANovVUhRK50NLS8RYfX0BxrimoKsHWUPPy8v5UEl8i6vzF7e4POo3u+AhPItDwccUAJjMfIOmydxBJmQw==}
+  react-router@8.1.0:
+    resolution: {integrity: sha512-Mdfi61uObuvWNN9OhChOC0HV6YWOIfKRzEWOvCHRSuQg8IM+Nv10edaM/2HE8ZixBpUTdQbruyWqC3sDkkh9vw==}
     engines: {node: '>=22.22.0'}
     peerDependencies:
       react: '>=19.2.7'
@@ -5869,10 +5863,6 @@ packages:
     resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
     engines: {node: '>=18'}
 
-  tinyglobby@0.2.16:
-    resolution: {integrity: sha512-pn99VhoACYR8nFHhxqix+uvsbXineAasWm5ojXoN8xEwK5Kd3/TrhNn1wByuD52UxWRLy8pu+kRMniEi6Eq9Zg==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -5909,6 +5899,17 @@ packages:
 
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
+
+  tsconfck@3.1.6:
+    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
+    engines: {node: ^18 || >=20}
+    deprecated: unmaintained
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.0.0
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   tsconfig-paths@4.2.0:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
@@ -6092,6 +6093,14 @@ packages:
   victory-vendor@37.3.6:
     resolution: {integrity: sha512-SbPDPdDBYp+5MJHhBCAyI7wKM3d5ivekigc2Dk2s7pgbZ9wIgIBYGVw4zGHBml/qTFbexrofXW6Gu4noGxrOwQ==}
 
+  vite-tsconfig-paths@5.1.4:
+    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
+    peerDependencies:
+      vite: '*'
+    peerDependenciesMeta:
+      vite:
+        optional: true
+
   vite@7.3.2:
     resolution: {integrity: sha512-Bby3NOsna2jsjfLVOHKes8sGwgl4TT0E6vvpYgnAYDIF/tie7MRaFthmKuHx1NSXjiTueXH3do80FMQgvEktRg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -6263,17 +6272,17 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  workerd@1.20260625.1:
-    resolution: {integrity: sha512-GApQvFX52SDM6L4u0+RRnUDB1wJOnEwoXjinkmOPtIyofWBxrlZckdegJSYc1leg++lLZ3+DQ4zMVmBqYVtzfA==}
+  workerd@1.20260630.1:
+    resolution: {integrity: sha512-7M0AA4l14hmPGtzQ5YPHyXosIKI/uz3TdcPHeiFDbgb7/0c8ECVMzIaodSV5bZIVhDHL0OlzqITAdPiwAr+dTg==}
     engines: {node: '>=16'}
     hasBin: true
 
-  wrangler@4.103.0:
-    resolution: {integrity: sha512-3Lv1P5t2xcSEkSTKtG+Lz+3JFryuU7YPLkaCUj7gNe+CJsjZJLtUwqsh1x595QBxkIbCE0GAvDx2DCJUU4+oqw==}
+  wrangler@4.106.0:
+    resolution: {integrity: sha512-b6EVbsvbmAUY4bUQXT3+f8oFP8x+J5rEa5z3Akeh+6vyKiN4x8+PyZ53DPpnqdxhIihhq/a00Yq5chGJ19QXBQ==}
     engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
-      '@cloudflare/workers-types': ^4.20260617.1
+      '@cloudflare/workers-types': ^4.20260630.1
     peerDependenciesMeta:
       '@cloudflare/workers-types':
         optional: true
@@ -6333,9 +6342,6 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
-  zod@4.4.2:
-    resolution: {integrity: sha512-IynmDyxsEsb9RKzO3J9+4SxXnl2FTFSzNBaKKaMV6tsSk0rw9gYw9gs+JFCq/qk2LCZ78KDwyj+Z289TijSkUw==}
 
   zod@4.4.3:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
@@ -6660,7 +6666,7 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)':
+  '@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)':
     dependencies:
       '@better-auth/utils': 0.4.2
       '@better-fetch/fetch': 1.3.1
@@ -6672,41 +6678,41 @@ snapshots:
       nanostores: 1.3.0
       zod: 4.4.3
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260620.1
+      '@cloudflare/workers-types': 4.20260630.1
       '@opentelemetry/api': 1.9.0
 
-  '@better-auth/drizzle-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))':
+  '@better-auth/drizzle-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
     optionalDependencies:
-      drizzle-orm: 0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
+      drizzle-orm: 0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
 
-  '@better-auth/kysely-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)':
+  '@better-auth/kysely-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
     optionalDependencies:
       kysely: 0.29.2
 
-  '@better-auth/memory-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
+  '@better-auth/memory-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
 
-  '@better-auth/mongo-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
+  '@better-auth/mongo-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
 
-  '@better-auth/prisma-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
+  '@better-auth/prisma-adapter@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
 
-  '@better-auth/telemetry@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)':
+  '@better-auth/telemetry@1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)':
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
       '@better-auth/utils': 0.4.2
       '@better-fetch/fetch': 1.3.1
 
@@ -6911,56 +6917,71 @@ snapshots:
 
   '@cloudflare/kv-asset-handler@0.5.0': {}
 
-  '@cloudflare/unenv-preset@2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260617.1)':
+  '@cloudflare/unenv-preset@2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260630.1)':
     dependencies:
       unenv: 2.0.0-rc.24
     optionalDependencies:
-      workerd: 1.20260617.1
+      workerd: 1.20260630.1
 
-  '@cloudflare/vite-plugin@1.42.1(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(workerd@1.20260617.1)(wrangler@4.103.0(@cloudflare/workers-types@4.20260620.1))':
+  '@cloudflare/vite-plugin@1.42.1(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(workerd@1.20260630.1)(wrangler@4.106.0(@cloudflare/workers-types@4.20260630.1))':
     dependencies:
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260617.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260630.1)
       miniflare: 4.20260617.1
       unenv: 2.0.0-rc.24
       vite: 8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
-      wrangler: 4.103.0(@cloudflare/workers-types@4.20260620.1)
+      wrangler: 4.106.0(@cloudflare/workers-types@4.20260630.1)
       ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
       - workerd
 
+  '@cloudflare/vitest-pool-workers@0.17.0(@cloudflare/workers-types@4.20260630.1)(@vitest/runner@4.1.9)(@vitest/snapshot@4.1.9)(vitest@4.1.9)':
+    dependencies:
+      '@vitest/runner': 4.1.9
+      '@vitest/snapshot': 4.1.9
+      cjs-module-lexer: 1.2.3
+      esbuild: 0.28.1
+      miniflare: 4.20260630.0
+      vitest: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@22.20.0)(@vitest/coverage-v8@4.1.9)(msw@2.14.6(@types/node@22.20.0)(typescript@5.9.3))(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
+      wrangler: 4.106.0(@cloudflare/workers-types@4.20260630.1)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - '@cloudflare/workers-types'
+      - bufferutil
+      - utf-8-validate
+
   '@cloudflare/workerd-darwin-64@1.20260617.1':
     optional: true
 
-  '@cloudflare/workerd-darwin-64@1.20260625.1':
+  '@cloudflare/workerd-darwin-64@1.20260630.1':
     optional: true
 
   '@cloudflare/workerd-darwin-arm64@1.20260617.1':
     optional: true
 
-  '@cloudflare/workerd-darwin-arm64@1.20260625.1':
+  '@cloudflare/workerd-darwin-arm64@1.20260630.1':
     optional: true
 
   '@cloudflare/workerd-linux-64@1.20260617.1':
     optional: true
 
-  '@cloudflare/workerd-linux-64@1.20260625.1':
+  '@cloudflare/workerd-linux-64@1.20260630.1':
     optional: true
 
   '@cloudflare/workerd-linux-arm64@1.20260617.1':
     optional: true
 
-  '@cloudflare/workerd-linux-arm64@1.20260625.1':
+  '@cloudflare/workerd-linux-arm64@1.20260630.1':
     optional: true
 
   '@cloudflare/workerd-windows-64@1.20260617.1':
     optional: true
 
-  '@cloudflare/workerd-windows-64@1.20260625.1':
+  '@cloudflare/workerd-windows-64@1.20260630.1':
     optional: true
 
-  '@cloudflare/workers-types@4.20260620.1': {}
+  '@cloudflare/workers-types@4.20260630.1': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -7647,28 +7668,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
     optional: true
-
-  '@modelcontextprotocol/sdk@1.29.0(zod@4.4.2)':
-    dependencies:
-      '@hono/node-server': 1.19.14(hono@4.12.26)
-      ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
-      content-type: 1.0.5
-      cors: 2.8.6
-      cross-spawn: 7.0.6
-      eventsource: 3.0.7
-      eventsource-parser: 3.0.8
-      express: 5.2.1
-      express-rate-limit: 8.5.2(express@5.2.1)
-      hono: 4.12.26
-      jose: 6.2.3
-      json-schema-typed: 8.0.2
-      pkce-challenge: 5.0.1
-      raw-body: 3.0.2
-      zod: 4.4.2
-      zod-to-json-schema: 3.25.2(zod@4.4.2)
-    transitivePeerDependencies:
-      - supports-color
 
   '@modelcontextprotocol/sdk@1.29.0(zod@4.4.3)':
     dependencies:
@@ -8627,14 +8626,14 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@react-router/cloudflare@8.0.1(@cloudflare/workers-types@4.20260620.1)(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)':
+  '@react-router/cloudflare@8.1.0(@cloudflare/workers-types@4.20260630.1)(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)':
     dependencies:
-      '@cloudflare/workers-types': 4.20260620.1
-      react-router: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@cloudflare/workers-types': 4.20260630.1
+      react-router: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@react-router/dev@8.0.1(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(wrangler@4.103.0(@cloudflare/workers-types@4.20260620.1))':
+  '@react-router/dev@8.1.0(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))(wrangler@4.106.0(@cloudflare/workers-types@4.20260630.1))':
     dependencies:
       '@babel/core': 7.29.7
       '@babel/generator': 7.29.7
@@ -8643,9 +8642,8 @@ snapshots:
       '@babel/preset-typescript': 7.29.7(@babel/core@7.29.7)
       '@babel/traverse': 7.29.7
       '@babel/types': 7.29.7
-      '@react-router/node': 8.0.1(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)
+      '@react-router/node': 8.1.0(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)
       '@remix-run/node-fetch-server': 0.13.3
-      arg: 5.0.2
       babel-dead-code-elimination: 1.0.12
       chokidar: 5.0.0
       dedent: 1.7.2
@@ -8660,22 +8658,22 @@ snapshots:
       pkg-types: 2.3.1
       prettier: 3.8.4
       react-refresh: 0.18.0
-      react-router: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-router: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       semver: 7.8.4
       tinyglobby: 0.2.17
       valibot: 1.4.1(typescript@5.9.3)
       vite: 8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
     optionalDependencies:
       typescript: 5.9.3
-      wrangler: 4.103.0(@cloudflare/workers-types@4.20260620.1)
+      wrangler: 4.106.0(@cloudflare/workers-types@4.20260630.1)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
 
-  '@react-router/node@8.0.1(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)':
+  '@react-router/node@8.1.0(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)':
     dependencies:
       '@remix-run/node-fetch-server': 0.13.3
-      react-router: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-router: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     optionalDependencies:
       typescript: 5.9.3
 
@@ -8993,20 +8991,6 @@ snapshots:
       tailwindcss: 4.3.1
       vite: 8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
 
-  '@tekbreed/tekmemo-cli@1.0.0-alpha.0':
-    dependencies:
-      '@tekbreed/tekmemo': link:packages/tekmemo
-      commander: 14.0.3
-
-  '@tekbreed/tekmemo-mcp-server@1.0.0-alpha.0(zod@4.4.3)':
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(zod@4.4.3)
-      '@tekbreed/tekmemo': link:packages/tekmemo
-    transitivePeerDependencies:
-      - '@cfworker/json-schema'
-      - supports-color
-      - zod
-
   '@turbo/darwin-64@2.9.18':
     optional: true
 
@@ -9124,18 +9108,10 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@upstash/core-analytics@0.0.10':
-    dependencies:
-      '@upstash/redis': 1.38.0
-
-  '@upstash/ratelimit@2.0.8(@upstash/redis@1.38.0)':
-    dependencies:
-      '@upstash/core-analytics': 0.0.10
-      '@upstash/redis': 1.38.0
-
   '@upstash/redis@1.38.0':
     dependencies:
       uncrypto: 0.1.3
+    optional: true
 
   '@vercel/oidc@3.2.0': {}
 
@@ -9355,8 +9331,6 @@ snapshots:
 
   ansis@4.3.1: {}
 
-  arg@5.0.2: {}
-
   argparse@1.0.10:
     dependencies:
       sprintf-js: 1.0.3
@@ -9405,15 +9379,15 @@ snapshots:
 
   baseline-browser-mapping@2.10.38: {}
 
-  better-auth@1.6.20(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.9)(vue@3.5.38(typescript@5.9.3)):
+  better-auth@1.6.20(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@4.1.9)(vue@3.5.38(typescript@5.9.3)):
     dependencies:
-      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
-      '@better-auth/drizzle-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))
-      '@better-auth/kysely-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)
-      '@better-auth/memory-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
-      '@better-auth/mongo-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
-      '@better-auth/prisma-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
-      '@better-auth/telemetry': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260620.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)
+      '@better-auth/core': 1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0)
+      '@better-auth/drizzle-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2))
+      '@better-auth/kysely-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(kysely@0.29.2)
+      '@better-auth/memory-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
+      '@better-auth/mongo-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
+      '@better-auth/prisma-adapter': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)
+      '@better-auth/telemetry': 1.6.20(@better-auth/core@1.6.20(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@4.20260630.1)(@opentelemetry/api@1.9.0)(better-call@1.3.6(zod@4.4.3))(jose@6.2.3)(kysely@0.29.2)(nanostores@1.3.0))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)
       '@better-auth/utils': 0.4.2
       '@better-fetch/fetch': 1.3.1
       '@noble/ciphers': 2.2.0
@@ -9426,7 +9400,7 @@ snapshots:
       zod: 4.4.3
     optionalDependencies:
       drizzle-kit: 0.31.10
-      drizzle-orm: 0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
+      drizzle-orm: 0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2)
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       vitest: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@22.20.0)(@vitest/coverage-v8@4.1.9)(msw@2.14.6(@types/node@22.20.0)(typescript@5.9.3))(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
@@ -9527,6 +9501,8 @@ snapshots:
   chownr@3.0.0: {}
 
   citty@0.2.2: {}
+
+  cjs-module-lexer@1.2.3: {}
 
   class-variance-authority@0.7.1:
     dependencies:
@@ -9745,9 +9721,9 @@ snapshots:
       esbuild: 0.25.12
       tsx: 4.22.4
 
-  drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260620.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2):
+  drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260630.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.0)(@upstash/redis@1.38.0)(kysely@0.29.2):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260620.1
+      '@cloudflare/workers-types': 4.20260630.1
       '@libsql/client': 0.17.4
       '@opentelemetry/api': 1.9.0
       '@upstash/redis': 1.38.0
@@ -10172,6 +10148,8 @@ snapshots:
       merge2: 1.4.1
       slash: 3.0.0
 
+  globrex@0.1.2: {}
+
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
@@ -10548,12 +10526,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  miniflare@4.20260625.0:
+  miniflare@4.20260630.0:
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.34.5
       undici: 7.28.0
-      workerd: 1.20260625.1
+      workerd: 1.20260630.1
       ws: 8.21.0
       youch: 4.1.0-beta.10
     transitivePeerDependencies:
@@ -11019,7 +10997,7 @@ snapshots:
       picomatch: 4.0.4
       typescript: 5.9.3
 
-  react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+  react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
       cookie-es: 3.1.1
       react: 19.2.7
@@ -11083,15 +11061,15 @@ snapshots:
     dependencies:
       regex-utilities: 2.3.0
 
-  remix-themes@2.0.4(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)):
+  remix-themes@2.0.4(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)):
     dependencies:
-      react-router: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-router: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
-  remix-utils@10.0.0(@standard-schema/spec@1.1.0)(react-router@8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7):
+  remix-utils@10.0.0(@standard-schema/spec@1.1.0)(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7):
     optionalDependencies:
       '@standard-schema/spec': 1.1.0
       react: 19.2.7
-      react-router: 8.0.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      react-router: 8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
   require-directory@2.1.1:
     optional: true
@@ -11487,11 +11465,6 @@ snapshots:
 
   tinyexec@1.2.4: {}
 
-  tinyglobby@0.2.16:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-
   tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
@@ -11523,6 +11496,10 @@ snapshots:
   tree-kill@1.2.2: {}
 
   trim-lines@3.0.1: {}
+
+  tsconfck@3.1.6(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   tsconfig-paths@4.2.0:
     dependencies:
@@ -11599,7 +11576,8 @@ snapshots:
       '@quansync/fs': 1.0.0
       quansync: 1.0.0
 
-  uncrypto@0.1.3: {}
+  uncrypto@0.1.3:
+    optional: true
 
   undici-types@6.21.0: {}
 
@@ -11708,6 +11686,17 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
+  vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)):
+    dependencies:
+      debug: 4.4.3
+      globrex: 0.1.2
+      tsconfck: 3.1.6(typescript@5.9.3)
+    optionalDependencies:
+      vite: 8.0.16(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+
   vite@7.3.2(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4):
     dependencies:
       esbuild: 0.27.7
@@ -11715,7 +11704,7 @@ snapshots:
       picomatch: 4.0.4
       postcss: 8.5.13
       rollup: 4.60.2
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.9.3
       fsevents: 2.3.3
@@ -11904,26 +11893,26 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260617.1
       '@cloudflare/workerd-windows-64': 1.20260617.1
 
-  workerd@1.20260625.1:
+  workerd@1.20260630.1:
     optionalDependencies:
-      '@cloudflare/workerd-darwin-64': 1.20260625.1
-      '@cloudflare/workerd-darwin-arm64': 1.20260625.1
-      '@cloudflare/workerd-linux-64': 1.20260625.1
-      '@cloudflare/workerd-linux-arm64': 1.20260625.1
-      '@cloudflare/workerd-windows-64': 1.20260625.1
+      '@cloudflare/workerd-darwin-64': 1.20260630.1
+      '@cloudflare/workerd-darwin-arm64': 1.20260630.1
+      '@cloudflare/workerd-linux-64': 1.20260630.1
+      '@cloudflare/workerd-linux-arm64': 1.20260630.1
+      '@cloudflare/workerd-windows-64': 1.20260630.1
 
-  wrangler@4.103.0(@cloudflare/workers-types@4.20260620.1):
+  wrangler@4.106.0(@cloudflare/workers-types@4.20260630.1):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
-      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260617.1)
+      '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260630.1)
       blake3-wasm: 2.1.5
       esbuild: 0.28.1
-      miniflare: 4.20260617.1
+      miniflare: 4.20260630.0
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
-      workerd: 1.20260617.1
+      workerd: 1.20260630.1
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260620.1
+      '@cloudflare/workers-types': 4.20260630.1
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
@@ -11981,17 +11970,11 @@ snapshots:
       zod: 3.25.76
     optional: true
 
-  zod-to-json-schema@3.25.2(zod@4.4.2):
-    dependencies:
-      zod: 4.4.2
-
   zod-to-json-schema@3.25.2(zod@4.4.3):
     dependencies:
       zod: 4.4.3
 
   zod@3.25.76: {}
-
-  zod@4.4.2: {}
 
   zod@4.4.3: {}
 

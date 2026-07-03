@@ -1,5 +1,6 @@
 {
-	"name": "@tekbreed/benchmarks",
+	"name": "@tekmemo/benchmarks",
+	"version": "1.0.0-beta.1",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -14,12 +15,18 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@tekbreed/tekmemo": "workspace:*",
-		"@tekbreed/tekmemo-benchmark-kit": "workspace:*"
+		"@tekmemo/core": "workspace:*",
+		"@tekmemo/benchmark-kit": "workspace:*"
 	},
 	"devDependencies": {
 		"@repo/typescript": "workspace:*",
 		"tsx": "^4.22.4",
 		"typescript": "6.0.3"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "benchmarks"
+	},
+	"description": "Private workspace runner for TekMemo benchmark suites."
 }

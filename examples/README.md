@@ -72,6 +72,14 @@ agent-rules` for each agent, and the per-platform MCP config. This is TekMemo's
 differentiator for **local daily builders** — memory that lives in your repo,
 not a vendor database. See [`mcp-coding-agent/README.md`](./mcp-coding-agent/README.md).
 
+### Self-host the `tekmemo-server` runtime — [`server/`](./server/)
+
+Run the **same** memory engine TekMemo Cloud runs, on your own infra — a single
+Node process (Fly / Railway / VPS) or a Cloudflare Worker. Bring your own blob
+store (R2-compatible), metadata store (Turso/libSQL), and providers; the engine
+is identical. Covers the JSON-RPC runtime API, the write-gate, and the canonical
+self-host bundle. See [`server/README.md`](./server/README.md).
+
 ## See also
 
 - [AI SDK Tools guide](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/tools)

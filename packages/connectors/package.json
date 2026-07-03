@@ -1,0 +1,84 @@
+{
+	"name": "@tekmemo/connectors",
+	"version": "1.0.0-beta.1",
+	"private": false,
+	"description": "Local connector framework for ingesting external sources into TekMemo memory.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/connectors"
+	},
+	"homepage": "https://docs.memo.tekbreed.com/packages/connectors/",
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"connectors",
+		"ingestion",
+		"github",
+		"notion",
+		"ai",
+		"agents",
+		"memory",
+		"tekmemo",
+		"adapter",
+		"typescript"
+	],
+	"engines": {
+		"node": ">=22"
+	},
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"dependencies": {
+		"@tekmemo/core": "workspace:^"
+	},
+	"devDependencies": {
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@tekmemo/testing": "workspace:^",
+		"@types/node": "^22.20.0"
+	}
+}

@@ -11,8 +11,8 @@ This is an open-source software (OSS) project.
 - **Do not** add `prettier` — it has been removed; all formatting goes through Biome
 - **Do not** use `@repo/` for public OSS packages — that scope is for internal tooling only
 - **Do not** copy-paste tsdown options into new packages — import `pkgConfig` from `@repo/tsdown` instead
-- **DRY & SSOT everywhere**: Enforce Single Source of Truth and Don't-Repeat-Yourself across the **entire workspace**, including the cloud app. Do not duplicate knowledge, logic, constants, or copy that already lives elsewhere — extract to a shared module, type, or constant and import it. Do not duplicate knowledge in this file that already exists in TekMemo memory
-- **Always use** the `copywriting` skill when writing package READMEs (keep in mind it is for users and contributors)
+- **DRY & SSOT everywhere**: Enforce Single Source of Truth and Don't-Repeat-Yourself across the **entire workspace**, including the cloud app. Do not duplicate knowledge, logic, constants, or copy that already lives elsewhere — extract to a shared module, type, or constant and import it.
+- **Always use** the `technical-writer` skill when writing package READMEs and user facing documentation.
 
 ## Cloud App Rules
 
@@ -97,19 +97,18 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 - **⚠️ Important**: No file should be more than 500 LoC, including React components.
 - **⚠️ Important**: A React component must not exceed 100 LoC (hard cap).
 - **⚠️ Important**: A File can contain multiple React components but must not exceed 500 LoC.
-- **⚠️ Important**: Strictly adhere to React Router v7 recommended best practices when working with React Router on the client.
+- **⚠️ Important**: Strictly adhere to React Router v8 recommended best practices when working with React Router on the client.
 - **⚠️ Important**: Aim for performance, optimistic UI, database query optimization, clean and highly organized and maintainable code.
 - **⚠️ Important**: Your code must be well organized, clean and maintainable.
 - **⚠️ Always use** [miniflare](https://developers.cloudflare.com/workers/testing/miniflare/get-started/) together with playwright for mocks and e2e tests.
-- **⚠️ Always use** Vitest together with Miniflare for unit and visual regression tests and mocks where required.
-- **⚠️ Important**: All mock and dev values must be set in Miniflare for development, mocks, and testing (both e2e, integration, and unit).
+- **⚠️ Always use** StatusCodes from `http-status-codes` for consistent HTTP status code handling.
 
 ## General Rules
 
 - **⚠️ Always use** the `code-reviewer` skill to review your plan implementation after completing the plan (all checkboxes are checked).
 - **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
-- **⚠️ Always use** the `copywriting` skill to polish the UI and make sure the language is correct for public facing users and accurate.
 - **⚠️ Always use** the `cloudflare` skill when working with Cloudflare or building on the server for best practices.
+- **⚠️ Avoid** adding adding adr related nameings to code documentation and avoid pointing to ADRs in code documentation. ADRs are for internal team reference and not for public documentation. Use ADRs only for internal team reference and not for public documentation. Do not track ADRs in git history.
 
 ## References
 
@@ -119,23 +118,13 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 - [Visual regression testing](https://vitest.dev/guide/browser/visual-regression-testing.html)
 
 ### Cloudflare
+- [Service bindings](https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings)
 - [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
 - [All cloudflare configuration](https://developers.cloudflare.com/workers/configuration/)
 - [Multiple workers](https://developers.cloudflare.com/workers/local-development/multi-workers/)
-- [Statix assets](https://developers.cloudflare.com/workers/static-assets/)
+- [Static assets](https://developers.cloudflare.com/workers/static-assets/)
 - [Testing guide](https://developers.cloudflare.com/workers/testing/)
 - [Observability](https://developers.cloudflare.com/workers/observability/)
-
-### Miniflare
-- [Writing tests with miniflare](https://developers.cloudflare.com/workers/testing/miniflare/writing-tests/)
-- [Miniflare compatibility dates and flags](https://developers.cloudflare.com/workers/testing/miniflare/core/compatibility/)
-- [Miniflare fetch events](https://developers.cloudflare.com/workers/testing/miniflare/core/fetch/)
-- [Miniflare modules](https://developers.cloudflare.com/workers/testing/miniflare/core/modules/)
-- [Miniflare multiple workers](https://developers.cloudflare.com/workers/testing/miniflare/core/multiple-workers/)
-- [Miniflare queues](https://developers.cloudflare.com/workers/testing/miniflare/core/queues/)
-- [Miniflare schedule events](https://developers.cloudflare.com/workers/testing/miniflare/core/scheduled/)
-- [Miniflare varibles and secrets](https://developers.cloudflare.com/workers/testing/miniflare/core/variables-secrets/)
-- [Miniflare web standards](https://developers.cloudflare.com/workers/testing/miniflare/core/standards/)
 
 ## Pointers
 

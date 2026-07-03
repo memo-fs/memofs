@@ -2,35 +2,37 @@
 
 ```
 tekmemo/
-├── .agents/                      # Workspace agents rules and skills
-├── .changeset/                   # Code version and publish configs (Changesets)
+├── .agents/                      # Workspace agent rules and skills
+├── .changeset/                   # Changesets version and publish config
 ├── .github/
 │   ├── ISSUE_TEMPLATE/           # GitHub issue templates
 │   ├── workflows/                # CI/CD workflows
-│   └── PULL_REQUEST_TEMPLATE.md  # Pull request templates
+│   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
 ├── apps/
-│   ├── cloud/                    # @tekbreed/tekmemo-cloud - Cloudflare worker/pages web application (React Router)
-│   └── docs/                     # @tekbreed/docs - TekMemo documentation site (VitePress)
-├── benchmarks/                   # @tekbreed/benchmarks - Workspace-wide benchmark suites and performance runner
-├── examples/                     # @tekbreed/examples - Example integration scripts and agent code templates
+│   ├── cloud/                    # @tekmemo/cloud - Cloudflare web app
+│   └── docs/                     # @tekmemo/docs - VitePress documentation site
+├── benchmarks/                   # @tekmemo/benchmarks - workspace benchmark runner
+├── examples/                     # @tekmemo/examples - integration examples
 ├── packages/
-│   ├── tekmemo/                  # @tekbreed/tekmemo - Core OSS memory runtime and engine
-│   ├── tekmemo-adapter-ai-sdk/   # @tekbreed/tekmemo-adapter-ai-sdk - Vercel AI SDK integration adapter
-│   ├── tekmemo-adapter-openai/   # @tekbreed/tekmemo-adapter-openai - OpenAI Embedder integration adapter
-│   ├── tekmemo-adapter-r2/       # @tekbreed/tekmemo-adapter-r2 - Cloudflare R2 + Turso remote-blob store adapter
-│   ├── tekmemo-adapter-transformers/ # @tekbreed/tekmemo-adapter-transformers - Local Transformers.js ONNX embedder adapter
-│   ├── tekmemo-adapter-voyage/   # @tekbreed/tekmemo-adapter-voyage - Voyage AI Embedder/Reranker adapter
-│   ├── tekmemo-adapter-workers-ai/ # @tekbreed/tekmemo-adapter-workers-ai - Cloudflare Workers AI extractor adapter
-│   ├── tekmemo-benchmark-kit/    # @tekbreed/tekmemo-benchmark-kit - Shared benchmark suites and utilities
-│   ├── tekmemo-cli/              # @tekbreed/tekmemo-cli - CLI tool for local memory administration/inspection
-│   ├── tekmemo-connectors/       # @tekbreed/tekmemo-connectors - Connectors for Notion, GitHub, and other third-party inputs
-│   ├── tekmemo-mcp-server/       # @tekbreed/tekmemo-mcp-server - Model Context Protocol (MCP) server for agent tools
-│   └── tekmemo-testing/          # @tekbreed/tekmemo-testing - Shared test contract suites and fakes/fixtures
+│   ├── adapter-ai-sdk/           # @tekmemo/adapter-ai-sdk - Vercel AI SDK adapter
+│   ├── adapter-openai/           # @tekmemo/adapter-openai - OpenAI embedder adapter
+│   ├── adapter-r2/               # @tekmemo/adapter-r2 - Cloudflare R2 blob adapter
+│   ├── adapter-transformers/     # @tekmemo/adapter-transformers - local Transformers.js embedder
+│   ├── adapter-voyage/           # @tekmemo/adapter-voyage - Voyage AI embedder/reranker adapter
+│   ├── adapter-workers-ai/       # @tekmemo/adapter-workers-ai - Workers AI extractor adapter
+│   ├── benchmark-kit/            # @tekmemo/benchmark-kit - reusable benchmark library
+│   ├── connectors/               # @tekmemo/connectors - local connector framework
+│   ├── core/                     # @tekmemo/core - core runtime and primitives
+│   ├── json-rpc/                 # @tekmemo/json-rpc - shared JSON-RPC primitives
+│   ├── mcp-server/               # @tekmemo/mcp-server - MCP server for agent tools
+│   ├── server/                   # @tekmemo/server - self-hostable runtime server
+│   ├── tekmemo/                  # tekmemo - CLI distribution
+│   └── testing/                  # @tekmemo/testing - shared tests, fixtures, and fakes
 ├── tooling/
-│   ├── tsdown/                   # @repo/tsdown - Shared tsdown configurations and build factory
-│   ├── typescript/               # @repo/typescript - Shared tsconfig base configurations
-│   └── utils/                    # @repo/utils - Shared utility helpers for builds and linting
-├── biome.json                    # Linting + formatting configuration (Biome)
-├── turbo.json                    # Turborepo task pipeline orchestration config
-└── pnpm-workspace.yaml           # PNPM workspace definition
+│   ├── tsdown/                   # @repo/tsdown - shared tsdown configuration
+│   ├── typescript/               # @repo/typescript - shared tsconfig base configuration
+│   └── utils/                    # @repo/utils - internal workspace utilities
+├── biome.json                    # Biome linting and formatting
+├── turbo.json                    # Turborepo task pipeline
+└── pnpm-workspace.yaml           # pnpm workspace definition
 ```

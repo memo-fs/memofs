@@ -1,0 +1,122 @@
+{
+	"name": "@tekmemo/testing",
+	"version": "1.0.0-beta.1",
+	"private": false,
+	"description": "Shared contract tests, fixtures, and fakes for TekMemo packages.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/testing"
+	},
+	"homepage": "https://docs.memo.tekbreed.com/packages/testing/",
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./contracts": {
+			"import": {
+				"types": "./dist/contracts/index.d.mts",
+				"default": "./dist/contracts/index.mjs"
+			},
+			"require": {
+				"types": "./dist/contracts/index.d.cts",
+				"default": "./dist/contracts/index.cjs"
+			}
+		},
+		"./fakes": {
+			"import": {
+				"types": "./dist/fakes/index.d.mts",
+				"default": "./dist/fakes/index.mjs"
+			},
+			"require": {
+				"types": "./dist/fakes/index.d.cts",
+				"default": "./dist/fakes/index.cjs"
+			}
+		},
+		"./fixtures": {
+			"import": {
+				"types": "./dist/fixtures/index.d.mts",
+				"default": "./dist/fixtures/index.mjs"
+			},
+			"require": {
+				"types": "./dist/fixtures/index.d.cts",
+				"default": "./dist/fixtures/index.cjs"
+			}
+		},
+		"./vitest": {
+			"import": {
+				"types": "./dist/vitest.d.mts",
+				"default": "./dist/vitest.mjs"
+			},
+			"require": {
+				"types": "./dist/vitest.d.cts",
+				"default": "./dist/vitest.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"testing",
+		"tests",
+		"fixtures",
+		"fakes",
+		"ai",
+		"agents",
+		"memory",
+		"tekmemo",
+		"typescript"
+	],
+	"engines": {
+		"node": ">=22"
+	},
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"peerDependencies": {
+		"vitest": "^4.1.5"
+	},
+	"devDependencies": {
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*"
+	}
+}

@@ -7,7 +7,7 @@
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["build/**", "dist/**", ".vitepress/dist/**"]
 		},
-		"@tekbreed/tekmemo#build": {
+		"@tekmemo/core#build": {
 			"dependsOn": [],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["build/**", "dist/**"]

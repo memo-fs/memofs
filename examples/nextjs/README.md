@@ -33,7 +33,7 @@ This example is meant to be copied into a Next.js app. From a fresh
 [Next.js](https://nextjs.org) project (App Router):
 
 ```bash
-npm install @tekbreed/tekmemo ai @ai-sdk/openai
+npm install @tekmemo/core ai @ai-sdk/openai
 ```
 
 Add `app/api/chat/route.ts` from this folder, then:

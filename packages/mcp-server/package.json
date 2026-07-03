@@ -1,0 +1,108 @@
+{
+	"name": "@tekmemo/mcp-server",
+	"version": "1.0.0-beta.1",
+	"private": false,
+	"description": "Model Context Protocol server for TekMemo agent integrations.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "packages/mcp-server"
+	},
+	"homepage": "https://docs.memo.tekbreed.com/packages/mcp-server/",
+	"bugs": {
+		"url": "https://github.com/tekbreed/tekmemo/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./http": {
+			"import": {
+				"types": "./dist/http.d.mts",
+				"default": "./dist/http.mjs"
+			},
+			"require": {
+				"types": "./dist/http.d.cts",
+				"default": "./dist/http.cjs"
+			}
+		}
+	},
+	"bin": {
+		"tekmemo-mcp": "./dist/bin/tekmemo-mcp.mjs"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"ai",
+		"agents",
+		"memory",
+		"tekmemo",
+		"typescript"
+	],
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": ">=1.29.0",
+		"@tekmemo/core": "workspace:^",
+		"@tekmemo/json-rpc": "workspace:^"
+	},
+	"optionalDependencies": {
+		"@tekmemo/adapter-transformers": "workspace:^"
+	},
+	"peerDependenciesMeta": {
+		"@huggingface/transformers": {
+			"optional": true
+		},
+		"@tekmemo/adapter-transformers": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@tekmemo/testing": "workspace:^",
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"@types/node": "^25.9.2"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

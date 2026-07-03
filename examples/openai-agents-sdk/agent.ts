@@ -3,7 +3,7 @@
  * for TypeScript (`@openai/agents`).
  *
  * Run it:
- *   pnpm --filter @tekbreed/examples openai-agents:agent
+ *   pnpm --filter @tekmemo/examples openai-agents:agent
  *
  * Requires:
  *   OPENAI_API_KEY — for the model
@@ -24,7 +24,7 @@
  */
 
 import { Agent, run, tool } from "@openai/agents";
-import { Tekmemo } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekmemo/core";
 import { z } from "zod";
 
 const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });

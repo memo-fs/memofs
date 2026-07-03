@@ -9,7 +9,7 @@ in your repo, not in a vendor's database.
 
 ## What you get
 
-- **MCP server** — `@tekbreed/tekmemo-mcp-server` exposes `context`, `recall`,
+- **MCP server** — `@tekmemo/mcp-server` exposes `context`, `recall`,
   `remember`, `read_core_memory`, and more to any MCP-compatible coding agent.
 - **Agent-rules file** — `tekmemo generate agent-rules` emits a ≤50-line
   instructions file (per agent) that *tells your agent to actually use the
@@ -21,9 +21,9 @@ in your repo, not in a vendor's database.
 ## 1. Install the TekMemo CLI
 
 ```bash
-npm install -g @tekbreed/tekmemo-cli
+npm install -g tekmemo
 # or use without installing:
-npx @tekbreed/tekmemo-cli
+npx tekmemo
 ```
 
 Initialize memory in your project:
@@ -67,7 +67,7 @@ over stdio — no API key, no cloud.
   "mcpServers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server"]
+      "args": ["-y", "@tekmemo/mcp-server"]
     }
   }
 }
@@ -80,7 +80,7 @@ over stdio — no API key, no cloud.
   "mcpServers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server"]
+      "args": ["-y", "@tekmemo/mcp-server"]
     }
   }
 }
@@ -91,7 +91,7 @@ over stdio — no API key, no cloud.
 ```toml
 [mcp_servers.tekmemo]
 command = "npx"
-args = ["-y", "@tekbreed/tekmemo-mcp-server"]
+args = ["-y", "@tekmemo/mcp-server"]
 ```
 
 ### VS Code / GitHub Copilot (`.vscode/mcp.json`)
@@ -101,7 +101,7 @@ args = ["-y", "@tekbreed/tekmemo-mcp-server"]
   "servers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server"]
+      "args": ["-y", "@tekmemo/mcp-server"]
     }
   }
 }
@@ -114,7 +114,7 @@ args = ["-y", "@tekbreed/tekmemo-mcp-server"]
   "mcpServers": {
     "tekmemo": {
       "command": "npx",
-      "args": ["-y", "@tekbreed/tekmemo-mcp-server"]
+      "args": ["-y", "@tekmemo/mcp-server"]
     }
   }
 }
@@ -157,10 +157,10 @@ git commit -m "chore: record auth-session decision"
 
 - **Agent doesn't call the memory tools** → you skipped step 2. The
   `generate agent-rules` file is what makes agents proactively use memory.
-- **`tekmemo` command not found** → run via `npx @tekbreed/tekmemo-cli ...`.
+- **`tekmemo` command not found** → run via `npx tekmemo ...`.
 - **Want semantic recall without an API key?** → the MCP server defaults to
   lexical (BM25 + fuzzy) recall. For zero-config hybrid recall, see
-  [`@tekbreed/tekmemo-adapter-transformers`](../../packages/tekmemo-adapter-transformers).
+  [`@tekmemo/adapter-transformers`](../../packages/adapter-transformers).
 
 ## See also
 

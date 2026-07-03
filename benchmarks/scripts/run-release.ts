@@ -10,13 +10,13 @@ import {
 	NOTES_MEMORY_PATH,
 	readCoreMemory,
 	writeCoreMemory,
-} from "@tekbreed/tekmemo";
+} from "@tekmemo/core";
 import {
 	createBenchmarkSuite,
 	createMemoryReadBenchmarkCase,
 	createMemoryWriteBenchmarkCase,
 	createRecallQueryBenchmarkCase,
-} from "@tekbreed/tekmemo-benchmark-kit";
+} from "@tekmemo/benchmark-kit";
 import {
 	createMemoryText,
 	createRecallDocuments,
@@ -53,7 +53,7 @@ try {
 						iterations: 10,
 						warmupIterations: 1,
 						async run() {
-							await import("@tekbreed/tekmemo");
+							await import("@tekmemo/core");
 						},
 					},
 					createMemoryWriteBenchmarkCase({

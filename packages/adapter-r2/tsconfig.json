@@ -1,0 +1,13 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": ".",
+		"types": ["@cloudflare/workers-types", "node"],
+		"paths": {
+			"@tekmemo/adapter-r2": ["./src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

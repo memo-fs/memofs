@@ -4,7 +4,7 @@ import path from "node:path";
 async function main() {
 	const pkgPath = path.resolve(
 		process.cwd(),
-		"packages/tekmemo-cli/package.json",
+		"packages/tekmemo/package.json",
 	);
 	const pkgData = await fs.readFile(pkgPath, "utf-8");
 	const pkg = JSON.parse(pkgData);

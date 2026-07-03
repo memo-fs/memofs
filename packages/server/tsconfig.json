@@ -1,0 +1,18 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"types": ["node"],
+		"outDir": "dist",
+		"rootDir": ".",
+		"paths": {
+			"@tekmemo/server": ["./src/index.ts"],
+			// Ambient module declarations for the `cloudflare:test` imports used by
+			// the workers-pool integration tests (`tests/workers/**`).
+			"cloudflare:test": [
+				"./node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts",
+			]
+		}
+	},
+	"include": ["src/**/*.ts", "bin/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

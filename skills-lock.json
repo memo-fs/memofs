@@ -13,6 +13,12 @@
       "skillPath": "plugins/developer-essentials/skills/code-review-excellence/SKILL.md",
       "computedHash": "0f585a4ad2f6d8353069ca9051c6f0e8865abb9d3a6a268d423784c3c3852962"
     },
+    "code-reviewer": {
+      "source": "google-gemini/gemini-cli",
+      "sourceType": "github",
+      "skillPath": ".gemini/skills/code-reviewer/SKILL.md",
+      "computedHash": "270f0dd1d4c15a798bad5253a309cdc2056fe5322f99ba06ca22ce50581adc02"
+    },
     "copywriting": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
@@ -73,6 +79,18 @@
       "skillPath": "skills/opensource-guide-coach/SKILL.md",
       "computedHash": "71ed130d355df51a91940a28c313d09930876c3d70974fbb255a970c6a4dcbcc"
     },
+    "technical-article-writer": {
+      "source": "samber/cc-skills",
+      "sourceType": "github",
+      "skillPath": "skills/technical-article-writer/SKILL.md",
+      "computedHash": "82b749af66f645874fab03a4067a75f6ec78e6f3e095d8bcf7d51bc7a3d8f3b8"
+    },
+    "technical-writer": {
+      "source": "shubhamsaboo/awesome-llm-apps",
+      "sourceType": "github",
+      "skillPath": "awesome_agent_skills/technical-writer/SKILL.md",
+      "computedHash": "e1ccd2334efd9b2137844568db30b0a1c6679404b474c216476c59e22ad08c28"
+    },
     "turborepo-monorepo": {
       "source": "giuseppe-trisciuoglio/developer-kit",
       "sourceType": "github",
@@ -84,6 +102,12 @@
       "sourceType": "github",
       "skillPath": "skills/vitepress/SKILL.md",
       "computedHash": "629d8ec4bcbf7cac86c15c3ca5f173933f01729bcb6396c0d74733755a896a41"
+    },
+    "wayfinder": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/in-progress/wayfinder/SKILL.md",
+      "computedHash": "344b8b82c70b9884abd682e54a1782fb2946d3ce46f3c8b474503cda72679637"
     },
     "writing-beats": {
       "source": "mattpocock/skills",

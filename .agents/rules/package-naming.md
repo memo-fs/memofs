@@ -1,53 +1,62 @@
 ## Package Naming Convention
 
-This repo uses namespaces and conventions to keep public OSS packages, internal tooling, and private apps separated:
+This repo keeps public OSS packages, private apps, and internal tooling in
+separate naming lanes.
 
-### Public OSS Packages (`@tekbreed` Scope)
+### Public OSS Packages
 
-These packages are published to npm under the `@tekbreed` scope:
-
-| Package directory | Published name | Scope | Description |
-|---|---|---|---|
-| `packages/tekmemo` | `@tekbreed/tekmemo` | `@tekbreed` | Core memory runtime for AI apps and agents |
-| `packages/tekmemo-adapter-ai-sdk` | `@tekbreed/tekmemo-adapter-ai-sdk` | `@tekbreed` | Vercel AI SDK adapter, memory tool, runtime bridge |
-| `packages/tekmemo-adapter-openai` | `@tekbreed/tekmemo-adapter-openai` | `@tekbreed` | OpenAI embedder adapter |
-| `packages/tekmemo-adapter-r2` | `@tekbreed/tekmemo-adapter-r2` | `@tekbreed` | Cloudflare R2 + Turso/libSQL remote-blob adapter |
-| `packages/tekmemo-adapter-transformers` | `@tekbreed/tekmemo-adapter-transformers` | `@tekbreed` | Local ONNX embedder adapter (Transformers.js) |
-| `packages/tekmemo-adapter-voyage` | `@tekbreed/tekmemo-adapter-voyage` | `@tekbreed` | Voyage AI embedder/reranker adapter |
-| `packages/tekmemo-adapter-workers-ai` | `@tekbreed/tekmemo-adapter-workers-ai` | `@tekbreed` | Cloudflare Workers AI extractor adapter |
-| `packages/tekmemo-benchmark-kit` | `@tekbreed/tekmemo-benchmark-kit` | `@tekbreed` | Benchmark workloads and runner library |
-| `packages/tekmemo-cli` | `@tekbreed/tekmemo-cli` | `@tekbreed` | CLI tool for local memory inspection |
-| `packages/tekmemo-connectors` | `@tekbreed/tekmemo-connectors` | `@tekbreed` | Local connector framework (GitHub, Notion, etc.) |
-| `packages/tekmemo-mcp-server` | `@tekbreed/tekmemo-mcp-server` | `@tekbreed` | Model Context Protocol (MCP) server |
-| `packages/tekmemo-testing` | `@tekbreed/tekmemo-testing` | `@tekbreed` | Shared contract tests and mock drivers |
-
-### Internal Workspace Tooling (`@repo` Scope)
-
-Internal packages under the `@repo` scope are strictly for local workspace tooling and must never be published externally:
+Public packages use the `@tekmemo/*` npm scope, except the CLI distribution. The
+CLI stays unscoped as `tekmemo` so `npm install -g tekmemo` and `npx tekmemo`
+remain the primary install surfaces.
 
 | Package directory | Published name | Scope | Description |
 |---|---|---|---|
-| `tooling/tsdown` | `@repo/tsdown` | `@repo` | Shared tsdown base build configurations |
-| `tooling/typescript` | `@repo/typescript` | `@repo` | Shared tsconfig base configurations |
+| `packages/core` | `@tekmemo/core` | `@tekmemo` | Core memory runtime, primitives, stores, recall, graph, AgentFS, and cloud-client contracts |
+| `packages/tekmemo` | `tekmemo` | unscoped | CLI tool for local and cloud memory workflows |
+| `packages/adapter-ai-sdk` | `@tekmemo/adapter-ai-sdk` | `@tekmemo` | Vercel AI SDK adapter, memory tool, runtime bridge |
+| `packages/adapter-openai` | `@tekmemo/adapter-openai` | `@tekmemo` | OpenAI embedder adapter |
+| `packages/adapter-r2` | `@tekmemo/adapter-r2` | `@tekmemo` | Cloudflare R2 remote-blob adapter |
+| `packages/adapter-transformers` | `@tekmemo/adapter-transformers` | `@tekmemo` | Local ONNX embedder adapter with Transformers.js |
+| `packages/adapter-voyage` | `@tekmemo/adapter-voyage` | `@tekmemo` | Voyage AI embedder and reranker adapter |
+| `packages/adapter-workers-ai` | `@tekmemo/adapter-workers-ai` | `@tekmemo` | Cloudflare Workers AI extractor adapter |
+| `packages/benchmark-kit` | `@tekmemo/benchmark-kit` | `@tekmemo` | Benchmark workloads and runner library |
+| `packages/connectors` | `@tekmemo/connectors` | `@tekmemo` | Local connector framework for GitHub, Notion, and future sources |
+| `packages/json-rpc` | `@tekmemo/json-rpc` | `@tekmemo` | Shared JSON-RPC 2.0 protocol primitives |
+| `packages/mcp-server` | `@tekmemo/mcp-server` | `@tekmemo` | Model Context Protocol server |
+| `packages/server` | `@tekmemo/server` | `@tekmemo` | OSS-deployable hosted-memory server |
+| `packages/testing` | `@tekmemo/testing` | `@tekmemo` | Shared contract tests, fixtures, and fakes |
+
+### Internal Workspace Tooling
+
+Internal packages under the `@repo/*` scope are only for local workspace
+tooling. They must not be published as public OSS packages.
+
+| Package directory | Package name | Scope | Description |
+|---|---|---|---|
+| `tooling/tsdown` | `@repo/tsdown` | `@repo` | Shared tsdown base build configuration |
+| `tooling/typescript` | `@repo/typescript` | `@repo` | Shared tsconfig base configuration |
 | `tooling/utils` | `@repo/utils` | `@repo` | Shared internal workspace utilities |
 
-### Private Applications and Workspaces
+### Private Applications And Workspaces
 
-These workspaces are marked `"private": true` and are not published:
+These workspaces are marked `"private": true` and are not published.
 
-| Directory | Name | Type | Description |
+| Directory | Package name | Type | Description |
 |---|---|---|---|
-| `apps/cloud` | `@tekbreed/tekmemo-cloud` | Cloud App | Cloud application running on Cloudflare Workers/Pages |
-| `apps/docs` | `@tekbreed/docs` | Docs App | Documentation site built with VitePress |
-| `benchmarks` | `@tekbreed/benchmarks` | Benchmark Runner | Performance benchmarking runner |
-| `examples` | `@tekbreed/examples` | Examples | Example integration projects (AI SDK, Next.js, etc.) |
+| `apps/cloud` | `@tekmemo/cloud` | Cloud app | Cloud application running on Cloudflare Workers |
+| `apps/docs` | `@tekmemo/docs` | Docs app | Documentation site built with VitePress |
+| `benchmarks` | `@tekmemo/benchmarks` | Benchmark runner | Workspace benchmark runner and results owner |
+| `examples` | `@tekmemo/examples` | Examples | Example integration scripts and agent templates |
 
-**Rule:** Public OSS packages must be published under the `@tekbreed` scope. Internal workspace tooling is published under the `@repo/*` scope and is never published externally. Private applications or workspaces are marked private.
+**Rule:** directory name equals the package name without its scope for every
+public package directory. Internal tooling stays under `@repo/*`; public OSS
+packages do not use `@repo/*`.
 
-When referencing internal tooling or workspace packages in `devDependencies` / `dependencies`, use `"workspace:*"` or `"workspace:^"`:
+When referencing workspace packages from `dependencies` or `devDependencies`,
+use `"workspace:*"` or `"workspace:^"`:
 
 ```json
 "devDependencies": {
-  "@repo/typescript": "workspace:*"
+	"@repo/typescript": "workspace:*"
 }
 ```

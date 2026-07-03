@@ -12,12 +12,12 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { Tekmemo } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekmemo/core";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
 	createAiSdkRuntimeFromTekmemo,
-} from "@tekbreed/tekmemo-adapter-ai-sdk";
+} from "@tekmemo/adapter-ai-sdk";
 import { streamText } from "ai";
 
 // In production, persist these per conversation (a Map keyed by conversationId,

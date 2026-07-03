@@ -1,15 +1,15 @@
 {
-	"name": "@tekbreed/tekmemo",
-	"version": "1.0.0-alpha.0",
+	"name": "tekmemo",
+	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "TekMemo memory runtime for AI apps and agents",
+	"description": "TekMemo command-line interface for local and cloud memory workflows.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
 		"directory": "packages/tekmemo"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/tekmemo/",
+	"homepage": "https://docs.memo.tekbreed.com/packages/cli/",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
@@ -28,17 +28,10 @@
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
-		},
-		"./cloud-client": {
-			"import": {
-				"types": "./dist/cloud-client.d.mts",
-				"default": "./dist/cloud-client.mjs"
-			},
-			"require": {
-				"types": "./dist/cloud-client.d.cts",
-				"default": "./dist/cloud-client.cjs"
-			}
 		}
+	},
+	"bin": {
+		"tekmemo": "./dist/bin/tekmemo.mjs"
 	},
 	"files": [
 		"dist",
@@ -63,38 +56,32 @@
 		"pack:dry-run": "pnpm build && npm pack --dry-run",
 		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
 	},
-	"keywords": [
-		"agents",
-		"ai",
-		"llm",
-		"memory",
-		"recall",
-		"@tekbreed/tekmemo",
-		"typescript"
-	],
+	"dependencies": {
+		"@tekmemo/core": "workspace:^",
+		"@tekmemo/connectors": "workspace:^",
+		"commander": "^14.0.3"
+	},
 	"devDependencies": {
-		"@tekbreed/tekmemo-testing": "workspace:^",
+		"@tekmemo/testing": "workspace:^",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
 		"@types/node": "^25.9.2"
 	},
-	"engines": {
-		"node": ">=22"
-	},
+	"keywords": [
+		"cli",
+		"command-line",
+		"ai",
+		"agents",
+		"memory",
+		"tekmemo",
+		"typescript"
+	],
 	"funding": {
 		"type": "github",
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
-	"dependencies": {
-		"zod": "^4.4.2"
-	},
-	"peerDependencies": {
-		"@modelcontextprotocol/sdk": ">=1.29.0"
-	},
-	"peerDependenciesMeta": {
-		"@modelcontextprotocol/sdk": {
-			"optional": true
-		}
+	"engines": {
+		"node": ">=22"
 	}
 }
