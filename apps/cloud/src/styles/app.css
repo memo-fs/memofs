@@ -3,7 +3,7 @@
 /* @import "shadcn/tailwind.css"; */
 @import '@fontsource-variable/Geist';
 @import "@fontsource-variable/geist-mono";
-/* @import "@fontsource-variable/sora"; */
+@import "@fontsource-variable/sora";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -47,7 +47,7 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: 'Sora Variable', sans-serif;
   --font-heading: 'Geist Mono Variable', monospace;
   --font-sentient: 'Sentient', sans-serif;
   --shadow-glow: 0 0 8px 2px var(--tw-shadow-color);
