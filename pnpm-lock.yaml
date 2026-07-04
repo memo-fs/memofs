@@ -65,6 +65,9 @@ importers:
       '@better-auth/utils':
         specifier: ^0.4.2
         version: 0.4.2
+      '@elithrar/workers-hono-rate-limit':
+        specifier: ^0.5.1
+        version: 0.5.1(hono@4.12.26)
       '@fontsource-variable/geist':
         specifier: ^5.2.9
         version: 5.2.9
@@ -77,6 +80,9 @@ importers:
       '@fontsource-variable/sora':
         specifier: ^5.2.8
         version: 5.2.8
+      '@libsql/client':
+        specifier: ^0.17.4
+        version: 0.17.4
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -86,6 +92,27 @@ importers:
       '@polar-sh/sdk':
         specifier: ^0.48.1
         version: 0.48.1
+      '@tekmemo/adapter-r2':
+        specifier: workspace:^
+        version: link:../../packages/adapter-r2
+      '@tekmemo/adapter-turso':
+        specifier: workspace:^
+        version: link:../../packages/adapter-turso
+      '@tekmemo/adapter-voyage':
+        specifier: workspace:^
+        version: link:../../packages/adapter-voyage
+      '@tekmemo/adapter-workers-ai':
+        specifier: workspace:^
+        version: link:../../packages/adapter-workers-ai
+      '@tekmemo/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@tekmemo/json-rpc':
+        specifier: workspace:^
+        version: link:../../packages/json-rpc
+      '@tekmemo/server':
+        specifier: workspace:^
+        version: link:../../packages/server
       aws4fetch:
         specifier: ^1.0.20
         version: 1.0.20
@@ -113,6 +140,9 @@ importers:
       hono:
         specifier: ^4.12.26
         version: 4.12.26
+      hono-rate-limiter:
+        specifier: ^0.5.3
+        version: 0.5.3(hono@4.12.26)
       http-status-codes:
         specifier: ^2.3.0
         version: 2.3.0
@@ -321,9 +351,6 @@ importers:
 
   packages/adapter-openai:
     dependencies:
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
       '@tekmemo/core':
         specifier: workspace:^
         version: link:../core
@@ -337,15 +364,15 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
       '@tekmemo/testing':
         specifier: workspace:^
         version: link:../testing
 
   packages/adapter-r2:
     dependencies:
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
       '@tekmemo/core':
         specifier: workspace:^
         version: link:../core
@@ -384,9 +411,6 @@ importers:
 
   packages/adapter-turso:
     dependencies:
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
       '@tekmemo/core':
         specifier: workspace:^
         version: link:../core
@@ -409,9 +433,6 @@ importers:
 
   packages/adapter-voyage:
     dependencies:
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
       '@tekmemo/core':
         specifier: workspace:^
         version: link:../core
@@ -422,15 +443,15 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
       '@tekmemo/testing':
         specifier: workspace:^
         version: link:../testing
 
   packages/adapter-workers-ai:
     dependencies:
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
       '@tekmemo/core':
         specifier: workspace:^
         version: link:../core
@@ -444,6 +465,9 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
       '@tekmemo/testing':
         specifier: workspace:^
         version: link:../testing
@@ -1177,6 +1201,11 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+
+  '@elithrar/workers-hono-rate-limit@0.5.1':
+    resolution: {integrity: sha512-DKOxeQxyIHuVnD7fqWUhg2KxFchjUCnbmWmrXY/9jnAN67C1s7k2ABvKI4Iavv7D0Pt08tbMOKB1fLAb3wioBw==}
+    peerDependencies:
+      hono: '>=4.0.0'
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -4695,6 +4724,15 @@ packages:
   headers-polyfill@5.0.1:
     resolution: {integrity: sha512-1TJ6Fih/b8h5TIcv+1+Hw0PDQWJTKDKzFZzcKOiW1wJza3XoAQlkCuXLbymPYB8+ZQyw8mHvdw560e8zVFIWyA==}
 
+  hono-rate-limiter@0.5.3:
+    resolution: {integrity: sha512-M0DxbVMpPELEzLi0AJg1XyBHLGJXz7GySjsPoK+gc5YeeBsdGDGe+2RvVuCAv8ydINiwlbxqYMNxUEyYfRji/A==}
+    peerDependencies:
+      hono: ^4.10.8
+      unstorage: ^1.17.3
+    peerDependenciesMeta:
+      unstorage:
+        optional: true
+
   hono@4.12.26:
     resolution: {integrity: sha512-uyZtpnYxM9CmQ7QsQknM4zN8EftNqhON1qYeIKM0Se67CCEe2c44xyGURwB0axX2fBDu1dqHrHAc1hmNT8ITkw==}
     engines: {node: '>=16.9.0'}
@@ -7019,6 +7057,10 @@ snapshots:
   '@docsearch/sidepanel-js@4.6.3': {}
 
   '@drizzle-team/brocli@0.10.2': {}
+
+  '@elithrar/workers-hono-rate-limit@0.5.1(hono@4.12.26)':
+    dependencies:
+      hono: 4.12.26
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -10217,6 +10259,10 @@ snapshots:
       '@types/set-cookie-parser': 2.4.10
       set-cookie-parser: 3.1.0
     optional: true
+
+  hono-rate-limiter@0.5.3(hono@4.12.26):
+    dependencies:
+      hono: 4.12.26
 
   hono@4.12.26: {}
 
