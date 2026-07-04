@@ -1,0 +1,72 @@
+# `@tekmemo/core`
+
+`@tekmemo/core` is the core memory runtime and provider-neutral contract engine for TekMemo. It provides the architectural foundation for local-first, versioned, and semantic memory for AI agents.
+
+## Features
+
+- **Unified Core Runtime:** Provides the main `Tekmemo` client orchestrating storage and intelligence.
+- **Provider-Neutral Contracts:** Interfaces for embedders, rerankers, extractors, and LLM clients.
+- **AgentFS:** Virtual filesystem abstraction for project memory files.
+- **Hybrid Recall:** Out-of-the-box local BM25, fuzzy, and semantic search routing.
+- **Durable Graph Memory:** Entity-relationship mapping for versioned memory snapshots.
+
+## Installation
+
+Install the core package using your preferred package manager:
+
+```bash
+npm install @tekmemo/core
+```
+
+> [!NOTE]
+> Since `@tekmemo/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@tekmemo/core/node-fs`.
+
+## Quick Start
+
+Initialize memory in your project and read the core memory:
+
+```ts
+import { Tekmemo } from "@tekmemo/core";
+import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+
+// Initialize a Node.js filesystem-backed memory store
+const store = createNodeFsMemoryStore({
+  rootDir: "./.tekmemo",
+});
+
+// Create the unified client
+const memo = new Tekmemo({
+  store,
+  projectId: "my-project",
+  mode: "local",
+});
+
+// Retrieve core memory
+const context = await memo.read({
+  kind: "core",
+});
+
+console.log(context.content);
+```
+
+## Package Architecture
+
+The `@tekmemo/core` codebase is organized around a strict layering model:
+
+1. **`core`**: Canonical schemas, documents, events, and in-memory stores.
+2. **`agentfs`**: Virtual file matching and leases.
+3. **`ai-runtime`**: Core LLM client and intelligence contract definitions.
+4. **`recall`**: Hybrid lexical and vector query routing.
+5. **`graph`**: Graph database engine and snapshot rollback.
+6. **`security`**: Durability tier classifier and secret blocklist gating.
+
+## Boundaries
+
+As a public open-source core package, `@tekmemo/core` remains strictly neutral:
+- It **does not** import or bundle any provider-specific packages (e.g., OpenAI, Voyage, or Turso).
+- It **does not** contain proprietary cloud tenancy, pricing models, or dashboard features.
+- All public capabilities are exported directly from the package root or the Node-only `@tekmemo/core/node-fs` subpath.
+
+## License
+
+MIT

@@ -39,29 +39,30 @@ TekMemo gives agents a **persistent memory layer** with:
 Install TekMemo:
 
 ```bash
-npm install @tekbreed/tekmemo
+npm install @tekmemo/core
 ```
 
 ```ts
-import { Tekmemo } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekmemo/core";
+import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
 
 const memo = new Tekmemo({
-  rootDir: "./.tekmemo",
+  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
   projectId: "my-app",
 });
 
 // Read durable, project-wide facts (lives in memory/core.md)
-await memo.core.read();
+const core = await memo.read({ kind: "core" });
+console.log(core.content);
 
 // Record a durable note (appended to memory/notes.md)
-await memo.notes.record({
+await memo.write({
   content: "User prefers dark mode with high contrast.",
   kind: "preference",
-  tags: ["ui", "theme"],
 });
 
 // Recall relevant context for an agent — works offline, no API keys
-const hits = await memo.recall("What does the user prefer for UI?");
+const hits = await memo.recall({ query: "What does the user prefer for UI?" });
 ```
 
 ## What's Next
@@ -69,13 +70,13 @@ const hits = await memo.recall("What does the user prefer for UI?");
 - **Visual memory inspector** — Browse and edit memory in the browser
 - **Team workspaces** — Shared memory with access controls
 - **Memory analytics** — Understand what your agents actually remember
-- **More vector adapters** — Pinecone, Weaviate, Qdrant support
+- **More vector adapters** — Pinecone, Weaviate, support
 
 ## Get Started
 
-- [Installation Guide](/packages/tekmemo/installation)
-- [Architecture Overview](/packages/tekmemo/architecture/memory-model)
-- [API Reference](/api/tekmemo/)
+- [Installation Guide](/packages/cli/)
+- [Architecture Overview](/packages/core/concepts)
+- [API Reference](/api/)
 
 ---
 

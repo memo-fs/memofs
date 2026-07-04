@@ -48,45 +48,14 @@ const modes = [
 	{
 		label: "Local",
 		kicker: "Zero cloud. Works offline.",
-		code: `import { Tekmemo } from "@tekbreed/tekmemo";
-
-// Default. Memory lives in .tekmemo/ as markdown + JSON.
-// No API keys, no network. Read it, diff it, commit it.
-const memo = new Tekmemo({
-  mode: "local",
-  rootDir: "./.tekmemo",
-  projectId: "my-app",
-});`,
 	},
 	{
 		label: "Hybrid + sync",
 		kicker: "Local first, cloud as a replica.",
-		code: `import { Tekmemo } from "@tekbreed/tekmemo";
-
-// Same engine, same files — plus a cloud replica for other machines.
-// Reads/writes hit local first; sync.push / sync.pull mirror .tekmemo/.
-const memo = new Tekmemo({
-  mode: "hybrid",
-  rootDir: "./.tekmemo",
-  cloud: {
-    baseUrl: process.env.TEKMEMO_CLOUD_URL!,
-    apiKey: process.env.TEKMEMO_API_KEY!,
-  },
-  readPolicy: "local-first",
-  writePolicy: "local-first",
-});`,
 	},
 	{
 		label: "Managed (later)",
 		kicker: "TekMemo Cloud runs the engine.",
-		code: `// TekMemo Cloud can host the runtime so thin clients (CI, dashboards)
-// read memory over HTTPS without a local checkout.
-//
-//   • Cloud client: a file-sync transport today
-//     (push / complete / pull / status).
-//   • Managed runtime: coming after early access.
-//
-// Same data model either way — .tekmemo/ is always the source of truth.`,
 	},
 ];
 </script>
@@ -177,7 +146,7 @@ const memo = new Tekmemo({
                       <span class="terminal-dot green"></span>
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npm install -D @tekbreed/tekmemo-cli
+                      <span class="terminal-prompt">$</span> npm install -D tekmemo
                     </div>
                   </div>
                 </div>
@@ -210,7 +179,7 @@ const memo = new Tekmemo({
                       <span class="terminal-dot green"></span>
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npx tekmemo remember "Auth uses JWT with refresh rotation" --tag auth<br />
+                      <span class="terminal-prompt">$</span> npx tekmemo remember "Auth uses JWT with refresh rotation" --kind decision<br />
                       <span class="terminal-success">✓ Saved to core memory.</span>
                     </div>
                   </div>
@@ -236,7 +205,7 @@ const memo = new Tekmemo({
                   <code>.tekmemo/</code>. Open it in your editor. Diff it in review. Commit it with
                   your code. Memory stops being a black box.
                 </p>
-                <a href="/packages/tekmemo/file-first-memory" class="showcase-link">
+                <a href="/packages/core/agentfs" class="showcase-link">
                   Learn about file-first memory →
                 </a>
               </div>
@@ -272,7 +241,7 @@ const memo = new Tekmemo({
                   fragment that fits the task — semantically, not by keyword. Hybrid recall merges
                   lexical and vector search, then reranks.
                 </p>
-                <a href="/packages/tekmemo/architecture/indexing-recall" class="showcase-link">
+                <a href="/packages/core/concepts" class="showcase-link">
                   See how recall works →
                 </a>
               </div>
@@ -324,8 +293,8 @@ const memo = new Tekmemo({
                   across machines. Managed runtime is on the roadmap. The engine and the API stay
                   the same — you only change how memory is stored and synced.
                 </p>
-                <a href="/packages/tekmemo/cloud-client" class="showcase-link">
-                  Explore the cloud client →
+                <a href="/configure/storage" class="showcase-link">
+                  Explore the storage options →
                 </a>
               </div>
               <div class="feature-showcase-visual">
@@ -343,7 +312,42 @@ const memo = new Tekmemo({
                   </div>
                   <div class="mode-toggle-kicker">{{ modes[activeMode].kicker }}</div>
                   <div class="mode-toggle-code">
-                    <pre><code>{{ modes[activeMode].code }}</code></pre>
+                    <pre v-show="activeMode === 0"><code><span class="token keyword">import</span> { <span class="token class">Tekmemo</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core"</span>;
+<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core/node-fs"</span>;
+
+<span class="token comment">// Default. Memory lives in .tekmemo/ as markdown + JSON.</span>
+<span class="token comment">// No API keys, no network. Read it, diff it, commit it.</span>
+<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">Tekmemo</span>({
+  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.tekmemo"</span> }),
+  projectId: <span class="token string">"my-app"</span>,
+  mode: <span class="token string">"local"</span>,
+});</code></pre>
+
+                    <pre v-show="activeMode === 1"><code><span class="token keyword">import</span> { <span class="token class">Tekmemo</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core"</span>;
+<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core/node-fs"</span>;
+
+<span class="token comment">// Same engine, same files — plus a cloud replica for other machines.</span>
+<span class="token comment">// Reads/writes hit local first; sync.push / sync.pull mirror .tekmemo/.</span>
+<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">Tekmemo</span>({
+  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.tekmemo"</span> }),
+  projectId: <span class="token string">"my-app"</span>,
+  mode: <span class="token string">"hybrid"</span>,
+  cloud: {
+    baseUrl: process.env.TEKMEMO_CLOUD_URL!,
+    apiKey: process.env.TEKMEMO_API_KEY!,
+  },
+  readPolicy: <span class="token string">"local-first"</span>,
+  writePolicy: <span class="token string">"local-first"</span>,
+});</code></pre>
+
+                    <pre v-show="activeMode === 2"><code><span class="token comment">// TekMemo Cloud can host the runtime so thin clients (CI, dashboards)</span>
+<span class="token comment">// read memory over HTTPS without a local checkout.</span>
+<span class="token comment">//</span>
+<span class="token comment">//   • Cloud client: a file-sync transport today</span>
+<span class="token comment">//     (push / complete / pull / status).</span>
+<span class="token comment">//   • Managed runtime: coming after early access.</span>
+<span class="token comment">//</span>
+<span class="token comment">// Same data model either way — .tekmemo/ is always the source of truth.</span></code></pre>
                   </div>
                 </div>
               </div>
@@ -361,11 +365,11 @@ const memo = new Tekmemo({
                 <span class="audience-emoji">🧩</span>
                 <h3>Building AI apps</h3>
                 <p>
-                  Give your app durable memory. Import <code>@tekbreed/tekmemo</code> — the same API
+                  Give your app durable memory. Import <code>@tekmemo/core</code> — the same API
                   whether memory lives in local files, the cloud, or both. The AI SDK runtime ships
                   recall, context-building, and a tool definition ready to wire into any agent.
                 </p>
-                <a href="/api/tekmemo/" class="audience-link">See the API reference →</a>
+                <a href="/api/core" class="audience-link">See the API reference →</a>
               </div>
               <div class="audience-card">
                 <span class="audience-emoji">🤖</span>
@@ -375,7 +379,7 @@ const memo = new Tekmemo({
                   config block into Claude Code, Cursor, or Codex, and your agent gets project
                   context every session — automatically.
                 </p>
-                <a href="/packages/mcp/client-setup" class="audience-link">Connect your agent →</a>
+                <a href="/packages/mcp/" class="audience-link">Connect your agent →</a>
               </div>
             </div>
           </div>
@@ -441,7 +445,7 @@ const memo = new Tekmemo({
               <code>npx tekmemo init</code>
             </div>
             <div class="cta-buttons">
-              <a href="/packages/tekmemo/" class="cta-button primary">Read the Quick Start →</a>
+              <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
               <a href="https://memo.tekbreed.com" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
                 Explore TekMemo Cloud →
               </a>
@@ -1142,5 +1146,33 @@ const memo = new Tekmemo({
   .cta-button {
     text-align: center;
   }
+}
+
+/* Syntax Highlighting Tokens */
+.token.keyword {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+.token.string {
+  color: #10b981;
+}
+:root.dark .token.string {
+  color: #34d399;
+}
+.token.comment {
+  color: var(--vp-c-text-3);
+  font-style: italic;
+}
+.token.class {
+  color: #2563eb;
+}
+:root.dark .token.class {
+  color: #60a5fa;
+}
+.token.function {
+  color: #db2777;
+}
+:root.dark .token.function {
+  color: #f472b6;
 }
 </style>

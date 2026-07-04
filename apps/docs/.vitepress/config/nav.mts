@@ -3,13 +3,13 @@ import type { DefaultTheme } from "vitepress";
 export const nav: DefaultTheme.NavItem[] = [
 	{
 		text: "Get Started",
-		link: "/packages/tekmemo",
-		activeMatch: "/packages/tekmemo/",
+		link: "/packages/core/",
+		activeMatch: "/packages/core/",
 	},
 	{
 		text: "API",
-		link: "/api/tekmemo",
-		activeMatch: "/api/tekmemo/",
+		link: "/api/",
+		activeMatch: "/api/",
 	},
 	{
 		text: "Blog",

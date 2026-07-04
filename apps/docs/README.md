@@ -6,9 +6,9 @@ Developer documentation for the TekMemo OSS workspace.
 
 This VitePress app documents the TekMemo OSS workspace:
 
-- `@tekbreed/tekmemo` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
-- `@tekbreed/tekmemo-cli` (CLI distribution)
-- `@tekbreed/tekmemo-mcp-server` (Model Context Protocol server)
+- `@tekmemo/core` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
+- `tekmemo` (CLI distribution)
+- `@tekmemo/mcp-server` (Model Context Protocol server)
 - examples and architecture
 
 It also hosts the engineering blog (`/blog/`), changelog (`/changelog/`), and
@@ -34,10 +34,10 @@ lives in [`docs/architecture/docs-drift-triage.md`][triage].
 ## Commands
 
 ```bash
-pnpm --filter @tekbreed/docs dev
-pnpm --filter @tekbreed/docs build
-pnpm --filter @tekbreed/docs preview
-pnpm --filter @tekbreed/docs check:links
+pnpm --filter @tekmemo/docs dev
+pnpm --filter @tekmemo/docs build
+pnpm --filter @tekmemo/docs preview
+pnpm --filter @tekmemo/docs check:links
 ```
 
 ## Environment

@@ -31,50 +31,55 @@ npm install @tekmemo/core
 
 ```ts
 import { Tekmemo } from "@tekmemo/core";
+import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
 
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
-await memo.notes.record({ content: "Use D1 for tenant metadata.", kind: "decision" });
-const hits = await memo.recall("database decisions");
+const memo = new Tekmemo({
+  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+  projectId: "my-app",
+  mode: "local",
+});
+
+await memo.write({ content: "Use D1 for tenant metadata.", kind: "decision" });
+const hits = await memo.recall({ query: "database decisions" });
 ```
 
 ## Docs
 
-- Overview & quick start: https://docs.memo.tekbreed.com/packages/tekmemo/
-- Installation: https://docs.memo.tekbreed.com/packages/tekmemo/installation
-- The `Tekmemo` client (modes, strategies, API surface): https://docs.memo.tekbreed.com/packages/tekmemo/client
-- Configuration (resolution chain, env vars, config.json): https://docs.memo.tekbreed.com/packages/tekmemo/configuration
-- Core concepts: https://docs.memo.tekbreed.com/packages/tekmemo/concepts
-- Filesystem layout: https://docs.memo.tekbreed.com/packages/tekmemo/filesystem-layout
-- Cloud client: https://docs.memo.tekbreed.com/packages/tekmemo/cloud-client
-- Architecture: https://docs.memo.tekbreed.com/packages/tekmemo/architecture/
+- Overview & quick start: https://docs.memo.tekbreed.com/packages/core/
+- Installation: https://docs.memo.tekbreed.com/packages/cli/
+- The `Tekmemo` client (modes, strategies, API surface): https://docs.memo.tekbreed.com/packages/core/client
+- Configuration (resolution chain, env vars, config.json): https://docs.memo.tekbreed.com/packages/core/configuration
+- Core concepts: https://docs.memo.tekbreed.com/packages/core/concepts
+- Filesystem layout: https://docs.memo.tekbreed.com/packages/core/agentfs
+- Cloud client / storage: https://docs.memo.tekbreed.com/configure/storage
+- Architecture: https://docs.memo.tekbreed.com/packages/core/concepts
 
 ## Runtime modes
 
-`Tekmemo` supports four runtime modes, selected in config: `local` (filesystem), `cloud` (TekMemo Cloud), `hybrid` (local + cloud with read/write policies), and `memory` (volatile, for tests).
+`Tekmemo` supports three runtime modes, selected in config: `local` (filesystem), `hybrid` (local + cloud with read/write policies), and `memory` (volatile, for tests).
 
-- Local vs cloud vs hybrid: https://docs.memo.tekbreed.com/packages/tekmemo/client
-- Configuration resolution: https://docs.memo.tekbreed.com/packages/tekmemo/configuration
+- Local vs hybrid: https://docs.memo.tekbreed.com/packages/core/client
+- Configuration resolution: https://docs.memo.tekbreed.com/packages/core/configuration
 
 ## MCP (Model Context Protocol)
 
 Two ways to expose TekMemo to coding agents:
 
-- **Hosted server** (cloud-only): `https://mcp.memo.tekbreed.com/` over Streamable HTTP, bearer-token auth, read-only by default. Docs: https://docs.memo.tekbreed.com/packages/mcp/hosted
-- **Self-hosted stdio server** (`@tekmemo/mcp-server`): supports `local`, `cloud`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memo.tekbreed.com/packages/mcp/
+- **Hosted server** (cloud-only): `https://mcp.memo.tekbreed.com/` over Streamable HTTP, bearer-token auth, read-only by default. Docs: https://docs.memo.tekbreed.com/packages/mcp/
+- **Self-hosted stdio server** (`@tekmemo/mcp-server`): supports `local`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memo.tekbreed.com/packages/mcp/
 
-Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.memo.tekbreed.com/packages/mcp/client-setup
+Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.memo.tekbreed.com/packages/mcp/
 
 ## CLI
 
 - CLI guide: https://docs.memo.tekbreed.com/packages/cli/
-- Local commands: https://docs.memo.tekbreed.com/packages/cli/local-commands
-- Cloud commands: https://docs.memo.tekbreed.com/packages/cli/cloud-commands
+- Commands: https://docs.memo.tekbreed.com/packages/cli/
 
 ## API reference
 
-- Modules overview: https://docs.memo.tekbreed.com/api/tekmemo/
-- Cloud client API: https://docs.memo.tekbreed.com/api/tekmemo/cloud-client
-- AI SDK helpers: https://docs.memo.tekbreed.com/api/tekmemo/ai-sdk
+- Modules overview: https://docs.memo.tekbreed.com/api/
+- Core client API: https://docs.memo.tekbreed.com/api/core
+- AI SDK helpers: https://docs.memo.tekbreed.com/packages/adapters/ai-sdk
 
 ## Cloud
 

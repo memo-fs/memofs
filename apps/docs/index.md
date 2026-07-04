@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: "Get Started"
-      link: /packages/tekmemo/
+      link: /packages/core/
     - theme: alt
       text: "Star on GitHub"
       link: https://github.com/tekbreed/tekmemo
@@ -17,15 +17,15 @@ hero:
 features:
   - title: Memory you can read
     icon: 📁
-    link: /packages/tekmemo/file-first-memory
+    link: /packages/core/agentfs
     details: Every memory is a markdown file in `.tekmemo/`. Read it in your editor, review it in PRs, track it in Git — alongside your source code.
   - title: Local by default
     icon: 🔒
-    link: /packages/tekmemo/configuration
+    link: /packages/core/configuration
     details: Works offline with zero cloud setup. Your memory never leaves your repo unless you say so.
   - title: Sync when you need it
     icon: ☁️
-    link: /packages/tekmemo/cloud-client
+    link: /configure/storage
     details: Add a cloud replica so memory follows you across machines. Same engine, same files, same code — the cloud is a sync transport, not a separate system.
   - title: Works with your coding agent
     icon: 🧠
@@ -33,10 +33,15 @@ features:
     details: One config block and Claude Code, Cursor, Codex, or any MCP-compatible agent remembers your project — every session, automatically.
   - title: Ask, don't search
     icon: 💬
-    link: /packages/tekmemo/architecture/indexing-recall
+    link: /packages/core/concepts
     details: Semantic recall finds the right memory for each task. No keyword guessing. No re-reading old transcripts.
   - title: Roll back any decision
     icon: 🕸️
-    link: /packages/tekmemo/architecture/graph-memory
+    link: /packages/core/concepts
     details: Versioned snapshots and a knowledge graph let you restore any state. One bad edit never erases a good decision.
+  - title: Auto-ingest context
+    icon: 🔌
+    link: /packages/connectors/
+    details: Pull context from GitHub issues or Notion docs directly into your local memory files.
 ---
+
