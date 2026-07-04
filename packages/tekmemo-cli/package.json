@@ -59,14 +59,14 @@
 	"dependencies": {
 		"@tekbreed/tekmemo": "workspace:^",
 		"@tekbreed/tekmemo-connectors": "workspace:^",
-		"commander": "^14.0.3"
+		"commander": "^15.0.0"
 	},
 	"devDependencies": {
 		"@tekbreed/tekmemo-testing": "workspace:^",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@types/node": "^25.9.2"
+		"@types/node": "^26.1.0"
 	},
 	"keywords": [
 		"cli",

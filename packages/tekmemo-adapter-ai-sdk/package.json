@@ -72,7 +72,7 @@
 	},
 	"dependencies": {
 		"@tekbreed/tekmemo": "workspace:^",
-		"zod": "^4.4.2"
+		"zod": "^4.4.3"
 	},
 	"peerDependencies": {
 		"ai": ">=5.0.0 <7.0.0"

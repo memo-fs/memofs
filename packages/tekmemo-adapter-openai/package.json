@@ -74,7 +74,7 @@
 	"dependencies": {
 		"@repo/utils": "workspace:*",
 		"@tekbreed/tekmemo": "workspace:^",
-		"openai": "^6.10.0"
+		"openai": "^6.45.0"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",

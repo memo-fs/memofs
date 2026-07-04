@@ -99,7 +99,7 @@
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@types/node": "^25.9.2"
+		"@types/node": "^26.1.0"
 	},
 	"engines": {
 		"node": ">=22"

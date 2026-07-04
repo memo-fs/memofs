@@ -79,6 +79,6 @@
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@tekbreed/tekmemo-testing": "workspace:^",
-		"@types/node": "^22.20.0"
+		"@types/node": "^26.1.0"
 	}
 }

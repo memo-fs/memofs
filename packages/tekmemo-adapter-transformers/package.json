@@ -76,7 +76,7 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@huggingface/transformers": "^3.7.6",
+		"@huggingface/transformers": "^4.2.0",
 		"@tekbreed/tekmemo": "workspace:^"
 	},
 	"devDependencies": {
