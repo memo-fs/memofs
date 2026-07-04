@@ -6,13 +6,11 @@
  * as `drizzle.config.ts` and the dev Vite bridge.
  */
 export interface CloudWorkerEnv {
+	/** Cloudflare D1 Database holding app metadata. */
+	DB: D1Database;
+
 	/** R2 bucket holding content-addressed blobs at `tekmemo/blobs/{sha256}`. */
 	BLOBS: R2Bucket;
-
-	/** Turso/libSQL HTTPS endpoint (e.g. `https://...turso.io`). */
-	DATABASE_URL: string;
-	/** Turso auth token (optional for local/ephemeral DBs). */
-	DATABASE_AUTH_TOKEN?: string;
 
 	/** Optional Workers AI binding for hosted graph extraction. */
 	AI?: Ai;
@@ -34,14 +32,10 @@ export interface CloudWorkerEnv {
 	GOOGLE_CLIENT_ID?: string;
 	GOOGLE_CLIENT_SECRET?: string;
 
-	// --- Email (Plunk, plain HTTP transport) --------------------------------
-	PLUNK_API_KEY?: string;
+	// --- Email (Resend, plain HTTP transport) --------------------------------
+	RESEND_API_KEY?: string;
 	/** RFC 5322 From header, e.g. `TekMemo Cloud <noreply@tekbreed.com>`. */
-	PLUNK_FROM?: string;
-
-	// --- Rate limiting (Upstash REST — SC4.1 magic-link defense) ------------
-	UPSTASH_REDIS_REST_URL?: string;
-	UPSTASH_REDIS_REST_TOKEN?: string;
+	RESEND_FROM?: string;
 
 	/** R2 S3-compatible API credentials for presigning PUT/GET URLs. */
 	R2_S3_ACCESS_KEY_ID: string;
@@ -78,6 +72,12 @@ export interface CloudWorkerEnv {
 
 	// Dashboard session cookie secret (used by React Router session storage).
 	SESSION_SECRET: string;
+
+	// --- Hosted Runtime Concurrency (libSQL/Turso) ---------------------------
+	/** Turso/libSQL HTTPS endpoint (e.g. `https://...turso.io`). */
+	DATABASE_URL: string;
+	/** Turso auth token (optional for local/ephemeral DBs). */
+	DATABASE_AUTH_TOKEN?: string;
 }
 
 /** Default presigned-URL lifetime when `PRESIGN_TTL_SECONDS` is unset. */

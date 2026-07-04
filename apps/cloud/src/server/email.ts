@@ -1,11 +1,11 @@
 /**
- * Plunk email transport for outbound TekMemo mail.
+ * Resend email transport for outbound TekMemo mail.
  *
- * Plunk has no SDK — it's a plain HTTPS POST to `api.useplunk.com/v1/send` with
- * a Bearer token. HTML bodies are rendered from React Email templates
- * (`src/emails/*`) via their `.tsx` render seams, so this module is only the
- * transport, not the copy. Keeping the JSX out of this file lets it stay
- * pure-TypeScript.
+ * Resend has no SDK requirements for Workers — it's a plain HTTPS POST to
+ * `api.resend.com/emails` with a Bearer token. HTML bodies are rendered from
+ * React Email templates (`src/emails/*`) via their `.tsx` render seams, so this
+ * module is only the transport, not the copy. Keeping the JSX out of this file
+ * lets it stay pure-TypeScript.
  *
  * Two outbound mail types share this transport:
  *   - **magic-link sign-in** (`src/emails/magic-link`) — implements the
@@ -13,8 +13,8 @@
  *   - **team invitation** (`src/emails/team-invitation`) — the single-use accept
  *     link the dashboard `/team` action mints (ADR 0011 Phase 2).
  *
- * `PLUNK_API_KEY` is optional on the env type — when absent we construct a dev
- * mailer that logs the link instead of calling Plunk, so local dev + CI work
+ * `RESEND_API_KEY` is optional on the env type — when absent we construct a dev
+ * mailer that logs the link instead of calling Resend, so local dev + CI work
  * keyless for BOTH flows.
  *
  * @see MagicLinkMailer in {@link ./auth.ts} — the sign-in contract.
@@ -26,10 +26,10 @@ import { renderTeamInvitationHtml } from "../emails/render-team-invitation";
 import type { MagicLinkMailer } from "./auth";
 import type { CloudWorkerEnv } from "./env";
 
-/** Plunk API endpoint (no trailing slash). */
-const PLUNK_ENDPOINT = "https://api.useplunk.com/v1/send";
+/** Resend API endpoint (no trailing slash). */
+const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
-/** Default From when `PLUNK_FROM` is unset; overridden by `wrangler.jsonc` in prod. */
+/** Default From when `RESEND_FROM` is unset; overridden by `wrangler.toml` in prod. */
 const DEFAULT_FROM = "TekMemo Cloud <team@tekbreed.com>";
 
 /**
@@ -37,7 +37,7 @@ const DEFAULT_FROM = "TekMemo Cloud <team@tekbreed.com>";
  * Mirrors the props of the React Email template; `url` is the accept link.
  */
 export interface TeamInvitationMail {
-	/** The invitee's email — the Plunk `to` address. */
+	/** The invitee's email — the Resend `to` address. */
 	email: string;
 	/** The accept link — `${baseURL}/team/accept?token=…`. */
 	url: string;
@@ -54,7 +54,7 @@ export interface TeamInvitationMail {
 /**
  * Builds the magic-link mailer for the current request.
  *
- * Returns a Plunk-backed mailer when `PLUNK_API_KEY` is bound, otherwise a dev
+ * Returns a Resend-backed mailer when `RESEND_API_KEY` is bound, otherwise a dev
  * mailer that logs the link (so `pnpm dev` sign-in works keyless). The branch
  * is decided once per request in `createAuth`'s caller, not per email.
  *
@@ -62,8 +62,8 @@ export interface TeamInvitationMail {
  * @returns a {@link MagicLinkMailer} suitable for injection into `createAuth`.
  */
 export function createMagicLinkMailer(env: CloudWorkerEnv): MagicLinkMailer {
-	if (env.PLUNK_API_KEY) {
-		return new PlunkMailer(env);
+	if (env.RESEND_API_KEY) {
+		return new ResendMailer(env);
 	}
 	return new DevLogMailer();
 }
@@ -78,8 +78,8 @@ export function createMagicLinkMailer(env: CloudWorkerEnv): MagicLinkMailer {
 export function createMailer(
 	env: CloudWorkerEnv,
 ): MagicLinkMailer & TeamInvitationSender {
-	if (env.PLUNK_API_KEY) {
-		return new PlunkMailer(env);
+	if (env.RESEND_API_KEY) {
+		return new ResendMailer(env);
 	}
 	return new DevLogMailer();
 }
@@ -91,11 +91,11 @@ export interface TeamInvitationSender {
 }
 
 /**
- * Plunk-backed mailer. POSTs the rendered HTML to Plunk; surfaces transport
+ * Resend-backed mailer. POSTs the rendered HTML to Resend; surfaces transport
  * failures via the thrown promise so the caller returns a retryable error
  * rather than silently dropping the link. Implements both mail types.
  */
-class PlunkMailer implements MagicLinkMailer, TeamInvitationSender {
+class ResendMailer implements MagicLinkMailer, TeamInvitationSender {
 	constructor(private readonly env: CloudWorkerEnv) {}
 
 	async sendMagicLink({
@@ -136,7 +136,7 @@ class PlunkMailer implements MagicLinkMailer, TeamInvitationSender {
 		});
 	}
 
-	/** Shared Plunk POST — the one fetch both mail types use. */
+	/** Shared Resend POST — the one fetch both mail types use. */
 	private async send({
 		to,
 		subject,
@@ -146,33 +146,38 @@ class PlunkMailer implements MagicLinkMailer, TeamInvitationSender {
 		subject: string;
 		html: string;
 	}): Promise<void> {
-		const from = this.env.PLUNK_FROM ?? DEFAULT_FROM;
-		const response = await fetch(PLUNK_ENDPOINT, {
+		const from = this.env.RESEND_FROM ?? DEFAULT_FROM;
+		const response = await fetch(RESEND_ENDPOINT, {
 			method: "POST",
 			headers: {
-				Authorization: `Bearer ${this.env.PLUNK_API_KEY}`,
+				Authorization: `Bearer ${this.env.RESEND_API_KEY}`,
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({ to, subject, from, body: html }),
+			body: JSON.stringify({
+				from,
+				to: [to],
+				subject,
+				html,
+			}),
 		});
 
 		if (!response.ok) {
-			// Don't surface Plunk's body verbatim (PII/quota detail) — log it
+			// Don't surface Resend's body verbatim (PII/quota detail) — log it
 			// server-side and throw a generic message.
 			const detail = await response.text().catch(() => "");
-			console.error("[email] Plunk send failed", {
+			console.error("[email] Resend send failed", {
 				status: response.status,
 				to,
 				detail: detail.slice(0, 200),
 			});
-			throw new Error(`Plunk send failed (${response.status})`);
+			throw new Error(`Resend send failed (${response.status})`);
 		}
 	}
 }
 
 /**
  * Dev mailer: logs the links instead of sending them. Used when
- * `PLUNK_API_KEY` is unset so local development and CI can exercise both the
+ * `RESEND_API_KEY` is unset so local development and CI can exercise both the
  * sign-in + invitation flows without an external email dependency.
  */
 class DevLogMailer implements MagicLinkMailer, TeamInvitationSender {

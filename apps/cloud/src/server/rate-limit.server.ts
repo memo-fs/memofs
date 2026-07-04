@@ -3,59 +3,16 @@
  *
  * Passwordless auth turns the inbox into the only factor, so the
  * request-magic-link endpoint is a prime abuse vector (inbox flooding, list
- * bombing, enumeration). This module caps it per-IP via Upstash Redis using a
- * sliding window. Upstash is REST-based so it runs in the Worker without a TCP
- * socket (unlike the Turso driver, which has its own fetch transport).
+ * bombing, enumeration). This module caps it per-IP via Cloudflare's native
+ * Rate Limiting binding (SESSION_RATE_LIMIT).
  *
- * Graceful degradation: when the Upstash env is unset (local dev, or an env
- * that hasn't provisioned Redis yet) the limiter resolves to `null` and callers
+ * Graceful degradation: when the Rate Limit binding is unset (local dev, or an env
+ * that hasn't bound it yet) the limiter resolves to `{ ok: true }` and callers
  * fall through to the normal path — auth still works, just un-throttled. This
  * keeps the local `pnpm dev` flow dependency-free.
- *
- * @see docs/adr/0005-cloud-tech-stack.md — Upstash as the rate-limit store.
  */
-
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
 import type { CloudWorkerEnv } from "./env";
-
-/**
- * Requests allowed per window, per IP. Generous enough that a real user
- * retrying after a typo or a lost link isn't blocked; tight enough that
- * automated flooding is contained. Tunable once we have traffic data.
- */
-const MAGIC_LINK_MAX = 5;
-
-/** Sliding window length. {@link MAGIC_LINK_MAX} requests per this duration. */
-const MAGIC_LINK_WINDOW = "15 m" as const;
-
-/** Redis key namespace — isolates magic-link counters from other Upstash uses. */
-const MAGIC_LINK_PREFIX = "tekmemo:ratelimit:magic-link" as const;
-
-/**
- * Build the Upstash-backed limiter, or `null` when Upstash isn't configured.
- *
- * Constructed per-request (cheap: it's a thin config object over the REST
- * client) so the env is always current and there's no module-level state to
- * leak across deploys/preview branches.
- */
-export function createMagicLinkLimiter(env: CloudWorkerEnv): Ratelimit | null {
-	if (!env.UPSTASH_REDIS_REST_URL || !env.UPSTASH_REDIS_REST_TOKEN) {
-		return null;
-	}
-
-	const redis = new Redis({
-		url: env.UPSTASH_REDIS_REST_URL,
-		token: env.UPSTASH_REDIS_REST_TOKEN,
-	});
-
-	return new Ratelimit({
-		redis,
-		limiter: Ratelimit.slidingWindow(MAGIC_LINK_MAX, MAGIC_LINK_WINDOW),
-		prefix: MAGIC_LINK_PREFIX,
-	});
-}
 
 /**
  * Resolve the client IP from Worker request headers.
@@ -72,9 +29,6 @@ export function getClientIp(request: Request): string {
 	const forwarded = headers.get("X-Forwarded-For");
 	if (forwarded) return forwarded.split(",")[0].trim();
 
-	// Unknown source — bucket under a shared anon key so the limit still applies
-	// rather than being bypassed. This is deliberately a fixed string, not the
-	// empty string, so it's a stable identifier in Upstash.
 	return "anonymous";
 }
 
@@ -101,29 +55,30 @@ export function rateLimitMessage(result: RateLimitResult): {
  *
  * Returns `{ ok: true }` when the request may proceed, or `{ ok: false, reset }`
  * with the unix-ms timestamp when the caller may retry. When no limiter is
- * configured (Upstash unset), always allows — see module doc.
- *
- * The limiter's `pending` promise (cross-region sync + analytics) is drained in
- * the background via `ctx.waitUntil` so it never blocks the response, per the
- * Upstash Cloudflare guidance.
+ * configured, always allows.
  */
 export async function consumeMagicLinkToken(
 	env: CloudWorkerEnv,
 	request: Request,
 	ctx: ExecutionContext,
 ): Promise<RateLimitResult> {
-	const limiter = createMagicLinkLimiter(env);
-	if (!limiter) return { ok: true };
+	if (!env.SESSION_RATE_LIMIT) {
+		return { ok: true };
+	}
 
 	const ip = getClientIp(request);
-	const result = await limiter.limit(ip);
 
-	// Drain background analytics/sync off the hot path. Ignoring rejections here
-	// is correct: a failed analytics write must not fail the auth request.
-	ctx.waitUntil(result.pending.catch(() => {}));
-
-	if (!result.success) {
-		return { ok: false, reset: result.reset };
+	try {
+		// Cloudflare Rate Limiting binding call.
+		const limitResult = await env.SESSION_RATE_LIMIT.limit({ key: ip });
+		if (!limitResult.success) {
+			// Native rate limit hit, back off for 60 seconds.
+			return { ok: false, reset: Date.now() + 60000 };
+		}
+	} catch (error) {
+		// Fallback gracefully on rate limiting service errors to avoid lockouts.
+		console.error("[rate-limit] Cloudflare limit call failed", error);
 	}
+
 	return { ok: true };
 }
