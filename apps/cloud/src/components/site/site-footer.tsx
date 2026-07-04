@@ -43,8 +43,8 @@ export function SiteFooter() {
 							<Wordmark />
 						</Link>
 						<p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-							Local-first memory for AI apps and coding agents. The cloud is a
-							file replica — the engine stays on your machine.
+							Local-first memory for AI apps and coding agents. Secure file
+							replication and hosted serverless query runtime.
 						</p>
 						<a
 							href={SITE_LINKS.github}

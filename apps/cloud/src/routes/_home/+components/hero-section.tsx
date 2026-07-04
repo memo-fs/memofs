@@ -21,14 +21,12 @@ export function HeroSection() {
 					Cloud sync is live
 				</Badge>
 				<h1 className="font-semibold text-balance text-5xl text-foreground md:text-6xl">
-					Your <span className="text-primary">.tekmemo/</span> follows you
-					everywhere
+					Local-first memory. <span className="text-primary">Fully-hosted</span> runtime.
 				</h1>
 				<p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-muted-foreground">
-					Local-first memory for AI apps and coding agents. TekMemo Cloud
-					mirrors your <InlineCode>.tekmemo/</InlineCode> across every machine.
-					The engine runs on your machine; the cloud is a quiet, reliable
-					replica.
+					TekMemo Cloud mirrors your local <InlineCode>.tekmemo/</InlineCode> across every machine
+					and hosts a secure serverless query engine. Access semantic recall, knowledge graphs,
+					and notes anywhere via a fast cloud API.
 				</p>
 				<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
 					<Button

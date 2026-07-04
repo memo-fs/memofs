@@ -24,8 +24,9 @@ export function SolutionSection() {
 							<>
 								TekMemo Cloud mirrors your{" "}
 								<InlineCode className="text-xs">.tekmemo/</InlineCode> files
-								byte-for-byte. The TekMemo engine runs entirely on your machine
-								— the cloud is a quiet file replica, not a processor.
+								byte-for-byte. The TekMemo engine runs locally for full privacy, while the
+								cloud acts as a replica and a hosted serverless query runtime
+								for remote recall.
 							</>
 						}
 					/>
@@ -49,7 +50,7 @@ export function SolutionSection() {
 									TekMemo Cloud
 								</CardTitle>
 								<CardDescription className="text-xs text-muted-foreground">
-									File replica · not a processor
+									Secure replica & hosted runtime
 								</CardDescription>
 							</div>
 						</div>

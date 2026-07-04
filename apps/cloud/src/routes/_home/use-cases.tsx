@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Layers, RefreshCw } from "lucide-react";
+import { ArrowRight, Check, Cpu, RefreshCw, Users } from "lucide-react";
 import { Link } from "react-router";
 import { GithubMark } from "~/components/site/brand-icons";
 import { Section } from "~/components/site/visuals";
@@ -9,10 +9,9 @@ import type { Route } from "./+types/use-cases";
 /**
  * Use-cases page (SC2).
  *
- * Concrete "what TekMemo Cloud is for." Three honest v1 use cases (multi-device
- * sync, connector ingestion, team memory) grounded in the product reality: the
- * cloud is a file replica, connectors run locally, shared workspaces arrive
- * with the Teams tier.
+ * Concrete "what TekMemo Cloud is for." Four honest v1 use cases (multi-device
+ * sync, hosted query runtime, connector ingestion, team memory) grounded in the
+ * product reality.
  */
 
 const USE_CASES = [
@@ -30,6 +29,18 @@ const USE_CASES = [
 	},
 	{
 		n: "02",
+		icon: Cpu,
+		title: "Hosted query runtime",
+		tagline: "Access your knowledge graph remotely via API.",
+		body: "Query your memory from anywhere without needing local files. Our secure, serverless runtime calculates embeddings, runs semantic search, and processes context on the fly over HTTP via your test or production API keys.",
+		bullets: [
+			"Fast, serverless semantic query execution over HTTP",
+			"Automated knowledge graph extraction and vector embedding",
+			"Secure API key authorization for remote app integrations",
+		],
+	},
+	{
+		n: "03",
 		icon: GithubMark,
 		title: "Connector ingestion",
 		tagline: "Feed your memory from the tools you already use.",
@@ -41,11 +52,11 @@ const USE_CASES = [
 		],
 	},
 	{
-		n: "03",
-		icon: Layers,
+		n: "04",
+		icon: Users,
 		title: "Team memory",
 		tagline: "Shared workspaces — coming with Teams.",
-		body: "A shared .tekmemo/ that a whole team reads and writes. Per-seat billing, shared workspace, and unlimited connectors — part of the Teams tier at $24/mo. We're gathering demand now and opening it up as the tier launches.",
+		body: "A shared .tekmemo/ that a whole team reads and writes. Per-seat billing, shared workspace, and unlimited connectors — part of the Teams tier at $24/seat/mo. We're gathering demand now and opening it up as the tier launches.",
 		bullets: [
 			"$24/seat/mo — list price locked",
 			"Shared workspace with unlimited connectors",
@@ -60,7 +71,7 @@ export function meta(_: Route.MetaArgs) {
 		{
 			name: "description",
 			content:
-				"Multi-device sync, connector ingestion, and team memory. What TekMemo Cloud is for, grounded in the local-first file-replica model.",
+				"Multi-device sync, hosted serverless query runtime, connector ingestion, and team collaboration. Discover the core capabilities of TekMemo Cloud.",
 		},
 	];
 }
@@ -82,12 +93,11 @@ export default function UseCases(_props: Route.ComponentProps) {
 					What TekMemo Cloud is <span className="text-primary">for</span>.
 				</h1>
 				<p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-					The cloud is a file replica — it mirrors your{" "}
+					TekMemo Cloud mirrors your{" "}
 					<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground">
 						.tekmemo/
 					</code>{" "}
-					across devices and sources. Here's what it does for you today, and
-					what's coming next.
+					across devices and hosts a secure serverless query runtime for remote recall. Here is what you can build with it today.
 				</p>
 			</header>
 

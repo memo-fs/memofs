@@ -20,11 +20,11 @@ import type { Route } from "./+types/index";
 
 export function meta(_: Route.MetaArgs) {
 	return [
-		{ title: "TekMemo Cloud — memory that follows you" },
+		{ title: "TekMemo Cloud — Local-first sync & hosted runtime" },
 		{
 			name: "description",
 			content:
-				"Local-first memory for AI apps and coding agents. TekMemo Cloud mirrors your .tekmemo/ files across devices — the engine runs on your machine, the cloud is a file replica.",
+				"Local-first memory for AI apps. TekMemo Cloud mirrors your .tekmemo/ files across devices and hosts a secure serverless query runtime for fast remote semantic recall.",
 		},
 	];
 }

@@ -9,18 +9,21 @@
 
 export const HERO_COMMANDS = [
 	{
-		cmd: "tekmemo init quoin",
-		note: "Initialize and connect to cloud",
+		cmd: "tekmemo init",
+		note: "Initialize local memory and connect to cloud",
 	},
-	{ cmd: "tekmemo push", note: "Pushed 247 files (2.4 MB) in 1.2s" },
-	{ cmd: "tekmemo pull", note: "Pull on any other machine" },
+	{ cmd: "tekmemo push", note: "Sync: 247 memory nodes pushed to Cloud" },
+	{
+		cmd: "curl -H \"Authorization: Bearer tm_...\" https://api.tekmemo.com/v1/recall?q=\"react-router\"",
+		note: "{\"data\": {\"context\": \"Use +loader.server.ts for route data fetching...\"}}",
+	},
 ];
 
 export const SOLUTION_BULLETS = [
 	"Pre-sync snapshots before every push — one-click rollback",
 	"Content-addressed blobs (sha256) — no silent overwrites",
-	"Cursor-based protocol — conflicts surface immediately, not silently",
-	"Zero-config connectors — GitHub, Notion, and more already wired in",
+	"Fully-hosted serverless runtime — query your memory from anywhere via API",
+	"Semantic search & graph extraction — runs automatically in-process",
 ];
 
 export const CLOUD_FILES = [
@@ -33,31 +36,23 @@ export const CLOUD_FILES = [
 export const SYNC_STEPS = [
 	{
 		step: "01",
-		cmd: "tekmemo init quion",
-		title: "Initialize",
-		desc: "Creates .tekmemo/ in the current directory and registers the project with TekMemo Cloud. Generates an API key for this machine.",
+		cmd: "tekmemo init",
+		title: "Initialize & Sync",
+		desc: "Creates .tekmemo/ in the current directory and registers the project with TekMemo Cloud. Mirrors your files across devices.",
 	},
 	{
 		step: "02",
 		cmd: "tekmemo push",
-		title: "Push",
-		desc: "Diffs local files against the last cursor, uploads changed blobs, advances the cursor. Takes a pre-push snapshot automatically.",
+		title: "Push Memories",
+		desc: "Diffs local files, uploads changed blobs, and advances the sync cursor. Automatically triggers knowledge graph extraction.",
 	},
 	{
 		step: "03",
-		cmd: "tekmemo pull",
-		title: "Pull",
-		desc: "Downloads all blobs since your local cursor and writes them to disk. On any machine — laptop, CI, workstation.",
+		cmd: "curl https://api.tekmemo.com/v1/recall",
+		title: "Hosted Recall API",
+		desc: "Query your memory remotely. The hosted serverless runtime handles embeddings, semantic search, and context rendering over HTTP.",
 	},
 ];
-
-export type Connector = {
-	icon: "github" | "notion" | "linear";
-	name: string;
-	desc: string;
-	status: string;
-	disabled: boolean;
-};
 
 export const CONNECTORS: Connector[] = [
 	{
@@ -83,6 +78,14 @@ export const CONNECTORS: Connector[] = [
 	},
 ];
 
+export type Connector = {
+	icon: "github" | "notion" | "linear";
+	name: string;
+	desc: string;
+	status: string;
+	disabled: boolean;
+};
+
 // Comparison cells use a typed status so we render clean lucide icons instead
 // of emoji. `note` is an optional short label under the icon (e.g. "Manual").
 export type Cell = { status: "yes" | "partial" | "no"; note?: string };
@@ -100,6 +103,13 @@ export const COMPARISON: {
 		git: { status: "partial", note: "Manual" },
 		st: { status: "partial", note: "Peer setup" },
 		db: { status: "yes" },
+	},
+	{
+		feature: "Hosted Serverless Runtime",
+		tm: { status: "yes", note: "API Query" },
+		git: { status: "no" },
+		st: { status: "no" },
+		db: { status: "no" },
 	},
 	{
 		feature: "Pre-sync snapshots",
@@ -137,29 +147,26 @@ export const COMPARISON: {
 		db: { status: "no", note: "Silent" },
 	},
 	{
-		feature: "Privacy — no content scanning",
+		feature: "Privacy & Encryption",
 		tm: { status: "yes" },
 		git: { status: "yes" },
 		st: { status: "yes" },
 		db: { status: "no" },
 	},
-	{
-		feature: "Works offline",
-		tm: { status: "yes", note: "Engine local" },
-		git: { status: "yes" },
-		st: { status: "yes" },
-		db: { status: "partial", note: "Partial" },
-	},
 ];
 
 export const FAQ_ITEMS = [
 	{
-		q: "What exactly does TekMemo Cloud sync?",
-		a: "Everything inside your .tekmemo/ directory — config, memories, connector manifests, and any other files you've created there. The sync is byte-for-byte; we do not transform or re-encode your files.",
+		q: "What is the Hosted Runtime?",
+		a: "It is a secure, serverless execution environment in the cloud that lets you query your local memories remotely. Instead of running the extraction and search local-only, our cloud runs an in-process instance of the TekMemo engine to provide instant semantic recall, note-taking, and context generation via HTTP.",
 	},
 	{
 		q: "Does TekMemo Cloud read my memory contents?",
-		a: "No. Blobs are stored content-addressed (sha256) in R2 object storage. Your files are encrypted at rest. We store metadata (paths, sizes, hashes) to power the sync protocol — we do not index or analyze content.",
+		a: "By default, your synced memory files are private, content-addressed, and stored securely. If you enable the Hosted Runtime, the cloud instantiates a secure, isolated serverless engine to compile your knowledge graph, calculate embeddings, and answer queries. You can query your memory anytime via our fast Cloud API.",
+	},
+	{
+		q: "What exactly does TekMemo Cloud sync?",
+		a: "Everything inside your .tekmemo/ directory — config, memories, connector manifests, and any other files you've created there. The sync is byte-for-byte; we do not transform or re-encode your files.",
 	},
 	{
 		q: "What happens if I push from two machines simultaneously?",
