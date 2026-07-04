@@ -1,0 +1,56 @@
+"$schema" = "./node_modules/wrangler/config-schema.json"
+name = "tekmemo-cloud"
+compatibility_date = "2026-06-24"
+compatibility_flags = ["nodejs_compat"]
+main = "./workers/app.ts"
+
+[assets]
+directory = "./build/client"
+binding = "ASSETS"
+
+# Databases
+[[d1_databases]]
+binding = "DB"
+database_name = "tekmemo-database"
+database_id = "<unique-ID-for-your-database>"
+migrations_dir = "drizzle"
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "tekmemo-database"
+database_id = "<unique-ID-for-your-database>"
+migrations_dir = "drizzle"
+
+# Memory blobs
+[[r2_buckets]]
+binding = "BLOBS"
+bucket_name = "tekmemo-blobs"
+
+[[env.dev.r2_buckets]]
+binding = "BLOBS"
+bucket_name = "tekmemo-blobs"
+
+# AI
+[ai]
+binding = "AI"
+
+[observability]
+enabled = true
+
+[vars]
+ENVIRONMENT = "development"
+CLOUD_PUBLIC_BASE_URL = "http://localhost:5173"
+BETTER_AUTH_URL = "http://localhost:5173"
+RESEND_FROM = "TekMemo Cloud <team@tekbreed.com>"
+PRESIGN_TTL_SECONDS = "900"
+R2_BUCKET_NAME = "tekmemo-blobs"
+POLAR_ENV = "sandbox"
+
+[env.dev.vars]
+ENVIRONMENT = "development"
+CLOUD_PUBLIC_BASE_URL = "http://localhost:5173"
+BETTER_AUTH_URL = "http://localhost:5173"
+RESEND_FROM = "TekMemo Cloud <team@tekbreed.com>"
+PRESIGN_TTL_SECONDS = "900"
+R2_BUCKET_NAME = "tekmemo-blobs"
+POLAR_ENV = "sandbox"
