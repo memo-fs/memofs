@@ -14,15 +14,15 @@
  * readiness gate rather than serving sync traffic it cannot honour.
  */
 import { Hono } from "hono";
-import type { CloudWorkerEnv } from "../server/env";
-import type { ApiEnv } from "./index";
-import { json } from "./json";
 // Static import: the version is inlined at build time, never read at runtime.
 // Reading `process.env.npm_package_version` instead stalls under workerd — its
 // `process.env` proxy hangs on nested keys (a stall, not a throw, so a
 // try/catch cannot rescue it). The JSON import is the build-time SSOT, matching
 // the CLI's pattern (`packages/tekmemo-cli/src/runner.ts`).
 import pkg from "../../package.json" with { type: "json" };
+import type { CloudWorkerEnv } from "../server/env";
+import type { ApiEnv } from "./index";
+import { json } from "./json";
 
 /** Cloud name + version surfaced in health output + the hosted runtime. */
 export const CLOUD_NAME = "tekmemo-cloud";

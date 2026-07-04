@@ -1,72 +1,59 @@
-// /**
-//  * TekMemo Cloud Worker entry.
-//  *
-//  * One Cloudflare Worker serves the JSON API, Better Auth, hosted-memory helper
-//  * code, and the React Router SSR dashboard. Hosted-memory reads run in-process
-//  * through `src/server/runtime-client.ts`; there is no second runtime Worker.
-//  */
-// import * as build from "virtual:react-router/server-build";
-// import { createRequestHandler } from "@react-router/cloudflare";
-// import { createApiApp } from "../src/api";
-// import { createDb } from "../src/db/index.server";
-// import { createAuth } from "../src/server/auth";
-// import { createMagicLinkMailer } from "../src/server/email";
-// import type { CloudWorkerEnv } from "../src/server/env";
+/**
+ * TekMemo Cloud Worker entry.
+ *
+ * One Cloudflare Worker serves three concerns (ADR 0005):
+ *   1. the JSON API at `/v1/*` (Hono) — health, readiness, sync;
+ *   2. Better Auth at `/api/auth/*` — passwordless sign-in/session endpoints;
+ *   3. the React Router v8 SSR dashboard + static assets for everything else.
+ *
+ * Routing is decided in this single Hono application: requests under `/v1` go
+ * to the Hono API app; requests under `/api/auth` go to the Better Auth handler;
+ * everything else goes to the React Router handler, which falls through to the
+ * Static Assets (`ASSETS`) binding for built files.
+ */
 
-// const api = createApiApp();
-// const handleSsr = createRequestHandler<CloudWorkerEnv>({
-// 	build,
-// 	getLoadContext: (args) => args.context as never,
-// });
-
-// export default {
-// 	async fetch(
-// 		request: Request,
-// 		env: CloudWorkerEnv,
-// 		ctx: ExecutionContext,
-// 	): Promise<Response> {
-// 		const { pathname } = new URL(request.url);
-// 		if (pathname === "/v1" || pathname.startsWith("/v1/")) {
-// 			return api.fetch(request, env, ctx);
-// 		}
-// 		if (pathname === "/api/auth" || pathname.startsWith("/api/auth/")) {
-// 			const db = createDb(env);
-// 			const auth = createAuth(env, db, createMagicLinkMailer(env));
-// 			return auth.handler(request);
-// 		}
-// 		return handleSsr({ request, env, ctx } as never);
-// 	},
-// };
-
-import { drizzle } from "drizzle-orm/d1";
+import { createRequestHandler } from "@react-router/cloudflare";
 import { Hono } from "hono";
-import { createRequestHandler } from "react-router";
+import { RouterContextProvider } from "react-router";
+import { createApiApp } from "../src/api";
+import { createDb } from "../src/db/index.server";
+import { createAuth } from "../src/server/auth";
+import { createMagicLinkMailer } from "../src/server/email";
+import type { CloudWorkerEnv } from "../src/server/env";
 
-export interface Env {
-	DB: D1Database;
-}
+const app = new Hono<{ Bindings: CloudWorkerEnv }>();
 
-const app = new Hono();
+// 1. Mount the Hono API sub-app
+const api = createApiApp();
+app.route("/", api);
 
-function _getDB(env: Env) {
-	return drizzle(env.DB);
-}
-
-app.get("/", (c) => {
-	console.log(c.env);
-	return c.text("Hello, world!");
+// 2. Mount the Better Auth sub-app
+app.all("/api/auth/*", (c) => {
+	const db = createDb(c.env);
+	const auth = createAuth(c.env, db, createMagicLinkMailer(c.env));
+	return auth.handler(c.req.raw);
 });
 
-// Add more routes here
+// 3. Mount React Router SSR handler fallback
+// Instantiate the request handler once outside the request path for efficiency.
+const requestHandler = createRequestHandler({
+	build: () => import("virtual:react-router/server-build"),
+	mode: import.meta.env.MODE,
+	getLoadContext(args) {
+		const context = new RouterContextProvider();
+		Object.assign(context, args.context);
+		return context;
+	},
+});
 
-app.get("*", (c) => {
-	const requestHandler = createRequestHandler(
-		() => import("virtual:react-router/server-build"),
-		import.meta.env.MODE,
-	);
-
-	return requestHandler(c.req.raw, {
-		cf: { env: c.env, ctx: c.executionCtx },
+app.all("*", (c) => {
+	return requestHandler({
+		request: c.req.raw,
+		env: c.env,
+		waitUntil: c.executionCtx.waitUntil.bind(c.executionCtx),
+		passThroughOnException: c.executionCtx.passThroughOnException
+			? c.executionCtx.passThroughOnException.bind(c.executionCtx)
+			: () => {},
 	});
 });
 

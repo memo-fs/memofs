@@ -23,6 +23,7 @@
  * handlers + helpers stay type-safe instead of reaching into `any`.
  */
 import { type Context, Hono } from "hono";
+import { routePath } from "hono/route";
 import type { Database } from "../db/index.server";
 import type { CloudWorkerEnv } from "../server/env";
 import { isApiError } from "./errors";
@@ -115,7 +116,7 @@ export function createApiApp() {
 						cause.headers,
 					);
 				}
-				console.error("[api] unhandled error", cause);
+				console.error(`[api] unhandled error on route ${routePath(c)}`, cause);
 				return jsonError(c, 500, "internal_error", "Internal server error.");
 			})
 	);
