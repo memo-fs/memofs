@@ -167,7 +167,7 @@ describe("MCP protocol", () => {
 		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
 		const server = createTekMemoMcpProtocolServer({ runtime });
 		// graph_upsert_nodes/edges and graph_neighbors were demoted to runtime
-		// methods (ADR 0009 Component 1). Seed + read the graph directly through
+		// methods. Seed + read the graph directly through
 		// the runtime to prove the capability is intact end-to-end.
 		// biome-ignore lint/style/noNonNullAssertion: local factory always wires graph methods
 		await runtime.upsertGraphNodes!({

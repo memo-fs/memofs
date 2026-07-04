@@ -6,7 +6,7 @@
  * store + provider bundle, with **no provider hardcoding**. The provider-neutral
  * {@link createHostedRuntime} factory assembles a {@link Tekmemo} from injected
  * adapters; an OSS self-hoster deploys it as a single Node process, and the cloud
- * deploys it as the runtime Worker behind a Service Binding (ADR 0013). The two
+ * deploys it as the runtime Worker behind a Service Binding. The two
  * run **identical** factory code — the only difference is the adapters injected.
  *
  * Slice 0 landed the factory + the `LlmClient` core contract.

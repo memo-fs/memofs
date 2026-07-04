@@ -1,13 +1,15 @@
+# `@tekmemo/server`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-server"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-server?label=%40tekbreed%2Ftekmemo-server&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/server"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fserver?label=%40tekmemo%2Fserver&style=for-the-badge" alt="npm version" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-server"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-server?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/server"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fserver?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
   <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-server`
+Self-hostable TekMemo runtime server for Node and Cloudflare Workers deployments.
 
 ## What is this?
 
@@ -15,7 +17,7 @@
 engine TekMemo Cloud runs, over a memory store you bring, with **no provider
 hardcoding**. TekMemo Cloud runs this package as its runtime worker; you can run
 the identical code on your own infra as a single Node process — the only
-difference is which adapters you inject (ADR 0003 / ADR 0013).
+difference is which adapters you inject ( /).
 
 Bring your own blob store, metadata store, embedder, reranker, extractor, and LLM
 client. No vendor lock-in. No TekMemo Cloud dependency.
@@ -31,21 +33,21 @@ npm install @tekbreed/tekmemo-server
 ```ts
 import { createHostedRuntime } from "@tekbreed/tekmemo-server";
 import {
-  InMemoryMemoryStore,
+ InMemoryMemoryStore,
 } from "@tekbreed/tekmemo";
 
 const tek = createHostedRuntime({
-  // The only required slot: the memory store (your file replica).
-  store: new InMemoryMemoryStore(),
-  projectId: "my-project",
+ // The only required slot: the memory store (your file replica).
+ store: new InMemoryMemoryStore(),
+ projectId: "my-project",
 
-  // Optional intelligence slots — each runs its deterministic default
-  // when omitted (lexical recall, rule-based extraction, no LLM tier).
-  // Inject a provider adapter to upgrade a slot.
-  embedder: yourEmbedder,
-  reranker: yourReranker,
-  extractor: yourExtractor,
-  llmClient: yourLlmClient,
+ // Optional intelligence slots — each runs its deterministic default
+ // when omitted (lexical recall, rule-based extraction, no LLM tier).
+ // Inject a provider adapter to upgrade a slot.
+ embedder: yourEmbedder,
+ reranker: yourReranker,
+ extractor: yourExtractor,
+ llmClient: yourLlmClient,
 });
 
 await tek.writeMemory({ content: "self-hosted runtime runs the engine" });
@@ -82,7 +84,7 @@ it consumes this same factory).
 
 ## The HTTP runtime API (JSON-RPC over HTTP)
 
-The same engine is reachable over HTTP — the two-Worker boundary (ADR 0013). An
+The same engine is reachable over HTTP — the two-Worker boundary. An
 OSS self-hoster deploys it as a **Node single process**; TekMemo Cloud deploys it
 as the **runtime Worker** behind a Service Binding. Both run identical code.
 
@@ -91,7 +93,7 @@ as the **runtime Worker** behind a Service Binding. Both run identical code.
 ```bash
 # Node single process (Fly / Railway / VPS) — the bin boots a node:http server.
 PORT=8787 node dist/bin/tekmemo-server.mjs
-curl http://127.0.0.1:8787/health  # {"ok":true,...}
+curl http://127.0.0.1:8787/health # {"ok":true,...}
 ```
 
 ```ts
@@ -99,10 +101,10 @@ curl http://127.0.0.1:8787/health  # {"ok":true,...}
 import { createRuntimeFetchHandler } from "@tekbreed/tekmemo-server/worker";
 
 export default {
-  fetch: createRuntimeFetchHandler({
-    createRuntime: (env) => buildRuntimeFromBindings(env),
-    requireAuth: false, // behind a private Service Binding
-  }),
+ fetch: createRuntimeFetchHandler({
+ createRuntime: (env) => buildRuntimeFromBindings(env),
+ requireAuth: false, // behind a private Service Binding
+ }),
 };
 ```
 
@@ -130,7 +132,7 @@ gated** (see below).
 ### The write-gate (important)
 
 Every mutating method returns **`503`** until the concurrency layer ships
-(slice 3 / [ADR 0010](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0010-cloud-concurrency-control-for-b3.md)).
+(slice 3 / [](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0010-cloud-concurrency-control-for-b3.md)).
 This is deliberate: concurrent writes to the same project would silently lose
 data under last-writer-wins, so **no write surface is reachable before the
 serialization layer that makes writes safe exists**. The gate is "method
@@ -143,9 +145,9 @@ use the `Tekmemo` client directly in-process.
 
 - **Slice 0** — the provider-neutral factory + the `LlmClient` core contract.
 - **Slice 1 (this release)** — the JSON-RPC-over-HTTP runtime API, the Worker
-  entry, and the Node bin. Reads are live; writes are gated on slice 3.
+ entry, and the Node bin. Reads are live; writes are gated on slice 3.
 - **Slice 2** — the cloud wires this package as its runtime Worker (Service
-  Binding) and deletes its hardcoded `hosted-runtime.ts`.
+ Binding) and deletes its hardcoded `hosted-runtime.ts`.
 - **Slice 3** — the concurrency layer lands; the write-gate flips to live routes.
 
 See the

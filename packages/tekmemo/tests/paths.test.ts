@@ -9,7 +9,7 @@ describe("resolveInsideRoot", () => {
 
 	it("throws on empty relative path", () => {
 		expect(() => resolveInsideRoot("/project", "")).toThrow();
-		expect(() => resolveInsideRoot("/project", "   ")).toThrow();
+		expect(() => resolveInsideRoot("/project", " ")).toThrow();
 	});
 
 	it("throws on null bytes", () => {

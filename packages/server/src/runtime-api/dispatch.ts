@@ -13,7 +13,7 @@
  * The dispatcher refuses every mutating method (the {@link GATED_METHODS} set)
  * with a `503` JSON-RPC error **until a `concurrencyLayer` is injected**
  * (slice 3). This is the load-bearing safety invariant: no concurrent-write
- * surface is reachable before its serialization (ADR 0010). The gate is
+ * surface is reachable before its serialization. The gate is
  * "method rejects," never "method present unsafely." Slice 3 flips it by
  * injecting the lock + delegating the mutating handlers to run inside it.
  *
@@ -40,7 +40,7 @@ import { RUNTIME_HANDLERS } from "./handlers";
 
 /**
  * The concurrency-layer seam. Slice 1 leaves this `undefined`; slice 3
- * injects the ADR 0010 lock + manifest validation so mutating handlers can
+ * injects the lock + manifest validation so mutating handlers can
  * run safely under concurrent writers.
  *
  * Kept as an option type (not implemented today) so the dispatcher's signature
@@ -48,7 +48,7 @@ import { RUNTIME_HANDLERS } from "./handlers";
  * surface.
  */
 export interface ConcurrencyLayer {
-	/** The ADR 0010 project lock primitive (slice 3). Implemented then. */
+	/** The project lock primitive (slice 3). Implemented then. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly acquire: (projectId: string, fn: () => Promise<any>) => Promise<any>;
 }
@@ -71,7 +71,7 @@ export const CONCURRENCY_GATE_ERROR_CODE = -32000;
 
 /** The canonical gated-write failure message. */
 export const CONCURRENCY_GATE_MESSAGE =
-	"Concurrent writes require the concurrency layer (slice 3, ADR 0010). This method is read-only until it merges.";
+	"Concurrent writes require the concurrency layer (slice 3). This method is read-only until it merges.";
 
 /**
  * Builds the `503` concurrency-gate failure response for a request id.
@@ -126,7 +126,7 @@ export async function dispatchRuntimeText(
  * @param message - The parsed payload (object or array).
  * @param options - Dispatch options.
  * @returns The response, response array, or `undefined` (notification / empty
- *   batch of notifications).
+ * batch of notifications).
  */
 export async function dispatchRuntimeMessage(
 	tek: Tekmemo,
@@ -197,9 +197,9 @@ async function dispatchSingle(
 	}
 
 	// The write-gate (Hard ordering rule). Gated mutating methods:
-	//   - return 503 when no concurrency layer is injected (slice 1), AND
-	//   - run inside `concurrencyLayer.acquire` when one is (slice 3+), so
-	//     concurrent writers to the same project serialize through the lock.
+	// - return 503 when no concurrency layer is injected (slice 1), AND
+	// - run inside `concurrencyLayer.acquire` when one is (slice 3+), so
+	// concurrent writers to the same project serialize through the lock.
 	// The acquire wiring is real: slice 3 implements the lock + injects it
 	// here; the test that exercises this path proves the acquire callback runs.
 	if (GATED_METHODS.has(request.method)) {

@@ -16,7 +16,7 @@ describe("OpenAIEmbedder", () => {
 
 	it("rejects whitespace-only text by default", async () => {
 		const embedder = createOpenAIEmbedder({ client: createFakeOpenAIClient() });
-		await expect(embedder.embedTexts({ texts: ["   "] })).rejects.toThrow(
+		await expect(embedder.embedTexts({ texts: [" "] })).rejects.toThrow(
 			OpenAIValidationError,
 		);
 	});

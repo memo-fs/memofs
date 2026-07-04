@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker entry for `tekmemo-server` (ADR 0013 — the runtime Worker).
+ * Cloudflare Worker entry for `tekmemo-server` ( — the runtime Worker).
  *
  * @remarks
  * This is the deployable Worker entry the cloud mounts as the **runtime

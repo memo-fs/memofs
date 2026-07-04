@@ -6,7 +6,7 @@
  * This is the single source of truth for the **Hard ordering rule**
  * (s3-execution-plan.md §"Hard ordering rule"). Every mutating method is a
  * member of {@link GATED_METHODS}; until slice 3's concurrency layer
- * (ADR 0010) merges, the dispatcher refuses those methods with `503`. No
+ * merges, the dispatcher refuses those methods with `503`. No
  * concurrent-write surface is reachable before its serialization — the gate
  * is "method rejects," never "method present unsafely."
  *
@@ -16,7 +16,7 @@
  *
  * The method surface mirrors the {@link Tekmemo} client's frozen public API
  * (`recall`, `context`, `writeMemory`, `core`, `notes`, `graph`, `snapshots`,
- * `health`) — this **is** the two-Worker boundary (ADR 0013): the runtime API
+ * `health`) — this **is** the two-Worker boundary: the runtime API
  * the commercial Worker reaches over a Service Binding is the same surface an
  * OSS self-hoster gets over HTTP.
  *

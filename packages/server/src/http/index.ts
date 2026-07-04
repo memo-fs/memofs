@@ -5,7 +5,7 @@
  * Takes a Web `Request` + an assembled {@link Tekmemo} runtime + options, and
  * returns a Web `Response`. This is the one place the runtime API touches
  * HTTP; both the Worker entry (`worker.ts`) and the Node bin
- * (`bin/tekmemo-server.ts`) are thin adapters over it — ADR 0013's "the cloud
+ * (`bin/tekmemo-server.ts`) are thin adapters over it's "the cloud
  * and the OSS self-hoster run identical `tekmemo-server` code" made literal.
  *
  * The shape mirrors `tekmemo-mcp-server`'s `handleTekMemoMcpRequest`:

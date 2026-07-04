@@ -91,7 +91,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("calls read tools through the HTTP adapter", async () => {
-		// tekmemo.health was demoted to a runtime method (ADR 0009 Component 1);
+		// tekmemo.health was demoted to a runtime method;
 		// exercise the HTTP read dispatch through tekmemo.context, a surviving
 		// read verb.
 		const response = await handleTekMemoMcpRequest(

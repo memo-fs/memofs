@@ -10,7 +10,7 @@ describe("validateSnapshotLabel", () => {
 
 	it("rejects empty labels", () => {
 		expect(() => validateSnapshotLabel("")).toThrow();
-		expect(() => validateSnapshotLabel("   ")).toThrow();
+		expect(() => validateSnapshotLabel(" ")).toThrow();
 	});
 
 	it("rejects labels with path separators", () => {

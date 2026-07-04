@@ -3,7 +3,7 @@
  *
  * @remarks
  * Returns a `(request, env, ctx) => Response` — the Cloudflare Worker `fetch`
- * signature (ADR 0013: the cloud deploys `tekmemo-server` as the **runtime
+ * signature (: the cloud deploys `tekmemo-server` as the **runtime
  * Worker** behind a Service Binding). Mirrors `tekmemo-mcp-server`'s
  * `createTekMemoMcpFetchHandler`.
  *

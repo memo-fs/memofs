@@ -3,11 +3,11 @@
  *
  * @remarks
  * Proves the framework-free core's contract at slice 1:
- *   - `GET /health` returns liveness JSON.
- *   - `POST /` dispatches JSON-RPC and returns the envelope (success + gate).
- *   - The concurrency gate surfaces as an HTTP `503` (so client retry engages).
- *   - Bearer-token auth rejects/accepts correctly.
- *   - Unsupported verbs + paths return the right status.
+ * - `GET /health` returns liveness JSON.
+ * - `POST /` dispatches JSON-RPC and returns the envelope (success + gate).
+ * - The concurrency gate surfaces as an HTTP `503` (so client retry engages).
+ * - Bearer-token auth rejects/accepts correctly.
+ * - Unsupported verbs + paths return the right status.
  *
  * The runtime is an injected fake bundle (no real provider calls).
  */

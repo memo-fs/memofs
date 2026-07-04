@@ -46,7 +46,7 @@ describe("Security", () => {
 
 	it("runtime timeouts are converted into tool-level errors", async () => {
 		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
-		// tekmemo.health was demoted to a runtime method (ADR 0009 Component 1),
+		// tekmemo.health was demoted to a runtime method,
 		// so exercise the timeout path through tekmemo.recall — a surviving read
 		// verb. The wrapped recall stalls past the 1ms deadline.
 		const slow = {

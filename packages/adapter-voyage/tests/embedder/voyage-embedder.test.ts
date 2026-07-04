@@ -16,7 +16,7 @@ describe("VoyageEmbedder", () => {
 
 	it("rejects whitespace-only text by default", async () => {
 		const embedder = createVoyageEmbedder({ client: createFakeVoyageClient() });
-		await expect(embedder.embedTexts({ texts: ["   "] })).rejects.toThrow(
+		await expect(embedder.embedTexts({ texts: [" "] })).rejects.toThrow(
 			VoyageValidationError,
 		);
 	});

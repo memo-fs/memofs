@@ -3,7 +3,7 @@ import { connectorNoteId } from "../src/id";
 import type { ConnectorRecord } from "../src/types";
 
 /**
- * Q3 (ADR 0002): the connector note id is content-derived with no wall-clock in
+ * Q3: the connector note id is content-derived with no wall-clock in
  * the hashed bytes. Re-ingesting identical external content must reproduce the
  * same id — that's what makes sync-manifest diffs report "no change".
  */

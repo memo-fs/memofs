@@ -9,7 +9,7 @@
  * bundled deps resolve — this is how the MCP bin runs too
  * (`dist/bin/tekmemo-mcp.mjs`).
  *
- * Proves ADR 0013's "the cloud and the OSS self-hoster run identical
+ * Proves's "the cloud and the OSS self-hoster run identical
  * `tekmemo-server` code" at the Node target: the same `handleRuntimeRequest`
  * core the Worker uses serves the same shapes from `node:http`.
  *

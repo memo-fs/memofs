@@ -10,7 +10,7 @@
  * core already works: the strategy assembles from injected slots; the cloud
  * supplies one provider bundle (R2 + Turso + Voyage + Workers AI), an OSS
  * self-hoster supplies another (e.g. S3 + Postgres + OpenAI). The factory is
- * the realization of ADR 0003's "self-host the same engine free" thesis
+ * the realization of's "self-host the same engine free" thesis
  * ([CONTEXT.md](../../docs/CONTEXT.md) S3-Q1) — the cloud and the OSS
  * self-hoster run **identical** factory code; the only difference is the
  * adapters injected.
@@ -35,7 +35,7 @@
  * seam the embedder/reranker/extractor/`LlmClient` family locks, expressed once
  * at the factory boundary.
  *
- * @see ADR 0014 — the `LlmClient` contract this factory threads.
+ * @see — the `LlmClient` contract this factory threads.
  * @see {@link Tekmemo} — the client this factory assembles.
  *
  * @public
@@ -76,7 +76,7 @@ export interface HostedRuntimeOptions {
 	/** Optional graph extractor. When omitted, the zero-config rule-based extractor runs. */
 	extractor?: Extractor;
 	/**
-	 * Optional LLM transport (ADR 0014). When omitted, every LLM-enhanced
+	 * Optional LLM transport. When omitted, every LLM-enhanced
 	 * intelligence feature runs its deterministic default. Slice 0 threads the
 	 * seam; the strategist (Q23) and consolidation (Q25a) consume it later.
 	 */

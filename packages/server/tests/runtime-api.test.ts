@@ -3,12 +3,12 @@
  *
  * @remarks
  * Proves the slice-1 bars (s3-execution-plan.md slice 1, "Test bars"):
- *   1. A read method (`recall`) round-trips data over the JSON-RPC envelope.
- *   2. **Every gated mutating method returns the `503` concurrency gate** — the
- *      "second concurrent writer gets 503" bar, proven trivially-correct
- *      pre-slice-3 (no write path is reachable).
- *   3. JSON-RPC parse + validation errors map to the correct spec codes.
- *   4. Batch dispatch + notification handling behave per spec.
+ * 1. A read method (`recall`) round-trips data over the JSON-RPC envelope.
+ * 2. **Every gated mutating method returns the `503` concurrency gate** — the
+ * "second concurrent writer gets 503" bar, proven trivially-correct
+ * pre-slice-3 (no write path is reachable).
+ * 3. JSON-RPC parse + validation errors map to the correct spec codes.
+ * 4. Batch dispatch + notification handling behave per spec.
  *
  * The runtime is assembled from `createHostedRuntime` + injected fakes (no real
  * provider calls), mirroring the slice-0 factory test.
@@ -130,7 +130,7 @@ describe("runtime-API dispatch — slice 1", () => {
 			},
 		);
 
-		it("the gate message references slice 3 / ADR 0010", async () => {
+		it("the gate message references slice 3", async () => {
 			const response = (await dispatchRuntimeMessage(tek, {
 				jsonrpc: "2.0",
 				id: 1,
@@ -138,7 +138,7 @@ describe("runtime-API dispatch — slice 1", () => {
 				params: { content: "x" },
 			})) as unknown as { error: { message: string } };
 			expect(response.error.message).toMatch(/slice 3/i);
-			expect(response.error.message).toMatch(/ADR 0010/);
+			expect(response.error.message).toMatch(/concurrency layer/i);
 		});
 
 		it("injecting a concurrencyLayer runs the mutating handler inside acquire (the slice-3 seam)", async () => {

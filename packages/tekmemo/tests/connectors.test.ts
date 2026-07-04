@@ -12,7 +12,7 @@ import {
 	type ConnectorIngestContext,
 	type ConnectorRecord,
 	ConnectorRegistry,
-} from "../../connectors/src/types";
+} from "@tekmemo/connectors";
 import {
 	runConnectorsAddCommand,
 	runConnectorsListCommand,

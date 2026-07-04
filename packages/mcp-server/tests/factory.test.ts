@@ -45,10 +45,10 @@ async function tempRoot() {
  * runtime mode. The embedder itself is lazy (loaded on first vector query), so
  * these tests assert the *observable* consequences of the wiring decision:
  *
- *  - memory mode never attempts the local vector path,
- *  - local mode stays functional with zero API keys (lexical fallback),
- *  - a missing adapter never breaks recall (graceful degradation),
- *  - disabling local embeddings keeps the runtime import-light.
+ * - memory mode never attempts the local vector path,
+ * - local mode stays functional with zero API keys (lexical fallback),
+ * - a missing adapter never breaks recall (graceful degradation),
+ * - disabling local embeddings keeps the runtime import-light.
  */
 
 describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {

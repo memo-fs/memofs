@@ -172,7 +172,7 @@ describe("MCP tools", () => {
 			client,
 			projectId: "proj_1",
 		});
-		// sync_status was demoted to a runtime method (ADR 0009 Component 1).
+		// sync_status was demoted to a runtime method.
 		// biome-ignore lint/style/noNonNullAssertion: cloud runtime always wires syncStatus
 		const result = await runtime.syncStatus!({});
 		expect(calls).toEqual(["sync.status:proj_1"]);

@@ -2,7 +2,7 @@
 
 /**
  * Node single-process entry for `tekmemo-server` — the OSS self-host deploy
- * (ADR 0013: "a single Node process for OSS self-hosters — Fly / Railway /
+ * (: "a single Node process for OSS self-hosters — Fly / Railway /
  * Render / a VPS — no size cap, nothing to split").
  *
  * @remarks

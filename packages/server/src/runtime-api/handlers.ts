@@ -5,7 +5,7 @@
  * @remarks
  * The method surface mirrors the frozen `Tekmemo` public API (`recall`,
  * `context`, `core`, `notes`, `graph`, `snapshots`, `health`). This **is** the
- * two-Worker boundary (ADR 0013): the runtime API the commercial Worker reaches
+ * two-Worker boundary: the runtime API the commercial Worker reaches
  * over a Service Binding is the same surface an OSS self-hoster gets over HTTP.
  *
  * Read handlers run live at slice 1. Write handlers (the gated set) only run
@@ -179,7 +179,7 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 	},
 
 	// ── Writes (gated on slice 3 — refused with 503 until the concurrency
-	//    layer merges; handlers exist so the slice-3 flip drops the gate) ──
+	// layer merges; handlers exist so the slice-3 flip drops the gate) ──
 	async [RUNTIME_METHOD.write](tek, params) {
 		return (await tek.writeMemory(
 			params as never,

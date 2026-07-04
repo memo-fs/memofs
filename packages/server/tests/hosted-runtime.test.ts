@@ -17,12 +17,12 @@ import { createHostedRuntime } from "../src";
 
 /**
  * Slice 0 contract for the provider-neutral hosted-runtime factory. Proves:
- *   1. It assembles a working {@link Tekmemo} from **injected** adapters (no
- *      env reads, no hardcoded provider) — the cloud + the OSS self-hoster pass
- *      different bundles and get the identical engine.
- *   2. `store` is the only required slot; missing it throws a clear error.
- *   3. Every intelligence slot is optional and threads through to the assembled
- *      runtime (the `llmClient` seam especially — slice 6 reads it).
+ * 1. It assembles a working {@link Tekmemo} from **injected** adapters (no
+ * env reads, no hardcoded provider) — the cloud + the OSS self-hoster pass
+ * different bundles and get the identical engine.
+ * 2. `store` is the only required slot; missing it throws a clear error.
+ * 3. Every intelligence slot is optional and threads through to the assembled
+ * runtime (the `llmClient` seam especially — slice 6 reads it).
  *
  * No real provider is ever called: the local fakes stand in for the whole
  * bundle (mirrors how `apps/cloud`'s hosted-runtime test builds local doubles).
