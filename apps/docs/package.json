@@ -1,6 +1,6 @@
 {
-	"name": "@tekbreed/docs",
-	"version": "0.1.0",
+	"name": "@tekmemo/docs",
+	"version": "1.0.0-beta.1",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -15,5 +15,12 @@
 		"@repo/typescript": "workspace:*",
 		"vitepress": "2.0.0-alpha.17",
 		"vue": "^3.5.35"
-	}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"directory": "apps/docs"
+	},
+	"description": "TekMemo documentation site.",
+	"homepage": "https://docs.memo.tekbreed.com/"
 }

@@ -1,13 +1,15 @@
+# `@tekmemo/connectors`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-connectors"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-connectors?label=%40tekbreed%2Ftekmemo-connectors&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/connectors"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fconnectors?label=%40tekmemo%2Fconnectors&style=for-the-badge" alt="npm version" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-connectors"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-connectors?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/connectors"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fconnectors?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-connectors`
+Local connector framework for ingesting external sources into TekMemo memory.
 
 ## What is this?
 
@@ -31,20 +33,20 @@ import { runConnectors, EnvSecretResolver } from "@tekbreed/tekmemo-connectors";
 const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
 
 const result = await runConnectors({
-  rootDir: "./.tekmemo",
-  memo,
-  secretResolver: new EnvSecretResolver({ rootDir: "./.tekmemo" }),
+ rootDir: "./.tekmemo",
+ memo,
+ secretResolver: new EnvSecretResolver({ rootDir: "./.tekmemo" }),
 });
 
-console.log(result.written);  // ["conn_...", ...] — newly ingested note ids
-console.log(result.skipped);  // ["issue:42", ...] — already ingested (dedup)
+console.log(result.written); // ["conn_...", ...] — newly ingested note ids
+console.log(result.skipped); // ["issue:42", ...] — already ingested (dedup)
 ```
 
 ## How it works
 
 ```
-.tekmemo/connectors.json   ──►  runConnectors()  ──►  .tekmemo/notes.md (+ derived indexes)
-   (config, no tokens)            (local engine)        (source: "connector")
+.tekmemo/connectors.json ──► runConnectors() ──► .tekmemo/notes.md (+ derived indexes)
+ (config, no tokens) (local engine) (source: "connector")
 ```
 
 1. **Config** lives in `.tekmemo/connectors.json` — one of TekMemo's 11 canonical sync units. Each connector row carries an opaque `secretRef`, **never** the token.
@@ -52,7 +54,7 @@ console.log(result.skipped);  // ["issue:42", ...] — already ingested (dedup)
 3. **Ingestion** runs locally: each connector fetches its source, normalizes items into `ConnectorRecord`s, and the runner writes them through the local engine with the connector-write discipline (see below).
 4. **The resulting files** sync back to the cloud like any other memory file.
 
-### The connector-write discipline (Q3 / ADR 0002)
+### The connector-write discipline (Q3 /)
 
 Every connector-emitted note is written with three guarantees:
 
@@ -66,16 +68,16 @@ Every connector-emitted note is written with three guarantees:
 
 ```json
 {
-  "connectors": [
-    {
-      "id": "github-main",
-      "type": "github",
-      "enabled": true,
-      "schedule": "@hourly",
-      "sourceMapping": { "repository": "owner/repo", "kinds": ["issues", "prs"] },
-      "secretRef": "ss_abc123"
-    }
-  ]
+ "connectors": [
+ {
+ "id": "github-main",
+ "type": "github",
+ "enabled": true,
+ "schedule": "@hourly",
+ "sourceMapping": { "repository": "owner/repo", "kinds": ["issues", "prs"] },
+ "secretRef": "ss_abc123"
+ }
+ ]
 }
 ```
 
@@ -145,22 +147,22 @@ The token is a Notion internal integration token (`ntn_…` / `secret_…`) with
 import { type Connector, type ConnectorRecord, type ConnectorIngestContext } from "@tekbreed/tekmemo-connectors";
 
 class LinearConnector implements Connector {
-  readonly type = "linear";
-  readonly displayName = "Linear";
+ readonly type = "linear";
+ readonly displayName = "Linear";
 
-  async ingest(ctx: ConnectorIngestContext): Promise<ConnectorRecord[]> {
-    const records = await fetchLinearIssues(ctx.token, ctx.config.sourceMapping);
-    // The runner handles dedup + the write discipline; the connector just
-    // returns normalized records.
-    return records.map((issue) => ({
-      externalId: `linear:${issue.id}`,
-      title: issue.title,
-      content: issue.description,
-      url: issue.url,
-      occurredAt: issue.createdAt,
-      metadata: { team: issue.team, status: issue.state },
-    }));
-  }
+ async ingest(ctx: ConnectorIngestContext): Promise<ConnectorRecord[]> {
+ const records = await fetchLinearIssues(ctx.token, ctx.config.sourceMapping);
+ // The runner handles dedup + the write discipline; the connector just
+ // returns normalized records.
+ return records.map((issue) => ({
+ externalId: `linear:${issue.id}`,
+ title: issue.title,
+ content: issue.description,
+ url: issue.url,
+ occurredAt: issue.createdAt,
+ metadata: { team: issue.team, status: issue.state },
+ }));
+ }
 }
 ```
 

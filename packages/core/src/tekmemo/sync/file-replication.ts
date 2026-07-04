@@ -7,14 +7,14 @@
  * `pull`, `status`) mirror the frozen cloud-client surface 1:1 (§7), so the
  * runtime stays honest with the wire protocol:
  *
- * - `push`     — phase 1: send the local manifest, receive presigned upload
- *                targets. Does NOT upload bytes (§4.4).
+ * - `push` — phase 1: send the local manifest, receive presigned upload
+ * targets. Does NOT upload bytes (§4.4).
  * - `complete` — phase 2: commit a preceding push. Does NOT upload bytes; the
- *                caller uploads between `push` and `complete` via `upload()`.
- * - `pull`     — single round trip: receive presigned download URLs, fetch +
- *                verify + write each file, delete server-removed paths, then
- *                re-derive local indexes (§4.5, §10).
- * - `status`   — read the cloud manifest, cursor, and storage usage.
+ * caller uploads between `push` and `complete` via `upload()`.
+ * - `pull` — single round trip: receive presigned download URLs, fetch +
+ * verify + write each file, delete server-removed paths, then
+ * re-derive local indexes (§4.5, §10).
+ * - `status` — read the cloud manifest, cursor, and storage usage.
  *
  * `computeLocalManifest()` and `upload()` are local helpers (not part of the
  * §7 contract) that the orchestration uses to compute the manifest and to

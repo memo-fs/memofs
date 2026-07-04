@@ -35,14 +35,14 @@ Use this file for lower-confidence notes, observations, and working memory.
 export const DEFAULT_JSONL = "";
 
 /**
- * Empty connector-config payload — the 11th canonical file (ADR 0002 / decision Q2).
+ * Empty connector-config payload — the 11th canonical file ( / decision Q2).
  *
  * Connector config is a sync unit. It holds one entry per connector with its
  * type, schedule, source mapping, enabled flag, and an opaque `secretRef` —
  * **never** the token itself (tokens live server-side; see `secrets.ts`).
  */
 export const DEFAULT_CONNECTORS_CONFIG = `{
-  "connectors": []
+ "connectors": []
 }
 `;
 

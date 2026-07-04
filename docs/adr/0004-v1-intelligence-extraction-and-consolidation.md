@@ -57,7 +57,7 @@ The LLM extractor is a **pluggable adapter, provider-neutral** — not a hard
 dependency on one provider. This:
 
 - Honors `AGENTS.md`: "Core protocol contracts must be provider-neutral."
-- Mirrors the existing adapter pattern (`@tekbreed/tekmemo-adapter-openai`,
+- Mirrors the existing adapter pattern (`@tekmemo/adapter-openai`,
   `-voyage`, `-transformers`).
 - **Preserves the local-first thesis:** the `-transformers` adapter already
   proves a model can run fully in-process (ONNX, zero API key). An extractor

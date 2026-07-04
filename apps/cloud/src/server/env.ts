@@ -1,28 +1,23 @@
 /**
- * Worker bindings — declared in `wrangler.jsonc` and typed by `wrangler types`
- * (the `cf-typegen` script emits `.wrangler/types/worker-configuration.d.ts`).
+ * Worker runtime configuration for the single Cloud app Worker.
  *
- * Runtime config comes from these bindings, NEVER from `process.env`. The only
- * legitimate `process.env` reads in this app are in the drizzle-kit CLI path
- * (`drizzle.config.ts`), which runs in Node at build time.
- *
- * @see docs/adr/0005-cloud-tech-stack.md — R2 (blobs) + Turso/libSQL (metadata).
+ * Runtime config comes from Worker env, never from `process.env`. The only
+ * legitimate `process.env` reads in this app are Node-only tooling paths such
+ * as `drizzle.config.ts` and the dev Vite bridge.
  */
 export interface CloudWorkerEnv {
 	/** R2 bucket holding content-addressed blobs at `tekmemo/blobs/{sha256}`. */
 	BLOBS: R2Bucket;
 
-	/**
-	 * Cloudflare Workers AI binding — the frontier extractor for hosted-memory
-	 * graph extraction (ADR 0011 Phase 3, Q18). The hosted `Tekmemo` runtime
-	 * uses it as the Pro+ extractor; the Free tier runs the rule-based floor.
-	 */
-	AI: Ai;
-
 	/** Turso/libSQL HTTPS endpoint (e.g. `https://...turso.io`). */
 	DATABASE_URL: string;
 	/** Turso auth token (optional for local/ephemeral DBs). */
 	DATABASE_AUTH_TOKEN?: string;
+
+	/** Optional Workers AI binding for hosted graph extraction. */
+	AI?: Ai;
+	/** Optional Voyage key for hosted embedding and reranking. */
+	VOYAGE_API_KEY?: string;
 
 	/** HMAC/lookup salt applied when hashing API keys. */
 	TEKMEMO_API_KEY_SALT?: string;
@@ -83,14 +78,6 @@ export interface CloudWorkerEnv {
 
 	// Dashboard session cookie secret (used by React Router session storage).
 	SESSION_SECRET: string;
-
-	// --- Hosted-memory intelligence (ADR 0011 Phase 3) ----------------------
-	/**
-	 * Voyage AI API key — the hosted-memory embedder + reranker provider. Used
-	 * by the hosted `Tekmemo` runtime for semantic recall + hybrid reranking
-	 * against R2-resident files. Secret — set via `wrangler secret put`.
-	 */
-	VOYAGE_API_KEY: string;
 }
 
 /** Default presigned-URL lifetime when `PRESIGN_TTL_SECONDS` is unset. */

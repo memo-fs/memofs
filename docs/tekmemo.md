@@ -1,23 +1,23 @@
-# TekMemo Core Package Notes (`@tekbreed/tekmemo`)
+# TekMemo Core Package Notes (`@tekmemo/core`)
 
-> **Scope:** this document covers the **core** `@tekbreed/tekmemo` package only.
+> **Scope:** this document covers the **core** `@tekmemo/core` package only.
 > For the full product architecture (9 published packages, cloud, adapters), see
 > [`docs/CONTEXT.md`](./CONTEXT.md).
 
-TekMemo ships as multiple focused packages under the `@tekbreed/` scope (see
+TekMemo ships as multiple focused packages under the `@tekmemo/` scope (see
 [`CONTEXT.md` → Key entry points](./CONTEXT.md#key-entry-points) and the
 [README packages table](../README.md#packages)). The **core** package is
-`@tekbreed/tekmemo`. Framework-specific integrations, embedder/reranker
+`@tekmemo/core`. Framework-specific integrations, embedder/reranker
 adapters, and connectors live in their own published packages following the
-adapter pattern (e.g. `@tekbreed/tekmemo-adapter-ai-sdk`,
-`@tekbreed/tekmemo-adapter-openai`).
+adapter pattern (e.g. `@tekmemo/adapter-ai-sdk`,
+`@tekmemo/adapter-openai`).
 
 ## Core Package Shape
 
 Install the core package:
 
 ```bash
-pnpm add @tekbreed/tekmemo
+pnpm add @tekmemo/core
 ```
 
 Import core capabilities directly from the root entrypoint:
@@ -28,13 +28,13 @@ import {
   createNodeFsMemoryStore,
   InMemoryMemoryStore,
   Tekmemo
-} from "@tekbreed/tekmemo";
+} from "@tekmemo/core";
 ```
 
-Do not introduce public subpath imports on core (e.g., `@tekbreed/tekmemo/fs`,
-`@tekbreed/tekmemo/graph`). All core public capabilities must be re-exported in
-`packages/tekmemo/src/index.ts`. Add new capabilities as internal modules under
-`packages/tekmemo/src/<module>/`.
+Do not introduce public subpath imports on core (e.g., `@tekmemo/core/fs`,
+`@tekmemo/core/graph`). All core public capabilities must be re-exported in
+`packages/core/src/index.ts`. Add new capabilities as internal modules under
+`packages/core/src/<module>/`.
 
 Provider-specific integrations (AI SDK, OpenAI embeddings, Voyage reranker, etc.)
 belong in **adapter packages**, not in core — per AGENTS.md ("Core protocol
@@ -58,7 +58,7 @@ The canonical local memory root is:
   snapshots/snapshots.jsonl
 ```
 
-The root `@tekbreed/tekmemo` API owns the protocol constants, validation,
+The root `@tekmemo/core` API owns the protocol constants, validation,
 document types, event types, chunk records, snapshot records, and
 provider-neutral contracts. Storage and provider modules implement those
 contracts without changing the protocol.
@@ -80,7 +80,7 @@ contracts without changing the protocol.
   tests.
 - **Provider Adapters**: Provider adapters (such as OpenAI, VoyageAI, and Voyage
   Rerank) translate TekMemo contracts to provider APIs. They live in their own
-  `@tekbreed/tekmemo-adapter-*` packages and should accept credentials from the
+  `@tekmemo/adapter-*` packages and should accept credentials from the
   host app — must not store secrets.
 
 ## Release Layers
@@ -104,7 +104,7 @@ A TekMemo capability is not release-ready until:
 - Contract tests pass when the capability implements a shared contract.
 - Path safety, malformed input, provider failure, and secret-redaction edge
   cases are covered where relevant.
-- Public docs use `@tekbreed/tekmemo` root imports only (for core APIs).
+- Public docs use `@tekmemo/core` root imports only (for core APIs).
 - package.json exports expose only the root `.` entrypoint.
-- `pnpm --filter @tekbreed/tekmemo pack:dry-run` contains only publishable
+- `pnpm --filter @tekmemo/core pack:dry-run` contains only publishable
   files.

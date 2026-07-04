@@ -2,7 +2,7 @@
  * Sync router — the four file-replication sync endpoints.
  *
  * Mounted by `createApiApp` at `/v1/projects/:projectId/sync/*` (the path the
- * frozen `@tekbreed/tekmemo/cloud-client` transport calls). Implements §4.4
+ * frozen `@tekmemo/core/cloud-client` transport calls). Implements §4.4
  * (push + push/complete), §4.5 (pull), §4.6 (status) of the locked cloud-sync
  * spec, composed from the pure helpers in `./shared` + the R2 presigner.
  *
@@ -49,7 +49,7 @@
 import type {
 	CloudFileManifest,
 	FileManifest,
-} from "@tekbreed/tekmemo/cloud-client";
+} from "@tekmemo/core/cloud-client";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import type { Database } from "../../db/index.server";

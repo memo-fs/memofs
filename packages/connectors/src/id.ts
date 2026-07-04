@@ -1,5 +1,5 @@
 /**
- * Content-derived id helper — the Q3 (ADR 0002) connector-write discipline.
+ * Content-derived id helper — the Q3 connector-write discipline.
  *
  * @public
  */
@@ -10,7 +10,7 @@ import type { ConnectorRecord } from "./types";
 /**
  * Deterministic note id for a connector record.
  *
- * Q3 (ADR 0002): the id is derived from `externalId` + `content` with **no
+ * Q3: the id is derived from `externalId` + `content` with **no
  * wall-clock** in the hashed bytes. Re-ingesting identical external content
  * reproduces the same id → identical bytes in `notes.md` → the sync manifest
  * reports "no change" → no phantom conflict, no needless upload.

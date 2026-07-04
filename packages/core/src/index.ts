@@ -12,7 +12,7 @@ export * from "./agentfs";
 export { isNotFoundError } from "./agentfs";
 // Framework-neutral AI-runtime contract (implemented by adapter packages).
 // Replaces the vendor-coupled ai-sdk re-export that moved to
-// @tekmemo/adapter-ai-sdk (ADR 0007).
+// @tekmemo/adapter-ai-sdk.
 export * from "./ai-runtime";
 // The cloud is a file replica: its file-manifest sync types are the canonical
 // public surface and are re-exported explicitly to win over the legacy
@@ -67,7 +67,7 @@ export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
-// Write intelligence (ADR 0009 Component 6): secret/PII blocklist gate +
+// Write intelligence: secret/PII blocklist gate +
 // durability tier classifier.
 export * from "./security/durability-tier";
 export * from "./security/secret-blocklist";
@@ -75,5 +75,5 @@ export type { RecallResult } from "./tekmemo";
 export * from "./tekmemo";
 // NOTE: `./testing` (createTempTekMemoDir) is NOT re-exported here — it imports
 // `node:fs`/`node:os`/`node:path`, which would pull `node:fs` into this barrel
-// and break the runtime Worker (ADR 0013). It lives behind the Node-only
+// and break the runtime Worker. It lives behind the Node-only
 // `@tekmemo/core/node-fs` subpath instead.

@@ -18,9 +18,9 @@ import { tokenize } from "./tokenize";
  * @remarks
  * - An exact token match contributes `1`.
  * - A partial match (one token contains the other, e.g. "auth" inside
- *   "authentication") contributes `0.25`.
+ * "authentication") contributes `0.25`.
  * - The result is normalized by the number of query terms, yielding a value
- *   in `[0, 1]`.
+ * in `[0, 1]`.
  *
  * @param queryTerms - Tokenized query terms.
  * @param documentTerms - Tokenized document terms.

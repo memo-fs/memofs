@@ -52,10 +52,8 @@ to the same `handleRuntimeRequest` core the bin uses:
 ```ts
 import { createHostedRuntime, handleRuntimeRequest } from "@tekmemo/server";
 import { createServer } from "node:http";
-import {
-  createR2BlobClient,
-  createTursoMetadataStore,
-} from "@tekmemo/adapter-r2";
+import { createR2BlobClient } from "@tekmemo/adapter-r2";
+import { createTursoMetadataStore } from "@tekmemo/adapter-turso";
 import { createVoyageEmbedder } from "@tekmemo/adapter-voyage";
 
 const runtime = createHostedRuntime({

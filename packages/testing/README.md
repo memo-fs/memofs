@@ -1,13 +1,15 @@
+# `@tekmemo/testing`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-testing"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-testing?label=%40tekbreed%2Ftekmemo-testing&style=for-the-badge" alt="npm version" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp; 
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-testing"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-testing?style=for-the-badge" alt="npm downloads" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp; 
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp; 
+  <a href="https://www.npmjs.com/package/@tekmemo/testing"><img src="https://img.shields.io/npm/v/%40tekmemo%2Ftesting?label=%40tekmemo%2Ftesting&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/testing"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Ftesting?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-testing`
+Shared contract tests, fixtures, and fakes for TekMemo packages.
 
 ## What is this?
 
@@ -41,13 +43,13 @@ import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 
 // Define your adapter under test
 const target = () => createOpenAIEmbedder({
-  apiKey: process.env.OPENAI_API_KEY!,
-  model: "text-embedding-3-large",
+ apiKey: process.env.OPENAI_API_KEY!,
+ model: "text-embedding-3-large",
 });
 
 // Run the contract suite — ensures your embedder satisfies the contract
 describe("OpenAI Embedder Contract", () => {
-  embedderContractTests(target);
+ embedderContractTests(target);
 });
 ```
 
@@ -61,11 +63,11 @@ import { createInMemoryRecallStore } from "@tekbreed/tekmemo";
 const target = () => createInMemoryRecallStore();
 
 describe("In-Memory Recall Store Contract", () => {
-  recallStoreContractTests(target, {
-    requiresEmbedder: true,
-    supportsBatching: true,
-    supportsMetadataFiltering: true,
-  });
+ recallStoreContractTests(target, {
+ requiresEmbedder: true,
+ supportsBatching: true,
+ supportsMetadataFiltering: true,
+ });
 });
 ```
 
@@ -77,12 +79,12 @@ import { rerankerContractTests } from "@tekbreed/tekmemo-testing/contracts";
 import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
 
 const target = () => createVoyageReranker({
-  apiKey: process.env.VOYAGE_API_KEY!,
-  model: "rerank-2",
+ apiKey: process.env.VOYAGE_API_KEY!,
+ model: "rerank-2",
 });
 
 describe("Voyage Reranker Contract", () => {
-  rerankerContractTests(target);
+ rerankerContractTests(target);
 });
 ```
 
@@ -94,7 +96,7 @@ import { memoryStoreContractTests } from "@tekbreed/tekmemo-testing/contracts";
 import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
 
 describe("NodeFs Memory Store Contract", () => {
-  memoryStoreContractTests(() => createNodeFsMemoryStore({ rootDir: ".test" }));
+ memoryStoreContractTests(() => createNodeFsMemoryStore({ rootDir: ".test" }));
 });
 ```
 
@@ -108,9 +110,9 @@ Pre-built fakes for unit testing without external API dependencies:
 import { createFakeEmbedder } from "@tekbreed/tekmemo-testing/fakes";
 
 const embedder = createFakeEmbedder({
-  dimensions: 1536,
-  latencyMs: 5,     // Simulated delay per call
-  deterministic: true, // Same output for same input
+ dimensions: 1536,
+ latencyMs: 5, // Simulated delay per call
+ deterministic: true, // Same output for same input
 });
 
 const result = await embedder.embed(["hello"]);
@@ -123,8 +125,8 @@ const result = await embedder.embed(["hello"]);
 import { createFakeReranker } from "@tekbreed/tekmemo-testing/fakes";
 
 const reranker = createFakeReranker({
-  scores: [0.95, 0.8, 0.6, 0.4, 0.2],  // Scores mapped by index
-  latencyMs: 10,
+ scores: [0.95, 0.8, 0.6, 0.4, 0.2], // Scores mapped by index
+ latencyMs: 10,
 });
 ```
 
@@ -147,7 +149,7 @@ const results = await recallStore.query({ query: "test", topK: 5 });
 import { createFakeMemoryStore } from "@tekbreed/tekmemo-testing/fakes";
 
 const store = createFakeMemoryStore({
-  records: { "mem-1": { content: "Hello", metadata: {} } },
+ records: { "mem-1": { content: "Hello", metadata: {} } },
 });
 
 const record = await store.read("mem-1");
@@ -160,10 +162,10 @@ Pre-configured test data for consistent testing:
 
 ```ts
 import {
-  embeddingFixtures,
-  rerankFixtures,
-  recallFixtures,
-  memoryFixtures,
+ embeddingFixtures,
+ rerankFixtures,
+ recallFixtures,
+ memoryFixtures,
 } from "@tekbreed/tekmemo-testing/fixtures";
 
 // Embedding fixtures
@@ -185,11 +187,11 @@ Domain-specific assertions for adapter testing:
 
 ```ts
 import {
-  expectVector,
-  expectSortedDescending,
-  expectFiniteNumber,
-  expectNoMutation,
-  cloneForMutationCheck,
+ expectVector,
+ expectSortedDescending,
+ expectFiniteNumber,
+ expectNoMutation,
+ cloneForMutationCheck,
 } from "@tekbreed/tekmemo-testing";
 
 // Verify embedding vector shape
@@ -224,31 +226,31 @@ Each contract test suite accepts options to tune which tests run:
 
 ```ts
 export interface EmbedderContractOptions {
-  expectedDimensions?: number;
-  supportsBatching?: boolean;
-  skipTests?: string[];       // Test names to skip
-  timeout?: number;            // Per-test timeout
+ expectedDimensions?: number;
+ supportsBatching?: boolean;
+ skipTests?: string[]; // Test names to skip
+ timeout?: number; // Per-test timeout
 }
 
 export interface RecallStoreContractOptions {
-  requiresEmbedder?: boolean;
-  supportsBatching?: boolean;
-  supportsMetadataFiltering?: boolean;
-  supportsNamespacePartitioning?: boolean;
-  skipTests?: string[];
-  timeout?: number;
+ requiresEmbedder?: boolean;
+ supportsBatching?: boolean;
+ supportsMetadataFiltering?: boolean;
+ supportsNamespacePartitioning?: boolean;
+ skipTests?: string[];
+ timeout?: number;
 }
 
 export interface RerankerContractOptions {
-  supportsTopK?: boolean;
-  topK?: number;
-  skipTests?: string[];
-  timeout?: number;
+ supportsTopK?: boolean;
+ topK?: number;
+ skipTests?: string[];
+ timeout?: number;
 }
 
 export interface MemoryStoreContractOptions {
-  skipTests?: string[];
-  timeout?: number;
+ skipTests?: string[];
+ timeout?: number;
 }
 ```
 
@@ -266,16 +268,16 @@ import { createMyEmbedder } from "./my-embedder";
 
 // Contract compliance
 describe("My Embedder Contract", () => {
-  embedderContractTests(() => createMyEmbedder({ apiKey: "test" }));
+ embedderContractTests(() => createMyEmbedder({ apiKey: "test" }));
 });
 
 // Unit tests with fakes
 describe("My Embedder Consumer", () => {
-  it("batches requests correctly", async () => {
-    const fake = createFakeEmbedder({ dimensions: 1024 });
-    const consumer = new MyConsumer(fake);
-    // ...test consumer logic using fakes
-  });
+ it("batches requests correctly", async () => {
+ const fake = createFakeEmbedder({ dimensions: 1024 });
+ const consumer = new MyConsumer(fake);
+ // ...test consumer logic using fakes
+ });
 });
 ```
 

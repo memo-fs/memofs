@@ -1,5 +1,5 @@
-import type { TekMemoCloudFetch } from "@tekbreed/tekmemo/cloud-client";
-import { createTekMemoCloudClient } from "@tekbreed/tekmemo/cloud-client";
+import type { TekMemoCloudFetch } from "@tekmemo/core/cloud-client";
+import { createTekMemoCloudClient } from "@tekmemo/core/cloud-client";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Database } from "../../../db/index.server";
@@ -15,7 +15,7 @@ import { type ApiEnv, createApiApp } from "../..";
  *
  * `sync.test.ts` proves the four handlers behave correctly when driven by raw
  * `fetch()` calls shaped by hand. This file proves the *other* half of the
- * contract: the published `@tekbreed/tekmemo/cloud-client` (the frozen surface
+ * contract: the published `@tekmemo/core/cloud-client` (the frozen surface
  * every SDK consumer imports) and the cloud server agree on the wire — so a
  * real client driving the real server round-trips a file set end-to-end.
  *

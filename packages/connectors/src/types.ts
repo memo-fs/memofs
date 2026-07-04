@@ -5,7 +5,7 @@
  * through the local engine. Each source is a plugin implementing {@link Connector}.
  * This mirrors the embedder/extractor adapter pattern used across TekMemo:
  * adding a connector = writing a new adapter, not refactoring the framework
- * (decision Q10 / ADR 0002).
+ * (decision Q10 /).
  *
  * @public
  */
@@ -18,7 +18,7 @@ import type { JsonObject, Tekmemo } from "@tekmemo/core";
  * Locked schema (decision Q7): `{ id, type, enabled, schedule, sourceMapping,
  * secretRef }`. The `secretRef` is an opaque pointer to a token stored
  * server-side — **never** the token itself (tokens never ride in the file
- * replica; ADR 0002).
+ * replica;).
  *
  * @public
  */
@@ -149,7 +149,7 @@ export interface Connector {
 	 * Fetch + normalize external items into {@link ConnectorRecord}s.
 	 *
 	 * The connector does **not** write notes itself — the runner handles the
-	 * connector-write discipline (decision Q3 / ADR 0002): `source: "connector"`,
+	 * connector-write discipline (decision Q3 /): `source: "connector"`,
 	 * stable `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock.
 	 * Returning records (rather than writing) keeps the discipline in one place
 	 * and makes connectors trivial to test.

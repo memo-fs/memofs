@@ -1,5 +1,5 @@
 /**
- * Memory consolidation — the differentiator of v1 intelligence (ADR 0004 / Q5).
+ * Memory consolidation — the differentiator of v1 intelligence ( / Q5).
  *
  * @remarks
  * Consolidation is a local, deterministic pass over the graph that makes the
@@ -10,11 +10,11 @@
  *
  * The pass is built entirely on primitives that already exist:
  * - {@link invalidateSupersededEdges} — the invalidation primitive (the seam
- *   ADR 0004 named explicitly). Consolidation calls it as a building block.
+ * named explicitly). Consolidation calls it as a building block.
  * - the `supersedes` edge type the rule-based extractor already emits.
  * - {@link GraphStore.mergeNodes} / `queryEdges` / `upsertEdges` — the store's
- *   own invariants stay the source of truth; consolidation only computes a diff
- *   and persists it.
+ * own invariants stay the source of truth; consolidation only computes a diff
+ * and persists it.
  *
  * Why it operates on snapshots: the pure {@link consolidateGraph} function
  * takes `StoredGraphNode[]` / `StoredGraphEdge[]` (the {@link GraphSnapshot}
@@ -41,7 +41,7 @@
  * which rewrites edges onto the surviving node and records the absorbed label
  * as an alias (see `in-memory-graph-store.ts`).
  *
- * @see ADR 0004 — v1 intelligence = LLM-based extraction + memory consolidation.
+ * @see — v1 intelligence = LLM-based extraction + memory consolidation.
  * @see {@link invalidateSupersededEdges} — the invalidation building block.
  * @see {@link GraphStore.mergeNodes} — the merge building block.
  *
@@ -195,7 +195,7 @@ export async function applyConsolidation(
 	plan: ConsolidationResult,
 ): Promise<{ mergesApplied: number; retirementsApplied: number }> {
 	// 1. Merge duplicate nodes first so edge references are canonicalized before
-	//    any retirement marks land.
+	// any retirement marks land.
 	let mergesApplied = 0;
 	for (const merge of plan.merges) {
 		try {
@@ -215,10 +215,10 @@ export async function applyConsolidation(
 	}
 
 	// 2. Retire superseded edges (node-level: every edge referencing a superseded
-	//    node is marked deprecated, preserving the audit trail). Fetch each edge
-	//    first: `upsertEdges` runs `normalizeEdge`, which requires `from`/`to`/
-	//    `type`, so the patch must be merged onto the existing record rather than
-	//    sent as a bare `{id, status}` fragment.
+	// node is marked deprecated, preserving the audit trail). Fetch each edge
+	// first: `upsertEdges` runs `normalizeEdge`, which requires `from`/`to`/
+	// `type`, so the patch must be merged onto the existing record rather than
+	// sent as a bare `{id, status}` fragment.
 	let retirementsApplied = 0;
 	const retiredEdgePatches: GraphEdge[] = [];
 	for (const r of plan.retiredEdges) {
@@ -241,8 +241,8 @@ export async function applyConsolidation(
 	}
 
 	// 3. Retire the superseded nodes themselves (same fetch-then-merge as edges:
-	//    `upsertNodes` requires `type` and `label`, which only the existing
-	//    record carries).
+	// `upsertNodes` requires `type` and `label`, which only the existing
+	// record carries).
 	const retiredNodePatches: GraphNode[] = [];
 	for (const r of plan.retiredNodes) {
 		const existing = await store.getNode(r.id);
@@ -272,7 +272,7 @@ export async function applyConsolidation(
  * Two active nodes are candidates when:
  * - one's `id` appears in the other's `aliases`, or
  * - their canonical labels collide (case-insensitive, trimmed) — the classic
- *   "same concept written twice" duplicate the extractor produces from prose.
+ * "same concept written twice" duplicate the extractor produces from prose.
  *
  * The earlier node (by `createdAt`, stable on `id` as a tiebreak) is kept as
  * the target so the canonical id is stable across runs.
@@ -348,7 +348,7 @@ function findRetirements(
 	supersededNodeIds: string[];
 } {
 	// First, the legacy primitive: edges whose `id` matches a `supersedes.to`.
-	// Kept for parity with the documented seam (ADR 0004 references it by name).
+	// Kept for parity with the documented seam ( references it by name).
 	const invalidated = invalidateSupersededEdges({
 		edges,
 		supersedingEdgeType: supersedingType,

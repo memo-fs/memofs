@@ -2,6 +2,13 @@
 .env
 /node_modules/
 
+# Local secrets + dev data — never commit.
+# `.dev.vars` is loaded by `wrangler dev` as the local Worker bindings; the
+# `.example` is the tracked template.
+.dev.vars
+# Local libSQL server data + logs (from `pnpm dev:db`).
+/.sqld/
+
 # React Router
 /.react-router/
 /build/

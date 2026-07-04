@@ -32,7 +32,7 @@ import {
  * extraction, and agent sessions all run locally.
  *
  * The client is project-scoped:
- *   /v1/projects/:projectId/sync/{push,push/complete,pull,status}
+ * /v1/projects/:projectId/sync/{push,push/complete,pull,status}
  *
  * See `docs/architecture/cloud-sync-and-refactor.md` §7 for the contract.
  *

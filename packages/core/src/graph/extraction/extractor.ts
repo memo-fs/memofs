@@ -13,15 +13,15 @@
  * so the built-in rule-based extractor can satisfy this interface via
  * {@link createRuleBasedExtractor} — letting the write fan-out call *one*
  * shape whether or not an LLM extractor is configured. The rule-based
- * extractor stays the zero-config / offline fallback (ADR 0004); the LLM
+ * extractor stays the zero-config / offline fallback; the LLM
  * extractor layers on top when an adapter is configured.
  *
  * The optional `contradictions` field is the seam memory consolidation
  * consumes: subject–predicate pairs the extractor detected as disagreeing
- * become `supersedes` edges during a consolidation pass (ADR 0004 — "resolve
+ * become `supersedes` edges during a consolidation pass ( — "resolve
  * contradictions via the existing `supersedes` edge type").
  *
- * @see ADR 0004 — v1 intelligence = LLM-based extraction + memory consolidation.
+ * @see — v1 intelligence = LLM-based extraction + memory consolidation.
  * @see {@link MemoryEmbedder} — the precedent adapter interface this mirrors.
  * @see {@link RuleBasedExtractionResult} — the deterministic fallback shape.
  *
@@ -101,7 +101,7 @@ export interface Extractor {
 
 /**
  * Wraps the built-in rule-based extractor to satisfy the {@link Extractor}
- * contract. This is the zero-config / offline fallback (ADR 0004) used when no
+ * contract. This is the zero-config / offline fallback used when no
  * LLM extractor adapter is configured — so the write fan-out always calls one
  * shape.
  *

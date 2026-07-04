@@ -201,32 +201,32 @@ function printHelp(): void {
 	console.log(`Usage: tekmemo-mcp-server [options]
 
 Options:
-  --runtime <local|memory|cloud|hybrid>  Runtime mode. Defaults to local.
-  --root <path>                         Local workspace root. Defaults to cwd.
-  --project-id <id>                     Optional project id / default cloud project id.
-  --workspace-id <id>                   Optional default cloud workspace id.
-  --cloud-url <url>                     TekMemo Cloud API root, e.g. https://memo.tekbreed.com/api/v1.
-  --api-key <key>                       TekMemo Cloud API key. Prefer TEKMEMO_API_KEY.
-  --cloud-timeout-ms <number>           Cloud request timeout. Defaults to cloud-client default.
-  --read-policy <local-first|cloud-first>
-                                         Hybrid read policy. Defaults to local-first.
-  --write-policy <local-first|cloud-first|local-only|cloud-only>
-                                         Hybrid write policy. Defaults to local-first.
-  --read-only                           Block all write tools.
-  --allow-writes                        Allow write tools when host authorizes them.
-  --request-timeout-ms <number>         Per-tool timeout. Defaults to 30000.
-  --max-input-bytes <number>            Max tool argument bytes.
-  --max-output-bytes <number>           Max tool result bytes.
-  --help                                Show this help.
+ --runtime <local|memory|cloud|hybrid> Runtime mode. Defaults to local.
+ --root <path> Local workspace root. Defaults to cwd.
+ --project-id <id> Optional project id / default cloud project id.
+ --workspace-id <id> Optional default cloud workspace id.
+ --cloud-url <url> TekMemo Cloud API root, e.g. https://memo.tekbreed.com/api/v1.
+ --api-key <key> TekMemo Cloud API key. Prefer TEKMEMO_API_KEY.
+ --cloud-timeout-ms <number> Cloud request timeout. Defaults to cloud-client default.
+ --read-policy <local-first|cloud-first>
+ Hybrid read policy. Defaults to local-first.
+ --write-policy <local-first|cloud-first|local-only|cloud-only>
+ Hybrid write policy. Defaults to local-first.
+ --read-only Block all write tools.
+ --allow-writes Allow write tools when host authorizes them.
+ --request-timeout-ms <number> Per-tool timeout. Defaults to 30000.
+ --max-input-bytes <number> Max tool argument bytes.
+ --max-output-bytes <number> Max tool result bytes.
+ --help Show this help.
 
 Environment:
-  TEKMEMO_RUNTIME                       local, memory, cloud, or hybrid.
-  TEKMEMO_ROOT                          Local workspace root.
-  TEKMEMO_CLOUD_URL / TEKMEMO_API_URL   TekMemo Cloud API root.
-  TEKMEMO_API_KEY                       TekMemo Cloud API key.
-  TEKMEMO_WORKSPACE_ID                  Default cloud workspace id.
-  TEKMEMO_PROJECT_ID                    Default project id.
-  TEKMEMO_CLOUD_TIMEOUT_MS              Cloud request timeout.
-  TEKMEMO_MCP_READ_ONLY                 true to block write tools.
+ TEKMEMO_RUNTIME local, memory, cloud, or hybrid.
+ TEKMEMO_ROOT Local workspace root.
+ TEKMEMO_CLOUD_URL / TEKMEMO_API_URL TekMemo Cloud API root.
+ TEKMEMO_API_KEY TekMemo Cloud API key.
+ TEKMEMO_WORKSPACE_ID Default cloud workspace id.
+ TEKMEMO_PROJECT_ID Default project id.
+ TEKMEMO_CLOUD_TIMEOUT_MS Cloud request timeout.
+ TEKMEMO_MCP_READ_ONLY true to block write tools.
 `);
 }

@@ -124,7 +124,7 @@ export const JSON_RPC_ERRORS = {
  * @param input - The raw JSON string payload.
  * @returns The parsed JSON value.
  * @throws {JsonRpcProtocolError} mapped to {@link JSON_RPC_ERRORS.parseError}
- *   if parsing fails.
+ * if parsing fails.
  */
 export function parseJsonRpcPayload(input: string): unknown {
 	try {

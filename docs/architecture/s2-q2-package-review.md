@@ -77,7 +77,7 @@ target.)
 ### B3 — S2-Q1 extraction is **not done** in code (ADR 0007 says it is)
 
 - ADR 0007 + CONTEXT.md + decisions S2-Q1 describe `ai-sdk/` as already
-  extracted to `@tekbreed/tekmemo-adapter-ai-sdk`, with `TekMemoAiRuntime`
+  extracted to `@tekmemo/adapter-ai-sdk`, with `TekMemoAiRuntime`
   renamed to `TekMemoMemoryRuntime` and the `ai` peer dep dropped from core.
 - **Code reality:** `packages/tekmemo/src/ai-sdk/` still has all 14 files
   (runtime, tools, scope, schemas, prepare-call, agent-session). `TekMemoAiRuntime`

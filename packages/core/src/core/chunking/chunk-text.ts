@@ -53,8 +53,8 @@ export interface ChunkTextOptions {
  * @example
  * ```typescript
  * const chunks = chunkText("Long text here...", {
- *   source: { sourceType: "document", sourceId: "doc1" },
- *   memoryType: "core",
+ * source: { sourceType: "document", sourceId: "doc1" },
+ * memoryType: "core",
  * });
  * ```
  */

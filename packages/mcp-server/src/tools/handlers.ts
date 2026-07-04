@@ -316,7 +316,7 @@ function validateToolArguments(
 				1024,
 				262144,
 			);
-			// Progressive disclosure (ADR 0009 Component 4 / Q27).
+			// Progressive disclosure ( / Q27).
 			const detailRaw = optionalString(object.detail, "detail", 16);
 			if (
 				detailRaw !== undefined &&

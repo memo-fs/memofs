@@ -17,6 +17,7 @@ tekmemo/
 │   ├── adapter-ai-sdk/           # @tekmemo/adapter-ai-sdk - Vercel AI SDK adapter
 │   ├── adapter-openai/           # @tekmemo/adapter-openai - OpenAI embedder adapter
 │   ├── adapter-r2/               # @tekmemo/adapter-r2 - Cloudflare R2 blob adapter
+│   ├── adapter-turso/            # @tekmemo/adapter-turso - Turso/libSQL metadata adapter
 │   ├── adapter-transformers/     # @tekmemo/adapter-transformers - local Transformers.js embedder
 │   ├── adapter-voyage/           # @tekmemo/adapter-voyage - Voyage AI embedder/reranker adapter
 │   ├── adapter-workers-ai/       # @tekmemo/adapter-workers-ai - Workers AI extractor adapter

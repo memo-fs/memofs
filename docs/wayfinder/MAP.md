@@ -111,6 +111,8 @@ the current canonical architecture before any build work.
 ### Closed local tickets
 
 - [WF-2 — Execute workspace naming + scope overhaul (@tekbreed → @tekmemo)](tickets/WF-2-naming-and-scope-overhaul.md) — local package names, directories, versions, repository metadata, lockfile references, and SSOT rule docs now follow the reconciled package map.
+- [WF-1 — Blob/metadata-decoupled adapter contract](tickets/WF-1-adapter-cloudflare-contract.md) — `@tekmemo/adapter-r2` (blob-only) + `@tekmemo/adapter-turso` (metadata-only) ship as decoupled packages over the provider-neutral `BlobClient`/`MetadataStore` interfaces in core (S3-Q3, carried under K1).
+- [WF-5 — Amend ADRs + SSOT docs to match the overhaul](tickets/WF-5-adr-and-ssot-doc-amendments.md) — ADRs 0005/0011/0012/0013 amended for K1–K3; new [ADR 0016](../adr/0016-scope-flip-and-dir-equals-name.md) records the scope flip + K4 + dir-equals-name SSOT; decisions.md / CONTEXT.md / D2 doc + root docs flipped to `@tekmemo/*` and `packages/core`. K5 (GitHub Issues migration) + local-ticket deletion deferred.
 
 ## Fog
 

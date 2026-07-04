@@ -1,22 +1,21 @@
 import { defineConfig, devices } from "@playwright/test";
-import "dotenv/config";
 
-const PORT = "8787";
-const BASE_URL = "http://127.0.0";
+const PORT = 8787;
+const ORIGIN = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
 	testDir: "./tests/e2e",
-	timeout: 5 * 1000,
+	timeout: 30 * 1000,
 	expect: {
-		timeout: 5 * 1000,
+		timeout: 10 * 1000,
 	},
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
-	retries: process.env.CI ? 2 : 1,
+	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
-	reporter: "html",
+	reporter: process.env.CI ? "github" : "html",
 	use: {
-		baseURL: `${BASE_URL}.1:${PORT}`,
+		baseURL: ORIGIN,
 		trace: "on-first-retry",
 		screenshot: "only-on-failure",
 	},
@@ -30,12 +29,11 @@ export default defineConfig({
 	],
 
 	webServer: {
-		command: `npx miniflare --port ${PORT}`,
-		port: Number(PORT),
-		url: BASE_URL,
-		reuseExistingServer: true,
+		command: `pnpm preview --port ${PORT}`,
+		url: `${ORIGIN}/v1/health`,
+		reuseExistingServer: !process.env.CI,
+		timeout: 180 * 1000,
 		stdout: "pipe",
 		stderr: "pipe",
-		env: { PORT },
 	},
 });

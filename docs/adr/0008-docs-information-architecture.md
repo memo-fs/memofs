@@ -125,7 +125,7 @@ locked decisions:
 
 2. **The AI SDK lives in its adapter, not core.**
    `packages/tekmemo/ai-sdk/*` and `api/tekmemo/ai-sdk.md` must point at
-   `@tekbreed/tekmemo-adapter-ai-sdk` and the renamed `TekMemoMemoryRuntime`
+   `@tekmemo/adapter-ai-sdk` and the renamed `TekMemoMemoryRuntime`
    (was `TekMemoAiRuntime`) — S2-Q1 / ADR 0007. Core's API page stops
    re-exporting the Vercel tool schemas.
 

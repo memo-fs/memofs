@@ -6,8 +6,8 @@ import { MemoryWriteBlockedError } from "../core/errors/errors";
  *
  * @remarks
  * This is the read-side-independent safety layer of write intelligence
- * (ADR 0009 Component 6, layer 1). It is the same security thesis as the
- * connector `secretRef` model (ADR 0002) — *never store secret material, store
+ * (, layer 1). It is the same security thesis as the
+ * connector `secretRef` model — *never store secret material, store
  * an opaque reference* — applied to memory *content*. An agent that scrapes a
  * `.env` and writes `OPENAI_API_KEY=sk-...` into `notes.md` is creating a
  * security hole: `notes.md` syncs to the cloud replica and lives on disk in
@@ -16,24 +16,24 @@ import { MemoryWriteBlockedError } from "../core/errors/errors";
  * Design principles:
  *
  * - **Pure and data-driven.** A {@link BlocklistRule} table drives detection; a
- *   single {@link detectBlockedContent} function runs every rule. Trivially
- *   unit-testable, trivially extensible — add a rule, not a branch.
+ * single {@link detectBlockedContent} function runs every rule. Trivially
+ * unit-testable, trivially extensible — add a rule, not a branch.
  * - **High precision over high recall.** v1 favors false negatives (a leaked
- *   secret slips through) over false positives (a legitimate note about auth is
- *   rejected). Rejected writes are disruptive and erode trust in the tool. The
- *   rule set targets the shapes real API keys take (provider prefixes, PEM
- *   blocks, JWTs) plus structured `key=value` secret assignments that require a
- *   digit and 12+ chars — so "password: must be rotated" and "we use bcrypt"
- *   (documentation) never trip.
+ * secret slips through) over false positives (a legitimate note about auth is
+ * rejected). Rejected writes are disruptive and erode trust in the tool. The
+ * rule set targets the shapes real API keys take (provider prefixes, PEM
+ * blocks, JWTs) plus structured `key=value` secret assignments that require a
+ * digit and 12+ chars — so "password: must be rotated" and "we use bcrypt"
+ * (documentation) never trip.
  * - **Never echo the secret.** Violations carry a redacted {@link
- *   BlocklistViolation.preview} (first 3 chars + … + last 1), never the full
- *   match. Error messages and logs must propagate only the preview.
- * - **Deterministic, always-on, no LLM.** Per the invariant (ADR 0009): the
- *   security layer is deterministic by default. There is no LLM path for the
- *   blocklist — secrets are rejected regardless of configuration.
+ * BlocklistViolation.preview} (first 3 chars + … + last 1), never the full
+ * match. Error messages and logs must propagate only the preview.
+ * - **Deterministic, always-on, no LLM.** Per the invariant: the
+ * security layer is deterministic by default. There is no LLM path for the
+ * blocklist — secrets are rejected regardless of configuration.
  *
- * @see ADR 0009 Component 6 — write intelligence (blocklist + durability tier).
- * @see ADR 0002 — the `secretRef` model (reference, never store).
+ * @see — write intelligence (blocklist + durability tier).
+ * @see — the `secretRef` model (reference, never store).
  *
  * @public
  */
@@ -83,14 +83,14 @@ export interface BlocklistViolation {
  * @remarks
  * Precision notes:
  * - Provider-prefixed keys (`AKIA…`, `ghp_…`, `sk-…`, `AIza…`, `xox…`,
- *   `sk_live_…`) are near-zero false-positive — the prefixes are unambiguous.
+ * `sk_live_…`) are near-zero false-positive — the prefixes are unambiguous.
  * - PEM `PRIVATE KEY` blocks and JWTs (`eyJ…`) are structurally unambiguous.
  * - The `secret_assignment` rule requires the value to be 12+ chars *and*
- *   contain a digit, so documentation prose ("password: must be rotated",
- *   "we use bcrypt", "secret: see docs") does not trip it. Real API secrets are
- *   alphanumeric/base64 and almost always ≥12 chars with a digit.
+ * contain a digit, so documentation prose ("password: must be rotated",
+ * "we use bcrypt", "secret: see docs") does not trip it. Real API secrets are
+ * alphanumeric/base64 and almost always ≥12 chars with a digit.
  * - Connection strings (`scheme://user:pass@host`) catch DB/redis URLs with
- *   embedded credentials.
+ * embedded credentials.
  */
 export const BLOCKLIST_RULES: readonly BlocklistRule[] = [
 	{
@@ -222,7 +222,7 @@ function redact(match: string): string {
  * Assert that a write is allowed, throwing {@link MemoryWriteBlockedError} if
  * any scanned text contains blocklisted secret material.
  *
- * This is the enforcement half of write intelligence (ADR 0009 Component 6).
+ * This is the enforcement half of write intelligence.
  * The pure {@link detectBlockedContent} decides; this function acts. Both the
  * typed write path (`writeMemory` / `updateCoreMemory`) and the agent-session
  * durable-memory append call it, so the two known routes into syncable

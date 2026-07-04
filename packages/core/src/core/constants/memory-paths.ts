@@ -42,7 +42,7 @@ export const TEKMEMO_PATHS = Object.freeze({
 	snapshots: Object.freeze({
 		index: `${TEKMEMO_DIR}/snapshots/snapshots.jsonl`,
 	}),
-	/** Connector config — the 11th canonical file (ADR 0002 / decision Q2). No secrets. */
+	/** Connector config — the 11th canonical file ( / decision Q2). No secrets. */
 	connectors: `${TEKMEMO_DIR}/connectors.json`,
 	tmpDir: `${TEKMEMO_DIR}/tmp`,
 } as const);

@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router";
-import { safeRelativeRedirect } from "~/server/session.server";
+// import { safeRelativeRedirect } from "~/server/redirect";
 
 /**
  * Get the `redirect` or `next` query param as a validated same-origin path.
@@ -15,7 +15,9 @@ import { safeRelativeRedirect } from "~/server/session.server";
  */
 export function useAuthRedirect() {
 	const [params] = useSearchParams();
-	return safeRelativeRedirect(
-		params.get("redirect") ?? params.get("next") ?? undefined,
-	);
+	return params.get("redirect") ?? params.get("next") ?? undefined;
+
+	// safeRelativeRedirect(
+	// params.get("redirect") ?? params.get("next") ?? undefined
+	// );
 }

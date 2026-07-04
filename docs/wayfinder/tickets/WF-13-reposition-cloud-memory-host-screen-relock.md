@@ -1,5 +1,12 @@
 # WF-13 — Reposition cloud as "file replica + hosted memory runtime" and re-lock screens
 
+> **Premises superseded (2026-07-04).** This ticket's body was charted
+> before the [reconciliation](../../architecture/reconciliation-2026-07-02.md)
+> locked K1–K5. Where the body conflicts with K1–K5, the reconciliation wins.
+> Tracker migration to GitHub Issues (K5) and local-file deletion are deferred.
+
+
+
 `wayfinder:grilling` · status: open · claimed: no · blocked-by: WF-1 (hosted-memory infra contract), WF-3 (single-Worker can run the runtime)
 
 ## Question

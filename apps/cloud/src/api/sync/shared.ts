@@ -20,7 +20,7 @@ import { createId } from "@paralleldrive/cuid2";
 import type {
 	CloudFileManifest,
 	FileManifest,
-} from "@tekbreed/tekmemo/cloud-client";
+} from "@tekmemo/core/cloud-client";
 import { desc, eq, sql } from "drizzle-orm";
 import type { Database } from "../../db/index.server";
 import { projectFiles, projects, syncCursors } from "../../db/schema";

@@ -15,7 +15,7 @@
  * `maxAgeMs` safety net guards against PID reuse. Malformed/partial lock files
  * (a human hand-edited `.lock`) are treated as stale and reclaimed.
  *
- * This is the local counterpart to ADR 0010's cloud concurrency-control layer:
+ * This is the local counterpart to's cloud concurrency-control layer:
  * local *serializes* (a second local process is accidental, not a workload);
  * cloud serializes *through a DB* (multi-agent writers are the intended B3
  * workload). Two mechanisms, two scales.
@@ -257,7 +257,7 @@ export class AdvisoryFileLock {
  *
  * @param pid - The process id to probe.
  * @returns `true` if the process exists (alive or running as another user),
- *   `false` if it is dead.
+ * `false` if it is dead.
  */
 export function isProcessAlive(pid: number): boolean {
 	if (typeof pid !== "number" || !Number.isFinite(pid) || pid <= 0) {

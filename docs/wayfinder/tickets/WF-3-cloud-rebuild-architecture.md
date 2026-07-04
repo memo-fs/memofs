@@ -1,5 +1,12 @@
 # WF-3 — Cloud app (apps/cloud) rebuild architecture
 
+> **Premises superseded (2026-07-04).** This ticket's body was charted
+> before the [reconciliation](../../architecture/reconciliation-2026-07-02.md)
+> locked K1–K5. Where the body conflicts with K1–K5, the reconciliation wins.
+> Tracker migration to GitHub Issues (K5) and local-file deletion are deferred.
+
+
+
 `wayfinder:grilling` · status: open · claimed: no · blocked-by: none
 
 ## Question

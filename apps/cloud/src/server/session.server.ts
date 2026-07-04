@@ -22,6 +22,16 @@ import { createMagicLinkMailer } from "./email";
 import type { CloudWorkerEnv } from "./env";
 import { type AccountView, getAccountForUser } from "./queries/account";
 
+// Re-export the open-redirect guard for legacy `~/server/session.server` imports.
+// The SSOT now lives in `./redirect` so client code (which cannot import a
+// `.server` module) can use it too. New code should import from `./redirect`
+// directly.
+export {
+	SAFE_REDIRECT_DEFAULT,
+	safeRedirect,
+	safeRelativeRedirect,
+} from "./redirect";
+
 /** Dashboard-facing user identity: the Better Auth user + their billing account. */
 export interface SessionUser {
 	id: string;
@@ -165,35 +175,6 @@ export async function requireUserWithAccount(
 		db,
 		account,
 	};
-}
-
-/**
- * Default destination when a redirect target is missing or unsafe.
- */
-const SAFE_REDIRECT_DEFAULT = "/dashboard";
-
-/**
- * Coerces an attacker-influenced redirect target into a same-origin path.
- *
- * The `redirect`/`callbackURL` values originate from the URL / form body and
- * flow into Better Auth's post-login redirect. Without validation an absolute
- * URL (`https://evil.com`) would win during URL resolution and phish the user
- * off-site after a legitimate sign-in (VULN-001). The cloud app has no
- * legitimate cross-origin post-login destination, so this enforces the strictest
- * policy: a path starting with a single `/` (rejects `//evil.com` — the
- * protocol-relative form — and any scheme://host). Anything else falls back to
- * {@link SAFE_REDIRECT_DEFAULT}.
- *
- * @param to the raw redirect target from a query param or form field.
- */
-export function safeRelativeRedirect(
-	to: FormDataEntryValue | string | null | undefined,
-): string {
-	if (!to || typeof to !== "string") return SAFE_REDIRECT_DEFAULT;
-	// Same-origin relative path: "/dashboard", "/projects/x". Reject "//evil.com"
-	// (protocol-relative — resolves to evil.com) and backslash variants.
-	if (/^\/[^/\\]/.test(to) || to === "/") return to;
-	return SAFE_REDIRECT_DEFAULT;
 }
 
 /**

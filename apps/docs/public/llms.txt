@@ -2,15 +2,15 @@
 
 > TekMemo is a file-first memory runtime for AI agents and coding assistants. It gives LLMs durable, project-scoped context so they stay accurate and consistent across sessions. Memory lives as plain text and JSON in a `.tekmemo/` folder (local) or in TekMemo Cloud (hosted).
 
-TekMemo is published as three packages:
-- `@tekbreed/tekmemo` — the core memory runtime (the `Tekmemo` client, filesystem store, graph memory, recall, cloud client, AI SDK helpers).
-- `@tekbreed/tekmemo-cli` — the `tekmemo` CLI for terminal and CI workflows.
-- `@tekbreed/tekmemo-mcp-server` — a self-hostable MCP server (stdio) for agent integration.
+TekMemo is published as focused packages:
+- `@tekmemo/core` — the core memory runtime (the `Tekmemo` client, filesystem store, graph memory, recall, and cloud client contracts).
+- `tekmemo` — the CLI for terminal and CI workflows.
+- `@tekmemo/mcp-server` — a self-hostable MCP server (stdio) for agent integration.
 
 Official adapters live alongside it:
-- `@tekbreed/tekmemo-adapter-openai` — OpenAI embeddings.
-- `@tekbreed/tekmemo-adapter-voyage` — Voyage AI embedder + reranker.
-- `@tekbreed/tekmemo-adapter-transformers` — zero-config local ONNX embedder (Transformers.js) for hybrid recall with no API key, no cloud.
+- `@tekmemo/adapter-openai` — OpenAI embeddings.
+- `@tekmemo/adapter-voyage` — Voyage AI embedder + reranker.
+- `@tekmemo/adapter-transformers` — zero-config local ONNX embedder (Transformers.js) for hybrid recall with no API key, no cloud.
 
 ## Recall (local intelligence)
 
@@ -26,11 +26,11 @@ Environment variables (same priority chain: constructor args > env > `.tekmemo/c
 Install the core runtime and start recording memory in code:
 
 ```bash
-npm install @tekbreed/tekmemo
+npm install @tekmemo/core
 ```
 
 ```ts
-import { Tekmemo } from "@tekbreed/tekmemo";
+import { Tekmemo } from "@tekmemo/core";
 
 const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
 await memo.notes.record({ content: "Use D1 for tenant metadata.", kind: "decision" });
@@ -60,7 +60,7 @@ const hits = await memo.recall("database decisions");
 Two ways to expose TekMemo to coding agents:
 
 - **Hosted server** (cloud-only): `https://mcp.memo.tekbreed.com/` over Streamable HTTP, bearer-token auth, read-only by default. Docs: https://docs.memo.tekbreed.com/packages/mcp/hosted
-- **Self-hosted stdio server** (`@tekbreed/tekmemo-mcp-server`): supports `local`, `cloud`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memo.tekbreed.com/packages/mcp/
+- **Self-hosted stdio server** (`@tekmemo/mcp-server`): supports `local`, `cloud`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memo.tekbreed.com/packages/mcp/
 
 Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.memo.tekbreed.com/packages/mcp/client-setup
 

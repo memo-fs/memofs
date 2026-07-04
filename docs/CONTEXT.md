@@ -40,7 +40,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 ### Code & contracts
 
 - **Tekmemo (class)** — The primary TekMemo client
-  (`packages/tekmemo/src/tekmemo/Tekmemo.ts`). Construct it with
+  (`packages/core/src/tekmemo/Tekmemo.ts`). Construct it with
   `{ rootDir, projectId, mode? }`. **Modes: `local` | `hybrid`** (locked S3-Q5 —
   two modes, not three). The legacy `"cloud"` mode was removed per D4 (the cloud
   is a file replica, not a runtime mode); the volatile `"memory"` mode was
@@ -61,7 +61,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   degrade to plain text search in any mode.
 
 - **TekMemoMemoryRuntime** — The **framework-neutral runtime contract** (locked
-  S2-Q1) that lives in **core** (`packages/tekmemo/src/ai-runtime/types.ts`).
+  S2-Q1) that lives in **core** (`packages/core/src/ai-runtime/types.ts`).
   Methods: `recall`, `readCoreMemory`, `updateCoreMemory`, `listNotes`,
   `createNote`, and an optional `index`. Each AI-framework adapter implements it
   (the Vercel AI SDK adapter via `createAiSdkRuntimeFromTekmemo`); future adapters
@@ -73,14 +73,14 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 - **createAiSdkRuntimeFromTekmemo** — The supported way to build a
   `TekMemoMemoryRuntime` for the **Vercel AI SDK**. Takes a `Tekmemo` instance and
   delegates every call back to it, so recall always flows through the
-  intelligent engine. Lives in **`@tekbreed/tekmemo-adapter-ai-sdk`** (extracted
+  intelligent engine. Lives in **`@tekmemo/adapter-ai-sdk`** (extracted
   from core per decisions log S2-Q1). See ADR 0007.
 
 - **AI SDK helpers** — `buildRuntimeMemoryContext()` (context-first system
   prompt: core memory + notes + recall), `buildRuntimeMemoryToolDefinition()`
   (multi-command memory tool for in-turn recall/remember),
   `runRuntimeMemoryTool()` (executes a tool command with scope enforcement).
-  Exported from **`@tekbreed/tekmemo-adapter-ai-sdk`** (not core) per S2-Q1.
+  Exported from **`@tekmemo/adapter-ai-sdk`** (not core) per S2-Q1.
 
 - **AiMemoryAccessContext** — Scope object (`projectId`, `userId`,
   `conversationId`, `workspaceId`, `tenantId`, `participantIds`) controlling
@@ -110,7 +110,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 - **Recall decay** — The recency component of recall scoring: an exponential
   half-life (default 30 days) applied to the recency boost, so newer memories
   rank higher. Affects ranking only, never storage. Implemented in
-  `packages/tekmemo/src/recall/hybrid/hybrid-recall.ts`.
+  `packages/core/src/recall/hybrid/hybrid-recall.ts`.
 
 - **Managed-runtime tier** — The future cloud tier (v1.x/v2) where TekMemo
   Cloud runs the *same* local `Tekmemo` engine + an embedder against the user's
@@ -263,7 +263,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   file-first": day-one v1 scenario (two Claude Code windows on one repo) no
   longer silently loses a core-memory write. See decisions log Q28.
 
-- **Connector framework (`@tekbreed/tekmemo-connectors`)** — A new published
+- **Connector framework (`@tekmemo/connectors`)** — A new published
   package (locked Q6) holding the local connector framework + built-in
   connectors (Notion, GitHub, …). Executes ingestion locally per Q1; config
   syncs via `.tekmemo/connectors.json` per Q2. See decisions log Q6.
@@ -295,12 +295,14 @@ _Avoid:_ `ChatModel` (Vercel-AI-SDK-flavored — that name belongs in the
 you mean this specific transport contract (say `LlmClient`).
 
 - **Connector (interface)** — The provider-neutral plugin contract in
-  `@tekbreed/tekmemo-connectors` (locked Q7); each connector (GitHub, Notion,
+  `@tekmemo/connectors` (locked Q7); each connector (GitHub, Notion,
   later Linear/Slack/…) implements it. Adding a connector = writing a new
   adapter, not refactoring the framework. v1 ships GitHub + Notion; Linear is
   queued as #3.
 
-- **Cloud stack** — TekMemo Cloud runs as **one Cloudflare Worker**: Hono API +
+- **Cloud stack** — TekMemo Cloud runs as **one Cloudflare Worker** (v1
+  file-replica; the two-Worker split is gated on a K3 bundle measurement — see
+  [ADR 0013](./adr/0013-two-worker-split.md) amended): Hono API +
   React Router **v8** framework-mode SSR dashboard, served via Static Assets.
   Storage: R2 (blobs, free egress) + Turso/libSQL + Drizzle. Auth: Better Auth
   (pending capability check). Scheduling/queues: Upstash QStash+Redis+Workflow.
@@ -355,9 +357,9 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   (Merchant of Record — handles global tax; Benefits API maps to entitlements;
   metered for storage overage). See ADR 0006.
 
-- **AI SDK adapter (`@tekbreed/tekmemo-adapter-ai-sdk`)** — A new **published
+- **AI SDK adapter (`@tekmemo/adapter-ai-sdk`)** — A new **published
   adapter package** (locked S2-Q1) holding the Vercel AI SDK integration that
-  previously lived in `packages/tekmemo/src/ai-sdk/`. Owns the runtime bridge
+  previously lived in `packages/core/src/ai-sdk/`. Owns the runtime bridge
   (`createAiSdkRuntimeFromTekmemo`), the AI SDK tool wrapper
   (`buildMemoryToolDefinition` / `runStructuredMemoryTool`), prepare-call memory
   text, agent-session instructions, and scope policy. The `ai` peer dep is a
@@ -366,7 +368,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   core). See decisions log S2-Q1.
 
 - **AgentFS** — The **framework-agnostic session-workspace primitive** that
-  stays in **core** (`packages/tekmemo/src/agentfs/`, locked S2-Q1). Defines
+  stays in **core** (`packages/core/src/agentfs/`, locked S2-Q1). Defines
   `AgentfsLikeClient` (readText/writeText/appendText/exists/deleteText +
   optional sync) and `createTekMemoAgentSession` (isolated per-session
   workspace: pulls memory in, scaffolds plan/commands/errors/changes/notes,
@@ -410,7 +412,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   parallel store — one set of files, the runtime is a new reader/writer over
   them.
 
-- **R2 memory store adapter (`@tekbreed/tekmemo-adapter-r2`)** — The concrete
+- **R2 memory store adapter (`@tekmemo/adapter-r2`)** — The concrete
   published adapter (locked Q31 / ADR 0012) implementing the
   **`BlobClient`** contract for Cloudflare R2: `createR2BlobClient(binding:
   R2Bucket)`. **Blob-only** (locked S3-Q3 — the blob and metadata axes were
@@ -433,18 +435,18 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   `-postgres` / `-d1` / `-sqlite` (metadata) implement the same contracts.
 _Avoid:_ "tekmemo-adapter-r2-turso" (the legacy bundled name); combo package
 names generally.
-- **`tekmemo-adapter-turso` (`@tekbreed/tekmemo-adapter-turso`)** — The new
+- **`tekmemo-adapter-turso` (`@tekmemo/adapter-turso`)** — The new
   **metadata-only** package (locked S3-Q3) holding the Turso/libSQL
   `MetadataStore` extracted out of the old bundled R2 package. A
   **replica-aware** store: reuses the cloud's existing `project_files` table
   (the sync-replica reuse optimization from ADR 0012 — "one set of files").
   `apps/cloud` imports `tekmemo-adapter-r2` + `tekmemo-adapter-turso` (one extra
   import; behavior unchanged).
-- **`tekmemo-adapter-s3` (`@tekbreed/tekmemo-adapter-s3`)** — The new
+- **`tekmemo-adapter-s3` (`@tekmemo/adapter-s3`)** — The new
   **blob-only** package (locked S3-Q3): a `BlobClient` over the S3 API
   (universal — covers AWS S3, MinIO, Backblaze B2, DigitalOcean Spaces, and R2
   via its S3-compatible API). The build-now blob adapter for self-hosters.
-- **`tekmemo-adapter-postgres` (`@tekbreed/tekmemo-adapter-postgres`)** — The
+- **`tekmemo-adapter-postgres` (`@tekmemo/adapter-postgres`)** — The
   new **metadata-only** package (locked S3-Q3): a `MetadataStore` over a
   `pg`/Postgres connection. A **standalone** store (no sync replica to reuse),
   so it owns its **own schema** (`tekmemo_files`) + an `ensureSchema()` migration,
@@ -639,7 +641,7 @@ under S3-Q9); "defer the intelligence tier" (it ships).
 _Avoid:_ "self-hosted cloud," "on-prem runtime" (on-prem implies the cloud
 product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 
-- **tekmemo-server (`@tekbreed/tekmemo-server`)** — The **OSS-deployable
+- **tekmemo-server (`@tekmemo/server`)** — The **OSS-deployable
   hosted-runtime server** (locked S3-Q1, shape B). A published package that
   serves the hosted runtime over an API (HTTP/JSON-RPC), built on the
   **provider-neutral** `createHostedRuntime` factory. Deployable two ways: as a
@@ -652,7 +654,7 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   library." Owns the provider-neutral factory; `apps/cloud` consumes it. The
   cloud and the OSS self-hoster run **identical `tekmemo-server` code** — the
   only difference is the deployment target + the providers injected.
-  **Distinct from** `@tekbreed/tekmemo` (the core library, in-process only) and
+  **Distinct from** `@tekmemo/core` (the core library, in-process only) and
   `apps/cloud` (the SaaS = substrate + commercial layer).
 
 ### Self-hosting commercial boundary (locked S3-Q7)
@@ -682,7 +684,16 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   **sync entitlements apply, runtime entitlements don't** (the runtime is
   self-hosted).
 
-### Cloud worker topology (locked S3-Q2)
+### Cloud worker topology (locked S3-Q2; **commitment gated by K3 — see [ADR 0013](./adr/0013-two-worker-split.md) amended**)
+
+> **K3 (2026-07-04):** the two-Worker split below is the **canonical topology**,
+> but the commitment to actually split is gated on a `wrangler deploy --dry-run`
+> measurement that has not yet run. The "runtime imports do not fit in 3 MB"
+> claim is asserted, never measured — `@tekmemo/server` is a thin factory over
+> injected adapters. Three outcomes: ≤ 3 MB → collapse to one Worker; ≤ 10 MB →
+> free-tier-only split; > 10 MB → split stands. WF-3 owns the dry-run. The
+> split's *thesis* (the boundary is the runtime API; cloud and OSS run identical
+> `@tekmemo/server` code) is unchanged by K3.
 
 - **Two-Worker split** — The cloud deploys as **two** Cloudflare Workers, not
   one (locked S3-Q2; revises ADR 0005's "one Worker" claim). A hard constraint
@@ -718,16 +729,16 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 ## Key entry points
 
 - AI SDK runtime: `packages/tekmemo-adapter-ai-sdk/` *(was
-  `packages/tekmemo/src/ai-sdk/runtime/tekmemo-runtime.ts`; extracted per
+  `packages/core/src/ai-sdk/runtime/tekmemo-runtime.ts`; extracted per
   decisions log S2-Q1).*
-- `Tekmemo` class: `packages/tekmemo/src/tekmemo/Tekmemo.ts`
+- `Tekmemo` class: `packages/core/src/tekmemo/Tekmemo.ts`
 - Provider-neutral hosted-runtime factory: `packages/tekmemo-server/` *(new, S3-Q1
   — `createHostedRuntime`, consumed by the OSS server + the cloud's runtime
   Worker).*
-- `LlmClient` contract: `packages/tekmemo/src/ai-runtime/` *(new core interface,
+- `LlmClient` contract: `packages/core/src/ai-runtime/` *(new core interface,
   S3-Q4 / ADR 0014 — the 4th member of the embedder/reranker/extractor family).*
 - AgentFS session controller:
-  `packages/tekmemo/src/agentfs/session/agent-session.ts`
+  `packages/core/src/agentfs/session/agent-session.ts`
 - AI SDK tests: `packages/tekmemo-adapter-ai-sdk/tests/` *(moved with the
   package)*
 - Runnable example: `examples/ai-sdk/agent.ts`
@@ -754,7 +765,7 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   $24-coming-soon; entitlement-based enforcement (numeric caps, not plan-name
   checks); Polar billing (Merchant of Record).
 - [ADR 0007](./adr/0007-ai-sdk-extraction.md) — Extract the Vercel AI SDK
-  integration out of core into `@tekbreed/tekmemo-adapter-ai-sdk`; keep
+  integration out of core into `@tekmemo/adapter-ai-sdk`; keep
   framework-agnostic `agentfs/` in core. Runtime interface
   (`TekMemoMemoryRuntime`, renamed from `TekMemoAiRuntime`) stays in core as the
   framework-neutral contract; the Vercel tool/protocol layer stays in the
@@ -782,7 +793,7 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   silent-data-loss bug; the concurrency layer is smaller than the full runtime
   and ships first, unblocking Teams revenue safely. Captures Q32.
 - [ADR 0012](./adr/0012-r2-memory-store-adapter.md) — R2-backed `MemoryStore`
-  as a new adapter `@tekbreed/tekmemo-adapter-r2` + a provider-neutral
+  as a new adapter `@tekmemo/adapter-r2` + a provider-neutral
   remote-blob store contract (`RemoteBlobMemoryStore`) in core. The hard OSS
   prerequisite for phase 3 (Workers have no Node `fs`). Captures Q31.
 - [ADR 0013](./adr/0013-two-worker-split.md) — The cloud deploys **two**

@@ -15,7 +15,8 @@ remain the primary install surfaces.
 | `packages/tekmemo` | `tekmemo` | unscoped | CLI tool for local and cloud memory workflows |
 | `packages/adapter-ai-sdk` | `@tekmemo/adapter-ai-sdk` | `@tekmemo` | Vercel AI SDK adapter, memory tool, runtime bridge |
 | `packages/adapter-openai` | `@tekmemo/adapter-openai` | `@tekmemo` | OpenAI embedder adapter |
-| `packages/adapter-r2` | `@tekmemo/adapter-r2` | `@tekmemo` | Cloudflare R2 remote-blob adapter |
+| `packages/adapter-r2` | `@tekmemo/adapter-r2` | `@tekmemo` | Cloudflare R2 blob adapter |
+| `packages/adapter-turso` | `@tekmemo/adapter-turso` | `@tekmemo` | Turso/libSQL metadata adapter |
 | `packages/adapter-transformers` | `@tekmemo/adapter-transformers` | `@tekmemo` | Local ONNX embedder adapter with Transformers.js |
 | `packages/adapter-voyage` | `@tekmemo/adapter-voyage` | `@tekmemo` | Voyage AI embedder and reranker adapter |
 | `packages/adapter-workers-ai` | `@tekmemo/adapter-workers-ai` | `@tekmemo` | Cloudflare Workers AI extractor adapter |

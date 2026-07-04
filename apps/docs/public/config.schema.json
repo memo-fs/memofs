@@ -69,7 +69,7 @@
 				},
 				"localEmbeddings": {
 					"type": "boolean",
-					"description": "When true, lazy-load a local ONNX embedder (via @tekbreed/tekmemo-adapter-transformers) so hybrid recall works with no API keys. The model is only loaded on the first recall. Disable to keep the runtime import-light. Defaults to false in the core runtime; the MCP server may default this on."
+					"description": "When true, lazy-load a local ONNX embedder (via @tekmemo/adapter-transformers) so hybrid recall works with no API keys. The model is only loaded on the first recall. Disable to keep the runtime import-light. Defaults to false in the core runtime; the MCP server may default this on."
 				},
 				"embeddingModel": {
 					"type": "string",

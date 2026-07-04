@@ -1,5 +1,5 @@
 /**
- * Progressive recall — per-section expansion cursors (ADR 0009 Component 4 /
+ * Progressive recall — per-section expansion cursors ( /
  * Q27).
  *
  * @remarks
@@ -9,7 +9,7 @@
  * `expand` to pull only the section it needs and stops. Compact ≈ 6kb; full ≈
  * 80kb; the agent pulls the 2kb it needs — vs ~64kb truncated before Q27.
  *
- * The strategist intelligence (Rewrite → Resolve → Filter → Budget, ADR 0009
+ * The strategist intelligence (Rewrite → Resolve → Filter → Budget
  * Component 2) already exists. Q27 is a *delivery* change plus one genuinely
  * new piece of machinery: the strategist must be **stateful across two calls**
  * so the second call re-resolves fast. Today's `buildContext()` is stateless.
@@ -25,7 +25,7 @@
  * `helpers.ts` (the recall/list pagination cursors) — consistent cursor
  * hygiene across the runtime.
  *
- * @see ADR 0009 — Component 4 (progressive recall).
+ * @see — Component 4 (progressive recall).
  *
  * @public
  */
@@ -45,7 +45,7 @@ import type {
  * Per-section caps for compact mode. These are what make the first call ~6kb
  * instead of ~64kb: each negotiable section is capped, and the surplus is
  * advertised as an expansion affordance (the agent pulls it only if it needs
- * it). Entities are already compact one-liners (ADR 0009 Component 3 / Q26),
+ * it). Entities are already compact one-liners ( / Q26),
  * so they're never capped in compact mode — capping them would lose the
  * high-trust artifact, which defeats the trust-order purpose.
  *
@@ -181,7 +181,7 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 8;
 
 /**
- * A session-scoped cache of resolved context pointers (ADR 0009 Component 4 /
+ * A session-scoped cache of resolved context pointers ( /
  * Q27). Held as a closure variable by each runtime strategy (one per
  * `Tekmemo` instance), so the cache is never global and never crosses
  * instances. LRU + TTL bounded: the cache is a performance optimization for

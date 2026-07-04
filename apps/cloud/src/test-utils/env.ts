@@ -5,14 +5,13 @@
  * were copy-pasted across the sync/concurrency/parity/hosted-runtime suites:
  *
  *   - a Map-backed fake R2 `BLOBS` bucket (content-addressed by sha256);
- *   - a no-op `AI` (Workers AI) stub returning a deterministic empty extraction;
- *   - a throwaway-cred `CloudWorkerEnv` assembled from the two.
+ *   - a throwaway-cred `CloudWorkerEnv` assembled from the fake bucket.
  *
  * These run the REAL Hono app + handlers against an in-memory libSQL DB seeded
  * by {@link createTestDb}, exercising the actual SQL + manifest/blob logic
  * without live network calls. The Node-pool suites (vitest, `environment:
  * "node"`) use these today; the workers-pool integration suite
- * (`@cloudflare/vitest-pool-workers`) swaps them for REAL R2 + AI bindings
+ * (`@cloudflare/vitest-pool-workers`) swaps them for a real R2 binding
  * served by miniflare — but the env-shape + bucket semantics stay identical, so
  * tests port across pools by changing only their import, not their assertions.
  *
@@ -102,21 +101,6 @@ async function toArrayBuffer(body: BodyInit): Promise<ArrayBuffer> {
 }
 
 /**
- * A no-op `AI` (Workers AI) stub. Returns a deterministic empty extraction so
- * the hosted runtime's extractor path (when NOT overridden by a fake) resolves
- * without a network call. The hosted-runtime integration tests inject a real
- * fake extractor via `overrides`, so this stub is only reached on the
- * default-extractor code path.
- */
-export function createStubAi(): Ai {
-	return {
-		async run() {
-			return { response: '{"facts":[]}' };
-		},
-	} as unknown as Ai;
-}
-
-/**
  * Options for {@link createTestEnv}. Every field is optional — the base env
  * already carries every binding + throwaway credential a test needs; a test
  * overrides only the slot its assertion depends on (e.g. a tighter
@@ -126,7 +110,7 @@ export type TestEnvOverrides = Partial<CloudWorkerEnv>;
 
 /**
  * Assembles a full `CloudWorkerEnv` from throwaway credentials + a fresh fake
- * R2 bucket + the stub `AI`. Deep-merges caller overrides last, so a test can
+ * R2 bucket. Deep-merges caller overrides last, so a test can
  * swap any binding (e.g. hand-build a failing R2 for a readiness test) without
  * rebuilding the whole env.
  *
@@ -142,8 +126,6 @@ export function createTestEnv(overrides: TestEnvOverrides = {}): CloudWorkerEnv 
 	const { bucket } = createFakeR2Bucket();
 	const base = {
 		BLOBS: bucket,
-		AI: createStubAi(),
-		VOYAGE_API_KEY: "test-voyage-key",
 		DATABASE_URL: "memory:",
 		TEKMEMO_API_KEY_SALT: "test-salt",
 		R2_S3_ACCESS_KEY_ID: "AKIA_TEST_KEY_ID",

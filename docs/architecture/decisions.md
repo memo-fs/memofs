@@ -1,5 +1,16 @@
 # New Architecture — Decisions Log
 
+> **Governing artifact (2026-07-04):** [`reconciliation-2026-07-02.md`](./reconciliation-2026-07-02.md)
+> (LOCKED). It locked five keystone decisions (K1–K5) that resolve contradictions
+> between this log's Q8 ("ONE Worker", bundled adapter) and the S3 grilling
+> (`s3-execution-plan.md`, ADRs 0013–0015). Where this log's body conflicts with
+> K1–K5, the reconciliation wins. The relevant amendments: scope flipped
+> `@tekbreed/*` → `@tekmemo/*` (recorded as [ADR 0016](../adr/0016-scope-flip-and-dir-equals-name.md));
+> D1 rejected, Turso/libSQL stays (K1); the two-Worker split is gated on a bundle
+> measurement (K3, [ADR 0013](../adr/0013-two-worker-split.md) amended); D2's
+> sync-only v1 is reinstated, the managed runtime is a v1.1 fast-follow (K2,
+> [ADR 0011](../adr/0011-managed-runtime-sequencing.md) amended).
+
 > **Terminology note:** Q15 (locked 2026-06-21) established the canonical
 > glossary. Uses of "engine" in Q1–Q14 predate this — the canonical term is
 > "memory runtime." Uses of "smart"/"intelligent" as unquantified claims are
@@ -74,7 +85,7 @@
 >     sequencing: concurrency layer → Teams → full managed runtime (from Q32;
 >     revises ADR 0003's two-phase sequence).
 >   - [ADR 0012](../adr/0012-r2-memory-store-adapter.md) — R2-backed MemoryStore
->     as a new adapter `@tekbreed/tekmemo-adapter-r2` + provider-neutral
+>     as a new adapter `@tekmemo/adapter-r2` + provider-neutral
 >     remote-blob store contract in core (from Q31).
 >   Q10 (connector set) and the license decision (folded into Q8) are captured in
 >   this log; the provider-neutral `Connector` interface from Q10 folds into
@@ -333,7 +344,7 @@
   being asked).
 - **Sub-question — extractor shape (locked): pluggable adapter, provider-neutral.**
   - Mirrors the existing embedder/reranker adapter pattern
-    (`@tekbreed/tekmemo-adapter-openai`, `-voyage`, `-transformers`).
+    (`@tekmemo/adapter-openai`, `-voyage`, `-transformers`).
   - Honors `AGENTS.md`: "Core protocol contracts must be provider-neutral."
   - **Key consequence for the local-first thesis:** the `-transformers` adapter
     already proves an LLM-capable model can run fully in-process (ONNX, zero API
@@ -378,7 +389,7 @@
   | `apps/docs` | **KEEP** | Docs site; update content per Q4/Q5 doc-fix lists. |
   | `tooling/*` (typescript, utils, tsdown) | **KEEP** | Internal `@repo/*` per AGENTS.md; unchanged. |
   | `packages/tekmemo-adapter-upstash` | **REMOVE** | **6a.** Zero consumers (no src refs outside itself). Cloud vector-store adapter contradicts D1/D2 (cloud = file replica, not a vector DB). Pre-launch (D8) → delete, no deprecation cycle. |
-  | `packages/tekmemo-benchmark-kit` ↔ `benchmarks/` | **CONSOLIDATE (6b)** | Two overlapping benchmark efforts. Keep `tekmemo-benchmark-kit` as the **published** reusable lib (datasets, runners, thresholds); make `benchmarks/` (private `@tekbreed/benchmarks`) **consume** the kit and own only results (`benchmark-results/{full,release,smoke}`). One source of truth: kit owns code, workspace owns results. Matches ROADMAP "Benchmark suite publication." |
+  | `packages/tekmemo-benchmark-kit` ↔ `benchmarks/` | **CONSOLIDATE (6b)** | Two overlapping benchmark efforts. Keep `tekmemo-benchmark-kit` as the **published** reusable lib (datasets, runners, thresholds); make `benchmarks/` (private `@tekmemo/benchmarks`) **consume** the kit and own only results (`benchmark-results/{full,release,smoke}`). One source of truth: kit owns code, workspace owns results. Matches ROADMAP "Benchmark suite publication." |
   | `apps/tekmemo-mcp-worker` | **SHELVE for v1 (6c)** | Currently built on the **deleted cloud engine** — its `Env` is `TEKMEMO_API_KEY`/`TEKMEMO_API_URL`/`cloud-only runtime` (verified in `apps/tekmemo-mcp-worker/src/index.ts`). Broken under new arch. Rewriting to run the engine in-Worker = the managed-runtime tier (Q4), sequenced as v1.x/v2. So: shelve for v1, remove from deploy path, reopen as the managed-runtime milestone. README line 145 "Hosted managed MCP endpoint" → "Later." |
   | `packages/tekmemo-connectors` | **ADD (6d)** | Locked by Q1–Q3. The local connector framework + built-in Notion/GitHub connectors. New published package. |
   | `packages/tekmemo-adapter-extractor` | **DEFER (6d)** | Q5 locked an LLM extractor as pluggable/provider-neutral, but no implementation exists yet. Don't create an empty package speculatively. **Define the `Extractor` interface in core `packages/tekmemo` now**; add the first concrete adapter package only when built (likely a `-transformers`-based local extractor to preserve zero-config intelligence). |
@@ -472,8 +483,8 @@
   `.tekmemo/connectors.json` (Q2), resolves `secretRef` → token via the future
   authenticated `GET .../connectors/:id/secret` endpoint, writes notes with
   `source: "connector"` + deterministic ids (Q3).
-- Depends on `@tekbreed/tekmemo` (core) for the write path. Published as
-  `@tekbreed/tekmemo-connectors`.
+- Depends on `@tekmemo/core` (core) for the write path. Published as
+  `@tekmemo/connectors`.
 
 ### `apps/docs` — content fixes (tracked in Q4/Q5)
 - Rewrite OSS-vs-Cloud framing: v1 cloud = file-replica sync + connectors
@@ -494,7 +505,7 @@
 
 ### `benchmarks/` ↔ `packages/tekmemo-benchmark-kit` — **CONSOLIDATE (6b)**
 - `tekmemo-benchmark-kit` owns code (datasets, runners, thresholds);
-  `benchmarks/` (`@tekbreed/benchmarks`, private) consumes it and owns only
+  `benchmarks/` (`@tekmemo/benchmarks`, private) consumes it and owns only
   result artifacts under `benchmark-results/`. Remove duplicated suite/dataset
   code from `benchmarks/`.
 
@@ -522,7 +533,7 @@
 
 | Layer | Choice | Why (cost/ASAP/arch-fit) |
 |---|---|---|
-| **Compute (API + dashboard)** | **Cloudflare Workers — ONE Worker** running Hono API + React Router **v8** framework-mode SSR dashboard, served via Static Assets | Hono + `@cloudflare/hono` adapter; RRv8 has first-class official support on Workers via the GA `@react-router/cloudflare` adapter + Cloudflare Vite plugin (verified: `@react-router/cloudflare@8.0.1` is `latest`). Free tier covers v1 (sync + dashboard are small). **Splittable to two Workers via service bindings** when the 3MB-free / 10MB-paid bundle cap bites or when the managed-runtime tier (ADR 0003) lands — no rewrite, just a seam. |
+| **Compute (API + dashboard)** | **Cloudflare Workers — ONE Worker** running Hono API + React Router **v8** framework-mode SSR dashboard, served via Static Assets | Hono + `@cloudflare/hono` adapter; RRv8 has first-class official support on Workers via the GA `@react-router/cloudflare` adapter + Cloudflare Vite plugin (verified: `@react-router/cloudflare@8.0.1` is `latest`). Free tier covers v1 (sync + dashboard are small). **Splittable to two Workers via service bindings** when the 3MB-free / 10MB-paid bundle cap bites or when the managed-runtime tier (ADR 0003) lands — no rewrite, just a seam. **(K3, 2026-07-04: the split is now gated on a `wrangler deploy --dry-run` measurement — [ADR 0013](../adr/0013-two-worker-split.md) amended. The v1 file-replica stays one Worker until measured.)** |
 | **Blob storage** | **Cloudflare R2** | Already locked (`cloud-sync-and-refactor.md` §12.2). ~$0.015/GB, **free egress** — critical for a sync product (downloads are the main traffic). |
 | **Metadata DB** | **Turso (libSQL) + Drizzle ORM** | Already locked (§12.2). libSQL/SQLite, free tier covers v1; Drizzle for type-safe DX matching the TS-everywhere stack. |
 | **Auth** | **Better Auth** *(pending capability check)* | Must cleanly handle: (a) `tm_…` API keys for machine-to-machine sync, (b) OAuth callbacks for Notion/GitHub connectors, (c) scoped tokens (`memory:sync`). **Verify before final commit**; if it can't do all three, pick an alternative. |
@@ -568,10 +579,10 @@
 5. **Email** → covered by Plunk (above).
 6. **Observability** → covered by Sentry (above).
 
-### Deployment topology (one Worker now, splittable later)
+### Deployment topology (one Worker now, splittable later — K3 gates the split)
 
 ```
-apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
+apps/cloud/                    ← Cloudflare Worker(s), MIT.
   ├── api/                     ← Hono (/v1/sync/*, health, connectors/:id/secret)
   ├── dashboard/               ← React Router v8 framework mode (SSR)
   └── assets binding           ← serves JS/CSS from the same deploy
@@ -581,13 +592,13 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
 
 - Worker 1 (cloud) + Worker 2 (managed runtime, future) communicate via
   **service bindings** — same Cloudflare account, same repo.
-- The cloud Worker `import`s from `@tekbreed/tekmemo` (workspace types, no npm
+- The cloud Worker `import`s from `@tekmemo/core` (workspace types, no npm
   publish needed pre-launch). It must implement 31 exported types from
   `cloud-client/types.ts`.
 
 ### License decision (locked)
 
-- **Whole repo stays MIT** (current state: root + `@tekbreed/tekmemo`).
+- **Whole repo stays MIT** (current state: root + `@tekmemo/core`).
 - **Rejected: AGPL / closed-source on the cloud.** Reasons:
   1. AGPL's copyleft trigger is *distribution*; a hosted SaaS isn't distributed
      (the "ASP loophole"), so it barely protects a service — yet it *does* bite
@@ -602,7 +613,7 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
 - **Real protection comes from:** (a) **trademark** — reserve "TekMemo" /
   "TekMemo Cloud" so nobody else can brand their hosted version; (b) the
   operational moat; (c) **SSOT of the client types** (you publish
-  `@tekbreed/tekmemo`, you control protocol evolution — followers stay a step
+  `@tekmemo/core`, you control protocol evolution — followers stay a step
   behind); (d) data/network-effects once users have memory in *your* cloud.
 - **One legitimate exception (not applicable):** if proprietary/closed third-
   party code were taken into the cloud Worker, that portion would need closing.
@@ -784,7 +795,7 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
     one violator living inside core.** `agentfs` is clean.
 - **Answer (locked, 2026-06-20, Option B):** **Extract `ai-sdk/` to a new
   published adapter package; keep `agentfs/` in core.**
-  - `packages/tekmemo/src/ai-sdk/*` → **new `@tekbreed/tekmemo-adapter-ai-sdk`**
+  - `packages/tekmemo/src/ai-sdk/*` → **new `@tekmemo/adapter-ai-sdk`**
     (published). It owns the Vercel AI SDK tool wrapper, runtime bridge,
     prepare-call memory text, agent-session instructions, scope policy. The
     `ai` peer dep moves from "optional in core" to "real dep of the adapter"
@@ -1707,7 +1718,7 @@ apps/tekmemo-cloud/            ← NEW. ONE Cloudflare Worker, MIT.
      **zero code** today. The first cloud-only capability; required for B3.
      Sequenced as phase 1 by Q32.
 - **Sub-decision — R2 store home (locked): a new adapter package
-  `@tekbreed/tekmemo-adapter-r2` with a provider-neutral *remote-blob store*
+  `@tekmemo/adapter-r2` with a provider-neutral *remote-blob store*
   contract in core.** Mirrors the `Embedder` / `Extractor` / `Connector` pattern
   (interface-in-core, impl-in-adapter). Chosen because ADR 0003's "self-host the
   same engine free" thesis genuinely needs the store reusable outside the cloud

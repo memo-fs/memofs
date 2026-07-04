@@ -89,7 +89,7 @@ the moment code changes, the failure mode ADR 0008 Rule 1 forbids).
 
 **Universal bars (apply to every slice):**
 - **Contract tests.** Every provider adapter passes the relevant contract suite
-  from `@tekbreed/tekmemo-testing` (`MemoryEmbedder`, `Reranker`, `Extractor`,
+  from `@tekmemo/testing` (`MemoryEmbedder`, `Reranker`, `Extractor`,
   `LlmClient`, `BlobClient`, `MetadataStore`). A new interface = a new contract
   suite added to the testing package *first*.
 - **Miniflare + Vitest** for unit/integration/visual-regression, per AGENTS.md.
@@ -110,7 +110,7 @@ the moment code changes, the failure mode ADR 0008 Rule 1 forbids).
 **Build:**
 - `LlmClient` core contract in `packages/tekmemo` (the 4th member of the
   embedder/reranker/extractor family). Add its contract suite to
-  `@tekbreed/tekmemo-testing` *first* (the bar the impl must meet).
+  `@tekmemo/testing` *first* (the bar the impl must meet).
 - The **provider-neutral `createHostedRuntime` factory** in a new
   `packages/tekmemo-server` package — takes injected
   `embedder`/`reranker`/`extractor`/`llmClient`/`store`, mirroring how
@@ -373,7 +373,7 @@ on when injected):**
   pages, folded in.
 - **`configure/intelligence` + `configure/storage` landing pages** — orienting
   indexes (4-role model; 2-axis model), link-not-duplicate discipline.
-- **AI-SDK pages** repoint at `@tekbreed/tekmemo-adapter-ai-sdk` +
+- **AI-SDK pages** repoint at `@tekmemo/adapter-ai-sdk` +
   `TekMemoMemoryRuntime` (the lingering S2-Q1 drift).
 - The 15 drifted + 8 missing pages from ADR 0008's triage — same class, batched.
 

@@ -459,7 +459,7 @@ triage + locked decisions require these **additions/fixes** (tracked in
   (Q5 / ADR 0004): hybrid recall + LLM extraction + consolidation.
 - **FIX** the `mode: "cloud"` / `cloud-only` policy-row sweep across the ~12
   pages (D4, per the triage register).
-- **FIX** the AI-SDK pages → repoint at `@tekbreed/tekmemo-adapter-ai-sdk` +
+- **FIX** the AI-SDK pages → repoint at `@tekmemo/adapter-ai-sdk` +
   `TekMemoMemoryRuntime` (S2-Q1 / ADR 0007).
 - **REMOVE (already done)** the dead `/api/tekmemo/vector-adapters` sidebar
   entry — verified **already absent** from `config/sidebar.mts` (2026-06-21).
@@ -481,7 +481,7 @@ Each locked item above was checked against the live code on this branch:
 | SC5.3 | `connectors.md` missing | `packages/tekmemo/` listing | **Confirmed missing** |
 | SC5.3 | `intelligence.md` missing | `packages/tekmemo/` listing | **Confirmed missing** |
 | SC5.3 | `mode: "cloud"` sweep needed | 8 pages incl. `configuration.md:40`, `cloud-client.md:21`, `concepts.md:52`, `faq.md`, `getting-started.md`, `cli/index.md:47` | **Confirmed** |
-| SC5.3 | AI-SDK docs point at wrong package | `ai-sdk/index.md:3` says "built directly into `@tekbreed/tekmemo`"; adapter `@tekbreed/tekmemo-adapter-ai-sdk` exists separately | **Confirmed drift (S2-Q1)** |
+| SC5.3 | AI-SDK docs point at wrong package | `ai-sdk/index.md:3` says "built directly into `@tekmemo/core`"; adapter `@tekmemo/adapter-ai-sdk` exists separately | **Confirmed drift (S2-Q1)** |
 | SC5.3 | `vector-adapters` sidebar dead | `config/sidebar.mts` | **Already removed** |
 
 - **Status: Docs IA — LOCKED.** Ready for `copywriting` (per-page copy) and

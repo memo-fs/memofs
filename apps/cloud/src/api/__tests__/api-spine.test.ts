@@ -9,7 +9,7 @@ import { json, jsonError } from "../json";
  * Tests for the cloud API spine: requestId middleware, the `{ data, meta }` /
  * `{ error, meta }` envelope contract, and the global notFound/onError handlers.
  *
- * These assert the WIRE SHAPE the published `@tekbreed/tekmemo/cloud-client`
+ * These assert the WIRE SHAPE the published `@tekmemo/core/cloud-client`
  * transport unwraps (`isSuccessEnvelope` / `isErrorEnvelope` in
  * `cloud-client/transport.ts`) — not internal call signatures — so a change to
  * the envelope fails here before it reaches a published client.

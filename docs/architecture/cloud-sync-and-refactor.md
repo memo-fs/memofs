@@ -1,8 +1,22 @@
 # TekMemo Cloud Sync Architecture & OSS Refactor Plan
 
-> **Status:** Decision record and refactor specification.
+> **Status:** Decision record and refactor specification. **Sequencing revised
+> 2026-07-04 by K2** — see the reconciliation banner below.
 > **Owner:** TekBreed platform architecture.
-> **Scope:** Governs both the OSS package (`packages/tekmemo`) refactor **and** the future TekMemo Cloud (`apps/api` `/v1/projects/:projectId/...`) build target.
+> **Scope:** Governs both the OSS package (`packages/core`) refactor **and** the
+> future TekMemo Cloud (`apps/cloud` `/v1/projects/:projectId/...`) build target.
+
+> **Reconciliation banner (2026-07-04, K2).** This document's D2 ("cloud v1 =
+> sync-only, no hosted recall/vector/graph/extraction") is **reinstated for v1**
+> by the [reconciliation](./reconciliation-2026-07-02.md). It had been contradicted
+> by S3-Q9 (`CONTEXT.md`), which compressed the full managed runtime into the v1
+> launch; K2 retires that compression. **v1 = file-replica sync + dashboard +
+> connector control-plane (D2's thesis). The managed memory runtime is a v1.1
+> fast-follow** ([ADR 0011](../adr/0011-managed-runtime-sequencing.md) amended).
+> D1–D8 otherwise stand. Code-path references to `packages/tekmemo` in the body
+> point at what is now `packages/core` after the K4 rename
+> ([ADR 0016](../adr/0016-scope-flip-and-dir-equals-name.md)); the historical
+> pointers are left in place as a session record.
 > **Relationship to other docs:** This document **replaces** the cloud-engine assumptions in `docs/tekmemo/build.md` (TekBreed workspace). That file describes a cloud that will not be built at v1. After this refactor, `build.md` must be rewritten to point here.
 
 ---

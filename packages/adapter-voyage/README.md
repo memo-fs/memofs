@@ -1,13 +1,15 @@
+# `@tekmemo/adapter-voyage`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-voyage"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-adapter-voyage?label=%40tekbreed%2Ftekmemo-adapter-voyage&style=for-the-badge" alt="npm version" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp; 
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-voyage"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-adapter-voyage?style=for-the-badge" alt="npm downloads" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp; 
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp; 
+  <a href="https://www.npmjs.com/package/@tekmemo/adapter-voyage"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-voyage?label=%40tekmemo%2Fadapter-voyage&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/adapter-voyage"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-voyage?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-adapter-voyage`
+Voyage AI embedder and reranker adapter for TekMemo.
 
 ## What is this?
 
@@ -29,18 +31,18 @@ You also need a Voyage AI API key from [voyageai.com](https://www.voyageai.com/)
 import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
 
 const embedder = createVoyageEmbedder({
-  apiKey: process.env.VOYAGE_API_KEY!,
-  model: "voyage-3-large",
+ apiKey: process.env.VOYAGE_API_KEY!,
+ model: "voyage-3-large",
 });
 
 // Embed a batch of texts
 const result = await embedder.embed([
-  "TekMemo provides unified memory runtime for AI agents",
-  "Voyage AI offers state-of-the-art embedding models",
+ "TekMemo provides unified memory runtime for AI agents",
+ "Voyage AI offers state-of-the-art embedding models",
 ]);
 
 console.log(result.embeddings); // number[][]
-console.log(result.usage);      // { promptTokens, totalTokens }
+console.log(result.usage); // { promptTokens, totalTokens }
 ```
 
 ### Reranking
@@ -49,18 +51,18 @@ console.log(result.usage);      // { promptTokens, totalTokens }
 import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
 
 const reranker = createVoyageReranker({
-  apiKey: process.env.VOYAGE_API_KEY!,
-  model: "rerank-2",
+ apiKey: process.env.VOYAGE_API_KEY!,
+ model: "rerank-2",
 });
 
 const result = await reranker.rerank({
-  query: "memory runtime for AI agents",
-  documents: [
-    "TekMemo is a memory layer for AI agents",
-    "Voyage AI provides embedding models",
-    "Upstash Vector is a serverless vector database",
-  ],
-  topK: 2,
+ query: "memory runtime for AI agents",
+ documents: [
+ "TekMemo is a memory layer for AI agents",
+ "Voyage AI provides embedding models",
+ "Upstash Vector is a serverless vector database",
+ ],
+ topK: 2,
 });
 
 console.log(result.results); // RerankResult[] with relevance scores
@@ -95,7 +97,7 @@ console.log(result.results); // RerankResult[] with relevance scores
 
 ### Embeddings
 - `voyage-3` — General purpose, 1024 dimensions
-- `voyage-3-large` — Highest quality, 1024 dimensions  
+- `voyage-3-large` — Highest quality, 1024 dimensions 
 - `voyage-3-lite` — Fast and cost-effective, 512 dimensions
 - `voyage-code-3` — Optimized for code, 1024 dimensions
 
@@ -112,8 +114,8 @@ import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
 const store = await bootstrapMemoryStore({ rootDir: "./.tekmemo" });
 
 const embedder = createVoyageEmbedder({
-  apiKey: process.env.VOYAGE_API_KEY!,
-  model: "voyage-3-large",
+ apiKey: process.env.VOYAGE_API_KEY!,
+ model: "voyage-3-large",
 });
 
 // Local-first persistent recall store backed by .tekmemo/indexes/embeddings.jsonl
@@ -130,8 +132,8 @@ The package exports fake implementations for testing:
 import { createFakeVoyageClient } from "@tekbreed/tekmemo-adapter-voyage/testing";
 
 const fakeClient = createFakeVoyageClient({
-  embeddings: [[0.1, 0.2, 0.3]],
-  rerankScores: [0.9, 0.7, 0.3],
+ embeddings: [[0.1, 0.2, 0.3]],
+ rerankScores: [0.9, 0.7, 0.3],
 });
 ```
 

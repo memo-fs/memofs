@@ -6,7 +6,7 @@
  * self-hoster), the in-memory store, and the error/option types. These import
  * only core types, so importing this barrel — and therefore the root
  * `@tekmemo/core` barrel — never pulls `node:fs`/`node:path` at module-eval
- * time. The `tekmemo-server` runtime Worker (ADR 0013) loads this surface
+ * time. The `tekmemo-server` runtime Worker loads this surface
  * unconditionally.
  *
  * The Node.js `fs`-backed store (`NodeFsMemoryStore` + its `node:fs`/`node:path`

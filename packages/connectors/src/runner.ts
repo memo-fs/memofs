@@ -1,17 +1,17 @@
 /**
  * The connector runner — orchestrates a single connector run.
  *
- * Flow (ADR 0002 / decisions Q1–Q3):
- *  1. Read `.tekmemo/connectors.json`, select enabled connectors.
- *  2. For each: resolve the token via the injected {@link SecretResolver}
- *     (in-memory only — never written to disk, never logged).
- *  3. Look up the {@link Connector} by `type`; call `ingest()` to get records.
- *  4. Dedupe by `externalId` against already-ingested connector notes.
- *  5. Write new records through the host's `Tekmemo` instance with the Q3
- *     connector-write discipline (`source: "connector"`, stable
- *     `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock).
- *  6. Aggregate `{ written, skipped, errors }`. A single connector error never
- *     aborts the whole run — it's recorded and the next connector proceeds.
+ * Flow ( / decisions Q1–Q3):
+ * 1. Read `.tekmemo/connectors.json`, select enabled connectors.
+ * 2. For each: resolve the token via the injected {@link SecretResolver}
+ * (in-memory only — never written to disk, never logged).
+ * 3. Look up the {@link Connector} by `type`; call `ingest()` to get records.
+ * 4. Dedupe by `externalId` against already-ingested connector notes.
+ * 5. Write new records through the host's `Tekmemo` instance with the Q3
+ * connector-write discipline (`source: "connector"`, stable
+ * `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock).
+ * 6. Aggregate `{ written, skipped, errors }`. A single connector error never
+ * aborts the whole run — it's recorded and the next connector proceeds.
  *
  * @public
  */

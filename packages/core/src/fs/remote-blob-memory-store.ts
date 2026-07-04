@@ -1,5 +1,5 @@
 /**
- * Provider-neutral remote-blob memory store (ADR 0012).
+ * Provider-neutral remote-blob memory store.
  *
  * The runtime's read/write path runs through the {@link MemoryStore} abstraction
  * (`NodeFsMemoryStore` for local OSS). Cloudflare Workers have no Node `fs`, so
@@ -11,18 +11,20 @@
  * Two injected interfaces keep the runtime unaware of any specific cloud:
  * - {@link BlobClient} — opaque-keyed get/put/delete of raw bytes.
  * - {@link MetadataStore} — the canonical-file manifest: path → blob id + size
- *   + sha256.
+ * + sha256.
  *
- * The concrete R2 + Turso implementation lives in the published adapter package
- * `@tekmemo/adapter-r2` (mirrors the Embedder/Extractor/Connector
- * interface-in-core + impl-in-adapter seam). A future `tekmemo-adapter-s3` /
- * `-gcs` implements the same interfaces and the runtime is unchanged.
+ * The concrete implementations live in published adapter packages (mirrors
+ * the Embedder/Extractor/Connector interface-in-core + impl-in-adapter seam):
+ * `@tekmemo/adapter-r2` (Cloudflare R2 blobs) + `@tekmemo/adapter-turso`
+ * (Turso/libSQL metadata), decoupled as not a bundled N×M adapter.
+ * A future `tekmemo-adapter-s3` / `-gcs` implements the same `BlobClient` and
+ * the runtime is unchanged.
  *
  * Content addressing: the blob key IS the sha256 of the content, matching the
  * cloud file replica exactly (sync handler: `r2Key === sha256`). Identical
  * content across paths/projects shares one blob — the runtime is a new
  * reader/writer over the same blobs the replica holds, not a parallel store
- * (ADR 0012 reuse sub-decision).
+ * ( reuse sub-decision).
  *
  * @public
  */

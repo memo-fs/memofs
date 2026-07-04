@@ -1,5 +1,5 @@
 /**
- * Secret resolution — the Q2 (ADR 0002) credential plane.
+ * Secret resolution — the Q2 credential plane.
  *
  * Tokens never ride in the file replica. `.tekmemo/connectors.json` carries only
  * an opaque `secretRef`; the framework resolves it to a live token through an

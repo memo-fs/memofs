@@ -17,17 +17,30 @@ import { Hono } from "hono";
 import type { CloudWorkerEnv } from "../server/env";
 import type { ApiEnv } from "./index";
 import { json } from "./json";
+// Static import: the version is inlined at build time, never read at runtime.
+// Reading `process.env.npm_package_version` instead stalls under workerd — its
+// `process.env` proxy hangs on nested keys (a stall, not a throw, so a
+// try/catch cannot rescue it). The JSON import is the build-time SSOT, matching
+// the CLI's pattern (`packages/tekmemo-cli/src/runner.ts`).
+import pkg from "../../package.json" with { type: "json" };
 
 /** Cloud name + version surfaced in health output + the hosted runtime. */
 export const CLOUD_NAME = "tekmemo-cloud";
-// `process.env` is legitimate here only for the build-time npm package version;
-// at runtime on the Worker this resolves to the bundler-inlined value.
-export const CLOUD_VERSION = process.env.npm_package_version ?? "0.0.0";
+
+/**
+ * Cloud version — the `package.json` `version`, inlined at build time.
+ *
+ * @returns the static package version (never touches `process.env`, so it is
+ *   safe under workerd).
+ */
+export function cloudVersion(): string {
+	return pkg.version;
+}
 const CAPABILITIES = ["sync.file-replication"];
 
 export const healthApp = new Hono<ApiEnv>()
 	.get("/health", (c) =>
-		json(c, { ok: true, name: CLOUD_NAME, version: CLOUD_VERSION }),
+		json(c, { ok: true, name: CLOUD_NAME, version: cloudVersion() }),
 	)
 	.get("/readiness", async (c) => {
 		// A readiness probe: the R2 binding must exist and respond to a trivial
@@ -39,7 +52,7 @@ export const healthApp = new Hono<ApiEnv>()
 			{
 				ok,
 				name: CLOUD_NAME,
-				version: CLOUD_VERSION,
+				version: cloudVersion(),
 				capabilities: CAPABILITIES,
 				warnings,
 			},

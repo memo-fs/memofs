@@ -40,7 +40,7 @@ export interface TekmemoConfig {
 	/**
 	 * Pre-parsed `.tekmemo/config.json` values. Core no longer reads the
 	 * filesystem (the read moved to Node-only entry points so the root barrel
-	 * stays free of `node:fs` — ADR 0013). A Node consumer reads the file and
+	 * stays free of `node:fs`). A Node consumer reads the file and
 	 * passes it here; the Worker path injects a store and never sets this.
 	 */
 	fileConfig?: TekMemoConfigFile;
@@ -48,7 +48,7 @@ export interface TekmemoConfig {
 	recallStore?: RecallStore;
 	/**
 	 * Optional graph extractor (LLM-based or otherwise). When omitted, the
-	 * zero-config rule-based extractor runs (ADR 0004 fallback). When provided,
+	 * zero-config rule-based extractor runs ( fallback). When provided,
 	 * extraction + consolidation can grow the graph from natural prose.
 	 */
 	extractor?: Extractor;
@@ -59,7 +59,7 @@ export interface TekmemoConfig {
 	 */
 	reranker?: Reranker;
 	/**
-	 * Optional LLM transport (the 4th contract member, ADR 0014) powering the
+	 * Optional LLM transport (the 4th contract member) powering the
 	 * LLM-enhanced intelligence tier — the retrieval strategist (Q23),
 	 * writer-critic consolidation (Q25a), staleness re-verification (Q24 v1.x),
 	 * and semantic consolidation (Q25a). When omitted, every feature runs its
@@ -180,7 +180,7 @@ export function resolveTekmemoConfig(input: {
 
 	// `rootDir` is resolved against CWD WITHOUT `node:path` — a pure join keeps
 	// `resolveTekmemoConfig` (and the root barrel) free of any `node:` import
-	// edge so it loads in workerd (ADR 0013). The Node-fs store re-normalizes
+	// edge so it loads in workerd. The Node-fs store re-normalizes
 	// via `normalizeRootDir` (its own `node:path` call) on construction, so a
 	// not-fully-absolute path here is corrected there. A Worker that injects its
 	// own store ignores `rootDir` entirely.
@@ -192,8 +192,7 @@ export function resolveTekmemoConfig(input: {
 
 	// Config-file resolution is the caller's concern (Node-only) — see
 	// {@link readTekMemoConfigFile}. Core never touches the filesystem.
-	const fileConfig =
-		config.fileConfig ?? readTekMemoConfigFile(rootDir);
+	const fileConfig = config.fileConfig ?? readTekMemoConfigFile(rootDir);
 
 	const mode = resolveMode(config.mode, env, fileConfig);
 	const projectId =
@@ -370,7 +369,7 @@ function resolveCloudOptions(
  *
  * @remarks
  * This used to read the file synchronously here via `node:fs`, but that eager
- * import pulled `node:fs` into the Worker bundle (ADR 0013 — the runtime
+ * import pulled `node:fs` into the Worker bundle ( — the runtime
  * Worker cannot evaluate it). Config-file resolution is now the **caller's**
  * responsibility: a Node consumer (the CLI / MCP factory) reads the file and
  * passes its values as constructor args; the Worker path injects a store and

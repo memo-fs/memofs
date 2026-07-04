@@ -1,7 +1,7 @@
 /**
  * Response envelope helpers — the SSOT for how the cloud API shapes JSON.
  *
- * The published `@tekbreed/tekmemo/cloud-client` transport unwraps exactly two
+ * The published `@tekmemo/core/cloud-client` transport unwraps exactly two
  * shapes (`cloud-client/transport.ts` `isSuccessEnvelope` / `isErrorEnvelope`):
  *
  *   success: { data, meta: { requestId, ... } }
@@ -23,7 +23,7 @@ import type {
 	TekMemoCloudErrorEnvelope,
 	TekMemoCloudMeta,
 	TekMemoCloudSuccessEnvelope,
-} from "@tekbreed/tekmemo/cloud-client";
+} from "@tekmemo/core/cloud-client";
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 

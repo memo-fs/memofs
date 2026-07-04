@@ -1,13 +1,13 @@
 # TekMemo Workspace Runbook
 
-Welcome to the `@tekbreed/tekmemo` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
+Welcome to the `@tekmemo/core` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
 
 ---
 
 ## Workspace Overview
 
 The TekMemo repository is structured as a **pnpm monorepo** containing:
-1. **Public Package**: `@tekbreed/tekmemo` (located in [packages/tekmemo](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo)) — the unified file-first memory runtime.
+1. **Public Package**: `@tekmemo/core` (located in [packages/tekmemo](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo)) — the unified file-first memory runtime.
 2. **Docs App**: `apps/docs` — the VitePress-based documentation site.
 3. **Tooling**: `@repo/*` packages in [tooling](file:///Users/codingsimba/Desktop/projects/oss/tooling) — private workspace support for builds, tests, and configuration.
 
@@ -34,9 +34,9 @@ tekmemo/
 
 ---
 
-## Module Map (`packages/tekmemo/src/`)
+## Module Map (`packages/core/src/`)
 
-All TekMemo capabilities live as **internal modules** under `packages/tekmemo/src/` and are re-exported from the package root: [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo/src/index.ts). There are **no public subpath imports** or separate adapter packages.
+All TekMemo capabilities live as **internal modules** under `packages/core/src/` and are re-exported from the package root: [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). There are **no public subpath imports** or separate adapter packages.
 
 | Module | Description |
 | :--- | :--- |
@@ -122,8 +122,8 @@ pnpm validate:workspace
 
 ## Style & Safety Rules
 
-1. **Exports Consolidation**: All public APIs must be re-exported through [packages/tekmemo/src/index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/tekmemo/src/index.ts). Subpath imports are prohibited.
+1. **Exports Consolidation**: All public APIs must be re-exported through [packages/core/src/index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). Subpath imports are prohibited.
 2. **Typing Standards**: Always use TypeScript strict mode. Prefer `unknown` for unchecked outer boundaries. Avoid using `any` unless explicitly justified by comments.
 3. **Style and Formatting**: Use Biome for formatting (uses tabs and double quotes). Do not install Prettier.
-4. **SaaS Boundary**: Do not add billing, tenancy, user dashboards, or encrypted BYOK storage to the open-source repository. Keep cloud features strictly bounded to client transport APIs (`@tekbreed/tekmemo/cloud`).
+4. **SaaS Boundary**: Do not add billing, tenancy, user dashboards, or encrypted BYOK storage to the open-source repository. Keep cloud features strictly bounded to client transport APIs (`@tekmemo/core/cloud`).
 5. **Credentials Security**: Do not hardcode or commit keys, secrets, `.env` configs, or cloud credentials. Pass security tokens down from host applications at runtime.

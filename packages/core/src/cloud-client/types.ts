@@ -10,7 +10,7 @@
  * See `docs/architecture/cloud-sync-and-refactor.md` for the full contract.
  *
  * The client is project-scoped:
- *   /api/v1/projects/:projectId/sync/{push,pull,status}
+ * /api/v1/projects/:projectId/sync/{push,pull,status}
  *
  * It intentionally does not import Cloudflare, Turso, Better Auth, Polar, or any
  * server-only TekMemo Cloud internals.

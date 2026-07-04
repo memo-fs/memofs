@@ -7,17 +7,17 @@
  * LangChain / OpenAI Agents SDK / Mastra later). It lives in core so that:
  *
  * 1. Core's public surface stays **provider-neutral** (AGENTS.md: "Core
- *    protocol contracts must be provider-neutral") — no Vercel/zod tool types
- *    leak into a user who only wants the memory engine.
+ * protocol contracts must be provider-neutral") — no Vercel/zod tool types
+ * leak into a user who only wants the memory engine.
  * 2. Each framework adapter implements the **same** contract, so memory
- *    semantics are identical across frameworks (no per-framework drift).
+ * semantics are identical across frameworks (no per-framework drift).
  *
  * It mirrors the embedder interface/impl split: the `Embedder` interface is a
  * core type; OpenAI/Voyage/transformers implementations are adapter packages.
  * `TekMemoMemoryRuntime` is the runtime equivalent of `Embedder`.
  *
- * Renamed from `TekMemoAiRuntime` (2026-06-20, ADR 0007) to drop the
- * AI-SDK-flavored naming from a core type. See ADR 0007.
+ * Renamed from `TekMemoAiRuntime` (2026-06-20) to drop the
+ * AI-SDK-flavored naming from a core type. See.
  *
  * @public
  */

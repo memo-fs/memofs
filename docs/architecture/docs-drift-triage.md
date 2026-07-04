@@ -76,7 +76,7 @@ Code reality: the 14 `src/ai-sdk/*` files moved to
 
 | path | verdict | rule |
 |---|---|---|
-| `packages/tekmemo/ai-sdk/index.md:80,83` | names `TekMemoAiRuntime`; references `mode: "cloud"`. → `TekMemoMemoryRuntime`; integration now in `@tekbreed/tekmemo-adapter-ai-sdk` — import from there. | R1/R2 |
+| `packages/tekmemo/ai-sdk/index.md:80,83` | names `TekMemoAiRuntime`; references `mode: "cloud"`. → `TekMemoMemoryRuntime`; integration now in `@tekmemo/adapter-ai-sdk` — import from there. | R1/R2 |
 | `packages/tekmemo/ai-sdk/tools.md:9,20,51` | names `TekMemoAiRuntime` (×3). → `TekMemoMemoryRuntime`; update imports to the adapter package. | R1/R2 |
 | `api/tekmemo/ai-sdk.md:93` | example `mode: "cloud"` (D4). → remove/replace; confirm this API page is generated from the **adapter's** exports, not core's (core no longer exports these). | R1/R2 |
 
@@ -96,9 +96,9 @@ Code reality: package deleted; lockfile + 9 ref files pruned.
 | path | why missing | verdict | rule |
 |---|---|---|---|
 | `api/tekmemo/vector-adapters.md` | **sidebar links to it (`config/sidebar.mts:103`); file does not exist.** `ignoreDeadLinks: false` → this is a build-breaking dead link. | Either restore the page (scoped to the *surviving* vector stores, since upstash is gone) or remove the sidebar entry. Likely **remove the entry** unless other vector adapters still ship — confirm at edit time. | R2 |
-| `packages/tekmemo/connectors.md` | ADR 0002 + Q1–Q3 lock connectors (local execution, `connectors.json` 11th canonical file, secret handling) but **no docs page exists.** | **Create** — local execution model, config sync, `secretRef` (never the token), connector-write determinism. Single home; link from sidebar. Do NOT add an `api/tekmemo/connectors` page until `@tekbreed/tekmemo-connectors` package exists (no vapor docs). | R2/R3 |
+| `packages/tekmemo/connectors.md` | ADR 0002 + Q1–Q3 lock connectors (local execution, `connectors.json` 11th canonical file, secret handling) but **no docs page exists.** | **Create** — local execution model, config sync, `secretRef` (never the token), connector-write determinism. Single home; link from sidebar. Do NOT add an `api/tekmemo/connectors` page until `@tekmemo/connectors` package exists (no vapor docs). | R2/R3 |
 | `packages/tekmemo/intelligence.md` | Q5 / ADR 0004 lock v1 intelligence (hybrid recall + LLM extraction + consolidation) but the "how smart is TekMemo" story is scattered/absent. | **Create** — projects the Q5 decision table (strong retrieval, rule-based+LLM graph, consolidation). | R3 |
-| `packages/tekmemo/ai-sdk/*` adapter pointer | the AI SDK guide pages still live under `packages/tekmemo/ai-sdk/` but the code moved to an adapter package. | **Resolve routing:** keep the guide URL (don't break inbound links) but repoint all imports/exports at `@tekbreed/tekmemo-adapter-ai-sdk`. | R2 |
+| `packages/tekmemo/ai-sdk/*` adapter pointer | the AI SDK guide pages still live under `packages/tekmemo/ai-sdk/` but the code moved to an adapter package. | **Resolve routing:** keep the guide URL (don't break inbound links) but repoint all imports/exports at `@tekmemo/adapter-ai-sdk`. | R2 |
 | `apps/docs/includes/` (dir) | ADR 0008 Rule 4 needs a shared-include root; it does not exist. | **Create** the dir + migrate the duplicated hybrid-mode paragraph (`faq.md` / `faqs/index.md`) and any byte-identical OSS-vs-Cloud block into includes. | R4 |
 
 ---

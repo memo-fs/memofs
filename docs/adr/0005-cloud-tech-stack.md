@@ -79,7 +79,7 @@ stays MIT. Railway deferred to the managed-runtime tier (ADR 0003).**
 ### Deployment topology
 
 ```
-apps/tekmemo-cloud/          ← NEW. ONE Cloudflare Worker, MIT.
+apps/cloud/                  ← Cloudflare Worker(s), MIT.
   ├── api/                   ← Hono (/v1/sync/*, health, connectors/:id/secret)
   ├── dashboard/             ← React Router v8 framework mode (SSR)
   └── assets binding         ← serves JS/CSS from the same deploy
@@ -88,7 +88,7 @@ apps/tekmemo-cloud/          ← NEW. ONE Cloudflare Worker, MIT.
 ```
 
 Two Workers communicate via **service bindings** (same CF account, same repo).
-The cloud Worker `import`s from `@tekbreed/tekmemo` (workspace types, no npm
+The cloud Worker `import`s from `@tekmemo/core` (workspace types, no npm
 publish pre-launch). It must implement 31 exported types from
 `cloud-client/types.ts`.
 
@@ -145,6 +145,37 @@ publish pre-launch). It must implement 31 exported types from
   scaffold to `@react-router/cloudflare` is an implementation task tracked under
   S2-Q3.
 
+## Amendment — 2026-07-04 reconciliation (K1, K2, K3)
+
+> **Governing artifact:** [`docs/architecture/reconciliation-2026-07-02.md`](../architecture/reconciliation-2026-07-02.md)
+> (LOCKED). Where this ADR's body conflicts with K1–K5, the reconciliation wins.
+
+This ADR's **single-Worker framing** ("ONE Cloudflare Worker") is **qualified by
+K3**: before the two-Worker split ([ADR 0013](./0013-two-worker-split.md)) is
+committed, a `wrangler deploy --dry-run` measurement decides whether the cloud
+runs as one Worker (≤ 3 MB → collapse), a free-tier-only split (≤ 10 MB), or two
+Workers (> 10 MB). The original "one Worker, splittable later" line was correct
+for the v1 file-replica scope and remains the default until the measurement
+graduates from [fog](../architecture/reconciliation-2026-07-02.md#k3--measure-the-bundle-before-committing-the-two-worker-split).
+
+Two corrections locked by the reconciliation, recorded here so this ADR stops
+contradicting the canonical record:
+
+- **Turso/libSQL stays (K1).** The body's R2 + Turso pairing is **unchanged** —
+  D1 is rejected. Turso is load-bearing for the concurrency layer
+  ([ADR 0010](./0010-cloud-concurrency-control-for-b3.md), implemented as libSQL
+  `BEGIN IMMEDIATE` in `73d2cef`) and for the OSS self-host thesis (a Node
+  self-hoster cannot bind a Cloudflare D1). The "ONE Worker … on R2 + Turso"
+  stack choice stands.
+- **v1 = file-replica; the managed runtime is a v1.1 fast-follow (K2).** The
+  body's "managed-runtime tier is Railway-deferred" framing is reinstated:
+  v1 ships sync + dashboard + connector control-plane only; the hosted memory
+  runtime lands in v1.1. See [ADR 0011](./0011-managed-runtime-sequencing.md) as
+  amended by K2.
+
+Body references to `@tekbreed/tekmemo` and `apps/tekmemo-cloud/` were updated to
+`@tekmemo/core` and `apps/cloud/` in the same pass.
+
 ## References
 
 - Decisions log: `docs/architecture/decisions.md` Q8 (stack + license)
@@ -152,3 +183,5 @@ publish pre-launch). It must implement 31 exported types from
 - Pricing: [ADR 0006](./0006-pricing-and-entitlements.md)
 - Managed tier: [ADR 0003](./0003-managed-runtime-tier.md)
 - Connectors: [ADR 0002](./0002-connectors-run-locally.md)
+- Reconciliation (2026-07-02): [`docs/architecture/reconciliation-2026-07-02.md`](../architecture/reconciliation-2026-07-02.md)
+  — K1–K5 govern wherever they conflict with this ADR.

@@ -1,19 +1,19 @@
 /**
  * MCP Tool definitions configuration mapping schemas and safety constraints.
  *
- * The model-facing surface is two namespaces and ten tools (ADR 0009 Component 1):
+ * The model-facing surface is two namespaces and ten tools:
  *
- *  - 4 memory verbs: `tekmemo.context`, `tekmemo.recall`, `tekmemo.remember`,
- *    `tekmemo.consolidate`. This is the entire memory lifecycle the model
- *    drives. Graph/sync/health/snapshot/validation/core-memory-update ops were
- *    demoted to runtime methods (`TekMemoMcpRuntime`) the developer/host calls
- *    imperatively — capabilities are preserved, only the model-facing wrapper
- *    was removed. The strategist (ADR 0009 Component 2) lives behind
- *    `tekmemo.context`; the write gate (Component 6) lives behind
- *    `tekmemo.remember`.
- *  - 6 AgentFS session tools: `tekmemo_agent_session_*`. A separate axis (a
- *    coding-agent scratch filesystem, not the memory store), kept model-facing
- *    because agents drive their own sessions mid-work.
+ * - 4 memory verbs: `tekmemo.context`, `tekmemo.recall`, `tekmemo.remember`,
+ * `tekmemo.consolidate`. This is the entire memory lifecycle the model
+ * drives. Graph/sync/health/snapshot/validation/core-memory-update ops were
+ * demoted to runtime methods (`TekMemoMcpRuntime`) the developer/host calls
+ * imperatively — capabilities are preserved, only the model-facing wrapper
+ * was removed. The strategist lives behind
+ * `tekmemo.context`; the write gate (Component 6) lives behind
+ * `tekmemo.remember`.
+ * - 6 AgentFS session tools: `tekmemo_agent_session_*`. A separate axis (a
+ * coding-agent scratch filesystem, not the memory store), kept model-facing
+ * because agents drive their own sessions mid-work.
  *
  * @module definitions
  */
@@ -52,7 +52,7 @@ const kindSchema: JsonObject = {
 /**
  * Creates and returns all model-facing MCP tool definitions supported by TekMemo.
  *
- * The surface is the 4 memory verbs plus the 6 AgentFS session tools (ADR 0009
+ * The surface is the 4 memory verbs plus the 6 AgentFS session tools (
  * Component 1). Developer-level operations (graph/sync/health/snapshot/validate/
  * core-memory-update) are runtime methods on `TekMemoMcpRuntime`, not tools.
  *
@@ -319,7 +319,7 @@ export function createToolDefinitions(
 			name: "tekmemo.consolidate",
 			title: "Consolidate TekMemo Graph Memory",
 			description:
-				"Run a memory consolidation pass over the local graph: merge duplicate entities and retire facts superseded by a `supersedes` edge. The audit trail is preserved — nothing is deleted, only marked `deprecated`. This is the second half of v1 intelligence (ADR 0004): extraction grows the graph, consolidation keeps it tidy. Pass apply=false to preview the plan without persisting. Hosts should authorize this write when apply is true.",
+				"Run a memory consolidation pass over the local graph: merge duplicate entities and retire facts superseded by a `supersedes` edge. The audit trail is preserved — nothing is deleted, only marked `deprecated`. This is the second half of v1 intelligence: extraction grows the graph, consolidation keeps it tidy. Pass apply=false to preview the plan without persisting. Hosts should authorize this write when apply is true.",
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,

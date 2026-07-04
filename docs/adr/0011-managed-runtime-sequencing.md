@@ -242,11 +242,35 @@ work rather than the moat blocking revenue.
   it ships, not *whether*.
 - **The managed runtime has zero code presence today** — `apps/cloud` exposes
   only `/v1/health`, `/v1/readiness`, `/v1/projects/:id/sync/*`; it imports
-  `@tekbreed/tekmemo` only for `cloud-client` types, never `createTekmemo`. The
+  `@tekmemo/core` only for `cloud-client` types, never `createTekmemo`. The
   R2-backed `MemoryStore` does not exist (→ [ADR 0012](./0012-r2-memory-store-adapter.md)).
 - **Pricing is unaffected** by the sequence — ADR 0006 prices stand; Q33
   reaffirms the managed-tier differentiation is *entitlements* (caps), not
   price.
+
+## Amendment — 2026-07-04 reconciliation (K2)
+
+> **Governing artifact:** [`docs/architecture/reconciliation-2026-07-02.md`](../architecture/reconciliation-2026-07-02.md)
+> (LOCKED). Where this ADR's body conflicts with K1–K5, the reconciliation wins.
+
+**K2 reaffirms this ADR's phased sequencing.** The reconciliation retired two
+conflicting positions — the older D2 ("cloud v1 = sync-only, never runs the
+engine") and S3-Q9 ("compress the full managed runtime into the v1 launch") —
+both of which compressed or denied the phase boundary this ADR draws. K2 lands
+back on the prudent sequencing:
+
+- **v1 launch = file-replica sync + dashboard + connector control-plane.** No
+  hosted memory runtime. This is D2's thesis, sequenced honestly.
+- **v1.1 fast-follow = `@tekmemo/server` runtime Worker + hosted runtime +
+  concurrency-layer completion + Teams writes + SC8 hosted-memory + SC9
+  entitlement rows + LLM intelligence tier.** This is S3-Q9's ambition,
+  sequenced honestly — weeks after v1 revenue, not all-at-once.
+
+The three phases this ADR defines (concurrency layer → Teams → full managed
+runtime) are **unchanged**; only the release cadence relaxes. Phase 1 is
+implemented (`73d2cef`); phases 2 and 3 remain as the ADR states. Slice 0
+(`createHostedRuntime` + `LlmClient`, commits `c443ea2` + `83253b1`) stays
+landed as v1.1 prep, not wasted work.
 
 ## References
 

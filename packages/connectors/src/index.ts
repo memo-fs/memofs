@@ -4,7 +4,7 @@
  * Connectors ingest external sources (GitHub, Notion, …) into `.tekmemo/`
  * through the local engine. Each source is a plugin implementing the
  * provider-neutral {@link Connector} interface. See `README.md` and
- * [ADR 0002](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0002-connectors-run-locally.md).
+ * [](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0002-connectors-run-locally.md).
  *
  * @public
  */

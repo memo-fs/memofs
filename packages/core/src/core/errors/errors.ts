@@ -168,7 +168,7 @@ export class MemoryStoreError extends TekMemoError {
  * Thrown when a write is hard-rejected by the secret/PII blocklist.
  *
  * @remarks
- * This is the security gate of write intelligence (ADR 0009 Component 6,
+ * This is the security gate of write intelligence (,
  * layer 1). The blocklist detects secrets/credentials in content before it can
  * reach a syncable memory file (`notes.md`, core memory, agent-session durable
  * memory). The write never persists — the caller (agent, SDK, CLI) must drop
@@ -203,11 +203,11 @@ export class MemoryWriteBlockedError extends TekMemoError {
  * @example
  * ```typescript
  * try {
- *   await store.read(path);
+ * await store.read(path);
  * } catch (error) {
- *   if (isTekMemoError(error)) {
- *     console.error(`TekMemo error: ${error.code} - ${error.message}`);
- *   }
+ * if (isTekMemoError(error)) {
+ * console.error(`TekMemo error: ${error.code} - ${error.message}`);
+ * }
  * }
  * ```
  */

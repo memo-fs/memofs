@@ -1,12 +1,13 @@
 # Two-Worker split — the cloud deploys two Workers, not one
 
 **Status:** accepted (2026-06-29). Revises [ADR 0005](./0005-cloud-tech-stack.md)'s
-"one Cloudflare Worker" claim.
+"one Cloudflare Worker" claim. **Amended 2026-07-04 (K1/K3) — see the amendment
+section at the end.**
 
 The cloud deploys as **two** Cloudflare Workers joined by a Service Binding:
 the **commercial Worker** (`apps/cloud` → `workers/app.ts` — RRv8 SSR dashboard +
 Better Auth + Polar billing + the sync API + connectors control-plane) and the
-**runtime Worker** (the `@tekbreed/tekmemo-server` package deployed as a Worker,
+**runtime Worker** (the `@tekmemo/server` package deployed as a Worker,
 holding per-project `Tekmemo` instances). Hosted-memory calls flow from the
 commercial Worker to the runtime Worker over the binding.
 
@@ -14,8 +15,8 @@ commercial Worker to the runtime Worker over the binding.
 
 A hard constraint on the Cloudflare free plan: a deployed Worker is capped at
 **3 MB** (compressed). The commercial stack alone approaches that, and the
-hosted runtime's eager imports (`@tekbreed/tekmemo` core + the R2, Voyage, and
-Workers AI adapter packages — see `apps/cloud/src/server/hosted-runtime.ts`)
+hosted runtime's eager imports (`@tekmemo/core` core + the R2, Voyage, and
+Workers AI adapter packages — see the former `apps/cloud/src/server/hosted-runtime.ts`)
 push the bundle well past 3 MB. Splitting achieves 3 + 3.
 
 ## Why this split (not some other cut)
@@ -58,3 +59,37 @@ deployment level.
   the free-plan limit.
 - **`apps/cloud`'s `hosted-runtime.ts` is deleted** in favour of the shared
   provider-neutral factory in `tekmemo-server`. No parallel runtime assembly.
+
+## Amendment — 2026-07-04 reconciliation (K1, K3)
+
+> **Governing artifact:** [`docs/architecture/reconciliation-2026-07-02.md`](../architecture/reconciliation-2026-07-02.md)
+> (LOCKED). Where this ADR's body conflicts with K1–K5, the reconciliation wins.
+
+**K1 keeps the two-Worker split canonical**, but **K3 gates it on a bundle
+measurement** that has not yet run. The "Why split" section's load-bearing claim
+— *"the hosted runtime's eager imports push the bundle well past 3 MB"* — is
+**asserted, never measured** against `wrangler deploy --dry-run`. Verified in the
+reconciliation: `@tekmemo/server` (slice 0) is a thin factory over **injected
+adapters**; `packages/server/src/` has **no eager adapter imports and no dynamic
+`import()`**. The runtime carries no model weights (adapters call out to
+providers), so a single Worker plausibly fits.
+
+**Decision (K3):** run `wrangler deploy --dry-run` on a single-Worker config
+with the runtime imports **before** baking the split into WF-3. Three outcomes:
+
+1. **Single Worker ≤ 3 MB** → collapse to one Worker; delete the runtime Worker
+   + merge the wrangler configs. Simpler topology.
+2. **Single Worker > 3 MB free, ≤ 10 MB paid** → keep two Workers for the free
+   tier, document the measurement, collapse to one on paid later.
+3. **Single Worker > 10 MB** → two Workers is load-bearing; this ADR stands as-is.
+
+The split's *thesis* (the two-Worker boundary is the runtime API; cloud and OSS
+run identical `@tekmemo/server` code; OSS self-hosters are unaffected) is
+unaffected by K3 — only the *commitment to the split* is gated on the
+measurement. Until the measurement lands, the topology is
+[fog](../architecture/reconciliation-2026-07-02.md#k3--measure-the-bundle-before-committing-the-two-worker-split);
+WF-3 owns the dry-run. The K3 outcome is recorded back here when known.
+
+Body references to `@tekbreed/tekmemo-server` were flipped to `@tekmemo/server`
+in the same pass; the deleted `apps/cloud/src/server/hosted-runtime.ts` path is
+noted as "former" since the file no longer exists.

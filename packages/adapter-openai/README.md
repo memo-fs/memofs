@@ -1,13 +1,15 @@
+# `@tekmemo/adapter-openai`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-openai"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-adapter-openai?label=%40tekbreed%2Ftekmemo-adapter-openai&style=for-the-badge" alt="npm version" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp; 
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-adapter-openai"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-adapter-openai?style=for-the-badge" alt="npm downloads" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp; 
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp; 
+  <a href="https://www.npmjs.com/package/@tekmemo/adapter-openai"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-openai?label=%40tekmemo%2Fadapter-openai&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/adapter-openai"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-openai?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-adapter-openai`
+OpenAI embeddings adapter for TekMemo.
 
 ## What is this?
 
@@ -27,18 +29,18 @@ You also need an OpenAI API key from [platform.openai.com](https://platform.open
 import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 
 const embedder = createOpenAIEmbedder({
-  apiKey: process.env.OPENAI_API_KEY!,
-  model: "text-embedding-3-large",
+ apiKey: process.env.OPENAI_API_KEY!,
+ model: "text-embedding-3-large",
 });
 
 // Embed a batch of texts
 const result = await embedder.embed([
-  "TekMemo provides unified memory runtime for AI agents",
-  "OpenAI offers state-of-the-art embedding models",
+ "TekMemo provides unified memory runtime for AI agents",
+ "OpenAI offers state-of-the-art embedding models",
 ]);
 
 console.log(result.embeddings); // number[][]
-console.log(result.usage);      // { promptTokens, totalTokens }
+console.log(result.usage); // { promptTokens, totalTokens }
 ```
 
 ## Configuration
@@ -73,9 +75,9 @@ import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 const store = await bootstrapMemoryStore({ rootDir: "./.tekmemo" });
 
 const embedder = createOpenAIEmbedder({
-  apiKey: process.env.OPENAI_API_KEY!,
-  model: "text-embedding-3-large",
-  dimensions: 1536, // Optional: reduce dimensions for speed
+ apiKey: process.env.OPENAI_API_KEY!,
+ model: "text-embedding-3-large",
+ dimensions: 1536, // Optional: reduce dimensions for speed
 });
 
 // Local-first persistent recall store backed by .tekmemo/indexes/embeddings.jsonl
@@ -91,14 +93,14 @@ import { OpenAI } from "openai";
 import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 
 const customClient = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-  baseURL: "https://custom-proxy.example.com/v1", // For proxies, Azure, etc.
-  defaultHeaders: { "x-custom-header": "value" },
+ apiKey: process.env.OPENAI_API_KEY!,
+ baseURL: "https://custom-proxy.example.com/v1", // For proxies, Azure, etc.
+ defaultHeaders: { "x-custom-header": "value" },
 });
 
 const embedder = createOpenAIEmbedder({
-  client: customClient,
-  model: "text-embedding-3-large",
+ client: customClient,
+ model: "text-embedding-3-large",
 });
 ```
 
@@ -110,8 +112,8 @@ The package exports fake implementations for testing:
 import { createFakeOpenAIClient } from "@tekbreed/tekmemo-adapter-openai/testing";
 
 const fakeClient = createFakeOpenAIClient({
-  embeddings: [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
-  usage: { promptTokens: 10, totalTokens: 10 },
+ embeddings: [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+ usage: { promptTokens: 10, totalTokens: 10 },
 });
 ```
 

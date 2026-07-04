@@ -6,7 +6,7 @@
  * its `node:fs`/`node:path` utils. It is **deliberately** split out of the root
  * `@tekmemo/core` barrel so that importing the root barrel never pulls
  * `node:fs`/`node:path` at module-eval time. The `tekmemo-server` runtime
- * Worker (ADR 0013) cannot evaluate `node:fs` even under `nodejs_compat`, so
+ * Worker cannot evaluate `node:fs` even under `nodejs_compat`, so
  * keeping it behind this subpath lets the Worker load the real `Tekmemo` +
  * `RemoteBlobMemoryStore` from the root barrel while Node consumers (the CLI,
  * the MCP server, OSS self-hosters) opt into the filesystem store explicitly:
@@ -40,7 +40,7 @@ import { extractConfigFile, type TekMemoConfigFile } from "./tekmemo/config";
  * Reads + parses `.tekmemo/config.json` synchronously (Node-only).
  *
  * Core's `resolveTekmemoConfig` no longer touches the filesystem (the read
- * moved out of the Worker-loadable root barrel — ADR 0013). A Node consumer
+ * moved out of the Worker-loadable root barrel). A Node consumer
  * (the CLI / MCP factory) calls this, then passes the result as
  * `TekmemoConfig.fileConfig` so the constructor > env > file > defaults
  * priority chain is preserved.

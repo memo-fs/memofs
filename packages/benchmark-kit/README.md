@@ -1,13 +1,15 @@
+# `@tekmemo/benchmark-kit`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-benchmark-kit"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-benchmark-kit?label=%40tekbreed%2Ftekmemo-benchmark-kit&style=for-the-badge" alt="npm version" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp; 
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-benchmark-kit"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-benchmark-kit?style=for-the-badge" alt="npm downloads" /></a> &nbsp; 
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp; 
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp; 
+  <a href="https://www.npmjs.com/package/@tekmemo/benchmark-kit"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fbenchmark-kit?label=%40tekmemo%2Fbenchmark-kit&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/benchmark-kit"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fbenchmark-kit?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-benchmark-kit`
+Reusable benchmark workloads, runners, and reporters for TekMemo.
 
 ## What is this?
 
@@ -31,8 +33,8 @@ const openaiEmbedder = createOpenAIEmbedder({ apiKey: "...", model: "text-embedd
 const voyageEmbedder = createVoyageEmbedder({ apiKey: "...", model: "voyage-3-large" });
 
 suite
-  .benchmark("openai-text-embedding-3-large", createEmbedderWorkloads(openaiEmbedder))
-  .benchmark("voyage-voyage-3-large", createEmbedderWorkloads(voyageEmbedder));
+ .benchmark("openai-text-embedding-3-large", createEmbedderWorkloads(openaiEmbedder))
+ .benchmark("voyage-voyage-3-large", createEmbedderWorkloads(voyageEmbedder));
 
 const runner = new BenchmarkRunner();
 const results = await runner.runSuite(suite);
@@ -48,9 +50,9 @@ A `BenchmarkSuite` groups related benchmarks together. Each benchmark maps to a 
 import { BenchmarkSuite } from "@tekbreed/tekmemo-benchmark-kit";
 
 const suite = new BenchmarkSuite("my-suite")
-  .benchmark("target-a", [...workloads])
-  .benchmark("target-b", [...workloads])
-  .setIterations(10);
+ .benchmark("target-a", [...workloads])
+ .benchmark("target-b", [...workloads])
+ .setIterations(10);
 ```
 
 ### BenchmarkRunner
@@ -61,9 +63,9 @@ The runner executes all benchmark workloads and collects results. It handles war
 import { BenchmarkRunner } from "@tekbreed/tekmemo-benchmark-kit";
 
 const runner = new BenchmarkRunner({
-  iterations: 10,
-  warmupIterations: 2,
-  timeout: 60000,
+ iterations: 10,
+ warmupIterations: 2,
+ timeout: 60000,
 });
 
 const results = await runner.runSuite(suite);
@@ -80,10 +82,10 @@ Pre-built workloads for common TekMemo operations:
 
 ```ts
 import {
-  createEmbedderWorkloads,
-  createRerankWorkloads,
-  createRecallWorkloads,
-  createMemoryStoreWorkloads,
+ createEmbedderWorkloads,
+ createRerankWorkloads,
+ createRecallWorkloads,
+ createMemoryStoreWorkloads,
 } from "@tekbreed/tekmemo-benchmark-kit/workloads";
 ```
 
@@ -96,11 +98,11 @@ import { Stats } from "@tekbreed/tekmemo-benchmark-kit";
 
 const stats = Stats.fromLatencies([15.2, 14.8, 16.1, 15.5, 15.9]);
 
-console.log(stats.mean);     // ~15.5ms
-console.log(stats.p50);      // 15.5ms
-console.log(stats.p95);      // 16.1ms
-console.log(stats.p99);      // 16.1ms
-console.log(stats.stdDev);   // ~0.5ms
+console.log(stats.mean); // ~15.5ms
+console.log(stats.p50); // 15.5ms
+console.log(stats.p95); // 16.1ms
+console.log(stats.p99); // 16.1ms
+console.log(stats.stdDev); // ~0.5ms
 ```
 
 ### Thresholds
@@ -111,10 +113,10 @@ Define pass/fail criteria for benchmarks:
 import { Threshold } from "@tekbreed/tekmemo-benchmark-kit";
 
 const thresholds = [
-  Threshold.latency("p50", { max: 50 }),      // p50 under 50ms
-  Threshold.latency("p95", { max: 200 }),      // p95 under 200ms
-  Threshold.throughput({ min: 100 }),           // at least 100 ops/sec
-  Threshold.errorRate({ max: 0.01 }),           // under 1% errors
+ Threshold.latency("p50", { max: 50 }), // p50 under 50ms
+ Threshold.latency("p95", { max: 200 }), // p95 under 200ms
+ Threshold.throughput({ min: 100 }), // at least 100 ops/sec
+ Threshold.errorRate({ max: 0.01 }), // under 1% errors
 ];
 ```
 
@@ -127,8 +129,8 @@ import { JSONReporter, MarkdownReporter } from "@tekbreed/tekmemo-benchmark-kit"
 
 const jsonReport = JSONReporter.report(results);
 const mdReport = await MarkdownReporter.report(results, {
-  includeCharts: true,
-  outputPath: "./benchmarks/results.md",
+ includeCharts: true,
+ outputPath: "./benchmarks/results.md",
 });
 ```
 
@@ -138,19 +140,19 @@ const mdReport = await MarkdownReporter.report(results, {
 import { defineWorkload } from "@tekbreed/tekmemo-benchmark-kit/workloads";
 
 const myWorkload = defineWorkload({
-  name: "custom-load",
-  setup: async ({ target }) => {
-    // Prepare test data
-  },
-  run: async ({ target, state }) => {
-    // Execute the operation to measure
-    const start = performance.now();
-    await target.someOperation(state.data);
-    return performance.now() - start;
-  },
-  teardown: async ({ target, state }) => {
-    // Clean up
-  },
+ name: "custom-load",
+ setup: async ({ target }) => {
+ // Prepare test data
+ },
+ run: async ({ target, state }) => {
+ // Execute the operation to measure
+ const start = performance.now();
+ await target.someOperation(state.data);
+ return performance.now() - start;
+ },
+ teardown: async ({ target, state }) => {
+ // Clean up
+ },
 });
 ```
 
@@ -162,7 +164,7 @@ Deterministic data generation for reproducible benchmarks:
 import { SeededRandom } from "@tekbreed/tekmemo-benchmark-kit";
 
 const rng = new SeededRandom(42);
-const texts = rng.sample(textCorpus, 100);  // Always the same 100 texts
+const texts = rng.sample(textCorpus, 100); // Always the same 100 texts
 ```
 
 ## Full Example
@@ -174,25 +176,25 @@ import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
 import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
 
 const embedders = {
-  openai: createOpenAIEmbedder({ apiKey: process.env.OPENAI_API_KEY!, model: "text-embedding-3-large" }),
-  voyage: createVoyageEmbedder({ apiKey: process.env.VOYAGE_API_KEY!, model: "voyage-3-large" }),
+ openai: createOpenAIEmbedder({ apiKey: process.env.OPENAI_API_KEY!, model: "text-embedding-3-large" }),
+ voyage: createVoyageEmbedder({ apiKey: process.env.VOYAGE_API_KEY!, model: "voyage-3-large" }),
 };
 
 const suite = new BenchmarkSuite("embedder-benchmarks")
-  .setIterations(5);
+ .setIterations(5);
 
 for (const [name, embedder] of Object.entries(embedders)) {
-  suite.benchmark(name, createEmbedderWorkloads(embedder));
+ suite.benchmark(name, createEmbedderWorkloads(embedder));
 }
 
 const runner = new BenchmarkRunner({
-  warmupIterations: 1,
-  timeout: 120000,
+ warmupIterations: 1,
+ timeout: 120000,
 });
 
 const results = await runner.runSuite(suite);
 const report = await MarkdownReporter.report(results, {
-  outputPath: "./benchmarks/embedder-results.md",
+ outputPath: "./benchmarks/embedder-results.md",
 });
 
 console.log(report);

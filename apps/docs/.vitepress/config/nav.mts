@@ -7,16 +7,6 @@ export const nav: DefaultTheme.NavItem[] = [
 		activeMatch: "/packages/tekmemo/",
 	},
 	{
-		text: "CLI",
-		link: "/packages/cli",
-		activeMatch: "/packages/cli/",
-	},
-	{
-		text: "MCP Server",
-		link: "/packages/mcp",
-		activeMatch: "/packages/mcp/",
-	},
-	{
 		text: "API",
 		link: "/api/tekmemo",
 		activeMatch: "/api/tekmemo/",

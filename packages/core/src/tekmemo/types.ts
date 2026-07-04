@@ -74,20 +74,20 @@ export interface MemoryContextInput extends RecallInput {
 	includeNotes?: boolean;
 	includeRecent?: boolean;
 	/**
-	 * Progressive disclosure level (ADR 0009 Component 4 / Q27).
+	 * Progressive disclosure level ( / Q27).
 	 *
 	 * - `"compact"` (default): a small briefing with expandable sections. The
-	 *   agent calls back with `section` + `expand` to pull only the section it
-	 *   needs. Compact ≈ 6kb vs ~64kb truncated today — the Q16 cold-start
-	 *   token-reduction north star.
+	 * agent calls back with `section` + `expand` to pull only the section it
+	 * needs. Compact ≈ 6kb vs ~64kb truncated today — the Q16 cold-start
+	 * token-reduction north star.
 	 * - `"full"`: today's whole-budget behavior — all sections packed into
-	 *   `maxBytes`, no expansion affordances, no cache. Use this when you want
-	 *   the entire dump in one call (the benchmark kit measuring recall
-	 *   coverage, power users, debugging).
+	 * `maxBytes`, no expansion affordances, no cache. Use this when you want
+	 * the entire dump in one call (the benchmark kit measuring recall
+	 * coverage, power users, debugging).
 	 */
 	detail?: "compact" | "full";
 	/**
-	 * Expand a single section (progressive disclosure, ADR 0009 Component 4 /
+	 * Expand a single section (progressive disclosure /
 	 * Q27). Set together with {@link expand} to the opaque cursor the compact
 	 * call returned in `MemoryContextResult.expandable`. The result then
 	 * contains only that one section, expanded beyond the compact cap, and
@@ -106,7 +106,7 @@ export interface MemoryContextInput extends RecallInput {
 }
 
 /**
- * The sections a compact `tekmemo.context` briefing marks expandable (ADR 0009
+ * The sections a compact `tekmemo.context` briefing marks expandable (
  * Component 4 / Q27). Each can be pulled individually on a second call via
  * `section` + `expand`.
  *
@@ -124,7 +124,7 @@ export interface MemoryContextResult {
 	 * Ordered context sections. The first section is a `directive` that tells
 	 * the agent how to act on the rest of the context; the remaining sections
 	 * carry the memory content in trust order (core → entities → recall →
-	 * recent → notes). The `entities` section (ADR 0009 Component 2/3) renders
+	 * recent → notes). The `entities` section (/3) renders
 	 * graph entities the strategist's Resolve stage matched for the query.
 	 */
 	sections: Array<{
@@ -141,7 +141,7 @@ export interface MemoryContextResult {
 	}>;
 	items?: RecallItem[];
 	/**
-	 * Expandable sections for progressive disclosure (ADR 0009 Component 4 /
+	 * Expandable sections for progressive disclosure ( /
 	 * Q27). Populated on compact calls; absent on `detail: "full"` and on
 	 * expand calls. Each entry tells the agent what it can pull and the opaque
 	 * cursor to pass back via `tekmemo.context(section, expand)`. The agent
@@ -153,7 +153,7 @@ export interface MemoryContextResult {
 }
 
 /**
- * One expandable section in a compact `tekmemo.context` briefing (ADR 0009
+ * One expandable section in a compact `tekmemo.context` briefing (
  * Component 4 / Q27).
  *
  * @public
@@ -190,14 +190,14 @@ export interface WriteMemoryInput {
 	/**
 	 * Optional caller-supplied stable memory id. When set, the strategy uses it
 	 * verbatim instead of computing the default `mem_<wall-clock:content>` hash.
-	 * This is the Q3 (ADR 0002) connector-write-discipline hook: connectors pass
+	 * This is the Q3 connector-write-discipline hook: connectors pass
 	 * a content-derived id with no wall-clock in the hashed bytes, so re-ingesting
 	 * unchanged external content reproduces identical bytes → the sync manifest
 	 * reports "no change". When omitted, the strategy's default id is computed.
 	 */
 	id?: string;
 	/**
-	 * Optional explicit durability tier override (ADR 0009 Component 6). When
+	 * Optional explicit durability tier override. When
 	 * set, the classifier returns it verbatim; when omitted, the deterministic
 	 * classifier decides from `kind` + `confidence` + content shape. `transient`
 	 * memories are written to `notes.md` (audit trail) but not indexed into
@@ -211,7 +211,7 @@ export interface WriteMemoryResult {
 	created: boolean;
 	sourceRefs?: SourceRef[];
 	/**
-	 * The durability tier the write was classified into (ADR 0009 Component 6).
+	 * The durability tier the write was classified into.
 	 * `transient` means the memory was written to `notes.md` but **not** indexed
 	 * into recall/graph. Always present on a successful write so callers can
 	 * audit the decision.

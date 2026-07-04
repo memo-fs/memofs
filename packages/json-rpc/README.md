@@ -1,20 +1,15 @@
+# `@tekmemo/json-rpc`
+
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-json-rpc"><img src="https://img.shields.io/npm/v/%40tekbreed%2Ftekmemo-json-rpc?label=%40tekbreed%2Ftekmemo-json-rpc&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/json-rpc"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fjson-rpc?label=%40tekmemo%2Fjson-rpc&style=for-the-badge" alt="npm version" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekbreed/tekmemo-json-rpc"><img src="https://img.shields.io/npm/dm/%40tekbreed%2Ftekmemo-json-rpc?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@tekmemo/json-rpc"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fjson-rpc?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/packages/tekmemo/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-# `@tekbreed/tekmemo-json-rpc`
-
-A small, zero-dependency TypeScript implementation of the
-[JSON-RPC 2.0 spec](https://www.jsonrpc.org/specification). It holds the types,
-parsing, validation, and response-envelope helpers every JSON-RPC-speaking
-package in the TekMemo workspace needs — so each transport (`tekmemo-server`'s
-runtime API, `tekmemo-mcp-server`'s MCP layer) imports one source of truth
-instead of vendoring its own copy.
+Dependency-free JSON-RPC 2.0 protocol primitives shared by TekMemo transports.
 
 ## Why a separate package?
 
@@ -27,16 +22,16 @@ dependency-free package fixes both:
 
 - One set of types and helpers, consumed everywhere.
 - A neutral error type (`JsonRpcProtocolError`) — consumers that own their own
-  error hierarchy catch it and re-throw in their own type.
+ error hierarchy catch it and re-throw in their own type.
 
 ## What's inside
 
 - **Types** — `JsonRpcRequest`, `JsonRpcResponse`, `JsonRpcSuccessResponse`,
-  `JsonRpcErrorResponse`, `JsonRpcId`.
+ `JsonRpcErrorResponse`, `JsonRpcId`.
 - **Constants** — `JSON_RPC_ERRORS` (the five spec codes: `parseError`,
-  `invalidRequest`, `methodNotFound`, `invalidParams`, `internalError`).
+ `invalidRequest`, `methodNotFound`, `invalidParams`, `internalError`).
 - **Parsing & validation** — `parseJsonRpcPayload`, `validateJsonRpcRequest`
-  (throw `JsonRpcProtocolError` with the correct spec code on any violation).
+ (throw `JsonRpcProtocolError` with the correct spec code on any violation).
 - **Response helpers** — `success(id, result)`, `failure(id, code, message, data?)`.
 - **Utilities** — `isNotification`, `isPlainObject`.
 

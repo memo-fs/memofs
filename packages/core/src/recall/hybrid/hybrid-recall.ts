@@ -7,9 +7,9 @@
  * vector path and the BM25 lexical path, merges them by document id, then
  * produces a final score by:
  *
- *   finalScore = relevanceWeight * rerankScore
- *              + recencyWeight   * recencyBoost
- *              + confidenceWeight * confidence
+ * finalScore = relevanceWeight * rerankScore
+ * + recencyWeight * recencyBoost
+ * + confidenceWeight * confidence
  *
  * where `rerankScore` comes from the deterministic fallback reranker (lexical
  * overlap, which catches synonym/paraphrase the vector path can miss at the

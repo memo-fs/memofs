@@ -115,7 +115,7 @@ export function validateConnectorsFile(raw: unknown): ConnectorsFile {
 		for (const leak of TOKEN_LEAK_FIELDS) {
 			if (leak in row) {
 				throw new ConnectorConfigError(
-					`Connector at index ${index} contains a "${leak}" field — tokens must not appear in connectors.json. Use "secretRef" instead (ADR 0002).`,
+					`Connector at index ${index} contains a "${leak}" field — tokens must not appear in connectors.json. Use "secretRef" instead.`,
 				);
 			}
 		}

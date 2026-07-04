@@ -38,7 +38,7 @@ const REQUEST_TIMEOUT_MS = 30_000;
  * @param token resolved Notion integration token (in-memory only)
  * @param sourceMapping the connector's `sourceMapping`
  * @param signal optional abort signal (caller cancellation); combined with a
- *   per-request timeout so a stalled endpoint can't hang the run.
+ * per-request timeout so a stalled endpoint can't hang the run.
  * @returns the normalized pages, in source order
  */
 export async function fetchNotionPages(

@@ -1,5 +1,5 @@
 /**
- * @file Durability tier — write intelligence layer 2 (ADR 0009 Component 6).
+ * @file Durability tier — write intelligence layer 2.
  *
  * @remarks
  * Where the {@link ./secret-blocklist} gate *rejects* writes outright, the
@@ -7,11 +7,11 @@
  * retrieval*. Two levels:
  *
  * - **`durable`** — indexed into the recall store + graph. Surfaced by
- *   `tekmemo.recall` / `tekmemo.context`. The memory that shapes future
- *   sessions.
+ * `tekmemo.recall` / `tekmemo.context`. The memory that shapes future
+ * sessions.
  * - **`transient`** — written to `notes.md` (the audit trail) and visible in
- *   `list_recent_memories`, but **never indexed**. It does not pollute
- *   retrieval. Scratch, working state, low-confidence guesses.
+ * `list_recent_memories`, but **never indexed**. It does not pollute
+ * retrieval. Scratch, working state, low-confidence guesses.
  *
  * This is the **memweave thesis** — files as source of truth, derived index
  * disposable — applied to writes. The file keeps everything that passes the
@@ -38,7 +38,7 @@
  * honest price of zero-config: file-first + rebuildable index means the failure
  * mode is "slightly noisier retrieval," never "lost memory."
  *
- * @see ADR 0009 Component 6 — write intelligence (blocklist + durability tier).
+ * @see — write intelligence (blocklist + durability tier).
  *
  * @public
  */
@@ -134,16 +134,16 @@ export const TRANSIENT_CONTENT_MIN_LENGTH = 20;
  *
  * Decision order (first match wins):
  * 1. **Explicit override** — if `input.tier` is set, return it verbatim. The
- *    caller (or a configured LLM adapter) knows better than the heuristic.
+ * caller (or a configured LLM adapter) knows better than the heuristic.
  * 2. **Low confidence** — confidence below {@link TRANSIENT_CONFIDENCE_THRESHOLD}
- *    → transient. An uncertain fact shouldn't pollute retrieval.
+ * → transient. An uncertain fact shouldn't pollute retrieval.
  * 3. **Low-signal content** — content shorter than {@link
- *    TRANSIENT_CONTENT_MIN_LENGTH} → transient. Scratch, one-word acks.
+ * TRANSIENT_CONTENT_MIN_LENGTH} → transient. Scratch, one-word acks.
  * 4. **Kind** — durable kinds (`decision`/`constraint`/`goal`/`preference`/
- *    `reference`) → durable; transient kinds (`note`/`summary`) → transient.
+ * `reference`) → durable; transient kinds (`note`/`summary`) → transient.
  * 5. **Default** — when kind is absent, default to durable (preserve today's
- *    behavior: everything indexed). Safer to over-index than to silently drop
- *    from retrieval.
+ * behavior: everything indexed). Safer to over-index than to silently drop
+ * from retrieval.
  *
  * Pure, synchronous, side-effect free.
  *

@@ -36,7 +36,7 @@
  * `@tekmemo/adapter-openai`). Honors `AGENTS.md`: "Core protocol
  * contracts must be provider-neutral."
  *
- * @see ADR 0014 — the decision to add `LlmClient` as a contract distinct from
+ * @see — the decision to add `LlmClient` as a contract distinct from
  * `Extractor`.
  * @see {@link Extractor} — the domain-extraction contract (kept separate).
  * @see {@link MemoryEmbedder} — the precedent adapter interface this mirrors.

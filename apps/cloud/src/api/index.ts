@@ -22,10 +22,9 @@
  * The `Variables` type declares what middleware makes available on `c.var` so
  * handlers + helpers stay type-safe instead of reaching into `any`.
  */
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import type { Database } from "../db/index.server";
 import type { CloudWorkerEnv } from "../server/env";
-import { billingApp } from "./billing";
 import { isApiError } from "./errors";
 import { healthApp } from "./health";
 import { json, jsonError } from "./json";
@@ -49,6 +48,34 @@ export interface ApiVariables {
 
 export type ApiEnv = { Bindings: CloudWorkerEnv; Variables: ApiVariables };
 
+/**
+ * Memoized billing sub-app (ADR 0006 / ADR 0011 Phase 2).
+ *
+ * `@polar-sh/sdk` + `@polar-sh/hono` hang under workerd's synchronous module-eval
+ * (a hard stall, not a throw), so they cannot be imported eagerly at
+ * `createApiApp()` eval time — doing so hangs the Worker on cold start. This
+ * lazy loader `import()`s the billing sub-app on the first `/v1/billing/*`
+ * request and memoizes it for the isolate's lifetime, so non-billing requests
+ * (health, readiness, sync) never pay the Polar import cost. The first billing
+ * request absorbs it once.
+ */
+let billingAppPromise: Promise<typeof import("./billing")> | undefined;
+
+/** Lazily resolves the billing sub-app, importing it once per isolate. */
+function loadBillingApp() {
+	return (billingAppPromise ??= import("./billing"));
+}
+
+/**
+ * Catch-all handler that mounts the lazily-imported billing sub-app on
+ * `/v1/billing/*`. Forwards the request verbatim once the sub-app is resolved,
+ * so the routing tree is identical to an eager `.route("/v1/billing", ...)`.
+ */
+const lazyBillingHandler = async (c: Context<ApiEnv>) => {
+	const { billingApp } = await loadBillingApp();
+	return billingApp.fetch(c.req.raw, c.env, c.executionCtx);
+};
+
 export function createApiApp() {
 	return (
 		new Hono<ApiEnv>()
@@ -60,7 +87,15 @@ export function createApiApp() {
 			// Billing routes (ADR 0006 / ADR 0011 Phase 2): Polar webhook
 			// (signature-authenticated), checkout, and customer portal. Carry their
 			// own db middleware; the webhook is NOT bearer-authenticated (Polar signs).
-			.route("/v1/billing", billingApp)
+			//
+			// LAZY-MOUNTED: the `@polar-sh/sdk` + `@polar-sh/hono` deps hang under
+			// workerd's synchronous module-eval (a hard stall, not a throw), so
+			// importing them eagerly in `createApiApp()` would hang the Worker on
+			// cold start. The billing sub-app is dynamically `import()`-ed on the
+			// first `/v1/billing/*` request and memoized — non-billing requests
+			// (health, readiness, sync) never pay the Polar import cost, and the
+			// routing tree is otherwise identical to an eager `.route()`.
+			.all("/v1/billing/*", lazyBillingHandler)
 			.notFound((c) => jsonError(c, 404, "not_found", "Unknown API route."))
 			.onError((cause, c) => {
 				// Our own `ApiError` carries a stable `code`, status, and optional

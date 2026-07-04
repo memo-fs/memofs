@@ -1,5 +1,12 @@
 # WF-5 — Amend ADRs + SSOT docs to match the overhaul
 
+> **Premises superseded (2026-07-04).** This ticket's body was charted
+> before the [reconciliation](../../architecture/reconciliation-2026-07-02.md)
+> locked K1–K5. Where the body conflicts with K1–K5, the reconciliation wins.
+> Tracker migration to GitHub Issues (K5) and local-file deletion are deferred.
+
+
+
 `wayfinder:task` · status: open · claimed: no · blocked-by: WF-1, WF-2, WF-3 (WF-4 optional)
 
 ## Question

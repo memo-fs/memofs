@@ -23,7 +23,7 @@
  *
  * @see packages/tekmemo/src/cloud-client/errors.ts — client-side decoding.
  */
-import type { JsonValue } from "@tekbreed/tekmemo/cloud-client";
+import type { JsonValue } from "@tekmemo/core/cloud-client";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { PlanTier } from "../db/schema";
 
