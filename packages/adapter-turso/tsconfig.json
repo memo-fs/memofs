@@ -1,0 +1,13 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": ".",
+		"types": ["node"],
+		"paths": {
+			"@tekmemo/adapter-turso": ["./src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

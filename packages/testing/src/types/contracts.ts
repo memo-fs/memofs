@@ -5,6 +5,58 @@ export interface MinimalMemoryStore {
 	exists(path: string): Promise<boolean> | boolean;
 }
 
+/**
+ * Structural mirror of core's `BlobEntry` — the canonical-file manifest row.
+ * Kept structural (not imported from `@tekmemo/core`) so the contract carries
+ * no core dependency, matching the rest of the `Minimal*` family.
+ */
+export interface MinimalBlobEntry {
+	/** 64-char lowercase hex sha256 of the file content. */
+	sha256: string;
+	/** Opaque blob key the `MinimalBlobClient` resolves (=== sha256 for R2). */
+	blobKey: string;
+	/** Content byte length. */
+	sizeBytes: number;
+}
+
+/**
+ * Structural mirror of core's `BlobClient` — opaque-keyed get/put/delete of
+ * raw bytes. The contract any blob backend (R2, S3, GCS, MinIO) implements.
+ */
+export interface MinimalBlobClient {
+	/** Reads a blob's bytes; `null` if the key is absent. */
+	get(key: string): Promise<ArrayBuffer | null> | ArrayBuffer | null;
+	/**
+	 * Writes a blob, overwriting if the key exists. Accepts a `BufferSource`
+	 * or a byte stream.
+	 */
+	put(
+		key: string,
+		body: BufferSource | ReadableStream<Uint8Array>,
+	): Promise<void> | void;
+	/** Deletes a blob. Idempotent: a missing key resolves without error. */
+	delete(key: string): Promise<void> | void;
+}
+
+/**
+ * Structural mirror of core's `MetadataStore` — the canonical-file manifest:
+ * path → `MinimalBlobEntry`. The source of truth for which files exist and
+ * where their bytes live.
+ */
+export interface MinimalMetadataStore {
+	/** Returns the entry for a canonical path, or `undefined` if absent. */
+	getEntry(
+		path: string,
+	): Promise<MinimalBlobEntry | undefined> | MinimalBlobEntry | undefined;
+	/** Upserts a path → entry row (insert-or-replace). */
+	upsertEntry(
+		path: string,
+		entry: MinimalBlobEntry,
+	): Promise<void> | void;
+	/** Removes a manifest row for a path. Idempotent. */
+	removeEntry(path: string): Promise<void> | void;
+}
+
 export interface MinimalEmbedder {
 	embedTexts(input: {
 		texts: string[];
@@ -217,7 +269,7 @@ export interface MinimalLlmCompletionResult {
  * packages must satisfy (the fourth member of the embedder/reranker/extractor
  * family). Any concrete `LlmClient` from `@tekmemo/core` is assignable to
  * this. Has no core default impl: the deterministic-default seam is "field
- * absent → feature runs its deterministic path" (ADR 0014).
+ * absent → feature runs its deterministic path".
  */
 export interface MinimalLlmClient {
 	readonly name: string;

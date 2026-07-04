@@ -1,14 +1,14 @@
 /**
- * @tekmemo/adapter-r2 — Cloudflare R2 + Turso/libSQL adapter for
- * TekMemo's remote-blob memory store.
+ * @tekmemo/adapter-r2 — Cloudflare R2 blob adapter for TekMemo's remote-blob
+ * memory store.
  *
- * Implements core's provider-neutral {@link BlobClient} + {@link MetadataStore}
- * contracts (ADR 0012): `createR2BlobClient` over an R2 binding, and
- * `createTursoMetadataStore` over the cloud's existing `project_files` table.
- * The cloud's R2 + Turso coupling lives here, never in core.
+ * Implements core's provider-neutral {@link BlobClient} contract:
+ * `createR2BlobClient` over an R2 binding. Blob storage only — the matching
+ * Turso/libSQL metadata store lives in `@tekmemo/adapter-turso` 
+ * decoupling, not a bundled N×M adapter). The Cloudflare R2 coupling lives
+ * here, never in core.
  *
  * @packageDocumentation
  */
 
 export * from "./r2-blob-client";
-export * from "./turso-metadata-store";

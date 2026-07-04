@@ -19,6 +19,8 @@ export * from "./contracts/index";
 export * from "./fakes/index";
 export * from "./fixtures/index";
 export type {
+	MinimalBlobClient,
+	MinimalBlobEntry,
 	MinimalEmbedder,
 	MinimalExtractionContradiction,
 	MinimalExtractionInput,
@@ -32,6 +34,7 @@ export type {
 	MinimalLlmCompletionResult,
 	MinimalLlmStructuredSchema,
 	MinimalMemoryStore,
+	MinimalMetadataStore,
 	MinimalRecallDocument,
 	MinimalRecallQuery,
 	MinimalRecallResult,

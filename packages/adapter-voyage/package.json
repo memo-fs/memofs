@@ -73,12 +73,12 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@repo/utils": "workspace:*",
 		"@tekmemo/core": "workspace:^"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
 		"@tekmemo/testing": "workspace:^"
 	}
 }

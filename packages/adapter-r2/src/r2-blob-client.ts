@@ -3,13 +3,13 @@
  * over an `R2Bucket` binding.
  *
  * The R2 coupling (the `R2Bucket` type from `@cloudflare/workers-types`) is
- * quarantined here, never in core (ADR 0012). A future S3/GCS adapter implements
+ * quarantined here, never in core. A future S3/GCS adapter implements
  * the same `BlobClient` interface and the runtime is unchanged.
  *
  * Content addressing: this adapter writes blobs keyed by their sha256 (the blob
  * key core's `RemoteBlobMemoryStore` computes), matching the cloud file replica's
  * `r2_key === sha256` layout exactly — so the runtime and the sync handler share
- * the *same* R2 objects, not a parallel store (ADR 0012 reuse sub-decision).
+ * the *same* R2 objects, not a parallel store ( reuse sub-decision).
  *
  * @public
  */

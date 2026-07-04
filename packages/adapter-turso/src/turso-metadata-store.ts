@@ -3,7 +3,7 @@
  * {@link MetadataStore} over the cloud's existing `project_files` table.
  *
  * Reuses the file-replica sync infra rather than inventing a parallel store
- * (ADR 0012 reuse sub-decision): the runtime's canonical `.tekmemo/` files are
+ * ( reuse sub-decision): the runtime's canonical `.tekmemo/` files are
  * the *same* files the replica holds. `project_files (project_id, path, sha256,
  * r2_key, size_bytes, updated_at)` — with its unique `(project_id, path)` index
  * — is the single source of truth for which paths exist and where their bytes
@@ -13,6 +13,12 @@
  * stays free of the cloud's drizzle schema. The cloud passes its raw client
  * (`db.$client`, exposed by the drizzle libSQL driver) — see
  * `apps/cloud/src/db/index.server.ts`. Column names are the documented contract.
+ *
+ * This package owns metadata storage only; the matching Cloudflare R2 blob
+ * client lives in `@tekmemo/adapter-r2`. The two are intentionally decoupled
+ * , not a bundled N×M adapter) so a Node self-hoster can pair this
+ * metadata store with any `BlobClient` (S3, GCS, MinIO) and so the runtime
+ * composes them through core's provider-neutral `RemoteBlobMemoryStore`.
  *
  * @public
  */
@@ -41,11 +47,11 @@ export interface CreateTursoMetadataStoreOptions {
  *
  * @example
  * ```ts
- * import { createTursoMetadataStore } from "@tekmemo/adapter-r2";
+ * import { createTursoMetadataStore } from "@tekmemo/adapter-turso";
  *
  * const metadata = createTursoMetadataStore({
- *   client: db.$client,
- *   projectId,
+ * client: db.$client,
+ * projectId,
  * });
  * ```
  *
@@ -60,8 +66,8 @@ export function createTursoMetadataStore(
 		async getEntry(path) {
 			const rs = await client.execute({
 				sql: `SELECT sha256, r2_key, size_bytes FROM ${TABLE}
-				      WHERE project_id = ? AND path = ?
-				      LIMIT 1`,
+				 WHERE project_id = ? AND path = ?
+				 LIMIT 1`,
 				args: [projectId, path],
 			});
 			const row = rs.rows[0];
@@ -76,12 +82,12 @@ export function createTursoMetadataStore(
 			// without importing the cloud's cuid2 factory (cross-runtime).
 			await client.execute({
 				sql: `INSERT INTO ${TABLE} (id, project_id, path, sha256, r2_key, size_bytes)
-				      VALUES (?, ?, ?, ?, ?, ?)
-				      ON CONFLICT (project_id, path) DO UPDATE SET
-				        sha256 = excluded.sha256,
-				        r2_key = excluded.r2_key,
-				        size_bytes = excluded.size_bytes,
-				        updated_at = current_timestamp`,
+				 VALUES (?, ?, ?, ?, ?, ?)
+				 ON CONFLICT (project_id, path) DO UPDATE SET
+				 sha256 = excluded.sha256,
+				 r2_key = excluded.r2_key,
+				 size_bytes = excluded.size_bytes,
+				 updated_at = current_timestamp`,
 				args: [
 					newId(),
 					projectId,
@@ -97,7 +103,7 @@ export function createTursoMetadataStore(
 			// Idempotent: deleting a missing row is a no-op.
 			await client.execute({
 				sql: `DELETE FROM ${TABLE}
-				      WHERE project_id = ? AND path = ?`,
+				 WHERE project_id = ? AND path = ?`,
 				args: [projectId, path],
 			});
 		},

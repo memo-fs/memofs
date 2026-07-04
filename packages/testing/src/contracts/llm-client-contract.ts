@@ -29,7 +29,7 @@ export interface LlmClientContractOptions {
  * Mirrors the embedder/reranker/extractor contract family: a stable name, a
  * `complete` call that resolves to a text result, input immutability, and the
  * optional structured-output (JSON-schema) seam. A new provider adapter (OpenAI
- * today, Anthropic/local later) passes this same suite (ADR 0014).
+ * today, Anthropic/local later) passes this same suite.
  *
  * ## Defensive-parse obligation (per-adapter, not asserted here)
  *

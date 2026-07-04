@@ -71,7 +71,6 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@repo/utils": "workspace:*",
 		"@tekmemo/core": "workspace:^"
 	},
 	"peerDependencies": {
@@ -86,6 +85,7 @@
 		"@cloudflare/workers-types": "^4.20250617.0",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
 		"@tekmemo/testing": "workspace:^"
 	}
 }

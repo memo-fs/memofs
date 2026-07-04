@@ -1,15 +1,15 @@
 {
-	"name": "@tekmemo/adapter-openai",
+	"name": "@tekmemo/adapter-turso",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "OpenAI embeddings adapter for TekMemo.",
+	"description": "Turso/libSQL metadata adapter for TekMemo remote blob memory stores.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/tekbreed/tekmemo.git",
-		"directory": "packages/adapter-openai"
+		"directory": "packages/adapter-turso"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-openai/",
+	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-turso/",
 	"bugs": {
 		"url": "https://github.com/tekbreed/tekmemo/issues"
 	},
@@ -54,12 +54,10 @@
 		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
 	},
 	"keywords": [
-		"openai",
-		"embeddings",
-		"embedder",
-		"ai",
-		"agents",
-		"memory",
+		"turso",
+		"libsql",
+		"metadata",
+		"memory-store",
 		"tekmemo",
 		"adapter",
 		"typescript"
@@ -72,13 +70,21 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:^",
-		"openai": "^6.10.0"
+		"@tekmemo/core": "workspace:^"
+	},
+	"peerDependencies": {
+		"@libsql/client": "^0.17.0"
+	},
+	"peerDependenciesMeta": {
+		"@libsql/client": {
+			"optional": true
+		}
 	},
 	"devDependencies": {
+		"@libsql/client": "^0.17.4",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
-		"@repo/utils": "workspace:*",
+		"@tekmemo/adapter-r2": "workspace:^",
 		"@tekmemo/testing": "workspace:^"
 	}
 }

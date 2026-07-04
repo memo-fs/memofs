@@ -2,7 +2,7 @@
 	"name": "@tekmemo/adapter-r2",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Cloudflare R2 blob and Turso/libSQL metadata adapter for TekMemo remote blob memory stores.",
+	"description": "Cloudflare R2 blob adapter for TekMemo remote blob memory stores.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -56,8 +56,6 @@
 	"keywords": [
 		"r2",
 		"cloudflare",
-		"turso",
-		"libsql",
 		"blob-storage",
 		"memory-store",
 		"tekmemo",
@@ -72,24 +70,18 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@repo/utils": "workspace:*",
 		"@tekmemo/core": "workspace:^"
 	},
 	"peerDependencies": {
-		"@cloudflare/workers-types": "^4.20250617.0",
-		"@libsql/client": "^0.17.0"
+		"@cloudflare/workers-types": "^4.20250617.0"
 	},
 	"peerDependenciesMeta": {
 		"@cloudflare/workers-types": {
-			"optional": true
-		},
-		"@libsql/client": {
 			"optional": true
 		}
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250617.0",
-		"@libsql/client": "^0.17.4",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@tekmemo/testing": "workspace:^"

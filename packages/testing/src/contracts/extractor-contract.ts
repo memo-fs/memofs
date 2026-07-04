@@ -45,7 +45,7 @@ export interface ExtractorContractOptions {
  * invariants: a stable name, one result per call, provenance stamping, and the
  * `supersedes` → `contradictions` seam consolidation depends on. The rule-based
  * extractor is the reference implementation; LLM adapters layer on top and must
- * pass this same suite (ADR 0004).
+ * pass this same suite.
  */
 export function defineExtractorContractTests(
 	options: ExtractorContractOptions,
