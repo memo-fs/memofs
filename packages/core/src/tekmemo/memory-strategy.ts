@@ -12,6 +12,14 @@ import { classifyDurability } from "../security/durability-tier";
 import { assertWriteAllowed } from "../security/secret-blocklist";
 import { buildContext, paginateArray } from "./helpers";
 import { ContextCache } from "./progressive";
+import {
+	edgeId,
+	memoryGraphNeighbors,
+	memoryGraphPath,
+} from "./memory-strategy/graph";
+import { memoryConsolidateMemory } from "./memory-strategy/consolidate";
+import { memoryRecall } from "./memory-strategy/recall";
+import type { StoredNote } from "./memory-strategy/types";
 import type {
 	AgentSessionCompleteInput,
 	AgentSessionExtractResult,
@@ -30,7 +38,6 @@ import type {
 	MemoryContextResult,
 	MemoryDocumentResult,
 	RecallInput,
-	RecallItem,
 	RecallResult,
 	RecentMemoryInput,
 	RecentMemoryResult,
@@ -47,6 +54,7 @@ import type {
 	ValidateMemoryResult,
 	WriteMemoryInput,
 	WriteMemoryResult,
+	JsonObject,
 } from "./types";
 
 export interface MemoryStrategyOptions {
@@ -54,30 +62,11 @@ export interface MemoryStrategyOptions {
 	version: string;
 }
 
-interface StoredNote {
-	id: string;
-	title?: string;
-	content: string;
-	kind?: string;
-	workspaceId?: string;
-	projectId?: string;
-	tags?: string[];
-	createdAt: string;
-}
-
 export function createMemoryStrategy(options: MemoryStrategyOptions) {
 	const notes = new Map<string, StoredNote>();
 	const nodes = new Map<string, GraphNodeInput>();
 	const edges = new Map<string, GraphEdgeInput>();
-	// Per-instance progressive-disclosure cache (ADR 0009 Component 4 / Q27).
 	const contextCache = new ContextCache();
-
-	function edgeId(edge: GraphEdgeInput): string {
-		return (
-			edge.id ??
-			`${edge.from}|${edge.type}|${edge.to}|${edge.directed ?? true}|${edge.dedupeKey ?? ""}`
-		);
-	}
 
 	return {
 		async health(signal?: AbortSignal): Promise<TekMemoHealthResult> {
@@ -130,10 +119,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 								})),
 						};
 					},
-					recall: (i) => recallImpl(i),
-					// Progressive disclosure (ADR 0009 Component 4 / Q27): the
-					// cache lets a compact call hand off resolved pointers to an
-					// expand call. Memory mode gets progressive recall too.
+					recall: (i) => Promise.resolve(memoryRecall(notes, i)),
 					cache: contextCache,
 				},
 				input,
@@ -146,7 +132,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<RecallResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
-			return recallImpl(input);
+			return memoryRecall(notes, input);
 		},
 
 		async writeMemory(
@@ -154,10 +140,6 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<WriteMemoryResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
-			// Mirror write intelligence (ADR 0009 Component 6) so the in-memory fake
-			// stays honest with the real local strategy: blocklist rejects secrets,
-			// tier classifier decides durability. Transient memories are still
-			// stored here (the audit trail), they just report their tier.
 			assertWriteAllowed(
 				[input.content, ...(input.title === undefined ? [] : [input.title])],
 				NOTES_MEMORY_PATH,
@@ -170,8 +152,6 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 					: { confidence: input.confidence }),
 				...(input.tier === undefined ? {} : { tier: input.tier }),
 			});
-			// Q3 (ADR 0002): honor a caller-supplied stable id so the in-memory fake
-			// stays honest with the local strategy's connector-write discipline.
 			const id = input.id ?? `note_${notes.size + 1}`;
 			notes.set(id, {
 				id,
@@ -348,44 +328,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			nextCursor?: string;
 		}> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
-			const direction = input.direction ?? "both";
-			const results: Array<{
-				node: GraphNodeInput;
-				edge: GraphEdgeInput;
-				direction: "in" | "out";
-			}> = [];
-			for (const edge of edges.values()) {
-				if (input.edgeTypes && !input.edgeTypes.includes(edge.type)) continue;
-				if (
-					input.minWeight !== undefined &&
-					(edge.weight ?? 1) < input.minWeight
-				)
-					continue;
-				if (
-					(direction === "out" || direction === "both") &&
-					edge.from === input.nodeId
-				) {
-					const node = nodes.get(edge.to);
-					if (node) results.push({ node, edge, direction: "out" });
-				}
-				if (
-					(direction === "in" || direction === "both") &&
-					edge.to === input.nodeId
-				) {
-					const node = nodes.get(edge.from);
-					if (node) results.push({ node, edge, direction: "in" });
-				}
-			}
-			return paginateArray(
-				results,
-				{
-					cursor: input.cursor,
-					limit: input.limit,
-					defaultLimit: 25,
-					maxLimit: 100,
-				},
-				`neighbors:${input.nodeId}`,
-			);
+			return memoryGraphNeighbors(nodes, edges, input);
 		},
 
 		async graphPath(
@@ -393,51 +336,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<GraphPathResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
-			const maxDepth = input.maxDepth ?? 10;
-			const start = nodes.get(input.from);
-			if (!start) return { found: false, nodes: [], edges: [] };
-			const queue: Array<{
-				id: string;
-				nodePath: GraphNodeInput[];
-				edgePath: GraphEdgeInput[];
-			}> = [{ id: input.from, nodePath: [start], edgePath: [] }];
-			const seen = new Set<string>([input.from]);
-			while (queue.length > 0) {
-				const current = queue.shift();
-				if (!current) break;
-				if (current.id === input.to) {
-					const totalWeight = current.edgePath.reduce(
-						(sum, edge) => sum + (edge.weight ?? 1),
-						0,
-					);
-					return {
-						found: true,
-						nodes: current.nodePath,
-						edges: current.edgePath,
-						totalWeight,
-					};
-				}
-				if (current.edgePath.length >= maxDepth) continue;
-				for (const edge of edges.values()) {
-					if (edge.from !== current.id) continue;
-					if (input.edgeTypes && !input.edgeTypes.includes(edge.type)) continue;
-					if (
-						input.minWeight !== undefined &&
-						(edge.weight ?? 1) < input.minWeight
-					)
-						continue;
-					if (seen.has(edge.to)) continue;
-					const next = nodes.get(edge.to);
-					if (!next) continue;
-					seen.add(edge.to);
-					queue.push({
-						id: edge.to,
-						nodePath: [...current.nodePath, next],
-						edgePath: [...current.edgePath, edge],
-					});
-				}
-			}
-			return { found: false, nodes: [], edges: [] };
+			return memoryGraphPath(nodes, edges, input);
 		},
 
 		async listGraphNodes(
@@ -479,111 +378,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<ConsolidateMemoryResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
-			const apply = input.apply ?? true;
-			const now = input.now ?? new Date().toISOString();
-			const supersedingType = input.supersedingEdgeType ?? "supersedes";
-
-			// Duplicate-label merges: two active nodes sharing a canonical label.
-			const byLabel = new Map<string, GraphNodeInput[]>();
-			for (const node of nodes.values()) {
-				if (node.status !== undefined && node.status !== "active") continue;
-				const key = node.label.trim().toLowerCase();
-				if (key.length === 0) continue;
-				const bucket = byLabel.get(key) ?? [];
-				bucket.push(node);
-				byLabel.set(key, bucket);
-			}
-			const mergeCount = [...byLabel.values()].filter(
-				(b) => b.length >= 2,
-			).length;
-			// Supersession retirements: edges whose `to` is pointed at by a
-			// `supersedes` edge retire that node + referencing edges.
-			const supersededNodeIds = new Set<string>();
-			for (const edge of edges.values()) {
-				if (edge.type !== supersedingType) continue;
-				if (edge.status !== undefined && edge.status !== "active") continue;
-				supersededNodeIds.add(edge.to);
-			}
-			const retiredEdgeCount = [...edges.values()].filter(
-				(e) =>
-					e.status !== "deprecated" &&
-					e.type !== supersedingType &&
-					(supersededNodeIds.has(e.from) || supersededNodeIds.has(e.to)),
-			).length;
-
-			const changed =
-				mergeCount > 0 || retiredEdgeCount > 0 || supersededNodeIds.size > 0;
-
-			if (!apply || !changed) {
-				return {
-					plan: {
-						merges: mergeCount,
-						retiredEdges: retiredEdgeCount,
-						retiredNodes: supersededNodeIds.size,
-						changed,
-						now,
-					},
-					mergesApplied: 0,
-					retirementsApplied: 0,
-					applied: false,
-				};
-			}
-
-			// Apply merges: absorb each duplicate into the earliest node.
-			let mergesApplied = 0;
-			for (const bucket of byLabel.values()) {
-				if (bucket.length < 2) continue;
-				const sorted = [...bucket].sort((a, b) => a.id.localeCompare(b.id));
-				const target = sorted[0];
-				if (!target) continue;
-				for (const source of sorted.slice(1)) {
-					if (source === target) continue;
-					nodes.delete(source.id);
-					// Rewrite edges that referenced the absorbed node.
-					for (const [key, edge] of [...edges.entries()]) {
-						if (edge.from !== source.id && edge.to !== source.id) continue;
-						edges.delete(key);
-						edges.set(key, {
-							...edge,
-							from: edge.from === source.id ? target.id : edge.from,
-							to: edge.to === source.id ? target.id : edge.to,
-						});
-					}
-					mergesApplied += 1;
-				}
-			}
-			// Apply retirements.
-			let retirementsApplied = 0;
-			for (const [key, edge] of [...edges.entries()]) {
-				if (edge.type === supersedingType) continue;
-				if (edge.status === "deprecated") continue;
-				if (
-					!supersededNodeIds.has(edge.from) &&
-					!supersededNodeIds.has(edge.to)
-				)
-					continue;
-				edges.set(key, { ...edge, status: "deprecated" });
-				retirementsApplied += 1;
-			}
-			for (const id of supersededNodeIds) {
-				const node = nodes.get(id);
-				if (!node) continue;
-				nodes.set(id, { ...node, status: "deprecated" });
-				retirementsApplied += 1;
-			}
-
-			return {
-				plan: {
-					merges: mergeCount,
-					retiredEdges: retiredEdgeCount,
-					retiredNodes: supersededNodeIds.size,
-					changed,
-					now,
-				},
-				mergesApplied,
-				retirementsApplied,
-				applied: true,
-			};
+			return memoryConsolidateMemory(nodes, edges, input);
 		},
 
 		async syncPush(
@@ -610,35 +405,4 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 			throw new Error("sync.status is not available in memory mode.");
 		},
 	};
-
-	async function recallImpl(input: RecallInput): Promise<RecallResult> {
-		const query = input.query.toLowerCase();
-		const limit = input.limit ?? 10;
-		const items: RecallItem[] = [];
-		for (const note of notes.values()) {
-			if (
-				input.workspaceId !== undefined &&
-				note.workspaceId !== input.workspaceId
-			)
-				continue;
-			if (input.projectId !== undefined && note.projectId !== input.projectId)
-				continue;
-			const haystack =
-				`${note.title ?? ""}\n${note.content}\n${note.tags?.join(" ") ?? ""}`.toLowerCase();
-			if (haystack.includes(query)) {
-				items.push({
-					id: note.id,
-					text: note.content,
-					score: 1,
-					metadata: {
-						title: note.title ?? null,
-						createdAt: note.createdAt,
-					} as JsonObject,
-				});
-			}
-		}
-		return { items: items.slice(0, limit) };
-	}
 }
-
-import type { JsonObject } from "./types";

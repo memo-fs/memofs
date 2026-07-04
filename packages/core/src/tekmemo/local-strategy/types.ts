@@ -1,0 +1,94 @@
+import type { Extractor } from "../../graph/extraction/extractor";
+import type { MemoryEmbedder } from "../../core/types/embeddings";
+import type { MemoryStore } from "../../core/types/memory-store";
+import type { Reranker } from "../../rerank";
+import type { RecallStore } from "../../recall/types";
+import type { FileSyncLayer } from "../sync/file-replication";
+import type {
+	AgentfsLikeClient,
+	GraphNodeInput,
+	GraphEdgeInput,
+	SnapshotMemoryInput,
+	SnapshotMemoryResult,
+	InMemoryGraphStore,
+	LlmClient,
+} from "../../index";
+import type { BM25Store } from "../../recall/lexical/bm25";
+import type { ContextCache } from "../progressive";
+
+export type LocalGraphStore = Pick<
+	InMemoryGraphStore,
+	| "upsertNodes"
+	| "upsertEdges"
+	| "getNode"
+	| "getEdge"
+	| "queryNodes"
+	| "queryEdges"
+	| "neighbors"
+	| "fewestHopsPath"
+	| "weightedShortestPath"
+	| "mergeNodes"
+	| "stats"
+	| "exportSnapshot"
+	| "importSnapshot"
+> & { hydrate?: () => Promise<void> };
+
+export interface LocalStrategyOptions {
+	store: MemoryStore;
+	embedder?: MemoryEmbedder;
+	extractor?: Extractor;
+	recallStore?: RecallStore;
+	projectId: string;
+	tenantId?: string;
+	autoBootstrap: boolean;
+	name: string;
+	version: string;
+	reranker?: Reranker;
+	llmClient?: LlmClient;
+	graphStore?: LocalGraphStore;
+	autoExtractGraph?: boolean;
+	syncLayer?: FileSyncLayer;
+	createAgentfsClient?: (opts: {
+		store: MemoryStore;
+		projectId: string;
+		syncLayer?: FileSyncLayer;
+		createSnapshot?(input?: SnapshotMemoryInput): Promise<SnapshotMemoryResult>;
+	}) => AgentfsLikeClient;
+}
+
+export interface LocalStrategyContext {
+	options: LocalStrategyOptions;
+	bootstrapped: boolean;
+	setBootstrapped: (val: boolean) => void;
+	graphNodes: Map<string, GraphNodeInput>;
+	graphEdges: Map<string, GraphEdgeInput>;
+	lexicalStore: BM25Store;
+	lexicalTextById: Map<string, string>;
+	contextCache: ContextCache;
+	agentfsClient: AgentfsLikeClient;
+	extractor: Extractor;
+	graphStore: LocalGraphStore;
+	reranker: Reranker;
+	ensureReady: () => Promise<void>;
+	indexLexical: (doc: { id: string; text: string }) => void;
+	pruneLexical: (ids: string[]) => void;
+	isRetiredGraphDoc: (lexicalId: string) => boolean;
+	collectRetiredGraphDocIds: () => Set<string>;
+	createSnapshotImpl: (
+		input?: SnapshotMemoryInput,
+		signal?: AbortSignal,
+	) => Promise<SnapshotMemoryResult>;
+	listRecentMemories: (
+		limit?: number,
+		signal?: AbortSignal,
+	) => Promise<{
+		items: Array<{
+			id: string;
+			type: string;
+			timestamp: string;
+			summary: string;
+			metadata: Record<string, unknown>;
+		}>;
+		warnings?: string[];
+	}>;
+}

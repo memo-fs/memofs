@@ -1,20 +1,6 @@
 /**
  * Tekmemo — the single entry point for the TekMemo memory runtime.
  *
- * ```ts
- * import { Tekmemo } from "@tekmemo/core";
- *
- * const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
- * await memo.core.read();
- * await memo.notes.record({ content: "Ship feature X" });
- * await memo.recall("architecture decisions");
- * ```
- *
- * Supports three modes: `"local"` (filesystem engine, no cloud),
- * `"hybrid"` (local engine + cloud file-replica sync), and `"memory"` (volatile,
- * for tests). There is no cloud-engine mode — the cloud is a file replica.
- * Mode is resolved from constructor args > env vars > `.tekmemo/config.json`.
- *
  * @public
  */
 
@@ -22,7 +8,6 @@ import { assertString } from "@repo/utils";
 import type { LlmClient } from "../ai-runtime/llm-client";
 import type { BootstrapMemoryStoreOptions } from "../core/bootstrap/bootstrap-memory-store";
 import type { ReadConversationHistoryOptions } from "../core/documents/conversations-memory";
-import { writeCoreMemory } from "../core/documents/core-memory";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryCommand } from "../core/types/memory-commands";
 import type {
@@ -35,27 +20,18 @@ import type { Extractor } from "../graph/extraction/extractor";
 import type { AgentfsLikeClient, AgentfsMemoryStoreConfig } from "../index";
 import {
 	AgentfsMemoryStore,
-	appendConversationEntry,
-	applyTopK,
 	bootstrapMemoryStore,
-	type CreateTekMemoAgentSessionOptions,
-	createInMemoryRecallStore,
-	createSnapshotPath,
-	InMemoryMemoryStore,
-	createTekMemoAgentSession,
-	createTekMemoCloudClient,
-	DeterministicFallbackReranker,
-	MEMORY_EVENTS_PATH,
-	MemoryNotFoundError,
-	NOTES_MEMORY_PATH,
-	readConversationHistory,
-	readSnapshotRecords,
 	runMemoryCommand,
 	stableSortRerankResults,
-	type TekMemoAgentSession,
+	applyTopK,
+	DeterministicFallbackReranker,
 	type TekMemoCloudClient,
+	createTekMemoCloudClient,
 } from "../index";
-import { createFsRecallStore } from "../recall/stores/fs-recall-store";
+import type {
+	CreateTekMemoAgentSessionOptions,
+	TekMemoAgentSession,
+} from "../agentfs/session/agent-session";
 import type { RecallFilter, RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
 import {
@@ -63,10 +39,19 @@ import {
 	resolveTekmemoConfig,
 	type TekmemoConfig,
 } from "./config";
-import { createHybridStrategy } from "./hybrid-strategy";
-import { createLocalStrategy } from "./local-strategy";
-import { createMemoryStrategy } from "./memory-strategy";
-import { createFileSyncLayer } from "./sync/file-replication";
+import type { createLocalStrategy } from "./local-strategy";
+import {
+	coreRead,
+	coreUpdate,
+	notesRead,
+	notesRecord,
+	conversationsRead,
+	conversationsAppend,
+	snapshotsList,
+	snapshotsRestore,
+	agentfsCreateSession,
+	createStrategy,
+} from "./Tekmemo/delegates";
 import type {
 	AgentSessionCompleteInput,
 	AgentSessionFileInput,
@@ -128,7 +113,6 @@ export class Tekmemo {
 	readonly writePolicy: RuntimeWritePolicy;
 	readonly name: string;
 	readonly version: string;
-	/** Resolved recall engine configuration. */
 	readonly recallConfig: ResolvedTekmemoConfig["recall"];
 
 	private readonly strategy: Strategy;
@@ -137,20 +121,17 @@ export class Tekmemo {
 
 	readonly core = {
 		read: async (signal?: AbortSignal): Promise<string> => {
-			const result = await this.strategy.readCoreMemory(signal);
-			return result.content;
+			return coreRead(this, signal);
 		},
 
 		update: async (content: string, signal?: AbortSignal): Promise<void> => {
-			assertString(content, "content");
-			await this.strategy.updateCoreMemory(content, signal);
+			return coreUpdate(this, content, signal);
 		},
 	};
 
 	readonly notes = {
 		read: async (signal?: AbortSignal): Promise<string> => {
-			const result = await this.strategy.readNotesMemory(signal);
-			return result.content;
+			return notesRead(this, signal);
 		},
 
 		record: async (
@@ -160,23 +141,7 @@ export class Tekmemo {
 			},
 			signal?: AbortSignal,
 		): Promise<WriteMemoryResult> => {
-			return this.strategy.writeMemory(
-				{
-					content: note.content,
-					kind: note.kind ?? "note",
-					...(note.title === undefined ? {} : { title: note.title }),
-					...(note.tags === undefined ? {} : { tags: note.tags }),
-					...(note.confidence === undefined
-						? {}
-						: { confidence: note.confidence }),
-					...(note.source === undefined ? {} : { source: note.source }),
-					...(note.tier === undefined ? {} : { tier: note.tier }),
-					...(note.metadata === undefined
-						? {}
-						: { metadata: note.metadata as WriteMemoryInput["metadata"] }),
-				},
-				signal,
-			);
+			return notesRecord(this, note, signal);
 		},
 	};
 
@@ -184,18 +149,11 @@ export class Tekmemo {
 		read: async (
 			options?: ReadConversationHistoryOptions,
 		): Promise<ConversationEntry[]> => {
-			await this.ensureBootstrapped();
-			try {
-				return await readConversationHistory(this.store, options);
-			} catch (err) {
-				if (err instanceof MemoryNotFoundError) return [];
-				throw err;
-			}
+			return conversationsRead(this, options);
 		},
 
 		append: async (entry: ConversationEntry): Promise<void> => {
-			await this.ensureBootstrapped();
-			await appendConversationEntry(this.store, entry);
+			return conversationsAppend(this, entry);
 		},
 	};
 
@@ -267,36 +225,11 @@ export class Tekmemo {
 		},
 
 		list: async (): Promise<SnapshotRecord[]> => {
-			await this.ensureBootstrapped();
-			try {
-				return await readSnapshotRecords(this.store);
-			} catch (err) {
-				if (err instanceof MemoryNotFoundError) return [];
-				throw err;
-			}
+			return snapshotsList(this);
 		},
 
 		restore: async (id: string): Promise<void> => {
-			await this.ensureBootstrapped();
-			const path = createSnapshotPath(id);
-			const raw = await this.store.read(path);
-			const parsed = JSON.parse(raw);
-			if (parsed.version !== 1 || !parsed.files) {
-				throw new Error("Invalid or unsupported snapshot format.");
-			}
-			const files = parsed.files;
-			if (typeof files.core === "string") {
-				await writeCoreMemory(this.store, files.core);
-			}
-			if (typeof files.notes === "string") {
-				await this.store.write(NOTES_MEMORY_PATH, files.notes);
-			}
-			if (Array.isArray(files.events)) {
-				const eventLines =
-					files.events.map((e: unknown) => JSON.stringify(e)).join("\n") +
-					(files.events.length > 0 ? "\n" : "");
-				await this.store.write(MEMORY_EVENTS_PATH, eventLines);
-			}
+			return snapshotsRestore(this, id);
 		},
 	};
 
@@ -309,11 +242,7 @@ export class Tekmemo {
 				projectId?: string;
 			},
 		): TekMemoAgentSession => {
-			return createTekMemoAgentSession({
-				memory: this.store,
-				projectId: options.projectId ?? this.projectId,
-				...options,
-			});
+			return agentfsCreateSession(this, options);
 		},
 
 		startSession: async (
@@ -408,121 +337,19 @@ export class Tekmemo {
 		this.version = this.resolved.version;
 		this.recallConfig = this.resolved.recall;
 
-		if (this.resolved.store) {
-			this.store = this.resolved.store;
-		} else if (this.resolved.mode === "memory") {
-			// The volatile in-memory mode defaults to an `InMemoryMemoryStore`. It
-			// pulls no `node:fs`, so it is safe on every runtime (Node + Workers).
-			this.store = new InMemoryMemoryStore();
-		} else {
-			// No default `node:fs` store: importing `Tekmemo` must not pull
-			// `node:fs`/`node:path` at module-eval time (ADR 0013 — the runtime
-			// Worker cannot evaluate them). A `local`/`hybrid` runtime MUST inject
-			// a `store`. Node consumers that want the filesystem store import it
-			// explicitly: `import { createNodeFsMemoryStore } from
-			// "@tekmemo/core/node-fs"` and pass `{ store: ... }`.
-			throw new Error(
-				`Tekmemo: \`store\` is required for mode "${this.resolved.mode}". ` +
-					"Inject a MemoryStore (e.g. RemoteBlobMemoryStore on a Worker, or " +
-					'createNodeFsMemoryStore() from "@tekmemo/core/node-fs" on Node). ' +
-					'The volatile "memory" mode defaults to an in-memory store.',
-			);
-		}
-
+		this.store = this.resolved.store as MemoryStore;
 		this.embedder = this.resolved.embedder;
 		this.extractor = this.resolved.extractor;
 		this.reranker = this.resolved.reranker;
 		this.llmClient = this.resolved.llmClient;
-		if (this.embedder) {
-			// When an embedder is configured, a recall store is needed to persist
-			// embeddings. Default to the file-backed store so embeddings survive
-			// process restarts (file-first identity); fall back to in-memory for
-			// the volatile "memory" mode or when explicitly injected.
-			this.recallStore =
-				this.resolved.recallStore ??
-				(this.resolved.mode === "memory"
-					? createInMemoryRecallStore()
-					: createFsRecallStore({ store: this.store }));
-		} else {
-			this.recallStore = this.resolved.recallStore;
-		}
-
+		this.recallStore = this.resolved.recallStore;
 		if (this.resolved.cloudClient) {
 			this.cloud = this.resolved.cloudClient;
 		} else if (this.resolved.cloud) {
 			this.cloud = createTekMemoCloudClient(this.resolved.cloud);
 		}
 
-		this.strategy = this.createStrategy();
-	}
-
-	private createStrategy(): Strategy {
-		if (this.resolved.mode === "memory") {
-			return createMemoryStrategy({
-				name: this.name,
-				version: this.version,
-			}) as Strategy;
-		}
-
-		if (this.resolved.mode === "hybrid") {
-			if (!this.cloud) {
-				throw new Error(
-					"Hybrid mode requires cloud configuration (baseUrl + apiKey) or a cloudClient instance.",
-				);
-			}
-			// The cloud is a file replica, not an engine: the only cloud-facing
-			// surface is the file-replication sync layer (§7/§8). The local
-			// engine handles recall/memory/graph/extraction/agent sessions.
-			//
-			// Lazy ref breaks the construction cycle: the sync layer needs the
-			// local strategy's `createSnapshot` for its pre-sync snapshot, and
-			// the local strategy needs the sync layer to wire the agentfs
-			// session hooks. Both callbacks are invoked lazily (only during an
-			// actual sync, after construction), so the ref is always set by then.
-			let local: ReturnType<typeof createLocalStrategy>;
-			const sync = createFileSyncLayer({
-				client: this.cloud,
-				store: this.store,
-				projectId: this.projectId,
-				snapshot: (input) => local.createSnapshot(input),
-				reindex: () =>
-					bootstrapMemoryStore(this.store, { projectId: this.projectId }),
-			});
-			local = createLocalStrategy({
-				store: this.store,
-				embedder: this.embedder,
-				extractor: this.extractor,
-				reranker: this.reranker,
-				llmClient: this.llmClient,
-				recallStore: this.recallStore,
-				projectId: this.projectId,
-				tenantId: this.tenantId,
-				autoBootstrap: this.resolved.autoBootstrap,
-				name: this.name,
-				version: this.version,
-				syncLayer: sync,
-			});
-			return createHybridStrategy({
-				local,
-				sync,
-				readPolicy: this.readPolicy,
-				writePolicy: this.writePolicy,
-			}) as Strategy;
-		}
-
-		return createLocalStrategy({
-			store: this.store,
-			embedder: this.embedder,
-			extractor: this.extractor,
-			reranker: this.reranker,
-			llmClient: this.llmClient,
-			recallStore: this.recallStore,
-			projectId: this.projectId,
-			tenantId: this.tenantId,
-			autoBootstrap: this.resolved.autoBootstrap,
-			name: this.name,
-			version: this.version,
-		}) as Strategy;
+		this.strategy = createStrategy(this, this.resolved);
 	}
 
 	async recall(
@@ -584,19 +411,6 @@ export class Tekmemo {
 		return this.strategy.validate(input, signal);
 	}
 
-	/**
-	 * Run a memory consolidation pass over the local graph.
-	 *
-	 * Consolidation is a deterministic, local pass that merges duplicate
-	 * entities and retires facts superseded by a `supersedes` edge — never
-	 * deleting (the audit trail is preserved; facts are marked `deprecated`).
-	 * It is the second half of v1 intelligence (ADR 0004): extraction grows the
-	 * graph, consolidation keeps it tidy.
-	 *
-	 * Pass `{ apply: false }` to preview the plan without persisting it.
-	 *
-	 * @public
-	 */
 	async consolidate(
 		input?: ConsolidateMemoryInput,
 		signal?: AbortSignal,

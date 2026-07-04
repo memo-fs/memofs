@@ -253,135 +253,17 @@ export class InMemoryGraphStore implements GraphStore {
 	async fewestHopsPath(
 		query: GraphShortestPathQuery,
 	): Promise<GraphPath | undefined> {
-		const from = this.requireNode(query.from, "Start");
-		const to = this.requireNode(query.to, "Target");
-
-		const maxDepth = validateDepth(query.maxDepth, 8, 32);
-		const direction = query.direction ?? "out";
-		const queue: PathQueueItem[] = [
-			{
-				nodeId: from.id,
-				steps: [{ node: cloneJson(from) }],
-				totalWeight: 0,
-				totalCost: 0,
-				depth: 0,
-			},
-		];
-		const visited = new Set<string>([from.id]);
-
-		while (queue.length > 0) {
-			// biome-ignore lint/style/noNonNullAssertion: guaranteed by length check
-			const current = queue.shift()!;
-			if (current.nodeId === to.id) {
-				return {
-					steps: current.steps,
-					totalWeight: current.totalWeight,
-					totalCost: current.totalCost,
-				};
-			}
-			if (current.depth >= maxDepth) continue;
-
-			const nextNeighbors = await this.neighbors({
-				nodeId: current.nodeId,
-				direction,
-				edgeTypes: query.edgeTypes,
-				statuses: query.statuses,
-				minWeight: query.minWeight,
-				includeInactive: query.includeInactive,
-				includeExpired: query.includeExpired,
-				now: query.now,
-				limit: 10_000,
-			});
-
-			for (const neighbor of nextNeighbors) {
-				if (visited.has(neighbor.node.id)) continue;
-				visited.add(neighbor.node.id);
-				queue.push({
-					nodeId: neighbor.node.id,
-					steps: [
-						...current.steps,
-						{ node: neighbor.node, via: neighbor.edge },
-					],
-					totalWeight: current.totalWeight + neighbor.edge.weight,
-					totalCost: current.totalCost + edgeCost(neighbor.edge),
-					depth: current.depth + 1,
-				});
-			}
-		}
-
-		return undefined;
+		const { fewestHopsPath: computeFewestHops } = await import("./pathfinding");
+		return computeFewestHops(this, query);
 	}
 
 	async weightedShortestPath(
 		query: GraphShortestPathQuery,
 	): Promise<GraphPath | undefined> {
-		const from = this.requireNode(query.from, "Start");
-		const to = this.requireNode(query.to, "Target");
-		const maxDepth = validateDepth(query.maxDepth, 8, 32);
-		const direction = query.direction ?? "out";
-
-		const queue: PathQueueItem[] = [
-			{
-				nodeId: from.id,
-				steps: [{ node: cloneJson(from) }],
-				totalWeight: 0,
-				totalCost: 0,
-				depth: 0,
-			},
-		];
-		const bestCostByNode = new Map<string, number>([[from.id, 0]]);
-
-		while (queue.length > 0) {
-			queue.sort(
-				(a, b) =>
-					a.totalCost - b.totalCost ||
-					b.totalWeight - a.totalWeight ||
-					a.depth - b.depth,
-			);
-			// biome-ignore lint/style/noNonNullAssertion: guaranteed by length check
-			const current = queue.shift()!;
-			const knownCost = bestCostByNode.get(current.nodeId);
-			if (knownCost !== undefined && current.totalCost > knownCost) continue;
-			if (current.nodeId === to.id) {
-				return {
-					steps: current.steps,
-					totalWeight: current.totalWeight,
-					totalCost: current.totalCost,
-				};
-			}
-			if (current.depth >= maxDepth) continue;
-
-			const nextNeighbors = await this.neighbors({
-				nodeId: current.nodeId,
-				direction,
-				edgeTypes: query.edgeTypes,
-				statuses: query.statuses,
-				minWeight: query.minWeight,
-				includeInactive: query.includeInactive,
-				includeExpired: query.includeExpired,
-				now: query.now,
-				limit: 10_000,
-			});
-
-			for (const neighbor of nextNeighbors) {
-				const nextCost = current.totalCost + edgeCost(neighbor.edge);
-				const previousBest = bestCostByNode.get(neighbor.node.id);
-				if (previousBest !== undefined && nextCost >= previousBest) continue;
-				bestCostByNode.set(neighbor.node.id, nextCost);
-				queue.push({
-					nodeId: neighbor.node.id,
-					steps: [
-						...current.steps,
-						{ node: neighbor.node, via: neighbor.edge },
-					],
-					totalWeight: current.totalWeight + neighbor.edge.weight,
-					totalCost: nextCost,
-					depth: current.depth + 1,
-				});
-			}
-		}
-
-		return undefined;
+		const { weightedShortestPath: computeWeighted } = await import(
+			"./pathfinding"
+		);
+		return computeWeighted(this, query);
 	}
 
 	async mergeNodes(input: GraphMergeNodesInput): Promise<StoredGraphNode> {

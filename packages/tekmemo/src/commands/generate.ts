@@ -315,8 +315,8 @@ export async function runGenerateAgentRulesCommand(
 		} else {
 			const lines = ["Supported agent-rules targets:", ""];
 			for (const t of targets) {
-				lines.push(`  ${t.target.padEnd(8)} -> ${t.file}`);
-				lines.push(`           MCP config: ${t.mcp}`);
+				lines.push(` ${t.target.padEnd(8)} -> ${t.file}`);
+				lines.push(` MCP config: ${t.mcp}`);
 			}
 			options.output.write(lines.join("\n"));
 		}

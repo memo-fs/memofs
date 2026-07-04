@@ -220,7 +220,7 @@ export async function runDiffCommand(
 
 	options.output.write(`Comparing "${options.labelA}" vs "${options.labelB}"`);
 	options.output.write(
-		`  [A] ${data.snapshotA.createdAt ?? "unknown"}  [B] ${data.snapshotB.createdAt ?? "unknown"}`,
+		` [A] ${data.snapshotA.createdAt ?? "unknown"} [B] ${data.snapshotB.createdAt ?? "unknown"}`,
 	);
 	options.output.write("");
 	if (changed.length === 0) {
@@ -235,18 +235,18 @@ export async function runDiffCommand(
 	};
 	for (const diff of changed) {
 		const icon = statusLabel[diff.status] ?? "?";
-		let line = `  ${icon} ${diff.path}`;
+		let line = ` ${icon} ${diff.path}`;
 		if (diff.status === "changed") {
 			const sizeInfo = `${diff.bytesA}B → ${diff.bytesB}B`;
 			const recordInfo =
 				diff.recordsA !== undefined && diff.recordsB !== undefined
 					? ` (${diff.recordsA} → ${diff.recordsB} records)`
 					: "";
-			line += `  ${sizeInfo}${recordInfo}`;
+			line += ` ${sizeInfo}${recordInfo}`;
 		} else if (diff.status === "added" && diff.bytesB !== undefined)
-			line += `  (${diff.bytesB}B)`;
+			line += ` (${diff.bytesB}B)`;
 		else if (diff.status === "removed" && diff.bytesA !== undefined)
-			line += `  (${diff.bytesA}B)`;
+			line += ` (${diff.bytesA}B)`;
 		options.output.write(line);
 	}
 	options.output.write(

@@ -20,7 +20,7 @@ import {
 	EnvSecretResolver,
 	type RunConnectorsResult,
 	validateConnectorsFile,
-} from "../../../connectors/src/types";
+} from "@tekmemo/connectors";
 import { getRootDir, readTextIfExists, writeText } from "../cli/store-helpers";
 import { CliUsageError, CliValidationError } from "../errors/cli-errors";
 import type { CliOutput } from "../output/output";
@@ -64,9 +64,9 @@ export async function runConnectorsListCommand(
 		const state = c.enabled ? "enabled" : "disabled";
 		const schedule = c.schedule ? `, schedule: ${c.schedule}` : "";
 		lines.push(`- ${c.id} (${c.type}) [${state}${schedule}]`);
-		lines.push(`    secretRef: ${c.secretRef}`);
+		lines.push(` secretRef: ${c.secretRef}`);
 		if (c.sourceMapping) {
-			lines.push(`    source: ${JSON.stringify(c.sourceMapping)}`);
+			lines.push(` source: ${JSON.stringify(c.sourceMapping)}`);
 		}
 	}
 	options.output.write(lines.join("\n"));
@@ -86,7 +86,7 @@ export interface ConnectorsAddCommandOptions extends ConnectorsCommandOptions {
 /**
  * `tekmemo connectors add` — add a connector row to `.tekmemo/connectors.json`.
  *
- * Accepts only an opaque `--secret-ref`, never a raw token (ADR 0002). Validates
+ * Accepts only an opaque `--secret-ref`, never a raw token. Validates
  * the resulting file (rejects token-leak fields) and writes through the store
  * (single-writer lock).
  *
@@ -100,7 +100,7 @@ export async function runConnectorsAddCommand(
 	}
 	if (!options.secretRef || options.secretRef.length === 0) {
 		throw new CliUsageError(
-			"--secret-ref <ref> is required. This is an opaque pointer to a token stored server-side — never the token itself (ADR 0002).",
+			"--secret-ref <ref> is required. This is an opaque pointer to a token stored server-side — never the token itself.",
 		);
 	}
 
@@ -229,7 +229,7 @@ export interface ConnectorsRunCommandOptions extends ConnectorsCommandOptions {
 export async function runConnectorsRunCommand(
 	options: ConnectorsRunCommandOptions,
 ): Promise<number> {
-	const { runConnectors } = await import("../../../connectors/src/types");
+	const { runConnectors } = await import("@tekmemo/connectors");
 	const rootDir = getRootDir(options.memo.store);
 	const registry = options.registry ?? new ConnectorRegistry();
 
@@ -256,7 +256,7 @@ export async function runConnectorsRunCommand(
 	if (result.errors.length > 0) {
 		lines.push(`- errors: ${result.errors.length}`);
 		for (const err of result.errors) {
-			lines.push(`    [${err.connectorType}] ${err.message}`);
+			lines.push(` [${err.connectorType}] ${err.message}`);
 		}
 	}
 	options.output.write(lines.join("\n"));
