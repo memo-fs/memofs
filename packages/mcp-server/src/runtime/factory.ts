@@ -81,6 +81,12 @@ export function createTekMemoMcpRuntimeFromConfig(
 			})
 		: undefined;
 
+	if (embedder && typeof embedder.prewarm === "function") {
+		embedder.prewarm().catch((err: unknown) => {
+			console.error("[mcp] embedder pre-warm failed in background:", err);
+		});
+	}
+
 	const memo = new Tekmemo({
 		// The MCP server is Node-only: inject the filesystem-backed store
 		// explicitly. The root `@tekmemo/core` barrel is Worker-safe (no

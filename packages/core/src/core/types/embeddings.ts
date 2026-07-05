@@ -38,4 +38,5 @@ export interface MemoryEmbedder {
 		text: string,
 		options?: Omit<EmbedTextsInput, "texts">,
 	): Promise<EmbeddingRecord>;
+	prewarm?(): Promise<void>;
 }

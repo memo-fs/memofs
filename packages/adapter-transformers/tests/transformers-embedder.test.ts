@@ -99,6 +99,13 @@ describe("TransformersEmbedder", () => {
 		});
 	});
 
+	describe("prewarm", () => {
+		it("pre-warms the internal pipeline", async () => {
+			const embedder = embedderWith();
+			await expect(embedder.prewarm()).resolves.toBeUndefined();
+		});
+	});
+
 	describe("defaults", () => {
 		it("uses the canonical default model name", () => {
 			const embedder = createTransformersEmbedder({

@@ -143,6 +143,10 @@ export class TransformersEmbedder implements MemoryEmbedder {
 		return this.inferredDimensions;
 	}
 
+	async prewarm(): Promise<void> {
+		await this.loadPipeline();
+	}
+
 	async embedText(
 		text: string,
 		options?: Omit<EmbedTextsInput, "texts">,

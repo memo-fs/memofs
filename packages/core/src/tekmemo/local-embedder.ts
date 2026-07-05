@@ -116,6 +116,9 @@ export function createLazyLocalEmbedder(
 	}
 
 	return {
+		async prewarm(): Promise<void> {
+			await loadEmbedder();
+		},
 		async embedTexts(input: EmbedTextsInput): Promise<EmbedTextsResult> {
 			const embedder = await loadEmbedder();
 			return embedder.embedTexts(input);

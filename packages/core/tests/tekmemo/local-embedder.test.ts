@@ -69,6 +69,16 @@ describe("createLazyLocalEmbedder", () => {
 			expect(factory).toHaveBeenCalledTimes(1);
 			expect(result.embeddings).toHaveLength(2);
 		});
+
+		it("pre-warms the adapter by invoking the factory", async () => {
+			const inner = fakeEmbedder();
+			const factory = vi.fn(async () => inner);
+			const embedder = createLazyLocalEmbedder({ adapterFactory: factory });
+
+			expect(typeof embedder.prewarm).toBe("function");
+			await expect(embedder.prewarm!()).resolves.toBeUndefined();
+			expect(factory).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe("delegation", () => {

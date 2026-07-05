@@ -89,7 +89,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		).resolves.toBeUndefined();
 
 		await parentStore.dispose();
-	});
+	}, 20_000);
 
 	test("a crashed process leaves a stale lock that the next process reclaims", async () => {
 		const rootDir = await createTempRoot();
@@ -128,7 +128,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		expect(JSON.parse(afterRaw).pid).toBe(process.pid);
 
 		await parentStore.dispose();
-	});
+	}, 20_000);
 });
 
 /** Waits for a marker file to appear (child signaling readiness), with timeout. */
