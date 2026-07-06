@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
@@ -23,6 +24,7 @@ import {
 	CardHeader,
 } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
+import { invariantResponse } from "~/utils/misc";
 import { formatBytes, formatRelative } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { ProjectManifest } from "./+components/project-manifest";
@@ -65,9 +67,7 @@ export async function loader({
 	const project = account
 		? await getProjectForAccount(db, account.id, projectId)
 		: null;
-	if (!project) {
-		throw new Response("Project not found", { status: 404 });
-	}
+	invariantResponse(project, "Project not found", { status: StatusCodes.NOT_FOUND });
 
 	const [files, cursors] = await Promise.all([
 		listProjectFiles(db, projectId),

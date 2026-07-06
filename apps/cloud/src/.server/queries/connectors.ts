@@ -13,6 +13,7 @@
 
 import { and, count, eq } from "drizzle-orm";
 import type { Database } from "../db";
+import { invariant } from "../../utils/misc";
 import { type ConnectorType, connectors, projects } from "../db/schema";
 
 /** The dashboard-facing connector shape — no `encryptedSecret` (never exposed). */
@@ -134,7 +135,7 @@ export async function createConnector(
 		.from(connectors)
 		.where(eq(connectors.id, id))
 		.limit(1);
-	if (!row[0]) throw new Error("Connector insert failed");
+	invariant(row[0], "Connector insert failed");
 	return toView(row[0]);
 }
 

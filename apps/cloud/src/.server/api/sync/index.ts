@@ -54,6 +54,7 @@ import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import type { Database } from "../../db";
 import { getDB } from "../../db";
+import { invariant } from "../../../utils/misc";
 import { ConflictError, EntitlementError, ValidationError } from "../errors";
 import type { ApiEnv, ApiVariables } from "../index";
 import { json } from "../json";
@@ -143,12 +144,10 @@ const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
  */
 const authMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
 	const db = c.get("db");
-	if (!db) {
-		// Defensive: the router mounts db before auth, so this is unreachable in
-		// normal operation. Failing loudly surfaces a wiring bug rather than
-		// letting an unauthenticated request slip past.
-		throw new Error("db middleware must run before auth middleware");
-	}
+	// Defensive: the router mounts db before auth, so this is unreachable in
+	// normal operation. Failing loudly surfaces a wiring bug rather than
+	// letting an unauthenticated request slip past.
+	invariant(db, "db middleware must run before auth middleware");
 	const salt = c.env.API_KEY_SALT ?? "";
 	const account = await resolveAccount(db, salt, c.req.header("authorization"));
 	c.set("account", account);
@@ -482,7 +481,7 @@ function parseUploaded(
 /** `c.get("db")` narrowed to non-undefined; throws loudly if middleware mis-ran. */
 function requireDb(c: HonoContext): Database {
 	const db = c.get("db");
-	if (!db) throw new Error("db not set on context");
+	invariant(db, "db not set on context");
 	return db;
 }
 
@@ -509,7 +508,7 @@ function requireProjectId(c: HonoContext): string {
  */
 function requireAccount(c: HonoContext): ApiVariables["account"] & object {
 	const account = c.get("account");
-	if (!account) throw new Error("account not set on context");
+	invariant(account, "account not set on context");
 	return account;
 }
 

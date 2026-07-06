@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { data } from "react-router";
 import { sendWaitlistEmail, subscribeUser } from "~/.server/email/resend";
 import { hasMxRecord } from "~/.server/mx-check";
@@ -19,7 +20,7 @@ export async function action({ request }: Route.ActionArgs) {
 	if (!email?.includes("@")) {
 		return data(
 			{ ok: false as const, error: "Please enter a valid email address." },
-			{ status: 400 },
+			{ status: StatusCodes.BAD_REQUEST },
 		);
 	}
 
@@ -31,7 +32,7 @@ export async function action({ request }: Route.ActionArgs) {
 				error:
 					"That email domain doesn't appear to be reachable. Please use a different address.",
 			},
-			{ status: 400 },
+			{ status: StatusCodes.BAD_REQUEST },
 		);
 	}
 

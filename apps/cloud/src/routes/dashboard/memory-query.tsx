@@ -1,7 +1,9 @@
+import { StatusCodes } from "http-status-codes";
 import { getDB } from "~/.server/db";
 import { listProjectsForAccount } from "~/.server/queries";
 import { createRuntimeClient } from "~/.server/runtime-client";
 import { requireUserWithAccount } from "~/.server/session";
+import { invariantResponse } from "~/utils/misc";
 import type { Route } from "./+types/memory-query";
 
 /**
@@ -62,36 +64,30 @@ export async function action({
 	if (!projectId || !account) {
 		return Response.json(
 			{ ok: false, error: "Missing workspace, account, or project." },
-			{ status: 400 },
+			{ status: StatusCodes.BAD_REQUEST },
 		);
 	}
 
 	// Validate ownership
 	const owned = await listProjectsForAccount(db, account.id);
-	if (!owned.some((p) => p.id === projectId)) {
-		return Response.json(
-			{ ok: false, error: "Unauthorized project access." },
-			{ status: 403 },
-		);
-	}
-
-	if (intent === "consolidate") {
-		try {
-			const runtimeClient = createRuntimeClient();
-			const result = await runtimeClient.consolidate(projectId, {
-				apply: true,
-			});
-			return Response.json({ ok: true, result });
-		} catch (err) {
-			return Response.json({
-				ok: false,
-				error: err instanceof Error ? err.message : String(err),
-			});
-		}
-	}
-
-	return Response.json(
-		{ ok: false, error: "Unknown intent." },
-		{ status: 400 },
+	invariantResponse(
+		owned.some((p) => p.id === projectId),
+		"Unauthorized project access.",
+		{ status: StatusCodes.FORBIDDEN },
 	);
+
+	invariantResponse(intent === "consolidate", "Unknown intent.");
+
+	try {
+		const runtimeClient = createRuntimeClient();
+		const result = await runtimeClient.consolidate(projectId, {
+			apply: true,
+		});
+		return Response.json({ ok: true, result });
+	} catch (err) {
+		return Response.json({
+			ok: false,
+			error: err instanceof Error ? err.message : String(err),
+		});
+	}
 }

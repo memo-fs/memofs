@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { Loader2 } from "lucide-react";
 import { data, useFetcher } from "react-router";
 import { getCtx, getEnv } from "~/.server/context";
@@ -60,7 +61,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const limited = await consumeMagicLinkToken(request, getCtx(context));
 	const limitedMessage = rateLimitMessage(limited);
 	if (limitedMessage) {
-		return data({ ok: false, error: limitedMessage.error }, { status: 429 });
+		return data({ ok: false, error: limitedMessage.error }, { status: StatusCodes.TOO_MANY_REQUESTS });
 	}
 
 	const validation = validateEmail(email);
@@ -68,7 +69,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (!validation.ok) {
 		return data(
 			{ ok: false, error: emailIssueMessage(validation.issue) },
-			{ status: 400 },
+			{ status: StatusCodes.BAD_REQUEST },
 		);
 	}
 

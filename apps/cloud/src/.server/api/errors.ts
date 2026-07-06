@@ -25,6 +25,7 @@
  */
 import type { JsonValue } from "@memofs/core/cloud-client";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { StatusCodes } from "http-status-codes";
 import type { PlanTier } from "../db/schema";
 
 /**
@@ -70,35 +71,35 @@ export class ApiError extends Error {
 /** 400 — malformed request body / params. */
 export class ValidationError extends ApiError {
 	constructor(message: string, details?: JsonValue) {
-		super({ code: "validation_error", message, status: 400, details });
+		super({ code: "validation_error", message, status: StatusCodes.BAD_REQUEST, details });
 	}
 }
 
 /** 401 — missing/invalid bearer token (§12.4). */
 export class AuthError extends ApiError {
 	constructor(message = "Authentication required.", details?: JsonValue) {
-		super({ code: "unauthorized", message, status: 401, details });
+		super({ code: "unauthorized", message, status: StatusCodes.UNAUTHORIZED, details });
 	}
 }
 
 /** 403 — authenticated but not allowed to touch this project. */
 export class PermissionError extends ApiError {
 	constructor(message = "Forbidden.", details?: JsonValue) {
-		super({ code: "forbidden", message, status: 403, details });
+		super({ code: "forbidden", message, status: StatusCodes.FORBIDDEN, details });
 	}
 }
 
 /** 404 — project/file/route not found. */
 export class NotFoundError extends ApiError {
 	constructor(message = "Not found.", details?: JsonValue) {
-		super({ code: "not_found", message, status: 404, details });
+		super({ code: "not_found", message, status: StatusCodes.NOT_FOUND, details });
 	}
 }
 
 /** 409 — cursor/version conflict (§4.4 push semantics). */
 export class ConflictError extends ApiError {
 	constructor(message: string, details?: JsonValue) {
-		super({ code: "conflict", message, status: 409, details });
+		super({ code: "conflict", message, status: StatusCodes.CONFLICT, details });
 	}
 }
 
@@ -121,7 +122,7 @@ export class EntitlementError extends ApiError {
 		super({
 			code: "entitlement_limit_exceeded",
 			message,
-			status: 402,
+			status: StatusCodes.PAYMENT_REQUIRED,
 			details: details as JsonValue,
 		});
 	}
@@ -138,7 +139,7 @@ export class RateLimitError extends ApiError {
 		super({
 			code: "rate_limited",
 			message,
-			status: 429,
+			status: StatusCodes.TOO_MANY_REQUESTS,
 			headers: retryAfterMs
 				? { "retry-after": String(Math.ceil(retryAfterMs / 1000)) }
 				: undefined,
@@ -171,7 +172,7 @@ export class ConcurrencyError extends ApiError {
 		super({
 			code: "concurrency_locked",
 			message,
-			status: 503,
+			status: StatusCodes.SERVICE_UNAVAILABLE,
 			headers: {
 				"retry-after": String(Math.ceil(retryAfterMs / 1000)),
 			},

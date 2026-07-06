@@ -42,6 +42,7 @@ import {
 } from "../../queries/billing";
 import type { ApiEnv } from "../index";
 import { json, jsonError } from "../json";
+import { invariant } from "../../../utils/misc";
 
 /** Per-request drizzle client, mirroring the sync router's `dbMiddleware`. */
 const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
@@ -52,7 +53,7 @@ const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
 /** Read `c.var.db`, throwing if a wiring bug left it unset. */
 function requireDb(c: Context<ApiEnv>) {
 	const db = c.get("db");
-	if (!db) throw new Error("db middleware must run before the billing handler");
+	invariant(db, "db middleware must run before the billing handler");
 	return db;
 }
 

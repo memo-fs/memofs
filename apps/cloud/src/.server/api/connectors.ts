@@ -12,6 +12,7 @@
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { decryptToken } from "../utils";
+import { invariant } from "../../utils/misc";
 import { getDB } from "../db";
 import { connectors } from "../db/schema";
 import { NotFoundError, ValidationError } from "./errors";
@@ -68,9 +69,7 @@ connectorsApp.get("/secret", async (c) => {
 	}
 
 	const encryptionKey = c.env.ENCRYPTION_KEY;
-	if (!encryptionKey) {
-		throw new Error("ENCRYPTION_KEY secret is not set on the server.");
-	}
+	invariant(encryptionKey, "ENCRYPTION_KEY secret is not set on the server.");
 
 	const secret = await decryptToken(row.encryptedSecret, encryptionKey);
 

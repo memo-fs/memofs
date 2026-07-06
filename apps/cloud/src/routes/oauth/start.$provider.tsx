@@ -1,3 +1,4 @@
+import { StatusCodes } from "http-status-codes";
 import { redirect } from "react-router";
 import { getDB } from "~/.server/db";
 import {
@@ -6,6 +7,7 @@ import {
 	type OAuthProviderId,
 } from "~/.server/oauth-providers";
 import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
+import { invariantResponse } from "~/utils/misc";
 import type { Route } from "./+types/start.$provider";
 
 /**
@@ -28,14 +30,18 @@ export async function loader({
 
 	// 404-shaped guard against an unknown provider id. The canonical id list
 	// (`OAUTH_PROVIDER_IDS`) is the SSOT — no hand-maintained local set.
-	if (!OAUTH_PROVIDER_IDS.includes(provider as OAuthProviderId)) {
-		throw new Response("Unknown OAuth provider", { status: 404 });
-	}
+	invariantResponse(
+		OAUTH_PROVIDER_IDS.includes(provider as OAuthProviderId),
+		"Unknown OAuth provider",
+		{ status: StatusCodes.NOT_FOUND },
+	);
 	// A known-but-unconfigured provider also 404s — `enabledOAuthProviders` is
 	// the same predicate `createAuth` uses, so the two never disagree.
-	if (!enabledOAuthProviders().includes(provider as OAuthProviderId)) {
-		throw new Response("OAuth provider not configured", { status: 404 });
-	}
+	invariantResponse(
+		enabledOAuthProviders().includes(provider as OAuthProviderId),
+		"OAuth provider not configured",
+		{ status: StatusCodes.NOT_FOUND },
+	);
 
 	// Where to land after the Better Auth callback completes the session.
 	const url = new URL(request.url);
