@@ -30,9 +30,9 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const store = createNodeFsMemoryStore({ rootDir });
 		stores.push(store);
 
-		await store.write(".tekmemo/memory/core.md", "hello");
+		await store.write(".memofs/memory/core.md", "hello");
 
-		expect(await pathExists(path.join(rootDir, ".tekmemo", ".lock"))).toBe(
+		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(
 			true,
 		);
 	});
@@ -43,12 +43,12 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir });
 		stores.push(storeA, storeB);
 
-		await storeA.write(".tekmemo/memory/core.md", "v1");
+		await storeA.write(".memofs/memory/core.md", "v1");
 
 		// storeA now holds the lock; storeB is a second process's view.
 		// storeB can read freely (reads never acquire).
-		await expect(storeB.read(".tekmemo/memory/core.md")).resolves.toBe("v1");
-		await expect(storeB.exists(".tekmemo/memory/core.md")).resolves.toBe(true);
+		await expect(storeB.read(".memofs/memory/core.md")).resolves.toBe("v1");
+		await expect(storeB.exists(".memofs/memory/core.md")).resolves.toBe(true);
 	});
 
 	test("a second store on the same rootDir cannot write while the first holds the lock", async () => {
@@ -57,10 +57,10 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir });
 		stores.push(storeA, storeB);
 
-		await storeA.write(".tekmemo/memory/core.md", "a");
+		await storeA.write(".memofs/memory/core.md", "a");
 
 		await expect(
-			storeB.write(".tekmemo/memory/core.md", "b"),
+			storeB.write(".memofs/memory/core.md", "b"),
 		).rejects.toBeInstanceOf(LockHeldError);
 	});
 
@@ -70,14 +70,14 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir });
 		stores.push(storeA, storeB);
 
-		await storeA.write(".tekmemo/memory/notes.md", "first\n");
+		await storeA.write(".memofs/memory/notes.md", "first\n");
 
 		await expect(
-			storeB.append(".tekmemo/memory/notes.md", "second\n"),
+			storeB.append(".memofs/memory/notes.md", "second\n"),
 		).rejects.toBeInstanceOf(LockHeldError);
 
 		await expect(
-			storeB.delete(".tekmemo/memory/notes.md"),
+			storeB.delete(".memofs/memory/notes.md"),
 		).rejects.toBeInstanceOf(LockHeldError);
 	});
 
@@ -87,20 +87,20 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir });
 		stores.push(storeB);
 
-		await storeA.write(".tekmemo/memory/core.md", "a");
+		await storeA.write(".memofs/memory/core.md", "a");
 
 		// storeA holds the lock; storeB is blocked.
 		await expect(
-			storeB.write(".tekmemo/memory/core.md", "b"),
+			storeB.write(".memofs/memory/core.md", "b"),
 		).rejects.toBeInstanceOf(LockHeldError);
 
 		// Release via dispose; now storeB can proceed.
 		await storeA.dispose();
 
 		await expect(
-			storeB.write(".tekmemo/memory/core.md", "b"),
+			storeB.write(".memofs/memory/core.md", "b"),
 		).resolves.toBeUndefined();
-		expect(await storeB.read(".tekmemo/memory/core.md")).toBe("b");
+		expect(await storeB.read(".memofs/memory/core.md")).toBe("b");
 	});
 
 	test("lock: false disables the advisory lock entirely", async () => {
@@ -109,14 +109,14 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir, lock: false });
 		stores.push(storeA, storeB);
 
-		await storeA.write(".tekmemo/memory/core.md", "a");
+		await storeA.write(".memofs/memory/core.md", "a");
 
 		// No lock file created.
 		expect(await pathExists(path.join(rootDir, ".lock"))).toBe(false);
 
 		// Second store writes freely (no enforcement). This is the opt-out path.
 		await expect(
-			storeB.write(".tekmemo/memory/core.md", "b"),
+			storeB.write(".memofs/memory/core.md", "b"),
 		).resolves.toBeUndefined();
 	});
 
@@ -126,10 +126,10 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		const storeB = createNodeFsMemoryStore({ rootDir });
 		stores.push(storeA, storeB);
 
-		await storeA.write(".tekmemo/memory/core.md", "a");
+		await storeA.write(".memofs/memory/core.md", "a");
 
 		try {
-			await storeB.write(".tekmemo/memory/core.md", "b");
+			await storeB.write(".memofs/memory/core.md", "b");
 			expect.unreachable("should have thrown");
 		} catch (error) {
 			expect(error).toBeInstanceOf(LockHeldError);
@@ -139,18 +139,18 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 			};
 			// The holder is this test process.
 			expect(details.pid).toBe(process.pid);
-			expect(details.lockPath).toBe(path.join(rootDir, ".tekmemo", ".lock"));
+			expect(details.lockPath).toBe(path.join(rootDir, ".memofs", ".lock"));
 		}
 	});
 
-	test("the .lock file lives inside .tekmemo/ (Q28: .tekmemo/.lock)", async () => {
+	test("the .lock file lives inside .memofs/ (Q28: .memofs/.lock)", async () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 		stores.push(store);
 
-		await store.write(".tekmemo/memory/core.md", "x");
+		await store.write(".memofs/memory/core.md", "x");
 
-		expect(await pathExists(path.join(rootDir, ".tekmemo", ".lock"))).toBe(
+		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(
 			true,
 		);
 		// And NOT at the rootDir level.

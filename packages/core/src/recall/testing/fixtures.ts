@@ -14,7 +14,7 @@ import type { RecallDocument } from "../types";
  * Creates a single RecallDocument with sensible defaults.
  *
  * @remarks
- * Default values: id="doc_1", text about TekMemo, embedding [1, 0, 0],
+ * Default values: id="doc_1", text about MemoFS, embedding [1, 0, 0],
  * projectId="proj_1", sourceType="document", sourceId="core", memoryType="core".
  * Any property can be overridden via the overrides parameter.
  *
@@ -39,7 +39,7 @@ export function createRecallDocument(
 		id: overrides.id ?? "doc_1",
 		text:
 			overrides.text ??
-			"TekMemo stores developer-owned memory in local .tekmemo files.",
+			"MemoFS stores developer-owned memory in local .memofs files.",
 		embedding: overrides.embedding ?? [1, 0, 0],
 		metadata,
 		...(overrides.namespace === undefined

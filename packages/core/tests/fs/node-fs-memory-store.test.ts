@@ -34,11 +34,11 @@ describe("NodeFsMemoryStore", () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
-		await store.write(".tekmemo/memory/notes.md", "# Notes\n");
-		await store.append(".tekmemo/memory/notes.md", "\n- one");
-		await store.append(".tekmemo/memory/notes.md", "\n- two");
+		await store.write(".memofs/memory/notes.md", "# Notes\n");
+		await store.append(".memofs/memory/notes.md", "\n- one");
+		await store.append(".memofs/memory/notes.md", "\n- two");
 
-		await expect(store.read(".tekmemo/memory/notes.md")).resolves.toBe(
+		await expect(store.read(".memofs/memory/notes.md")).resolves.toBe(
 			"# Notes\n\n- one\n- two",
 		);
 	});
@@ -47,9 +47,9 @@ describe("NodeFsMemoryStore", () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
-		await store.append(".tekmemo/memory/notes.md", "");
+		await store.append(".memofs/memory/notes.md", "");
 
-		await expect(store.exists(".tekmemo/memory/notes.md")).resolves.toBe(false);
+		await expect(store.exists(".memofs/memory/notes.md")).resolves.toBe(false);
 	});
 
 	test("exists returns true for files and false for missing files", async () => {
@@ -85,7 +85,7 @@ describe("NodeFsMemoryStore", () => {
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		await expect(
-			store.write(".tekmemo/unknown.md" as never, "x"),
+			store.write(".memofs/unknown.md" as never, "x"),
 		).rejects.toBeInstanceOf(MemoryPathError);
 	});
 
@@ -103,7 +103,7 @@ describe("NodeFsMemoryStore", () => {
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		await expect(
-			store.exists(".tekmemo/memory/core.md\0" as never),
+			store.exists(".memofs/memory/core.md\0" as never),
 		).rejects.toBeInstanceOf(MemoryPathError);
 	});
 

@@ -1,6 +1,6 @@
 declare const process: { env?: Record<string, string | undefined> } | undefined;
 
-import { TekMemoCloudTransport } from "./transport";
+import { MemoFsCloudTransport } from "./transport";
 import type {
 	ProjectScopedInput,
 	SyncPullInput,
@@ -11,9 +11,9 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoCloudClient,
-	TekMemoCloudClientOptions,
-	TekMemoCloudHealthResult,
+	MemoFsCloudClient,
+	MemoFsCloudClientOptions,
+	MemoFSCloudHealthResult,
 } from "./types";
 import {
 	assertProjectId,
@@ -38,10 +38,10 @@ import {
  *
  * @public
  */
-export function createTekMemoCloudClient(
-	options: TekMemoCloudClientOptions,
-): TekMemoCloudClient {
-	const transport = new TekMemoCloudTransport(options);
+export function createMemoFsCloudClient(
+	options: MemoFsCloudClientOptions,
+): MemoFsCloudClient {
+	const transport = new MemoFsCloudTransport(options);
 	const defaultProjectId = options.defaultProjectId;
 
 	const projectPath = (
@@ -66,7 +66,7 @@ export function createTekMemoCloudClient(
 
 	return {
 		health(signal) {
-			return transport.request<TekMemoCloudHealthResult>({
+			return transport.request<MemoFSCloudHealthResult>({
 				method: "GET",
 				path: "/health",
 				signal,
@@ -74,7 +74,7 @@ export function createTekMemoCloudClient(
 			});
 		},
 		readiness(signal) {
-			return transport.request<TekMemoCloudHealthResult>({
+			return transport.request<MemoFSCloudHealthResult>({
 				method: "GET",
 				path: "/readiness",
 				signal,
@@ -156,20 +156,20 @@ export function createTekMemoCloudClient(
 	};
 }
 
-export function createTekMemoCloudClientFromEnv(
+export function createMemoFsCloudClientFromEnv(
 	env: Record<string, string | undefined> = defaultEnv(),
-	options: Partial<Omit<TekMemoCloudClientOptions, "baseUrl" | "apiKey">> = {},
-): TekMemoCloudClient {
-	const baseUrl = env.TEKMEMO_CLOUD_URL ?? env.TEKMEMO_API_URL;
+	options: Partial<Omit<MemoFsCloudClientOptions, "baseUrl" | "apiKey">> = {},
+): MemoFsCloudClient {
+	const baseUrl = env.MEMOFS_CLOUD_URL ?? env.MEMOFS_API_URL;
 	if (!baseUrl) {
-		throw new Error("TEKMEMO_CLOUD_URL or TEKMEMO_API_URL is required.");
+		throw new Error("MEMOFS_CLOUD_URL or MEMOFS_API_URL is required.");
 	}
-	return createTekMemoCloudClient({
+	return createMemoFsCloudClient({
 		...options,
 		baseUrl,
-		apiKey: env.TEKMEMO_API_KEY,
-		defaultProjectId: options.defaultProjectId ?? env.TEKMEMO_PROJECT_ID,
-		defaultWorkspaceId: options.defaultWorkspaceId ?? env.TEKMEMO_WORKSPACE_ID,
+		apiKey: env.MEMOFS_API_KEY,
+		defaultProjectId: options.defaultProjectId ?? env.MEMOFS_PROJECT_ID,
+		defaultWorkspaceId: options.defaultWorkspaceId ?? env.MEMOFS_WORKSPACE_ID,
 	});
 }
 
@@ -183,9 +183,9 @@ function defaultEnv(): Record<string, string | undefined> {
  * scoped to `projectId`, so callers can pass inputs without repeating it.
  */
 export function createProjectScopedClient(
-	client: TekMemoCloudClient,
+	client: MemoFsCloudClient,
 	projectId: string,
-): TekMemoCloudClient {
+): MemoFsCloudClient {
 	assertProjectId(projectId);
 	const withProject = <T extends ProjectScopedInput>(
 		input?: T,

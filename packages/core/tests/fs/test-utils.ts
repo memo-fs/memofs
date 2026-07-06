@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-export async function createTempRoot(prefix = "tekmemo-fs-"): Promise<string> {
+export async function createTempRoot(prefix = "memofs-fs-"): Promise<string> {
 	return await fs.mkdtemp(path.join(os.tmpdir(), prefix));
 }
 

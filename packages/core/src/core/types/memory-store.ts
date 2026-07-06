@@ -9,10 +9,10 @@ import type { MemoryPath } from "../constants/memory-paths";
 export type { MemoryPath } from "../constants/memory-paths";
 
 /**
- * Interface for a memory store that reads/writes canonical TekMemo files.
+ * Interface for a memory store that reads/writes canonical MemoFS files.
  *
  * @remarks
- * All paths must be canonical `.tekmemo/` paths validated by `assertMemoryPath`.
+ * All paths must be canonical `.memofs/` paths validated by `assertMemoryPath`.
  * Implementations include `NodeFsMemoryStore` (filesystem) and
  * `InMemoryMemoryStore` (for testing).
  *
@@ -22,7 +22,7 @@ export interface MemoryStore {
 	/**
 	 * Reads the content of a memory file.
 	 *
-	 * @param path - Canonical memory path (e.g., `.tekmemo/memory/core.md`).
+	 * @param path - Canonical memory path (e.g., `.memofs/memory/core.md`).
 	 * @returns The file content as a string.
 	 * @throws {@link MemoryNotFoundError} If the file does not exist.
 	 */

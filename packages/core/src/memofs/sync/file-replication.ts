@@ -20,7 +20,7 @@
  * §7 contract) that the orchestration uses to compute the manifest and to
  * perform the byte uploads that sit between phase 1 and phase 2 of a push.
  *
- * The local engine always runs against the same `.tekmemo/` files this layer
+ * The local engine always runs against the same `.memofs/` files this layer
  * mirrors; sync never embeds, recalls, or runs graph traversal.
  *
  * @internal
@@ -37,10 +37,10 @@ import type {
 	SyncStatusInput,
 	SyncStatusResult,
 	SyncUploadTarget,
-	TekMemoCloudClient,
+	MemoFsCloudClient,
 } from "../../cloud-client/types";
 import {
-	CANONICAL_TEKMEMO_FILES,
+	CANONICAL_MEMOFS_FILES,
 	createSnapshotPath,
 	type MemoryPath,
 } from "../../core/constants/memory-paths";
@@ -84,8 +84,8 @@ export interface FileSyncLayer {
 
 export interface CreateFileSyncLayerOptions {
 	/** The frozen cloud-client surface (health/readiness/sync only). */
-	client: TekMemoCloudClient;
-	/** The local store holding the canonical `.tekmemo/` files. */
+	client: MemoFsCloudClient;
+	/** The local store holding the canonical `.memofs/` files. */
 	store: MemoryStore;
 	/** Project scope for sync calls. */
 	projectId: string;
@@ -113,7 +113,7 @@ export function createFileSyncLayer(
 	/** Canonical + snapshot paths that currently exist in the store. */
 	async function listPresentPaths(): Promise<MemoryPath[]> {
 		const paths: MemoryPath[] = [];
-		for (const path of CANONICAL_TEKMEMO_FILES) {
+		for (const path of CANONICAL_MEMOFS_FILES) {
 			if (await store.exists(path)) paths.push(path);
 		}
 		// Snapshot files are dynamic — derive their paths from the index.
@@ -328,7 +328,7 @@ async function fetchText(url: string, signal?: AbortSignal): Promise<string> {
 
 /** Coerces an arbitrary string into a canonical/snapshot MemoryPath, or undefined. */
 function safeMemoryPath(path: string): MemoryPath | undefined {
-	for (const canonical of CANONICAL_TEKMEMO_FILES) {
+	for (const canonical of CANONICAL_MEMOFS_FILES) {
 		if (canonical === path) return canonical;
 	}
 	return safeSnapshotPathFromPath(path);
@@ -345,9 +345,9 @@ function safeSnapshotPath(id: string): MemoryPath | undefined {
 
 /** Recognizes an existing snapshot file path string. */
 function safeSnapshotPathFromPath(path: string): MemoryPath | undefined {
-	if (!path.startsWith(".tekmemo/snapshots/")) return undefined;
+	if (!path.startsWith(".memofs/snapshots/")) return undefined;
 	if (!path.endsWith(".json")) return undefined;
-	const id = path.slice(".tekmemo/snapshots/".length, -".json".length);
+	const id = path.slice(".memofs/snapshots/".length, -".json".length);
 	return safeSnapshotPath(id);
 }
 

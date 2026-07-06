@@ -24,7 +24,7 @@ describe("Extractor contract", () => {
 	it("extract resolves to an ExtractionResult with nodes and edges", async () => {
 		const extractor = createRuleBasedExtractor();
 		const result = await extractor.extract({
-			text: "TekMemo uses BM25\nTekMemo depends on TypeScript",
+			text: "MemoFS uses BM25\nMemoFS depends on TypeScript",
 			sourceRef: { sourceType: "document", sourceId: "core" },
 		});
 		expect(isValidResult(result)).toBe(true);
@@ -39,7 +39,7 @@ describe("Extractor contract", () => {
 		const extractor = createRuleBasedExtractor();
 		const sourceRef = { sourceType: "document", sourceId: "core" };
 		const result = await extractor.extract({
-			text: "TekMemo uses BM25",
+			text: "MemoFS uses BM25",
 			sourceRef,
 		});
 		for (const node of result.nodes) {
@@ -63,7 +63,7 @@ describe("Extractor contract", () => {
 	it("produces no contradictions when there is no supersession", async () => {
 		const extractor = createRuleBasedExtractor();
 		const result = await extractor.extract({
-			text: "TekMemo uses BM25",
+			text: "MemoFS uses BM25",
 		});
 		expect(result.contradictions).toBeUndefined();
 	});

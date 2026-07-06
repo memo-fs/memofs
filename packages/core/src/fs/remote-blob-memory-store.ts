@@ -5,7 +5,7 @@
  * (`NodeFsMemoryStore` for local OSS). Cloudflare Workers have no Node `fs`, so
  * the *same* `local-strategy` runtime cannot run there unmodified against a
  * POSIX filesystem. This module defines the provider-neutral contract that lets
- * the runtime read/write its canonical `.tekmemo/` files against a remote-blob
+ * the runtime read/write its canonical `.memofs/` files against a remote-blob
  * backend (Cloudflare R2, S3, GCS, …) instead.
  *
  * Two injected interfaces keep the runtime unaware of any specific cloud:
@@ -17,7 +17,7 @@
  * the Embedder/Extractor/Connector interface-in-core + impl-in-adapter seam):
  * `@memofs/adapter-r2` (Cloudflare R2 blobs) + `@memofs/adapter-turso`
  * (Turso/libSQL metadata), decoupled as not a bundled N×M adapter.
- * A future `tekmemo-adapter-s3` / `-gcs` implements the same `BlobClient` and
+ * A future `memofs-adapter-s3` / `-gcs` implements the same `BlobClient` and
  * the runtime is unchanged.
  *
  * Content addressing: the blob key IS the sha256 of the content, matching the
@@ -55,7 +55,7 @@ export interface BlobEntry {
 /**
  * Minimal opaque-blob byte store: get/put/delete by opaque key.
  *
- * Implementations hold no TekMemo knowledge — the key is opaque, the bytes are
+ * Implementations hold no MemoFS knowledge — the key is opaque, the bytes are
  * raw. Streaming-friendly: `put` accepts a `ReadableStream` or a buffer.
  *
  * @public
@@ -287,7 +287,7 @@ export class RemoteBlobMemoryStore implements MemoryStore {
  * `node:crypto` (keeping the store Worker-loadable unconditionally).
  *
  * Named `hashBytesHex` (not `sha256Hex`) to avoid clashing with the sync-side
- * `sha256Hex(string): string` exported from `./tekmemo/sync/sha256` — this one
+ * `sha256Hex(string): string` exported from `./memofs/sync/sha256` — this one
  * takes bytes and is async (Web Crypto's `subtle.digest` is async).
  *
  * @public

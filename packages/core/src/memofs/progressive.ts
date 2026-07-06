@@ -4,7 +4,7 @@
  *
  * @remarks
  * This is the headline delivery of the Q16 cold-start token-reduction north
- * star. A compact first `tekmemo.context` call returns a small briefing
+ * star. A compact first `memofs.context` call returns a small briefing
  * (~6kb) with expandable sections; the agent calls back with `section` +
  * `expand` to pull only the section it needs and stops. Compact ≈ 6kb; full ≈
  * 80kb; the agent pulls the 2kb it needs — vs ~64kb truncated before Q27.
@@ -15,7 +15,7 @@
  * so the second call re-resolves fast. Today's `buildContext()` is stateless.
  *
  * The state lives in a per-{@link ContextCache} instance held by each runtime
- * strategy (one per `Tekmemo` instance). It is a fast-re-resolve optimization,
+ * strategy (one per `MemoFS` instance). It is a fast-re-resolve optimization,
  * not durable state: entries expire after 10 minutes and the cache holds at
  * most 8 (LRU). A cache miss on expand degrades gracefully — a fresh compact
  * briefing is returned with a warning, never an error.
@@ -172,7 +172,7 @@ export interface ContextCacheEntry {
 }
 
 // ---------------------------------------------------------------------------
-// ContextCache — LRU + TTL, per Tekmemo instance
+// ContextCache — LRU + TTL, per MemoFS instance
 // ---------------------------------------------------------------------------
 
 /** 10-minute TTL. The cache is a fast-re-resolve optimization, not state. */
@@ -183,7 +183,7 @@ const CACHE_MAX_ENTRIES = 8;
 /**
  * A session-scoped cache of resolved context pointers ( /
  * Q27). Held as a closure variable by each runtime strategy (one per
- * `Tekmemo` instance), so the cache is never global and never crosses
+ * `MemoFS` instance), so the cache is never global and never crosses
  * instances. LRU + TTL bounded: the cache is a performance optimization for
  * the second call, not durable state.
  *
@@ -334,5 +334,5 @@ export function expandAffordanceLine(
 ): string {
 	const count =
 		expansion.available === undefined ? "" : ` (${expansion.available} more)`;
-	return `↳ expand${count}: tekmemo.context(section="${expansion.section}", expand="<cursor>")`;
+	return `↳ expand${count}: memofs.context(section="${expansion.section}", expand="<cursor>")`;
 }

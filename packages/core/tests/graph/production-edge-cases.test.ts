@@ -3,7 +3,7 @@ import {
 	createInMemoryGraphStore,
 	expandFromEntities,
 	GraphValidationError,
-	isTekMemoGraphError,
+	isMemoFsGraphError,
 	matchesMetadataFilter,
 	parseGraphNodesJsonlDetailed,
 } from "../../src/index";
@@ -86,9 +86,9 @@ describe("production-edge-cases", () => {
 		expect(result.issues.length).toBe(1);
 	});
 
-	it("typed graph error guard identifies TekMemo graph errors", () => {
+	it("typed graph error guard identifies MemoFS graph errors", () => {
 		const error = new GraphValidationError("bad graph");
-		expect(isTekMemoGraphError(error)).toBe(true);
-		expect(isTekMemoGraphError(new Error("generic"))).toBe(false);
+		expect(isMemoFsGraphError(error)).toBe(true);
+		expect(isMemoFsGraphError(new Error("generic"))).toBe(false);
 	});
 });

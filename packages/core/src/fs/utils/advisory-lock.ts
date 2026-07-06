@@ -5,7 +5,7 @@
  * Implements the Q28 decision (decisions.md): the local runtime is
  * single-process by contract, but two Claude Code windows on one repo is a
  * day-one v1 scenario. A replace-whole-file race on `core.md` silently loses
- * a write. This lock — `.tekmemo/.lock`, the git-index model — is acquired on
+ * a write. This lock — `.memofs/.lock`, the git-index model — is acquired on
  * the first mutating write and held process-lifetime; a second process
  * attempting a mutating op gets a clear {@link LockHeldError}. Non-mutating
  * reads never block.

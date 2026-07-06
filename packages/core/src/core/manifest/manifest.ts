@@ -1,9 +1,9 @@
 /**
- * Manifest management for TekMemo projects.
+ * Manifest management for MemoFS projects.
  *
  * @remarks
  * The manifest (`manifest.json`) defines the canonical file structure
- * and metadata for a TekMemo project. This module provides create,
+ * and metadata for a MemoFS project. This module provides create,
  * read, write, parse, and validate functions.
  *
  * @public
@@ -22,7 +22,7 @@ import {
 	SNAPSHOTS_INDEX_PATH,
 } from "../constants/memory-paths";
 import { MemoryValidationError } from "../errors/errors";
-import type { TekMemoManifest } from "../types/memory-documents";
+import type { MemoFsManifest } from "../types/memory-documents";
 import type { MemoryStore } from "../types/memory-store";
 import {
 	assertIsoTimestamp,
@@ -30,21 +30,21 @@ import {
 	assertNonEmptyString,
 } from "../validation/assertions";
 
-export interface CreateDefaultTekMemoManifestOptions {
+export interface CreateDefaultMemoFsManifestOptions {
 	projectId?: string;
 	now?: () => string;
 	version?: string;
 }
 
 /**
- * Creates a default TekMemo manifest for a new project.
+ * Creates a default MemoFS manifest for a new project.
  *
  * @param options - Options including projectId, version, and custom clock.
- * @returns A {@link TekMemoManifest} with defaults filled in.
+ * @returns A {@link MemoFsManifest} with defaults filled in.
  */
-export function createDefaultTekMemoManifest(
-	options: CreateDefaultTekMemoManifestOptions = {},
-): TekMemoManifest {
+export function createDefaultMemoFsManifest(
+	options: CreateDefaultMemoFsManifestOptions = {},
+): MemoFsManifest {
 	const timestamp = options.now?.() ?? new Date().toISOString();
 	assertIsoTimestamp(timestamp, "timestamp");
 
@@ -82,8 +82,8 @@ export function createDefaultTekMemoManifest(
  * @param manifest - The manifest to stringify.
  * @returns The JSON string (with trailing newline).
  */
-export function stringifyManifest(manifest: TekMemoManifest): string {
-	const normalized = validateTekMemoManifest(manifest);
+export function stringifyManifest(manifest: MemoFsManifest): string {
+	const normalized = validateMemoFsManifest(manifest);
 	return `${JSON.stringify(normalized, null, 2)}\n`;
 }
 
@@ -91,10 +91,10 @@ export function stringifyManifest(manifest: TekMemoManifest): string {
  * Parses a manifest from a JSON string.
  *
  * @param content - The JSON string to parse.
- * @returns The validated {@link TekMemoManifest}.
+ * @returns The validated {@link MemoFsManifest}.
  * @throws {@link MemoryValidationError} If the JSON is invalid or manifest is malformed.
  */
-export function parseManifest(content: string): TekMemoManifest {
+export function parseManifest(content: string): MemoFsManifest {
 	assertNonEmptyString(content, "manifest content");
 	let parsed: unknown;
 	try {
@@ -104,18 +104,18 @@ export function parseManifest(content: string): TekMemoManifest {
 			error: error instanceof Error ? error.message : String(error),
 		});
 	}
-	return validateTekMemoManifest(parsed);
+	return validateMemoFsManifest(parsed);
 }
 
 /**
  * Reads and parses the manifest from a memory store.
  *
  * @param store - The memory store to read from.
- * @returns The validated {@link TekMemoManifest}.
+ * @returns The validated {@link MemoFsManifest}.
  */
 export async function readManifest(
 	store: MemoryStore,
-): Promise<TekMemoManifest> {
+): Promise<MemoFsManifest> {
 	return parseManifest(await store.read(MANIFEST_PATH));
 }
 
@@ -127,24 +127,24 @@ export async function readManifest(
  */
 export async function writeManifest(
 	store: MemoryStore,
-	manifest: TekMemoManifest,
+	manifest: MemoFsManifest,
 ): Promise<void> {
 	await store.write(MANIFEST_PATH, stringifyManifest(manifest));
 }
 
 /**
- * Validates that a value is a well-formed {@link TekMemoManifest}.
+ * Validates that a value is a well-formed {@link MemoFsManifest}.
  *
  * @param value - The unknown value to validate.
- * @returns The validated {@link TekMemoManifest}.
+ * @returns The validated {@link MemoFsManifest}.
  * @throws {@link MemoryValidationError} If validation fails.
  */
-export function validateTekMemoManifest(value: unknown): TekMemoManifest {
+export function validateMemoFsManifest(value: unknown): MemoFsManifest {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
 		throw new MemoryValidationError("Manifest must be an object.");
 	}
 
-	const manifest = value as Partial<TekMemoManifest>;
+	const manifest = value as Partial<MemoFsManifest>;
 	assertNonEmptyString(manifest.version, "manifest.version");
 	assertIsoTimestamp(manifest.createdAt, "manifest.createdAt");
 	assertIsoTimestamp(manifest.updatedAt, "manifest.updatedAt");
@@ -173,7 +173,7 @@ export function validateTekMemoManifest(value: unknown): TekMemoManifest {
 	});
 	assertJsonSerializable(manifest, "manifest");
 
-	return manifest as TekMemoManifest;
+	return manifest as MemoFsManifest;
 }
 
 /**
@@ -200,7 +200,7 @@ function validatePathObject(
 		assertMemoryPath(record[key]);
 		if (record[key] !== expectedPath) {
 			throw new MemoryValidationError(
-				`${fieldName}.${key} must match the canonical TekMemo path.`,
+				`${fieldName}.${key} must match the canonical MemoFS path.`,
 				{
 					fieldName: `${fieldName}.${key}`,
 					path: record[key],

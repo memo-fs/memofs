@@ -1,5 +1,5 @@
 /**
- * In-memory runtime strategy for Tekmemo.
+ * In-memory runtime strategy for MemoFS.
  *
  * Provides a volatile, Map-backed implementation useful for testing and
  * sandbox environments. No data persists after the instance is discarded.
@@ -35,6 +35,7 @@ import type {
 	GraphPathResult,
 	JsonObject,
 	ListGraphInput,
+	MemoFSHealthResult,
 	MemoryContextInput,
 	MemoryContextResult,
 	MemoryDocumentResult,
@@ -50,7 +51,6 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoHealthResult,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -69,7 +69,7 @@ export function createMemoryStrategy(options: MemoryStrategyOptions) {
 	const contextCache = new ContextCache();
 
 	return {
-		async health(signal?: AbortSignal): Promise<TekMemoHealthResult> {
+		async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			return {
 				ok: true,

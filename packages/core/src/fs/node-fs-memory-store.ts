@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
+
 /**
  * Filesystem-backed memory store implementation.
  *
@@ -10,9 +11,9 @@ import fs from "node:fs/promises";
  * @public
  */
 
-import { PathLock } from "@repo/utils";
 import type { MemoryPath, MemoryStore } from "@memofs/core";
-import { MemoryNotFoundError, TEKMEMO_DIR } from "@memofs/core";
+import { MEMOFS_DIR, MemoryNotFoundError } from "@memofs/core";
+import { PathLock } from "@repo/utils";
 import { assertString } from "../core/validation/assertions";
 import { isNotFoundError, wrapFsError } from "./errors/fs-memory-store-error";
 import type {
@@ -63,9 +64,9 @@ export class NodeFsMemoryStore implements MemoryStore {
 		return this.options.rootDir;
 	}
 
-	/** Absolute path of the cross-process advisory lock file (`.tekmemo/.lock`). */
+	/** Absolute path of the cross-process advisory lock file (`.memofs/.lock`). */
 	private get lockPath(): string {
-		return `${this.options.rootDir}/${TEKMEMO_DIR}/.lock`;
+		return `${this.options.rootDir}/${MEMOFS_DIR}/.lock`;
 	}
 
 	/**
@@ -88,7 +89,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 	 *
 	 * The root directory is ensured *first* so that `createRoot: false` and
 	 * rootDir-is-a-file errors surface before the lock file is created. The
-	 * `.tekmemo/` parent of the lock is also ensured (it is a canonical path
+	 * `.memofs/` parent of the lock is also ensured (it is a canonical path
 	 * that any write would create anyway; creating it here is a no-op for a
 	 * healthy store and lets the lock file land).
 	 *

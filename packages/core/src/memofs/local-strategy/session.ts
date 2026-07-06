@@ -1,6 +1,6 @@
 import {
 	createAgentWorkspacePaths,
-	createTekMemoAgentSession,
+	createMemoFsAgentSession,
 	extractSessionMemory,
 	type JsonObject,
 } from "../../index";
@@ -28,7 +28,7 @@ export async function startAgentSession(
 ): Promise<AgentSessionResult> {
 	if (signal?.aborted) throw new Error("Operation aborted.");
 	await ctx.ensureReady();
-	const session = createTekMemoAgentSession({
+	const session = createMemoFsAgentSession({
 		client: ctx.agentfsClient,
 		memory: ctx.options.store,
 		task: input.task,
@@ -100,7 +100,7 @@ export async function completeAgentSession(
 ): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
 	if (signal?.aborted) throw new Error("Operation aborted.");
 	await ctx.ensureReady();
-	const session = createTekMemoAgentSession({
+	const session = createMemoFsAgentSession({
 		client: ctx.agentfsClient,
 		memory: ctx.options.store,
 		task: "Agent session",

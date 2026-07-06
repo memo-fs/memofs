@@ -1,5 +1,5 @@
 /**
- * Shared embedding types for TekMemo.
+ * Shared embedding types for MemoFS.
  *
  * @public
  */

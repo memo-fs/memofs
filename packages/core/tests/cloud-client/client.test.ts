@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { TekMemoCloudFetch } from "../../src/cloud-client";
+import type { MemoFsCloudFetch } from "../../src/cloud-client";
 import {
 	createProjectScopedClient,
-	createTekMemoCloudClient,
-	createTekMemoCloudClientFromEnv,
-	TekMemoCloudAuthError,
-	TekMemoCloudValidationError,
+	createMemoFsCloudClient,
+	createMemoFsCloudClientFromEnv,
+	MemoFsCloudAuthError,
+	MemoFsCloudValidationError,
 } from "../../src/cloud-client";
 
 /** A valid sha256 hex digest (64 lowercase hex chars), used in manifests. */
@@ -31,52 +31,52 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 	describe("health & readiness", () => {
 		it("GET /health is project-agnostic and does not require an API key", async () => {
 			const calls: Array<{ url: string; requireApiKey?: boolean }> = [];
-			const fetch: TekMemoCloudFetch = async (url) => {
+			const fetch: MemoFsCloudFetch = async (url) => {
 				calls.push({ url: String(url) });
 				return jsonResponse({
-					data: { ok: true, name: "tekmemo-cloud" },
+					data: { ok: true, name: "memofs-cloud" },
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				fetch,
 			});
 			await expect(client.health()).resolves.toEqual({
 				ok: true,
-				name: "tekmemo-cloud",
+				name: "memofs-cloud",
 			});
-			expect(calls[0]?.url).toBe("https://memo.tekbreed.com/api/v1/health");
+			expect(calls[0]?.url).toBe("https://memofs.dev/api/v1/health");
 		});
 
 		it("GET /readiness mirrors health and is project-agnostic", async () => {
 			const calls: string[] = [];
-			const fetch: TekMemoCloudFetch = async (url) => {
+			const fetch: MemoFsCloudFetch = async (url) => {
 				calls.push(String(url));
 				return jsonResponse({
-					data: { ok: true, name: "tekmemo-cloud" },
+					data: { ok: true, name: "memofs-cloud" },
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				fetch,
 			});
 			await client.readiness();
-			expect(calls).toEqual(["https://memo.tekbreed.com/api/v1/readiness"]);
+			expect(calls).toEqual(["https://memofs.dev/api/v1/readiness"]);
 		});
 	});
 
 	describe("sync.push — phase 1", () => {
 		it("POSTs the local manifest to the project-scoped push route with the bearer token", async () => {
 			const calls: Array<{ url: string; init?: RequestInit }> = [];
-			const fetch: TekMemoCloudFetch = async (url, init) => {
+			const fetch: MemoFsCloudFetch = async (url, init) => {
 				calls.push({ url: String(url), init });
 				return jsonResponse({
 					data: {
 						upload: [
 							{
-								path: ".tekmemo/memory/core.md",
+								path: ".memofs/memory/core.md",
 								sha256: SHA_B,
 								sizeBytes: 42,
 								presignedPutUrl: "https://r2/put",
@@ -87,22 +87,22 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					meta: { requestId: "req_1" },
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
 
 			const result = await client.sync.push({
-				manifest: { ".tekmemo/memory/core.md": SHA_A },
+				manifest: { ".memofs/memory/core.md": SHA_A },
 			});
 
 			expect(calls[0]?.url).toBe(
-				"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push",
+				"https://memofs.dev/api/v1/projects/proj_123/sync/push",
 			);
 			expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
-				manifest: { ".tekmemo/memory/core.md": SHA_A },
+				manifest: { ".memofs/memory/core.md": SHA_A },
 				baseCursor: undefined,
 			});
 			expect(
@@ -114,11 +114,11 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 
 		it("forwards an optional baseCursor in the push body", async () => {
 			const calls: unknown[] = [];
-			const fetch: TekMemoCloudFetch = async (_url, init) => {
+			const fetch: MemoFsCloudFetch = async (_url, init) => {
 				calls.push(JSON.parse(String(init?.body)));
 				return jsonResponse({ data: { upload: [], cursor: "c2" }, meta: {} });
 			};
-			const client = createTekMemoCloudClient({
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "p",
@@ -132,8 +132,8 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 		});
 
 		it("rejects a manifest value that is not a sha256 digest before any request", async () => {
-			const fetch = vi.fn() as unknown as TekMemoCloudFetch;
-			const client = createTekMemoCloudClient({
+			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "p",
@@ -141,19 +141,19 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			});
 			await expect(
 				client.sync.push({ manifest: { "path/x": "not-a-sha" } }),
-			).rejects.toBeInstanceOf(TekMemoCloudValidationError);
+			).rejects.toBeInstanceOf(MemoFsCloudValidationError);
 			expect(fetch).not.toHaveBeenCalled();
 		});
 
 		it("requires a project id (configured or per-call) for push", async () => {
-			const fetch = vi.fn() as unknown as TekMemoCloudFetch;
-			const client = createTekMemoCloudClient({
+			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				fetch,
 			});
 			await expect(client.sync.push({ manifest: {} })).rejects.toBeInstanceOf(
-				TekMemoCloudValidationError,
+				MemoFsCloudValidationError,
 			);
 			expect(fetch).not.toHaveBeenCalled();
 		});
@@ -162,14 +162,14 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 	describe("sync.complete — phase 2", () => {
 		it("confirms uploads at /sync/push/complete with the cursor", async () => {
 			const calls: Array<{ url: string; init?: RequestInit }> = [];
-			const fetch: TekMemoCloudFetch = async (url, init) => {
+			const fetch: MemoFsCloudFetch = async (url, init) => {
 				calls.push({ url: String(url), init });
 				return jsonResponse({
 					data: {
 						cursor: "cursor-2",
 						manifest: {
-							".tekmemo/memory/core.md": {
-								path: ".tekmemo/memory/core.md",
+							".memofs/memory/core.md": {
+								path: ".memofs/memory/core.md",
 								sha256: SHA_B,
 								sizeBytes: 42,
 								updatedAt: "2026-06-20T00:00:00.000Z",
@@ -179,32 +179,32 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
 
 			const result = await client.sync.complete({
-				uploaded: [{ path: ".tekmemo/memory/core.md", sha256: SHA_B }],
+				uploaded: [{ path: ".memofs/memory/core.md", sha256: SHA_B }],
 				cursor: "cursor-1",
 			});
 
 			expect(calls[0]?.url).toBe(
-				"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push/complete",
+				"https://memofs.dev/api/v1/projects/proj_123/sync/push/complete",
 			);
 			expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
-				uploaded: [{ path: ".tekmemo/memory/core.md", sha256: SHA_B }],
+				uploaded: [{ path: ".memofs/memory/core.md", sha256: SHA_B }],
 				cursor: "cursor-1",
 			});
 			expect(result.cursor).toBe("cursor-2");
-			expect(result.manifest[".tekmemo/memory/core.md"]?.sha256).toBe(SHA_B);
+			expect(result.manifest[".memofs/memory/core.md"]?.sha256).toBe(SHA_B);
 		});
 
 		it("rejects a complete with an invalid uploaded sha256", async () => {
-			const fetch = vi.fn() as unknown as TekMemoCloudFetch;
-			const client = createTekMemoCloudClient({
+			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "p",
@@ -215,60 +215,60 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					uploaded: [{ path: "x", sha256: "bad" }],
 					cursor: "c1",
 				}),
-			).rejects.toBeInstanceOf(TekMemoCloudValidationError);
+			).rejects.toBeInstanceOf(MemoFsCloudValidationError);
 		});
 	});
 
 	describe("sync.pull", () => {
 		it("POSTs the local manifest (or cursor) to /sync/pull", async () => {
 			const calls: Array<{ url: string; init?: RequestInit }> = [];
-			const fetch: TekMemoCloudFetch = async (url, init) => {
+			const fetch: MemoFsCloudFetch = async (url, init) => {
 				calls.push({ url: String(url), init });
 				return jsonResponse({
 					data: {
 						files: [
 							{
-								path: ".tekmemo/memory/core.md",
+								path: ".memofs/memory/core.md",
 								sha256: SHA_B,
 								sizeBytes: 42,
 								presignedGetUrl: "https://r2/get",
 							},
 						],
-						removed: [".tekmemo/indexes/embeddings.jsonl"],
+						removed: [".memofs/indexes/embeddings.jsonl"],
 						cursor: "cursor-2",
 						manifest: {},
 					},
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
 
 			const result = await client.sync.pull({
-				manifest: { ".tekmemo/memory/core.md": SHA_A },
+				manifest: { ".memofs/memory/core.md": SHA_A },
 			});
 
 			expect(calls[0]?.url).toBe(
-				"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/pull",
+				"https://memofs.dev/api/v1/projects/proj_123/sync/pull",
 			);
 			expect(result.files[0]?.presignedGetUrl).toBe("https://r2/get");
-			expect(result.removed).toEqual([".tekmemo/indexes/embeddings.jsonl"]);
+			expect(result.removed).toEqual([".memofs/indexes/embeddings.jsonl"]);
 		});
 
 		it("defaults to an empty pull body and pulls every known file", async () => {
 			const calls: unknown[] = [];
-			const fetch: TekMemoCloudFetch = async (_url, init) => {
+			const fetch: MemoFsCloudFetch = async (_url, init) => {
 				calls.push(JSON.parse(String(init?.body)));
 				return jsonResponse({
 					data: { files: [], removed: [], cursor: "c", manifest: {} },
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "p",
@@ -282,7 +282,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 	describe("sync.status", () => {
 		it("GETs the project-scoped status route", async () => {
 			const calls: string[] = [];
-			const fetch: TekMemoCloudFetch = async (url) => {
+			const fetch: MemoFsCloudFetch = async (url) => {
 				calls.push(String(url));
 				return jsonResponse({
 					data: {
@@ -293,15 +293,15 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const client = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
 			const result = await client.sync.status();
 			expect(calls).toEqual([
-				"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
+				"https://memofs.dev/api/v1/projects/proj_123/sync/status",
 			]);
 			expect(result.cursor).toBe("srv-cursor-7");
 			expect(result.storageBytes).toBe(1337);
@@ -310,7 +310,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 
 	describe("error handling", () => {
 		it("parses the canonical error envelope and never leaks the API key", async () => {
-			const fetch: TekMemoCloudFetch = async () =>
+			const fetch: MemoFsCloudFetch = async () =>
 				jsonResponse(
 					{
 						error: {
@@ -321,7 +321,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					},
 					{ status: 401 },
 				);
-			const client = createTekMemoCloudClient({
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_secret",
 				defaultProjectId: "p",
@@ -335,19 +335,19 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 		});
 
 		it("requires an API key for protected sync routes", async () => {
-			const client = createTekMemoCloudClient({
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				defaultProjectId: "p",
-				fetch: vi.fn() as unknown as TekMemoCloudFetch,
+				fetch: vi.fn() as unknown as MemoFsCloudFetch,
 			});
 			await expect(client.sync.status()).rejects.toBeInstanceOf(
-				TekMemoCloudAuthError,
+				MemoFsCloudAuthError,
 			);
 		});
 
 		it("retries transient 5xx statuses", async () => {
 			let count = 0;
-			const fetch: TekMemoCloudFetch = async () => {
+			const fetch: MemoFsCloudFetch = async () => {
 				count += 1;
 				if (count === 1)
 					return jsonResponse(
@@ -366,7 +366,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					meta: {},
 				});
 			};
-			const client = createTekMemoCloudClient({
+			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				defaultProjectId: "p",
@@ -383,7 +383,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 	describe("createProjectScopedClient", () => {
 		it("binds every sync call to the bound project id", async () => {
 			const urls: string[] = [];
-			const fetch: TekMemoCloudFetch = async (url) => {
+			const fetch: MemoFsCloudFetch = async (url) => {
 				urls.push(String(url));
 				const path = String(url);
 				if (path.endsWith("/sync/push"))
@@ -405,7 +405,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					});
 				return jsonResponse({ data: { ok: true }, meta: {} });
 			};
-			const base = createTekMemoCloudClient({
+			const base = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "tk_live_test",
 				fetch,
@@ -426,15 +426,15 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 		});
 	});
 
-	describe("createTekMemoCloudClientFromEnv", () => {
-		it("builds a client from TEKMEMO_CLOUD_URL and the API key env var", async () => {
-			const client = createTekMemoCloudClientFromEnv({
-				TEKMEMO_CLOUD_URL: "https://memo.tekbreed.com/api/v1",
-				TEKMEMO_API_KEY: "tk_live_env",
-				TEKMEMO_PROJECT_ID: "env_proj",
+	describe("createMemoFsCloudClientFromEnv", () => {
+		it("builds a client from MEMOFS_CLOUD_URL and the API key env var", async () => {
+			const client = createMemoFsCloudClientFromEnv({
+				MEMOFS_CLOUD_URL: "https://memofs.dev/api/v1",
+				MEMOFS_API_KEY: "tk_live_env",
+				MEMOFS_PROJECT_ID: "env_proj",
 			});
 			const calls: string[] = [];
-			const fetch: TekMemoCloudFetch = async (url) => {
+			const fetch: MemoFsCloudFetch = async (url) => {
 				calls.push(String(url));
 				return jsonResponse({
 					data: { manifest: {}, cursor: "c", storageBytes: 0 },
@@ -443,19 +443,19 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			// Re-create with the captured fetch since env construction doesn't
 			// take one; verify the resolved defaults by using the same env.
-			const clientWithFetch = createTekMemoCloudClient({
-				baseUrl: "https://memo.tekbreed.com/api/v1",
+			const clientWithFetch = createMemoFsCloudClient({
+				baseUrl: "https://memofs.dev/api/v1",
 				apiKey: "tk_live_env",
 				defaultProjectId: "env_proj",
 				fetch,
 			});
 			await clientWithFetch.sync.status();
 			expect(calls).toEqual([
-				"https://memo.tekbreed.com/api/v1/projects/env_proj/sync/status",
+				"https://memofs.dev/api/v1/projects/env_proj/sync/status",
 			]);
 			// env path must throw when no URL is configured
-			expect(() => createTekMemoCloudClientFromEnv({})).toThrow(
-				/TEKMEMO_CLOUD_URL/,
+			expect(() => createMemoFsCloudClientFromEnv({})).toThrow(
+				/MEMOFS_CLOUD_URL/,
 			);
 			// smoke-check the env-built client is shaped correctly
 			expect(typeof client.sync.push).toBe("function");

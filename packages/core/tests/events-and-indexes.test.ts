@@ -24,7 +24,7 @@ describe("memory events", () => {
 		const store = new InMemoryMemoryStore();
 		const event = createMemoryEvent({
 			type: "memory.updated",
-			sourcePath: ".tekmemo/memory/core.md",
+			sourcePath: ".memofs/memory/core.md",
 			summary: "Updated core memory",
 			actor: { type: "agent", id: "agent_1" },
 			now: () => "2026-05-02T00:00:00.000Z",
@@ -48,18 +48,18 @@ describe("memory events", () => {
 describe("chunk records", () => {
 	it("creates chunk records from chunks and can mark them stale", async () => {
 		const store = new InMemoryMemoryStore();
-		const [chunk] = chunkText("This is a durable memory about TekMemo.", {
+		const [chunk] = chunkText("This is a durable memory about MemoFS.", {
 			source: {
 				sourceType: "document",
 				sourceId: "core",
-				sourcePath: ".tekmemo/memory/core.md",
+				sourcePath: ".memofs/memory/core.md",
 			},
 			memoryType: "core",
 		});
 		if (!chunk) throw new Error("expected chunk");
 
 		const record = createChunkRecord(chunk, {
-			sourcePath: ".tekmemo/memory/core.md",
+			sourcePath: ".memofs/memory/core.md",
 			sourceType: "document",
 			sourceId: "core",
 			sourceHash: "source_hash",
@@ -107,7 +107,7 @@ describe("snapshot records", () => {
 
 		await appendSnapshotRecord(store, record);
 		expect(await readSnapshotRecords(store)).toEqual([record]);
-		expect(record.path).toBe(".tekmemo/snapshots/snapshot-1.json");
+		expect(record.path).toBe(".memofs/snapshots/snapshot-1.json");
 	});
 
 	it("rejects snapshot records with unsafe paths", () => {
@@ -130,7 +130,7 @@ describe("snapshot records", () => {
 			validateSnapshotRecord(
 				{
 					id: "snapshot-1",
-					path: ".tekmemo/snapshots/snapshot-2.json",
+					path: ".memofs/snapshots/snapshot-2.json",
 					type: "manual",
 					status: "available",
 					createdAt: "2026-05-02T00:00:00.000Z",

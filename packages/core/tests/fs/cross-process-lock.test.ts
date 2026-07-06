@@ -2,7 +2,7 @@
  * Cross-process advisory lock tests (Q28).
  *
  * These are the *real* proof of Q28: two actual OS processes contending on the
- * same `.tekmemo/.lock`. The single-process tests (store-lock.test.ts) verify
+ * same `.memofs/.lock`. The single-process tests (store-lock.test.ts) verify
  * the store wiring; these verify the lock actually works across a process
  * boundary — the whole point of the feature.
  *
@@ -42,7 +42,7 @@ function spawnChildHolder(
 		import { createNodeFsMemoryStore } from ${JSON.stringify(SRC_ENTRY)};
 		import { writeFileSync } from "node:fs";
 		const store = createNodeFsMemoryStore({ rootDir: process.argv[1] });
-		await store.write(".tekmemo/memory/core.md", "child\\n");
+		await store.write(".memofs/memory/core.md", "child\\n");
 		writeFileSync(process.argv[2], "ready");
 		${crashSuffix}
 	`;
@@ -58,7 +58,7 @@ describe("cross-process advisory lock (Q28)", () => {
 	test("a second OS process is blocked while the first holds the lock", async () => {
 		const rootDir = await createTempRoot();
 		const marker = path.join(rootDir, ".child-ready");
-		const lockPath = path.join(rootDir, ".tekmemo", ".lock");
+		const lockPath = path.join(rootDir, ".memofs", ".lock");
 
 		const child = spawnChildHolder(rootDir, marker, "hold");
 
@@ -76,7 +76,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		// The parent (this process) is a DIFFERENT live process → blocked.
 		const parentStore = createNodeFsMemoryStore({ rootDir });
 		await expect(
-			parentStore.write(".tekmemo/memory/core.md", "parent\n"),
+			parentStore.write(".memofs/memory/core.md", "parent\n"),
 		).rejects.toBeInstanceOf(LockHeldError);
 
 		// Release the child (close stdin → graceful exit → exit handler unlinks).
@@ -85,7 +85,7 @@ describe("cross-process advisory lock (Q28)", () => {
 
 		// Now the parent can write (child released cleanly).
 		await expect(
-			parentStore.write(".tekmemo/memory/core.md", "parent-after\n"),
+			parentStore.write(".memofs/memory/core.md", "parent-after\n"),
 		).resolves.toBeUndefined();
 
 		await parentStore.dispose();
@@ -94,7 +94,7 @@ describe("cross-process advisory lock (Q28)", () => {
 	test("a crashed process leaves a stale lock that the next process reclaims", async () => {
 		const rootDir = await createTempRoot();
 		const marker = path.join(rootDir, ".child-ready");
-		const lockPath = path.join(rootDir, ".tekmemo", ".lock");
+		const lockPath = path.join(rootDir, ".memofs", ".lock");
 
 		const child = spawnChildHolder(rootDir, marker, "crash");
 
@@ -120,7 +120,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		// dead child) and writes successfully.
 		const parentStore = createNodeFsMemoryStore({ rootDir });
 		await expect(
-			parentStore.write(".tekmemo/memory/core.md", "reclaimed\n"),
+			parentStore.write(".memofs/memory/core.md", "reclaimed\n"),
 		).resolves.toBeUndefined();
 
 		// The lock now carries the parent's PID.

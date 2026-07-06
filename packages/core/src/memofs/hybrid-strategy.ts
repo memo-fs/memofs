@@ -1,5 +1,5 @@
 /**
- * Hybrid runtime strategy for Tekmemo.
+ * Hybrid runtime strategy for MemoFS.
  *
  * After the cloud-sync refactor (see `docs/architecture/cloud-sync-and-refactor.md`),
  * `hybrid` means: a local engine (recall, memory CRUD, graph, extraction,
@@ -48,7 +48,7 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoHealthResult,
+	MemoFSHealthResult,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -67,7 +67,7 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 	const { local, sync } = options;
 
 	return {
-		async health(signal?: AbortSignal): Promise<TekMemoHealthResult> {
+		async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {
 			const warnings: string[] = [];
 			try {
 				const localHealth = await local.health(signal);
@@ -86,7 +86,7 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 			}
 			return {
 				ok: true,
-				name: "hybrid-tekmemo",
+				name: "hybrid-memofs",
 				version: "0.1.0",
 				mode: "hybrid",
 				capabilities: [

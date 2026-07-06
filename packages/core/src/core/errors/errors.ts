@@ -1,39 +1,39 @@
 /**
- * Error codes for all TekMemo-specific errors.
+ * Error codes for all MemoFS-specific errors.
  */
-export type TekMemoErrorCode =
-	| "TEKMEMO_INVALID_PATH"
-	| "TEKMEMO_NOT_FOUND"
-	| "TEKMEMO_VALIDATION_ERROR"
-	| "TEKMEMO_PARSE_ERROR"
-	| "TEKMEMO_COMMAND_ERROR"
-	| "TEKMEMO_STORE_ERROR"
-	| "TEKMEMO_WRITE_BLOCKED";
+export type MemoFsErrorCode =
+	| "MEMOFS_INVALID_PATH"
+	| "MEMOFS_NOT_FOUND"
+	| "MEMOFS_VALIDATION_ERROR"
+	| "MEMOFS_PARSE_ERROR"
+	| "MEMOFS_COMMAND_ERROR"
+	| "MEMOFS_STORE_ERROR"
+	| "MEMOFS_WRITE_BLOCKED";
 
 /**
- * Base error class for all TekMemo errors.
+ * Base error class for all MemoFS errors.
  *
  * @remarks
- * All TekMemo errors extend this class and include a machine-readable `code`
+ * All MemoFS errors extend this class and include a machine-readable `code`
  * and optional `details` and `cause` for structured error handling.
  *
  * @public
  */
-export class TekMemoError extends Error {
+export class MemoFsError extends Error {
 	/** Machine-readable error code identifying the error category. */
-	readonly code: TekMemoErrorCode;
+	readonly code: MemoFsErrorCode;
 	/** Optional structured details about what caused the error. */
 	readonly details?: Record<string, unknown>;
 	/** Optional original cause of this error (for chaining). */
 	readonly cause?: unknown;
 
 	/**
-	 * Creates a new TekMemoError.
+	 * Creates a new MemoFsError.
 	 *
 	 * @param options - Error options including code, message, and optional details/cause.
 	 */
 	constructor(options: {
-		code: TekMemoErrorCode;
+		code: MemoFsErrorCode;
 		message: string;
 		details?: Record<string, unknown>;
 		cause?: unknown;
@@ -42,7 +42,7 @@ export class TekMemoError extends Error {
 		this.code = options.code;
 		this.details = options.details;
 		this.cause = options.cause;
-		this.name = "TekMemoError";
+		this.name = "MemoFsError";
 	}
 }
 
@@ -51,7 +51,7 @@ export class TekMemoError extends Error {
  *
  * @public
  */
-export class MemoryPathError extends TekMemoError {
+export class MemoryPathError extends MemoFsError {
 	/**
 	 * Creates a new MemoryPathError.
 	 *
@@ -59,7 +59,7 @@ export class MemoryPathError extends TekMemoError {
 	 * @param details - Optional structured details.
 	 */
 	constructor(message: string, details?: Record<string, unknown>) {
-		super({ code: "TEKMEMO_INVALID_PATH", message, details });
+		super({ code: "MEMOFS_INVALID_PATH", message, details });
 		this.name = "MemoryPathError";
 	}
 }
@@ -69,7 +69,7 @@ export class MemoryPathError extends TekMemoError {
  *
  * @public
  */
-export class MemoryNotFoundError extends TekMemoError {
+export class MemoryNotFoundError extends MemoFsError {
 	/**
 	 * Creates a new MemoryNotFoundError.
 	 *
@@ -77,7 +77,7 @@ export class MemoryNotFoundError extends TekMemoError {
 	 * @param details - Optional structured details (often includes the path).
 	 */
 	constructor(message: string, details?: Record<string, unknown>) {
-		super({ code: "TEKMEMO_NOT_FOUND", message, details });
+		super({ code: "MEMOFS_NOT_FOUND", message, details });
 		this.name = "MemoryNotFoundError";
 	}
 }
@@ -87,7 +87,7 @@ export class MemoryNotFoundError extends TekMemoError {
  *
  * @public
  */
-export class MemoryValidationError extends TekMemoError {
+export class MemoryValidationError extends MemoFsError {
 	/**
 	 * Creates a new MemoryValidationError.
 	 *
@@ -95,7 +95,7 @@ export class MemoryValidationError extends TekMemoError {
 	 * @param details - Optional structured details about the validation failure.
 	 */
 	constructor(message: string, details?: Record<string, unknown>) {
-		super({ code: "TEKMEMO_VALIDATION_ERROR", message, details });
+		super({ code: "MEMOFS_VALIDATION_ERROR", message, details });
 		this.name = "MemoryValidationError";
 	}
 }
@@ -105,7 +105,7 @@ export class MemoryValidationError extends TekMemoError {
  *
  * @public
  */
-export class MemoryParseError extends TekMemoError {
+export class MemoryParseError extends MemoFsError {
 	/**
 	 * Creates a new MemoryParseError.
 	 *
@@ -118,7 +118,7 @@ export class MemoryParseError extends TekMemoError {
 		details?: Record<string, unknown>,
 		cause?: unknown,
 	) {
-		super({ code: "TEKMEMO_PARSE_ERROR", message, details, cause });
+		super({ code: "MEMOFS_PARSE_ERROR", message, details, cause });
 		this.name = "MemoryParseError";
 	}
 }
@@ -128,7 +128,7 @@ export class MemoryParseError extends TekMemoError {
  *
  * @public
  */
-export class MemoryCommandError extends TekMemoError {
+export class MemoryCommandError extends MemoFsError {
 	/**
 	 * Creates a new MemoryCommandError.
 	 *
@@ -136,7 +136,7 @@ export class MemoryCommandError extends TekMemoError {
 	 * @param details - Optional structured details about the command failure.
 	 */
 	constructor(message: string, details?: Record<string, unknown>) {
-		super({ code: "TEKMEMO_COMMAND_ERROR", message, details });
+		super({ code: "MEMOFS_COMMAND_ERROR", message, details });
 		this.name = "MemoryCommandError";
 	}
 }
@@ -146,7 +146,7 @@ export class MemoryCommandError extends TekMemoError {
  *
  * @public
  */
-export class MemoryStoreError extends TekMemoError {
+export class MemoryStoreError extends MemoFsError {
 	/**
 	 * Creates a new MemoryStoreError.
 	 *
@@ -159,7 +159,7 @@ export class MemoryStoreError extends TekMemoError {
 		details?: Record<string, unknown>,
 		cause?: unknown,
 	) {
-		super({ code: "TEKMEMO_STORE_ERROR", message, details, cause });
+		super({ code: "MEMOFS_STORE_ERROR", message, details, cause });
 		this.name = "MemoryStoreError";
 	}
 }
@@ -180,7 +180,7 @@ export class MemoryStoreError extends TekMemoError {
  *
  * @public
  */
-export class MemoryWriteBlockedError extends TekMemoError {
+export class MemoryWriteBlockedError extends MemoFsError {
 	/**
 	 * Creates a new MemoryWriteBlockedError.
 	 *
@@ -189,28 +189,28 @@ export class MemoryWriteBlockedError extends TekMemoError {
 	 * (redacted BlocklistViolation[]) and optionally the write `path`.
 	 */
 	constructor(message: string, details?: Record<string, unknown>) {
-		super({ code: "TEKMEMO_WRITE_BLOCKED", message, details });
+		super({ code: "MEMOFS_WRITE_BLOCKED", message, details });
 		this.name = "MemoryWriteBlockedError";
 	}
 }
 
 /**
- * Type guard to check if an unknown value is a TekMemoError.
+ * Type guard to check if an unknown value is a MemoFsError.
  *
  * @param error - The value to check.
- * @returns `true` if the value is a TekMemoError, `false` otherwise.
+ * @returns `true` if the value is a MemoFsError, `false` otherwise.
  *
  * @example
  * ```typescript
  * try {
  * await store.read(path);
  * } catch (error) {
- * if (isTekMemoError(error)) {
- * console.error(`TekMemo error: ${error.code} - ${error.message}`);
+ * if (isMemoFsError(error)) {
+ * console.error(`MemoFS error: ${error.code} - ${error.message}`);
  * }
  * }
  * ```
  */
-export function isTekMemoError(error: unknown): error is TekMemoError {
-	return error instanceof TekMemoError;
+export function isMemoFsError(error: unknown): error is MemoFsError {
+	return error instanceof MemoFsError;
 }

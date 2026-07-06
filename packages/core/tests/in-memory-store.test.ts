@@ -33,7 +33,7 @@ describe("InMemoryMemoryStore", () => {
 	it("rejects null-byte paths", async () => {
 		const store = new InMemoryMemoryStore();
 		await expect(
-			store.exists(".tekmemo/memory/core.md\0" as typeof CORE_MEMORY_PATH),
+			store.exists(".memofs/memory/core.md\0" as typeof CORE_MEMORY_PATH),
 		).rejects.toBeInstanceOf(MemoryPathError);
 	});
 

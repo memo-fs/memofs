@@ -38,8 +38,8 @@ describe("path utilities", () => {
 		const rootDir = await createTempRoot();
 		const options = normalizeOptions({ rootDir });
 
-		expect(resolveAbsoluteMemoryPath(options, ".tekmemo/memory/core.md")).toBe(
-			path.join(rootDir, ".tekmemo", "memory", "core.md"),
+		expect(resolveAbsoluteMemoryPath(options, ".memofs/memory/core.md")).toBe(
+			path.join(rootDir, ".memofs", "memory", "core.md"),
 		);
 	});
 });

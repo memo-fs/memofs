@@ -1,5 +1,5 @@
 /**
- * Shared internal helpers for Tekmemo runtime implementations.
+ * Shared internal helpers for MemoFS runtime implementations.
  *
  * @internal
  */

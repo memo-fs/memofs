@@ -25,7 +25,7 @@ import { resolveAgentfsMemoryPath } from "./resolve-agentfs-memory-path";
 import { normalizeAgentfsMemoryStoreConfig } from "./resolve-store-root";
 
 /**
- * AgentFS-backed implementation of the TekMemo {@link MemoryStore} interface.
+ * AgentFS-backed implementation of the MemoFS {@link MemoryStore} interface.
  *
  * @remarks
  * This store delegates all read/write/append operations to an {@link AgentfsLikeClient},

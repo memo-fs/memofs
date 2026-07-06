@@ -7,7 +7,7 @@
  * retrieval*. Two levels:
  *
  * - **`durable`** — indexed into the recall store + graph. Surfaced by
- * `tekmemo.recall` / `tekmemo.context`. The memory that shapes future
+ * `memofs.recall` / `memofs.context`. The memory that shapes future
  * sessions.
  * - **`transient`** — written to `notes.md` (the audit trail) and visible in
  * `list_recent_memories`, but **never indexed**. It does not pollute
@@ -43,7 +43,7 @@
  * @public
  */
 
-import type { MemoryKind } from "../tekmemo/types";
+import type { MemoryKind } from "../memofs/types";
 
 /**
  * How long a written memory should influence retrieval.

@@ -10,13 +10,13 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Tekmemo } from "../../src/index";
+import { MemoFS } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 async function seedMemo() {
-	const { rootDir, cleanup } = await createTempTekMemoDir();
-	const memo = new Tekmemo({
+	const { rootDir, cleanup } = await createTempMemoFsDir();
+	const memo = new MemoFS({
 		store: createNodeFsMemoryStore({
 			rootDir,
 			createRoot: true,
@@ -31,7 +31,7 @@ async function seedMemo() {
 	return { memo, cleanup };
 }
 
-describe("tekmemo.context — entity-centric recall (ADR 0009 Component 3 / Q26)", () => {
+describe("memofs.context — entity-centric recall (ADR 0009 Component 3 / Q26)", () => {
 	it("renders the current state derived from active edges", async () => {
 		const { memo, cleanup } = await seedMemo();
 		try {

@@ -1,5 +1,5 @@
 /**
- * Unified public types for the Tekmemo client API.
+ * Unified public types for the MemoFS client API.
  *
  * These types were previously scattered across the MCP server, CLI, and cloud-client.
  * They are now consolidated here as the single source of truth.
@@ -12,7 +12,7 @@ import type {
 	DurabilityTier,
 } from "../security/durability-tier";
 
-export type TekMemoRuntimeMode = "local" | "hybrid" | "memory";
+export type MemoFSRuntimeMode = "local" | "hybrid" | "memory";
 
 export type RuntimeReadPolicy = "local-first" | "cloud-first" | "local-only";
 
@@ -97,7 +97,7 @@ export interface MemoryContextInput extends RecallInput {
 	section?: MemoryContextExpandableSection;
 	/**
 	 * Opaque expansion cursor returned by a prior compact
-	 * `tekmemo.context` call (`MemoryContextResult.expandable[].cursor`). Set
+	 * `memofs.context` call (`MemoryContextResult.expandable[].cursor`). Set
 	 * together with {@link section} to pull that section's expanded content.
 	 * Malformed/expired cursors degrade gracefully: a fresh compact briefing is
 	 * returned with a warning (expansion is best-effort, never a hard error).
@@ -106,7 +106,7 @@ export interface MemoryContextInput extends RecallInput {
 }
 
 /**
- * The sections a compact `tekmemo.context` briefing marks expandable (
+ * The sections a compact `memofs.context` briefing marks expandable (
  * Component 4 / Q27). Each can be pulled individually on a second call via
  * `section` + `expand`.
  *
@@ -144,7 +144,7 @@ export interface MemoryContextResult {
 	 * Expandable sections for progressive disclosure ( /
 	 * Q27). Populated on compact calls; absent on `detail: "full"` and on
 	 * expand calls. Each entry tells the agent what it can pull and the opaque
-	 * cursor to pass back via `tekmemo.context(section, expand)`. The agent
+	 * cursor to pass back via `memofs.context(section, expand)`. The agent
 	 * expands only what it needs and stops — the headline delivery of the Q16
 	 * cold-start token-reduction north star.
 	 */
@@ -153,7 +153,7 @@ export interface MemoryContextResult {
 }
 
 /**
- * One expandable section in a compact `tekmemo.context` briefing (
+ * One expandable section in a compact `memofs.context` briefing (
  * Component 4 / Q27).
  *
  * @public
@@ -162,7 +162,7 @@ export interface MemoryContextExpansion {
 	/** The section this cursor expands. */
 	section: MemoryContextExpandableSection;
 	/**
-	 * Opaque cursor. Pass back as `tekmemo.context({ section, expand: cursor })`.
+	 * Opaque cursor. Pass back as `memofs.context({ section, expand: cursor })`.
 	 * Encodes the first call's resolved pointers so the second call re-resolves
 	 * fast. Opaque by contract — callers must not inspect it.
 	 */
@@ -452,11 +452,11 @@ export interface ConsolidateMemoryResult {
 	applied: boolean;
 }
 
-export interface TekMemoHealthResult {
+export interface MemoFSHealthResult {
 	ok: boolean;
 	name: string;
 	version: string;
-	mode?: TekMemoRuntimeMode;
+	mode?: MemoFSRuntimeMode;
 	capabilities: string[];
 	warnings?: string[];
 }

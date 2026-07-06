@@ -2,7 +2,7 @@
  * Utilities for parsing and stringifying JSONL (JSON Lines) content.
  *
  * @remarks
- * JSONL is used for all append-only log files in TekMemo (.jsonl files).
+ * JSONL is used for all append-only log files in MemoFS (.jsonl files).
  * This module provides safe parsing with error handling and line-by-line validation.
  *
  * @public

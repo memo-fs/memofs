@@ -10,7 +10,7 @@ export interface GraphErrorOptions {
 	details?: Record<string, unknown>;
 }
 
-export class TekMemoGraphError extends Error {
+export class MemoFsGraphError extends Error {
 	readonly code: GraphErrorCode;
 	readonly details?: Record<string, unknown>;
 	override readonly cause?: unknown;
@@ -28,38 +28,38 @@ export class TekMemoGraphError extends Error {
 	}
 }
 
-export class GraphConfigError extends TekMemoGraphError {
+export class GraphConfigError extends MemoFsGraphError {
 	constructor(message: string, options?: GraphErrorOptions) {
 		super("GRAPH_CONFIG_ERROR", message, options);
 	}
 }
 
-export class GraphValidationError extends TekMemoGraphError {
+export class GraphValidationError extends MemoFsGraphError {
 	constructor(message: string, options?: GraphErrorOptions) {
 		super("GRAPH_VALIDATION_ERROR", message, options);
 	}
 }
 
-export class GraphNotFoundError extends TekMemoGraphError {
+export class GraphNotFoundError extends MemoFsGraphError {
 	constructor(message: string, options?: GraphErrorOptions) {
 		super("GRAPH_NOT_FOUND", message, options);
 	}
 }
 
-export class GraphConflictError extends TekMemoGraphError {
+export class GraphConflictError extends MemoFsGraphError {
 	constructor(message: string, options?: GraphErrorOptions) {
 		super("GRAPH_CONFLICT", message, options);
 	}
 }
 
-export class GraphParseError extends TekMemoGraphError {
+export class GraphParseError extends MemoFsGraphError {
 	constructor(message: string, options?: GraphErrorOptions) {
 		super("GRAPH_PARSE_ERROR", message, options);
 	}
 }
 
-export function isTekMemoGraphError(
+export function isMemoFsGraphError(
 	error: unknown,
-): error is TekMemoGraphError {
-	return error instanceof TekMemoGraphError;
+): error is MemoFsGraphError {
+	return error instanceof MemoFsGraphError;
 }

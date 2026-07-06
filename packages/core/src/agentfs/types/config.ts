@@ -39,7 +39,7 @@ export interface AgentfsMemoryStoreConfig {
 	rootPrefix?: string | undefined;
 
 	/**
-	 * `throw` matches the production TekMemo core store behavior.
+	 * `throw` matches the production MemoFS core store behavior.
 	 * `empty` keeps older relaxed behavior for adapters/experiments.
 	 */
 	missingFileBehavior?: MissingFileBehavior | undefined;

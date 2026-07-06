@@ -1,43 +1,29 @@
 /**
- * Local (filesystem-backed) runtime strategy for Tekmemo.
+ * Local (filesystem-backed) runtime strategy for MemoFS.
  *
  * Uses a MemoryStore (NodeFsMemoryStore by default) plus core document/event
- * functions to implement the full Tekmemo API surface.
+ * functions to implement the full MemoFS API surface.
  *
  * @internal
  */
 
-import { chunkText } from "../core/chunking/chunk-text";
 import {
-	type AgentfsLikeClient,
-	appendMemoryEvent,
 	appendSnapshotRecord,
-	appendTimestampedNote,
 	bootstrapMemoryStore,
-	CORE_MEMORY_PATH,
 	createBM25Store,
 	createFsGraphStore,
-	createMemoryEvent,
 	createRuleBasedExtractor,
 	createSnapshotPath,
 	createSnapshotRecord,
 	DeterministicFallbackReranker,
 	type Extractor,
-	type GraphEdge,
-	type GraphNode,
-	type InMemoryGraphStore,
-	type LlmClient,
-	NOTES_MEMORY_PATH,
-	type Reranker,
 	readCoreMemory,
 	readManifest,
 	readMemoryEventsWithIssues,
 	readNotesMemory,
 	readSnapshotRecordsWithIssues,
-	writeCoreMemory,
 } from "../index";
 import type { BM25Store } from "../recall/lexical/bm25";
-import type { RecallStore } from "../recall/types";
 import { buildContext } from "./helpers";
 import { createLocalAgentfsClient } from "./local-strategy/client";
 import {
@@ -50,7 +36,6 @@ import {
 	upsertGraphNodes,
 } from "./local-strategy/graph";
 import {
-	hash,
 	message,
 	snapshotId,
 	stableEdgeKey,
@@ -74,7 +59,6 @@ import type {
 import { updateCoreMemory, writeMemory } from "./local-strategy/write";
 import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
-import type { FileSyncLayer } from "./sync/file-replication";
 
 export type { LocalGraphStore, LocalStrategyOptions };
 
@@ -177,7 +161,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				createdAt: now,
 				metadata: {
 					label: input?.label ?? null,
-					createdBy: "tekmemo",
+					createdBy: "memofs",
 					...(input?.metadata ?? {}),
 				},
 			}),

@@ -39,7 +39,7 @@ export interface LockHeldDetails {
 }
 
 /**
- * Thrown when a second process attempts a mutating op on a `.tekmemo/` root
+ * Thrown when a second process attempts a mutating op on a `.memofs/` root
  * that is already locked.
  *
  * @remarks
@@ -67,7 +67,7 @@ export class LockHeldError extends FsMemoryStoreError {
 		if (holder?.pid !== undefined) details.pid = holder.pid;
 		if (holder?.startedAt !== undefined) details.startedAt = holder.startedAt;
 		super(
-			`TekMemo store is locked by another process (lock: ${lockPath}${
+			`MemoFS store is locked by another process (lock: ${lockPath}${
 				holder?.pid ? `, pid ${holder.pid}` : ""
 			}). A second process cannot mutate this store. Exit the other process or remove the lock file.`,
 			details,

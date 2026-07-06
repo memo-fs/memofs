@@ -3,19 +3,19 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	type RecallEngineConfig,
-	resolveTekmemoConfig,
-	type TekMemoConfigFile,
+	resolveMemoFsConfig,
+	type MemoFsConfigFile,
 } from "../../src/index";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 /**
  * @file Recall engine config resolution — covers the `recall` block priority
- * chain (constructor > env > `.tekmemo/config.json` > defaults) and the env
- * var parsing for `TEKMEMO_RECALL_ENGINE` / `TEKMEMO_LOCAL_EMBEDDINGS` /
- * `TEKMEMO_EMBEDDING_MODEL`.
+ * chain (constructor > env > `.memofs/config.json` > defaults) and the env
+ * var parsing for `MEMOFS_RECALL_ENGINE` / `MEMOFS_LOCAL_EMBEDDINGS` /
+ * `MEMOFS_EMBEDDING_MODEL`.
  *
  * Core no longer reads the filesystem (ADR 0013 — the root barrel stays free
- * of `node:fs`). The `.tekmemo/config.json` file is the **caller's**
+ * of `node:fs`). The `.memofs/config.json` file is the **caller's**
  * responsibility: these tests mirror a Node consumer by writing the file,
  * reading + parsing it, and passing it as `config.fileConfig`.
  */
@@ -24,9 +24,9 @@ async function writeConfigFile(
 	rootDir: string,
 	recall: unknown,
 ): Promise<void> {
-	await mkdir(resolve(rootDir, ".tekmemo"), { recursive: true });
+	await mkdir(resolve(rootDir, ".memofs"), { recursive: true });
 	await writeFile(
-		resolve(rootDir, ".tekmemo", "config.json"),
+		resolve(rootDir, ".memofs", "config.json"),
 		JSON.stringify({ recall }),
 		"utf8",
 	);
@@ -34,15 +34,15 @@ async function writeConfigFile(
 
 /**
  * Mirrors what a Node consumer (CLI / MCP factory) does: read + parse
- * `.tekmemo/config.json`, then hand it to `resolveTekmemoConfig` as
+ * `.memofs/config.json`, then hand it to `resolveMemoFsConfig` as
  * `fileConfig`. Core never touches the filesystem.
  */
 async function readConfigFileAsFileConfig(
 	rootDir: string,
-): Promise<TekMemoConfigFile> {
+): Promise<MemoFsConfigFile> {
 	try {
 		const raw = await readFile(
-			resolve(rootDir, ".tekmemo", "config.json"),
+			resolve(rootDir, ".memofs", "config.json"),
 			"utf8",
 		);
 		return { recall: (JSON.parse(raw) as { recall?: unknown }).recall };
@@ -53,10 +53,10 @@ async function readConfigFileAsFileConfig(
 
 const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
 
-describe("resolveTekmemoConfig — recall engine", () => {
+describe("resolveMemoFsConfig — recall engine", () => {
 	describe("defaults", () => {
 		it("defaults to engine 'auto', localEmbeddings false, canonical model", () => {
-			const resolved = resolveTekmemoConfig({ env: {} });
+			const resolved = resolveMemoFsConfig({ env: {} });
 			expect(resolved.recall).toEqual({
 				engine: "auto",
 				localEmbeddings: false,
@@ -65,7 +65,7 @@ describe("resolveTekmemoConfig — recall engine", () => {
 		});
 
 		it("marks recall as Required<RecallEngineConfig>", () => {
-			const resolved = resolveTekmemoConfig({ env: {} });
+			const resolved = resolveMemoFsConfig({ env: {} });
 			// All three keys are always present on the resolved config.
 			const keys = Object.keys(resolved.recall) as (keyof RecallEngineConfig)[];
 			expect(keys).toContain("engine");
@@ -76,8 +76,8 @@ describe("resolveTekmemoConfig — recall engine", () => {
 
 	describe("constructor arg priority", () => {
 		it("honors an explicit constructor recall block", () => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_RECALL_ENGINE: "lexical" },
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_RECALL_ENGINE: "lexical" },
 				config: {
 					recall: {
 						engine: "hybrid",
@@ -94,8 +94,8 @@ describe("resolveTekmemoConfig — recall engine", () => {
 		});
 
 		it("constructor fields override only the keys they specify (partial)", () => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_RECALL_ENGINE: "lexical" },
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_RECALL_ENGINE: "lexical" },
 				config: { recall: { localEmbeddings: true } },
 			});
 			// localEmbeddings from constructor wins; engine falls through env.
@@ -105,18 +105,18 @@ describe("resolveTekmemoConfig — recall engine", () => {
 	});
 
 	describe("env var parsing", () => {
-		it("TEKMEMO_RECALL_ENGINE drives the engine", () => {
+		it("MEMOFS_RECALL_ENGINE drives the engine", () => {
 			for (const engine of ["lexical", "vector", "hybrid", "auto"] as const) {
-				const resolved = resolveTekmemoConfig({
-					env: { TEKMEMO_RECALL_ENGINE: engine },
+				const resolved = resolveMemoFsConfig({
+					env: { MEMOFS_RECALL_ENGINE: engine },
 				});
 				expect(resolved.recall.engine).toBe(engine);
 			}
 		});
 
 		it("falls back to 'auto' for an invalid engine env value", () => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_RECALL_ENGINE: "nonsense" },
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_RECALL_ENGINE: "nonsense" },
 			});
 			expect(resolved.recall.engine).toBe("auto");
 		});
@@ -128,31 +128,31 @@ describe("resolveTekmemoConfig — recall engine", () => {
 			["0", false],
 			["false", false],
 			["", false],
-		])("TEKMEMO_LOCAL_EMBEDDINGS=%s → %s", (raw, expected) => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_LOCAL_EMBEDDINGS: raw },
+		])("MEMOFS_LOCAL_EMBEDDINGS=%s → %s", (raw, expected) => {
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_LOCAL_EMBEDDINGS: raw },
 			});
 			expect(resolved.recall.localEmbeddings).toBe(expected);
 		});
 
-		it("TEKMEMO_EMBEDDING_MODEL sets the model when non-empty", () => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_EMBEDDING_MODEL: "env/model" },
+		it("MEMOFS_EMBEDDING_MODEL sets the model when non-empty", () => {
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_EMBEDDING_MODEL: "env/model" },
 			});
 			expect(resolved.recall.embeddingModel).toBe("env/model");
 		});
 
-		it("ignores an empty TEKMEMO_EMBEDDING_MODEL (falls back to default)", () => {
-			const resolved = resolveTekmemoConfig({
-				env: { TEKMEMO_EMBEDDING_MODEL: "" },
+		it("ignores an empty MEMOFS_EMBEDDING_MODEL (falls back to default)", () => {
+			const resolved = resolveMemoFsConfig({
+				env: { MEMOFS_EMBEDDING_MODEL: "" },
 			});
 			expect(resolved.recall.embeddingModel).toBe(DEFAULT_MODEL);
 		});
 	});
 
 	describe("config.json file", () => {
-		it("reads the recall block from .tekmemo/config.json", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+		it("reads the recall block from .memofs/config.json", async () => {
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				await writeConfigFile(rootDir, {
 					engine: "hybrid",
@@ -160,7 +160,7 @@ describe("resolveTekmemoConfig — recall engine", () => {
 					embeddingModel: "file/model",
 				});
 				const fileConfig = await readConfigFileAsFileConfig(rootDir);
-				const resolved = resolveTekmemoConfig({
+				const resolved = resolveMemoFsConfig({
 					cwd: rootDir,
 					env: {},
 					config: { fileConfig },
@@ -176,16 +176,16 @@ describe("resolveTekmemoConfig — recall engine", () => {
 		});
 
 		it("constructor > env > file priority", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				await writeConfigFile(rootDir, {
 					engine: "lexical",
 					localEmbeddings: false,
 				});
 				const fileConfig = await readConfigFileAsFileConfig(rootDir);
-				const resolved = resolveTekmemoConfig({
+				const resolved = resolveMemoFsConfig({
 					cwd: rootDir,
-					env: { TEKMEMO_RECALL_ENGINE: "vector" },
+					env: { MEMOFS_RECALL_ENGINE: "vector" },
 					config: { recall: { engine: "hybrid" }, fileConfig },
 				});
 				// Constructor wins over env wins over file.
@@ -198,11 +198,11 @@ describe("resolveTekmemoConfig — recall engine", () => {
 		});
 
 		it("ignores an invalid engine in the config.json file", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				await writeConfigFile(rootDir, { engine: "bogus" });
 				const fileConfig = await readConfigFileAsFileConfig(rootDir);
-				const resolved = resolveTekmemoConfig({
+				const resolved = resolveMemoFsConfig({
 					cwd: rootDir,
 					env: {},
 					config: { fileConfig },
@@ -214,10 +214,10 @@ describe("resolveTekmemoConfig — recall engine", () => {
 		});
 
 		it("tolerates a missing config.json (defaults apply)", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const fileConfig = await readConfigFileAsFileConfig(rootDir);
-				const resolved = resolveTekmemoConfig({
+				const resolved = resolveMemoFsConfig({
 					cwd: rootDir,
 					env: {},
 					config: { fileConfig },

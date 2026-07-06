@@ -14,15 +14,15 @@ import {
 	writeWorkspaceScaffold,
 } from "./helpers";
 import type {
-	CreateTekMemoAgentSessionOptions,
+	CreateMemoFSAgentSessionOptions,
 	ExtractedSessionMemory,
-	TekMemoAgentSessionPaths,
+	MemoFSAgentSessionPaths,
 } from "./types";
 
 export function createAgentWorkspacePaths(
 	sessionId: string,
 	rootPrefix?: string,
-): TekMemoAgentSessionPaths {
+): MemoFSAgentSessionPaths {
 	const safeSessionId = validateSafeSegment(sessionId, "sessionId");
 	const root = `${normalizeRootPrefix(rootPrefix ?? "/agent-sessions")}/${safeSessionId}`;
 
@@ -50,8 +50,8 @@ export function createAgentWorkspacePaths(
 }
 
 export async function createAgentWorkspaceFiles(
-	options: CreateTekMemoAgentSessionOptions,
-	paths: TekMemoAgentSessionPaths,
+	options: CreateMemoFSAgentSessionOptions,
+	paths: MemoFSAgentSessionPaths,
 	sessionId: string,
 ): Promise<void> {
 	const manifest = await readMemoryFile(options.memory, MANIFEST_PATH);
@@ -154,7 +154,7 @@ export async function createAgentWorkspaceFiles(
 
 export async function extractSessionMemory(
 	client: AgentfsLikeClient,
-	paths: TekMemoAgentSessionPaths,
+	paths: MemoFSAgentSessionPaths,
 ): Promise<ExtractedSessionMemory> {
 	const [summary, durableMemory, followUps, errors, changes] =
 		await Promise.all([

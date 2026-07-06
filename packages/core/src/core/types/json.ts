@@ -1,5 +1,5 @@
 /**
- * Shared JSON utility types for TekMemo.
+ * Shared JSON utility types for MemoFS.
  *
  * @public
  */

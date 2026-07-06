@@ -28,11 +28,11 @@ import type {
 } from "../types";
 import { decodeCursor } from "./utils";
 
-export const AGENT_CONTEXT_DIRECTIVE = `TekMemo is your long-term memory — treat it as the single source of truth for project identity, architecture, constraints, and decisions.
+export const AGENT_CONTEXT_DIRECTIVE = `MemoFS is your long-term memory — treat it as the single source of truth for project identity, architecture, constraints, and decisions.
 
 - Adhere to memory: follow the constraints, decisions, and preferences below. Stored facts override assumptions and guesses.
-- Recall before answering: when a fact, convention, or prior decision might exist, call tekmemo.recall instead of re-deriving it.
-- Persist discoveries: when you learn a durable decision, constraint, preference, or architectural fact, call tekmemo.remember (classify with kind, set confidence) without waiting to be asked.
+- Recall before answering: when a fact, convention, or prior decision might exist, call memofs.recall instead of re-deriving it.
+- Persist discoveries: when you learn a durable decision, constraint, preference, or architectural fact, call memofs.remember (classify with kind, set confidence) without waiting to be asked.
 - Never store secrets, credentials, or environment values. Respect read-only intent where indicated.`;
 
 export async function buildContext(
@@ -117,7 +117,7 @@ async function assembleContext(
 
 	nonNegotiable.push({
 		type: "directive",
-		title: "How to use TekMemo context",
+		title: "How to use MemoFS context",
 		content: AGENT_CONTEXT_DIRECTIVE,
 		nonNegotiable: true,
 	});
@@ -357,7 +357,7 @@ async function expandContext(
 	const nonNegotiable: BudgetSection[] = [
 		{
 			type: "directive",
-			title: "How to use TekMemo context",
+			title: "How to use MemoFS context",
 			content: AGENT_CONTEXT_DIRECTIVE,
 			nonNegotiable: true,
 		},

@@ -1,23 +1,23 @@
 import {
 	createHttpError,
 	redactSecrets,
-	TekMemoCloudAuthError,
-	TekMemoCloudNetworkError,
-	TekMemoCloudResponseParseError,
-	TekMemoCloudTimeoutError,
+	MemoFsCloudAuthError,
+	MemoFSCloudNetworkError,
+	MemoFSCloudResponseParseError,
+	MemoFSCloudTimeoutError,
 } from "./errors";
 import type {
-	TekMemoCloudClientOptions,
-	TekMemoCloudErrorEnvelope,
-	TekMemoCloudFetch,
-	TekMemoCloudRequestOptions,
-	TekMemoCloudRetryOptions,
-	TekMemoCloudSuccessEnvelope,
+	MemoFsCloudClientOptions,
+	MemoFSCloudErrorEnvelope,
+	MemoFsCloudFetch,
+	MemoFSCloudRequestOptions,
+	MemoFSCloudRetryOptions,
+	MemoFsCloudSuccessEnvelope,
 } from "./types";
 import { normalizeApiKey, normalizeBaseUrl } from "./validation";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_RETRY_OPTIONS: Required<TekMemoCloudRetryOptions> = Object.freeze(
+const DEFAULT_RETRY_OPTIONS: Required<MemoFSCloudRetryOptions> = Object.freeze(
 	{
 		retries: 2,
 		baseDelayMs: 250,
@@ -26,24 +26,24 @@ const DEFAULT_RETRY_OPTIONS: Required<TekMemoCloudRetryOptions> = Object.freeze(
 	},
 );
 
-export interface TekMemoCloudTransportOptions
-	extends TekMemoCloudClientOptions {}
+export interface MemoFsCloudTransportOptions
+	extends MemoFsCloudClientOptions {}
 
-export class TekMemoCloudTransport {
+export class MemoFsCloudTransport {
 	readonly baseUrl: string;
 	private readonly apiKey?: string;
-	private readonly fetchImpl: TekMemoCloudFetch;
+	private readonly fetchImpl: MemoFsCloudFetch;
 	private readonly timeoutMs: number;
-	private readonly retryOptions: Required<TekMemoCloudRetryOptions> | false;
+	private readonly retryOptions: Required<MemoFSCloudRetryOptions> | false;
 	private readonly headers: Record<string, string>;
 	private readonly requireApiKey: boolean;
 
-	constructor(options: TekMemoCloudTransportOptions) {
+	constructor(options: MemoFsCloudTransportOptions) {
 		this.baseUrl = normalizeBaseUrl(options.baseUrl);
 		this.apiKey = normalizeApiKey(options.apiKey);
 		this.fetchImpl = options.fetch ?? globalThis.fetch?.bind(globalThis);
 		if (typeof this.fetchImpl !== "function") {
-			throw new TekMemoCloudNetworkError({
+			throw new MemoFSCloudNetworkError({
 				code: "fetch_unavailable",
 				message:
 					"No fetch implementation is available. Pass a fetch implementation in client options.",
@@ -55,12 +55,12 @@ export class TekMemoCloudTransport {
 		this.requireApiKey = options.requireApiKey ?? true;
 	}
 
-	async request<T>(options: TekMemoCloudRequestOptions): Promise<T> {
+	async request<T>(options: MemoFSCloudRequestOptions): Promise<T> {
 		if ((options.requireApiKey ?? this.requireApiKey) && !this.apiKey) {
-			throw new TekMemoCloudAuthError({
+			throw new MemoFsCloudAuthError({
 				code: "api_key_required",
 				message:
-					"TekMemo Cloud API key is required. Set TEKMEMO_API_KEY or pass apiKey.",
+					"MemoFS Cloud API key is required. Set MEMOFS_API_KEY or pass apiKey.",
 			});
 		}
 
@@ -82,7 +82,7 @@ export class TekMemoCloudTransport {
 	}
 
 	private async requestOnce<T>(
-		options: TekMemoCloudRequestOptions,
+		options: MemoFSCloudRequestOptions,
 	): Promise<T> {
 		const timeoutController = new AbortController();
 		const timeout = setTimeout(() => timeoutController.abort(), this.timeoutMs);
@@ -109,7 +109,7 @@ export class TekMemoCloudTransport {
 					code: errorBody.code || httpStatusCode(response.status),
 					message: redactSecrets(
 						errorBody.message ||
-							`TekMemo Cloud request failed with HTTP ${response.status}.`,
+							`MemoFS Cloud request failed with HTTP ${response.status}.`,
 						[this.apiKey],
 					),
 					status: response.status,
@@ -123,14 +123,14 @@ export class TekMemoCloudTransport {
 			return unwrapped;
 		} catch (error) {
 			if (error instanceof Error && error.name === "AbortError") {
-				throw new TekMemoCloudTimeoutError({
+				throw new MemoFSCloudTimeoutError({
 					code: "request_timeout",
-					message: `TekMemo Cloud request timed out after ${this.timeoutMs}ms.`,
+					message: `MemoFS Cloud request timed out after ${this.timeoutMs}ms.`,
 					cause: error,
 				});
 			}
 			if (error instanceof TypeError) {
-				throw new TekMemoCloudNetworkError({
+				throw new MemoFSCloudNetworkError({
 					code: "network_error",
 					message: redactSecrets(error.message, [this.apiKey]),
 					cause: error,
@@ -172,8 +172,8 @@ function normalizeHeaders(
 }
 
 function normalizeRetryOptions(
-	retry: TekMemoCloudRetryOptions | false | undefined,
-): Required<TekMemoCloudRetryOptions> | false {
+	retry: MemoFSCloudRetryOptions | false | undefined,
+): Required<MemoFSCloudRetryOptions> | false {
 	if (retry === false) return false;
 	return {
 		retries: retry?.retries ?? DEFAULT_RETRY_OPTIONS.retries,
@@ -191,7 +191,7 @@ function buildUrl(
 		| undefined,
 ): URL {
 	if (!path.startsWith("/")) {
-		throw new TekMemoCloudNetworkError({
+		throw new MemoFSCloudNetworkError({
 			code: "invalid_path",
 			message: "request path must start with /.",
 		});
@@ -213,9 +213,9 @@ async function parseJsonPayload(response: {
 	try {
 		return JSON.parse(text) as unknown;
 	} catch (cause) {
-		throw new TekMemoCloudResponseParseError({
+		throw new MemoFSCloudResponseParseError({
 			code: "invalid_json_response",
-			message: "TekMemo Cloud response was not valid JSON.",
+			message: "MemoFS Cloud response was not valid JSON.",
 			status: response.status,
 			cause,
 		});
@@ -236,10 +236,10 @@ function unwrapSuccessPayload<T>(
 		});
 	}
 
-	throw new TekMemoCloudResponseParseError({
+	throw new MemoFSCloudResponseParseError({
 		code: "invalid_response_envelope",
 		message:
-			"TekMemo Cloud response must use { data, meta } or { error, meta } envelope.",
+			"MemoFS Cloud response must use { data, meta } or { error, meta } envelope.",
 		requestId: headerRequestId,
 	});
 }
@@ -268,7 +268,7 @@ function unwrapErrorBody(
 
 function isSuccessEnvelope<T>(
 	payload: unknown,
-): payload is TekMemoCloudSuccessEnvelope<T> {
+): payload is MemoFsCloudSuccessEnvelope<T> {
 	return (
 		typeof payload === "object" &&
 		payload !== null &&
@@ -279,7 +279,7 @@ function isSuccessEnvelope<T>(
 
 function isErrorEnvelope(
 	payload: unknown,
-): payload is TekMemoCloudErrorEnvelope {
+): payload is MemoFSCloudErrorEnvelope {
 	return (
 		typeof payload === "object" &&
 		payload !== null &&
@@ -307,7 +307,7 @@ function shouldRetry(
 	error: unknown,
 	attempt: number,
 	attempts: number,
-	retry: Required<TekMemoCloudRetryOptions> | false,
+	retry: Required<MemoFSCloudRetryOptions> | false,
 ): boolean {
 	if (retry === false || attempt >= attempts - 1) return false;
 	const status =
@@ -316,15 +316,15 @@ function shouldRetry(
 			: undefined;
 	if (typeof status === "number") return retry.statuses.includes(status);
 	return (
-		error instanceof TekMemoCloudNetworkError ||
-		error instanceof TekMemoCloudTimeoutError
+		error instanceof MemoFSCloudNetworkError ||
+		error instanceof MemoFSCloudTimeoutError
 	);
 }
 
 function getRetryDelayMs(
 	error: unknown,
 	attempt: number,
-	retry: Required<TekMemoCloudRetryOptions> | false,
+	retry: Required<MemoFSCloudRetryOptions> | false,
 ): number {
 	if (retry === false) return 0;
 	const retryAfterMs =

@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
 	assertMemoryPath,
 	CORE_MEMORY_PATH,
-	createDefaultTekMemoManifest,
+	createDefaultMemoFsManifest,
 	isMemoryPath,
-	isTekMemoError,
+	isMemoFsError,
 	MemoryPathError,
 	MemoryValidationError,
 	memoryTypeFromPath,
 	normalizeTimestampedNote,
-	TekMemoError,
-	validateTekMemoManifest,
+	MemoFsError,
+	validateMemoFsManifest,
 } from "../src/index";
 
 describe("path validation", () => {
@@ -34,24 +34,24 @@ describe("path validation", () => {
 		expect(() => assertMemoryPath("C:\\Windows")).toThrow(MemoryPathError);
 	});
 
-	it("rejects paths outside .tekmemo/", () => {
-		expect(() => assertMemoryPath(".tekmemo/../etc/passwd")).toThrow(
+	it("rejects paths outside .memofs/", () => {
+		expect(() => assertMemoryPath(".memofs/../etc/passwd")).toThrow(
 			MemoryPathError,
 		);
-		expect(() => assertMemoryPath(".tekmemo/../secret")).toThrow(
+		expect(() => assertMemoryPath(".memofs/../secret")).toThrow(
 			MemoryPathError,
 		);
 	});
 });
 
 describe("typed errors", () => {
-	it("detects TekMemo errors", () => {
-		const error = new TekMemoError({
-			code: "TEKMEMO_VALIDATION_ERROR",
+	it("detects MemoFS errors", () => {
+		const error = new MemoFsError({
+			code: "MEMOFS_VALIDATION_ERROR",
 			message: "bad",
 		});
-		expect(isTekMemoError(error)).toBe(true);
-		expect(error.code).toBe("TEKMEMO_VALIDATION_ERROR");
+		expect(isMemoFsError(error)).toBe(true);
+		expect(error.code).toBe("MEMOFS_VALIDATION_ERROR");
 	});
 });
 
@@ -146,12 +146,12 @@ describe("note validation", () => {
 
 describe("manifest validation", () => {
 	it("rejects paths outside the canonical protocol", () => {
-		const manifest = createDefaultTekMemoManifest({
+		const manifest = createDefaultMemoFsManifest({
 			now: () => "2026-05-02T00:00:00.000Z",
 		});
 
 		expect(() =>
-			validateTekMemoManifest({
+			validateMemoFsManifest({
 				...manifest,
 				memory: { ...manifest.memory, core: "core.md" },
 			}),
@@ -159,16 +159,16 @@ describe("manifest validation", () => {
 	});
 
 	it("rejects safe paths assigned to the wrong manifest field", () => {
-		const manifest = createDefaultTekMemoManifest({
+		const manifest = createDefaultMemoFsManifest({
 			now: () => "2026-05-02T00:00:00.000Z",
 		});
 
 		expect(() =>
-			validateTekMemoManifest({
+			validateMemoFsManifest({
 				...manifest,
 				memory: {
 					...manifest.memory,
-					core: ".tekmemo/snapshots/not-core.json",
+					core: ".memofs/snapshots/not-core.json",
 				},
 			}),
 		).toThrow(MemoryValidationError);

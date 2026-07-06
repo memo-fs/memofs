@@ -1,14 +1,14 @@
 /**
- * Default templates for canonical TekMemo files.
+ * Default templates for canonical MemoFS files.
  *
  * @remarks
- * These templates are used when bootstrapping a new TekMemo project.
+ * These templates are used when bootstrapping a new MemoFS project.
  * They provide sensible defaults for core.md, notes.md, and all JSONL files.
  *
  * @public
  */
 
-import { createDefaultTekMemoManifest } from "../manifest/manifest";
+import { createDefaultMemoFsManifest } from "../manifest/manifest";
 
 export const DEFAULT_CORE_MEMORY = `# Core Memory
 
@@ -70,7 +70,7 @@ export function createDefaultMemoryTemplates(
 	options: { projectId?: string; now?: () => string } = {},
 ): MemoryTemplates {
 	return {
-		manifest: `${JSON.stringify(createDefaultTekMemoManifest(options), null, 2)}\n`,
+		manifest: `${JSON.stringify(createDefaultMemoFsManifest(options), null, 2)}\n`,
 		core: DEFAULT_CORE_MEMORY,
 		notes: DEFAULT_NOTES_MEMORY,
 		memoryEvents: DEFAULT_JSONL,

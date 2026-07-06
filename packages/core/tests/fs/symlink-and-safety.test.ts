@@ -8,22 +8,22 @@ import { createTempRoot } from "./test-utils";
 describe("filesystem safety", () => {
 	test("rejects symlinked managed memory directory by default", async () => {
 		const rootDir = await createTempRoot();
-		const outside = await createTempRoot("tekmemo-fs-outside-");
-		await fs.symlink(outside, path.join(rootDir, ".tekmemo"), "dir");
+		const outside = await createTempRoot("memofs-fs-outside-");
+		await fs.symlink(outside, path.join(rootDir, ".memofs"), "dir");
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		await expect(
-			store.write(".tekmemo/memory/core.md", "x"),
+			store.write(".memofs/memory/core.md", "x"),
 		).rejects.toBeInstanceOf(FsMemoryStoreError);
 	});
 
 	test("allows symlinks when disallowSymlinks is false", async () => {
 		const rootDir = await createTempRoot();
-		const outside = await createTempRoot("tekmemo-fs-outside-");
-		await fs.symlink(outside, path.join(rootDir, ".tekmemo"), "dir");
+		const outside = await createTempRoot("memofs-fs-outside-");
+		await fs.symlink(outside, path.join(rootDir, ".memofs"), "dir");
 		const store = createNodeFsMemoryStore({ rootDir, disallowSymlinks: false });
 
-		await store.write(".tekmemo/memory/core.md", "allowed\n");
+		await store.write(".memofs/memory/core.md", "allowed\n");
 		await expect(
 			fs.readFile(path.join(outside, "memory", "core.md"), "utf8"),
 		).resolves.toBe("allowed\n");
@@ -33,10 +33,10 @@ describe("filesystem safety", () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
-		await store.write(".tekmemo/memory/core.md", "safe\n");
+		await store.write(".memofs/memory/core.md", "safe\n");
 
 		await expect(
-			fs.readFile(path.join(rootDir, ".tekmemo", "memory", "core.md"), "utf8"),
+			fs.readFile(path.join(rootDir, ".memofs", "memory", "core.md"), "utf8"),
 		).resolves.toBe("safe\n");
 	});
 });

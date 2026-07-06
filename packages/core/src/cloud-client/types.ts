@@ -1,8 +1,8 @@
 /**
  * Public types for @memofs/core/cloud.
  *
- * TekMemo Cloud is a **file replica**, not an engine. The cloud stores
- * byte-for-byte replicas of the canonical `.tekmemo/` files and syncs them by
+ * MemoFS Cloud is a **file replica**, not an engine. The cloud stores
+ * byte-for-byte replicas of the canonical `.memofs/` files and syncs them by
  * file path + sha256 checksum. The cloud never embeds, recalls, runs graph
  * traversal, extracts memory, or hosts agent sessions — every one of those
  * operations runs in the local runtime against the same files the cloud mirrors.
@@ -13,7 +13,7 @@
  * /api/v1/projects/:projectId/sync/{push,pull,status}
  *
  * It intentionally does not import Cloudflare, Turso, Better Auth, Polar, or any
- * server-only TekMemo Cloud internals.
+ * server-only MemoFS Cloud internals.
  *
  * @public
  */
@@ -23,30 +23,30 @@ export type { JsonObject, JsonPrimitive, JsonValue };
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-export interface TekMemoCloudMeta {
+export interface MemoFSCloudMeta {
 	requestId?: string;
 	[key: string]: JsonValue | undefined;
 }
 
-export interface TekMemoCloudSuccessEnvelope<T> {
+export interface MemoFsCloudSuccessEnvelope<T> {
 	data: T;
-	meta?: TekMemoCloudMeta;
+	meta?: MemoFSCloudMeta;
 }
 
-export interface TekMemoCloudErrorEnvelope {
+export interface MemoFSCloudErrorEnvelope {
 	error: {
 		code: string;
 		message: string;
 		details?: JsonValue;
 	};
-	meta?: TekMemoCloudMeta;
+	meta?: MemoFSCloudMeta;
 }
 
-export type TekMemoCloudEnvelope<T> =
-	| TekMemoCloudSuccessEnvelope<T>
-	| TekMemoCloudErrorEnvelope;
+export type MemoFSCloudEnvelope<T> =
+	| MemoFsCloudSuccessEnvelope<T>
+	| MemoFSCloudErrorEnvelope;
 
-export interface TekMemoCloudFetchResponse {
+export interface MemoFsCloudFetchResponse {
 	readonly ok: boolean;
 	readonly status: number;
 	readonly statusText: string;
@@ -54,36 +54,36 @@ export interface TekMemoCloudFetchResponse {
 	text(): Promise<string>;
 }
 
-export type TekMemoCloudFetch = (
+export type MemoFsCloudFetch = (
 	input: URL | RequestInfo,
 	init?: RequestInit,
-) => Promise<TekMemoCloudFetchResponse>;
+) => Promise<MemoFsCloudFetchResponse>;
 
-export interface TekMemoCloudRetryOptions {
+export interface MemoFSCloudRetryOptions {
 	retries?: number;
 	baseDelayMs?: number;
 	maxDelayMs?: number;
 	statuses?: number[];
 }
 
-export interface TekMemoCloudClientOptions {
-	/** Base URL, usually https://memo.tekbreed.com/api/v1 or a self-hosted /api/v1 URL. */
+export interface MemoFsCloudClientOptions {
+	/** Base URL, usually https://memofs.dev/api/v1 or a self-hosted /api/v1 URL. */
 	baseUrl: string;
-	/** TekMemo API key, e.g. tm_... . Never pass provider keys here. */
+	/** MemoFS API key, e.g. tm_... . Never pass provider keys here. */
 	apiKey?: string;
 	/** Default project used by project-scoped API calls. */
 	defaultProjectId?: string;
 	/** Optional workspace value kept for caller metadata/config. API calls are project-scoped. */
 	defaultWorkspaceId?: string;
-	fetch?: TekMemoCloudFetch;
+	fetch?: MemoFsCloudFetch;
 	timeoutMs?: number;
-	retry?: TekMemoCloudRetryOptions | false;
+	retry?: MemoFSCloudRetryOptions | false;
 	headers?: Record<string, string>;
 	userAgent?: string;
 	requireApiKey?: boolean;
 }
 
-export interface TekMemoCloudRequestOptions {
+export interface MemoFSCloudRequestOptions {
 	method: HttpMethod;
 	path: string;
 	query?: Record<string, string | number | boolean | null | undefined>;
@@ -92,7 +92,7 @@ export interface TekMemoCloudRequestOptions {
 	requireApiKey?: boolean;
 }
 
-export interface TekMemoCloudRequestMeta {
+export interface MemoFSCloudRequestMeta {
 	requestId?: string;
 	status?: number;
 	retryAfterMs?: number;
@@ -106,7 +106,7 @@ export interface ProjectScopedInput {
  * Health check result. The cloud reports itself as a sync replica; its
  * `capabilities` advertise only sync-related capabilities.
  */
-export interface TekMemoCloudHealthResult {
+export interface MemoFSCloudHealthResult {
 	ok: boolean;
 	name?: string;
 	version?: string;
@@ -119,11 +119,11 @@ export interface TekMemoCloudHealthResult {
 // ---------------------------------------------------------------------------
 
 /**
- * A single canonical `.tekmemo/` file entry in a sync manifest, identified by
+ * A single canonical `.memofs/` file entry in a sync manifest, identified by
  * its canonical path and versioned by the sha256 of its content.
  */
 export interface FileSyncEntry {
-	/** Canonical `.tekmemo/` path, e.g. `.tekmemo/memory/core.md`. */
+	/** Canonical `.memofs/` path, e.g. `.memofs/memory/core.md`. */
 	path: string;
 	/** sha256 hex digest of the file content. */
 	sha256: string;
@@ -244,7 +244,7 @@ export interface SyncStatusResult {
 // Client interfaces
 // ---------------------------------------------------------------------------
 
-export interface TekMemoCloudSyncClient {
+export interface MemoFSCloudSyncClient {
 	/** Request presigned upload URLs for changed/missing files. */
 	push(input: SyncPushInput, signal?: AbortSignal): Promise<SyncPushResult>;
 	/** Confirm uploads and commit the manifest update. */
@@ -265,8 +265,8 @@ export interface TekMemoCloudSyncClient {
  * The cloud client surface frozen into v1.0.0-alpha.0. The cloud is a file
  * replica: only health/readiness and the four sync methods exist.
  */
-export interface TekMemoCloudClient {
-	health(signal?: AbortSignal): Promise<TekMemoCloudHealthResult>;
-	readiness(signal?: AbortSignal): Promise<TekMemoCloudHealthResult>;
-	sync: TekMemoCloudSyncClient;
+export interface MemoFsCloudClient {
+	health(signal?: AbortSignal): Promise<MemoFSCloudHealthResult>;
+	readiness(signal?: AbortSignal): Promise<MemoFSCloudHealthResult>;
+	sync: MemoFSCloudSyncClient;
 }

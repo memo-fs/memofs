@@ -1,8 +1,8 @@
 /**
- * Bootstrap utilities for initializing a new TekMemo project.
+ * Bootstrap utilities for initializing a new MemoFS project.
  *
  * @remarks
- * Ensures all canonical `.tekmemo/` files exist with sensible defaults.
+ * Ensures all canonical `.memofs/` files exist with sensible defaults.
  * Can optionally overwrite existing files.
  *
  * @public
@@ -10,7 +10,7 @@
 
 import { assertString } from "@repo/utils";
 import {
-	type CanonicalTekMemoFile,
+	type CanonicalMemoFSFile,
 	CHUNKS_INDEX_PATH,
 	CONNECTORS_PATH,
 	CONVERSATIONS_MEMORY_PATH,
@@ -56,7 +56,7 @@ export interface BootstrapMemoryStoreResult {
 }
 
 const BOOTSTRAP_FILE_ORDER: Array<{
-	path: CanonicalTekMemoFile;
+	path: CanonicalMemoFSFile;
 	key: keyof MemoryTemplates;
 }> = [
 	{ path: MANIFEST_PATH, key: "manifest" },
@@ -73,14 +73,14 @@ const BOOTSTRAP_FILE_ORDER: Array<{
 ];
 
 /**
- * Bootstrap a memory store by creating all canonical .tekmemo/ files.
+ * Bootstrap a memory store by creating all canonical .memofs/ files.
  *
  * @param store - The memory store to bootstrap.
  * @param options - Bootstrap options.
  * @returns A result object describing which files were created, overwritten, or skipped.
  */
 /**
- * Bootstrap a memory store by creating all canonical .tekmemo/ files.
+ * Bootstrap a memory store by creating all canonical .memofs/ files.
  *
  * @param store - The memory store to bootstrap.
  * @param options - Bootstrap options.
@@ -128,7 +128,7 @@ export async function bootstrapMemoryStore(
  */
 async function ensureFile(
 	store: MemoryStore,
-	path: CanonicalTekMemoFile,
+	path: CanonicalMemoFSFile,
 	content: string,
 	options: BootstrapMemoryStoreOptions,
 	result: BootstrapMemoryStoreResult,

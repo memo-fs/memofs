@@ -2,12 +2,12 @@ import { InMemoryMemoryStore, NOTES_MEMORY_PATH } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
 	createAgentWorkspacePaths,
-	createTekMemoAgentSession,
+	createMemoFsAgentSession,
 	extractSessionMemory,
 } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";
 
-describe("TekMemo AgentFS sessions", () => {
+describe("MemoFS AgentFS sessions", () => {
 	test("creates a stable session workspace path layout", () => {
 		const paths = createAgentWorkspacePaths("session_abc", "/workspaces");
 
@@ -22,11 +22,11 @@ describe("TekMemo AgentFS sessions", () => {
 	test("prepares context and scaffold files without overwriting existing work", async () => {
 		const client = new InMemoryAgentfsClient();
 		const memory = new InMemoryMemoryStore({
-			".tekmemo/manifest.json": '{"projectId":"proj_123"}\n',
-			".tekmemo/memory/core.md": "# Core\nRemember repo boundaries.\n",
-			".tekmemo/memory/notes.md": "# Notes\nExisting notes.\n",
+			".memofs/manifest.json": '{"projectId":"proj_123"}\n',
+			".memofs/memory/core.md": "# Core\nRemember repo boundaries.\n",
+			".memofs/memory/notes.md": "# Notes\nExisting notes.\n",
 		});
-		const session = createTekMemoAgentSession({
+		const session = createMemoFsAgentSession({
 			client,
 			memory,
 			task: "Refactor auth middleware",
@@ -56,9 +56,9 @@ describe("TekMemo AgentFS sessions", () => {
 			},
 		});
 		const memory = new InMemoryMemoryStore({
-			".tekmemo/memory/notes.md": "# Notes\n",
+			".memofs/memory/notes.md": "# Notes\n",
 		});
-		const session = createTekMemoAgentSession({
+		const session = createMemoFsAgentSession({
 			client,
 			memory,
 			task: "Add CLI command",
@@ -104,9 +104,9 @@ describe("TekMemo AgentFS sessions", () => {
 	test("complete ignores untouched durable-memory scaffold", async () => {
 		const client = new InMemoryAgentfsClient();
 		const memory = new InMemoryMemoryStore({
-			".tekmemo/memory/notes.md": "# Notes\n",
+			".memofs/memory/notes.md": "# Notes\n",
 		});
-		const session = createTekMemoAgentSession({
+		const session = createMemoFsAgentSession({
 			client,
 			memory,
 			task: "Investigate agent workspace",

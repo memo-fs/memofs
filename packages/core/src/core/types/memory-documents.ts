@@ -136,15 +136,15 @@ export interface MemoryChunk {
 }
 
 /**
- * Manifest describing the structure and file paths of a TekMemo project.
+ * Manifest describing the structure and file paths of a MemoFS project.
  *
  * @remarks
- * The manifest is stored as `manifest.json` in the `.tekmemo/` directory
+ * The manifest is stored as `manifest.json` in the `.memofs/` directory
  * and defines where each canonical file lives.
  *
  * @public
  */
-export interface TekMemoManifest {
+export interface MemoFsManifest {
 	/** Manifest schema version (currently "1"). */
 	version: string;
 	/** Optional project ID for namespacing. */

@@ -3,8 +3,8 @@
  *
  * @remarks
  * Delegates query/traversal to {@link InMemoryGraphStore} while persisting
- * every mutation to the canonical `.tekmemo/graph/nodes.jsonl` and
- * `.tekmemo/graph/edges.jsonl` files. On construction the store rehydrates
+ * every mutation to the canonical `.memofs/graph/nodes.jsonl` and
+ * `.memofs/graph/edges.jsonl` files. On construction the store rehydrates
  * from those files so the local graph accumulates across restarts.
  *
  * @public

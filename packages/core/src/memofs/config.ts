@@ -1,29 +1,29 @@
 /**
- * Configuration options and resolution logic for the Tekmemo client.
+ * Configuration options and resolution logic for the MemoFS client.
  *
  * This module absorbs config resolution from the CLI (`resolveCliRuntimeConfig`)
- * and MCP server factory (`createTekMemoMcpRuntimeFromConfig`) into a single
+ * and MCP server factory (`createMemoFSMcpRuntimeFromConfig`) into a single
  * source of truth inside the core package.
  *
- * Resolution priority: constructor args > env vars > `.tekmemo/config.json` > defaults.
+ * Resolution priority: constructor args > env vars > `.memofs/config.json` > defaults.
  *
  * @public
  */
 
 import type { LlmClient } from "../ai-runtime/llm-client";
-import type { TekMemoCloudClientOptions } from "../cloud-client/types";
+import type { MemoFsCloudClientOptions } from "../cloud-client/types";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
 import type { Extractor } from "../graph/extraction/extractor";
 import type { RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
 import type {
+	MemoFSRuntimeMode,
 	RuntimeReadPolicy,
 	RuntimeWritePolicy,
-	TekMemoRuntimeMode,
 } from "./types";
 
-export interface TekmemoCloudOptions {
+export interface MemoFsCloudOptions {
 	baseUrl?: string;
 	apiKey?: string;
 	workspaceId?: string;
@@ -31,19 +31,19 @@ export interface TekmemoCloudOptions {
 	timeoutMs?: number;
 	userAgent?: string;
 	requireApiKey?: boolean;
-	retry?: TekMemoCloudClientOptions["retry"];
+	retry?: MemoFsCloudClientOptions["retry"];
 }
 
-export interface TekmemoConfig {
+export interface MemoFsConfig {
 	rootDir?: string;
 	store?: MemoryStore;
 	/**
-	 * Pre-parsed `.tekmemo/config.json` values. Core no longer reads the
+	 * Pre-parsed `.memofs/config.json` values. Core no longer reads the
 	 * filesystem (the read moved to Node-only entry points so the root barrel
 	 * stays free of `node:fs`). A Node consumer reads the file and
 	 * passes it here; the Worker path injects a store and never sets this.
 	 */
-	fileConfig?: TekMemoConfigFile;
+	fileConfig?: MemoFsConfigFile;
 	embedder?: MemoryEmbedder;
 	recallStore?: RecallStore;
 	/**
@@ -72,11 +72,11 @@ export interface TekmemoConfig {
 	projectId?: string;
 	tenantId?: string;
 	workspaceId?: string;
-	mode?: TekMemoRuntimeMode;
+	mode?: MemoFSRuntimeMode;
 	readPolicy?: RuntimeReadPolicy;
 	writePolicy?: RuntimeWritePolicy;
-	cloud?: TekmemoCloudOptions;
-	cloudClient?: import("../cloud-client/types").TekMemoCloudClient;
+	cloud?: MemoFsCloudOptions;
+	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap?: boolean;
 	name?: string;
 	version?: string;
@@ -115,7 +115,7 @@ export interface RecallEngineConfig {
 	embeddingModel?: string;
 }
 
-export interface ResolvedTekmemoConfig {
+export interface ResolvedMemoFsConfig {
 	rootDir: string;
 	store?: MemoryStore;
 	embedder?: MemoryEmbedder;
@@ -126,19 +126,19 @@ export interface ResolvedTekmemoConfig {
 	projectId: string;
 	tenantId?: string;
 	workspaceId?: string;
-	mode: TekMemoRuntimeMode;
+	mode: MemoFSRuntimeMode;
 	readPolicy: RuntimeReadPolicy;
 	writePolicy: RuntimeWritePolicy;
-	cloud?: TekMemoCloudClientOptions;
-	cloudClient?: import("../cloud-client/types").TekMemoCloudClient;
+	cloud?: MemoFsCloudClientOptions;
+	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap: boolean;
 	name: string;
 	version: string;
 	recall: Required<RecallEngineConfig>;
 }
 
-export interface TekMemoConfigFile {
-	runtime?: TekMemoRuntimeMode;
+export interface MemoFsConfigFile {
+	runtime?: MemoFSRuntimeMode;
 	root?: string;
 	projectId?: string;
 	workspaceId?: string;
@@ -163,58 +163,58 @@ export interface TekMemoConfigFile {
 }
 
 /**
- * Resolves Tekmemo configuration by merging constructor args, environment variables,
- * and `.tekmemo/config.json` with a strict priority chain.
+ * Resolves MemoFS configuration by merging constructor args, environment variables,
+ * and `.memofs/config.json` with a strict priority chain.
  *
  * @param input - Constructor config, optional CWD, and env override (defaults to process.env).
  * @returns Fully resolved configuration with all defaults applied.
  */
-export function resolveTekmemoConfig(input: {
-	config?: TekmemoConfig;
+export function resolveMemoFsConfig(input: {
+	config?: MemoFsConfig;
 	cwd?: string;
 	env?: NodeJS.ProcessEnv;
-}): ResolvedTekmemoConfig {
+}): ResolvedMemoFsConfig {
 	const config = input.config ?? {};
 	const env = input.env ?? process.env;
 	const cwd = input.cwd ?? process.cwd();
 
 	// `rootDir` is resolved against CWD WITHOUT `node:path` — a pure join keeps
-	// `resolveTekmemoConfig` (and the root barrel) free of any `node:` import
+	// `resolveMemoFsConfig` (and the root barrel) free of any `node:` import
 	// edge so it loads in workerd. The Node-fs store re-normalizes
 	// via `normalizeRootDir` (its own `node:path` call) on construction, so a
 	// not-fully-absolute path here is corrected there. A Worker that injects its
 	// own store ignores `rootDir` entirely.
-	const rawRootDir = config.rootDir ?? env.TEKMEMO_ROOT ?? ".";
+	const rawRootDir = config.rootDir ?? env.MEMOFS_ROOT ?? ".";
 	const rootDir =
 		rawRootDir.startsWith("/") || rawRootDir.startsWith("file:")
 			? rawRootDir
 			: `${cwd.replace(/\/$/, "")}/${rawRootDir}`;
 
 	// Config-file resolution is the caller's concern (Node-only) — see
-	// {@link readTekMemoConfigFile}. Core never touches the filesystem.
-	const fileConfig = config.fileConfig ?? readTekMemoConfigFile(rootDir);
+	// {@link readMemoFsConfigFile}. Core never touches the filesystem.
+	const fileConfig = config.fileConfig ?? readMemoFsConfigFile(rootDir);
 
 	const mode = resolveMode(config.mode, env, fileConfig);
 	const projectId =
 		config.projectId ??
-		env.TEKMEMO_PROJECT_ID ??
+		env.MEMOFS_PROJECT_ID ??
 		fileConfig.projectId ??
 		"default";
 	const workspaceId =
-		config.workspaceId ?? env.TEKMEMO_WORKSPACE_ID ?? fileConfig.workspaceId;
+		config.workspaceId ?? env.MEMOFS_WORKSPACE_ID ?? fileConfig.workspaceId;
 	const tenantId = config.tenantId;
 	const readPolicy =
 		config.readPolicy ??
-		(isReadPolicy(env.TEKMEMO_READ_POLICY)
-			? env.TEKMEMO_READ_POLICY
+		(isReadPolicy(env.MEMOFS_READ_POLICY)
+			? env.MEMOFS_READ_POLICY
 			: undefined) ??
 		fileConfig.readPolicy ??
 		fileConfig.hybrid?.readPolicy ??
 		"local-first";
 	const writePolicy =
 		config.writePolicy ??
-		(isWritePolicy(env.TEKMEMO_WRITE_POLICY)
-			? env.TEKMEMO_WRITE_POLICY
+		(isWritePolicy(env.MEMOFS_WRITE_POLICY)
+			? env.MEMOFS_WRITE_POLICY
 			: undefined) ??
 		fileConfig.writePolicy ??
 		fileConfig.hybrid?.writePolicy ??
@@ -248,7 +248,7 @@ export function resolveTekmemoConfig(input: {
 			? { cloudClient: config.cloudClient }
 			: {}),
 		autoBootstrap: config.autoBootstrap ?? true,
-		name: config.name ?? "tekmemo",
+		name: config.name ?? "memofs",
 		version: config.version ?? "0.1.0",
 		recall,
 	};
@@ -257,40 +257,40 @@ export function resolveTekmemoConfig(input: {
 /**
  * Resolve the recall engine config from constructor args > env > file > defaults.
  *
- * Priority: constructor `config.recall` > env vars > `.tekmemo/config.json` `recall`.
+ * Priority: constructor `config.recall` > env vars > `.memofs/config.json` `recall`.
  *
- * - `TEKMEMO_RECALL_ENGINE` → engine
- * - `TEKMEMO_LOCAL_EMBEDDINGS` → localEmbeddings ("1"/"true" on, else off)
- * - `TEKMEMO_EMBEDDING_MODEL` → embeddingModel
+ * - `MEMOFS_RECALL_ENGINE` → engine
+ * - `MEMOFS_LOCAL_EMBEDDINGS` → localEmbeddings ("1"/"true" on, else off)
+ * - `MEMOFS_EMBEDDING_MODEL` → embeddingModel
  */
 function resolveRecallEngine(
-	config: TekmemoConfig,
+	config: MemoFsConfig,
 	env: NodeJS.ProcessEnv,
-	file: TekMemoConfigFile,
+	file: MemoFsConfigFile,
 ): Required<RecallEngineConfig> {
 	const cfg = config.recall ?? {};
 	const fileRecall = file.recall ?? {};
 
 	const engineRaw =
-		cfg.engine ?? env.TEKMEMO_RECALL_ENGINE ?? fileRecall.engine ?? "auto";
+		cfg.engine ?? env.MEMOFS_RECALL_ENGINE ?? fileRecall.engine ?? "auto";
 	const engine: RecallEngineConfig["engine"] = isRecallEngine(engineRaw)
 		? engineRaw
 		: "auto";
 
 	const localEmbeddingsRaw =
 		cfg.localEmbeddings ??
-		(env.TEKMEMO_LOCAL_EMBEDDINGS !== undefined
-			? env.TEKMEMO_LOCAL_EMBEDDINGS === "1" ||
-				env.TEKMEMO_LOCAL_EMBEDDINGS.toLowerCase() === "true"
+		(env.MEMOFS_LOCAL_EMBEDDINGS !== undefined
+			? env.MEMOFS_LOCAL_EMBEDDINGS === "1" ||
+				env.MEMOFS_LOCAL_EMBEDDINGS.toLowerCase() === "true"
 			: undefined) ??
 		fileRecall.localEmbeddings ??
 		false;
 
 	const embeddingModel =
 		cfg.embeddingModel ??
-		(typeof env.TEKMEMO_EMBEDDING_MODEL === "string" &&
-		env.TEKMEMO_EMBEDDING_MODEL.length > 0
-			? env.TEKMEMO_EMBEDDING_MODEL
+		(typeof env.MEMOFS_EMBEDDING_MODEL === "string" &&
+		env.MEMOFS_EMBEDDING_MODEL.length > 0
+			? env.MEMOFS_EMBEDDING_MODEL
 			: undefined) ??
 		fileRecall.embeddingModel ??
 		"Xenova/all-MiniLM-L6-v2";
@@ -308,40 +308,40 @@ function isRecallEngine(value: unknown): value is RecallEngineConfig["engine"] {
 }
 
 function resolveMode(
-	arg: TekMemoRuntimeMode | undefined,
+	arg: MemoFSRuntimeMode | undefined,
 	env: NodeJS.ProcessEnv,
-	file: TekMemoConfigFile,
-): TekMemoRuntimeMode {
+	file: MemoFsConfigFile,
+): MemoFSRuntimeMode {
 	if (arg !== undefined) return arg;
-	const envValue = env.TEKMEMO_RUNTIME;
+	const envValue = env.MEMOFS_RUNTIME;
 	if (envValue === "local" || envValue === "hybrid" || envValue === "memory")
 		return envValue;
 	return file.runtime ?? "local";
 }
 
 function resolveCloudOptions(
-	config: TekmemoConfig,
+	config: MemoFsConfig,
 	env: NodeJS.ProcessEnv,
-	file: TekMemoConfigFile,
+	file: MemoFsConfigFile,
 	scope: { workspaceId?: string; projectId: string },
-): TekMemoCloudClientOptions | undefined {
+): MemoFsCloudClientOptions | undefined {
 	const configCloud = config.cloud;
 	const fileCloud = file.cloud;
 
 	const baseUrl =
 		configCloud?.baseUrl ??
-		env.TEKMEMO_CLOUD_URL ??
-		env.TEKMEMO_API_URL ??
+		env.MEMOFS_CLOUD_URL ??
+		env.MEMOFS_API_URL ??
 		fileCloud?.baseUrl;
 
 	if (baseUrl === undefined && config.cloudClient === undefined)
 		return undefined;
 
-	const apiKey = configCloud?.apiKey ?? env.TEKMEMO_API_KEY;
+	const apiKey = configCloud?.apiKey ?? env.MEMOFS_API_KEY;
 	const timeoutMs =
 		configCloud?.timeoutMs ??
-		(env.TEKMEMO_CLOUD_TIMEOUT_MS
-			? Number(env.TEKMEMO_CLOUD_TIMEOUT_MS)
+		(env.MEMOFS_CLOUD_TIMEOUT_MS
+			? Number(env.MEMOFS_CLOUD_TIMEOUT_MS)
 			: fileCloud?.timeoutMs);
 	const workspaceId = configCloud?.workspaceId ?? scope.workspaceId;
 	const projectId = configCloud?.projectId ?? scope.projectId;
@@ -365,7 +365,7 @@ function resolveCloudOptions(
 }
 
 /**
- * Reads `.tekmemo/config.json` if present (best-effort).
+ * Reads `.memofs/config.json` if present (best-effort).
  *
  * @remarks
  * This used to read the file synchronously here via `node:fs`, but that eager
@@ -373,14 +373,14 @@ function resolveCloudOptions(
  * Worker cannot evaluate it). Config-file resolution is now the **caller's**
  * responsibility: a Node consumer (the CLI / MCP factory) reads the file and
  * passes its values as constructor args; the Worker path injects a store and
- * never reads the filesystem. This keeps `resolveTekmemoConfig` — and the
+ * never reads the filesystem. This keeps `resolveMemoFsConfig` — and the
  * whole root barrel — free of any `node:fs` import edge.
  *
  * The hook is `config.fileConfig`: callers pre-parse the file and pass it
  * through, so the resolution priority chain (constructor > env > file >
  * defaults) is preserved without core touching the filesystem.
  */
-function readTekMemoConfigFile(rootDir: string): TekMemoConfigFile {
+function readMemoFsConfigFile(rootDir: string): MemoFsConfigFile {
 	// No-op: the file read moved to Node-only entry points (CLI / MCP). The
 	// `rootDir` is accepted for signature stability but never read here.
 	void rootDir;
@@ -389,7 +389,7 @@ function readTekMemoConfigFile(rootDir: string): TekMemoConfigFile {
 
 export function extractConfigFile(
 	parsed: Record<string, unknown>,
-): TekMemoConfigFile {
+): MemoFsConfigFile {
 	const cloud = objectValue(parsed.cloud);
 	const hybrid = objectValue(parsed.hybrid);
 	const mcp = objectValue(parsed.mcp);
@@ -413,7 +413,7 @@ export function extractConfigFile(
 			? mcp.writePolicy
 			: undefined;
 
-	const result: TekMemoConfigFile = {};
+	const result: MemoFsConfigFile = {};
 	if (mode !== undefined) result.runtime = mode;
 	if (projectId !== undefined) result.projectId = projectId;
 	if (workspaceId !== undefined) result.workspaceId = workspaceId;
@@ -455,7 +455,7 @@ export function extractConfigFile(
 	return result;
 }
 
-function isRuntimeMode(value: unknown): value is TekMemoRuntimeMode {
+function isRuntimeMode(value: unknown): value is MemoFSRuntimeMode {
 	return value === "local" || value === "hybrid" || value === "memory";
 }
 

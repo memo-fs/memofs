@@ -11,7 +11,7 @@
 import { assertString } from "@repo/utils";
 import {
 	assertMemoryPath,
-	CANONICAL_TEKMEMO_FILES,
+	CANONICAL_MEMOFS_FILES,
 	type MemoryPath,
 } from "../constants/memory-paths";
 import { MemoryNotFoundError } from "../errors/errors";
@@ -106,7 +106,7 @@ export class InMemoryMemoryStore implements MemoryStore {
 	 */
 	snapshot(): MemoryStoreSnapshot {
 		const output: Record<string, string | undefined> = {};
-		for (const path of CANONICAL_TEKMEMO_FILES) {
+		for (const path of CANONICAL_MEMOFS_FILES) {
 			output[path] = this.files.get(path);
 		}
 		for (const [path, value] of this.files.entries()) {

@@ -5,11 +5,11 @@ import { AgentfsConfigError } from "../errors/agentfs-error";
  * Resolves a memory path to a full remote path within the AgentFS store root.
  *
  * @remarks
- * Validates that the resolved path stays within the `.tekmemo/` protocol root
+ * Validates that the resolved path stays within the `.memofs/` protocol root
  * and does not contain unsafe characters or path traversal sequences.
  *
  * @param root - The store root path.
- * @param memoryPath - The memory path to resolve (e.g., `.tekmemo/core/core.md`).
+ * @param memoryPath - The memory path to resolve (e.g., `.memofs/core/core.md`).
  * @returns The resolved absolute remote path.
  * @throws {@link AgentfsConfigError} If the root or resolved path is unsafe.
  *
@@ -42,9 +42,9 @@ export function resolveAgentfsMemoryPath(
 	const normalizedRoot = root === "/" ? "" : root.replace(/\/+$/g, "");
 	const remotePath = `${normalizedRoot}/${memoryPath}`;
 
-	if (!remotePath.startsWith(`${normalizedRoot}/.tekmemo/`)) {
+	if (!remotePath.startsWith(`${normalizedRoot}/.memofs/`)) {
 		throw new AgentfsConfigError(
-			"Resolved AgentFS memory path escaped the .tekmemo protocol root.",
+			"Resolved AgentFS memory path escaped the .memofs protocol root.",
 			{
 				root,
 				memoryPath,

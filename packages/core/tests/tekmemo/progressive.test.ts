@@ -16,7 +16,7 @@ import {
 	decodeExpansionCursor,
 	encodeExpansionCursor,
 	expandAffordanceLine,
-} from "../../src/tekmemo/progressive";
+} from "../../src/memofs/progressive";
 
 function makeEntry(
 	overrides: Partial<ContextCacheEntry> = {},
@@ -260,7 +260,7 @@ describe("expandAffordanceLine", () => {
 			available: 14,
 			hint: "14 more recall fragments",
 		});
-		expect(line).toContain('tekmemo.context(section="recall"');
+		expect(line).toContain('memofs.context(section="recall"');
 		expect(line).toContain("expand=");
 		expect(line).toContain("(14 more)");
 	});

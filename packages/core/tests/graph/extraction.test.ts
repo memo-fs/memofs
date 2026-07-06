@@ -8,8 +8,8 @@ import {
 describe("extraction", () => {
 	it("rule-based extractor reads arrow triples and simple relation lines", () => {
 		const result = extractGraphFactsRuleBased({
-			text: `TekMemo -> uses -> Local-first memory\nTekMemo depends on TypeScript`,
-			sourceRef: { sourceType: "document", path: ".tekmemo/memory/core.md" },
+			text: `MemoFS -> uses -> Local-first memory\nMemoFS depends on TypeScript`,
+			sourceRef: { sourceType: "document", path: ".memofs/memory/core.md" },
 		});
 
 		expect(result.edges.length).toBe(2);

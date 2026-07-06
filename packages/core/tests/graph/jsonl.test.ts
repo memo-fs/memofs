@@ -14,14 +14,14 @@ describe("jsonl", () => {
 		const jsonl = serializeGraphNodesJsonl([node()]);
 		const rows = parseGraphNodesJsonl(jsonl);
 		expect(rows.length).toBe(1);
-		expect(rows[0]?.id).toBe("project:tekmemo");
+		expect(rows[0]?.id).toBe("project:memofs");
 	});
 
 	it("serializes and parses graph edge JSONL", () => {
 		const jsonl = serializeGraphEdgesJsonl([edge()]);
 		const rows = parseGraphEdgesJsonl(jsonl);
 		expect(rows.length).toBe(1);
-		expect(rows[0]?.from).toBe("project:tekmemo");
+		expect(rows[0]?.from).toBe("project:memofs");
 	});
 
 	it("throws on malformed JSONL by default", () => {

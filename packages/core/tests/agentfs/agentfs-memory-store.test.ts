@@ -4,7 +4,7 @@ import {
 	MANIFEST_PATH,
 	MemoryNotFoundError,
 	MemoryPathError,
-	TEKMEMO_PATHS,
+	MEMOFS_PATHS,
 } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
@@ -17,7 +17,7 @@ import {
 import { InMemoryAgentfsClient } from "./test-utils";
 
 describe("AgentfsMemoryStore", () => {
-	test("uses the canonical .tekmemo protocol path", async () => {
+	test("uses the canonical .memofs protocol path", async () => {
 		const client = new InMemoryAgentfsClient();
 		const store = createAgentfsMemoryStore(client, {
 			scope: "project",
@@ -27,7 +27,7 @@ describe("AgentfsMemoryStore", () => {
 		await store.write(CORE_MEMORY_PATH, "# Core\n");
 
 		expect(
-			client.files.get("/stores/project/proj_123/.tekmemo/memory/core.md"),
+			client.files.get("/stores/project/proj_123/.memofs/memory/core.md"),
 		).toBe("# Core\n");
 		await expect(store.read(CORE_MEMORY_PATH)).resolves.toBe("# Core\n");
 	});
@@ -79,7 +79,7 @@ describe("AgentfsMemoryStore", () => {
 		});
 
 		await expect(
-			store.write(".tekmemo/../../evil" as never, "x"),
+			store.write(".memofs/../../evil" as never, "x"),
 		).rejects.toThrow(MemoryPathError);
 		await expect(store.read("/memories/core.md" as never)).rejects.toThrow(
 			MemoryPathError,
@@ -138,11 +138,11 @@ describe("AgentfsMemoryStore", () => {
 			projectId: "proj_123",
 		});
 
-		await store.write(TEKMEMO_PATHS.events.memoryEvents, "");
-		await store.append(TEKMEMO_PATHS.events.memoryEvents, "a\n");
-		await store.append(TEKMEMO_PATHS.events.memoryEvents, "b\n");
+		await store.write(MEMOFS_PATHS.events.memoryEvents, "");
+		await store.append(MEMOFS_PATHS.events.memoryEvents, "a\n");
+		await store.append(MEMOFS_PATHS.events.memoryEvents, "b\n");
 
-		await expect(store.read(TEKMEMO_PATHS.events.memoryEvents)).resolves.toBe(
+		await expect(store.read(MEMOFS_PATHS.events.memoryEvents)).resolves.toBe(
 			"a\nb\n",
 		);
 	});
@@ -154,10 +154,10 @@ describe("AgentfsMemoryStore", () => {
 			projectId: "proj_123",
 		});
 
-		await store.append(TEKMEMO_PATHS.events.memoryEvents, "a\n");
-		await store.append(TEKMEMO_PATHS.events.memoryEvents, "b\n");
+		await store.append(MEMOFS_PATHS.events.memoryEvents, "a\n");
+		await store.append(MEMOFS_PATHS.events.memoryEvents, "b\n");
 
-		await expect(store.read(TEKMEMO_PATHS.events.memoryEvents)).resolves.toBe(
+		await expect(store.read(MEMOFS_PATHS.events.memoryEvents)).resolves.toBe(
 			"a\nb\n",
 		);
 	});
@@ -171,7 +171,7 @@ describe("AgentfsMemoryStore", () => {
 		});
 
 		await expect(
-			store.append(TEKMEMO_PATHS.events.memoryEvents, "a\n"),
+			store.append(MEMOFS_PATHS.events.memoryEvents, "a\n"),
 		).rejects.toThrow(AgentfsValidationError);
 	});
 
@@ -184,7 +184,7 @@ describe("AgentfsMemoryStore", () => {
 		});
 
 		await expect(store.write(CORE_MEMORY_PATH, "x")).rejects.toMatchObject({
-			code: "TEKMEMO_STORE_ERROR",
+			code: "MEMOFS_STORE_ERROR",
 		});
 	});
 
@@ -217,7 +217,7 @@ describe("AgentfsMemoryStore", () => {
 		);
 	});
 
-	test("bootstraps all .tekmemo protocol files through core helpers", async () => {
+	test("bootstraps all .memofs protocol files through core helpers", async () => {
 		const client = new InMemoryAgentfsClient();
 		const store = new AgentfsMemoryStore(client, {
 			scope: "project",
@@ -227,9 +227,9 @@ describe("AgentfsMemoryStore", () => {
 		await bootstrapMemoryStore(store);
 
 		expect(await store.exists(MANIFEST_PATH)).toBe(true);
-		expect(await store.exists(TEKMEMO_PATHS.memory.core)).toBe(true);
-		expect(await store.exists(TEKMEMO_PATHS.events.conversations)).toBe(true);
-		expect(await store.exists(TEKMEMO_PATHS.indexes.chunks)).toBe(true);
+		expect(await store.exists(MEMOFS_PATHS.memory.core)).toBe(true);
+		expect(await store.exists(MEMOFS_PATHS.events.conversations)).toBe(true);
+		expect(await store.exists(MEMOFS_PATHS.indexes.chunks)).toBe(true);
 	});
 });
 
@@ -237,7 +237,7 @@ describe("resolveAgentfsMemoryPath", () => {
 	test("combines remote root and canonical path safely", () => {
 		expect(
 			resolveAgentfsMemoryPath("/stores/project/proj_123", CORE_MEMORY_PATH),
-		).toBe("/stores/project/proj_123/.tekmemo/memory/core.md");
+		).toBe("/stores/project/proj_123/.memofs/memory/core.md");
 	});
 
 	test("rejects unsafe root", () => {

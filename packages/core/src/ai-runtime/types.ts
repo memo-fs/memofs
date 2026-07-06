@@ -2,7 +2,7 @@
  * Framework-neutral runtime contract for AI-framework integrations.
  *
  * @remarks
- * This is the single memory-runtime interface every TekMemo AI-framework
+ * This is the single memory-runtime interface every MemoFS AI-framework
  * adapter implements (Vercel AI SDK today via `@memofs/adapter-ai-sdk`;
  * LangChain / OpenAI Agents SDK / Mastra later). It lives in core so that:
  *
@@ -14,9 +14,9 @@
  *
  * It mirrors the embedder interface/impl split: the `Embedder` interface is a
  * core type; OpenAI/Voyage/transformers implementations are adapter packages.
- * `TekMemoMemoryRuntime` is the runtime equivalent of `Embedder`.
+ * `MemoFSMemoryRuntime` is the runtime equivalent of `Embedder`.
  *
- * Renamed from `TekMemoAiRuntime` (2026-06-20) to drop the
+ * Renamed from `MemoFSAiRuntime` (2026-06-20) to drop the
  * AI-SDK-flavored naming from a core type. See.
  *
  * @public
@@ -85,7 +85,7 @@ export interface MemoryRuntimeRecallHit {
 /**
  * Strategy hint for recall. `"local"` = lexical/BM25+fuzzy only;
  * `"vector"` = embeddings only (when an embedder is configured);
- * `"hybrid"` = both (the default the {@link Tekmemo} class uses).
+ * `"hybrid"` = both (the default the {@link MemoFS} class uses).
  */
 export type MemoryRuntimeRecallStrategy = "local" | "vector" | "hybrid";
 
@@ -156,7 +156,7 @@ export interface MemoryRuntimeIndexResult {
  * The framework-neutral memory runtime contract.
  *
  * Every AI-framework adapter implements this interface by bridging a
- * {@link Tekmemo} client (or any equivalent memory backend) into it. Methods
+ * {@link MemoFS} client (or any equivalent memory backend) into it. Methods
  * are pure memory operations — read/write core memory, list/create notes,
  * recall — with no framework-specific types. An optional {@link index} method
  * is allowed for runtimes that expose explicit re-indexing; when absent, the
@@ -164,7 +164,7 @@ export interface MemoryRuntimeIndexResult {
  *
  * @public
  */
-export interface TekMemoMemoryRuntime {
+export interface MemoFSMemoryRuntime {
 	readCoreMemory(
 		signal?: AbortSignal,
 	): Promise<MemoryRuntimeCoreMemoryDocument>;

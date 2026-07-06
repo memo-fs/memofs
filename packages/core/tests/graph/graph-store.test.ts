@@ -22,7 +22,7 @@ describe("graph-store", () => {
 		expect(storedEdge?.id.startsWith("edge:")).toBe(true);
 
 		const neighbors = await graph.neighbors({
-			nodeId: "project:tekmemo",
+			nodeId: "project:memofs",
 			direction: "out",
 		});
 		expect(neighbors.length).toBe(1);
@@ -66,21 +66,21 @@ describe("graph-store", () => {
 	it("mergeNodes rewires edges and preserves provenance-friendly aliases", async () => {
 		const graph = createInMemoryGraphStore();
 		await graph.upsertNodes([
-			node({ id: "project:tekmemo", label: "TekMemo", aliases: ["Tek Memo"] }),
-			node({ id: "project:tek-memo", label: "Tek Memo" }),
+			node({ id: "project:memofs", label: "MemoFS", aliases: ["Tek Memo"] }),
+			node({ id: "project:memo-fs", label: "Tek Memo" }),
 			node({ id: "concept:graph", type: "concept", label: "Graph memory" }),
 		]);
 		await graph.upsertEdges([
-			edge({ from: "project:tek-memo", to: "concept:graph", type: "uses" }),
+			edge({ from: "project:memo-fs", to: "concept:graph", type: "uses" }),
 		]);
 
 		const merged = await graph.mergeNodes({
-			sourceId: "project:tek-memo",
-			targetId: "project:tekmemo",
+			sourceId: "project:memo-fs",
+			targetId: "project:memofs",
 		});
 		expect(merged.aliases.includes("Tek Memo")).toBe(true);
-		expect(await graph.getNode("project:tek-memo")).toBe(undefined);
-		const neighbors = await graph.neighbors({ nodeId: "project:tekmemo" });
+		expect(await graph.getNode("project:memo-fs")).toBe(undefined);
+		const neighbors = await graph.neighbors({ nodeId: "project:memofs" });
 		expect(neighbors.some((item) => item.node.id === "concept:graph")).toBe(
 			true,
 		);
@@ -98,7 +98,7 @@ describe("graph-store", () => {
 		]);
 		await graph.upsertEdges([edge()]);
 		await expect(() =>
-			graph.deleteNode("project:tekmemo", { cascadeEdges: false }),
+			graph.deleteNode("project:memofs", { cascadeEdges: false }),
 		).rejects.toThrow(GraphConflictError);
 	});
 

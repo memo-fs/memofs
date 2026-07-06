@@ -8,20 +8,20 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Tekmemo } from "../../src/index";
+import { MemoFS } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 const CORE = [
 	"# Core Memory",
 	"",
-	"TekMemo is a file-first long-term memory system.",
+	"MemoFS is a file-first long-term memory system.",
 	"All formatting goes through Biome.",
 ].join("\n");
 
 /** Seed enough notes that the compact recall cap leaves fragments to expand. */
 async function seedFixture(rootDir: string, projectId = "progressive") {
-	const memo = new Tekmemo({
+	const memo = new MemoFS({
 		store: createNodeFsMemoryStore({
 			rootDir,
 			createRoot: true,
@@ -48,7 +48,7 @@ async function seedFixture(rootDir: string, projectId = "progressive") {
 		["Package manager", "We prefer pnpm for package management.", "preference"],
 		[
 			"Test runner",
-			"Vitest is the test runner for the tekmemo package.",
+			"Vitest is the test runner for the memofs package.",
 			"reference",
 		],
 		["Formatting", "Biome handles linting and formatting.", "decision"],
@@ -60,10 +60,10 @@ async function seedFixture(rootDir: string, projectId = "progressive") {
 	return memo;
 }
 
-describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", () => {
+describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", () => {
 	describe("compact default", () => {
 		it("returns a small briefing with expandable affordances", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const result = await memo.context({ query: "auth deploy pnpm test" });
@@ -75,7 +75,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 				expect(result.expandable).toBeDefined();
 				expect(result.expandable?.length).toBeGreaterThan(0);
 				// The affordance lines appear in the rendered text.
-				expect(result.text).toMatch(/expand.*tekmemo\.context/);
+				expect(result.text).toMatch(/expand.*memofs\.context/);
 				// Compact stays small (well under the 64kb full budget).
 				expect(Buffer.byteLength(result.text, "utf8")).toBeLessThan(10_000);
 			} finally {
@@ -84,7 +84,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 		});
 
 		it("caps recall to the compact fragment count", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const result = await memo.context({ query: "auth deploy pnpm test" });
@@ -110,7 +110,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 
 	describe("expand round-trip", () => {
 		it("expands the recall section from the cached pointers", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const first = await memo.context({ query: "auth deploy pnpm test" });
@@ -145,7 +145,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 		});
 
 		it("expands the notes section", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const first = await memo.context({ query: "auth deploy pnpm test" });
@@ -174,7 +174,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 		});
 
 		it("reuses cached resolution — no re-rewrite", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const first = await memo.context({ query: "auth" });
@@ -199,7 +199,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 
 	describe('detail: "full" escape hatch', () => {
 		it("returns the whole-budget output with no affordances", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const result = await memo.context({
@@ -210,7 +210,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 				// Full mode does NOT populate expandable.
 				expect(result.expandable).toBeUndefined();
 				// Full mode does NOT append affordance lines.
-				expect(result.text).not.toMatch(/expand.*tekmemo\.context/);
+				expect(result.text).not.toMatch(/expand.*memofs\.context/);
 				// Full mode renders all matching recall fragments (no compact cap).
 				const recallSection = result.sections.find((s) => s.type === "recall");
 				if (recallSection) {
@@ -227,7 +227,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 
 	describe("graceful degradation", () => {
 		it("falls back to a compact briefing on a corrupted expand cursor", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				const result = await memo.context({
@@ -248,14 +248,14 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 		});
 
 		it("falls back to a compact briefing on an expired (cache-miss) cursor", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
+			const { rootDir, cleanup } = await createTempMemoFsDir();
 			try {
 				const memo = await seedFixture(rootDir);
 				// First call to populate the cache, then synthesize a cursor with a
 				// key that was never stored.
 				await memo.context({ query: "auth" });
 				const { encodeExpansionCursor } = await import(
-					"../../src/tekmemo/progressive"
+					"../../src/memofs/progressive"
 				);
 				const bogusCursor = encodeExpansionCursor({
 					v: 1,
@@ -280,7 +280,7 @@ describe("tekmemo.context — progressive recall (ADR 0009 Component 4 / Q27)", 
 
 	describe("memory mode parity", () => {
 		it("compact works in memory mode (verifies memory-strategy cache wiring)", async () => {
-			const memo = new Tekmemo({ mode: "memory" });
+			const memo = new MemoFS({ mode: "memory" });
 			await memo.core.update(CORE);
 			await memo.notes.record({
 				content: "Authentication uses JWT tokens.",

@@ -5,13 +5,13 @@ import {
 	createInMemoryRecallStore,
 	InMemoryMemoryStore,
 	NOTES_MEMORY_PATH,
-	Tekmemo,
+	MemoFS,
 } from "../src/index";
 
-describe("Tekmemo Client", () => {
+describe("MemoFS Client", () => {
 	it("initializes and lazily bootstraps memory files", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await expect(store.exists(CORE_MEMORY_PATH)).resolves.toBe(false);
 		await expect(store.exists(NOTES_MEMORY_PATH)).resolves.toBe(false);
@@ -25,7 +25,7 @@ describe("Tekmemo Client", () => {
 
 	it("supports explicit bootstrapping", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await memo.bootstrap({
 			templates: {
@@ -41,7 +41,7 @@ describe("Tekmemo Client", () => {
 		const store = new InMemoryMemoryStore();
 		const embedder = new FakeEmbedder({ dimensions: 4 });
 		const recallStore = createInMemoryRecallStore();
-		const memo = new Tekmemo({
+		const memo = new MemoFS({
 			store,
 			embedder,
 			recallStore,
@@ -64,7 +64,7 @@ describe("Tekmemo Client", () => {
 		const store = new InMemoryMemoryStore();
 		const embedder = new FakeEmbedder({ dimensions: 4 });
 		const recallStore = createInMemoryRecallStore();
-		const memo = new Tekmemo({
+		const memo = new MemoFS({
 			store,
 			embedder,
 			recallStore,
@@ -92,7 +92,7 @@ describe("Tekmemo Client", () => {
 
 	it("gracefully runs without embedder using text search fallback", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await memo.core.update("No embedder configured but text works.");
 		await memo.notes.record({ content: "Offline note for search." });
@@ -109,7 +109,7 @@ describe("Tekmemo Client", () => {
 
 	it("executes memory commands via runCommand", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await memo.core.update("Test runCommand content.");
 		const output = await memo.runCommand({
@@ -122,7 +122,7 @@ describe("Tekmemo Client", () => {
 
 	it("manages conversations namespace", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await memo.conversations.append({
 			timestamp: "2026-05-02T10:00:00.000Z",
@@ -138,7 +138,7 @@ describe("Tekmemo Client", () => {
 
 	it("manages graph namespace", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		const testNode = { id: "a", label: "Entity A", type: "custom" };
 		const testEdge = {
@@ -162,7 +162,7 @@ describe("Tekmemo Client", () => {
 
 	it("manages snapshots and restore namespace", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		await memo.core.update("Version 1 content.");
 		await memo.notes.record({ content: "Note 1 content." });
@@ -185,7 +185,7 @@ describe("Tekmemo Client", () => {
 
 	it("coordinates agentfs and rerank namespaces", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({ store });
+		const memo = new MemoFS({ store });
 
 		const results = [
 			{ id: "1", score: 0.5 },
@@ -215,7 +215,7 @@ describe("Tekmemo Client", () => {
 
 	it("configures cloud client features", async () => {
 		const store = new InMemoryMemoryStore();
-		const memo = new Tekmemo({
+		const memo = new MemoFS({
 			store,
 			cloud: {
 				baseUrl: "https://api.test.cloud/v1",
@@ -229,7 +229,7 @@ describe("Tekmemo Client", () => {
 	});
 
 	it("supports memory mode for testing", async () => {
-		const memo = new Tekmemo({ mode: "memory" });
+		const memo = new MemoFS({ mode: "memory" });
 
 		const health = await memo.health();
 		expect(health.ok).toBe(true);

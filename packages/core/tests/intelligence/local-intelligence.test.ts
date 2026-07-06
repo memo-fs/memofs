@@ -2,21 +2,21 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createInMemoryRecallStore,
 	type MemoryEmbedder,
-	Tekmemo,
+	MemoFS,
 } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 /**
- * End-to-end intelligence story: a zero-config local TekMemo (no embedder, no
+ * End-to-end intelligence story: a zero-config local MemoFS (no embedder, no
  * API key) still feels intelligent — memories are recalled by meaning, the
  * graph accumulates automatically, and recall returns ranked, recent results.
  */
 describe("local-first intelligence (zero config)", () => {
 	it("recalls a written memory via lexical hybrid recall with no embedder", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -43,9 +43,9 @@ describe("local-first intelligence (zero config)", () => {
 	});
 
 	it("auto-extracts graph facts from written memory", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -58,14 +58,14 @@ describe("local-first intelligence (zero config)", () => {
 
 			// The rule-based extractor recognizes "X uses Y" patterns.
 			await memo.notes.record({
-				content: "TekMemo uses BM25 for lexical recall.",
+				content: "MemoFS uses BM25 for lexical recall.",
 				kind: "decision",
 			});
 
 			// Give the in-memory graph a tick to settle, then inspect via listNodes.
 			const nodes = await memo.graph.listNodes({ limit: 50 });
 			const labels = nodes.items.map((n) => n.label);
-			expect(labels.some((l) => /tekmemo/i.test(l))).toBe(true);
+			expect(labels.some((l) => /memofs/i.test(l))).toBe(true);
 			expect(labels.some((l) => /bm25/i.test(l))).toBe(true);
 		} finally {
 			await cleanup();
@@ -73,10 +73,10 @@ describe("local-first intelligence (zero config)", () => {
 	});
 
 	it("persists graph across a restart via FsGraphStore rehydration", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			// First instance: write a memory that extracts a graph fact.
-			const first = new Tekmemo({
+			const first = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -94,7 +94,7 @@ describe("local-first intelligence (zero config)", () => {
 			expect(firstNodes.items.length).toBeGreaterThan(0);
 
 			// Second instance over the same root: graph must survive.
-			const second = new Tekmemo({
+			const second = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -115,9 +115,9 @@ describe("local-first intelligence (zero config)", () => {
 	});
 
 	it("returns ranked results ordered by score", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -155,7 +155,7 @@ describe("local-first intelligence (zero config)", () => {
  */
 describe("best-effort write path (failing embedder)", () => {
 	it("records a note even when the embedder rejects on every call", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			// An embedder that always fails — mimics a lazy local embedder whose
 			// optional runtime is missing, or an adapter whose init rejected.
@@ -166,7 +166,7 @@ describe("best-effort write path (failing embedder)", () => {
 				embedText: vi.fn().mockRejectedValue(new Error("onnx runtime missing")),
 			};
 
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -200,7 +200,7 @@ describe("best-effort write path (failing embedder)", () => {
 	});
 
 	it("records a note even when the recall store rejects", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const goodEmbedder: MemoryEmbedder = {
 				embedTexts: vi.fn().mockResolvedValue({
@@ -227,7 +227,7 @@ describe("best-effort write path (failing embedder)", () => {
 			const brokenStore = createInMemoryRecallStore();
 			brokenStore.upsert = vi.fn().mockRejectedValue(new Error("disk full"));
 
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -263,9 +263,9 @@ describe("best-effort write path (failing embedder)", () => {
  */
 describe("consolidation (end-to-end)", () => {
 	it("previews the plan without persisting when apply is false", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -295,9 +295,9 @@ describe("consolidation (end-to-end)", () => {
 	});
 
 	it("retires a superseded fact and preserves the audit trail when applied", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -325,9 +325,9 @@ describe("consolidation (end-to-end)", () => {
 	});
 
 	it("reports an unchanged plan when there is nothing to consolidate", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -339,7 +339,7 @@ describe("consolidation (end-to-end)", () => {
 			});
 			// No supersession, no duplicates.
 			await memo.notes.record({
-				content: "TekMemo uses BM25 for lexical recall.",
+				content: "MemoFS uses BM25 for lexical recall.",
 				kind: "reference",
 			});
 			const result = await memo.consolidate();
@@ -362,9 +362,9 @@ describe("consolidation (end-to-end)", () => {
  */
 describe("staleness loop — recall honors consolidation retirements", () => {
 	it("does not surface a superseded graph fact in recall after consolidation", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -411,9 +411,9 @@ describe("staleness loop — recall honors consolidation retirements", () => {
 	});
 
 	it("drops a manually deprecated graph node from lexical recall", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -427,7 +427,7 @@ describe("staleness loop — recall honors consolidation retirements", () => {
 			// "uses" triggers the rule-based extractor so a Fly.io node exists to
 			// deprecate. (A sentence with no relation verb extracts nothing.)
 			await memo.notes.record({
-				content: "TekMemo uses Fly.io for deployment.",
+				content: "MemoFS uses Fly.io for deployment.",
 				kind: "decision",
 			});
 

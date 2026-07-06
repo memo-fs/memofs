@@ -36,13 +36,13 @@ describe("consolidateGraph (pure decision)", () => {
 
 	it("merges duplicate nodes that collide on canonical label", () => {
 		const a = storedNode({
-			id: "project:tekmemo-a",
-			label: "TekMemo",
+			id: "project:memofs-a",
+			label: "MemoFS",
 			createdAt: "2026-05-04T00:00:00.000Z",
 		});
 		const b = storedNode({
-			id: "project:tekmemo-b",
-			label: " tekmemo ", // case + whitespace differ; canonical key matches
+			id: "project:memofs-b",
+			label: " memofs ", // case + whitespace differ; canonical key matches
 			createdAt: "2026-05-05T00:00:00.000Z",
 		});
 		const plan = consolidateGraph({
@@ -51,23 +51,23 @@ describe("consolidateGraph (pure decision)", () => {
 		});
 		expect(plan.merges).toHaveLength(1);
 		expect(plan.merges[0]).toMatchObject({
-			targetId: "project:tekmemo-a", // earlier createdAt wins
-			sourceId: "project:tekmemo-b",
+			targetId: "project:memofs-a", // earlier createdAt wins
+			sourceId: "project:memofs-b",
 			reason: "label-collision",
 		});
 	});
 
 	it("merges nodes linked by an alias", () => {
 		const target = storedNode({
-			id: "project:tekmemo",
-			label: "TekMemo",
+			id: "project:memofs",
+			label: "MemoFS",
 			aliases: [],
 		});
 		// B advertises the target's id as one of its aliases — same entity.
 		const source = storedNode({
-			id: "project:tekmemo-dup",
-			label: "TekMemo copy",
-			aliases: ["project:tekmemo"],
+			id: "project:memofs-dup",
+			label: "MemoFS copy",
+			aliases: ["project:memofs"],
 			createdAt: "2026-05-05T00:00:00.000Z",
 		});
 		const plan = consolidateGraph({
@@ -76,7 +76,7 @@ describe("consolidateGraph (pure decision)", () => {
 		});
 		expect(plan.merges).toHaveLength(1);
 		expect(plan.merges[0]?.reason).toBe("alias");
-		expect(plan.merges[0]?.sourceId).toBe("project:tekmemo-dup");
+		expect(plan.merges[0]?.sourceId).toBe("project:memofs-dup");
 	});
 
 	it("ignores inactive nodes when finding duplicates", () => {
@@ -106,7 +106,7 @@ describe("consolidateGraph (pure decision)", () => {
 		});
 		const fact = storedEdge({
 			id: "edge:uses-jwt",
-			from: "project:tekmemo",
+			from: "project:memofs",
 			to: "auth:jwt",
 			type: "uses",
 		});
@@ -114,7 +114,7 @@ describe("consolidateGraph (pure decision)", () => {
 			nodes: [
 				jwt,
 				oauth,
-				storedNode({ id: "project:tekmemo", label: "TekMemo" }),
+				storedNode({ id: "project:memofs", label: "MemoFS" }),
 			],
 			edges: [superseding, fact],
 		});
@@ -155,13 +155,13 @@ describe("applyConsolidation (store-backed)", () => {
 		const store = createInMemoryGraphStore();
 		await store.upsertNodes([
 			storedNode({
-				id: "project:tekmemo",
-				label: "TekMemo",
+				id: "project:memofs",
+				label: "MemoFS",
 				createdAt: "2026-05-04T00:00:00.000Z",
 			}),
 			storedNode({
-				id: "project:tekmemo-dup",
-				label: "TekMemo",
+				id: "project:memofs-dup",
+				label: "MemoFS",
 				createdAt: "2026-05-05T00:00:00.000Z",
 			}),
 		]);
@@ -173,9 +173,9 @@ describe("applyConsolidation (store-backed)", () => {
 		const applied = await applyConsolidation(store, plan);
 		expect(applied.mergesApplied).toBe(1);
 		// The absorbed node is gone; the survivor remains.
-		expect(await store.getNode("project:tekmemo-dup")).toBeUndefined();
-		expect((await store.getNode("project:tekmemo"))?.id).toBe(
-			"project:tekmemo",
+		expect(await store.getNode("project:memofs-dup")).toBeUndefined();
+		expect((await store.getNode("project:memofs"))?.id).toBe(
+			"project:memofs",
 		);
 	});
 
@@ -184,7 +184,7 @@ describe("applyConsolidation (store-backed)", () => {
 		await store.upsertNodes([
 			storedNode({ id: "auth:oauth", label: "OAuth2" }),
 			storedNode({ id: "auth:jwt", label: "JWT" }),
-			storedNode({ id: "project:tekmemo", label: "TekMemo" }),
+			storedNode({ id: "project:memofs", label: "MemoFS" }),
 		]);
 		await store.upsertEdges([
 			storedEdge({
@@ -195,7 +195,7 @@ describe("applyConsolidation (store-backed)", () => {
 			}),
 			storedEdge({
 				id: "edge:uses-jwt",
-				from: "project:tekmemo",
+				from: "project:memofs",
 				to: "auth:jwt",
 				type: "uses",
 			}),
@@ -222,14 +222,14 @@ describe("applyConsolidation (store-backed)", () => {
 		// GraphNotFoundError, which applyConsolidation swallows (best-effort).
 		const store = createInMemoryGraphStore();
 		await store.upsertNodes([
-			storedNode({ id: "project:tekmemo", label: "TekMemo" }),
+			storedNode({ id: "project:memofs", label: "MemoFS" }),
 		]);
 		const plan = consolidateGraph({
 			nodes: [
-				storedNode({ id: "project:tekmemo", label: "TekMemo" }),
+				storedNode({ id: "project:memofs", label: "MemoFS" }),
 				storedNode({
 					id: "project:ghost",
-					label: "TekMemo",
+					label: "MemoFS",
 					createdAt: "2026-05-05T00:00:00.000Z",
 				}),
 			],

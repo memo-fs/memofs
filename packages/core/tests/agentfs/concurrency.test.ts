@@ -1,4 +1,4 @@
-import { TEKMEMO_PATHS } from "@memofs/core";
+import { MEMOFS_PATHS } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import { AgentfsMemoryStore } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";
@@ -15,11 +15,11 @@ describe("same-instance append serialization", () => {
 
 		await Promise.all(
 			Array.from({ length: 20 }, (_, index) =>
-				store.append(TEKMEMO_PATHS.events.memoryEvents, `${index}\n`),
+				store.append(MEMOFS_PATHS.events.memoryEvents, `${index}\n`),
 			),
 		);
 
-		const lines = (await store.read(TEKMEMO_PATHS.events.memoryEvents))
+		const lines = (await store.read(MEMOFS_PATHS.events.memoryEvents))
 			.trim()
 			.split("\n");
 		expect(lines).toHaveLength(20);

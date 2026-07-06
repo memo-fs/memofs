@@ -1,7 +1,7 @@
 import { assertString } from "@repo/utils";
 import type {
-	CreateTekMemoAgentSessionOptions,
-	TekMemoAgentSession,
+	CreateMemoFSAgentSessionOptions,
+	MemoFSAgentSession,
 } from "../../agentfs/session/agent-session";
 import type { ReadConversationHistoryOptions } from "../../core/documents/conversations-memory";
 import type {
@@ -13,7 +13,7 @@ import {
 	appendConversationEntry,
 	bootstrapMemoryStore,
 	createSnapshotPath,
-	createTekMemoAgentSession,
+	createMemoFsAgentSession,
 	MEMORY_EVENTS_PATH,
 	MemoryNotFoundError,
 	NOTES_MEMORY_PATH,
@@ -25,7 +25,7 @@ import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
 import { createMemoryStrategy } from "../memory-strategy";
 import { createFileSyncLayer } from "../sync/file-replication";
-import type { Tekmemo } from "../Tekmemo";
+import type { MemoFS } from "../MemoFS";
 import type {
 	SnapshotMemoryInput,
 	WriteMemoryInput,
@@ -33,7 +33,7 @@ import type {
 } from "../types";
 
 export async function coreRead(
-	self: Tekmemo,
+	self: MemoFS,
 	signal?: AbortSignal,
 ): Promise<string> {
 	const result = await (self as any).strategy.readCoreMemory(signal);
@@ -41,7 +41,7 @@ export async function coreRead(
 }
 
 export async function coreUpdate(
-	self: Tekmemo,
+	self: MemoFS,
 	content: string,
 	signal?: AbortSignal,
 ): Promise<void> {
@@ -50,7 +50,7 @@ export async function coreUpdate(
 }
 
 export async function notesRead(
-	self: Tekmemo,
+	self: MemoFS,
 	signal?: AbortSignal,
 ): Promise<string> {
 	const result = await (self as any).strategy.readNotesMemory(signal);
@@ -58,7 +58,7 @@ export async function notesRead(
 }
 
 export async function notesRecord(
-	self: Tekmemo,
+	self: MemoFS,
 	note: Omit<TimestampedNote, "timestamp"> & {
 		timestamp?: string;
 		tier?: WriteMemoryInput["tier"];
@@ -81,7 +81,7 @@ export async function notesRecord(
 }
 
 export async function conversationsRead(
-	self: Tekmemo,
+	self: MemoFS,
 	options?: ReadConversationHistoryOptions,
 ): Promise<ConversationEntry[]> {
 	await self.bootstrap(); // ensure bootstrapped
@@ -94,14 +94,14 @@ export async function conversationsRead(
 }
 
 export async function conversationsAppend(
-	self: Tekmemo,
+	self: MemoFS,
 	entry: ConversationEntry,
 ): Promise<void> {
 	await self.bootstrap();
 	await appendConversationEntry(self.store, entry);
 }
 
-export async function snapshotsList(self: Tekmemo): Promise<SnapshotRecord[]> {
+export async function snapshotsList(self: MemoFS): Promise<SnapshotRecord[]> {
 	await self.bootstrap();
 	try {
 		return await readSnapshotRecords(self.store);
@@ -112,7 +112,7 @@ export async function snapshotsList(self: Tekmemo): Promise<SnapshotRecord[]> {
 }
 
 export async function snapshotsRestore(
-	self: Tekmemo,
+	self: MemoFS,
 	id: string,
 ): Promise<void> {
 	await self.bootstrap();
@@ -138,19 +138,19 @@ export async function snapshotsRestore(
 }
 
 export function agentfsCreateSession(
-	self: Tekmemo,
-	options: Omit<CreateTekMemoAgentSessionOptions, "memory" | "projectId"> & {
+	self: MemoFS,
+	options: Omit<CreateMemoFSAgentSessionOptions, "memory" | "projectId"> & {
 		projectId?: string;
 	},
-): TekMemoAgentSession {
-	return createTekMemoAgentSession({
+): MemoFSAgentSession {
+	return createMemoFsAgentSession({
 		memory: self.store,
 		projectId: options.projectId ?? self.projectId,
 		...options,
-	} as CreateTekMemoAgentSessionOptions);
+	} as CreateMemoFSAgentSessionOptions);
 }
 
-export function createStrategy(self: Tekmemo, resolved: any): any {
+export function createStrategy(self: MemoFS, resolved: any): any {
 	if (resolved.mode === "memory") {
 		return createMemoryStrategy({
 			name: self.name,

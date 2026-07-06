@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { NOTES_MEMORY_PATH, Tekmemo } from "../src/index";
+import { NOTES_MEMORY_PATH, MemoFS } from "../src/index";
 import {
 	NodeFsMemoryStore,
 	type NodeFsMemoryStoreOptions,
@@ -17,7 +17,7 @@ import {
 describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 	describe("memory strategy", () => {
 		it("uses the caller-supplied id verbatim", async () => {
-			const memo = new Tekmemo({ mode: "memory" });
+			const memo = new MemoFS({ mode: "memory" });
 
 			const result = await memo.writeMemory({
 				content: "connector-sourced fact",
@@ -30,7 +30,7 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 		});
 
 		it("falls back to the default id when `id` is omitted", async () => {
-			const memo = new Tekmemo({ mode: "memory" });
+			const memo = new MemoFS({ mode: "memory" });
 
 			const result = await memo.writeMemory({ content: "agent note" });
 
@@ -39,7 +39,7 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 		});
 
 		it("is deterministic across calls with the same caller id", async () => {
-			const memo = new Tekmemo({ mode: "memory" });
+			const memo = new MemoFS({ mode: "memory" });
 
 			const first = await memo.writeMemory({
 				content: "first",
@@ -60,16 +60,16 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 
 	describe("local (filesystem) strategy", () => {
 		let rootDir: string;
-		let memo: Tekmemo;
+		let memo: MemoFS;
 		let store: NodeFsMemoryStore;
 
 		beforeEach(async () => {
-			rootDir = await mkdtemp(join(tmpdir(), "tekmemo-caller-id-"));
+			rootDir = await mkdtemp(join(tmpdir(), "memofs-caller-id-"));
 			// The lock contract is single-process per root (Q28). A fresh temp
 			// root per test isolates writers naturally.
 			const storeOptions: NodeFsMemoryStoreOptions = { rootDir };
 			store = new NodeFsMemoryStore(storeOptions);
-			memo = new Tekmemo({ mode: "local", store });
+			memo = new MemoFS({ mode: "local", store });
 		});
 
 		afterEach(async () => {
@@ -114,10 +114,10 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 			const firstNotes = await memo.notes.read();
 
 			// Second store on a different root.
-			const otherRoot = await mkdtemp(join(tmpdir(), "tekmemo-caller-id-2-"));
+			const otherRoot = await mkdtemp(join(tmpdir(), "memofs-caller-id-2-"));
 			const otherStore = new NodeFsMemoryStore({ rootDir: otherRoot });
 			try {
-				const other = new Tekmemo({ mode: "local", store: otherStore });
+				const other = new MemoFS({ mode: "local", store: otherStore });
 				await other.writeMemory({
 					content: "identical body",
 					id: stableId,

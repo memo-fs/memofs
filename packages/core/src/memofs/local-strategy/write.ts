@@ -57,7 +57,7 @@ export async function writeMemory(
 		...(input.tags === undefined ? {} : { tags: input.tags }),
 		...(input.confidence === undefined ? {} : { confidence: input.confidence }),
 		...(input.source === undefined
-			? { source: "tekmemo" }
+			? { source: "memofs" }
 			: { source: input.source }),
 		metadata: {
 			id,
@@ -78,7 +78,7 @@ export async function writeMemory(
 			...((input.projectId ?? ctx.options.projectId)
 				? { projectId: input.projectId ?? ctx.options.projectId }
 				: {}),
-			actor: { type: "agent", id: "tekmemo" },
+			actor: { type: "agent", id: "memofs" },
 			summary: input.title ?? input.content.slice(0, 160),
 			metadata: {
 				id,
@@ -137,7 +137,7 @@ export async function updateCoreMemory(
 		createMemoryEvent({
 			type: "memory.updated",
 			...(ctx.options.projectId ? { projectId: ctx.options.projectId } : {}),
-			actor: { type: "agent", id: "tekmemo" },
+			actor: { type: "agent", id: "memofs" },
 			summary: "Core memory updated.",
 		}),
 	);

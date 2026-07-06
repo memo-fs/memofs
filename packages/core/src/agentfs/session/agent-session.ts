@@ -1,5 +1,5 @@
 /**
- * @file Agent session workspace helpers for AgentFS-backed TekMemo workflows.
+ * @file Agent session workspace helpers for AgentFS-backed MemoFS workflows.
  *
  * @packageDocumentation
  */
@@ -16,12 +16,12 @@ import {
 	extractSessionMemory,
 } from "./scaffolding";
 import type {
-	CompleteTekMemoAgentSessionOptions,
-	CompleteTekMemoAgentSessionResult,
-	CreateTekMemoAgentSessionOptions,
+	CompleteMemoFSAgentSessionOptions,
+	CompleteMemoFSAgentSessionResult,
+	CreateMemoFSAgentSessionOptions,
 	ExtractedSessionMemory,
-	PrepareTekMemoAgentSessionResult,
-	TekMemoAgentSession,
+	PrepareMemoFSAgentSessionResult,
+	MemoFSAgentSession,
 } from "./types";
 
 export {
@@ -30,26 +30,26 @@ export {
 	extractSessionMemory,
 } from "./scaffolding";
 export type {
-	CompleteTekMemoAgentSessionOptions,
-	CompleteTekMemoAgentSessionResult,
-	CreateTekMemoAgentSessionOptions,
+	CompleteMemoFSAgentSessionOptions,
+	CompleteMemoFSAgentSessionResult,
+	CreateMemoFSAgentSessionOptions,
 	ExtractedSessionMemory,
-	PrepareTekMemoAgentSessionResult,
-	TekMemoAgentSession,
-	TekMemoAgentSessionPaths,
+	PrepareMemoFSAgentSessionResult,
+	MemoFSAgentSession,
+	MemoFSAgentSessionPaths,
 } from "./types";
 
 /**
- * Creates a high-level TekMemo agent session backed by AgentFS files.
+ * Creates a high-level MemoFS agent session backed by AgentFS files.
  *
  * @param options - Session options.
  * @returns Agent session controller.
  *
  * @public
  */
-export function createTekMemoAgentSession(
-	options: CreateTekMemoAgentSessionOptions,
-): TekMemoAgentSession {
+export function createMemoFsAgentSession(
+	options: CreateMemoFSAgentSessionOptions,
+): MemoFSAgentSession {
 	const sessionId = validateSafeSegment(
 		options.sessionId ?? createDefaultSessionId(),
 		"sessionId",
@@ -59,7 +59,7 @@ export function createTekMemoAgentSession(
 	return {
 		sessionId,
 		paths,
-		prepare: async (): Promise<PrepareTekMemoAgentSessionResult> => {
+		prepare: async (): Promise<PrepareMemoFSAgentSessionResult> => {
 			const sync = await syncBeforeSession(options.client);
 			await createAgentWorkspaceFiles(options, paths, sessionId);
 			return { sync, paths };
@@ -67,8 +67,8 @@ export function createTekMemoAgentSession(
 		extract: async (): Promise<ExtractedSessionMemory> =>
 			extractSessionMemory(options.client, paths),
 		complete: async (
-			completeOptions: CompleteTekMemoAgentSessionOptions = {},
-		): Promise<CompleteTekMemoAgentSessionResult> => {
+			completeOptions: CompleteMemoFSAgentSessionOptions = {},
+		): Promise<CompleteMemoFSAgentSessionResult> => {
 			const extracted = await extractSessionMemory(options.client, paths);
 			const wantDurable =
 				(completeOptions.extractDurableMemory ?? false) &&

@@ -6,7 +6,7 @@ import {
 	containsBlockedContent,
 	detectBlockedContent,
 	MemoryWriteBlockedError,
-	Tekmemo,
+	MemoFS,
 } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import {
@@ -14,7 +14,7 @@ import {
 	TRANSIENT_CONFIDENCE_THRESHOLD,
 	TRANSIENT_CONTENT_MIN_LENGTH,
 } from "../../src/security/durability-tier";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 /**
  * Write intelligence — ADR 0009 Component 6.
@@ -142,7 +142,7 @@ describe("write intelligence — secret blocklist (layer 1)", () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(MemoryWriteBlockedError);
 				const e = error as MemoryWriteBlockedError;
-				expect(e.code).toBe("TEKMEMO_WRITE_BLOCKED");
+				expect(e.code).toBe("MEMOFS_WRITE_BLOCKED");
 				expect(Array.isArray(e.details?.violations)).toBe(true);
 				expect(e.details?.violations.length).toBeGreaterThan(0);
 			}
@@ -165,12 +165,12 @@ describe("write intelligence — secret blocklist (layer 1)", () => {
 			try {
 				assertWriteAllowed(
 					["AKIAIOSFODNN7EXAMPLE"],
-					".tekmemo/memory/notes.md",
+					".memofs/memory/notes.md",
 				);
 				throw new Error("should have thrown");
 			} catch (error) {
 				const e = error as MemoryWriteBlockedError;
-				expect(e.details?.path).toBe(".tekmemo/memory/notes.md");
+				expect(e.details?.path).toBe(".memofs/memory/notes.md");
 			}
 		});
 	});
@@ -268,9 +268,9 @@ describe("write intelligence — durability tier (layer 2)", () => {
  */
 describe("write intelligence — write-path behavior", () => {
 	it("hard-rejects a write containing a secret and never persists it", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -297,9 +297,9 @@ describe("write intelligence — write-path behavior", () => {
 	});
 
 	it("hard-rejects a secret in the title even when content is clean", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -323,9 +323,9 @@ describe("write intelligence — write-path behavior", () => {
 	});
 
 	it("writes a durable memory and indexes it for recall", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -337,7 +337,7 @@ describe("write intelligence — write-path behavior", () => {
 			});
 
 			const result = await memo.notes.record({
-				content: "TekMemo uses Biome for all linting and formatting.",
+				content: "MemoFS uses Biome for all linting and formatting.",
 				kind: "decision",
 			});
 			expect(result.tier).toBe("durable");
@@ -352,9 +352,9 @@ describe("write intelligence — write-path behavior", () => {
 	});
 
 	it("writes a transient memory to notes.md but does NOT index it", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -387,9 +387,9 @@ describe("write intelligence — write-path behavior", () => {
 	});
 
 	it("honors an explicit durable override on a transient-kind memory", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -420,9 +420,9 @@ describe("write intelligence — write-path behavior", () => {
 	});
 
 	it("does not auto-extract graph facts from a transient memory", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -435,7 +435,7 @@ describe("write intelligence — write-path behavior", () => {
 
 			// "X uses Y" would normally extract a graph edge — but it's a note.
 			await memo.notes.record({
-				content: "Scratch: TekMemo uses Redis locally for now.",
+				content: "Scratch: MemoFS uses Redis locally for now.",
 				kind: "note",
 			});
 

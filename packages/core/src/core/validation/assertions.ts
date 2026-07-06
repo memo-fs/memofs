@@ -1,5 +1,5 @@
 /**
- * Custom assertion functions for TekMemo validation.
+ * Custom assertion functions for MemoFS validation.
  *
  * @remarks
  * These assertions throw {@link MemoryValidationError} on failure and are

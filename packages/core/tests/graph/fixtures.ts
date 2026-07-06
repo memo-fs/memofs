@@ -7,9 +7,9 @@ import type {
 
 export function node(overrides?: Partial<GraphNode>): GraphNode {
 	return {
-		id: "project:tekmemo",
+		id: "project:memofs",
 		type: "project",
-		label: "TekMemo",
+		label: "MemoFS",
 		aliases: ["Tek Memo"],
 		confidence: 0.9,
 		importance: 0.8,
@@ -23,7 +23,7 @@ export function storedNode(
 ): StoredGraphNode {
 	return {
 		...node(overrides),
-		id: overrides?.id ?? "project:tekmemo",
+		id: overrides?.id ?? "project:memofs",
 		status: overrides?.status ?? "active",
 		createdAt: overrides?.createdAt ?? "2026-05-04T00:00:00.000Z",
 		updatedAt: overrides?.updatedAt ?? "2026-05-04T00:00:00.000Z",
@@ -32,7 +32,7 @@ export function storedNode(
 
 export function edge(overrides?: Partial<GraphEdge>): GraphEdge {
 	return {
-		from: "project:tekmemo",
+		from: "project:memofs",
 		to: "concept:local-first",
 		type: "uses",
 		directed: true,

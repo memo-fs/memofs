@@ -1,13 +1,13 @@
-import type { JsonValue, TekMemoCloudRequestMeta } from "./types";
+import type { JsonValue, MemoFSCloudRequestMeta } from "./types";
 
-export interface TekMemoCloudErrorOptions extends TekMemoCloudRequestMeta {
+export interface MemoFSCloudErrorOptions extends MemoFSCloudRequestMeta {
 	code: string;
 	message: string;
 	details?: JsonValue;
 	cause?: unknown;
 }
 
-export class TekMemoCloudError extends Error {
+export class MemoFSCloudError extends Error {
 	readonly code: string;
 	readonly status?: number;
 	readonly requestId?: string;
@@ -15,7 +15,7 @@ export class TekMemoCloudError extends Error {
 	readonly details?: JsonValue;
 	override readonly cause?: unknown;
 
-	constructor(options: TekMemoCloudErrorOptions) {
+	constructor(options: MemoFSCloudErrorOptions) {
 		super(options.message);
 		this.name = new.target.name;
 		this.code = options.code;
@@ -27,39 +27,39 @@ export class TekMemoCloudError extends Error {
 	}
 }
 
-export class TekMemoCloudAuthError extends TekMemoCloudError {}
-export class TekMemoCloudPermissionError extends TekMemoCloudError {}
-export class TekMemoCloudValidationError extends TekMemoCloudError {}
-export class TekMemoCloudRateLimitError extends TekMemoCloudError {}
-export class TekMemoCloudNotFoundError extends TekMemoCloudError {}
-export class TekMemoCloudConflictError extends TekMemoCloudError {}
-export class TekMemoCloudServerError extends TekMemoCloudError {}
-export class TekMemoCloudNetworkError extends TekMemoCloudError {}
-export class TekMemoCloudTimeoutError extends TekMemoCloudError {}
-export class TekMemoCloudResponseParseError extends TekMemoCloudError {}
-export class TekMemoCloudConfigurationError extends TekMemoCloudError {}
+export class MemoFsCloudAuthError extends MemoFSCloudError {}
+export class MemoFSCloudPermissionError extends MemoFSCloudError {}
+export class MemoFsCloudValidationError extends MemoFSCloudError {}
+export class MemoFSCloudRateLimitError extends MemoFSCloudError {}
+export class MemoFSCloudNotFoundError extends MemoFSCloudError {}
+export class MemoFSCloudConflictError extends MemoFSCloudError {}
+export class MemoFSCloudServerError extends MemoFSCloudError {}
+export class MemoFSCloudNetworkError extends MemoFSCloudError {}
+export class MemoFSCloudTimeoutError extends MemoFSCloudError {}
+export class MemoFSCloudResponseParseError extends MemoFSCloudError {}
+export class MemoFSCloudConfigurationError extends MemoFSCloudError {}
 
 export function createHttpError(
-	options: TekMemoCloudErrorOptions,
-): TekMemoCloudError {
+	options: MemoFSCloudErrorOptions,
+): MemoFSCloudError {
 	switch (options.status) {
 		case 400:
 		case 422:
-			return new TekMemoCloudValidationError(options);
+			return new MemoFsCloudValidationError(options);
 		case 401:
-			return new TekMemoCloudAuthError(options);
+			return new MemoFsCloudAuthError(options);
 		case 403:
-			return new TekMemoCloudPermissionError(options);
+			return new MemoFSCloudPermissionError(options);
 		case 404:
-			return new TekMemoCloudNotFoundError(options);
+			return new MemoFSCloudNotFoundError(options);
 		case 409:
-			return new TekMemoCloudConflictError(options);
+			return new MemoFSCloudConflictError(options);
 		case 429:
-			return new TekMemoCloudRateLimitError(options);
+			return new MemoFSCloudRateLimitError(options);
 		default:
 			if ((options.status ?? 0) >= 500)
-				return new TekMemoCloudServerError(options);
-			return new TekMemoCloudError(options);
+				return new MemoFSCloudServerError(options);
+			return new MemoFSCloudError(options);
 	}
 }
 
@@ -88,8 +88,8 @@ export function redactSecrets(
 	return output;
 }
 
-export function isTekMemoCloudError(
+export function isMemoFSCloudError(
 	value: unknown,
-): value is TekMemoCloudError {
-	return value instanceof TekMemoCloudError;
+): value is MemoFSCloudError {
+	return value instanceof MemoFSCloudError;
 }

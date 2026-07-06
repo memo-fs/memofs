@@ -3,7 +3,7 @@ import type { MissingFileBehavior } from "../../core/types/config";
 export type { MissingFileBehavior };
 export interface NodeFsMemoryStoreOptions {
 	/**
-	 * Root directory where TekMemo files are stored.
+	 * Root directory where MemoFS files are stored.
 	 * Memory paths are resolved beneath this directory.
 	 */
 	rootDir: string | URL;
@@ -39,12 +39,12 @@ export interface NodeFsMemoryStoreOptions {
 	fileMode?: number | undefined;
 
 	/**
-	 * Whether to acquire the cross-process advisory lock (`.tekmemo/.lock`)
+	 * Whether to acquire the cross-process advisory lock (`.memofs/.lock`)
 	 * on the first mutating write. Defaults to `true`.
 	 *
 	 * @remarks
 	 * Implements the local single-process contract (Q28 / decisions.md): a
-	 * second process mutating the same `.tekmemo/` root gets a
+	 * second process mutating the same `.memofs/` root gets a
 	 * {@link LockHeldError}. Set to `false` to opt out — e.g. when an external
 	 * coordinator already serializes access, or in tests that deliberately
 	 * share a root across stores.

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createFsGraphStore, createFsRecallStore } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 describe("FsRecallStore", () => {
 	it("persists upserts to embeddings.jsonl and rehydrates into a new store", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -41,7 +41,7 @@ describe("FsRecallStore", () => {
 	});
 
 	it("supports delete and persists the change", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -90,7 +90,7 @@ describe("FsRecallStore", () => {
 
 describe("FsGraphStore", () => {
 	it("persists nodes and edges to JSONL and rehydrates into a new store", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -125,7 +125,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("returns empty when no persisted graph exists", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -142,7 +142,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("hydrates is idempotent (only the first call reads disk)", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -164,7 +164,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("rehydrates a directed edge with correct direction filtering", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -208,7 +208,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("filters neighbors by edge type and minWeight", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -253,7 +253,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("survives a restart with re-indexed (upserted) nodes", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,
@@ -275,7 +275,7 @@ describe("FsGraphStore", () => {
 	});
 
 	it("clear() removes nodes and edges and persists the empty state", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
 			const store = createNodeFsMemoryStore({
 				rootDir,

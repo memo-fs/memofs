@@ -1,8 +1,8 @@
 /**
- * Canonical file paths and path utilities for TekMemo.
+ * Canonical file paths and path utilities for MemoFS.
  *
  * @remarks
- * All TekMemo files live under the `.tekmemo/` directory.
+ * All MemoFS files live under the `.memofs/` directory.
  * This module defines the canonical paths, validates paths, and provides
  * utilities for working with memory paths.
  *
@@ -11,66 +11,66 @@
 
 import { MemoryPathError } from "../errors/errors";
 
-/** The root directory name for all TekMemo files. */
-export const TEKMEMO_DIR = ".tekmemo" as const;
+/** The root directory name for all MemoFS files. */
+export const MEMOFS_DIR = ".memofs" as const;
 
 /**
  * Backwards-compatible alias for older package internals.
- * New code should prefer TEKMEMO_DIR.
+ * New code should prefer MEMOFS_DIR.
  */
-export const MEMORY_ROOT = TEKMEMO_DIR;
+export const MEMORY_ROOT = MEMOFS_DIR;
 
-/** Canonical .tekmemo/ protocol paths. */
-export const TEKMEMO_PATHS = Object.freeze({
-	manifest: `${TEKMEMO_DIR}/manifest.json`,
+/** Canonical .memofs/ protocol paths. */
+export const MEMOFS_PATHS = Object.freeze({
+	manifest: `${MEMOFS_DIR}/manifest.json`,
 	memory: Object.freeze({
-		core: `${TEKMEMO_DIR}/memory/core.md`,
-		notes: `${TEKMEMO_DIR}/memory/notes.md`,
+		core: `${MEMOFS_DIR}/memory/core.md`,
+		notes: `${MEMOFS_DIR}/memory/notes.md`,
 	}),
 	events: Object.freeze({
-		memoryEvents: `${TEKMEMO_DIR}/events/memory-events.jsonl`,
-		conversations: `${TEKMEMO_DIR}/events/conversations.jsonl`,
+		memoryEvents: `${MEMOFS_DIR}/events/memory-events.jsonl`,
+		conversations: `${MEMOFS_DIR}/events/conversations.jsonl`,
 	}),
 	indexes: Object.freeze({
-		chunks: `${TEKMEMO_DIR}/indexes/chunks.jsonl`,
-		embeddings: `${TEKMEMO_DIR}/indexes/embeddings.jsonl`,
+		chunks: `${MEMOFS_DIR}/indexes/chunks.jsonl`,
+		embeddings: `${MEMOFS_DIR}/indexes/embeddings.jsonl`,
 	}),
 	graph: Object.freeze({
-		nodes: `${TEKMEMO_DIR}/graph/nodes.jsonl`,
-		edges: `${TEKMEMO_DIR}/graph/edges.jsonl`,
+		nodes: `${MEMOFS_DIR}/graph/nodes.jsonl`,
+		edges: `${MEMOFS_DIR}/graph/edges.jsonl`,
 	}),
 	snapshots: Object.freeze({
-		index: `${TEKMEMO_DIR}/snapshots/snapshots.jsonl`,
+		index: `${MEMOFS_DIR}/snapshots/snapshots.jsonl`,
 	}),
 	/** Connector config — the 11th canonical file ( / decision Q2). No secrets. */
-	connectors: `${TEKMEMO_DIR}/connectors.json`,
-	tmpDir: `${TEKMEMO_DIR}/tmp`,
+	connectors: `${MEMOFS_DIR}/connectors.json`,
+	tmpDir: `${MEMOFS_DIR}/tmp`,
 } as const);
 
 /** Path to the manifest file. */
-export const MANIFEST_PATH = TEKMEMO_PATHS.manifest;
+export const MANIFEST_PATH = MEMOFS_PATHS.manifest;
 /** Path to the core memory file. */
-export const CORE_MEMORY_PATH = TEKMEMO_PATHS.memory.core;
+export const CORE_MEMORY_PATH = MEMOFS_PATHS.memory.core;
 /** Path to the notes memory file. */
-export const NOTES_MEMORY_PATH = TEKMEMO_PATHS.memory.notes;
+export const NOTES_MEMORY_PATH = MEMOFS_PATHS.memory.notes;
 /** Path to the memory events JSONL file. */
-export const MEMORY_EVENTS_PATH = TEKMEMO_PATHS.events.memoryEvents;
+export const MEMORY_EVENTS_PATH = MEMOFS_PATHS.events.memoryEvents;
 /** Path to the conversations JSONL file. */
-export const CONVERSATIONS_MEMORY_PATH = TEKMEMO_PATHS.events.conversations;
+export const CONVERSATIONS_MEMORY_PATH = MEMOFS_PATHS.events.conversations;
 /** Path to the chunks index JSONL file. */
-export const CHUNKS_INDEX_PATH = TEKMEMO_PATHS.indexes.chunks;
+export const CHUNKS_INDEX_PATH = MEMOFS_PATHS.indexes.chunks;
 /** Path to the persisted embeddings index JSONL file. */
-export const EMBEDDINGS_INDEX_PATH = TEKMEMO_PATHS.indexes.embeddings;
+export const EMBEDDINGS_INDEX_PATH = MEMOFS_PATHS.indexes.embeddings;
 /** Path to the graph nodes JSONL file. */
-export const GRAPH_NODES_PATH = TEKMEMO_PATHS.graph.nodes;
+export const GRAPH_NODES_PATH = MEMOFS_PATHS.graph.nodes;
 /** Path to the graph edges JSONL file. */
-export const GRAPH_EDGES_PATH = TEKMEMO_PATHS.graph.edges;
+export const GRAPH_EDGES_PATH = MEMOFS_PATHS.graph.edges;
 /** Path to the snapshots index JSONL file. */
-export const SNAPSHOTS_INDEX_PATH = TEKMEMO_PATHS.snapshots.index;
+export const SNAPSHOTS_INDEX_PATH = MEMOFS_PATHS.snapshots.index;
 /** Path to the connector-config JSON file (no secrets; `secretRef` only). */
-export const CONNECTORS_PATH = TEKMEMO_PATHS.connectors;
+export const CONNECTORS_PATH = MEMOFS_PATHS.connectors;
 
-export const CANONICAL_TEKMEMO_FILES = [
+export const CANONICAL_MEMOFS_FILES = [
 	MANIFEST_PATH,
 	CORE_MEMORY_PATH,
 	NOTES_MEMORY_PATH,
@@ -85,16 +85,16 @@ export const CANONICAL_TEKMEMO_FILES = [
 ] as const;
 
 /**
- * Backwards-compatible alias. New code should prefer CANONICAL_TEKMEMO_FILES.
+ * Backwards-compatible alias. New code should prefer CANONICAL_MEMOFS_FILES.
  */
-export const MEMORY_PATHS = CANONICAL_TEKMEMO_FILES;
+export const MEMORY_PATHS = CANONICAL_MEMOFS_FILES;
 
-export type CanonicalTekMemoFile = (typeof CANONICAL_TEKMEMO_FILES)[number];
-export type SnapshotFilePath = `${typeof TEKMEMO_DIR}/snapshots/${string}.json`;
-export type MemoryPath = CanonicalTekMemoFile | SnapshotFilePath;
+export type CanonicalMemoFSFile = (typeof CANONICAL_MEMOFS_FILES)[number];
+export type SnapshotFilePath = `${typeof MEMOFS_DIR}/snapshots/${string}.json`;
+export type MemoryPath = CanonicalMemoFSFile | SnapshotFilePath;
 
-const CANONICAL_TEKMEMO_FILE_SET = new Set<string>(CANONICAL_TEKMEMO_FILES);
-const SNAPSHOT_FILE_PATTERN = /^\.tekmemo\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
+const CANONICAL_MEMOFS_FILE_SET = new Set<string>(CANONICAL_MEMOFS_FILES);
+const SNAPSHOT_FILE_PATTERN = /^\.memofs\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
 
 /**
  * Checks if a value is a valid memory path.
@@ -105,7 +105,7 @@ const SNAPSHOT_FILE_PATTERN = /^\.tekmemo\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
 export function isMemoryPath(path: unknown): path is MemoryPath {
 	return (
 		typeof path === "string" &&
-		(CANONICAL_TEKMEMO_FILE_SET.has(path) || SNAPSHOT_FILE_PATTERN.test(path))
+		(CANONICAL_MEMOFS_FILE_SET.has(path) || SNAPSHOT_FILE_PATTERN.test(path))
 	);
 }
 
@@ -139,18 +139,18 @@ export function assertMemoryPath(path: unknown): asserts path is MemoryPath {
 		);
 	}
 
-	if (!path.startsWith(`${TEKMEMO_DIR}/`)) {
+	if (!path.startsWith(`${MEMOFS_DIR}/`)) {
 		throw new MemoryPathError(
-			"Memory path must be inside the canonical .tekmemo directory.",
+			"Memory path must be inside the canonical .memofs directory.",
 			{ path },
 		);
 	}
 
 	if (!isMemoryPath(path)) {
-		throw new MemoryPathError(`Unsupported TekMemo path: ${path}`, {
+		throw new MemoryPathError(`Unsupported MemoFS path: ${path}`, {
 			path,
-			supported: CANONICAL_TEKMEMO_FILES,
-			dynamic: `${TEKMEMO_DIR}/snapshots/<safe-name>.json`,
+			supported: CANONICAL_MEMOFS_FILES,
+			dynamic: `${MEMOFS_DIR}/snapshots/<safe-name>.json`,
 		});
 	}
 }
@@ -177,7 +177,7 @@ export function createSnapshotPath(snapshotId: string): SnapshotFilePath {
 	}
 
 	const path =
-		`${TEKMEMO_DIR}/snapshots/${normalized}.json` as SnapshotFilePath;
+		`${MEMOFS_DIR}/snapshots/${normalized}.json` as SnapshotFilePath;
 	assertMemoryPath(path);
 	return path;
 }

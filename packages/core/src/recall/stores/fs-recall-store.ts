@@ -3,8 +3,8 @@
  *
  * @remarks
  * Wraps the in-memory recall store so that embeddings survive process
- * restarts, staying true to TekMemo's file-first identity. On construction
- * the store rehydrates from `.tekmemo/indexes/embeddings.jsonl` (one document
+ * restarts, staying true to MemoFS's file-first identity. On construction
+ * the store rehydrates from `.memofs/indexes/embeddings.jsonl` (one document
  * per line) into the volatile index; every `upsert`/`delete`/`deleteBySource`
  * is mirrored to the same file as a full rewrite.
  *

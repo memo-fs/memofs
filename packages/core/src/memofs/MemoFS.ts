@@ -1,13 +1,12 @@
 /**
- * Tekmemo — the single entry point for the TekMemo memory runtime.
+ * MemoFS — the single entry point for the MemoFS memory runtime.
  *
  * @public
  */
 
-import { assertString } from "@repo/utils";
 import type {
-	CreateTekMemoAgentSessionOptions,
-	TekMemoAgentSession,
+	CreateMemoFSAgentSessionOptions,
+	MemoFSAgentSession,
 } from "../agentfs/session/agent-session";
 import type { LlmClient } from "../ai-runtime/llm-client";
 import type { BootstrapMemoryStoreOptions } from "../core/bootstrap/bootstrap-memory-store";
@@ -26,18 +25,18 @@ import {
 	AgentfsMemoryStore,
 	applyTopK,
 	bootstrapMemoryStore,
-	createTekMemoCloudClient,
+	createMemoFsCloudClient,
 	DeterministicFallbackReranker,
+	type MemoFsCloudClient,
 	runMemoryCommand,
 	stableSortRerankResults,
-	type TekMemoCloudClient,
 } from "../index";
 import type { RecallFilter, RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
 import {
-	type ResolvedTekmemoConfig,
-	resolveTekmemoConfig,
-	type TekmemoConfig,
+	type MemoFsConfig,
+	type ResolvedMemoFsConfig,
+	resolveMemoFsConfig,
 } from "./config";
 import type { createLocalStrategy } from "./local-strategy";
 import {
@@ -51,7 +50,7 @@ import {
 	notesRecord,
 	snapshotsList,
 	snapshotsRestore,
-} from "./Tekmemo/delegates";
+} from "./MemoFS/delegates";
 import type {
 	AgentSessionCompleteInput,
 	AgentSessionFileInput,
@@ -64,6 +63,8 @@ import type {
 	GraphPathInput,
 	GraphPathResult,
 	ListGraphInput,
+	MemoFSHealthResult,
+	MemoFSRuntimeMode,
 	MemoryContextInput,
 	MemoryContextResult,
 	RecallInput,
@@ -82,8 +83,6 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoHealthResult,
-	TekMemoRuntimeMode,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -93,12 +92,12 @@ import type {
 type Strategy = ReturnType<typeof createLocalStrategy>;
 
 /**
- * The high-level Tekmemo client — the single entry point for all memory operations.
+ * The high-level MemoFS client — the single entry point for all memory operations.
  *
  * @public
  */
-export class Tekmemo {
-	readonly mode: TekMemoRuntimeMode;
+export class MemoFS {
+	readonly mode: MemoFSRuntimeMode;
 	readonly projectId: string;
 	readonly tenantId?: string;
 	readonly workspaceId?: string;
@@ -108,15 +107,15 @@ export class Tekmemo {
 	readonly reranker?: Reranker;
 	readonly llmClient?: LlmClient;
 	readonly recallStore?: RecallStore;
-	readonly cloud?: TekMemoCloudClient;
+	readonly cloud?: MemoFsCloudClient;
 	readonly readPolicy: RuntimeReadPolicy;
 	readonly writePolicy: RuntimeWritePolicy;
 	readonly name: string;
 	readonly version: string;
-	readonly recallConfig: ResolvedTekmemoConfig["recall"];
+	readonly recallConfig: ResolvedMemoFsConfig["recall"];
 
 	private readonly strategy: Strategy;
-	private readonly resolved: ResolvedTekmemoConfig;
+	private readonly resolved: ResolvedMemoFsConfig;
 	private bootstrapped = false;
 
 	readonly core = {
@@ -235,13 +234,10 @@ export class Tekmemo {
 
 	readonly agentfs = {
 		createSession: (
-			options: Omit<
-				CreateTekMemoAgentSessionOptions,
-				"memory" | "projectId"
-			> & {
+			options: Omit<CreateMemoFSAgentSessionOptions, "memory" | "projectId"> & {
 				projectId?: string;
 			},
-		): TekMemoAgentSession => {
+		): MemoFSAgentSession => {
 			return agentfsCreateSession(this, options);
 		},
 
@@ -324,8 +320,8 @@ export class Tekmemo {
 		},
 	};
 
-	constructor(config: TekmemoConfig = {}) {
-		this.resolved = resolveTekmemoConfig({ config });
+	constructor(config: MemoFsConfig = {}) {
+		this.resolved = resolveMemoFsConfig({ config });
 
 		this.mode = this.resolved.mode;
 		this.projectId = this.resolved.projectId;
@@ -346,7 +342,7 @@ export class Tekmemo {
 		if (this.resolved.cloudClient) {
 			this.cloud = this.resolved.cloudClient;
 		} else if (this.resolved.cloud) {
-			this.cloud = createTekMemoCloudClient(this.resolved.cloud);
+			this.cloud = createMemoFsCloudClient(this.resolved.cloud);
 		}
 
 		this.strategy = createStrategy(this, this.resolved);
@@ -358,7 +354,7 @@ export class Tekmemo {
 	 * @internal
 	 */
 	getCloudOptions():
-		| import("../cloud-client/types").TekMemoCloudClientOptions
+		| import("../cloud-client/types").MemoFsCloudClientOptions
 		| undefined {
 		return this.resolved.cloud;
 	}
@@ -429,7 +425,7 @@ export class Tekmemo {
 		return this.strategy.consolidateMemory(input ?? {}, signal);
 	}
 
-	async health(signal?: AbortSignal): Promise<TekMemoHealthResult> {
+	async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {
 		return this.strategy.health(signal);
 	}
 

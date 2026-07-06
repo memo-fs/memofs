@@ -11,8 +11,8 @@
  * @public
  */
 import {
-	TekMemoCloudConfigurationError,
-	TekMemoCloudValidationError,
+	MemoFSCloudConfigurationError,
+	MemoFsCloudValidationError,
 } from "./errors";
 import type {
 	FileManifest,
@@ -32,7 +32,7 @@ export function assertNonEmptyString(
 	fieldName: string,
 ): asserts value is string {
 	if (typeof value !== "string" || value.trim().length === 0) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a non-empty string.`,
 		});
@@ -45,7 +45,7 @@ export function assertOptionalPositiveInteger(
 ): void {
 	if (value === undefined || value === null) return;
 	if (!Number.isInteger(value) || (value as number) <= 0) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a positive integer.`,
 		});
@@ -58,7 +58,7 @@ export function assertOptionalJsonObject(
 ): asserts value is JsonObject | undefined {
 	if (value === undefined) return;
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a JSON object.`,
 		});
@@ -66,7 +66,7 @@ export function assertOptionalJsonObject(
 	try {
 		JSON.stringify(value);
 	} catch (cause) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be JSON serializable.`,
 			cause,
@@ -92,7 +92,7 @@ export function assertSha256(
 	fieldName: string,
 ): asserts value is string {
 	if (typeof value !== "string" || !SHA256_PATTERN.test(value)) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a sha256 hex digest (64 lowercase hex characters).`,
 		});
@@ -108,7 +108,7 @@ export function assertProjectId(value: unknown, fallback?: string): string {
 
 /**
  * Validates an optional local file manifest. When present, it must be a map of
- * canonical `.tekmemo/` path → sha256; when absent, the server treats the
+ * canonical `.memofs/` path → sha256; when absent, the server treats the
  * request as "pull/push everything known" (see §4.5 of the refactor doc).
  */
 export function assertOptionalFileManifest(
@@ -117,7 +117,7 @@ export function assertOptionalFileManifest(
 ): asserts value is FileManifest | undefined {
 	if (value === undefined || value === null) return;
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a JSON object mapping paths to sha256 digests.`,
 		});
@@ -129,7 +129,7 @@ export function assertOptionalFileManifest(
 }
 
 /**
- * Validates a local file manifest: a map of canonical `.tekmemo/` path → sha256.
+ * Validates a local file manifest: a map of canonical `.memofs/` path → sha256.
  * Each path must be a non-empty string; each value must be a sha256 hex digest.
  */
 export function assertFileManifest(
@@ -137,7 +137,7 @@ export function assertFileManifest(
 	fieldName: string,
 ): asserts value is FileManifest {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a JSON object mapping paths to sha256 digests.`,
 		});
@@ -166,14 +166,14 @@ export function validateSyncPushCompleteInput(
 	input: SyncPushCompleteInput,
 ): SyncPushCompleteInput {
 	if (!Array.isArray(input.uploaded)) {
-		throw new TekMemoCloudValidationError({
+		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: "uploaded must be an array of { path, sha256 } entries.",
 		});
 	}
 	for (const [index, entry] of input.uploaded.entries()) {
 		if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
-			throw new TekMemoCloudValidationError({
+			throw new MemoFsCloudValidationError({
 				code: "invalid_input",
 				message: `uploaded[${index}] must be an object.`,
 			});
@@ -209,7 +209,7 @@ export function normalizeBaseUrl(baseUrl: string): string {
 	try {
 		url = new URL(baseUrl.trim());
 	} catch (cause) {
-		throw new TekMemoCloudConfigurationError({
+		throw new MemoFSCloudConfigurationError({
 			code: "invalid_base_url",
 			message: "baseUrl must be a valid absolute URL.",
 			cause,
@@ -220,7 +220,7 @@ export function normalizeBaseUrl(baseUrl: string): string {
 		url.hostname !== "localhost" &&
 		url.hostname !== "127.0.0.1"
 	) {
-		throw new TekMemoCloudConfigurationError({
+		throw new MemoFSCloudConfigurationError({
 			code: "insecure_base_url",
 			message:
 				"baseUrl must use https, except for localhost self-hosted development.",

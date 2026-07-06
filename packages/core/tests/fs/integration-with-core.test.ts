@@ -2,7 +2,7 @@ import {
 	appendConversationEntry,
 	appendTimestampedNote,
 	bootstrapMemoryStore,
-	CANONICAL_TEKMEMO_FILES,
+	CANONICAL_MEMOFS_FILES,
 	readConversationHistory,
 	readCoreMemory,
 	readNotesMemory,
@@ -12,13 +12,13 @@ import { describe, expect, test } from "vitest";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempRoot } from "./test-utils";
 
-describe("TekMemo core integration", () => {
+describe("MemoFS core integration", () => {
 	test("works end-to-end with bootstrap, core, notes, and conversations", async () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		const bootstrap = await bootstrapMemoryStore(store);
-		expect(bootstrap.created).toEqual([...CANONICAL_TEKMEMO_FILES]);
+		expect(bootstrap.created).toEqual([...CANONICAL_MEMOFS_FILES]);
 
 		await writeCoreMemory(
 			store,
@@ -53,6 +53,6 @@ describe("TekMemo core integration", () => {
 		const second = await bootstrapMemoryStore(store);
 
 		expect(second.created).toEqual([]);
-		expect(second.skipped).toEqual([...CANONICAL_TEKMEMO_FILES]);
+		expect(second.skipped).toEqual([...CANONICAL_MEMOFS_FILES]);
 	});
 });

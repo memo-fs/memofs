@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	bootstrapMemoryStore,
-	CANONICAL_TEKMEMO_FILES,
+	CANONICAL_MEMOFS_FILES,
 	CORE_MEMORY_PATH,
 	InMemoryMemoryStore,
 	MANIFEST_PATH,
@@ -10,14 +10,14 @@ import {
 } from "../src/index";
 
 describe("bootstrapMemoryStore", () => {
-	it("seeds the canonical .tekmemo protocol files", async () => {
+	it("seeds the canonical .memofs protocol files", async () => {
 		const store = new InMemoryMemoryStore();
 		const result = await bootstrapMemoryStore(store, {
 			now: () => "2026-05-02T00:00:00.000Z",
 		});
 
-		expect(result.created).toEqual([...CANONICAL_TEKMEMO_FILES]);
-		for (const path of CANONICAL_TEKMEMO_FILES) {
+		expect(result.created).toEqual([...CANONICAL_MEMOFS_FILES]);
+		for (const path of CANONICAL_MEMOFS_FILES) {
 			await expect(store.exists(path)).resolves.toBe(true);
 		}
 	});

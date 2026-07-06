@@ -2,7 +2,7 @@ import type { MemoryStore, SyncOperationResult } from "../../index";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import type { SyncAfterSessionResult } from "../sync/sync-after-session";
 
-export interface TekMemoAgentSessionPaths {
+export interface MemoFSAgentSessionPaths {
 	readonly root: string;
 	readonly meta: string;
 	readonly context: {
@@ -24,7 +24,7 @@ export interface TekMemoAgentSessionPaths {
 	};
 }
 
-export interface CreateTekMemoAgentSessionOptions {
+export interface CreateMemoFSAgentSessionOptions {
 	readonly client: AgentfsLikeClient;
 	readonly memory: MemoryStore;
 	readonly task: string;
@@ -35,9 +35,9 @@ export interface CreateTekMemoAgentSessionOptions {
 	readonly overwriteWorkspaceFiles?: boolean | undefined;
 }
 
-export interface PrepareTekMemoAgentSessionResult {
+export interface PrepareMemoFSAgentSessionResult {
 	readonly sync: SyncOperationResult;
-	readonly paths: TekMemoAgentSessionPaths;
+	readonly paths: MemoFSAgentSessionPaths;
 }
 
 export interface ExtractedSessionMemory {
@@ -48,25 +48,25 @@ export interface ExtractedSessionMemory {
 	readonly changes: string;
 }
 
-export interface CompleteTekMemoAgentSessionOptions {
+export interface CompleteMemoFSAgentSessionOptions {
 	readonly checkpointLabel?: string | undefined;
 	readonly extractDurableMemory?: boolean | undefined;
 	readonly skipCheckpoint?: boolean | undefined;
 	readonly requireSync?: boolean | undefined;
 }
 
-export interface CompleteTekMemoAgentSessionResult {
+export interface CompleteMemoFSAgentSessionResult {
 	readonly extracted: ExtractedSessionMemory;
 	readonly sync: SyncAfterSessionResult;
 	readonly durableMemoryWritten: boolean;
 }
 
-export interface TekMemoAgentSession {
+export interface MemoFSAgentSession {
 	readonly sessionId: string;
-	readonly paths: TekMemoAgentSessionPaths;
-	prepare(): Promise<PrepareTekMemoAgentSessionResult>;
+	readonly paths: MemoFSAgentSessionPaths;
+	prepare(): Promise<PrepareMemoFSAgentSessionResult>;
 	extract(): Promise<ExtractedSessionMemory>;
 	complete(
-		options?: CompleteTekMemoAgentSessionOptions,
-	): Promise<CompleteTekMemoAgentSessionResult>;
+		options?: CompleteMemoFSAgentSessionOptions,
+	): Promise<CompleteMemoFSAgentSessionResult>;
 }

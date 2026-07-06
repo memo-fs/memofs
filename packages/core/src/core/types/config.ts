@@ -1,5 +1,5 @@
 /**
- * Shared configuration types for TekMemo.
+ * Shared configuration types for MemoFS.
  *
  * @public
  */

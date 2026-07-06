@@ -9,22 +9,22 @@ describe("atomic writes and append locking", () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
-		await store.write(".tekmemo/memory/core.md", "one");
-		await store.write(".tekmemo/memory/core.md", "two");
+		await store.write(".memofs/memory/core.md", "one");
+		await store.write(".memofs/memory/core.md", "two");
 
-		await expect(store.read(".tekmemo/memory/core.md")).resolves.toBe("two");
+		await expect(store.read(".memofs/memory/core.md")).resolves.toBe("two");
 	});
 
 	test("write cleans up temp files after successful write", async () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 
-		await store.write(".tekmemo/memory/core.md", "clean\n");
+		await store.write(".memofs/memory/core.md", "clean\n");
 
-		// The .tekmemo dir now contains the advisory .lock (acquired by the
+		// The .memofs dir now contains the advisory .lock (acquired by the
 		// write, Q28) plus the memory/ subtree. Critically: NO leftover .tmp
 		// temp files from the atomic write.
-		const entries = await fs.readdir(path.join(rootDir, ".tekmemo"));
+		const entries = await fs.readdir(path.join(rootDir, ".memofs"));
 		expect(entries).toEqual([".lock", "memory"]);
 		expect(entries.some((e) => e.endsWith(".tmp"))).toBe(false);
 	});
@@ -35,10 +35,10 @@ describe("atomic writes and append locking", () => {
 
 		await Promise.all(
 			Array.from({ length: 50 }, (_, index) =>
-				store.append(".tekmemo/memory/notes.md", `line-${index}\n`),
+				store.append(".memofs/memory/notes.md", `line-${index}\n`),
 			),
 		);
-		const content = await store.read(".tekmemo/memory/notes.md");
+		const content = await store.read(".memofs/memory/notes.md");
 
 		for (let index = 0; index < 50; index += 1) {
 			expect(content).toContain(`line-${index}\n`);
@@ -50,9 +50,9 @@ describe("atomic writes and append locking", () => {
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		await expect(
-			store.write(".tekmemo/../core.md" as never, "bad"),
+			store.write(".memofs/../core.md" as never, "bad"),
 		).rejects.toThrow();
-		await expect(pathExists(path.join(rootDir, ".tekmemo"))).resolves.toBe(
+		await expect(pathExists(path.join(rootDir, ".memofs"))).resolves.toBe(
 			false,
 		);
 	});

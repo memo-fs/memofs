@@ -3,7 +3,7 @@
  *
  * Each stage is a pure function, so each is tested in isolation — mirroring the
  * `consolidateGraph` / `applyConsolidation` split. The end-to-end behavior
- * (does `tekmemo.context` actually use the strategist?) lives in the regression
+ * (does `memofs.context` actually use the strategist?) lives in the regression
  * harness + the intelligence story tests.
  */
 
@@ -18,7 +18,7 @@ import {
 	resolveEntityState,
 	rewriteQuery,
 	SECTION_WEIGHTS,
-} from "../../src/tekmemo/strategist";
+} from "../../src/memofs/strategist";
 
 // ---------------------------------------------------------------------------
 // Stage 1 — Rewrite

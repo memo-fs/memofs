@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createTekMemoCloudClient } from "../../src/cloud-client";
+import { createMemoFsCloudClient } from "../../src/cloud-client";
 
 /**
  * @file Cloud-client route parity.
@@ -16,7 +16,7 @@ import { createTekMemoCloudClient } from "../../src/cloud-client";
  */
 describe("Cloud Client Parity", () => {
 	it("exposes only the file-replica surface: health, readiness, and sync", () => {
-		const client = createTekMemoCloudClient({
+		const client = createMemoFsCloudClient({
 			baseUrl: "http://localhost",
 			apiKey: "tk_live_test",
 		});
@@ -31,7 +31,7 @@ describe("Cloud Client Parity", () => {
 	});
 
 	it("does not expose any deleted engine namespace", () => {
-		const client = createTekMemoCloudClient({
+		const client = createMemoFsCloudClient({
 			baseUrl: "http://localhost",
 			apiKey: "tk_live_test",
 		}) as unknown as Record<string, unknown>;

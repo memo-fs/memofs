@@ -1,8 +1,8 @@
 /**
- * TekMemo core — file-first memory runtime for agents and AI applications.
+ * MemoFS core — file-first memory runtime for agents and AI applications.
  *
  * This package provides the core memory model, document types, validation,
- * patching, and canonical file path conventions used by all TekMemo adapters.
+ * patching, and canonical file path conventions used by all MemoFS adapters.
  *
  * @public
  */
@@ -16,7 +16,7 @@ export { isNotFoundError } from "./agentfs";
 export * from "./ai-runtime";
 // The cloud is a file replica: its file-manifest sync types are the canonical
 // public surface and are re-exported explicitly to win over the legacy
-// event-based types still exported from "./tekmemo" (removed in a later batch).
+// event-based types still exported from "./memofs" (removed in a later batch).
 // See docs/architecture/cloud-sync-and-refactor.md §6.5.
 export type {
 	SyncPullInput,
@@ -71,9 +71,9 @@ export * from "./rerank";
 // durability tier classifier.
 export * from "./security/durability-tier";
 export * from "./security/secret-blocklist";
-export type { RecallResult } from "./tekmemo";
-export * from "./tekmemo";
-// NOTE: `./testing` (createTempTekMemoDir) is NOT re-exported here — it imports
+export type { RecallResult } from "./memofs";
+export * from "./memofs";
+// NOTE: `./testing` (createTempMemoFsDir) is NOT re-exported here — it imports
 // `node:fs`/`node:os`/`node:path`, which would pull `node:fs` into this barrel
 // and break the runtime Worker. It lives behind the Node-only
 // `@memofs/core/node-fs` subpath instead.

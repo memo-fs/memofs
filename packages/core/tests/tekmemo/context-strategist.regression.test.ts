@@ -1,5 +1,5 @@
 /**
- * Regression harness for the `tekmemo.context` retrieval strategist (ADR 0009,
+ * Regression harness for the `memofs.context` retrieval strategist (ADR 0009,
  * Component 2 / Q23).
  *
  * Before replacing the flat `buildContext()` assembler with the 4-stage
@@ -18,17 +18,17 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Tekmemo } from "../../src/index";
+import { MemoFS } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
-import { createTempTekMemoDir } from "../../src/testing/temp-dir";
+import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 /**
  * The shared fixture corpus. Every query in the harness runs against a fresh
- * TekMemo instance seeded with exactly these memories, so recall is
+ * MemoFS instance seeded with exactly these memories, so recall is
  * deterministic and isolated.
  */
 interface Fixture {
-	readonly kind: ConstructorParameters<typeof Tekmemo>[0] extends infer C
+	readonly kind: ConstructorParameters<typeof MemoFS>[0] extends infer C
 		? C extends { mode?: infer M }
 			? M
 			: never
@@ -53,7 +53,7 @@ const FIXTURE: Fixture = {
 	core: [
 		"# Core Memory",
 		"",
-		"TekMemo is a file-first long-term memory system for coding agents.",
+		"MemoFS is a file-first long-term memory system for coding agents.",
 		"All formatting goes through Biome — prettier has been removed.",
 		"The project is a pnpm + turborepo monorepo.",
 	].join("\n"),
@@ -75,7 +75,7 @@ const FIXTURE: Fixture = {
 		},
 		{
 			title: "Test runner",
-			content: "Vitest is the test runner for the tekmemo package.",
+			content: "Vitest is the test runner for the memofs package.",
 			kind: "reference",
 		},
 		// Supersession case: the staleness filter (Q24) must keep JWT out of
@@ -165,11 +165,11 @@ interface BaselineEntry {
 }
 
 async function seedMemo(): Promise<{
-	memo: Tekmemo;
+	memo: MemoFS;
 	cleanup: () => Promise<void>;
 }> {
-	const { rootDir, cleanup } = await createTempTekMemoDir();
-	const memo = new Tekmemo({
+	const { rootDir, cleanup } = await createTempMemoFsDir();
+	const memo = new MemoFS({
 		store: createNodeFsMemoryStore({
 			rootDir,
 			createRoot: true,
@@ -195,7 +195,7 @@ async function seedMemo(): Promise<{
  * captures the metrics the strategist must not regress.
  */
 async function captureEntry(
-	memo: Tekmemo,
+	memo: MemoFS,
 	queryCase: QueryCase,
 ): Promise<BaselineEntry> {
 	const result = await memo.context({ query: queryCase.query, limit: 10 });
@@ -224,7 +224,7 @@ async function captureEntry(
 	};
 }
 
-describe("tekmemo.context strategist — regression harness", () => {
+describe("memofs.context strategist — regression harness", () => {
 	it("directive leads, core is present, and recall is ordered after core", async () => {
 		const { memo, cleanup } = await seedMemo();
 		try {
@@ -385,7 +385,7 @@ describe("tekmemo.context strategist — regression harness", () => {
 			expect(result.expandable).toBeDefined();
 			expect(result.expandable?.length).toBeGreaterThan(0);
 			// The affordance instruction is copy-pasteable in the rendered text.
-			expect(result.text).toMatch(/expand.*tekmemo\.context/);
+			expect(result.text).toMatch(/expand.*memofs\.context/);
 		} finally {
 			await cleanup();
 		}
@@ -399,7 +399,7 @@ describe("tekmemo.context strategist — regression harness", () => {
 				detail: "full",
 			});
 			expect(result.expandable).toBeUndefined();
-			expect(result.text).not.toMatch(/expand.*tekmemo\.context/);
+			expect(result.text).not.toMatch(/expand.*memofs\.context/);
 		} finally {
 			await cleanup();
 		}

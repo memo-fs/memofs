@@ -5,7 +5,7 @@ import { defineMemoryStoreContractTests } from "@memofs/testing/contracts";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 
 async function createStore() {
-	const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "tekmemo-fs-"));
+	const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "memofs-fs-"));
 	return createNodeFsMemoryStore({ rootDir });
 }
 
