@@ -19,7 +19,7 @@ test.describe("cloud e2e: health + readiness", () => {
 		const res = await request.get("/v1/health");
 		expect(res.ok()).toBeTruthy();
 		const body = await res.json();
-		expect(body.data).toMatchObject({ ok: true, name: "tekmemo-cloud" });
+		expect(body.data).toMatchObject({ ok: true, name: "memofs-cloud" });
 	});
 
 	test("GET /v1/readiness reports ok with the R2 binding live", async ({

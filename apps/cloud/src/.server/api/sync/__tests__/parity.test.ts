@@ -1,5 +1,5 @@
-import type { MemofsCloudFetch } from "@memofs/core/cloud-client";
-import { createMemofsCloudClient } from "@memofs/core/cloud-client";
+import type { MemoFsCloudFetch } from "@memofs/core/cloud-client";
+import { createMemoFsCloudClient } from "@memofs/core/cloud-client";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createTestDb } from "../../../../../tests/utils/db";
@@ -106,9 +106,9 @@ function server() {
  * real `Response`, which already satisfies the `{ ok, status, headers, text }`
  * shape the transport reads — so no marshaling is needed on the way back.
  */
-function fetchIntoServer(): MemofsCloudFetch {
+function fetchIntoServer(): MemoFsCloudFetch {
 	const app = server();
-	return async (url, init) => {
+	return async (url: URL | RequestInfo, init?: RequestInit) => {
 		const request = new Request(String(url), init);
 		return (await app.fetch(request, testEnv())) as unknown as Response;
 	};
@@ -116,7 +116,7 @@ function fetchIntoServer(): MemofsCloudFetch {
 
 /** Builds the real published client wired to the in-process server. */
 function client() {
-	return createMemofsCloudClient({
+	return createMemoFsCloudClient({
 		baseUrl: BASE_URL,
 		apiKey: RAW_KEY,
 		defaultProjectId: PROJECT_ID,
@@ -148,7 +148,7 @@ describe("client ↔ server wire parity (round-trip)", () => {
 	it("health is anonymous and unwraps the { data, meta } envelope", async () => {
 		await seedOwner();
 		// No API key on this client — health must not require one.
-		const anon = createMemofsCloudClient({
+		const anon = createMemoFsCloudClient({
 			baseUrl: BASE_URL,
 			fetch: fetchIntoServer(),
 			requireApiKey: false,
@@ -217,7 +217,7 @@ describe("client ↔ server wire parity (round-trip)", () => {
 		const pullResult = await c.sync.pull({});
 		expect(pullResult.cursor).toBe("1");
 		expect(pullResult.files).toHaveLength(2);
-		const pulledPaths = pullResult.files.map((f) => f.path).sort();
+		const pulledPaths = pullResult.files.map((f: { path: string }) => f.path).sort();
 		expect(pulledPaths).toEqual([".memofs/core.md", ".memofs/notes.md"]);
 		for (const file of pullResult.files) {
 			expect(file.presignedGetUrl).toContain(
@@ -337,7 +337,7 @@ describe("client ↔ server wire parity (round-trip)", () => {
 		await seedOwner();
 		// Client with no key — the transport still sends the request (requireApiKey
 		// defaults true, but the error class is what we're asserting at the wire).
-		const unauthed = createMemofsCloudClient({
+		const unauthed = createMemoFsCloudClient({
 			baseUrl: BASE_URL,
 			defaultProjectId: PROJECT_ID,
 			fetch: fetchIntoServer(),

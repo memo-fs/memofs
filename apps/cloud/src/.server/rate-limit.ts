@@ -69,6 +69,9 @@ export async function consumeMagicLinkToken(
 
 	try {
 		// Cloudflare Rate Limiting binding call.
+		if (!cfEnv.SESSION_RATE_LIMIT) {
+			return { ok: true };
+		}
 		const limitResult = await cfEnv.SESSION_RATE_LIMIT.limit({ key: ip });
 		if (!limitResult.success) {
 			// Native rate limit hit, back off for 60 seconds.

@@ -19,12 +19,12 @@ import { describe, expect, it } from "vitest";
 
 describe("cloud-workers integration: health + readiness", () => {
 	it("GET /v1/health returns ok against the real Worker entry", async () => {
-		const res = await exports.default.fetch("http://tekmemo.test/v1/health");
+		const res = await exports.default.fetch("http://memofs.test/v1/health");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as {
 			data: { ok: boolean; name: string };
 		};
-		expect(body.data).toMatchObject({ ok: true, name: "tekmemo-cloud" });
+		expect(body.data).toMatchObject({ ok: true, name: "memofs-cloud" });
 	});
 
 	it("GET /v1/readiness reports ok because the REAL R2 binding is live", async () => {
@@ -34,7 +34,7 @@ describe("cloud-workers integration: health + readiness", () => {
 		// key returns `null` too — so readiness must ALSO be `ok: true`. If the
 		// fake ever diverges from real R2 here, this test fails.
 		expect(env.BLOBS).toBeDefined();
-		const res = await exports.default.fetch("http://tekmemo.test/v1/readiness");
+		const res = await exports.default.fetch("http://memofs.test/v1/readiness");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as {
 			data: { ok: boolean; warnings?: string[] };
@@ -48,7 +48,7 @@ describe("cloud-workers integration: health + readiness", () => {
 		// fake's `get` slices out of the stored Uint8Array's buffer; real R2
 		// streams a fresh `arrayBuffer()`. Both must yield the stored content.
 		const key = "integration-roundtrip";
-		const payload = new TextEncoder().encode("tekmemo-workers-r2");
+		const payload = new TextEncoder().encode("memofs-workers-r2");
 		await env.BLOBS.put(key, payload);
 		const obj = await env.BLOBS.get(key);
 		// `get` returns `R2ObjectBody | null`; narrow explicitly so the read is
@@ -57,7 +57,7 @@ describe("cloud-workers integration: health + readiness", () => {
 			throw new Error("expected R2 round-trip object to exist");
 		}
 		const bytes = new Uint8Array(await obj.arrayBuffer());
-		expect(new TextDecoder().decode(bytes)).toBe("tekmemo-workers-r2");
+		expect(new TextDecoder().decode(bytes)).toBe("memofs-workers-r2");
 		await env.BLOBS.delete(key);
 	});
 });

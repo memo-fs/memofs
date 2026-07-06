@@ -69,7 +69,7 @@ export interface CreatedApiKey {
  * so the caller can surface it exactly once. The raw key is never persisted and
  * never recoverable — losing it means revoking and re-creating.
  *
- * @param salt  `TEKMEMO_API_KEY_SALT` (injected, not read from env, for testing).
+ * @param salt  `MEMOFS_API_KEY_SALT` (injected, not read from env, for testing).
  */
 export async function createApiKey(
 	db: Database,

@@ -58,7 +58,7 @@ export const accounts = sqliteTable("accounts", {
  * the raw key is shown ONCE at provisioning and never persisted. We store a
  * salted sha256 of the raw key for lookup (ADR 0006 §entitlement model).
  *
- * The salt comes from the `TEKMEMO_API_KEY_SALT` Worker binding; `keyHash`
+ * The salt comes from the `MEMOFS_API_KEY_SALT` Worker binding; `keyHash`
  * here is `sha256(salt + ":" + rawKey)`.
  */
 export const apiKeys = sqliteTable("api_keys", {
@@ -189,7 +189,7 @@ export const syncCursors = sqliteTable("sync_cursors", {
 /**
  * Hosted-runtime audit trail — one row per runtime event on a project (SC10).
  *
- * The cloud's hosted-memory tier (v1.1) runs the `Tekmemo` engine over a
+ * The cloud's hosted-memory tier (v1.1) runs the `MemoFS` engine over a
  * project's R2-resident `.memofs/` files. That engine mutates memory
  * (consolidation retires graph nodes, agents write facts, core memory is
  * updated), and every mutation is a moment the user may want to audit. This

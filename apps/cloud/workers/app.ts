@@ -1,5 +1,5 @@
 /**
- * TekMemo Cloud Worker entry.
+ * MemoFS Cloud Worker entry.
  *
  * One Cloudflare Worker serves three concerns (ADR 0005):
  *   1. the JSON API at `/v1/*` (Hono) — health, readiness, sync;

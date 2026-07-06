@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { type ErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import { RootErrorUI } from "~/components/error-boundary";
 import type { Route } from "./+types/root";
 import appStyles from "./styles/app.css?url";
@@ -32,5 +32,5 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-	return <RootErrorUI error={error} />;
+	return <RootErrorUI error={error as ErrorResponse | Error} />;
 }

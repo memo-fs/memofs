@@ -2,7 +2,7 @@
  * In-process hosted runtime client for the single Cloud Worker.
  *
  * The Cloud app no longer delegates hosted-memory reads to a second Worker.
- * Instead, each project resolves to a cached `Tekmemo` instance assembled from
+ * Instead, each project resolves to a cached `MemoFS` instance assembled from
  * the same provider-neutral hosted runtime factory used by the OSS server.
  */
 
@@ -19,7 +19,7 @@ import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
 import {
 	createFsRecallStore,
 	RemoteBlobMemoryStore,
-	type Tekmemo,
+	type MemoFS,
 } from "@memofs/core";
 import { createHostedRuntime } from "@memofs/server";
 import { CLOUD_NAME, cloudVersion } from "./api/health";
@@ -27,25 +27,25 @@ import { logMemoryEvent } from "./queries";
 
 /** The read-method surface this client exposes today (slice 2). */
 export interface RuntimeClient {
-	/** Semantic recall (`Tekmemo.recall`). */
+	/** Semantic recall (`MemoFS.recall`). */
 	recall(
 		projectId: string,
 		query: string,
 		options?: { limit?: number },
 	): Promise<unknown>;
-	/** Task briefing / progressive-disclosure context (`Tekmemo.context`). */
+	/** Task briefing / progressive-disclosure context (`MemoFS.context`). */
 	context(
 		projectId: string,
 		task: string,
 		options?: { detail?: "compact" | "full" },
 	): Promise<unknown>;
-	/** Read the core-memory document (`Tekmemo.core.read`). */
+	/** Read the core-memory document (`MemoFS.core.read`). */
 	readCore(projectId: string): Promise<string>;
-	/** Read the notes document (`Tekmemo.notes.read`). */
+	/** Read the notes document (`MemoFS.notes.read`). */
 	readNotes(projectId: string): Promise<string>;
-	/** List recent memory events (`Tekmemo.listRecentMemories`). */
+	/** List recent memory events (`MemoFS.listRecentMemories`). */
 	listRecent(projectId: string, options?: { limit?: number }): Promise<unknown>;
-	/** Run a memory consolidation pass (`Tekmemo.consolidate`). */
+	/** Run a memory consolidation pass (`MemoFS.consolidate`). */
 	consolidate(
 		projectId: string,
 		options?: { apply?: boolean },
@@ -55,7 +55,7 @@ export interface RuntimeClient {
 /** Factory used by tests to supply a fake runtime without cloud providers. */
 export type RuntimeFactory = (
 	projectId: string,
-) => Tekmemo | Promise<Tekmemo>;
+) => MemoFS | Promise<MemoFS>;
 
 /** Optional seams for {@link createRuntimeClient}. */
 export interface RuntimeClientOptions {
@@ -65,15 +65,15 @@ export interface RuntimeClientOptions {
 const VOYAGE_EMBED_MODEL = "voyage-3-large";
 const VOYAGE_RERANK_MODEL = "rerank-2";
 
-/** Builds a hosted `Tekmemo` runtime for one project in the single Worker. */
-function createCloudRuntime(projectId: string): Tekmemo {
+/** Builds a hosted `MemoFS` runtime for one project in the single Worker. */
+function createCloudRuntime(projectId: string): MemoFS {
 	const client = createClient({
 		url: env.DATABASE_URL,
 		authToken: env.DATABASE_AUTH_TOKEN,
 	});
 
 	const store = new RemoteBlobMemoryStore({
-		blobClient: createR2BlobClient({ binding: env.BLOBS }),
+		blobClient: createR2BlobClient({ binding: env.BLOBS! }),
 		metadata: createTursoMetadataStore({
 			client,
 			projectId,
@@ -115,9 +115,9 @@ export function createRuntimeClient(
 	options: RuntimeClientOptions = {},
 ): RuntimeClient {
 	const createRuntime = options.createRuntime ?? createCloudRuntime;
-	const clientRuntimeCache = new Map<string, Promise<Tekmemo>>();
+	const clientRuntimeCache = new Map<string, Promise<MemoFS>>();
 
-	function runtime(projectId: string): Promise<Tekmemo> {
+	function runtime(projectId: string): Promise<MemoFS> {
 		const cached = clientRuntimeCache.get(projectId);
 		if (cached) return cached;
 		const created = Promise.resolve(createRuntime(projectId));

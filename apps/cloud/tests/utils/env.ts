@@ -127,7 +127,7 @@ export function createTestEnv(
 		R2_S3_ACCESS_KEY_ID: "AKIA_TEST_KEY_ID",
 		R2_S3_SECRET_ACCESS_KEY: "test-secret-key-with-enough-length",
 		R2_S3_ENDPOINT: "testacct.r2.cloudflarestorage.com",
-		R2_BUCKET_NAME: "tekmemo-blobs",
+		R2_BUCKET_NAME: "memofs-blobs",
 		BETTER_AUTH_SECRET: "test-better-auth-secret",
 		BETTER_AUTH_URL: "http://localhost:5173",
 		SESSION_SECRET: "test-session-secret",

@@ -20,9 +20,9 @@
 
 import type {
 	JsonValue,
-	MemofsCloudErrorEnvelope,
-	MemofsCloudMeta,
-	MemofsCloudSuccessEnvelope,
+	MemoFSCloudErrorEnvelope,
+	MemoFSCloudMeta,
+	MemoFsCloudSuccessEnvelope,
 } from "@memofs/core/cloud-client";
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
@@ -35,8 +35,8 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 export function successBody<T>(
 	c: Context,
 	data: T,
-	extraMeta?: MemofsCloudMeta,
-): MemofsCloudSuccessEnvelope<T> {
+	extraMeta?: MemoFSCloudMeta,
+): MemoFsCloudSuccessEnvelope<T> {
 	const requestId = c.get("requestId");
 	return {
 		data,
@@ -54,8 +54,8 @@ export function errorBody(
 	code: string,
 	message: string,
 	details?: JsonValue,
-	extraMeta?: MemofsCloudMeta,
-): MemofsCloudErrorEnvelope {
+	extraMeta?: MemoFSCloudMeta,
+): MemoFSCloudErrorEnvelope {
 	const requestId = c.get("requestId");
 	return {
 		error: { code, message, details },

@@ -31,7 +31,7 @@ const SQLD_DIR = resolve(here, "..", ".sqld");
 const DB_PATH = resolve(SQLD_DIR, "data.sqld");
 const LOG_PATH = resolve(SQLD_DIR, "sqld.log");
 const HOST = "127.0.0.1";
-const PORT = Number(process.env.TEKMEMO_DEV_DB_PORT ?? 8080);
+const PORT = Number(process.env.MEMOFS_DEV_DB_PORT ?? 8080);
 const URL = `http://${HOST}:${PORT}`;
 
 /** Fail loud if `sqld` isn't installed — no silent degradation. */
@@ -114,7 +114,7 @@ async function main() {
 	const INNER = 57;
 	const line = (content) => `│  ${content.padEnd(INNER - 2)}│`;
 	console.log(`╭${"─".repeat(INNER)}╮`);
-	console.log(line("TekMemo dev libSQL (sqld) is running"));
+	console.log(line("MemoFS dev libSQL (sqld) is running"));
 	console.log(line(""));
 	console.log(line(`URL:   ${URL}`));
 	console.log(line("DB:    .sqld/data.sqld  (gitignored, persists locally)"));

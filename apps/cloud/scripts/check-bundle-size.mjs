@@ -9,7 +9,7 @@
  * exceeds the cap. Run before deploy / in CI.
  *
  * The runtime Worker (`wrangler.runtime.jsonc`) is the critical proof — it
- * carries the `Tekmemo` engine + the R2/Voyage/Workers AI adapters, the bundle
+ * carries the `MemoFS` engine + the R2/Voyage/Workers AI adapters, the bundle
  * that previously pushed the single Worker past 3 MB. The commercial Worker
  * (`wrangler.jsonc`) needs its built assets (`build/client`) present, so it is
  * checked after `pnpm build`; when assets are absent the script skips it with
@@ -67,12 +67,12 @@ function fmt(bytes) {
 function main() {
 	const checks = [
 		{
-			name: "runtime (tekmemo-cloud-runtime)",
+			name: "runtime (memofs-cloud-runtime)",
 			config: "wrangler.runtime.jsonc",
 			requiresAssets: false,
 		},
 		{
-			name: "commercial (tekmemo-cloud)",
+			name: "commercial (memofs-cloud)",
 			config: "wrangler.jsonc",
 			requiresAssets: true,
 		},

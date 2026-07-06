@@ -61,7 +61,7 @@ const STATEMENT_BREAK = "--> statement-breakpoint";
  */
 export async function createTestDb(): Promise<Database> {
 	// Unique temp dir per DB so concurrent tests never collide on one file.
-	const dir = mkdtempSync(join(tmpdir(), "tekmemo-test-"));
+	const dir = mkdtempSync(join(tmpdir(), "memofs-test-"));
 	const url = `file:${join(dir, "test.db")}`;
 	const client = createClient({ url });
 	await applyMigrations(client);

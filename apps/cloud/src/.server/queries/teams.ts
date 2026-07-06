@@ -413,7 +413,7 @@ export async function resolveSeatsUsed(
  *
  * @param db         per-request drizzle client.
  * @param rawToken   the raw token from the accept link.
- * @param salt       `TEKMEMO_API_KEY_SALT` (injected, not read from env).
+ * @param salt       `MEMOFS_API_KEY_SALT` (injected, not read from env).
  */
 export async function getInvitationByToken(
 	db: Database,
@@ -446,10 +446,10 @@ export async function getInvitationByToken(
 /**
  * Salted sha256 of an accept token — mirrors the API-key discipline
  * (`sha256(salt + ":" + token)`). The raw token appears only in the email link;
- * the hash is the only thing persisted. Re-uses the same `TEKMEMO_API_KEY_SALT`
+ * the hash is the only thing persisted. Re-uses the same `MEMOFS_API_KEY_SALT`
  * binding, so there is one salt to rotate.
  *
- * @param salt  `TEKMEMO_API_KEY_SALT` (injected, not read from env).
+ * @param salt  `MEMOFS_API_KEY_SALT` (injected, not read from env).
  */
 export async function hashToken(
 	rawToken: string,
@@ -613,7 +613,7 @@ export async function createInvitation(
  * @param rawToken    the token from the accept link.
  * @param accepterId  the accepting account (already auth-resolved by the route).
  * @param accepterEmail  the accepter's `user.email`, checked against the invite.
- * @param salt        `TEKMEMO_API_KEY_SALT`.
+ * @param salt        `MEMOFS_API_KEY_SALT`.
  */
 export async function acceptInvitation(
 	db: Database,
