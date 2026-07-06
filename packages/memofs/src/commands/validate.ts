@@ -6,14 +6,14 @@
 
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	TEKMEMO_PATHS,
+	MEMOFS_PATHS,
 } from "../protocol/constants";
 import { parseManifest } from "../protocol/manifest";
 import {
@@ -28,9 +28,9 @@ import {
  */
 export interface ValidateCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -90,7 +90,7 @@ export async function runValidateCommand(
 
 	const manifestContent = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.manifest,
+		MEMOFS_PATHS.manifest,
 	);
 	if (manifestContent === undefined) {
 		issues.push({
@@ -119,10 +119,10 @@ export async function runValidateCommand(
 	}
 
 	const strictSchemas: Record<string, z.ZodSchema> = {
-		[TEKMEMO_PATHS.memoryEvents]: MemoryEventSchema,
-		[TEKMEMO_PATHS.conversations]: ConversationEntrySchema,
-		[TEKMEMO_PATHS.chunks]: MemoryChunkSchema,
-		[TEKMEMO_PATHS.snapshots]: SnapshotEntrySchema,
+		[MEMOFS_PATHS.memoryEvents]: MemoryEventSchema,
+		[MEMOFS_PATHS.conversations]: ConversationEntrySchema,
+		[MEMOFS_PATHS.chunks]: MemoryChunkSchema,
+		[MEMOFS_PATHS.snapshots]: SnapshotEntrySchema,
 	};
 
 	for (const [file, schema] of Object.entries(strictSchemas)) {

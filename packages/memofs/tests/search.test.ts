@@ -1,19 +1,19 @@
-import { TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 describe("search", () => {
 	it("finds matches in memory files", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -23,11 +23,11 @@ describe("search", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nImportant fact here.\n",
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["search", "--root", temp.rootDir, "Important"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -39,12 +39,12 @@ describe("search", () => {
 	});
 
 	it("reports no matches when query is not found", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["search", "--root", temp.rootDir, "nonexistent"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -55,12 +55,12 @@ describe("search", () => {
 	});
 
 	it("supports regex mode", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -70,11 +70,11 @@ describe("search", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.notes,
+				MEMOFS_PATHS.memory.notes,
 				"# Notes\n\nABC-123\nXYZ-456\n",
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["search", "--root", temp.rootDir, "--regex", "[A-Z]+-\\d+"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -85,12 +85,12 @@ describe("search", () => {
 	});
 
 	it("rejects invalid regex", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["search", "--root", temp.rootDir, "--regex", "[invalid"],
 			});
 			expect(result.exitCode).toBe(1);
@@ -101,12 +101,12 @@ describe("search", () => {
 	});
 
 	it("supports JSON output", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -116,11 +116,11 @@ describe("search", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nhello world\n",
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["search", "--root", temp.rootDir, "--json", "hello"],
 			});
 			expect(result.exitCode).toBe(0);

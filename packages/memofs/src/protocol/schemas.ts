@@ -11,7 +11,7 @@ const IsoDateSchema = z.string().datetime();
 const NonEmptyStringSchema = z.string().min(1);
 
 /**
- * Zod validation schema for the TekMemo manifest.json file.
+ * Zod validation schema for the MemoFS manifest.json file.
  */
 export const ManifestSchema = z.object({
 	version: NonEmptyStringSchema,

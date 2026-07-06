@@ -5,7 +5,7 @@
  */
 
 import {
-	CANONICAL_TEKMEMO_FILES,
+	CANONICAL_MEMOFS_FILES,
 	CHUNKS_INDEX_PATH,
 	CONVERSATIONS_MEMORY_PATH,
 	CORE_MEMORY_PATH,
@@ -15,17 +15,17 @@ import {
 	MEMORY_EVENTS_PATH,
 	NOTES_MEMORY_PATH,
 	SNAPSHOTS_INDEX_PATH,
-	TEKMEMO_DIR,
+	MEMOFS_DIR,
 } from "@memofs/core";
 
-export { TEKMEMO_DIR };
+export { MEMOFS_DIR };
 
 /**
  * Flat CLI path map kept for command ergonomics.
  * The values intentionally come from `@memofs/core`, so the CLI cannot drift from
  * the canonical protocol owned by the core package.
  */
-export const TEKMEMO_PATHS = {
+export const MEMOFS_PATHS = {
 	manifest: MANIFEST_PATH,
 	coreMemory: CORE_MEMORY_PATH,
 	notesMemory: NOTES_MEMORY_PATH,
@@ -35,24 +35,24 @@ export const TEKMEMO_PATHS = {
 	graphNodes: GRAPH_NODES_PATH,
 	graphEdges: GRAPH_EDGES_PATH,
 	snapshots: SNAPSHOTS_INDEX_PATH,
-	snapshotsDir: `${TEKMEMO_DIR}/snapshots`,
-	tmpDir: `${TEKMEMO_DIR}/tmp`,
+	snapshotsDir: `${MEMOFS_DIR}/snapshots`,
+	tmpDir: `${MEMOFS_DIR}/tmp`,
 } as const;
 
 /**
- * Canonical array of required files in a TekMemo workspace.
+ * Canonical array of required files in a MemoFS workspace.
  */
-export const REQUIRED_FILES = CANONICAL_TEKMEMO_FILES;
+export const REQUIRED_FILES = CANONICAL_MEMOFS_FILES;
 
 /**
- * Array of paths that must be initialized as directories inside a TekMemo workspace.
+ * Array of paths that must be initialized as directories inside a MemoFS workspace.
  */
 export const REQUIRED_DIRS = [
-	TEKMEMO_DIR,
-	`${TEKMEMO_DIR}/memory`,
-	`${TEKMEMO_DIR}/events`,
-	`${TEKMEMO_DIR}/indexes`,
-	`${TEKMEMO_DIR}/graph`,
-	`${TEKMEMO_DIR}/snapshots`,
-	`${TEKMEMO_DIR}/tmp`,
+	MEMOFS_DIR,
+	`${MEMOFS_DIR}/memory`,
+	`${MEMOFS_DIR}/events`,
+	`${MEMOFS_DIR}/indexes`,
+	`${MEMOFS_DIR}/graph`,
+	`${MEMOFS_DIR}/snapshots`,
+	`${MEMOFS_DIR}/tmp`,
 ] as const;

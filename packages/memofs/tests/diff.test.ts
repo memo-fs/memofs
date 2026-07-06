@@ -1,31 +1,31 @@
-import { TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 /**
- * Releases the Q28 advisory lock held by a direct Tekmemo so a subsequent CLI
+ * Releases the Q28 advisory lock held by a direct MemoFS so a subsequent CLI
  * write call (e.g. `snapshot`) on the same root can acquire it. The local
- * single-writer contract (Q28) forbids two live writers on one `.tekmemo/`
+ * single-writer contract (Q28) forbids two live writers on one `.memofs/`
  * root, so a direct memo must be disposed before interleaving CLI writes.
  */
-async function releaseLock(memo: Tekmemo): Promise<void> {
+async function releaseLock(memo: MemoFS): Promise<void> {
 	const store = memo.store as { dispose?: () => Promise<void> };
 	await store.dispose?.();
 }
 
 describe("diff", () => {
 	it("compares two snapshots", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -35,15 +35,15 @@ describe("diff", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nFirst version.\n",
 			);
 			await releaseLock(memo);
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v1"],
 			});
 
-			const memo2 = new Tekmemo({
+			const memo2 = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -53,15 +53,15 @@ describe("diff", () => {
 				autoBootstrap: false,
 			});
 			await memo2.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nSecond version.\n",
 			);
 			await releaseLock(memo2);
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "v2"],
 			});
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["diff", "--root", temp.rootDir, "v1", "v2"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -73,19 +73,19 @@ describe("diff", () => {
 	});
 
 	it("reports identical snapshots via JSON", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "snap-a"],
 			});
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "snap-b"],
 			});
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["diff", "--root", temp.rootDir, "--json", "snap-a", "snap-b"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -98,13 +98,13 @@ describe("diff", () => {
 	});
 
 	it("shows changed files in JSON output", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -114,15 +114,15 @@ describe("diff", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nAlpha.\n",
 			);
 			await releaseLock(memo);
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "alpha"],
 			});
 
-			const memo2 = new Tekmemo({
+			const memo2 = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -132,15 +132,15 @@ describe("diff", () => {
 				autoBootstrap: false,
 			});
 			await memo2.store.write(
-				TEKMEMO_PATHS.memory.core,
+				MEMOFS_PATHS.memory.core,
 				"# Core Memory\n\nBeta.\n",
 			);
 			await releaseLock(memo2);
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "beta"],
 			});
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["diff", "--root", temp.rootDir, "--json", "alpha", "beta"],
 			});
 			expect(result.exitCode).toBe(0);
@@ -152,12 +152,12 @@ describe("diff", () => {
 	});
 
 	it("errors when snapshot label is not found", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"diff",
 					"--root",
@@ -173,9 +173,9 @@ describe("diff", () => {
 	});
 
 	it("errors when no snapshots exist", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["diff", "--root", temp.rootDir, "a", "b"],
 			});
 			expect(result.exitCode).toBe(1);

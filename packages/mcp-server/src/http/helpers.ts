@@ -1,6 +1,6 @@
 import type { JsonRpcResponse } from "../protocol/json-rpc";
 import { SUPPORTED_PROTOCOL_VERSIONS } from "../schema";
-import type { TekMemoMcpHttpOptions } from "./index";
+import type { MemoFSMcpHttpOptions } from "./index";
 
 export const JSON_CONTENT_TYPE = "application/json";
 export const EVENT_STREAM_CONTENT_TYPE = "text/event-stream";
@@ -83,7 +83,7 @@ export function jsonResponse(
 	body: JsonRpcResponse | JsonRpcResponse[],
 	status: number,
 	request: Request,
-	options: TekMemoMcpHttpOptions,
+	options: MemoFSMcpHttpOptions,
 ): Response {
 	return new Response(JSON.stringify(body), {
 		status,
@@ -96,7 +96,7 @@ export function jsonResponse(
 export function emptyResponse(
 	status: number,
 	request: Request,
-	options: TekMemoMcpHttpOptions,
+	options: MemoFSMcpHttpOptions,
 	headers: HeadersInit = {},
 ): Response {
 	return new Response(null, {
@@ -108,7 +108,7 @@ export function emptyResponse(
 export function withCors(
 	response: Response,
 	request: Request,
-	options: TekMemoMcpHttpOptions,
+	options: MemoFSMcpHttpOptions,
 ): Response {
 	const headers = responseHeaders(
 		request,

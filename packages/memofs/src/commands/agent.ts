@@ -6,25 +6,25 @@
 
 import {
 	type AgentfsLikeClient,
-	createTekMemoAgentSession,
+	createMemoFsAgentSession,
 	extractSessionMemory,
-	type Tekmemo,
+	type MemoFS,
 } from "@memofs/core";
 import { appendText, exists, readText, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 
-const LATEST_AGENT_SESSION_PATH = `${TEKMEMO_PATHS.tmpDir}/agent-sessions/latest.json`;
+const LATEST_AGENT_SESSION_PATH = `${MEMOFS_PATHS.tmpDir}/agent-sessions/latest.json`;
 
 /**
  * Shared options for local AgentFS session commands.
  */
 interface AgentCommandBaseOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -91,7 +91,7 @@ export async function runAgentStartCommand(
 	options: AgentStartCommandOptions,
 ): Promise<number> {
 	const client = createLocalAgentfsClient(options.memo);
-	const session = createTekMemoAgentSession({
+	const session = createMemoFsAgentSession({
 		client,
 		memory: options.memo.store,
 		task: options.task,
@@ -120,7 +120,7 @@ export async function runAgentStartCommand(
 		return 0;
 	}
 
-	options.output.success(`Started TekMemo agent session ${session.sessionId}`);
+	options.output.success(`Started MemoFS agent session ${session.sessionId}`);
 	options.output.write(formatAgentInstructions(pointer));
 	return 0;
 }
@@ -166,7 +166,7 @@ export async function runAgentExtractCommand(
 	}
 	options.output.write(
 		[
-			`# TekMemo Agent Session ${pointer.sessionId}`,
+			`# MemoFS Agent Session ${pointer.sessionId}`,
 			"",
 			"## Summary",
 			extracted.summary || "No summary written.",
@@ -192,7 +192,7 @@ export async function runAgentCompleteCommand(
 ): Promise<number> {
 	const pointer = await readSessionPointer(options.memo, options.session);
 	const client = createLocalAgentfsClient(options.memo);
-	const session = createTekMemoAgentSession({
+	const session = createMemoFsAgentSession({
 		client,
 		memory: options.memo.store,
 		task: pointer.task,
@@ -213,7 +213,7 @@ export async function runAgentCompleteCommand(
 	}
 
 	options.output.success(
-		`Completed TekMemo agent session ${pointer.sessionId}`,
+		`Completed MemoFS agent session ${pointer.sessionId}`,
 	);
 	if (result.durableMemoryWritten) {
 		options.output.success("Persisted extracted durable memory to notes.");
@@ -227,10 +227,10 @@ export async function runAgentCompleteCommand(
 /**
  * Adapts the CLI filesystem to the AgentFS-like client contract.
  *
- * @param memo - Tekmemo client instance.
+ * @param memo - MemoFS client instance.
  * @returns AgentFS-like client.
  */
-function createLocalAgentfsClient(memo: Tekmemo): AgentfsLikeClient {
+function createLocalAgentfsClient(memo: MemoFS): AgentfsLikeClient {
 	return {
 		readText(path: string) {
 			return readText(memo.store, toRelativeAgentPath(path));
@@ -263,14 +263,14 @@ function toRelativeAgentPath(path: string): string {
 }
 
 /**
- * Reads a session pointer from `.tekmemo/tmp`.
+ * Reads a session pointer from `.memofs/tmp`.
  *
- * @param memo - Tekmemo client instance.
+ * @param memo - MemoFS client instance.
  * @param session - Session ID or latest.
  * @returns Session pointer.
  */
 async function readSessionPointer(
-	memo: Tekmemo,
+	memo: MemoFS,
 	session: string | undefined,
 ): Promise<AgentSessionPointer> {
 	const latest = await readText(memo.store, LATEST_AGENT_SESSION_PATH);
@@ -323,5 +323,5 @@ interface AgentSessionPointer {
 	root: string;
 	task: string;
 	createdAt: string;
-	paths: ReturnType<typeof createTekMemoAgentSession>["paths"];
+	paths: ReturnType<typeof createMemoFsAgentSession>["paths"];
 }

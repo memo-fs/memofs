@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/server"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/server/",
+	"homepage": "https://docs.memofs.dev/packages/server/",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"
 	},

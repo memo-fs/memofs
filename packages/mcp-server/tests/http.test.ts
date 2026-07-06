@@ -1,16 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-	createHonoTekMemoMcpHandler,
-	createTekMemoMcpFetchHandler,
-	handleTekMemoMcpRequest,
+	createHonoMemoFSMcpHandler,
+	createMemoFSMcpFetchHandler,
+	handleMemoFSMcpRequest,
 } from "../src/http/index";
 import {
-	createTekMemoMcpRuntimeFromConfig,
+	createMemoFSMcpRuntimeFromConfig,
 	type JsonRpcResponse,
 } from "../src/index";
 
-const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
+const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
 const auth = { requireAuth: true, bearerToken: "test-token" };
 
 /**
@@ -52,7 +52,7 @@ async function jsonRpc(response: Response): Promise<JsonRpcResponse> {
 
 describe("MCP HTTP adapter", () => {
 	it("handles initialize over stateless Streamable HTTP", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				id: 1,
@@ -74,7 +74,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("lists tools through the HTTP adapter", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				id: "tools",
@@ -91,15 +91,15 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("calls read tools through the HTTP adapter", async () => {
-		// tekmemo.health was demoted to a runtime method;
-		// exercise the HTTP read dispatch through tekmemo.context, a surviving
+		// memofs.health was demoted to a runtime method;
+		// exercise the HTTP read dispatch through memofs.context, a surviving
 		// read verb.
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				id: "context",
 				method: "tools/call",
-				params: { name: "tekmemo.context", arguments: { query: "auth" } },
+				params: { name: "memofs.context", arguments: { query: "auth" } },
 			}),
 			{ runtime, auth },
 		);
@@ -114,7 +114,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("returns 202 for notifications", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				method: "notifications/initialized",
@@ -128,7 +128,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("returns a parse error for invalid JSON", async () => {
-		const response = await handleTekMemoMcpRequest(mcpRequest("{bad"), {
+		const response = await handleMemoFSMcpRequest(mcpRequest("{bad"), {
 			runtime,
 			auth,
 		});
@@ -139,7 +139,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("returns a JSON-RPC error for unsupported methods", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				id: "bad",
@@ -155,7 +155,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("rejects disallowed browser origins", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest(
 				{ jsonrpc: "2.0", id: 1, method: "ping", params: {} },
 				{ headers: { Origin: "https://evil.example.com" } },
@@ -167,7 +167,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("rejects unsupported MCP protocol versions", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest(
 				{ jsonrpc: "2.0", id: 1, method: "ping", params: {} },
 				{ headers: { "MCP-Protocol-Version": "1999-01-01" } },
@@ -179,13 +179,13 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("blocks write tools by default", async () => {
-		const response = await handleTekMemoMcpRequest(
+		const response = await handleMemoFSMcpRequest(
 			mcpRequest({
 				jsonrpc: "2.0",
 				id: "write",
 				method: "tools/call",
 				params: {
-					name: "tekmemo.remember",
+					name: "memofs.remember",
 					arguments: { content: "remember this" },
 				},
 			}),
@@ -201,7 +201,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("creates fetch and Hono-style handlers without requiring framework deps", async () => {
-		const fetchHandler = createTekMemoMcpFetchHandler({ runtime, auth });
+		const fetchHandler = createMemoFSMcpFetchHandler({ runtime, auth });
 		const fetchResponse = await fetchHandler(
 			mcpRequest({ jsonrpc: "2.0", id: "fetch", method: "ping", params: {} }),
 			{},
@@ -209,7 +209,7 @@ describe("MCP HTTP adapter", () => {
 		);
 		expect(fetchResponse.status).toBe(200);
 
-		const honoHandler = createHonoTekMemoMcpHandler({ runtime, auth });
+		const honoHandler = createHonoMemoFSMcpHandler({ runtime, auth });
 		const honoResponse = await honoHandler({
 			req: {
 				raw: mcpRequest({

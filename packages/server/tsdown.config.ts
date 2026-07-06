@@ -5,6 +5,6 @@ export default pkgConfig({
 		index: "src/index.ts",
 		worker: "src/worker.ts",
 		http: "src/http/index.ts",
-		"bin/tekmemo-server": "bin/tekmemo-server.ts",
+		"bin/memofs-server": "bin/memofs-server.ts",
 	},
 });

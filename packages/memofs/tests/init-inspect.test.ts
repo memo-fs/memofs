@@ -1,17 +1,17 @@
-import { createTempTekMemoDir } from "@memofs/core/node-fs";
+import { createTempMemoFsDir } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 describe("init and inspect", () => {
-	it("initializes .tekmemo and inspects it", async () => {
-		const temp = await createTempTekMemoDir();
+	it("initializes .memofs and inspects it", async () => {
+		const temp = await createTempMemoFsDir();
 		try {
-			const init = await runTekMemoCli({
+			const init = await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
 			expect(init.exitCode).toBe(0);
 
-			const inspect = await runTekMemoCli({
+			const inspect = await runMemoFsCli({
 				argv: ["inspect", "--root", temp.rootDir, "--json"],
 			});
 			expect(inspect.exitCode).toBe(0);
@@ -25,9 +25,9 @@ describe("init and inspect", () => {
 	});
 
 	it("does not overwrite existing manifest unless forced", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: [
 					"init",
 					"--root",
@@ -37,7 +37,7 @@ describe("init and inspect", () => {
 					"proj_a",
 				],
 			});
-			const second = await runTekMemoCli({
+			const second = await runMemoFsCli({
 				argv: [
 					"init",
 					"--root",

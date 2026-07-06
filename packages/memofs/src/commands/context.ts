@@ -4,11 +4,11 @@
  * @module context
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 import { parsePositiveInteger } from "../utils/numbers";
 
@@ -17,9 +17,9 @@ import { parsePositiveInteger } from "../utils/numbers";
  */
 export interface ContextCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -113,16 +113,16 @@ export async function runContextCommand(
 				? parsePositiveInteger(options.maxChars, "max chars")
 				: 12000;
 	const core =
-		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.coreMemory)) ??
+		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.coreMemory)) ??
 		"";
 	const notes =
-		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.notesMemory)) ??
+		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.notesMemory)) ??
 		"";
 	const eventContent =
-		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.memoryEvents)) ??
+		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.memoryEvents)) ??
 		"";
 	const chunkContent =
-		(await readTextIfExists(options.memo.store, TEKMEMO_PATHS.chunks)) ?? "";
+		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.chunks)) ?? "";
 	const events = eventContent
 		? parseJsonl(eventContent)
 				.slice(-10)
@@ -135,8 +135,8 @@ export async function runContextCommand(
 		: [];
 	const matches = options.query
 		? [
-				...searchText(TEKMEMO_PATHS.coreMemory, core, options.query),
-				...searchText(TEKMEMO_PATHS.notesMemory, notes, options.query),
+				...searchText(MEMOFS_PATHS.coreMemory, core, options.query),
+				...searchText(MEMOFS_PATHS.notesMemory, notes, options.query),
 			]
 		: [];
 
@@ -156,7 +156,7 @@ export async function runContextCommand(
 	}
 
 	const sections = [
-		"# TekMemo Context",
+		"# MemoFS Context",
 		`Root: ${rootDir}`,
 		options.query ? `Query: ${options.query}` : undefined,
 		"",

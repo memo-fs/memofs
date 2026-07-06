@@ -4,10 +4,10 @@
  * @module chunks
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
 /**
@@ -15,9 +15,9 @@ import { parseJsonl } from "../protocol/jsonl";
  */
 export interface ChunksCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -47,7 +47,7 @@ export async function runChunksCommand(
 ): Promise<number> {
 	const content = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.chunks,
+		MEMOFS_PATHS.chunks,
 	);
 	const records = content
 		? parseJsonl(content, { strict: options.strict ?? false })

@@ -5,14 +5,14 @@
  * @module index
  */
 
-import { createPromptDefinitions, getTekMemoPrompt } from "../prompts/handlers";
+import { createPromptDefinitions, getMemoFSPrompt } from "../prompts/handlers";
 import {
 	createResourceDefinitions,
-	readTekMemoResource,
+	readMemoFSResource,
 } from "../resources/handlers";
 import { createToolDefinitions } from "../tools/definitions";
-import { callTekMemoTool } from "../tools/handlers";
-import type { TekMemoMcpOptions } from "../types";
+import { callMemoFSTool } from "../tools/handlers";
+import type { MemoFSMcpOptions } from "../types";
 
 /**
  * Structural interface matching the registration APIs of @modelcontextprotocol/sdk Server classes.
@@ -65,17 +65,17 @@ export interface StructuralMcpServer {
 }
 
 /**
- * Register TekMemo tools/resources/prompts on an official MCP SDK server instance.
+ * Register MemoFS tools/resources/prompts on an official MCP SDK server instance.
  *
  * This adapter is intentionally structural so @memofs/core/mcp can compile without bundling
  * the MCP SDK. Install @modelcontextprotocol/sdk in the host app and pass the SDK server.
  *
  * @param server - The instantiated MCP SDK or FastMCP server object.
- * @param options - Configuration options for the TekMemo MCP capabilities.
+ * @param options - Configuration options for the MemoFS MCP capabilities.
  */
-export function registerTekMemoMcpCapabilities(
+export function registerMemoFSMcpCapabilities(
 	server: StructuralMcpServer,
-	options: TekMemoMcpOptions,
+	options: MemoFSMcpOptions,
 ): void {
 	for (const tool of createToolDefinitions(options.maxPageSize ?? 100)) {
 		if (server.registerTool) {
@@ -88,14 +88,14 @@ export function registerTekMemoMcpCapabilities(
 					...(tool.outputSchema ? { outputSchema: tool.outputSchema } : {}),
 					...(tool.annotations ? { annotations: tool.annotations } : {}),
 				},
-				async (args: unknown) => callTekMemoTool(options, tool.name, args),
+				async (args: unknown) => callMemoFSTool(options, tool.name, args),
 			);
 		} else if (server.tool) {
 			server.tool(
 				tool.name,
 				tool.description,
 				tool.inputSchema,
-				async (args: unknown) => callTekMemoTool(options, tool.name, args),
+				async (args: unknown) => callMemoFSTool(options, tool.name, args),
 			);
 		}
 	}
@@ -106,7 +106,7 @@ export function registerTekMemoMcpCapabilities(
 				resource.name,
 				resource.uri,
 				{ description: resource.description, mimeType: resource.mimeType },
-				async () => readTekMemoResource(options, resource.uri),
+				async () => readMemoFSResource(options, resource.uri),
 			);
 		}
 	}
@@ -120,14 +120,14 @@ export function registerTekMemoMcpCapabilities(
 					description: prompt.description,
 					argsSchema: prompt.arguments,
 				},
-				async (args: unknown) => getTekMemoPrompt(prompt.name, args),
+				async (args: unknown) => getMemoFSPrompt(prompt.name, args),
 			);
 		} else if (server.prompt) {
 			server.prompt(
 				prompt.name,
 				prompt.description,
 				{},
-				async (args: unknown) => getTekMemoPrompt(prompt.name, args),
+				async (args: unknown) => getMemoFSPrompt(prompt.name, args),
 			);
 		}
 	}

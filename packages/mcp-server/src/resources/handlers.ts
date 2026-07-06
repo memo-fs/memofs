@@ -5,7 +5,7 @@
  */
 
 import { McpNotFoundError, McpValidationError, toSafeError } from "../errors";
-import type { McpResourceDefinition, TekMemoMcpOptions } from "../types";
+import type { McpResourceDefinition, MemoFSMcpOptions } from "../types";
 import { safeJsonStringify } from "../utils/json";
 import { normalizeLimit } from "../utils/pagination";
 
@@ -17,60 +17,60 @@ import { normalizeLimit } from "../utils/pagination";
 export function createResourceDefinitions(): McpResourceDefinition[] {
 	return [
 		{
-			uri: "tekmemo://agent-sessions/{sessionId}/context/core",
-			name: "TekMemo Agent Session Core Context",
+			uri: "memofs://agent-sessions/{sessionId}/context/core",
+			name: "MemoFS Agent Session Core Context",
 			description: "Core context file for an AgentFS-backed session.",
 			mimeType: "text/markdown",
 		},
 		{
-			uri: "tekmemo://agent-sessions/{sessionId}/output/durable-memory",
-			name: "TekMemo Agent Session Durable Memory",
+			uri: "memofs://agent-sessions/{sessionId}/output/durable-memory",
+			name: "MemoFS Agent Session Durable Memory",
 			description:
 				"Candidate durable memory output for an AgentFS-backed session.",
 			mimeType: "text/markdown",
 		},
 		{
-			uri: "tekmemo://health",
-			name: "TekMemo MCP Health",
+			uri: "memofs://health",
+			name: "MemoFS MCP Health",
 			description: "Runtime health, version, and capability summary.",
 			mimeType: "application/json",
 		},
 		{
-			uri: "tekmemo://context",
-			name: "TekMemo Agent Context",
+			uri: "memofs://context",
+			name: "MemoFS Agent Context",
 			description:
 				"Task-ready context. Query parameters: query, workspaceId, projectId, limit, maxBytes.",
 			mimeType: "application/json",
 		},
 		{
-			uri: "tekmemo://memory/core",
-			name: "TekMemo Core Memory",
+			uri: "memofs://memory/core",
+			name: "MemoFS Core Memory",
 			description: "Stable project/workspace core memory.",
 			mimeType: "text/markdown",
 		},
 		{
-			uri: "tekmemo://memory/notes",
-			name: "TekMemo Notes Memory",
+			uri: "memofs://memory/notes",
+			name: "MemoFS Notes Memory",
 			description: "Working notes and lower-confidence observations.",
 			mimeType: "text/markdown",
 		},
 		{
-			uri: "tekmemo://memory/recent",
-			name: "TekMemo Recent Memory Events",
+			uri: "memofs://memory/recent",
+			name: "MemoFS Recent Memory Events",
 			description:
 				"Recent memory events. Query parameters: workspaceId, projectId, limit.",
 			mimeType: "application/json",
 		},
 		{
-			uri: "tekmemo://graph/nodes",
-			name: "TekMemo Graph Nodes",
+			uri: "memofs://graph/nodes",
+			name: "MemoFS Graph Nodes",
 			description:
 				"A paginated JSON view of graph memory nodes. Query parameters: workspaceId, cursor, limit.",
 			mimeType: "application/json",
 		},
 		{
-			uri: "tekmemo://graph/edges",
-			name: "TekMemo Graph Edges",
+			uri: "memofs://graph/edges",
+			name: "MemoFS Graph Edges",
 			description:
 				"A paginated JSON view of graph memory edges. Query parameters: workspaceId, cursor, limit.",
 			mimeType: "application/json",
@@ -79,7 +79,7 @@ export function createResourceDefinitions(): McpResourceDefinition[] {
 }
 
 /**
- * Reads a TekMemo resource by URI, resolving parameters and queries.
+ * Reads a MemoFS resource by URI, resolving parameters and queries.
  *
  * @param options - Configuration options for the MCP server.
  * @param uri - The requested resource URI.
@@ -87,15 +87,15 @@ export function createResourceDefinitions(): McpResourceDefinition[] {
  * @throws {McpValidationError} If URI is invalid or query parameters fail validation.
  * @throws {McpNotFoundError} If the resource cannot be found or matched.
  */
-export async function readTekMemoResource(
-	options: TekMemoMcpOptions,
+export async function readMemoFSResource(
+	options: MemoFSMcpOptions,
 	uri: string,
 ): Promise<{
 	contents: Array<{ uri: string; mimeType: string; text: string }>;
 }> {
 	if (typeof uri !== "string" || uri.length > 2048)
 		throw new McpValidationError("uri is invalid.");
-	const parsed = parseTekMemoUri(uri);
+	const parsed = parseMemoFSUri(uri);
 	try {
 		switch (parsed.pathname) {
 			case "health":
@@ -221,7 +221,7 @@ export async function readTekMemoResource(
 				if (parsed.pathname.startsWith("agent-sessions/")) {
 					return readAgentSessionResource(options, uri, parsed.pathname);
 				}
-				throw new McpNotFoundError(`Unknown TekMemo resource: ${uri}.`);
+				throw new McpNotFoundError(`Unknown MemoFS resource: ${uri}.`);
 		}
 	} catch (error) {
 		return content(
@@ -233,7 +233,7 @@ export async function readTekMemoResource(
 }
 
 async function readAgentSessionResource(
-	options: TekMemoMcpOptions,
+	options: MemoFSMcpOptions,
 	uri: string,
 	pathname: string,
 ): Promise<{
@@ -265,7 +265,7 @@ function content(
 	return { contents: [{ uri, mimeType, text }] };
 }
 
-function parseTekMemoUri(uri: string): {
+function parseMemoFSUri(uri: string): {
 	pathname: string;
 	search: {
 		workspaceId?: string;
@@ -282,8 +282,8 @@ function parseTekMemoUri(uri: string): {
 	} catch {
 		throw new McpValidationError("uri must be a valid URI.");
 	}
-	if (url.protocol !== "tekmemo:")
-		throw new McpValidationError("Only tekmemo:// resources are supported.");
+	if (url.protocol !== "memofs:")
+		throw new McpValidationError("Only memofs:// resources are supported.");
 	const host = url.hostname;
 	const tail = url.pathname.replace(/^\//, "");
 	const pathname = tail ? `${host}/${tail}` : host;

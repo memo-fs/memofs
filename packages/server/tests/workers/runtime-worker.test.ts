@@ -9,7 +9,7 @@
  * Worker target.
  *
  * The test entry mounts a runtime stub (see `worker.ts` header for why the real
- * `Tekmemo` can't load in workerd today — core's eager `node:fs` re-export is a
+ * `MemoFS` can't load in workerd today — core's eager `node:fs` re-export is a
  * slice-9 concern). Deep behavioral coverage (recall round-trips, etc.) lives
  * in the `server-unit` pool, which runs on Node and loads the real runtime.
  */
@@ -18,15 +18,15 @@ import { describe, expect, it } from "vitest";
 
 describe("server-workers integration: runtime API over Worker", () => {
 	it("GET /health returns liveness JSON", async () => {
-		const res = await SELF.fetch("http://tekmemo.test/health");
+		const res = await SELF.fetch("http://memofs.test/health");
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { ok: boolean; name: string };
 		expect(body.ok).toBe(true);
-		expect(body.name).toBe("tekmemo-server");
+		expect(body.name).toBe("memofs-server");
 	});
 
 	it("POST / dispatches a read method over the Worker", async () => {
-		const res = await SELF.fetch("http://tekmemo.test/", {
+		const res = await SELF.fetch("http://memofs.test/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
@@ -45,7 +45,7 @@ describe("server-workers integration: runtime API over Worker", () => {
 		// The Hard ordering rule at the Worker layer: a mutating method returns
 		// 503 so a client's retry logic engages. Proves the gate survives the
 		// full Worker fetch-handler → dispatch → HTTP path.
-		const res = await SELF.fetch("http://tekmemo.test/", {
+		const res = await SELF.fetch("http://memofs.test/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
@@ -64,7 +64,7 @@ describe("server-workers integration: runtime API over Worker", () => {
 	});
 
 	it("unknown method returns methodNotFound (200 body) over the Worker", async () => {
-		const res = await SELF.fetch("http://tekmemo.test/", {
+		const res = await SELF.fetch("http://memofs.test/", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({

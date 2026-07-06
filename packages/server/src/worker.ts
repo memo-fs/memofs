@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker entry for `tekmemo-server` ( — the runtime Worker).
+ * Cloudflare Worker entry for `memofs-server` ( — the runtime Worker).
  *
  * @remarks
  * This is the deployable Worker entry the cloud mounts as the **runtime
@@ -34,7 +34,7 @@ export type { RuntimeExecutionContext, RuntimeWorkerEnv };
  * injected fakes, so this default export only needs to exist + be importable.
  *
  * Construction is deferred to slice 2 to avoid importing adapter packages
- * (`tekmemo-adapter-r2`, `tekmemo-adapter-voyage`, `tekmemo-adapter-workers-ai`)
+ * (`memofs-adapter-r2`, `memofs-adapter-voyage`, `memofs-adapter-workers-ai`)
  * into the runtime Worker's bundle before the Service Binding is wired —
  * which would bloat it past the 3 MB free-plan cap the split exists to solve.
  */
@@ -45,8 +45,8 @@ export default {
 		// Workers AI) in slice 2. This entry only needs to be importable.
 		createRuntime: () => {
 			throw new Error(
-				"tekmemo-server runtime Worker: createRuntimeFromEnv is wired in slice 2. " +
-					"Use the Node bin (packages/tekmemo-server/bin), the cloud's runtime " +
+				"memofs-server runtime Worker: createRuntimeFromEnv is wired in slice 2. " +
+					"Use the Node bin (packages/memofs-server/bin), the cloud's runtime " +
 					"Worker (apps/cloud/workers/runtime.ts), or the Miniflare test entry for a runnable runtime.",
 			);
 		},

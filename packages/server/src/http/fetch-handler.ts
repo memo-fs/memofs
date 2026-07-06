@@ -1,11 +1,11 @@
 /**
- * Worker fetch-handler factory for the `tekmemo-server` runtime API.
+ * Worker fetch-handler factory for the `memofs-server` runtime API.
  *
  * @remarks
  * Returns a `(request, env, ctx) => Response` — the Cloudflare Worker `fetch`
- * signature (: the cloud deploys `tekmemo-server` as the **runtime
- * Worker** behind a Service Binding). Mirrors `tekmemo-mcp-server`'s
- * `createTekMemoMcpFetchHandler`.
+ * signature (: the cloud deploys `memofs-server` as the **runtime
+ * Worker** behind a Service Binding). Mirrors `memofs-mcp-server`'s
+ * `createMemoFSMcpFetchHandler`.
  *
  * The runtime is supplied as a factory (`createRuntime`) rather than a single
  * instance so each Worker invocation can assemble it lazily from `env`
@@ -14,7 +14,7 @@
  * the Miniflare test, and the OSS self-hoster uses the Node bin (no Worker).
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { handleRuntimeRequest, type RuntimeHttpOptions } from "./index";
 
 /**
@@ -23,7 +23,7 @@ import { handleRuntimeRequest, type RuntimeHttpOptions } from "./index";
  */
 export interface RuntimeWorkerEnv {
 	/** Optional bearer token for the runtime API (when exposed publicly). */
-	TEKMEMO_SERVER_TOKEN?: string;
+	MEMOFS_SERVER_TOKEN?: string;
 	[key: string]: unknown;
 }
 
@@ -37,11 +37,11 @@ export interface RuntimeExecutionContext {
  * Options for {@link createRuntimeFetchHandler}. The `createRuntime` factory
  * receives the request + env so it can read bindings AND route per-project
  * (slice 2's instance-map concern): the cloud's runtime Worker scopes each call
- * to a `Tekmemo` instance keyed by a request header.
+ * to a `MemoFS` instance keyed by a request header.
  */
 export interface RuntimeFetchHandlerOptions {
 	/**
-	 * Builds the {@link Tekmemo} runtime for a request. Called per invocation
+	 * Builds the {@link MemoFS} runtime for a request. Called per invocation
 	 * with the request + env so it can read a project-id header (the cloud's
 	 * per-project instance map) and env bindings. Implementations may cache
 	 * instances per project.
@@ -49,7 +49,7 @@ export interface RuntimeFetchHandlerOptions {
 	createRuntime: (
 		request: Request,
 		env: RuntimeWorkerEnv,
-	) => Tekmemo | Promise<Tekmemo>;
+	) => MemoFS | Promise<MemoFS>;
 	/** Whether to require a bearer token (default: from `env`, else `false`). */
 	requireAuth?: boolean;
 	/** Allowed browser origins for CORS (default: none). */
@@ -79,9 +79,9 @@ export function createRuntimeFetchHandler(
 			...(options.requireAuth === undefined
 				? {}
 				: { requireAuth: options.requireAuth }),
-			...(env.TEKMEMO_SERVER_TOKEN === undefined
+			...(env.MEMOFS_SERVER_TOKEN === undefined
 				? {}
-				: { bearerToken: env.TEKMEMO_SERVER_TOKEN }),
+				: { bearerToken: env.MEMOFS_SERVER_TOKEN }),
 			...(options.allowedOrigins === undefined
 				? {}
 				: { allowedOrigins: options.allowedOrigins }),

@@ -1,5 +1,5 @@
 /**
- * CLI command handler for initializing a new TekMemo local workspace.
+ * CLI command handler for initializing a new MemoFS local workspace.
  *
  * @module init
  */
@@ -7,7 +7,7 @@
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import readline from "node:readline/promises";
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import {
 	exists,
 	getRootDir,
@@ -19,7 +19,7 @@ import { printJsonEnvelope } from "../output/output";
 import {
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	TEKMEMO_PATHS,
+	MEMOFS_PATHS,
 } from "../protocol/constants";
 import { createDefaultManifest } from "../protocol/manifest";
 
@@ -28,9 +28,9 @@ import { createDefaultManifest } from "../protocol/manifest";
  */
 export interface InitCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -69,7 +69,7 @@ export async function runInitCommand(
 	if (projectId !== undefined && projectId.length === 0) projectId = undefined;
 
 	if (!projectId && !options.json && !options.noInput && process.stdout.isTTY) {
-		options.output.write("Initializing TekMemo...");
+		options.output.write("Initializing MemoFS...");
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
@@ -90,13 +90,13 @@ export async function runInitCommand(
 
 	const existingManifest = await readTextIfExistsSafe(
 		options.memo.store,
-		TEKMEMO_PATHS.manifest,
+		MEMOFS_PATHS.manifest,
 	);
 	if (existingManifest && !options.force) {
 		const data = {
 			created: false,
 			rootDir,
-			message: ".tekmemo already exists. Use --force to overwrite seed files.",
+			message: ".memofs already exists. Use --force to overwrite seed files.",
 		};
 		if (options.json) printJsonEnvelope(options.output, "init", data);
 		else options.output.write(data.message);
@@ -105,15 +105,15 @@ export async function runInitCommand(
 
 	const manifest = createDefaultManifest(projectId ? { projectId } : undefined);
 	const seedFiles: Record<string, string> = {
-		[TEKMEMO_PATHS.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
-		[TEKMEMO_PATHS.coreMemory]: "# Core Memory\n\n",
-		[TEKMEMO_PATHS.notesMemory]: "# Notes\n\n",
-		[TEKMEMO_PATHS.memoryEvents]: "",
-		[TEKMEMO_PATHS.conversations]: "",
-		[TEKMEMO_PATHS.chunks]: "",
-		[TEKMEMO_PATHS.graphNodes]: "",
-		[TEKMEMO_PATHS.graphEdges]: "",
-		[TEKMEMO_PATHS.snapshots]: "",
+		[MEMOFS_PATHS.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
+		[MEMOFS_PATHS.coreMemory]: "# Core Memory\n\n",
+		[MEMOFS_PATHS.notesMemory]: "# Notes\n\n",
+		[MEMOFS_PATHS.memoryEvents]: "",
+		[MEMOFS_PATHS.conversations]: "",
+		[MEMOFS_PATHS.chunks]: "",
+		[MEMOFS_PATHS.graphNodes]: "",
+		[MEMOFS_PATHS.graphEdges]: "",
+		[MEMOFS_PATHS.snapshots]: "",
 	};
 
 	const created: string[] = [];
@@ -140,7 +140,7 @@ export async function runInitCommand(
 	if (options.json) printJsonEnvelope(options.output, "init", data);
 	else
 		options.output.success(
-			`Initialized .tekmemo at ${rootDir} (Project ID: ${manifest.projectId ?? "none"})`,
+			`Initialized .memofs at ${rootDir} (Project ID: ${manifest.projectId ?? "none"})`,
 		);
 	return 0;
 }

@@ -28,7 +28,7 @@ import {
 	runSnapshotCommand,
 	runValidateCommand,
 } from "../commands";
-import type { TekMemoConfigFile } from "../config";
+import type { MemoFsConfigFile } from "../config";
 import { configSchemaUrl, writeDefaultCliConfig } from "../config";
 import { CliUsageError } from "../errors/cli-errors";
 import { printJsonEnvelope } from "../output/output";
@@ -63,7 +63,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	program
 		.command("init")
-		.description("initialize canonical .tekmemo/ files")
+		.description("initialize canonical .memofs/ files")
 		.option("-f, --force", "overwrite existing seed files", false)
 		.option("-p, --project-id <id>", "explicit project ID")
 		.option("--no-input", "skip interactive prompts", false)
@@ -326,13 +326,13 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 	const generate = program
 		.command("generate")
 		.description(
-			"generate agent instruction files that enforce the TekMemo workflow",
+			"generate agent instruction files that enforce the MemoFS workflow",
 		);
 
 	generate
 		.command("agent-rules")
 		.description(
-			"emit a TekMemo-enforcing instructions file for an agent platform",
+			"emit a MemoFS-enforcing instructions file for an agent platform",
 		)
 		.argument(
 			"[target]",
@@ -363,7 +363,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	const agent = program
 		.command("agent")
-		.description("manage AgentFS-backed TekMemo coding sessions");
+		.description("manage AgentFS-backed MemoFS coding sessions");
 
 	agent
 		.command("start")
@@ -434,7 +434,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.option("--session <id>", "session ID or latest", "latest")
 		.option(
 			"--extract",
-			"append output/durable-memory.md to TekMemo notes",
+			"append output/durable-memory.md to MemoFS notes",
 			false,
 		)
 		.option("--checkpoint-label <label>", "checkpoint label")
@@ -456,7 +456,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 	const connectors = program
 		.command("connectors")
 		.description(
-			"manage local connectors: add, remove, list, run ingestion into .tekmemo/",
+			"manage local connectors: add, remove, list, run ingestion into .memofs/",
 		);
 
 	connectors
@@ -476,7 +476,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	connectors
 		.command("add")
-		.description("add a connector row to .tekmemo/connectors.json")
+		.description("add a connector row to .memofs/connectors.json")
 		.requiredOption("--type <type>", "connector type (github, notion, ...)")
 		.requiredOption(
 			"--secret-ref <ref>",
@@ -544,13 +544,13 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	const cloud = program
 		.command("cloud")
-		.description("use TekMemo Cloud file-replica sync");
+		.description("use MemoFS Cloud file-replica sync");
 
 	async function cloudGlobals() {
 		const g = await globals();
 		if (!g.memo.cloud) {
 			throw new CliUsageError(
-				"Cloud sync requires --cloud-url and --api-key or TEKMEMO_CLOUD_URL/TEKMEMO_API_KEY",
+				"Cloud sync requires --cloud-url and --api-key or MEMOFS_CLOUD_URL/MEMOFS_API_KEY",
 			);
 		}
 		return {
@@ -561,7 +561,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	cloud
 		.command("health")
-		.description("check TekMemo Cloud health")
+		.description("check MemoFS Cloud health")
 		.action(async () => {
 			setCurrentCommand("cloud.health");
 			const g = await cloudGlobals();
@@ -576,7 +576,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	cloud
 		.command("readiness")
-		.description("check TekMemo Cloud readiness")
+		.description("check MemoFS Cloud readiness")
 		.action(async () => {
 			setCurrentCommand("cloud.readiness");
 			const g = await cloudGlobals();
@@ -591,7 +591,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	const sync = cloud
 		.command("sync")
-		.description("use TekMemo Cloud file-replica sync APIs");
+		.description("use MemoFS Cloud file-replica sync APIs");
 
 	sync
 		.command("status")
@@ -628,7 +628,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	sync
 		.command("push")
-		.description("push local .tekmemo/ file replicas to the cloud")
+		.description("push local .memofs/ file replicas to the cloud")
 		.option("--base-cursor <cursor>", "cursor the client last synced at")
 		.action(async (options) => {
 			setCurrentCommand("cloud.sync.push");
@@ -647,7 +647,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	const configCmd = program
 		.command("config")
-		.description("inspect or create .tekmemo/config.json");
+		.description("inspect or create .memofs/config.json");
 
 	configCmd
 		.command("get")
@@ -673,14 +673,14 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 
 	configCmd
 		.command("init")
-		.description("create .tekmemo/config.json without storing secrets")
+		.description("create .memofs/config.json without storing secrets")
 		.option("-f, --force", "overwrite existing config", false)
 		.option(
 			"--runtime <mode>",
 			"runtime mode: local, hybrid, or memory",
 			"local",
 		)
-		.option("--cloud-url <url>", "TekMemo Cloud API URL")
+		.option("--cloud-url <url>", "MemoFS Cloud API URL")
 		.option("--workspace-id <id>", "cloud workspace ID")
 		.option("--project-id <id>", "cloud project ID")
 		.option("--read-policy <policy>", "hybrid read policy", "local-first")
@@ -707,7 +707,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 						readPolicy: options.readPolicy,
 						writePolicy: options.writePolicy,
 					},
-				} satisfies TekMemoConfigFile,
+				} satisfies MemoFsConfigFile,
 			});
 			if (g.json) printJsonEnvelope(output, "config.init", result);
 			else if (result.created) output.success(`Created ${result.path}`);

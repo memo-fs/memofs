@@ -4,19 +4,19 @@
  * @module inspect
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { getRootDir } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
-import { inspectTekMemo } from "../protocol/summary";
+import { inspectMemoFs } from "../protocol/summary";
 
 /**
  * Options configuration for the inspect command.
  */
 export interface InspectCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -36,7 +36,7 @@ export interface InspectCommandOptions {
 export async function runInspectCommand(
 	options: InspectCommandOptions,
 ): Promise<number> {
-	const inspection = await inspectTekMemo(
+	const inspection = await inspectMemoFs(
 		options.memo.store,
 		getRootDir(options.memo.store),
 	);
@@ -47,8 +47,8 @@ export async function runInspectCommand(
 	}
 
 	const lines = [
-		`TekMemo root: ${inspection.rootDir}`,
-		`.tekmemo exists: ${inspection.exists ? "yes" : "no"}`,
+		`MemoFS root: ${inspection.rootDir}`,
+		`.memofs exists: ${inspection.exists ? "yes" : "no"}`,
 		inspection.manifest
 			? `Project: ${inspection.manifest.projectId}`
 			: "Project: missing manifest",

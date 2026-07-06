@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-	createTekMemoMcpProtocolServer,
-	createTekMemoMcpRuntimeFromConfig,
+	createMemoFSMcpProtocolServer,
+	createMemoFSMcpRuntimeFromConfig,
 } from "../src/index";
 
 function makeServer() {
-	return createTekMemoMcpProtocolServer({
-		runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }),
+	return createMemoFSMcpProtocolServer({
+		runtime: createMemoFSMcpRuntimeFromConfig({ mode: "memory" }),
 		defaultPageSize: 2,
 		maxPageSize: 5,
 	});
@@ -77,7 +77,7 @@ describe("MCP protocol", () => {
 			jsonrpc: "2.0",
 			id: 2,
 			method: "tools/call",
-			params: { name: "tekmemo.recall", arguments: { query: "" } },
+			params: { name: "memofs.recall", arguments: { query: "" } },
 		})) as unknown as Obj;
 		expect("result" in response).toBe(true);
 		const result = response.result as Obj;
@@ -152,20 +152,20 @@ describe("MCP protocol", () => {
 			id: 12,
 			method: "prompts/get",
 			params: {
-				name: "tekmemo-recall-context",
-				arguments: { query: "TekMemo graph" },
+				name: "memofs-recall-context",
+				arguments: { query: "MemoFS graph" },
 			},
 		})) as unknown as Obj;
 		const promptResult = prompt.result as Obj;
 		const messages = promptResult.messages as Array<{
 			content: { text: string };
 		}>;
-		expect(messages[0]?.content.text).toMatch(/TekMemo graph/);
+		expect(messages[0]?.content.text).toMatch(/MemoFS graph/);
 	});
 
 	it("graph neighbors can be read via runtime methods after node and edge upserts", async () => {
-		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
-		const server = createTekMemoMcpProtocolServer({ runtime });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		const server = createMemoFSMcpProtocolServer({ runtime });
 		// graph_upsert_nodes/edges and graph_neighbors were demoted to runtime
 		// methods. Seed + read the graph directly through
 		// the runtime to prove the capability is intact end-to-end.

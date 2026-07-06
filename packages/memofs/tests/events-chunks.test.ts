@@ -1,19 +1,19 @@
-import { TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, stringifyJsonl } from "../src";
+import { runMemoFsCli, stringifyJsonl } from "../src";
 
 describe("events and chunks", () => {
 	it("prints event records", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -23,7 +23,7 @@ describe("events and chunks", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.append(
-				TEKMEMO_PATHS.events.memoryEvents,
+				MEMOFS_PATHS.events.memoryEvents,
 				stringifyJsonl([
 					{
 						id: "evt_1",
@@ -34,7 +34,7 @@ describe("events and chunks", () => {
 				]),
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["events", "--root", temp.rootDir],
 			});
 			expect(result.stdout.join("\n")).toContain("memory.updated");
@@ -44,12 +44,12 @@ describe("events and chunks", () => {
 	});
 
 	it("prints chunk records", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -59,11 +59,11 @@ describe("events and chunks", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.append(
-				TEKMEMO_PATHS.indexes.chunks,
+				MEMOFS_PATHS.indexes.chunks,
 				stringifyJsonl([
 					{
 						chunkId: "chunk_1",
-						sourcePath: TEKMEMO_PATHS.memory.core,
+						sourcePath: MEMOFS_PATHS.memory.core,
 						sourceType: "document",
 						sourceId: "core",
 						sourceHash: "hash_a",
@@ -78,7 +78,7 @@ describe("events and chunks", () => {
 				]),
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["chunks", "--root", temp.rootDir],
 			});
 			expect(result.stdout.join("\n")).toContain("chunk_1");

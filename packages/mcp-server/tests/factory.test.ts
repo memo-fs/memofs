@@ -2,10 +2,10 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createTekMemoMcpRuntimeFromConfig } from "../src/index";
+import { createMemoFSMcpRuntimeFromConfig } from "../src/index";
 
 /**
- * Create a throwaway TekMemo root dir for filesystem-backed local-mode tests.
+ * Create a throwaway MemoFS root dir for filesystem-backed local-mode tests.
  * The MCP server test suite otherwise only exercises memory mode; local mode
  * needs a real rootDir with the bootstrap files present.
  */
@@ -13,7 +13,7 @@ async function createTempRoot(): Promise<{
 	rootDir: string;
 	cleanup: () => Promise<void>;
 }> {
-	const rootDir = await mkdtemp(join(tmpdir(), "tekmemo-mcp-"));
+	const rootDir = await mkdtemp(join(tmpdir(), "memofs-mcp-"));
 	return {
 		rootDir,
 		async cleanup() {
@@ -41,7 +41,7 @@ async function tempRoot() {
  * @file MCP runtime factory — recall/embedder wiring.
  *
  * The factory decides whether to wire a lazy local ONNX embedder based on
- * `recall.localEmbeddings`, the `TEKMEMO_LOCAL_EMBEDDINGS` env var, and the
+ * `recall.localEmbeddings`, the `MEMOFS_LOCAL_EMBEDDINGS` env var, and the
  * runtime mode. The embedder itself is lazy (loaded on first vector query), so
  * these tests assert the *observable* consequences of the wiring decision:
  *
@@ -51,10 +51,10 @@ async function tempRoot() {
  * - disabling local embeddings keeps the runtime import-light.
  */
 
-describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
+describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 	describe("mode-gated wiring", () => {
 		it("memory mode: runtime is healthy and never wires the local embedder", async () => {
-			const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
+			const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
 			const health = await runtime.health();
 			expect(health.ok).toBe(true);
 			// memory mode is volatile; recall returns no items but must not throw.
@@ -70,7 +70,7 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 			// cloud-facing mode after the D4 trim; there is no standalone "cloud"
 			// mode. Pointed at a non-existent base URL so the client is constructed
 			// but unused; we only assert the runtime wires without throwing.
-			const runtime = createTekMemoMcpRuntimeFromConfig({
+			const runtime = createMemoFSMcpRuntimeFromConfig({
 				mode: "hybrid",
 				cloud: { baseUrl: "https://invalid.example.com" },
 				recall: { localEmbeddings: true },
@@ -88,7 +88,7 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 			// environment. Recall must degrade gracefully to lexical-only.
 			const { rootDir, cleanup } = await tempRoot();
 			try {
-				const runtime = createTekMemoMcpRuntimeFromConfig({
+				const runtime = createMemoFSMcpRuntimeFromConfig({
 					mode: "local",
 					rootDir,
 					projectId: "mcp-factory",
@@ -119,7 +119,7 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 		it("recall: false localEmbeddings keeps the runtime import-light and still works lexically", async () => {
 			const { rootDir, cleanup } = await tempRoot();
 			try {
-				const runtime = createTekMemoMcpRuntimeFromConfig({
+				const runtime = createMemoFSMcpRuntimeFromConfig({
 					mode: "local",
 					rootDir,
 					projectId: "mcp-factory",
@@ -145,12 +145,12 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 	});
 
 	describe("env var override", () => {
-		it("TEKMEMO_LOCAL_EMBEDDINGS=0 disables the local embedder", async () => {
-			vi.stubEnv("TEKMEMO_LOCAL_EMBEDDINGS", "0");
+		it("MEMOFS_LOCAL_EMBEDDINGS=0 disables the local embedder", async () => {
+			vi.stubEnv("MEMOFS_LOCAL_EMBEDDINGS", "0");
 			try {
 				const { rootDir, cleanup } = await tempRoot();
 				try {
-					const runtime = createTekMemoMcpRuntimeFromConfig({
+					const runtime = createMemoFSMcpRuntimeFromConfig({
 						mode: "local",
 						rootDir,
 						projectId: "mcp-factory",
@@ -179,7 +179,7 @@ describe("createTekMemoMcpRuntimeFromConfig — embedder wiring", () => {
 		it("readCoreMemory returns the bootstrapped core document", async () => {
 			const { rootDir, cleanup } = await tempRoot();
 			try {
-				const runtime = createTekMemoMcpRuntimeFromConfig({
+				const runtime = createMemoFSMcpRuntimeFromConfig({
 					mode: "local",
 					rootDir,
 					projectId: "mcp-factory",

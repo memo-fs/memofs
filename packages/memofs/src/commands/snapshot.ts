@@ -5,11 +5,11 @@
  */
 
 import { createHash } from "node:crypto";
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { appendText, readTextIfExists, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { REQUIRED_FILES, TEKMEMO_PATHS } from "../protocol/constants";
+import { REQUIRED_FILES, MEMOFS_PATHS } from "../protocol/constants";
 import { stringifyJsonl } from "../protocol/jsonl";
 import { createSafeIdFromLabel, validateSnapshotLabel } from "../utils/labels";
 
@@ -18,9 +18,9 @@ import { createSafeIdFromLabel, validateSnapshotLabel } from "../utils/labels";
  */
 export interface SnapshotCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -69,7 +69,7 @@ export async function runSnapshotCommand(
 	const label = validateSnapshotLabel(options.label);
 	const createdAt = new Date().toISOString();
 	const id = createSafeIdFromLabel(label, createdAt);
-	const path = `${TEKMEMO_PATHS.snapshotsDir}/${id}.json`;
+	const path = `${MEMOFS_PATHS.snapshotsDir}/${id}.json`;
 	const files: Record<string, string> = {};
 
 	for (const filePath of REQUIRED_FILES) {
@@ -105,25 +105,25 @@ export async function runSnapshotCommand(
 		metadata: {
 			label,
 			fileCount: Object.keys(files).length,
-			createdBy: "tekmemo/cli",
+			createdBy: "memofs/cli",
 		},
 	};
 
 	await appendText(
 		options.memo.store,
-		TEKMEMO_PATHS.snapshots,
+		MEMOFS_PATHS.snapshots,
 		stringifyJsonl([record]),
 	);
 	await appendText(
 		options.memo.store,
-		TEKMEMO_PATHS.memoryEvents,
+		MEMOFS_PATHS.memoryEvents,
 		stringifyJsonl([
 			{
 				id: `evt_${id}`,
 				type: "snapshot.created",
 				timestamp: createdAt,
 				sourcePath: path,
-				actor: { type: "system", id: "tekmemo/cli" },
+				actor: { type: "system", id: "memofs/cli" },
 				summary: `Created snapshot ${label}`,
 				metadata: { snapshotId: id, label, checksum: bundle.checksum },
 			},

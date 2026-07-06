@@ -2,9 +2,9 @@
  * `@memofs/server` — the OSS-deployable hosted-memory server.
  *
  * @remarks
- * Runs the **same** TekMemo memory engine the cloud runs, over a caller-supplied
+ * Runs the **same** MemoFS memory engine the cloud runs, over a caller-supplied
  * store + provider bundle, with **no provider hardcoding**. The provider-neutral
- * {@link createHostedRuntime} factory assembles a {@link Tekmemo} from injected
+ * {@link createHostedRuntime} factory assembles a {@link MemoFS} from injected
  * adapters; an OSS self-hoster deploys it as a single Node process, and the cloud
  * deploys it as the runtime Worker behind a Service Binding. The two
  * run **identical** factory code — the only difference is the adapters injected.
@@ -13,7 +13,7 @@
  * **Slice 1** (this release) adds the JSON-RPC-over-HTTP runtime API
  * (`recall` / `context` / `graph` / `memory` over `dispatchRuntimeMessage`) +
  * the framework-free HTTP core (`handleRuntimeRequest`) + the Worker entry
- * (`src/worker.ts`) + the Node bin (`bin/tekmemo-server.ts`). See
+ * (`src/worker.ts`) + the Node bin (`bin/memofs-server.ts`). See
  * [s3-execution-plan.md](../../docs/architecture/s3-execution-plan.md) slice 1.
  *
  * The write surface is gated on slice 3's concurrency layer (the Hard ordering

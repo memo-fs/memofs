@@ -4,20 +4,20 @@
  * @module read
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 
 /**
  * Options configuration for the read command.
  */
 export interface ReadCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -36,9 +36,9 @@ export interface ReadCommandOptions {
  * Internal mapping of targets to their respective workspace file paths.
  */
 const TARGET_PATHS = {
-	core: TEKMEMO_PATHS.coreMemory,
-	notes: TEKMEMO_PATHS.notesMemory,
-	manifest: TEKMEMO_PATHS.manifest,
+	core: MEMOFS_PATHS.coreMemory,
+	notes: MEMOFS_PATHS.notesMemory,
+	manifest: MEMOFS_PATHS.manifest,
 } as const;
 
 /**
@@ -58,7 +58,7 @@ export async function runReadCommand(
 				? await options.memo.notes.read().catch(() => undefined)
 				: await readTextIfExists(options.memo.store, path);
 	if (content === undefined) {
-		options.output.error(`${path} does not exist. Run tekmemo init first.`);
+		options.output.error(`${path} does not exist. Run memofs init first.`);
 		return 1;
 	}
 	if (options.json)

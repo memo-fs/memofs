@@ -3,15 +3,15 @@
  *
  * The model-facing surface is two namespaces and ten tools:
  *
- * - 4 memory verbs: `tekmemo.context`, `tekmemo.recall`, `tekmemo.remember`,
- * `tekmemo.consolidate`. This is the entire memory lifecycle the model
+ * - 4 memory verbs: `memofs.context`, `memofs.recall`, `memofs.remember`,
+ * `memofs.consolidate`. This is the entire memory lifecycle the model
  * drives. Graph/sync/health/snapshot/validation/core-memory-update ops were
- * demoted to runtime methods (`TekMemoMcpRuntime`) the developer/host calls
+ * demoted to runtime methods (`MemoFSMcpRuntime`) the developer/host calls
  * imperatively — capabilities are preserved, only the model-facing wrapper
  * was removed. The strategist lives behind
- * `tekmemo.context`; the write gate (Component 6) lives behind
- * `tekmemo.remember`.
- * - 6 AgentFS session tools: `tekmemo_agent_session_*`. A separate axis (a
+ * `memofs.context`; the write gate (Component 6) lives behind
+ * `memofs.remember`.
+ * - 6 AgentFS session tools: `memofs_agent_session_*`. A separate axis (a
  * coding-agent scratch filesystem, not the memory store), kept model-facing
  * because agents drive their own sessions mid-work.
  *
@@ -50,11 +50,11 @@ const kindSchema: JsonObject = {
 };
 
 /**
- * Creates and returns all model-facing MCP tool definitions supported by TekMemo.
+ * Creates and returns all model-facing MCP tool definitions supported by MemoFS.
  *
  * The surface is the 4 memory verbs plus the 6 AgentFS session tools (
  * Component 1). Developer-level operations (graph/sync/health/snapshot/validate/
- * core-memory-update) are runtime methods on `TekMemoMcpRuntime`, not tools.
+ * core-memory-update) are runtime methods on `MemoFSMcpRuntime`, not tools.
  *
  * @param maxPageSize - The maximum allowed page limit size constraint.
  * @returns An array of all available McpToolDefinitions.
@@ -64,10 +64,10 @@ export function createToolDefinitions(
 ): McpToolDefinition[] {
 	return [
 		{
-			name: "tekmemo_agent_session_start",
-			title: "Start TekMemo Agent Session",
+			name: "memofs_agent_session_start",
+			title: "Start MemoFS Agent Session",
 			description:
-				"Create an AgentFS-backed TekMemo session workspace and return paths/resources for coding agents.",
+				"Create an AgentFS-backed MemoFS session workspace and return paths/resources for coding agents.",
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,
@@ -86,8 +86,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo_agent_session_read",
-			title: "Read TekMemo Agent Session File",
+			name: "memofs_agent_session_read",
+			title: "Read MemoFS Agent Session File",
 			description: "Read one AgentFS session file.",
 			safety: "read",
 			annotations: {
@@ -105,8 +105,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo_agent_session_write",
-			title: "Write TekMemo Agent Session File",
+			name: "memofs_agent_session_write",
+			title: "Write MemoFS Agent Session File",
 			description:
 				"Write an allowed working/ or output/ file in an AgentFS session.",
 			safety: "write",
@@ -127,8 +127,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo_agent_session_append",
-			title: "Append TekMemo Agent Session File",
+			name: "memofs_agent_session_append",
+			title: "Append MemoFS Agent Session File",
 			description:
 				"Append to an allowed working/ or output/ file in an AgentFS session.",
 			safety: "write",
@@ -149,8 +149,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo_agent_session_extract",
-			title: "Extract TekMemo Agent Session Memory",
+			name: "memofs_agent_session_extract",
+			title: "Extract MemoFS Agent Session Memory",
 			description:
 				"Extract summary, durable memory, follow-ups, errors, and changes from an AgentFS session.",
 			safety: "read",
@@ -168,8 +168,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo_agent_session_complete",
-			title: "Complete TekMemo Agent Session",
+			name: "memofs_agent_session_complete",
+			title: "Complete MemoFS Agent Session",
 			description:
 				"Extract, checkpoint, push, and optionally persist durable memory from an AgentFS session.",
 			safety: "write",
@@ -183,7 +183,7 @@ export function createToolDefinitions(
 				{
 					sessionId: stringSchema("Session id.", 256),
 					extractDurableMemory: booleanSchema(
-						"Persist output/durable-memory.md into TekMemo notes.",
+						"Persist output/durable-memory.md into MemoFS notes.",
 					),
 					checkpointLabel: stringSchema("Checkpoint label.", 128),
 					...commonScopeProperties,
@@ -192,10 +192,10 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo.context",
-			title: "Build TekMemo Agent Context",
+			name: "memofs.context",
+			title: "Build MemoFS Agent Context",
 			description:
-				'REQUIRED at the start of every task: build task-ready memory context by combining core memory, recent memory, and recall. TekMemo is the single source of truth for project identity, architecture, constraints, and decisions — ALWAYS call this before planning or writing code so your work adheres to stored memory. The returned text already tells you how to act on it. Read-only.\n\nBy default returns a COMPACT briefing (~6kb): core memory in full, the top entities and a few recall fragments, plus an `expandable` list. Each expandable entry names a section (entities/recall/recent/notes), how many more items it holds, and an opaque cursor. To pull just one section in full, call tekmemo.context again with the same query plus `section` and `expand` (the cursor). Expand only the sections you need, then stop — do not expand everything. Pass `detail: "full"` to get the entire context in one call instead (larger; use when you want the whole dump).',
+				'REQUIRED at the start of every task: build task-ready memory context by combining core memory, recent memory, and recall. MemoFS is the single source of truth for project identity, architecture, constraints, and decisions — ALWAYS call this before planning or writing code so your work adheres to stored memory. The returned text already tells you how to act on it. Read-only.\n\nBy default returns a COMPACT briefing (~6kb): core memory in full, the top entities and a few recall fragments, plus an `expandable` list. Each expandable entry names a section (entities/recall/recent/notes), how many more items it holds, and an opaque cursor. To pull just one section in full, call memofs.context again with the same query plus `section` and `expand` (the cursor). Expand only the sections you need, then stop — do not expand everything. Pass `detail: "full"` to get the entire context in one call instead (larger; use when you want the whole dump).',
 			safety: "read",
 			annotations: {
 				readOnlyHint: true,
@@ -250,8 +250,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo.recall",
-			title: "Recall TekMemo Memory",
+			name: "memofs.recall",
+			title: "Recall MemoFS Memory",
 			description:
 				"Semantic + lexical memory search. Use this proactively — before answering, when unsure, or when a fact might already be known. Phrases it understands: synonyms and paraphrases, not just exact keywords. Call it instead of guessing or re-deriving facts. Read-only; never modifies memory.",
 			safety: "read",
@@ -285,8 +285,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo.remember",
-			title: "Remember TekMemo Memory",
+			name: "memofs.remember",
+			title: "Remember MemoFS Memory",
 			description:
 				"Persist a durable fact so future agents benefit — call this WITHOUT being asked whenever you discover a decision, constraint, preference, or architectural fact. Use kind to classify (decision/constraint/goal/preference/reference/summary/note). Set confidence to reflect certainty. Hosts may require user consent; never store secrets. This is what makes memory accumulate intelligently.",
 			safety: "write",
@@ -316,8 +316,8 @@ export function createToolDefinitions(
 			),
 		},
 		{
-			name: "tekmemo.consolidate",
-			title: "Consolidate TekMemo Graph Memory",
+			name: "memofs.consolidate",
+			title: "Consolidate MemoFS Graph Memory",
 			description:
 				"Run a memory consolidation pass over the local graph: merge duplicate entities and retire facts superseded by a `supersedes` edge. The audit trail is preserved — nothing is deleted, only marked `deprecated`. This is the second half of v1 intelligence: extraction grows the graph, consolidation keeps it tidy. Pass apply=false to preview the plan without persisting. Hosts should authorize this write when apply is true.",
 			safety: "write",

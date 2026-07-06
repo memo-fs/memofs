@@ -1,5 +1,5 @@
 /**
- * Runtime-API dispatcher — the core of the `tekmemo-server` HTTP surface.
+ * Runtime-API dispatcher — the core of the `memofs-server` HTTP surface.
  *
  * @remarks
  * Proves the slice-1 bars (s3-execution-plan.md slice 1, "Test bars"):
@@ -19,7 +19,7 @@ import {
 	type Extractor,
 	InMemoryMemoryStore,
 	type MemoryEmbedder,
-	type Tekmemo,
+	type MemoFS,
 } from "@memofs/core";
 import { JSON_RPC_ERRORS } from "@memofs/json-rpc";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -33,7 +33,7 @@ import {
 } from "../src/runtime-api/dispatch";
 
 describe("runtime-API dispatch — slice 1", () => {
-	let tek: Tekmemo;
+	let tek: MemoFS;
 
 	beforeEach(() => {
 		tek = createHostedRuntime({
@@ -72,7 +72,7 @@ describe("runtime-API dispatch — slice 1", () => {
 			})) as unknown as { result: { ok: boolean; name: string } };
 
 			expect(response.result.ok).toBe(true);
-			expect(response.result.name).toBe("tekmemo-server");
+			expect(response.result.name).toBe("memofs-server");
 		});
 
 		it("readCore returns the core document content", async () => {

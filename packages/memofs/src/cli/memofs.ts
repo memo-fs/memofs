@@ -1,19 +1,19 @@
 /**
- * CLI Tekmemo helper — creates a Tekmemo instance from CLI flags, env vars, and config files.
+ * CLI MemoFS helper — creates a MemoFS instance from CLI flags, env vars, and config files.
  *
- * Replaces the old `config/runtime.ts`, `cloud/client.ts`, and `fs/tekmemo-fs.ts` abstractions.
- * The Tekmemo class handles all config resolution, mode awareness, and cloud client creation internally.
+ * Replaces the old `config/runtime.ts`, `cloud/client.ts`, and `fs/memofs-fs.ts` abstractions.
+ * The MemoFS class handles all config resolution, mode awareness, and cloud client creation internally.
  *
- * @module tekmemo-cli
+ * @module memofs-cli
  */
 
-import { Tekmemo, type TekmemoConfig } from "@memofs/core";
+import { MemoFS, type MemoFsConfig } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	readTekMemoConfigFileSync,
+	readMemoFsConfigFileSync,
 } from "@memofs/core/node-fs";
 
-export interface CliTekmemoOptions {
+export interface CliMemoFSOptions {
 	cwd?: string;
 	root?: string;
 	runtime?: string;
@@ -27,25 +27,25 @@ export interface CliTekmemoOptions {
 }
 
 /**
- * Creates a Tekmemo instance from CLI flags, environment variables, and `.tekmemo/config.json`.
+ * Creates a MemoFS instance from CLI flags, environment variables, and `.memofs/config.json`.
  *
  * @param options - CLI flag options.
- * @returns A Tekmemo instance configured for the resolved mode.
+ * @returns A MemoFS instance configured for the resolved mode.
  */
-export function createTekmemoFromCli(options: CliTekmemoOptions = {}): Tekmemo {
+export function createMemoFSFromCli(options: CliMemoFSOptions = {}): MemoFS {
 	const rootDir = options.root ?? options.cwd ?? ".";
-	const config: TekmemoConfig = {
-		// Core no longer reads `.tekmemo/config.json` (the read moved out of the
+	const config: MemoFsConfig = {
+		// Core no longer reads `.memofs/config.json` (the read moved out of the
 		// Worker-loadable barrel). The CLI is Node-only, so it reads the file
 		// here and passes it as `fileConfig` — preserving constructor > env >
 		// file > defaults.
-		fileConfig: readTekMemoConfigFileSync(rootDir),
+		fileConfig: readMemoFsConfigFileSync(rootDir),
 		rootDir,
 		...(options.runtime !== undefined
-			? { mode: options.runtime as TekmemoConfig["mode"] }
+			? { mode: options.runtime as MemoFsConfig["mode"] }
 			: {}),
 		...(options.runtime !== undefined
-			? { mode: options.runtime as TekmemoConfig["mode"] }
+			? { mode: options.runtime as MemoFsConfig["mode"] }
 			: {}),
 		...(options.projectId !== undefined
 			? { projectId: options.projectId }
@@ -54,10 +54,10 @@ export function createTekmemoFromCli(options: CliTekmemoOptions = {}): Tekmemo {
 			? { workspaceId: options.workspaceId }
 			: {}),
 		...(options.readPolicy !== undefined
-			? { readPolicy: options.readPolicy as TekmemoConfig["readPolicy"] }
+			? { readPolicy: options.readPolicy as MemoFsConfig["readPolicy"] }
 			: {}),
 		...(options.writePolicy !== undefined
-			? { writePolicy: options.writePolicy as TekmemoConfig["writePolicy"] }
+			? { writePolicy: options.writePolicy as MemoFsConfig["writePolicy"] }
 			: {}),
 		...(options.cloudUrl !== undefined ||
 		options.apiKey !== undefined ||
@@ -71,7 +71,7 @@ export function createTekmemoFromCli(options: CliTekmemoOptions = {}): Tekmemo {
 						...(typeof options.timeoutMs === "number" && options.timeoutMs > 0
 							? { timeoutMs: options.timeoutMs }
 							: {}),
-						userAgent: "tekmemo/cli",
+						userAgent: "memofs/cli",
 					},
 				}
 			: {}),
@@ -82,7 +82,7 @@ export function createTekmemoFromCli(options: CliTekmemoOptions = {}): Tekmemo {
 	// a `local`/`hybrid` runtime requires a `store`. The volatile "memory" mode
 	// defaults to an in-memory store inside the constructor.
 	const resolvedMode = config.mode ?? "local";
-	const withStore: TekmemoConfig =
+	const withStore: MemoFsConfig =
 		resolvedMode === "memory"
 			? config
 			: {
@@ -94,5 +94,5 @@ export function createTekmemoFromCli(options: CliTekmemoOptions = {}): Tekmemo {
 					}),
 				};
 
-	return new Tekmemo(withStore);
+	return new MemoFS(withStore);
 }

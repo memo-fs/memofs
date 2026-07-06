@@ -7,10 +7,10 @@ import {
 	type ConnectorRecord,
 	ConnectorRegistry,
 } from "@memofs/connectors";
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -51,7 +51,7 @@ function record(externalId: string, content: string): ConnectorRecord {
 }
 
 /**
- * CLI integration tests for the `tekmemo connectors` command group. The
+ * CLI integration tests for the `memofs connectors` command group. The
  * `add`/`list`/`remove` cycle goes through the real CLI runner (full commander
  * dispatch); the `run` command is tested at the command-function level with an
  * injected fake registry so no network is hit.
@@ -59,11 +59,11 @@ function record(externalId: string, content: string): ConnectorRecord {
 describe("connectors CLI", () => {
 	describe("add / list / remove (via command functions)", () => {
 		let temp: { rootDir: string; cleanup: () => Promise<void> };
-		let memo: Tekmemo;
+		let memo: MemoFS;
 
 		beforeEach(async () => {
-			temp = await createTempTekMemoDir();
-			memo = new Tekmemo({
+			temp = await createTempMemoFsDir();
+			memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -75,7 +75,7 @@ describe("connectors CLI", () => {
 		});
 
 		afterEach(async () => {
-			// Release the Q28 advisory lock via the store (Tekmemo itself has no
+			// Release the Q28 advisory lock via the store (MemoFS itself has no
 			// dispose — the store owns the lock).
 			const store = memo.store as { dispose?: () => Promise<void> };
 			await store.dispose?.();
@@ -215,12 +215,12 @@ describe("connectors CLI", () => {
 
 	describe("run (with a fake connector injected via registry)", () => {
 		let rootDir: string;
-		let memo: Tekmemo;
+		let memo: MemoFS;
 
 		beforeEach(async () => {
-			rootDir = await mkdtemp(path.join(tmpdir(), "tekmemo-cli-run-"));
-			await mkdir(path.join(rootDir, ".tekmemo"), { recursive: true });
-			memo = new Tekmemo({
+			rootDir = await mkdtemp(path.join(tmpdir(), "memofs-cli-run-"));
+			await mkdir(path.join(rootDir, ".memofs"), { recursive: true });
+			memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -240,7 +240,7 @@ describe("connectors CLI", () => {
 		it("runs a fake connector and writes notes", async () => {
 			// Seed a connectors.json + a secrets.json so EnvSecretResolver works.
 			await writeFile(
-				path.join(rootDir, ".tekmemo/connectors.json"),
+				path.join(rootDir, ".memofs/connectors.json"),
 				JSON.stringify({
 					connectors: [
 						{
@@ -252,9 +252,9 @@ describe("connectors CLI", () => {
 					],
 				}),
 			);
-			await mkdir(path.join(rootDir, ".tekmemo"), { recursive: true });
+			await mkdir(path.join(rootDir, ".memofs"), { recursive: true });
 			await writeFile(
-				path.join(rootDir, ".tekmemo/secrets.json"),
+				path.join(rootDir, ".memofs/secrets.json"),
 				JSON.stringify({ ss_t: "test-token" }),
 			);
 
@@ -277,7 +277,7 @@ describe("connectors CLI", () => {
 
 		it("skips unchanged records on a re-run", async () => {
 			await writeFile(
-				path.join(rootDir, ".tekmemo/connectors.json"),
+				path.join(rootDir, ".memofs/connectors.json"),
 				JSON.stringify({
 					connectors: [
 						{ id: "fake", type: "fake", enabled: true, secretRef: "ss_t" },
@@ -285,7 +285,7 @@ describe("connectors CLI", () => {
 				}),
 			);
 			await writeFile(
-				path.join(rootDir, ".tekmemo/secrets.json"),
+				path.join(rootDir, ".memofs/secrets.json"),
 				JSON.stringify({ ss_t: "test-token" }),
 			);
 
@@ -307,7 +307,7 @@ describe("connectors CLI", () => {
 
 		it("JSON output returns a structured run envelope", async () => {
 			await writeFile(
-				path.join(rootDir, ".tekmemo/connectors.json"),
+				path.join(rootDir, ".memofs/connectors.json"),
 				JSON.stringify({
 					connectors: [
 						{ id: "fake", type: "fake", enabled: true, secretRef: "ss_t" },
@@ -315,7 +315,7 @@ describe("connectors CLI", () => {
 				}),
 			);
 			await writeFile(
-				path.join(rootDir, ".tekmemo/secrets.json"),
+				path.join(rootDir, ".memofs/secrets.json"),
 				JSON.stringify({ ss_t: "test-token" }),
 			);
 
@@ -338,7 +338,7 @@ describe("connectors CLI", () => {
 
 		it("reports errors without aborting (no secrets file → secret error recorded)", async () => {
 			await writeFile(
-				path.join(rootDir, ".tekmemo/connectors.json"),
+				path.join(rootDir, ".memofs/connectors.json"),
 				JSON.stringify({
 					connectors: [
 						{

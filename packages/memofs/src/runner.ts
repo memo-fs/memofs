@@ -4,10 +4,10 @@
  * @module runner
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { Command, CommanderError } from "commander";
 import pkg from "../package.json" with { type: "json" };
-import { createTekmemoFromCli } from "./cli/tekmemo";
+import { createMemoFSFromCli } from "./cli/memofs";
 import { CliError } from "./errors/cli-errors";
 import {
 	type CliOutput,
@@ -36,7 +36,7 @@ const parseNonNegativeOption = parseNonNegativeInteger as unknown as (
 /**
  * Input configuration variables for invoking the CLI runner programmatically.
  */
-export interface RunTekMemoCliInput {
+export interface RunMemoFSCliInput {
 	argv: string[];
 	cwd?: string;
 	output?: CliOutput;
@@ -49,7 +49,7 @@ export interface RunTekMemoCliInput {
 /**
  * Results returned by running the CLI runner.
  */
-export interface RunTekMemoCliResult {
+export interface RunMemoFSCliResult {
 	exitCode: number;
 	stdout: string[];
 	stderr: string[];
@@ -67,39 +67,39 @@ function createMemo(
 		readPolicy?: string;
 		writePolicy?: string;
 	},
-): Tekmemo {
-	return createTekmemoFromCli({
+): MemoFS {
+	return createMemoFSFromCli({
 		root,
 		...opts,
 	});
 }
 
-export async function runTekMemoCli(
-	input: RunTekMemoCliInput,
-): Promise<RunTekMemoCliResult> {
+export async function runMemoFsCli(
+	input: RunMemoFSCliInput,
+): Promise<RunMemoFSCliResult> {
 	const output =
 		input.output ??
 		createBufferedOutput(
 			input.noColor === undefined ? undefined : { noColor: input.noColor },
 		);
 	let exitCode = 0;
-	let currentCommand = "tekmemo";
+	let currentCommand = "memofs";
 	let wantsJson = input.argv.includes("--json") || input.argv.includes("-j");
-	let activeMemo: Tekmemo | undefined;
+	let activeMemo: MemoFS | undefined;
 
 	const program = new Command();
 	program
-		.name("tekmemo")
-		.description("CLI for TekMemo")
+		.name("memofs")
+		.description("CLI for MemoFS")
 		.version(pkg.version)
 		.option(
 			"-r, --root <path>",
-			"project root containing .tekmemo/",
+			"project root containing .memofs/",
 			input.cwd ?? process.cwd(),
 		)
 		.option("--runtime <mode>", "runtime mode: local, hybrid, or memory")
-		.option("--cloud-url <url>", "TekMemo Cloud API URL")
-		.option("--api-key <key>", "TekMemo Cloud API key")
+		.option("--cloud-url <url>", "MemoFS Cloud API URL")
+		.option("--api-key <key>", "MemoFS Cloud API key")
 		.option("--workspace-id <id>", "default cloud workspace ID")
 		.option("--project-id <id>", "default cloud project ID")
 		.option(
@@ -133,7 +133,7 @@ export async function runTekMemoCli(
 		json: boolean;
 		verbose: boolean;
 		quiet: boolean;
-		memo: Tekmemo;
+		memo: MemoFS;
 	}> {
 		const opts = program.opts() as {
 			root?: string;
@@ -220,11 +220,11 @@ function normalizeArgv(argv: string[]): string[] {
 		argv.length > 0 &&
 		!argv[0]?.endsWith("node") &&
 		!argv[0]?.includes("/") &&
-		argv[0] !== "tekmemo"
+		argv[0] !== "memofs"
 	) {
-		return ["node", "tekmemo", ...argv];
+		return ["node", "memofs", ...argv];
 	}
-	if (argv[0] === "tekmemo") return ["node", ...argv];
+	if (argv[0] === "memofs") return ["node", ...argv];
 	return [...argv];
 }
 

@@ -1,19 +1,19 @@
-import { TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli, stringifyJsonl } from "../src";
+import { runMemoFsCli, stringifyJsonl } from "../src";
 
 describe("doctor and validate", () => {
 	it("passes doctor after init", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["doctor", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
@@ -24,9 +24,9 @@ describe("doctor and validate", () => {
 	});
 
 	it("fails doctor when protocol is missing", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["doctor", "--root", temp.rootDir, "--json"],
 			});
 			expect(result.exitCode).toBe(1);
@@ -38,12 +38,12 @@ describe("doctor and validate", () => {
 	});
 
 	it("passes validate after init", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["validate", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
@@ -53,12 +53,12 @@ describe("doctor and validate", () => {
 	});
 
 	it("validate is strict about JSONL schema", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -68,11 +68,11 @@ describe("doctor and validate", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.events.memoryEvents,
+				MEMOFS_PATHS.events.memoryEvents,
 				stringifyJsonl([{ type: "patch" }]),
 			);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["validate", "--root", temp.rootDir, "--json"],
 			});
 			expect(result.exitCode).toBe(1);
@@ -89,12 +89,12 @@ describe("doctor and validate", () => {
 	});
 
 	it("validate detects invalid JSON lines", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -103,9 +103,9 @@ describe("doctor and validate", () => {
 				rootDir: temp.rootDir,
 				autoBootstrap: false,
 			});
-			await memo.store.write(TEKMEMO_PATHS.events.memoryEvents, "{bad json}\n");
+			await memo.store.write(MEMOFS_PATHS.events.memoryEvents, "{bad json}\n");
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["validate", "--root", temp.rootDir, "--json"],
 			});
 			expect(result.exitCode).toBe(1);

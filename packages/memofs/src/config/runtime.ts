@@ -1,9 +1,9 @@
 /**
- * CLI config file writer for `.tekmemo/config.json`.
+ * CLI config file writer for `.memofs/config.json`.
  *
  * Config resolution (env vars, flags, config file merging) is now handled by
- * `Tekmemo`'s internal `resolveTekmemoConfig` — this module only retains the
- * `writeDefaultCliConfig` function for the `tekmemo config init` command.
+ * `MemoFS`'s internal `resolveMemoFsConfig` — this module only retains the
+ * `writeDefaultCliConfig` function for the `memofs config init` command.
  *
  * @module runtime
  */
@@ -12,8 +12,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import pkg from "../../package.json" with { type: "json" };
 
-export interface TekMemoConfigFile {
-	/** JSON Schema URL for editor validation of `.tekmemo/config.json`. */
+export interface MemoFsConfigFile {
+	/** JSON Schema URL for editor validation of `.memofs/config.json`. */
 	$schema?: string;
 	runtime?: "local" | "hybrid" | "memory";
 	root?: string;
@@ -33,17 +33,17 @@ export interface TekMemoConfigFile {
 }
 
 /**
- * Canonical JSON Schema URL for a given TekMemo version.
+ * Canonical JSON Schema URL for a given MemoFS version.
  *
- * Used as the `$schema` line in `.tekmemo/config.json` so editors validate
+ * Used as the `$schema` line in `.memofs/config.json` so editors validate
  * against the version-appropriate schema.
  */
 export function configSchemaUrl(version: string): string {
-	return `https://docs.memo.tekbreed.com/${version}/config.schema.json`;
+	return `https://docs.memofs.dev/${version}/config.schema.json`;
 }
 
 /**
- * Seeds or overrides a local workspace config file (`.tekmemo/config.json`) with defaults.
+ * Seeds or overrides a local workspace config file (`.memofs/config.json`) with defaults.
  *
  * @param input - Config write instructions.
  * @returns Status object detailing paths and whether file was created/overwritten.
@@ -51,11 +51,11 @@ export function configSchemaUrl(version: string): string {
 export async function writeDefaultCliConfig(input: {
 	cwd: string;
 	root?: string;
-	config?: TekMemoConfigFile;
+	config?: MemoFsConfigFile;
 	force?: boolean;
 }): Promise<{ path: string; created: boolean; overwritten: boolean }> {
 	const root = path.resolve(input.cwd, input.root ?? ".");
-	const configPath = path.join(root, ".tekmemo", "config.json");
+	const configPath = path.join(root, ".memofs", "config.json");
 	await fs.mkdir(path.dirname(configPath), { recursive: true });
 	const exists = await fileExists(configPath);
 	if (exists && !input.force)

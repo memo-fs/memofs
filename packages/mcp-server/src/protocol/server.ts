@@ -7,18 +7,18 @@
 import {
 	McpNotFoundError,
 	McpValidationError,
-	TekMemoMcpError,
+	MemoFSMcpError,
 	toSafeError,
 } from "../errors";
-import { createPromptDefinitions, getTekMemoPrompt } from "../prompts/handlers";
+import { createPromptDefinitions, getMemoFSPrompt } from "../prompts/handlers";
 import {
 	createResourceDefinitions,
-	readTekMemoResource,
+	readMemoFSResource,
 } from "../resources/handlers";
 import { LATEST_PROTOCOL_VERSION, negotiateProtocolVersion } from "../schema";
 import { createToolDefinitions } from "../tools/definitions";
-import { callTekMemoTool } from "../tools/handlers";
-import type { JsonValue, TekMemoMcpOptions } from "../types";
+import { callMemoFSTool } from "../tools/handlers";
+import type { JsonValue, MemoFSMcpOptions } from "../types";
 import { asObject } from "../utils/json";
 import { paginateArray } from "../utils/pagination";
 import {
@@ -34,19 +34,19 @@ import {
 } from "./json-rpc";
 
 /**
- * Interface defining the API of the TekMemo MCP Protocol Server.
+ * Interface defining the API of the MemoFS MCP Protocol Server.
  */
-export interface TekMemoMcpProtocolServer {
+export interface MemoFSMcpProtocolServer {
 	/**
 	 * Configured options resolved and typed.
 	 */
 	readonly options: Required<
 		Pick<
-			TekMemoMcpOptions,
+			MemoFSMcpOptions,
 			"name" | "version" | "instructions" | "defaultPageSize" | "maxPageSize"
 		>
 	> &
-		TekMemoMcpOptions;
+		MemoFSMcpOptions;
 
 	/**
 	 * Processes a structured message object (which could be single or a batch array of JSON-RPC requests).
@@ -68,56 +68,56 @@ export interface TekMemoMcpProtocolServer {
 }
 
 const DEFAULT_INSTRUCTIONS =
-	"TekMemo exposes four memory verbs: tekmemo.context (task briefing), tekmemo.recall (semantic search), tekmemo.remember (write a durable fact), and tekmemo.consolidate (merge/retire graph memory). Call tekmemo.context first, then write tools (remember/consolidate) only after host approval. AgentFS session tools (tekmemo_agent_session_*) drive a coding-agent scratch filesystem.";
+	"MemoFS exposes four memory verbs: memofs.context (task briefing), memofs.recall (semantic search), memofs.remember (write a durable fact), and memofs.consolidate (merge/retire graph memory). Call memofs.context first, then write tools (remember/consolidate) only after host approval. AgentFS session tools (memofs_agent_session_*) drive a coding-agent scratch filesystem.";
 
 /**
- * Factory function to create a new TekMemoMcpProtocolServer instance.
+ * Factory function to create a new MemoFSMcpProtocolServer instance.
  *
  * @param options - Configuration options for the MCP server.
- * @returns An implementation of `TekMemoMcpProtocolServer`.
+ * @returns An implementation of `MemoFSMcpProtocolServer`.
  */
-export function createTekMemoMcpProtocolServer(
-	options: TekMemoMcpOptions,
-): TekMemoMcpProtocolServer {
+export function createMemoFSMcpProtocolServer(
+	options: MemoFSMcpOptions,
+): MemoFSMcpProtocolServer {
 	const normalized = {
 		...options,
-		name: options.name ?? "tekmemo-mcp",
+		name: options.name ?? "memofs-mcp",
 		version: options.version ?? "0.1.0",
 		instructions: options.instructions ?? DEFAULT_INSTRUCTIONS,
 		defaultPageSize: options.defaultPageSize ?? 25,
 		maxPageSize: options.maxPageSize ?? 100,
 	};
-	return new DefaultTekMemoMcpProtocolServer(normalized);
+	return new DefaultMemoFSMcpProtocolServer(normalized);
 }
 
 /**
- * Default implementation of the TekMemoMcpProtocolServer.
+ * Default implementation of the MemoFSMcpProtocolServer.
  * Handles protocol lifecycle, ping, listing tools, invoking tools, listing resources, etc.
  *
  * @private
  */
-class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
+class DefaultMemoFSMcpProtocolServer implements MemoFSMcpProtocolServer {
 	readonly options: Required<
 		Pick<
-			TekMemoMcpOptions,
+			MemoFSMcpOptions,
 			"name" | "version" | "instructions" | "defaultPageSize" | "maxPageSize"
 		>
 	> &
-		TekMemoMcpOptions;
+		MemoFSMcpOptions;
 
 	/**
-	 * Creates a DefaultTekMemoMcpProtocolServer instance.
+	 * Creates a DefaultMemoFSMcpProtocolServer instance.
 	 *
 	 * @param options - Normalized options configuration.
 	 */
 	constructor(
 		options: Required<
 			Pick<
-				TekMemoMcpOptions,
+				MemoFSMcpOptions,
 				"name" | "version" | "instructions" | "defaultPageSize" | "maxPageSize"
 			>
 		> &
-			TekMemoMcpOptions,
+			MemoFSMcpOptions,
 	) {
 		this.options = options;
 	}
@@ -276,7 +276,7 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 				if (typeof object.name !== "string")
 					throw new McpValidationError("tools/call params.name is required.");
 				const args = object.arguments === undefined ? {} : object.arguments;
-				return (await callTekMemoTool(
+				return (await callMemoFSTool(
 					this.options,
 					object.name,
 					args,
@@ -303,7 +303,7 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 					throw new McpValidationError(
 						"resources/read params.uri is required.",
 					);
-				return (await readTekMemoResource(
+				return (await readMemoFSResource(
 					this.options,
 					object.uri,
 				)) as unknown as JsonValue;
@@ -327,7 +327,7 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 				const object = asObject(params, "params");
 				if (typeof object.name !== "string")
 					throw new McpValidationError("prompts/get params.name is required.");
-				return getTekMemoPrompt(
+				return getMemoFSPrompt(
 					object.name,
 					object.arguments,
 				) as unknown as JsonValue;
@@ -381,7 +381,7 @@ function toMcpError(error: unknown): unknown {
 }
 
 /**
- * Maps standard TekMemo MCP exceptions to standard JSON-RPC 2.0 error codes.
+ * Maps standard MemoFS MCP exceptions to standard JSON-RPC 2.0 error codes.
  *
  * @param error - The thrown exception.
  * @returns A JSON-RPC 2.0 compliant error code.
@@ -394,7 +394,7 @@ function errorCodeFrom(error: unknown): number {
 			: JSON_RPC_ERRORS.invalidParams;
 	}
 	if (error instanceof McpNotFoundError) return JSON_RPC_ERRORS.methodNotFound;
-	if (error instanceof TekMemoMcpError) return JSON_RPC_ERRORS.internalError;
+	if (error instanceof MemoFSMcpError) return JSON_RPC_ERRORS.internalError;
 	return JSON_RPC_ERRORS.internalError;
 }
 

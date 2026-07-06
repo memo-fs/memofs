@@ -1,19 +1,19 @@
 /**
- * CLI command handler for auditing and diagnosing TekMemo workspace repositories.
+ * CLI command handler for auditing and diagnosing MemoFS workspace repositories.
  *
  * @module doctor
  */
 
 import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	TEKMEMO_PATHS,
+	MEMOFS_PATHS,
 } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 import {
@@ -47,9 +47,9 @@ export interface DoctorIssue {
  */
 export interface DoctorCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -102,7 +102,7 @@ export async function runDoctorCommand(
 
 	const manifestContent = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.manifest,
+		MEMOFS_PATHS.manifest,
 	);
 	if (manifestContent) {
 		try {
@@ -118,10 +118,10 @@ export async function runDoctorCommand(
 	}
 
 	const validationMap: Record<string, z.ZodSchema> = {
-		[TEKMEMO_PATHS.memoryEvents]: MemoryEventSchema,
-		[TEKMEMO_PATHS.conversations]: ConversationEntrySchema,
-		[TEKMEMO_PATHS.chunks]: MemoryChunkSchema,
-		[TEKMEMO_PATHS.snapshots]: SnapshotEntrySchema,
+		[MEMOFS_PATHS.memoryEvents]: MemoryEventSchema,
+		[MEMOFS_PATHS.conversations]: ConversationEntrySchema,
+		[MEMOFS_PATHS.chunks]: MemoryChunkSchema,
+		[MEMOFS_PATHS.snapshots]: SnapshotEntrySchema,
 	};
 
 	const conversationIds = new Set<string>();
@@ -136,7 +136,7 @@ export async function runDoctorCommand(
 				const validated = schema.parse(record.value) as Record<string, unknown>;
 
 				if (
-					file === TEKMEMO_PATHS.conversations &&
+					file === MEMOFS_PATHS.conversations &&
 					typeof validated.id === "string"
 				) {
 					conversationIds.add(validated.id);
@@ -153,7 +153,7 @@ export async function runDoctorCommand(
 
 	const eventContent = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.memoryEvents,
+		MEMOFS_PATHS.memoryEvents,
 	);
 	if (eventContent) {
 		const events = parseJsonl(eventContent);
@@ -166,7 +166,7 @@ export async function runDoctorCommand(
 				issues.push({
 					level: "warning",
 					code: "orphaned_event",
-					message: `${TEKMEMO_PATHS.memoryEvents}:${event.line}: Event references unknown document/conversation "${docId}"`,
+					message: `${MEMOFS_PATHS.memoryEvents}:${event.line}: Event references unknown document/conversation "${docId}"`,
 				});
 			}
 		}
@@ -183,17 +183,17 @@ export async function runDoctorCommand(
 		if (issues.length > 0) {
 			options.output.warn(
 				[
-					"TekMemo doctor passed with warnings:",
+					"MemoFS doctor passed with warnings:",
 					...issues.map((issue) => `- [${issue.level}] ${issue.message}`),
 				].join("\n"),
 			);
 		} else {
-			options.output.success("TekMemo doctor passed.");
+			options.output.success("MemoFS doctor passed.");
 		}
 	} else {
 		options.output.error(
 			[
-				"TekMemo doctor found errors:",
+				"MemoFS doctor found errors:",
 				...issues.map((issue) => `- [${issue.level}] ${issue.message}`),
 			].join("\n"),
 		);

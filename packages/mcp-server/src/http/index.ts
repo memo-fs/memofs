@@ -1,5 +1,5 @@
 /**
- * Stateless Streamable HTTP adapter for TekMemo MCP.
+ * Stateless Streamable HTTP adapter for MemoFS MCP.
  *
  * This module is safe to import from Web Fetch runtimes such as Cloudflare
  * Workers. It intentionally avoids the stdio and local runtime entrypoints.
@@ -8,11 +8,11 @@
  */
 
 import { failure, JSON_RPC_ERRORS } from "../protocol/json-rpc";
-import { createTekMemoMcpProtocolServer } from "../protocol/server";
-import type { TekMemoMcpOptions, TekMemoMcpRuntime } from "../types";
+import { createMemoFSMcpProtocolServer } from "../protocol/server";
+import type { MemoFSMcpOptions, MemoFSMcpRuntime } from "../types";
 import {
-	createTekMemoCloudMcpRuntime,
-	type TekMemoCloudMcpRuntimeOptions,
+	createMemoFSCloudMcpRuntime,
+	type MemoFSCloudMcpRuntimeOptions,
 } from "./cloud-runtime";
 import {
 	bearerTokenFromRequest,
@@ -34,23 +34,23 @@ import {
 /**
  * Minimal environment shape used by Worker-style runtimes.
  */
-export interface TekMemoMcpHttpEnv {
+export interface MemoFSMcpHttpEnv {
 	[key: string]: string | undefined;
-	TEKMEMO_API_KEY?: string;
-	TEKMEMO_API_URL?: string;
-	TEKMEMO_CLOUD_URL?: string;
-	TEKMEMO_CLOUD_TIMEOUT_MS?: string;
-	TEKMEMO_MCP_READ_ONLY?: string;
-	TEKMEMO_MCP_TOKEN?: string;
-	TEKMEMO_MCP_BEARER_TOKEN?: string;
-	TEKMEMO_PROJECT_ID?: string;
-	TEKMEMO_WORKSPACE_ID?: string;
+	MEMOFS_API_KEY?: string;
+	MEMOFS_API_URL?: string;
+	MEMOFS_CLOUD_URL?: string;
+	MEMOFS_CLOUD_TIMEOUT_MS?: string;
+	MEMOFS_MCP_READ_ONLY?: string;
+	MEMOFS_MCP_TOKEN?: string;
+	MEMOFS_MCP_BEARER_TOKEN?: string;
+	MEMOFS_PROJECT_ID?: string;
+	MEMOFS_WORKSPACE_ID?: string;
 }
 
 /**
  * Authentication configuration for the HTTP adapter.
  */
-export interface TekMemoMcpHttpAuthOptions {
+export interface MemoFSMcpHttpAuthOptions {
 	requireAuth?: boolean;
 	bearerToken?: string;
 	authenticate?: (request: Request) => boolean | Promise<boolean>;
@@ -59,28 +59,28 @@ export interface TekMemoMcpHttpAuthOptions {
 /**
  * Options for handling a single MCP HTTP request.
  */
-export interface TekMemoMcpHttpOptions
-	extends Omit<TekMemoMcpOptions, "runtime"> {
-	runtime?: TekMemoMcpRuntime;
-	env?: TekMemoMcpHttpEnv;
-	cloud?: Partial<TekMemoCloudMcpRuntimeOptions>;
-	auth?: TekMemoMcpHttpAuthOptions;
+export interface MemoFSMcpHttpOptions
+	extends Omit<MemoFSMcpOptions, "runtime"> {
+	runtime?: MemoFSMcpRuntime;
+	env?: MemoFSMcpHttpEnv;
+	cloud?: Partial<MemoFSCloudMcpRuntimeOptions>;
+	auth?: MemoFSMcpHttpAuthOptions;
 	allowedOrigins?: readonly string[];
 }
 
 /**
  * Cloudflare Worker-compatible fetch handler type.
  */
-export type TekMemoMcpFetchHandler<Env = TekMemoMcpHttpEnv> = (
+export type MemoFSMcpFetchHandler<Env = MemoFSMcpHttpEnv> = (
 	request: Request,
 	env: Env,
-	ctx: TekMemoMcpExecutionContext,
+	ctx: MemoFSMcpExecutionContext,
 ) => Response | Promise<Response>;
 
 /**
  * Minimal Worker execution context shape used by the fetch-handler helper.
  */
-export interface TekMemoMcpExecutionContext {
+export interface MemoFSMcpExecutionContext {
 	waitUntil?(promise: Promise<unknown>): void;
 	passThroughOnException?(): void;
 }
@@ -88,9 +88,9 @@ export interface TekMemoMcpExecutionContext {
 /**
  * Minimal Hono context shape accepted by the optional Hono helper.
  */
-export interface TekMemoMcpHonoContext {
+export interface MemoFSMcpHonoContext {
 	req: { raw: Request };
-	env?: TekMemoMcpHttpEnv;
+	env?: MemoFSMcpHttpEnv;
 }
 
 /**
@@ -100,9 +100,9 @@ export interface TekMemoMcpHonoContext {
  * @param options - MCP runtime, cloud, security, and protocol options.
  * @returns HTTP response for the MCP request.
  */
-export async function handleTekMemoMcpRequest(
+export async function handleMemoFSMcpRequest(
 	request: Request,
-	options: TekMemoMcpHttpOptions = {},
+	options: MemoFSMcpHttpOptions = {},
 ): Promise<Response> {
 	const originResponse = validateOrigin(request, options.allowedOrigins);
 	if (originResponse) return originResponse;
@@ -155,11 +155,11 @@ export async function handleTekMemoMcpRequest(
 		return emptyResponse(202, request, options);
 	}
 
-	const server = createTekMemoMcpProtocolServer({
+	const server = createMemoFSMcpProtocolServer({
 		...options,
 		runtime: options.runtime ?? createRuntimeFromHttpOptions(options),
 		readOnly:
-			options.readOnly ?? options.env?.TEKMEMO_MCP_READ_ONLY !== "false",
+			options.readOnly ?? options.env?.MEMOFS_MCP_READ_ONLY !== "false",
 	});
 	const result = await server.handleJsonRpcMessage(payload);
 	if (result === undefined) return emptyResponse(202, request, options);
@@ -172,11 +172,11 @@ export async function handleTekMemoMcpRequest(
  * @param options - Static MCP HTTP options.
  * @returns Fetch handler that merges runtime environment bindings per request.
  */
-export function createTekMemoMcpFetchHandler<Env extends TekMemoMcpHttpEnv>(
-	options: TekMemoMcpHttpOptions = {},
-): TekMemoMcpFetchHandler<Env> {
+export function createMemoFSMcpFetchHandler<Env extends MemoFSMcpHttpEnv>(
+	options: MemoFSMcpHttpOptions = {},
+): MemoFSMcpFetchHandler<Env> {
 	return (request, env) =>
-		handleTekMemoMcpRequest(request, {
+		handleMemoFSMcpRequest(request, {
 			...options,
 			env: { ...env, ...options.env },
 		});
@@ -188,11 +188,11 @@ export function createTekMemoMcpFetchHandler<Env extends TekMemoMcpHttpEnv>(
  * @param options - Static MCP HTTP options.
  * @returns Function that accepts a Hono-like context and returns a Response.
  */
-export function createHonoTekMemoMcpHandler(
-	options: TekMemoMcpHttpOptions = {},
-): (context: TekMemoMcpHonoContext) => Promise<Response> {
+export function createHonoMemoFSMcpHandler(
+	options: MemoFSMcpHttpOptions = {},
+): (context: MemoFSMcpHonoContext) => Promise<Response> {
 	return (context) =>
-		handleTekMemoMcpRequest(context.req.raw, {
+		handleMemoFSMcpRequest(context.req.raw, {
 			...options,
 			env: { ...context.env, ...options.env },
 		});
@@ -202,23 +202,23 @@ export function createHonoTekMemoMcpHandler(
  * Creates a cloud-only runtime from HTTP adapter options.
  *
  * @param options - Adapter options containing env and cloud config.
- * @returns TekMemo MCP runtime.
+ * @returns MemoFS MCP runtime.
  */
 function createRuntimeFromHttpOptions(
-	options: TekMemoMcpHttpOptions,
-): TekMemoMcpRuntime {
+	options: MemoFSMcpHttpOptions,
+): MemoFSMcpRuntime {
 	const env = options.env ?? {};
 	const timeoutMs =
 		options.cloud?.timeoutMs ??
-		parsePositiveInteger(env.TEKMEMO_CLOUD_TIMEOUT_MS);
-	return createTekMemoCloudMcpRuntime({
+		parsePositiveInteger(env.MEMOFS_CLOUD_TIMEOUT_MS);
+	return createMemoFSCloudMcpRuntime({
 		baseUrl: requiredString(
-			options.cloud?.baseUrl ?? env.TEKMEMO_CLOUD_URL ?? env.TEKMEMO_API_URL,
-			"TEKMEMO_CLOUD_URL or TEKMEMO_API_URL is required for cloud MCP.",
+			options.cloud?.baseUrl ?? env.MEMOFS_CLOUD_URL ?? env.MEMOFS_API_URL,
+			"MEMOFS_CLOUD_URL or MEMOFS_API_URL is required for cloud MCP.",
 		),
-		apiKey: options.cloud?.apiKey ?? env.TEKMEMO_API_KEY,
-		projectId: options.cloud?.projectId ?? env.TEKMEMO_PROJECT_ID,
-		workspaceId: options.cloud?.workspaceId ?? env.TEKMEMO_WORKSPACE_ID,
+		apiKey: options.cloud?.apiKey ?? env.MEMOFS_API_KEY,
+		projectId: options.cloud?.projectId ?? env.MEMOFS_PROJECT_ID,
+		workspaceId: options.cloud?.workspaceId ?? env.MEMOFS_WORKSPACE_ID,
 		...(timeoutMs === undefined ? {} : { timeoutMs }),
 		...(options.cloud?.fetch === undefined
 			? {}
@@ -247,7 +247,7 @@ function createRuntimeFromHttpOptions(
  */
 async function authenticateRequest(
 	request: Request,
-	options: TekMemoMcpHttpOptions,
+	options: MemoFSMcpHttpOptions,
 ): Promise<Response | undefined> {
 	if (options.auth?.authenticate) {
 		const allowed = await options.auth.authenticate(request);
@@ -256,8 +256,8 @@ async function authenticateRequest(
 
 	const expectedToken =
 		options.auth?.bearerToken ??
-		options.env?.TEKMEMO_MCP_BEARER_TOKEN ??
-		options.env?.TEKMEMO_MCP_TOKEN;
+		options.env?.MEMOFS_MCP_BEARER_TOKEN ??
+		options.env?.MEMOFS_MCP_TOKEN;
 	const requireAuth = options.auth?.requireAuth ?? true;
 	if (!requireAuth) return undefined;
 	if (!expectedToken) {

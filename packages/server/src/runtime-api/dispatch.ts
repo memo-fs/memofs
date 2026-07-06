@@ -1,12 +1,12 @@
 /**
  * Runtime-API JSON-RPC dispatcher — the core that turns a parsed JSON-RPC
- * payload into a JSON-RPC response over a {@link Tekmemo} runtime.
+ * payload into a JSON-RPC response over a {@link MemoFS} runtime.
  *
  * @remarks
- * This is the heart of the `tekmemo-server` HTTP surface (s3-execution-plan
- * slice 1). It mirrors the dispatch shape in `tekmemo-mcp-server`'s protocol
+ * This is the heart of the `memofs-server` HTTP surface (s3-execution-plan
+ * slice 1). It mirrors the dispatch shape in `memofs-mcp-server`'s protocol
  * server (parse → validate → batch/single → route → envelope) but routes over
- * the frozen `Tekmemo` client API instead of MCP tools/resources.
+ * the frozen `MemoFS` client API instead of MCP tools/resources.
  *
  * ## The write-gate (Hard ordering rule)
  *
@@ -23,7 +23,7 @@
  * @module dispatch
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import {
 	failure,
 	isNotification,
@@ -99,7 +99,7 @@ export function concurrencyGateFailure(id: JsonRpcId): JsonRpcResponse {
  * @returns The stringified response, or `undefined` for a notification.
  */
 export async function dispatchRuntimeText(
-	tek: Tekmemo,
+	tek: MemoFS,
 	text: string,
 	options: DispatchOptions = {},
 ): Promise<string | undefined> {
@@ -127,7 +127,7 @@ export async function dispatchRuntimeText(
  * batch of notifications).
  */
 export async function dispatchRuntimeMessage(
-	tek: Tekmemo,
+	tek: MemoFS,
 	message: unknown,
 	options: DispatchOptions = {},
 ): Promise<JsonRpcResponse | JsonRpcResponse[] | undefined> {
@@ -157,7 +157,7 @@ export async function dispatchRuntimeMessage(
  * response (the HTTP layer maps that to `202`).
  */
 async function dispatchSingle(
-	tek: Tekmemo,
+	tek: MemoFS,
 	message: unknown,
 	options: DispatchOptions,
 ): Promise<JsonRpcResponse | undefined> {

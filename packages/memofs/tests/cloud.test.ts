@@ -1,10 +1,10 @@
-import { type MemoryPath, TEKMEMO_PATHS } from "@memofs/core";
+import { type MemoryPath, MEMOFS_PATHS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 describe("cloud commands", () => {
 	afterEach(() => {
@@ -21,14 +21,14 @@ describe("cloud commands", () => {
 					"Bearer tm_test_123",
 				);
 				expect(url).toBe(
-					"https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
+					"https://memofs.dev/api/v1/projects/proj_123/sync/status",
 				);
 				return new Response(
 					JSON.stringify({
 						data: {
 							manifest: {
-								".tekmemo/memory/core.md": {
-									path: ".tekmemo/memory/core.md",
+								".memofs/memory/core.md": {
+									path: ".memofs/memory/core.md",
 									sha256: "a".repeat(64),
 									sizeBytes: 42,
 								},
@@ -45,12 +45,12 @@ describe("cloud commands", () => {
 		);
 		vi.stubGlobal("fetch", fetchMock);
 
-		const result = await runTekMemoCli({
+		const result = await runMemoFsCli({
 			argv: [
 				"--json",
 				"cloud",
 				"--cloud-url",
-				"https://memo.tekbreed.com/api/v1",
+				"https://memofs.dev/api/v1",
 				"--api-key",
 				"tm_test_123",
 				"--project-id",
@@ -67,16 +67,16 @@ describe("cloud commands", () => {
 		expect(parsed.data.cursor).toBe("cursor_1");
 		expect(parsed.data.storageBytes).toBe(2048);
 		expect(calls).toEqual([
-			"GET https://memo.tekbreed.com/api/v1/projects/proj_123/sync/status",
+			"GET https://memofs.dev/api/v1/projects/proj_123/sync/status",
 		]);
 	});
 
 	it("runs the two-phase push (push -> upload -> complete) against project-scoped sync API", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
 			// Seed a canonical file so the local manifest is non-empty.
-			const { Tekmemo } = await import("@memofs/core");
-			const memo = new Tekmemo({
+			const { MemoFS } = await import("@memofs/core");
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -86,7 +86,7 @@ describe("cloud commands", () => {
 				autoBootstrap: false,
 			});
 			await memo.store.write(
-				TEKMEMO_PATHS.memory.core as MemoryPath,
+				MEMOFS_PATHS.memory.core as MemoryPath,
 				"# Core\n\nTwo-phase push smoke test.",
 			);
 
@@ -104,14 +104,14 @@ describe("cloud commands", () => {
 						const body = JSON.parse(String(init?.body));
 						expect(body.baseCursor).toBe("cursor_prev");
 						// The manifest must include the seeded core file, keyed by path.
-						expect(body.manifest).toHaveProperty(".tekmemo/memory/core.md");
+						expect(body.manifest).toHaveProperty(".memofs/memory/core.md");
 						return new Response(
 							JSON.stringify({
 								data: {
 									upload: [
 										{
-											path: ".tekmemo/memory/core.md",
-											sha256: body.manifest[".tekmemo/memory/core.md"],
+											path: ".memofs/memory/core.md",
+											sha256: body.manifest[".memofs/memory/core.md"],
 											sizeBytes: 37,
 											presignedPutUrl:
 												"https://r2.example.com/put/core.md?sig=abc",
@@ -134,15 +134,15 @@ describe("cloud commands", () => {
 						expect(body.cursor).toBe("cursor_push");
 						expect(body.uploaded).toHaveLength(1);
 						expect(body.uploaded[0]).toMatchObject({
-							path: ".tekmemo/memory/core.md",
+							path: ".memofs/memory/core.md",
 						});
 						return new Response(
 							JSON.stringify({
 								data: {
 									cursor: "cursor_complete",
 									manifest: {
-										".tekmemo/memory/core.md": {
-											path: ".tekmemo/memory/core.md",
+										".memofs/memory/core.md": {
+											path: ".memofs/memory/core.md",
 											sha256: body.uploaded[0].sha256,
 											sizeBytes: 37,
 											r2Key: "projects/proj_123/core.md",
@@ -164,14 +164,14 @@ describe("cloud commands", () => {
 			);
 			vi.stubGlobal("fetch", fetchMock);
 
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"--json",
 					"--root",
 					temp.rootDir,
 					"cloud",
 					"--cloud-url",
-					"https://memo.tekbreed.com/api/v1",
+					"https://memofs.dev/api/v1",
 					"--api-key",
 					"tm_test_123",
 					"--project-id",
@@ -191,8 +191,8 @@ describe("cloud commands", () => {
 			expect(parsed.data.complete.cursor).toBe("cursor_complete");
 			// Both phases of the two-phase push must hit the project-scoped sync API.
 			expect(calls).toEqual([
-				"POST https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push",
-				"POST https://memo.tekbreed.com/api/v1/projects/proj_123/sync/push/complete",
+				"POST https://memofs.dev/api/v1/projects/proj_123/sync/push",
+				"POST https://memofs.dev/api/v1/projects/proj_123/sync/push/complete",
 			]);
 		} finally {
 			await temp.cleanup();

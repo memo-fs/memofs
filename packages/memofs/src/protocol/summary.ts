@@ -8,26 +8,26 @@ import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { MemoryStore } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
-import { TEKMEMO_PATHS } from "./constants";
+import { MEMOFS_PATHS } from "./constants";
 import { parseJsonl } from "./jsonl";
-import { parseManifest, type TekMemoCliManifest } from "./manifest";
+import { parseManifest, type MemoFsCliManifest } from "./manifest";
 
 /**
- * Detailed diagnosis/inspection report of a TekMemo workspace repository.
+ * Detailed diagnosis/inspection report of a MemoFS workspace repository.
  */
-export interface TekMemoInspection {
+export interface MemoFsInspection {
 	/**
 	 * Normalized absolute workspace root directory path.
 	 */
 	rootDir: string;
 	/**
-	 * Whether the `.tekmemo` directory physically exists.
+	 * Whether the `.memofs` directory physically exists.
 	 */
 	exists: boolean;
 	/**
 	 * The parsed manifest.json object, if available.
 	 */
-	manifest?: TekMemoCliManifest;
+	manifest?: MemoFsCliManifest;
 	/**
 	 * Array of stats for tracked repository files.
 	 */
@@ -85,40 +85,40 @@ export interface TekMemoInspection {
 }
 
 /**
- * Inspects a TekMemo workspace and constructs a detailed health report.
+ * Inspects a MemoFS workspace and constructs a detailed health report.
  *
  * @param store - The memory store to inspect.
  * @param rootDir - The root directory of the workspace.
- * @returns Detailed TekMemoInspection health/status report.
+ * @returns Detailed MemoFsInspection health/status report.
  */
-export async function inspectTekMemo(
+export async function inspectMemoFs(
 	store: MemoryStore,
 	rootDir: string,
-): Promise<TekMemoInspection> {
+): Promise<MemoFsInspection> {
 	let dirExists = false;
 	try {
-		await stat(resolve(rootDir, ".tekmemo"));
+		await stat(resolve(rootDir, ".memofs"));
 		dirExists = true;
 	} catch {
 		dirExists = false;
 	}
-	const manifestContent = await readTextIfExists(store, TEKMEMO_PATHS.manifest);
+	const manifestContent = await readTextIfExists(store, MEMOFS_PATHS.manifest);
 	const manifest =
 		manifestContent === undefined ? undefined : parseManifest(manifestContent);
 
 	const tracked = [
-		TEKMEMO_PATHS.manifest,
-		TEKMEMO_PATHS.coreMemory,
-		TEKMEMO_PATHS.notesMemory,
-		TEKMEMO_PATHS.memoryEvents,
-		TEKMEMO_PATHS.conversations,
-		TEKMEMO_PATHS.chunks,
-		TEKMEMO_PATHS.graphNodes,
-		TEKMEMO_PATHS.graphEdges,
-		TEKMEMO_PATHS.snapshots,
+		MEMOFS_PATHS.manifest,
+		MEMOFS_PATHS.coreMemory,
+		MEMOFS_PATHS.notesMemory,
+		MEMOFS_PATHS.memoryEvents,
+		MEMOFS_PATHS.conversations,
+		MEMOFS_PATHS.chunks,
+		MEMOFS_PATHS.graphNodes,
+		MEMOFS_PATHS.graphEdges,
+		MEMOFS_PATHS.snapshots,
 	];
 
-	const files: TekMemoInspection["files"] = [];
+	const files: MemoFsInspection["files"] = [];
 	const recordCounts: Record<string, number> = {};
 
 	for (const filePath of tracked) {
@@ -148,12 +148,12 @@ export async function inspectTekMemo(
 		...(manifest ? { manifest } : {}),
 		files,
 		summary: {
-			eventCount: recordCounts[TEKMEMO_PATHS.memoryEvents] ?? 0,
-			conversationCount: recordCounts[TEKMEMO_PATHS.conversations] ?? 0,
-			chunkCount: recordCounts[TEKMEMO_PATHS.chunks] ?? 0,
-			graphNodeCount: recordCounts[TEKMEMO_PATHS.graphNodes] ?? 0,
-			graphEdgeCount: recordCounts[TEKMEMO_PATHS.graphEdges] ?? 0,
-			snapshotCount: recordCounts[TEKMEMO_PATHS.snapshots] ?? 0,
+			eventCount: recordCounts[MEMOFS_PATHS.memoryEvents] ?? 0,
+			conversationCount: recordCounts[MEMOFS_PATHS.conversations] ?? 0,
+			chunkCount: recordCounts[MEMOFS_PATHS.chunks] ?? 0,
+			graphNodeCount: recordCounts[MEMOFS_PATHS.graphNodes] ?? 0,
+			graphEdgeCount: recordCounts[MEMOFS_PATHS.graphEdges] ?? 0,
+			snapshotCount: recordCounts[MEMOFS_PATHS.snapshots] ?? 0,
 		},
 	};
 }

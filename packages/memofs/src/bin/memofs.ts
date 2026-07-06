@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * Executable entry point for the TekMemo CLI tool.
+ * Executable entry point for the MemoFS CLI tool.
  *
- * @module tekmemo-bin
+ * @module memofs-bin
  */
 
-import { runTekMemoCli } from "../runner";
+import { runMemoFsCli } from "../runner";
 
 /**
  * Main execution function parsing process arguments, invoking CLI runner, and formatting stdout/stderr.
  */
 async function main() {
-	const result = await runTekMemoCli({
+	const result = await runMemoFsCli({
 		argv: process.argv.slice(2),
 		cwd: process.cwd(),
 	});

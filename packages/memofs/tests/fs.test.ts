@@ -1,15 +1,15 @@
-import { type MemoryPath, TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { type MemoryPath, MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
 
-describe("Tekmemo store", () => {
+describe("MemoFS store", () => {
 	it("writes and reads files safely", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -18,8 +18,8 @@ describe("Tekmemo store", () => {
 				rootDir: temp.rootDir,
 				autoBootstrap: false,
 			});
-			await memo.store.write(TEKMEMO_PATHS.memory.core, "hello");
-			await expect(memo.store.read(TEKMEMO_PATHS.memory.core)).resolves.toBe(
+			await memo.store.write(MEMOFS_PATHS.memory.core, "hello");
+			await expect(memo.store.read(MEMOFS_PATHS.memory.core)).resolves.toBe(
 				"hello",
 			);
 		} finally {
@@ -28,9 +28,9 @@ describe("Tekmemo store", () => {
 	});
 
 	it("rejects path traversal", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -43,7 +43,7 @@ describe("Tekmemo store", () => {
 				memo.store.write("../bad" as MemoryPath, "content"),
 			).rejects.toThrow();
 			await expect(
-				memo.store.write(".tekmemo/../bad" as MemoryPath, "content"),
+				memo.store.write(".memofs/../bad" as MemoryPath, "content"),
 			).rejects.toThrow();
 		} finally {
 			await temp.cleanup();

@@ -1,5 +1,5 @@
 /**
- * JSON-RPC method names + the live/gated partition for the `tekmemo-server`
+ * JSON-RPC method names + the live/gated partition for the `memofs-server`
  * runtime API.
  *
  * @remarks
@@ -14,7 +14,7 @@
  * methods run live through it. The method names themselves never change, so
  * the OSS Node deploy and the cloud Worker deploy stay identical.
  *
- * The method surface mirrors the {@link Tekmemo} client's frozen public API
+ * The method surface mirrors the {@link MemoFS} client's frozen public API
  * (`recall`, `context`, `writeMemory`, `core`, `notes`, `graph`, `snapshots`,
  * `health`) — this **is** the two-Worker boundary: the runtime API
  * the commercial Worker reaches over a Service Binding is the same surface an
@@ -31,49 +31,49 @@
  * the same constants.
  */
 export const RUNTIME_METHOD = {
-	/** Liveness probe (mirrors `Tekmemo.health`). */
+	/** Liveness probe (mirrors `MemoFS.health`). */
 	health: "health",
-	/** Semantic recall (mirrors `Tekmemo.recall`). */
+	/** Semantic recall (mirrors `MemoFS.recall`). */
 	recall: "recall",
-	/** Task briefing / progressive-disclosure context (`Tekmemo.context`). */
+	/** Task briefing / progressive-disclosure context (`MemoFS.context`). */
 	context: "context",
-	/** Read the core-memory document (`Tekmemo.core.read`). */
+	/** Read the core-memory document (`MemoFS.core.read`). */
 	readCore: "memory.readCore",
-	/** Read the notes document (`Tekmemo.notes.read`). */
+	/** Read the notes document (`MemoFS.notes.read`). */
 	readNotes: "memory.readNotes",
-	/** Read conversation history (`Tekmemo.conversations.read`). */
+	/** Read conversation history (`MemoFS.conversations.read`). */
 	readConversations: "memory.readConversations",
-	/** List recent memory events (`Tekmemo.listRecentMemories`). */
+	/** List recent memory events (`MemoFS.listRecentMemories`). */
 	listRecent: "memory.listRecent",
-	/** Validate memory integrity (`Tekmemo.validate`). */
+	/** Validate memory integrity (`MemoFS.validate`). */
 	validate: "memory.validate",
-	/** List graph nodes (`Tekmemo.graph.listNodes`). */
+	/** List graph nodes (`MemoFS.graph.listNodes`). */
 	listNodes: "graph.listNodes",
-	/** List graph edges (`Tekmemo.graph.listEdges`). */
+	/** List graph edges (`MemoFS.graph.listEdges`). */
 	listEdges: "graph.listEdges",
-	/** Graph neighbors (`Tekmemo.graph.neighbors`). */
+	/** Graph neighbors (`MemoFS.graph.neighbors`). */
 	graphNeighbors: "graph.neighbors",
-	/** Graph path search (`Tekmemo.graph.path`). */
+	/** Graph path search (`MemoFS.graph.path`). */
 	graphPath: "graph.path",
-	/** List snapshots (`Tekmemo.snapshots.list`). */
+	/** List snapshots (`MemoFS.snapshots.list`). */
 	listSnapshots: "snapshots.list",
-	/** Write a memory (`Tekmemo.writeMemory`) — MUTATING. */
+	/** Write a memory (`MemoFS.writeMemory`) — MUTATING. */
 	write: "memory.write",
-	/** Record a note (`Tekmemo.notes.record`) — MUTATING. */
+	/** Record a note (`MemoFS.notes.record`) — MUTATING. */
 	recordNote: "memory.recordNote",
-	/** Update core memory (`Tekmemo.core.update`) — MUTATING. */
+	/** Update core memory (`MemoFS.core.update`) — MUTATING. */
 	updateCore: "memory.updateCore",
-	/** Append a conversation entry (`Tekmemo.conversations.append`) — MUTATING. */
+	/** Append a conversation entry (`MemoFS.conversations.append`) — MUTATING. */
 	appendConversation: "memory.appendConversation",
-	/** Upsert graph nodes (`Tekmemo.graph.upsertNodes`) — MUTATING. */
+	/** Upsert graph nodes (`MemoFS.graph.upsertNodes`) — MUTATING. */
 	upsertNodes: "graph.upsertNodes",
-	/** Upsert graph edges (`Tekmemo.graph.upsertEdges`) — MUTATING. */
+	/** Upsert graph edges (`MemoFS.graph.upsertEdges`) — MUTATING. */
 	upsertEdges: "graph.upsertEdges",
-	/** Run consolidation (`Tekmemo.consolidate`) — MUTATING. */
+	/** Run consolidation (`MemoFS.consolidate`) — MUTATING. */
 	consolidate: "consolidate",
-	/** Create a snapshot (`Tekmemo.snapshots.create`) — MUTATING. */
+	/** Create a snapshot (`MemoFS.snapshots.create`) — MUTATING. */
 	createSnapshot: "snapshots.create",
-	/** Restore a snapshot (`Tekmemo.snapshots.restore`) — MUTATING. */
+	/** Restore a snapshot (`MemoFS.snapshots.restore`) — MUTATING. */
 	restoreSnapshot: "snapshots.restore",
 } as const;
 

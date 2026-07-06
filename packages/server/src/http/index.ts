@@ -1,14 +1,14 @@
 /**
- * Framework-free HTTP core for the `tekmemo-server` runtime API.
+ * Framework-free HTTP core for the `memofs-server` runtime API.
  *
  * @remarks
- * Takes a Web `Request` + an assembled {@link Tekmemo} runtime + options, and
+ * Takes a Web `Request` + an assembled {@link MemoFS} runtime + options, and
  * returns a Web `Response`. This is the one place the runtime API touches
  * HTTP; both the Worker entry (`worker.ts`) and the Node bin
- * (`bin/tekmemo-server.ts`) are thin adapters over it's "the cloud
- * and the OSS self-hoster run identical `tekmemo-server` code" made literal.
+ * (`bin/memofs-server.ts`) are thin adapters over it's "the cloud
+ * and the OSS self-hoster run identical `memofs-server` code" made literal.
  *
- * The shape mirrors `tekmemo-mcp-server`'s `handleTekMemoMcpRequest`:
+ * The shape mirrors `memofs-mcp-server`'s `handleMemoFSMcpRequest`:
  * `GET /health` → liveness JSON; `POST /` → JSON-RPC dispatch; `OPTIONS` →
  * CORS preflight; everything else → `405`. Bearer-token auth is optional and
  * defaults off (the cloud reaches the runtime Worker over a private Service
@@ -24,7 +24,7 @@
  * @module http
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import type { JsonRpcResponse } from "@memofs/json-rpc";
 import {
 	type DispatchOptions,
@@ -38,7 +38,7 @@ export interface RuntimeHttpOptions extends DispatchOptions {
 	 * The Worker/Node entries build it from `createHostedRuntime` + a provider
 	 * bundle before calling here.
 	 */
-	runtime: Tekmemo;
+	runtime: MemoFS;
 	/**
 	 * Require a bearer token on `POST /`. Defaults to `false`: the cloud's
 	 * runtime Worker sits behind a private Service Binding (no shared secret
@@ -59,7 +59,7 @@ export interface RuntimeHttpOptions extends DispatchOptions {
 /** The liveness response body for `GET /health`. */
 const HEALTH_BODY = JSON.stringify({
 	ok: true,
-	name: "tekmemo-server",
+	name: "memofs-server",
 	version: "0.1.0",
 });
 

@@ -1,8 +1,8 @@
 /**
- * Provider-neutral hosted-runtime factory for TekMemo.
+ * Provider-neutral hosted-runtime factory for MemoFS.
  *
  * @remarks
- * Assembles a {@link Tekmemo} instance for the hosted/server runtime from
+ * Assembles a {@link MemoFS} instance for the hosted/server runtime from
  * **injected** adapters — the same engine the cloud runs, with **no provider
  * hardcoding**. The caller supplies its own bundle: a `MemoryStore` (required —
  * the file replica is the foundation), and an optional `embedder` / `reranker`
@@ -36,7 +36,7 @@
  * at the factory boundary.
  *
  * @see — the `LlmClient` contract this factory threads.
- * @see {@link Tekmemo} — the client this factory assembles.
+ * @see {@link MemoFS} — the client this factory assembles.
  *
  * @public
  */
@@ -48,7 +48,7 @@ import {
 	type MemoryStore,
 	type RecallStore,
 	type Reranker,
-	Tekmemo,
+	MemoFS,
 } from "@memofs/core";
 
 /**
@@ -81,14 +81,14 @@ export interface HostedRuntimeOptions {
 	 * seam; the strategist (Q23) and consolidation (Q25a) consume it later.
 	 */
 	llmClient?: LlmClient;
-	/** Runtime name surfaced in health output. Defaults to `"tekmemo-server"`. */
+	/** Runtime name surfaced in health output. Defaults to `"memofs-server"`. */
 	name?: string;
 	/** Runtime version surfaced in health output. Defaults to `"0.1.0"`. */
 	version?: string;
 }
 
 /**
- * Builds a hosted {@link Tekmemo} runtime from injected adapters.
+ * Builds a hosted {@link MemoFS} runtime from injected adapters.
  *
  * The factory is **provider-neutral**: it never reads env vars, never imports an
  * adapter package, and never hardcodes a provider. Every adapter the runtime
@@ -100,19 +100,19 @@ export interface HostedRuntimeOptions {
  * it from R2 + Turso; a self-hoster from S3 + Postgres). Every intelligence slot
  * is optional and degrades to its deterministic default when absent.
  *
- * @returns a ready {@link Tekmemo} instance for the project.
+ * @returns a ready {@link MemoFS} instance for the project.
  * @throws {Error} when `store` is omitted (the one required slot).
  *
  * @public
  */
-export function createHostedRuntime(options: HostedRuntimeOptions): Tekmemo {
+export function createHostedRuntime(options: HostedRuntimeOptions): MemoFS {
 	if (options.store === undefined || options.store === null) {
 		throw new Error(
 			"createHostedRuntime: `store` is required. The memory store (the file replica) is the foundation of the hosted runtime — there is no default to fall back on.",
 		);
 	}
 
-	return new Tekmemo({
+	return new MemoFS({
 		store: options.store,
 		projectId: options.projectId,
 		// The hosted runtime always runs the local engine over the injected store.
@@ -132,7 +132,7 @@ export function createHostedRuntime(options: HostedRuntimeOptions): Tekmemo {
 			? {}
 			: { llmClient: options.llmClient }),
 		autoBootstrap: true,
-		name: options.name ?? "tekmemo-server",
+		name: options.name ?? "memofs-server",
 		version: options.version ?? "0.1.0",
 	});
 }

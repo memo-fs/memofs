@@ -1,7 +1,7 @@
 /**
- * MCP Server runtime factory — thin adapter over the unified Tekmemo client.
+ * MCP Server runtime factory — thin adapter over the unified MemoFS client.
  *
- * Creates a `new Tekmemo(config)` instance and wraps it as a `TekMemoMcpRuntime`
+ * Creates a `new MemoFS(config)` instance and wraps it as a `MemoFSMcpRuntime`
  * for the MCP protocol server to consume.
  *
  * @module factory
@@ -11,24 +11,24 @@ import {
 	createLazyLocalEmbedder,
 	type RuntimeReadPolicy,
 	type RuntimeWritePolicy,
-	Tekmemo,
-	type TekmemoConfig,
+	MemoFS,
+	type MemoFsConfig,
 } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	readTekMemoConfigFileSync,
+	readMemoFsConfigFileSync,
 } from "@memofs/core/node-fs";
-import type { TekMemoMcpRuntime, TekMemoRuntimeMode } from "../types";
+import type { MemoFSMcpRuntime, MemoFSRuntimeMode } from "../types";
 
 /**
- * Options for creating an MCP runtime from Tekmemo configuration.
+ * Options for creating an MCP runtime from MemoFS configuration.
  */
 export interface RuntimeFactoryOptions {
-	mode?: TekMemoRuntimeMode;
+	mode?: MemoFSRuntimeMode;
 	rootDir?: string;
 	projectId?: string;
 	workspaceId?: string;
-	cloudClient?: TekmemoConfig["cloudClient"];
+	cloudClient?: MemoFsConfig["cloudClient"];
 	cloud?: {
 		baseUrl?: string;
 		apiKey?: string;
@@ -37,7 +37,7 @@ export interface RuntimeFactoryOptions {
 		timeoutMs?: number;
 		userAgent?: string;
 		requireApiKey?: boolean;
-		retry?: NonNullable<NonNullable<TekmemoConfig["cloud"]>["retry"]>;
+		retry?: NonNullable<NonNullable<MemoFsConfig["cloud"]>["retry"]>;
 	};
 	readPolicy?: RuntimeReadPolicy;
 	writePolicy?: RuntimeWritePolicy;
@@ -47,28 +47,28 @@ export interface RuntimeFactoryOptions {
 	 * hybrid (vector + lexical) recall works with zero API keys. Set
 	 * `localEmbeddings: false` to keep the runtime import-light (lexical-only).
 	 */
-	recall?: TekmemoConfig["recall"];
+	recall?: MemoFsConfig["recall"];
 }
 
 /**
- * Creates a TekMemoMcpRuntime by constructing a Tekmemo client and delegating
+ * Creates a MemoFSMcpRuntime by constructing a MemoFS client and delegating
  * all runtime methods to it.
  *
  * @param options - Factory configuration options.
- * @returns The TekMemoMcpRuntime adapter.
+ * @returns The MemoFSMcpRuntime adapter.
  */
-export function createTekMemoMcpRuntimeFromConfig(
+export function createMemoFSMcpRuntimeFromConfig(
 	options: RuntimeFactoryOptions = {},
-): TekMemoMcpRuntime {
+): MemoFSMcpRuntime {
 	const localEmbeddings =
 		options.recall?.localEmbeddings ??
-		(process.env.TEKMEMO_LOCAL_EMBEDDINGS !== "0" &&
-			process.env.TEKMEMO_LOCAL_EMBEDDINGS?.toLowerCase() !== "false");
+		(process.env.MEMOFS_LOCAL_EMBEDDINGS !== "0" &&
+			process.env.MEMOFS_LOCAL_EMBEDDINGS?.toLowerCase() !== "false");
 	const embeddingModel =
 		options.recall?.embeddingModel ??
-		(typeof process.env.TEKMEMO_EMBEDDING_MODEL === "string" &&
-		process.env.TEKMEMO_EMBEDDING_MODEL.length > 0
-			? process.env.TEKMEMO_EMBEDDING_MODEL
+		(typeof process.env.MEMOFS_EMBEDDING_MODEL === "string" &&
+		process.env.MEMOFS_EMBEDDING_MODEL.length > 0
+			? process.env.MEMOFS_EMBEDDING_MODEL
 			: undefined);
 
 	// Local ONNX embedder is lazy: constructing it is synchronous and cheap.
@@ -87,7 +87,7 @@ export function createTekMemoMcpRuntimeFromConfig(
 		});
 	}
 
-	const memo = new Tekmemo({
+	const memo = new MemoFS({
 		// The MCP server is Node-only: inject the filesystem-backed store
 		// explicitly. The root `@memofs/core` barrel is Worker-safe (no
 		// `node:fs` default), so a `local`/`hybrid` runtime requires a `store`.
@@ -102,10 +102,10 @@ export function createTekMemoMcpRuntimeFromConfig(
 						missingFileBehavior: "empty",
 					}),
 				}),
-		// Core no longer reads `.tekmemo/config.json` (the read moved out of the
+		// Core no longer reads `.memofs/config.json` (the read moved out of the
 		// Worker-loadable barrel). The MCP server is Node-only, so it reads the
 		// file here and passes it as `fileConfig`.
-		fileConfig: readTekMemoConfigFileSync(options.rootDir ?? "."),
+		fileConfig: readMemoFsConfigFileSync(options.rootDir ?? "."),
 		...(options.rootDir !== undefined ? { rootDir: options.rootDir } : {}),
 		...(options.mode !== undefined ? { mode: options.mode } : {}),
 		...(options.projectId !== undefined
@@ -157,18 +157,18 @@ export function createTekMemoMcpRuntimeFromConfig(
 			: {}),
 	});
 
-	return createTekMemoMcpRuntimeFromTekmemo(memo);
+	return createMemoFSMcpRuntimeFromMemoFS(memo);
 }
 
 /**
- * Wraps a Tekmemo instance as a TekMemoMcpRuntime adapter.
+ * Wraps a MemoFS instance as a MemoFSMcpRuntime adapter.
  *
- * @param memo - The Tekmemo client instance.
- * @returns The TekMemoMcpRuntime adapter.
+ * @param memo - The MemoFS client instance.
+ * @returns The MemoFSMcpRuntime adapter.
  */
-export function createTekMemoMcpRuntimeFromTekmemo(
-	memo: Tekmemo,
-): TekMemoMcpRuntime {
+export function createMemoFSMcpRuntimeFromMemoFS(
+	memo: MemoFS,
+): MemoFSMcpRuntime {
 	return {
 		async health(signal) {
 			return memo.health(signal);

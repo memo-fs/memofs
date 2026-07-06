@@ -5,9 +5,9 @@
  */
 
 /**
- * Base class for all TekMemo MCP runtime errors.
+ * Base class for all MemoFS MCP runtime errors.
  */
-export class TekMemoMcpError extends Error {
+export class MemoFSMcpError extends Error {
 	/**
 	 * Unique alphanumeric error type identifier.
 	 */
@@ -22,7 +22,7 @@ export class TekMemoMcpError extends Error {
 	readonly details?: unknown;
 
 	/**
-	 * Creates a TekMemoMcpError.
+	 * Creates a MemoFSMcpError.
 	 *
 	 * @param message - User-facing error message.
 	 * @param code - Error code identifier.
@@ -31,12 +31,12 @@ export class TekMemoMcpError extends Error {
 	 */
 	constructor(
 		message: string,
-		code = "TEKMEMO_MCP_ERROR",
+		code = "MEMOFS_MCP_ERROR",
 		status = 500,
 		details?: unknown,
 	) {
 		super(message);
-		this.name = "TekMemoMcpError";
+		this.name = "MemoFSMcpError";
 		this.code = code;
 		this.status = status;
 		this.details = details;
@@ -46,7 +46,7 @@ export class TekMemoMcpError extends Error {
 /**
  * Thrown when incoming MCP requests fail schema or validation assertions.
  */
-export class McpValidationError extends TekMemoMcpError {
+export class McpValidationError extends MemoFSMcpError {
 	/**
 	 * Creates an McpValidationError.
 	 *
@@ -62,7 +62,7 @@ export class McpValidationError extends TekMemoMcpError {
 /**
  * Thrown when a write tool operation is requested without client/user authorization.
  */
-export class McpAuthorizationError extends TekMemoMcpError {
+export class McpAuthorizationError extends MemoFSMcpError {
 	/**
 	 * Creates an McpAuthorizationError.
 	 *
@@ -81,7 +81,7 @@ export class McpAuthorizationError extends TekMemoMcpError {
 /**
  * Thrown when a requested resource, tool, or prompt is not found.
  */
-export class McpNotFoundError extends TekMemoMcpError {
+export class McpNotFoundError extends MemoFSMcpError {
 	/**
 	 * Creates an McpNotFoundError.
 	 *
@@ -97,7 +97,7 @@ export class McpNotFoundError extends TekMemoMcpError {
 /**
  * Thrown when an asynchronous runtime operation exceeds its timeout limit.
  */
-export class McpTimeoutError extends TekMemoMcpError {
+export class McpTimeoutError extends MemoFSMcpError {
 	/**
 	 * Creates an McpTimeoutError.
 	 *
@@ -113,7 +113,7 @@ export class McpTimeoutError extends TekMemoMcpError {
 /**
  * Thrown when a response size exceeds the configured payload byte limit.
  */
-export class McpOutputLimitError extends TekMemoMcpError {
+export class McpOutputLimitError extends MemoFSMcpError {
 	/**
 	 * Creates an McpOutputLimitError.
 	 *
@@ -142,7 +142,7 @@ export function toSafeError(error: unknown): {
 	status: number;
 	details?: unknown;
 } {
-	if (error instanceof TekMemoMcpError) {
+	if (error instanceof MemoFSMcpError) {
 		return {
 			name: error.name,
 			message: error.message,

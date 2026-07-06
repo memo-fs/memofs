@@ -1,8 +1,8 @@
 /**
- * CLI command handlers for interacting with the TekMemo Cloud service.
+ * CLI command handlers for interacting with the MemoFS Cloud service.
  *
  * The cloud is a **file replica**, not an engine: it stores byte-for-byte
- * replicas of the canonical `.tekmemo/` files and syncs them by path + sha256.
+ * replicas of the canonical `.memofs/` files and syncs them by path + sha256.
  * Only five cloud commands survive the v1.0.0-alpha.0 refactor — health,
  * readiness, and the three sync surface commands (`sync status|pull|push`)
  * that map onto the four-method frozen sync contract
@@ -17,9 +17,9 @@ import type {
 	FileManifest,
 	SyncCursor,
 	SyncPushCompleteResult,
-	TekMemoCloudClient,
+	MemoFsCloudClient,
 } from "@memofs/core";
-import { CANONICAL_TEKMEMO_FILES, sha256Hex } from "@memofs/core";
+import { CANONICAL_MEMOFS_FILES, sha256Hex } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
@@ -29,9 +29,9 @@ import { printJsonEnvelope } from "../output/output";
  */
 export interface CloudCommandBaseOptions {
 	/**
-	 * Pre-instantiated TekMemo Cloud client from memo.cloud.
+	 * Pre-instantiated MemoFS Cloud client from memo.cloud.
 	 */
-	client: TekMemoCloudClient;
+	client: MemoFsCloudClient;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -103,7 +103,7 @@ export async function runCloudHealthCommand(
 	}
 	options.output.write(
 		[
-			"TekMemo Cloud",
+			"MemoFS Cloud",
 			`ok: ${result.ok}`,
 			`name: ${result.name ?? "unknown"}`,
 			`version: ${result.version ?? "unknown"}`,
@@ -178,7 +178,7 @@ export async function runCloudSyncStatusCommand(
  *
  * NOTE: the actual byte download + verify + write + reindex is delegated to the
  * local file-sync layer (see
- * `packages/tekmemo/src/tekmemo/sync/file-replication.ts`). When this command is
+ * `packages/memofs/src/memofs/sync/file-replication.ts`). When this command is
  * invoked through the CLI runner, the runtime wires `pull` end-to-end; when
  * invoked directly with a raw cloud client, it reports the planned download set.
  *
@@ -207,7 +207,7 @@ export async function runCloudSyncPullCommand(
 }
 
 /**
- * Pushes local `.tekmemo/` file replicas to the cloud using the two-phase push
+ * Pushes local `.memofs/` file replicas to the cloud using the two-phase push
  * contract: (1) `push` computes the local manifest and requests presigned upload
  * URLs for changed/missing files; (2) the bytes are uploaded to R2; (3)
  * `complete` confirms the uploads and commits the manifest.
@@ -289,7 +289,7 @@ export async function runCloudSyncPushCommand(
  * file-sync layer can interleave the actual byte upload between phases 1 and 3.
  */
 async function completePush(
-	client: TekMemoCloudClient,
+	client: MemoFsCloudClient,
 	cursor: SyncCursor,
 	uploaded: Array<{ path: string; sha256: string }>,
 ): Promise<SyncPushCompleteResult> {
@@ -298,10 +298,10 @@ async function completePush(
 
 /**
  * Computes the local file manifest (canonical path → sha256) for the given
- * workspace root by reading the canonical `.tekmemo/` files through the public
+ * workspace root by reading the canonical `.memofs/` files through the public
  * node FS memory store. Missing files are skipped (they contribute no entry).
  *
- * @param rootDir - Workspace root containing the `.tekmemo/` directory.
+ * @param rootDir - Workspace root containing the `.memofs/` directory.
  * @returns the local file manifest.
  */
 export async function computeLocalManifest(
@@ -313,7 +313,7 @@ export async function computeLocalManifest(
 		missingFileBehavior: "empty",
 	});
 	const manifest: FileManifest = {};
-	for (const path of CANONICAL_TEKMEMO_FILES) {
+	for (const path of CANONICAL_MEMOFS_FILES) {
 		if (!(await store.exists(path))) continue;
 		const content = await store.read(path);
 		manifest[path] = sha256Hex(content);

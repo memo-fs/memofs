@@ -21,10 +21,10 @@ import {
 export function createPromptDefinitions(): McpPromptDefinition[] {
 	return [
 		{
-			name: "tekmemo-recall-context",
-			title: "Recall TekMemo Context",
+			name: "memofs-recall-context",
+			title: "Recall MemoFS Context",
 			description:
-				"Turn a user question into a grounded TekMemo recall instruction.",
+				"Turn a user question into a grounded MemoFS recall instruction.",
 			arguments: [
 				{
 					name: "query",
@@ -44,10 +44,10 @@ export function createPromptDefinitions(): McpPromptDefinition[] {
 			],
 		},
 		{
-			name: "tekmemo-memory-review",
+			name: "memofs-memory-review",
 			title: "Review Memory Candidate",
 			description:
-				"Review whether a text should become durable TekMemo memory.",
+				"Review whether a text should become durable MemoFS memory.",
 			arguments: [
 				{
 					name: "content",
@@ -72,42 +72,42 @@ export function createPromptDefinitions(): McpPromptDefinition[] {
  * @returns The structured McpPromptResult container.
  * @throws {McpNotFoundError} If the requested prompt name is unknown.
  */
-export function getTekMemoPrompt(
+export function getMemoFSPrompt(
 	name: string,
 	rawArgs: unknown,
 ): McpPromptResult {
 	const args =
 		rawArgs === undefined ? {} : asObject(rawArgs, "prompt arguments");
 	switch (name) {
-		case "tekmemo-recall-context": {
+		case "memofs-recall-context": {
 			const query = requiredString(args.query, "query", 4096);
 			const workspaceId = optionalString(args.workspaceId, "workspaceId", 256);
 			const includeGraph =
 				optionalBoolean(args.includeGraph, "includeGraph") ?? true;
 			return {
-				description: "Grounded recall workflow for TekMemo.",
+				description: "Grounded recall workflow for MemoFS.",
 				messages: [
 					{
 						role: "user",
 						content: {
 							type: "text",
-							text: `Use TekMemo recall to answer this request. Query: ${query}\nWorkspace: ${workspaceId ?? "runtime default"}\nGraph-aware recall: ${includeGraph ? "yes" : "no"}\nReturn grounded context first, then the answer.`,
+							text: `Use MemoFS recall to answer this request. Query: ${query}\nWorkspace: ${workspaceId ?? "runtime default"}\nGraph-aware recall: ${includeGraph ? "yes" : "no"}\nReturn grounded context first, then the answer.`,
 						},
 					},
 				],
 			};
 		}
-		case "tekmemo-memory-review": {
+		case "memofs-memory-review": {
 			const content = requiredString(args.content, "content", 100_000);
 			const workspaceId = optionalString(args.workspaceId, "workspaceId", 256);
 			return {
-				description: "Durable memory review workflow for TekMemo.",
+				description: "Durable memory review workflow for MemoFS.",
 				messages: [
 					{
 						role: "user",
 						content: {
 							type: "text",
-							text: `Review this candidate memory before writing it to TekMemo.\nWorkspace: ${workspaceId ?? "runtime default"}\n\nCandidate:\n${content}\n\nClassify it as durable, short-lived, sensitive, redundant, or unsafe. Explain whether it should be saved.`,
+							text: `Review this candidate memory before writing it to MemoFS.\nWorkspace: ${workspaceId ?? "runtime default"}\n\nCandidate:\n${content}\n\nClassify it as durable, short-lived, sensitive, redundant, or unsafe. Explain whether it should be saved.`,
 						},
 					},
 				],

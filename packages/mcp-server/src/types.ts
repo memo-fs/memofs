@@ -5,7 +5,7 @@
  * Only MCP-protocol-specific types (tool results, definitions, options) are defined here.
  *
  * The runtime surface mirrors the v1.0.0-alpha.0 contract: every operation runs in the
- * local engine against the canonical `.tekmemo/` files, and the cloud is a dumb file
+ * local engine against the canonical `.memofs/` files, and the cloud is a dumb file
  * replica exposed only through `sync.{push,pull,status}` (+ `health`/`readiness`). The
  * cloud-engine surface (context compose, extraction, evals, benchmarks, exports, hosted
  * snapshots, providers, and event-level conflict resolution) has been deleted — see
@@ -53,8 +53,8 @@ export type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoHealthResult,
-	TekMemoRuntimeMode,
+	MemoFSHealthResult,
+	MemoFSRuntimeMode,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -92,7 +92,7 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	TekMemoHealthResult,
+	MemoFSHealthResult,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -159,8 +159,8 @@ export interface AuthorizationContext {
 	arguments: unknown;
 }
 
-export interface TekMemoMcpOptions {
-	runtime: TekMemoMcpRuntime;
+export interface MemoFSMcpOptions {
+	runtime: MemoFSMcpRuntime;
 	name?: string;
 	version?: string;
 	instructions?: string;
@@ -178,7 +178,7 @@ export interface TekMemoMcpOptions {
  * Runtime contract implemented by every MCP server entrypoint.
  *
  * The local runtime implements every engine-backed method (recall, writeMemory,
- * graph*) against the canonical `.tekmemo/` files; the three `sync*` methods
+ * graph*) against the canonical `.memofs/` files; the three `sync*` methods
  * additionally mirror those files to/from the cloud replica. The Worker cloud
  * runtime implements only `health`, `readiness`, and `sync*` — every
  * engine-backed method is optional here so a file-replica runtime can omit it,
@@ -187,8 +187,8 @@ export interface TekMemoMcpOptions {
  * resolution is last-writer-wins (see `docs/architecture/cloud-sync-and-refactor.md`
  * §7 and §9).
  */
-export interface TekMemoMcpRuntime {
-	health(signal?: AbortSignal): Promise<TekMemoHealthResult>;
+export interface MemoFSMcpRuntime {
+	health(signal?: AbortSignal): Promise<MemoFSHealthResult>;
 	context?(
 		input: MemoryContextInput,
 		signal?: AbortSignal,

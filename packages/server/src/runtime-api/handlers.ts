@@ -1,9 +1,9 @@
 /**
  * Runtime-API method handlers — each maps a JSON-RPC method to a
- * {@link Tekmemo} client call.
+ * {@link MemoFS} client call.
  *
  * @remarks
- * The method surface mirrors the frozen `Tekmemo` public API (`recall`,
+ * The method surface mirrors the frozen `MemoFS` public API (`recall`,
  * `context`, `core`, `notes`, `graph`, `snapshots`, `health`). This **is** the
  * two-Worker boundary: the runtime API the commercial Worker reaches
  * over a Service Binding is the same surface an OSS self-hoster gets over HTTP.
@@ -14,13 +14,13 @@
  * slice-3 flip is "inject the lock + drop the gate," not "add new routes."
  *
  * Param extraction is defensive: every field is narrowed from `unknown`
- * before it reaches the typed {@link Tekmemo} call, so a malformed payload
+ * before it reaches the typed {@link MemoFS} call, so a malformed payload
  * surfaces as a clean `invalidParams` JSON-RPC error, never a runtime crash.
  *
  * @module handlers
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import type { JsonObject, JsonValue } from "@memofs/json-rpc";
 import { RUNTIME_METHOD } from "../protocol/methods";
 
@@ -29,7 +29,7 @@ import { RUNTIME_METHOD } from "../protocol/methods";
  * `params` object, returns the JSON-serializable result.
  */
 export type RuntimeMethodHandler = (
-	tek: Tekmemo,
+	tek: MemoFS,
 	params: JsonObject,
 ) => Promise<JsonValue>;
 

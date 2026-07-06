@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createTempTekMemoDir } from "@memofs/core/node-fs";
+import { createTempMemoFsDir } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 import {
 	AGENT_RULES_TARGETS,
 	emitAgentRules,
@@ -22,14 +22,14 @@ const EXPECTED: Record<
 	claude: { file: "CLAUDE.md", mcp: ".mcp.json" },
 	gemini: { file: "GEMINI.md", mcp: ".gemini/settings.json" },
 	copilot: { file: ".github/copilot-instructions.md", mcp: ".vscode/mcp.json" },
-	cursor: { file: ".cursor/rules/tekmemo.mdc", mcp: ".cursor/mcp.json" },
+	cursor: { file: ".cursor/rules/memofs.mdc", mcp: ".cursor/mcp.json" },
 };
 
 describe("generate agent-rules (pure emitter)", () => {
 	it.each(AGENT_RULES_TARGETS)("keeps %s output <= 50 lines", (target) => {
 		const file = emitAgentRules({
 			target,
-			projectName: "TekMemo",
+			projectName: "MemoFS",
 			rules: ["Do not add deps", "Do not commit secrets"],
 		});
 		const lineCount = file.content.split("\n").length;
@@ -63,10 +63,10 @@ describe("generate agent-rules (pure emitter)", () => {
 		expect(file.content.startsWith("---")).toBe(false);
 	});
 
-	it("always embeds the TekMemo MCP workflow directive", () => {
+	it("always embeds the MemoFS MCP workflow directive", () => {
 		const file = emitAgentRules({ target: "agents" });
-		expect(file.content).toContain("TekMemo Memory (REQUIRED)");
-		expect(file.content).toContain("tekmemo.context");
+		expect(file.content).toContain("MemoFS Memory (REQUIRED)");
+		expect(file.content).toContain("memofs.context");
 	});
 
 	it("rejects output that would exceed the line cap", () => {
@@ -79,9 +79,9 @@ describe("generate agent-rules (pure emitter)", () => {
 
 describe("generate agent-rules (CLI)", () => {
 	it("writes CLAUDE.md for the claude target", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"generate",
 					"agent-rules",
@@ -102,9 +102,9 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("creates nested directories (copilot -> .github/)", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "copilot", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
@@ -119,13 +119,13 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("refuses to overwrite an existing file without --force", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["generate", "agent-rules", "claude", "--root", temp.rootDir],
 			});
 			// Second run without --force must not clobber the first file.
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "claude", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
@@ -136,12 +136,12 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("overwrites an existing file with --force", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["generate", "agent-rules", "claude", "--root", temp.rootDir],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"generate",
 					"agent-rules",
@@ -162,9 +162,9 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("errors on an unknown target", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "unknown", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(1);
@@ -177,9 +177,9 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("--list enumerates all supported targets", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "--list", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
@@ -193,9 +193,9 @@ describe("generate agent-rules (CLI)", () => {
 	});
 
 	it("--json emits a structured envelope", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"generate",
 					"agent-rules",

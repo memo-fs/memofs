@@ -1,7 +1,7 @@
 /**
  * Convenience helpers for accessing the MemoryStore from CLI commands.
  *
- * These mirror the old `TekMemoFileSystem` methods (readTextIfExists, exists, etc.)
+ * These mirror the old `MemoFsFileSystem` methods (readTextIfExists, exists, etc.)
  * but operate on a `MemoryStore` from `@memofs/core`.
  *
  * @module store-helpers

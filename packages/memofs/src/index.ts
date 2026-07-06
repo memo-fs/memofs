@@ -1,12 +1,12 @@
 /**
- * Main entry point exporting the public API for the TekMemo CLI library.
+ * Main entry point exporting the public API for the MemoFS CLI library.
  *
  * @module index
  */
 
-export type { CliTekmemoOptions } from "./cli/tekmemo";
-export { createTekmemoFromCli } from "./cli/tekmemo";
-export type { TekMemoConfigFile } from "./config";
+export type { CliMemoFSOptions } from "./cli/memofs";
+export { createMemoFSFromCli } from "./cli/memofs";
+export type { MemoFsConfigFile } from "./config";
 export { configSchemaUrl, writeDefaultCliConfig } from "./config";
 export type { CliErrorCode } from "./errors/cli-errors";
 export {
@@ -31,20 +31,20 @@ export {
 export {
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	TEKMEMO_DIR,
-	TEKMEMO_PATHS,
+	MEMOFS_DIR,
+	MEMOFS_PATHS,
 } from "./protocol/constants";
 export type { JsonlParseOptions, JsonlRecord } from "./protocol/jsonl";
 export { parseJsonl, stringifyJsonl } from "./protocol/jsonl";
-export type { TekMemoCliManifest } from "./protocol/manifest";
+export type { MemoFsCliManifest } from "./protocol/manifest";
 export {
 	createDefaultManifest,
 	parseManifest,
 	validateManifest,
 } from "./protocol/manifest";
-export type { TekMemoInspection } from "./protocol/summary";
-export { inspectTekMemo } from "./protocol/summary";
-export type { RunTekMemoCliInput, RunTekMemoCliResult } from "./runner";
-export { runTekMemoCli } from "./runner";
+export type { MemoFsInspection } from "./protocol/summary";
+export { inspectMemoFs } from "./protocol/summary";
+export type { RunMemoFSCliInput, RunMemoFSCliResult } from "./runner";
+export { runMemoFsCli } from "./runner";
 export { createSafeIdFromLabel, validateSnapshotLabel } from "./utils/labels";
 export { redactSecretPreview, scanForSecrets } from "./utils/secrets";

@@ -1,11 +1,11 @@
 /**
- * CLI command handlers for the `tekmemo connectors` command group.
+ * CLI command handlers for the `memofs connectors` command group.
  *
  * Implements `add`, `remove`, `list`, and `run` (decision Q7). Config lives in
- * `.tekmemo/connectors.json` (the 11th canonical sync unit); tokens never ride
+ * `.memofs/connectors.json` (the 11th canonical sync unit); tokens never ride
  * in the file — `add` accepts only an opaque `--secret-ref`, never a raw token.
  * `run` invokes the `@memofs/connectors` framework with the host's
- * `Tekmemo` instance (single-writer contract, AGENTS.md).
+ * `MemoFS` instance (single-writer contract, AGENTS.md).
  *
  * @module commands/connectors
  */
@@ -20,7 +20,7 @@ import {
 	type RunConnectorsResult,
 	validateConnectorsFile,
 } from "@memofs/connectors";
-import type { JsonObject, Tekmemo } from "@memofs/core";
+import type { JsonObject, MemoFS } from "@memofs/core";
 import { CONNECTORS_PATH } from "@memofs/core";
 import { getRootDir, readTextIfExists, writeText } from "../cli/store-helpers";
 import { CliUsageError, CliValidationError } from "../errors/cli-errors";
@@ -31,13 +31,13 @@ import { printJsonEnvelope } from "../output/output";
  * Options shared by every connectors subcommand.
  */
 interface ConnectorsCommandOptions {
-	memo: Tekmemo;
+	memo: MemoFS;
 	output: CliOutput;
 	json?: boolean;
 }
 
 /**
- * `tekmemo connectors list` — list configured connectors.
+ * `memofs connectors list` — list configured connectors.
  *
  * @returns CLI exit code.
  */
@@ -55,7 +55,7 @@ export async function runConnectorsListCommand(
 	if (file.connectors.length === 0) {
 		options.output.write("No connectors configured.");
 		options.output.write(
-			`Add one with: tekmemo connectors add --type <type> --secret-ref <ref>`,
+			`Add one with: memofs connectors add --type <type> --secret-ref <ref>`,
 		);
 		return 0;
 	}
@@ -85,7 +85,7 @@ export interface ConnectorsAddCommandOptions extends ConnectorsCommandOptions {
 }
 
 /**
- * `tekmemo connectors add` — add a connector row to `.tekmemo/connectors.json`.
+ * `memofs connectors add` — add a connector row to `.memofs/connectors.json`.
  *
  * Accepts only an opaque `--secret-ref`, never a raw token. Validates
  * the resulting file (rejects token-leak fields) and writes through the store
@@ -170,7 +170,7 @@ export interface ConnectorsRemoveCommandOptions
 }
 
 /**
- * `tekmemo connectors remove` — remove a connector by id.
+ * `memofs connectors remove` — remove a connector by id.
  *
  * @returns CLI exit code.
  */
@@ -219,11 +219,11 @@ export interface ConnectorsRunCommandOptions extends ConnectorsCommandOptions {
 }
 
 /**
- * `tekmemo connectors run` — run enabled connectors, ingesting into `.tekmemo/`.
+ * `memofs connectors run` — run enabled connectors, ingesting into `.memofs/`.
  *
- * Uses the host's `Tekmemo` instance (single-writer contract — the runner never
+ * Uses the host's `MemoFS` instance (single-writer contract — the runner never
  * constructs its own). Resolves secrets via `EnvSecretResolver` (reads the
- * gitignored `.tekmemo/secrets.json`).
+ * gitignored `.memofs/secrets.json`).
  *
  * @returns CLI exit code.
  */
@@ -276,8 +276,8 @@ export async function runConnectorsRunCommand(
 
 // --- helpers ---
 
-/** Read + validate `.tekmemo/connectors.json` through the store. */
-async function readConnectorsFile(memo: Tekmemo): Promise<ConnectorsFile> {
+/** Read + validate `.memofs/connectors.json` through the store. */
+async function readConnectorsFile(memo: MemoFS): Promise<ConnectorsFile> {
 	const raw = await readTextIfExists(memo.store, CONNECTORS_PATH);
 	if (raw === undefined) {
 		return { connectors: [] };

@@ -9,7 +9,7 @@ import {
 	McpValidationError,
 	toSafeError,
 } from "../errors";
-import type { McpToolResult, TekMemoMcpOptions, ToolSafety } from "../types";
+import type { McpToolResult, MemoFSMcpOptions, ToolSafety } from "../types";
 import { asObject, safeJsonStringify, toJsonObject } from "../utils/json";
 import { enforceToolResultLimit } from "../utils/limits";
 import { withTimeout } from "../utils/timeout";
@@ -31,7 +31,7 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 
 /**
  * Main dispatcher to parse arguments, validate safety authorization, and run
- * the matching TekMemo operation tool by name.
+ * the matching MemoFS operation tool by name.
  *
  * @param options - Configuration options for the MCP runtime.
  * @param toolName - Name of the MCP tool being called.
@@ -40,8 +40,8 @@ const DEFAULT_TIMEOUT_MS = 30_000;
  * @throws {McpValidationError} If input arguments validation fails.
  * @throws {McpAuthorizationError} If write operation is not authorized by the configuration.
  */
-export async function callTekMemoTool(
-	options: TekMemoMcpOptions,
+export async function callMemoFSTool(
+	options: MemoFSMcpOptions,
 	toolName: string,
 	rawArgs: unknown,
 ): Promise<McpToolResult> {
@@ -80,7 +80,7 @@ export async function callTekMemoTool(
 }
 
 async function authorizeTool(
-	options: TekMemoMcpOptions,
+	options: MemoFSMcpOptions,
 	operation: string,
 	safety: ToolSafety,
 	workspaceId: string | undefined,
@@ -114,17 +114,17 @@ function textResult(output: unknown): McpToolResult {
 }
 
 async function executeTool(
-	options: TekMemoMcpOptions,
+	options: MemoFSMcpOptions,
 	toolName: string,
 	args: Record<string, unknown>,
 	signal: AbortSignal,
 ): Promise<McpToolResult> {
 	switch (toolName) {
-		case "tekmemo_agent_session_start":
+		case "memofs_agent_session_start":
 			return textResult(
 				await callOptionalRuntime(options, "startAgentSession", args, signal),
 			);
-		case "tekmemo_agent_session_read":
+		case "memofs_agent_session_read":
 			return textResult(
 				await callOptionalRuntime(
 					options,
@@ -133,7 +133,7 @@ async function executeTool(
 					signal,
 				),
 			);
-		case "tekmemo_agent_session_write":
+		case "memofs_agent_session_write":
 			return textResult(
 				await callOptionalRuntime(
 					options,
@@ -142,7 +142,7 @@ async function executeTool(
 					signal,
 				),
 			);
-		case "tekmemo_agent_session_append":
+		case "memofs_agent_session_append":
 			return textResult(
 				await callOptionalRuntime(
 					options,
@@ -151,11 +151,11 @@ async function executeTool(
 					signal,
 				),
 			);
-		case "tekmemo_agent_session_extract":
+		case "memofs_agent_session_extract":
 			return textResult(
 				await callOptionalRuntime(options, "extractAgentSession", args, signal),
 			);
-		case "tekmemo_agent_session_complete":
+		case "memofs_agent_session_complete":
 			return textResult(
 				await callOptionalRuntime(
 					options,
@@ -164,19 +164,19 @@ async function executeTool(
 					signal,
 				),
 			);
-		case "tekmemo.context":
+		case "memofs.context":
 			return textResult(
 				await callOptionalRuntime(options, "context", args, signal),
 			);
-		case "tekmemo.recall":
+		case "memofs.recall":
 			return textResult(
 				await callOptionalRuntime(options, "recall", args, signal),
 			);
-		case "tekmemo.remember":
+		case "memofs.remember":
 			return textResult(
 				await callOptionalRuntime(options, "writeMemory", args, signal),
 			);
-		case "tekmemo.consolidate":
+		case "memofs.consolidate":
 			return textResult(
 				await callOptionalRuntime(options, "consolidateMemory", args, signal),
 			);
@@ -186,8 +186,8 @@ async function executeTool(
 }
 
 async function callOptionalRuntime(
-	options: TekMemoMcpOptions,
-	method: keyof TekMemoMcpOptions["runtime"],
+	options: MemoFSMcpOptions,
+	method: keyof MemoFSMcpOptions["runtime"],
 	args: Record<string, unknown>,
 	signal: AbortSignal,
 ): Promise<unknown> {
@@ -231,7 +231,7 @@ function validateToolArguments(
 } {
 	const object = asObject(rawArgs, "tool arguments");
 	switch (toolName) {
-		case "tekmemo_agent_session_start": {
+		case "memofs_agent_session_start": {
 			const scope = scopeArgs(object);
 			const actorId = optionalString(object.actorId, "actorId", 256);
 			const sessionId = optionalString(object.sessionId, "sessionId", 256);
@@ -246,7 +246,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo_agent_session_read": {
+		case "memofs_agent_session_read": {
 			const scope = scopeArgs(object);
 			return {
 				args: {
@@ -258,8 +258,8 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo_agent_session_write":
-		case "tekmemo_agent_session_append": {
+		case "memofs_agent_session_write":
+		case "memofs_agent_session_append": {
 			const scope = scopeArgs(object);
 			return {
 				args: {
@@ -272,7 +272,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo_agent_session_extract": {
+		case "memofs_agent_session_extract": {
 			const scope = scopeArgs(object);
 			return {
 				args: {
@@ -283,7 +283,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo_agent_session_complete": {
+		case "memofs_agent_session_complete": {
 			const scope = scopeArgs(object);
 			const extractDurableMemory = optionalBoolean(
 				object.extractDurableMemory,
@@ -307,7 +307,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo.context": {
+		case "memofs.context": {
 			const scope = scopeArgs(object);
 			const limit = optionalInteger(object.limit, "limit", 1, maxPageSize);
 			const maxBytes = optionalInteger(
@@ -382,7 +382,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo.recall": {
+		case "memofs.recall": {
 			const scope = scopeArgs(object);
 			const limit = optionalInteger(object.limit, "limit", 1, maxPageSize);
 			const includeGraph = optionalBoolean(object.includeGraph, "includeGraph");
@@ -407,7 +407,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo.remember": {
+		case "memofs.remember": {
 			const scope = scopeArgs(object);
 			const title = optionalString(object.title, "title", 512);
 			const kind = validateMemoryKind(object.kind);
@@ -435,7 +435,7 @@ function validateToolArguments(
 				workspaceId: scope.workspaceId,
 			};
 		}
-		case "tekmemo.consolidate": {
+		case "memofs.consolidate": {
 			const scope = scopeArgs(object);
 			const apply = optionalBoolean(object.apply, "apply");
 			const now = optionalString(object.now, "now", 64);

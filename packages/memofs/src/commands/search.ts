@@ -4,19 +4,19 @@
  * @module search
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 
 /**
  * Options configuration for the search command.
  */
 export interface SearchCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -56,9 +56,9 @@ export async function runSearchCommand(
 	const matches: SearchMatch[] = [];
 
 	const filesToSearch = [
-		TEKMEMO_PATHS.coreMemory,
-		TEKMEMO_PATHS.notesMemory,
-		TEKMEMO_PATHS.conversations,
+		MEMOFS_PATHS.coreMemory,
+		MEMOFS_PATHS.notesMemory,
+		MEMOFS_PATHS.conversations,
 	];
 
 	let matcher: (line: string) => boolean;

@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
-	callTekMemoTool,
-	createTekMemoMcpRuntimeFromConfig,
+	callMemoFSTool,
+	createMemoFSMcpRuntimeFromConfig,
 	type WriteMemoryInput,
 } from "../src/index";
 
 describe("Security", () => {
 	it("metadata rejects prototype pollution keys", async () => {
-		const result = await callTekMemoTool(
-			{ runtime: createTekMemoMcpRuntimeFromConfig({ mode: "memory" }) },
-			"tekmemo.remember",
+		const result = await callMemoFSTool(
+			{ runtime: createMemoFSMcpRuntimeFromConfig({ mode: "memory" }) },
+			"memofs.remember",
 			{
 				content: "hello",
 				metadata: JSON.parse('{"__proto__":{"polluted":true}}'),
@@ -23,7 +23,7 @@ describe("Security", () => {
 
 	it("oversized input is rejected before runtime execution", async () => {
 		let called = false;
-		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
 		const wrapped = {
 			...runtime,
 			async writeMemory(input: WriteMemoryInput, signal?: AbortSignal) {
@@ -35,9 +35,9 @@ describe("Security", () => {
 				return runtime.writeMemory!(input, signal);
 			},
 		};
-		const result = await callTekMemoTool(
+		const result = await callMemoFSTool(
 			{ runtime: wrapped, maxInputBytes: 100 },
-			"tekmemo.remember",
+			"memofs.remember",
 			{ content: "x".repeat(1000) },
 		);
 		expect(result.isError).toBe(true);
@@ -45,9 +45,9 @@ describe("Security", () => {
 	});
 
 	it("runtime timeouts are converted into tool-level errors", async () => {
-		const runtime = createTekMemoMcpRuntimeFromConfig({ mode: "memory" });
-		// tekmemo.health was demoted to a runtime method,
-		// so exercise the timeout path through tekmemo.recall — a surviving read
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		// memofs.health was demoted to a runtime method,
+		// so exercise the timeout path through memofs.recall — a surviving read
 		// verb. The wrapped recall stalls past the 1ms deadline.
 		const slow = {
 			...runtime,
@@ -57,9 +57,9 @@ describe("Security", () => {
 				return runtime.recall!(input as never, signal);
 			},
 		};
-		const result = await callTekMemoTool(
+		const result = await callMemoFSTool(
 			{ runtime: slow, requestTimeoutMs: 1 },
-			"tekmemo.recall",
+			"memofs.recall",
 			{ query: "slow" },
 		);
 		expect(result.isError).toBe(true);

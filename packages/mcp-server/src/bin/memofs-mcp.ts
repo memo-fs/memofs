@@ -4,23 +4,23 @@
  * Command Line Interface entrypoint executable for the Model Context Protocol (MCP) server.
  * Parses process arguments, constructs the runtime, and starts the stdio server stream.
  *
- * @module tekmemo-mcp
+ * @module memofs-mcp
  */
 
 import {
-	createTekMemoMcpProtocolServer,
-	createTekMemoMcpRuntimeFromConfig,
+	createMemoFSMcpProtocolServer,
+	createMemoFSMcpRuntimeFromConfig,
 	runStdioServer,
 } from "../index";
 import type {
 	RuntimeReadPolicy,
 	RuntimeWritePolicy,
-	TekMemoRuntimeMode,
+	MemoFSRuntimeMode,
 } from "../types";
 
 main().catch((error) => {
 	console.error(
-		`[tekmemo-mcp] ${error instanceof Error ? error.message : String(error)}`,
+		`[memofs-mcp] ${error instanceof Error ? error.message : String(error)}`,
 	);
 	process.exit(2);
 });
@@ -38,10 +38,10 @@ async function main(): Promise<void> {
 		process.exit(0);
 	}
 
-	let runtime: Awaited<ReturnType<typeof createTekMemoMcpRuntimeFromConfig>>;
+	let runtime: Awaited<ReturnType<typeof createMemoFSMcpRuntimeFromConfig>>;
 	try {
-		runtime = await createTekMemoMcpRuntimeFromConfig({
-			mode: args.runtime as TekMemoRuntimeMode | undefined,
+		runtime = await createMemoFSMcpRuntimeFromConfig({
+			mode: args.runtime as MemoFSRuntimeMode | undefined,
 			rootDir: args.root as string | undefined,
 			projectId: args.projectId as string | undefined,
 			workspaceId: args.workspaceId as string | undefined,
@@ -60,15 +60,15 @@ async function main(): Promise<void> {
 		});
 	} catch (error) {
 		console.error(
-			`[tekmemo-mcp] ${error instanceof Error ? error.message : String(error)}`,
+			`[memofs-mcp] ${error instanceof Error ? error.message : String(error)}`,
 		);
 		process.exit(2);
 	}
 
 	const readOnly =
 		(args.readOnly as boolean | undefined) ??
-		process.env.TEKMEMO_MCP_READ_ONLY === "true";
-	const server = createTekMemoMcpProtocolServer({
+		process.env.MEMOFS_MCP_READ_ONLY === "true";
+	const server = createMemoFSMcpProtocolServer({
 		runtime,
 		readOnly,
 		requestTimeoutMs: numberArg(
@@ -123,7 +123,7 @@ function parseArgs(
 		else if (arg === "--max-output-bytes")
 			out.maxOutputBytes = requireValue(argv, ++index, arg);
 		else {
-			console.error(`[tekmemo-mcp] Unknown option: ${arg}`);
+			console.error(`[memofs-mcp] Unknown option: ${arg}`);
 			process.exit(2);
 		}
 	}
@@ -132,7 +132,7 @@ function parseArgs(
 		out.runtime !== undefined &&
 		!["local", "memory", "hybrid"].includes(out.runtime as string)
 	) {
-		console.error(`[tekmemo-mcp] --runtime must be local, memory, or hybrid.`);
+		console.error(`[memofs-mcp] --runtime must be local, memory, or hybrid.`);
 		process.exit(2);
 	}
 	if (
@@ -142,7 +142,7 @@ function parseArgs(
 		)
 	) {
 		console.error(
-			`[tekmemo-mcp] --read-policy must be local-first, cloud-first, or local-only.`,
+			`[memofs-mcp] --read-policy must be local-first, cloud-first, or local-only.`,
 		);
 		process.exit(2);
 	}
@@ -153,7 +153,7 @@ function parseArgs(
 		)
 	) {
 		console.error(
-			`[tekmemo-mcp] --write-policy must be local-first, cloud-first, or local-only.`,
+			`[memofs-mcp] --write-policy must be local-first, cloud-first, or local-only.`,
 		);
 		process.exit(2);
 	}
@@ -172,7 +172,7 @@ function parseArgs(
 function requireValue(argv: string[], index: number, flag: string): string {
 	const value = argv[index];
 	if (value === undefined || value.startsWith("--")) {
-		console.error(`[tekmemo-mcp] ${flag} requires a value.`);
+		console.error(`[memofs-mcp] ${flag} requires a value.`);
 		process.exit(2);
 	}
 	return value;
@@ -198,15 +198,15 @@ function numberArg(
  * Outputs the helper command usage documentation block to standard output.
  */
 function printHelp(): void {
-	console.log(`Usage: tekmemo-mcp-server [options]
+	console.log(`Usage: memofs-mcp-server [options]
 
 Options:
  --runtime <local|memory|cloud|hybrid> Runtime mode. Defaults to local.
  --root <path> Local workspace root. Defaults to cwd.
  --project-id <id> Optional project id / default cloud project id.
  --workspace-id <id> Optional default cloud workspace id.
- --cloud-url <url> TekMemo Cloud API root, e.g. https://memo.tekbreed.com/api/v1.
- --api-key <key> TekMemo Cloud API key. Prefer TEKMEMO_API_KEY.
+ --cloud-url <url> MemoFS Cloud API root, e.g. https://memofs.dev/api/v1.
+ --api-key <key> MemoFS Cloud API key. Prefer MEMOFS_API_KEY.
  --cloud-timeout-ms <number> Cloud request timeout. Defaults to cloud-client default.
  --read-policy <local-first|cloud-first>
  Hybrid read policy. Defaults to local-first.
@@ -220,13 +220,13 @@ Options:
  --help Show this help.
 
 Environment:
- TEKMEMO_RUNTIME local, memory, cloud, or hybrid.
- TEKMEMO_ROOT Local workspace root.
- TEKMEMO_CLOUD_URL / TEKMEMO_API_URL TekMemo Cloud API root.
- TEKMEMO_API_KEY TekMemo Cloud API key.
- TEKMEMO_WORKSPACE_ID Default cloud workspace id.
- TEKMEMO_PROJECT_ID Default project id.
- TEKMEMO_CLOUD_TIMEOUT_MS Cloud request timeout.
- TEKMEMO_MCP_READ_ONLY true to block write tools.
+ MEMOFS_RUNTIME local, memory, cloud, or hybrid.
+ MEMOFS_ROOT Local workspace root.
+ MEMOFS_CLOUD_URL / MEMOFS_API_URL MemoFS Cloud API root.
+ MEMOFS_API_KEY MemoFS Cloud API key.
+ MEMOFS_WORKSPACE_ID Default cloud workspace id.
+ MEMOFS_PROJECT_ID Default project id.
+ MEMOFS_CLOUD_TIMEOUT_MS Cloud request timeout.
+ MEMOFS_MCP_READ_ONLY true to block write tools.
 `);
 }

@@ -52,7 +52,7 @@ const MEMORY_KINDS = new Set<MemoryKind>([
 ]);
 
 /**
- * Validates that a value is a valid TekMemo MemoryKind.
+ * Validates that a value is a valid MemoFS MemoryKind.
  *
  * @param value - The value to validate.
  * @param name - The field name.

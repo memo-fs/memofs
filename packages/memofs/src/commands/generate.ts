@@ -1,19 +1,19 @@
 /**
- * CLI command handler for `tekmemo generate agent-rules`.
+ * CLI command handler for `memofs generate agent-rules`.
  *
  * Emits a <=50-line agent-instructions file (AGENTS.md, CLAUDE.md, GEMINI.md,
- * .github/copilot-instructions.md, or .cursor/rules/tekmemo.mdc) that enforces
- * the TekMemo MCP workflow. Each target gets a target-aware MCP config pointer
+ * .github/copilot-instructions.md, or .cursor/rules/memofs.mdc) that enforces
+ * the MemoFS MCP workflow. Each target gets a target-aware MCP config pointer
  * (each platform stores MCP servers in a different place). The file contains
  * only behavioral rules and pointers — no project facts (those live in
- * TekMemo memory, injected at runtime via `context`).
+ * MemoFS memory, injected at runtime via `context`).
  *
  * @module generate
  */
 
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import { getRootDir } from "../cli/store-helpers";
 import {
 	CliError,
@@ -73,7 +73,7 @@ export interface EmitAgentRulesOptions {
 	readonly pointers?: readonly AgentRulesPointer[];
 }
 
-/** Hard cap on generated file length. Project facts belong in TekMemo memory. */
+/** Hard cap on generated file length. Project facts belong in MemoFS memory. */
 export const MAX_AGENT_RULES_LINES = 50;
 
 /**
@@ -115,7 +115,7 @@ const TARGET_META: Record<AgentRulesTarget, TargetMeta> = {
 	},
 	// Cursor: rules in .cursor/rules/*.mdc; project MCP in .cursor/mcp.json.
 	cursor: {
-		file: ".cursor/rules/tekmemo.mdc",
+		file: ".cursor/rules/memofs.mdc",
 		mcp: { path: ".cursor/mcp.json", global: false },
 	},
 };
@@ -161,7 +161,7 @@ export function parseAgentRulesTarget(
 export function resolveMcpPointer(target: AgentRulesTarget): AgentRulesPointer {
 	const { mcp } = TARGET_META[target];
 	const hint = mcp.global ? " (global MCP config)" : " (project MCP config)";
-	return { label: `TekMemo MCP server config${hint}`, path: mcp.path };
+	return { label: `MemoFS MCP server config${hint}`, path: mcp.path };
 }
 
 /**
@@ -177,7 +177,7 @@ function buildFrontmatter(target: AgentRulesTarget): string | null {
 			// followed by a blank line so the closing "---" isn't misparsed.
 			return [
 				"---",
-				"description: TekMemo memory workflow — load context, recall, remember.",
+				"description: MemoFS memory workflow — load context, recall, remember.",
 				"globs: **/*",
 				"alwaysApply: true",
 				"---",
@@ -190,7 +190,7 @@ function buildFrontmatter(target: AgentRulesTarget): string | null {
 }
 
 /**
- * Builds the shared markdown body (the TekMemo workflow directive + rules +
+ * Builds the shared markdown body (the MemoFS workflow directive + rules +
  * pointers). Pure: identical for every target except the prepended frontmatter.
  *
  * @param opts - Resolved options (all fields required).
@@ -205,27 +205,27 @@ function buildBody(opts: {
 	lines.push(`# ${opts.projectName} — Agent Rules`);
 	lines.push("");
 	lines.push(
-		"This file is the bootstrap for agents working in this repo. **All project knowledge lives in TekMemo** — use MCP tools, not this file.",
+		"This file is the bootstrap for agents working in this repo. **All project knowledge lives in MemoFS** — use MCP tools, not this file.",
 	);
 	lines.push("");
-	lines.push("## TekMemo Memory (REQUIRED)");
+	lines.push("## MemoFS Memory (REQUIRED)");
 	lines.push("");
 	lines.push(
-		"This repo uses TekMemo as its single source of truth for project knowledge.",
+		"This repo uses MemoFS as its single source of truth for project knowledge.",
 	);
 	lines.push("At the **start of every task**, agents MUST:");
 	lines.push("");
 	lines.push(
-		"1. **Load context** — call the TekMemo `context` tool (e.g. `tekmemo.context`) with the task description to load core memory, notes, and recall.",
+		"1. **Load context** — call the MemoFS `context` tool (e.g. `memofs.context`) with the task description to load core memory, notes, and recall.",
 	);
 	lines.push(
-		"2. **Look up details** — use the TekMemo `recall` tool (e.g. `tekmemo.recall`) for specific lookups when context is insufficient.",
+		"2. **Look up details** — use the MemoFS `recall` tool (e.g. `memofs.recall`) for specific lookups when context is insufficient.",
 	);
 	lines.push(
 		"3. **Adhere to memory** — follow constraints, decisions, and references returned.",
 	);
 	lines.push(
-		"4. **Persist new facts** — store discovered facts/decisions via the TekMemo `remember` tool (e.g. `tekmemo.remember`).",
+		"4. **Persist new facts** — store discovered facts/decisions via the MemoFS `remember` tool (e.g. `memofs.remember`).",
 	);
 	lines.push("");
 	lines.push(
@@ -267,7 +267,7 @@ export function emitAgentRules(opts: EmitAgentRulesOptions): AgentRulesFile {
 	const lineCount = content.split("\n").length;
 	if (lineCount > MAX_AGENT_RULES_LINES) {
 		throw new CliValidationError(
-			`Generated ${opts.target} rules exceed ${MAX_AGENT_RULES_LINES} lines (${lineCount}). Trim rules or pointers — project facts belong in TekMemo memory, not this file.`,
+			`Generated ${opts.target} rules exceed ${MAX_AGENT_RULES_LINES} lines (${lineCount}). Trim rules or pointers — project facts belong in MemoFS memory, not this file.`,
 		);
 	}
 
@@ -278,8 +278,8 @@ export function emitAgentRules(opts: EmitAgentRulesOptions): AgentRulesFile {
  * Options configuration for the `generate agent-rules` command.
  */
 export interface GenerateAgentRulesCommandOptions {
-	/** The Tekmemo client instance. */
-	readonly memo: Tekmemo;
+	/** The MemoFS client instance. */
+	readonly memo: MemoFS;
 	/** The CLI output console wrapper. */
 	readonly output: CliOutput;
 	/** If true, outputs results in structured JSON format. */
@@ -295,7 +295,7 @@ export interface GenerateAgentRulesCommandOptions {
 }
 
 /**
- * Runs the `generate agent-rules` command: emits a TekMemo-enforcing
+ * Runs the `generate agent-rules` command: emits a MemoFS-enforcing
  * instructions file for the given target and writes it to the project root.
  *
  * @param options - Command configuration options.
@@ -388,7 +388,7 @@ export async function runGenerateAgentRulesCommand(
 		printJsonEnvelope(options.output, "generate.agent-rules", data);
 	} else {
 		options.output.success(
-			`Generated ${file.path} (${data.lines} lines) — TekMemo MCP configured at ${data.mcpConfig}`,
+			`Generated ${file.path} (${data.lines} lines) — MemoFS MCP configured at ${data.mcpConfig}`,
 		);
 	}
 	return 0;

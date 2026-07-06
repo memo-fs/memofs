@@ -2,7 +2,7 @@ import { cloudflareTest } from "@cloudflare/vitest-pool-workers";
 import { defineConfig } from "vitest/config";
 
 /**
- * Two-pool Vitest 4 config for `tekmemo-server`.
+ * Two-pool Vitest 4 config for `memofs-server`.
  *
  * Mirrors `apps/cloud/vitest.config.ts`'s split (Vitest 4 inline `test.projects`):
  *

@@ -6,8 +6,8 @@ const mf = new Miniflare({
 			type: "ESModule",
 			path: "entry.mjs",
 			contents: `
-    import { Tekmemo } from "@memofs/core";
-    export default { async fetch() { return new Response("OK " + typeof Tekmemo); } };
+    import { MemoFS } from "@memofs/core";
+    export default { async fetch() { return new Response("OK " + typeof MemoFS); } };
   `,
 		},
 	],

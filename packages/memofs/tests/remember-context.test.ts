@@ -1,19 +1,19 @@
-import { TEKMEMO_PATHS, Tekmemo } from "@memofs/core";
+import { MEMOFS_PATHS, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 describe("remember and context", () => {
 	it("stores a structured agent memory note", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"remember",
 					"Use VoyageAI for embeddings.",
@@ -33,7 +33,7 @@ describe("remember and context", () => {
 			expect(parsed.ok).toBe(true);
 			expect(parsed.data.kind).toBe("decision");
 
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir: temp.rootDir,
 					createRoot: true,
@@ -42,7 +42,7 @@ describe("remember and context", () => {
 				rootDir: temp.rootDir,
 				autoBootstrap: false,
 			});
-			const notes = await memo.store.read(TEKMEMO_PATHS.memory.notes);
+			const notes = await memo.store.read(MEMOFS_PATHS.memory.notes);
 			expect(notes).toContain("Use VoyageAI for embeddings");
 		} finally {
 			await temp.cleanup();
@@ -50,12 +50,12 @@ describe("remember and context", () => {
 	});
 
 	it("refuses likely secrets by default", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"remember",
 					"OPENAI_API_KEY=sk-123456789012345678901234",
@@ -71,12 +71,12 @@ describe("remember and context", () => {
 	});
 
 	it("packs context for agent use", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: [
 					"remember",
 					"Billing webhooks verify signatures.",
@@ -86,7 +86,7 @@ describe("remember and context", () => {
 					"constraint",
 				],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"context",
 					"--root",

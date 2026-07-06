@@ -5,11 +5,11 @@
  */
 
 import { createHash } from "node:crypto";
-import type { MemoryStore, Tekmemo } from "@memofs/core";
+import type { MemoryStore, MemoFS } from "@memofs/core";
 import { readText, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
 /**
@@ -17,9 +17,9 @@ import { parseJsonl } from "../protocol/jsonl";
  */
 export interface DiffCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -108,7 +108,7 @@ export async function runDiffCommand(
 ): Promise<number> {
 	const snapshotContent = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.snapshots,
+		MEMOFS_PATHS.snapshots,
 	);
 	if (!snapshotContent) {
 		options.output.error("No snapshots found.");

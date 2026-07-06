@@ -4,5 +4,5 @@
  * @module config
  */
 
-export type { TekMemoConfigFile } from "./runtime";
+export type { MemoFsConfigFile } from "./runtime";
 export { configSchemaUrl, writeDefaultCliConfig } from "./runtime";

@@ -1,5 +1,5 @@
 /**
- * HTTP layer for the `tekmemo-server` runtime API (`handleRuntimeRequest`).
+ * HTTP layer for the `memofs-server` runtime API (`handleRuntimeRequest`).
  *
  * @remarks
  * Proves the framework-free core's contract at slice 1:
@@ -34,7 +34,7 @@ async function post(
 	};
 	if (init?.token) headers.Authorization = `Bearer ${init.token}`;
 	const res = await handleRuntimeRequest(
-		new Request(`http://tekmemo.test${init?.path ?? "/"}`, {
+		new Request(`http://memofs.test${init?.path ?? "/"}`, {
 			method: "POST",
 			headers,
 			body: JSON.stringify(body),
@@ -66,13 +66,13 @@ describe("handleRuntimeRequest — HTTP layer", () => {
 
 	it("GET /health returns liveness JSON", async () => {
 		const res = await handleRuntimeRequest(
-			new Request("http://tekmemo.test/health"),
+			new Request("http://memofs.test/health"),
 			{ runtime },
 		);
 		expect(res.status).toBe(200);
 		const body = (await res.json()) as { ok: boolean; name: string };
 		expect(body.ok).toBe(true);
-		expect(body.name).toBe("tekmemo-server");
+		expect(body.name).toBe("memofs-server");
 	});
 
 	it("POST / dispatches a read method and returns the success envelope", async () => {
@@ -115,7 +115,7 @@ describe("handleRuntimeRequest — HTTP layer", () => {
 
 	it("rejects a non-JSON Content-Type with 415", async () => {
 		const res = await handleRuntimeRequest(
-			new Request("http://tekmemo.test/", {
+			new Request("http://memofs.test/", {
 				method: "POST",
 				headers: { "Content-Type": "text/plain" },
 				body: "nope",
@@ -127,7 +127,7 @@ describe("handleRuntimeRequest — HTTP layer", () => {
 
 	it("returns 405 for unsupported verbs", async () => {
 		const res = await handleRuntimeRequest(
-			new Request("http://tekmemo.test/health", { method: "DELETE" }),
+			new Request("http://memofs.test/health", { method: "DELETE" }),
 			{ runtime },
 		);
 		expect(res.status).toBe(405);
@@ -135,7 +135,7 @@ describe("handleRuntimeRequest — HTTP layer", () => {
 
 	it("returns 404 for unknown POST paths", async () => {
 		const res = await handleRuntimeRequest(
-			new Request("http://tekmemo.test/unknown", {
+			new Request("http://memofs.test/unknown", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: "{}",
@@ -170,7 +170,7 @@ describe("handleRuntimeRequest — HTTP layer", () => {
 		it("rejects a wrong token with 401 when auth is required", async () => {
 			// Server is configured with bearerToken "right"; client sends "wrong".
 			const res = await handleRuntimeRequest(
-				new Request("http://tekmemo.test/", {
+				new Request("http://memofs.test/", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",

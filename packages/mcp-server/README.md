@@ -5,7 +5,7 @@
   <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
   <a href="https://www.npmjs.com/package/@memofs/mcp-server"><img src="https://img.shields.io/npm/dm/%40memofs%2Fmcp-server?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://docs.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
@@ -53,7 +53,7 @@ You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the 
 
 The server supports advanced runtime modes (`local`, `cloud`, `hybrid`, `memory`), customizable read/write policies, and a strict `--read-only` flag to block mutating tools when used with untrusted clients.
 
-For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://docs.memo.memofs.dev/packages/mcp/).
+For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://docs.memofs.dev/packages/mcp/).
 
 ## Contributing
 

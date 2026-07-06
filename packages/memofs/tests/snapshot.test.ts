@@ -1,15 +1,15 @@
-import { createTempTekMemoDir } from "@memofs/core/node-fs";
+import { createTempMemoFsDir } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
-import { runTekMemoCli } from "../src";
+import { runMemoFsCli } from "../src";
 
 describe("snapshot", () => {
 	it("creates a snapshot", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: [
 					"snapshot",
 					"--root",
@@ -30,12 +30,12 @@ describe("snapshot", () => {
 	});
 
 	it("rejects unsafe snapshot labels", async () => {
-		const temp = await createTempTekMemoDir();
+		const temp = await createTempMemoFsDir();
 		try {
-			await runTekMemoCli({
+			await runMemoFsCli({
 				argv: ["init", "--root", temp.rootDir, "--no-input"],
 			});
-			const result = await runTekMemoCli({
+			const result = await runMemoFsCli({
 				argv: ["snapshot", "--root", temp.rootDir, "--label", "../bad"],
 			});
 

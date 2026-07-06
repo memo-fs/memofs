@@ -4,7 +4,7 @@
  * @module remember
  */
 
-import type { Tekmemo } from "@memofs/core";
+import type { MemoFS } from "@memofs/core";
 import {
 	appendText,
 	getRootDir,
@@ -14,7 +14,7 @@ import {
 import { CliUsageError } from "../errors/cli-errors";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { TEKMEMO_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS } from "../protocol/constants";
 import { stringifyJsonl } from "../protocol/jsonl";
 import { resolveCommandContent } from "../utils/content";
 import { parseMetadataJson } from "../utils/metadata";
@@ -26,9 +26,9 @@ import { scanForSecrets } from "../utils/secrets";
  */
 export interface RememberCommandOptions {
 	/**
-	 * The Tekmemo client instance.
+	 * The MemoFS client instance.
 	 */
-	memo: Tekmemo;
+	memo: MemoFS;
 	/**
 	 * The CLI output console wrapper.
 	 */
@@ -233,13 +233,13 @@ export async function runRememberCommand(
 
 	const currentNotes = await readTextIfExists(
 		options.memo.store,
-		TEKMEMO_PATHS.notesMemory,
+		MEMOFS_PATHS.notesMemory,
 	);
 	const nextNotes =
 		`${(currentNotes ?? "# Notes\n").trimEnd()}\n\n${note}`.trimStart();
 	await writeText(
 		options.memo.store,
-		TEKMEMO_PATHS.notesMemory,
+		MEMOFS_PATHS.notesMemory,
 		`${nextNotes.trimEnd()}\n`,
 	);
 
@@ -248,7 +248,7 @@ export async function runRememberCommand(
 		id: eventId,
 		type: "memory.created",
 		timestamp,
-		sourcePath: TEKMEMO_PATHS.notesMemory,
+		sourcePath: MEMOFS_PATHS.notesMemory,
 		actor,
 		summary:
 			options.title ??
@@ -260,19 +260,19 @@ export async function runRememberCommand(
 			confidence,
 			...(options.source ? { source: options.source } : {}),
 			...(metadata ? { userMetadata: metadata } : {}),
-			createdBy: "tekmemo/cli",
+			createdBy: "memofs/cli",
 		},
 	};
 	await appendText(
 		options.memo.store,
-		TEKMEMO_PATHS.memoryEvents,
+		MEMOFS_PATHS.memoryEvents,
 		stringifyJsonl([event]),
 	);
 
 	const data = {
 		stored: true,
 		eventId,
-		path: TEKMEMO_PATHS.notesMemory,
+		path: MEMOFS_PATHS.notesMemory,
 		kind,
 		tags,
 		confidence,
@@ -281,7 +281,7 @@ export async function runRememberCommand(
 	if (options.json) printJsonEnvelope(options.output, "remember", data);
 	else
 		options.output.success(
-			`Stored ${kind} memory in ${TEKMEMO_PATHS.notesMemory}`,
+			`Stored ${kind} memory in ${MEMOFS_PATHS.notesMemory}`,
 		);
 	return 0;
 }

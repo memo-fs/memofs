@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Node single-process entry for `tekmemo-server` — the OSS self-host deploy
+ * Node single-process entry for `memofs-server` — the OSS self-host deploy
  * (: "a single Node process for OSS self-hosters — Fly / Railway /
  * Render / a VPS — no size cap, nothing to split").
  *
@@ -18,7 +18,7 @@
  * deterministic in-memory default so the bin boots + passes its smoke test;
  * the cloud-bundle wiring is the deploy-doc configuration step.
  *
- * Auth: bearer token via `TEKMEMO_SERVER_TOKEN` (required when the port is
+ * Auth: bearer token via `MEMOFS_SERVER_TOKEN` (required when the port is
  * exposed publicly — set `requireAuth` off only behind a private network).
  */
 
@@ -27,21 +27,21 @@ import {
 	type IncomingMessage,
 	type ServerResponse,
 } from "node:http";
-import { InMemoryMemoryStore, type Tekmemo } from "@memofs/core";
+import { InMemoryMemoryStore, type MemoFS } from "@memofs/core";
 import { createHostedRuntime, handleRuntimeRequest } from "../src/index";
 
 const PORT = parsePort(process.env.PORT);
-const TOKEN = process.env.TEKMEMO_SERVER_TOKEN;
+const TOKEN = process.env.MEMOFS_SERVER_TOKEN;
 // Auth defaults OFF: the in-memory default bundle has no secret, and the cloud
 // reaches the runtime Worker over a private Service Binding. A self-hoster
-// exposing the port publicly sets TEKMEMO_SERVER_TOKEN (which auto-enables
-// auth) or TEKMEMO_SERVER_REQUIRE_AUTH=true explicitly.
+// exposing the port publicly sets MEMOFS_SERVER_TOKEN (which auto-enables
+// auth) or MEMOFS_SERVER_REQUIRE_AUTH=true explicitly.
 const REQUIRE_AUTH =
-	process.env.TEKMEMO_SERVER_REQUIRE_AUTH === "true" || TOKEN !== undefined;
+	process.env.MEMOFS_SERVER_REQUIRE_AUTH === "true" || TOKEN !== undefined;
 
 main().catch((error) => {
 	console.error(
-		`[tekmemo-server] ${error instanceof Error ? error.message : String(error)}`,
+		`[memofs-server] ${error instanceof Error ? error.message : String(error)}`,
 	);
 	process.exit(1);
 });
@@ -54,7 +54,7 @@ async function main(): Promise<void> {
 	const runtime = buildRuntime();
 	const server = createServer((req, res) => {
 		serve(req, res, runtime).catch((error) => {
-			console.error("[tekmemo-server] request failed", error);
+			console.error("[memofs-server] request failed", error);
 			if (!res.headersSent) {
 				res.writeHead(500, { "Content-Type": "text/plain" });
 			}
@@ -78,17 +78,17 @@ async function main(): Promise<void> {
 		// misconfigured public deploy leak memory silently.
 		if (!REQUIRE_AUTH) {
 			console.warn(
-				`[tekmemo-server] WARNING: auth is off and the server binds 0.0.0.0. ` +
-					`Set TEKMEMO_SERVER_TOKEN before exposing this port publicly, ` +
+				`[memofs-server] WARNING: auth is off and the server binds 0.0.0.0. ` +
+					`Set MEMOFS_SERVER_TOKEN before exposing this port publicly, ` +
 					`or run behind a private network / Service Binding.`,
 			);
 		}
-		console.log(`[tekmemo-server] listening on http://0.0.0.0:${PORT}${auth}`);
+		console.log(`[memofs-server] listening on http://0.0.0.0:${PORT}${auth}`);
 	});
 
 	// Graceful shutdown on SIGTERM/SIGINT (container hosts send these).
 	const shutdown = (signal: string) => {
-		console.log(`[tekmemo-server] ${signal} received, shutting down.`);
+		console.log(`[memofs-server] ${signal} received, shutting down.`);
 		server.close(() => process.exit(0));
 	};
 	process.on("SIGTERM", () => shutdown("SIGTERM"));
@@ -100,12 +100,12 @@ async function main(): Promise<void> {
  *
  * @param req - The Node incoming message.
  * @param res - The Node server response.
- * @param runtime - The assembled Tekmemo runtime.
+ * @param runtime - The assembled MemoFS runtime.
  */
 async function serve(
 	req: IncomingMessage,
 	res: ServerResponse,
-	runtime: Tekmemo,
+	runtime: MemoFS,
 ): Promise<void> {
 	const method = req.method ?? "GET";
 	const url = new URL(
@@ -203,11 +203,11 @@ function headersToObject(headers: Headers): Record<string, string> {
  * runtime so the bin boots + passes its smoke test. The deploy doc wires the
  * real bundle (R2-compatible bucket + Turso/libSQL + OpenAI) here.
  */
-function buildRuntime(): Tekmemo {
+function buildRuntime(): MemoFS {
 	return createHostedRuntime({
 		store: new InMemoryMemoryStore(),
-		projectId: process.env.TEKMEMO_PROJECT_ID ?? "self-host",
-		name: "tekmemo-server",
+		projectId: process.env.MEMOFS_PROJECT_ID ?? "self-host",
+		name: "memofs-server",
 		version: "0.1.0",
 	});
 }

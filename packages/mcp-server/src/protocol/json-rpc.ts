@@ -7,7 +7,7 @@
  * Historically this module held its own copy of the JSON-RPC types + helpers,
  * coupled to `McpValidationError`. Extracting that into
  * `@memofs/json-rpc` makes one spec implementation the workspace
- * SSOT (consumed here and by `tekmemo-server`'s runtime API). The MCP layer
+ * SSOT (consumed here and by `memofs-server`'s runtime API). The MCP layer
  * keeps its error identity by catching the neutral
  * {@link JsonRpcProtocolError} and re-throwing as `McpValidationError` at the
  * call sites in `protocol/server.ts` — the protocol layer never imports a

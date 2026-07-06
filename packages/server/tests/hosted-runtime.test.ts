@@ -10,14 +10,14 @@ import {
 	type Reranker,
 	type RerankInput,
 	type RerankResult,
-	Tekmemo,
+	MemoFS,
 } from "@memofs/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createHostedRuntime } from "../src";
 
 /**
  * Slice 0 contract for the provider-neutral hosted-runtime factory. Proves:
- * 1. It assembles a working {@link Tekmemo} from **injected** adapters (no
+ * 1. It assembles a working {@link MemoFS} from **injected** adapters (no
  * env reads, no hardcoded provider) — the cloud + the OSS self-hoster pass
  * different bundles and get the identical engine.
  * 2. `store` is the only required slot; missing it throws a clear error.
@@ -34,7 +34,7 @@ describe("createHostedRuntime — provider-neutral factory (slice 0)", () => {
 		store = new InMemoryMemoryStore();
 	});
 
-	it("assembles a working Tekmemo from injected fakes (no provider calls)", async () => {
+	it("assembles a working MemoFS from injected fakes (no provider calls)", async () => {
 		const tek = createHostedRuntime({
 			store,
 			projectId: "self-host",
@@ -44,7 +44,7 @@ describe("createHostedRuntime — provider-neutral factory (slice 0)", () => {
 			llmClient: createFakeLlmClient(),
 		});
 
-		expect(tek).toBeInstanceOf(Tekmemo);
+		expect(tek).toBeInstanceOf(MemoFS);
 		expect(tek.projectId).toBe("self-host");
 
 		// The assembled runtime works end-to-end over the injected store: a write
@@ -90,9 +90,9 @@ describe("createHostedRuntime — provider-neutral factory (slice 0)", () => {
 		expect(hits.items.length).toBeGreaterThan(0);
 	});
 
-	it("defaults name/version to the tekmemo-server identity", () => {
+	it("defaults name/version to the memofs-server identity", () => {
 		const tek = createHostedRuntime({ store, projectId: "defaults" });
-		expect(tek.name).toBe("tekmemo-server");
+		expect(tek.name).toBe("memofs-server");
 		expect(tek.version).toBe("0.1.0");
 	});
 
