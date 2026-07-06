@@ -18,16 +18,16 @@ Notes); the risk is completeness — zero missed references.
 
 Concrete work:
 1. **Rename directories:** `packages/client → packages/core`. Keep
-   `packages/adapter-r2` as `@tekmemo/adapter-r2`; the reconciliation rejects
+   `packages/adapter-r2` as `@memofs/adapter-r2`; the reconciliation rejects
    the old `adapter-cloudflare` direction, and WF-1 owns the later
    blob/metadata split.
 2. **Rewrite every `package.json` `name`** to the final map (see MAP Notes):
-   core `@tekmemo/core`, adapters `@tekmemo/adapter-*`, etc.; `packages/tekmemo`
-   stays `tekmemo`; `apps/cloud` → `@tekmemo/cloud`; `apps/docs` → `@tekmemo/docs`.
+   core `@memofs/core`, adapters `@memofs/adapter-*`, etc.; `packages/tekmemo`
+   stays `tekmemo`; `apps/cloud` → `@memofs/cloud`; `apps/docs` → `@memofs/docs`.
 3. **Fix `repository.directory`** in each package.json (currently points at old
    `packages/tekmemo-*` paths — broken after the dir renames).
-4. **Rewrite all internal imports** `@tekbreed/* → @tekmemo/*` (and
-   `@tekmemo/client → @tekmemo/core`) across `packages/*/src`, `apps/*/src`,
+4. **Rewrite all internal imports** `@tekbreed/* → @memofs/*` (and
+   `@memofs/client → @memofs/core`) across `packages/*/src`, `apps/*/src`,
    `examples/`, `benchmarks/`. (~30+ sites — grep, replace, verify.)
 5. **Drop stale `@tekbreed/tekmemo-cli`** references: root `devDependencies`
    + the `package-naming.md` table row. The CLI lives in `packages/tekmemo`.
@@ -47,15 +47,15 @@ remains in source; no broken `repository.directory`; `validate:workspace` passes
 
 Completed the local naming and scope overhaul for the workspace:
 
-- `packages/client` is now `packages/core`, published as `@tekmemo/core`.
+- `packages/client` is now `packages/core`, published as `@memofs/core`.
 - `packages/tekmemo` stays the unscoped `tekmemo` CLI package.
-- Public packages use `@tekmemo/*`; internal tooling stays `@repo/*`.
-- `packages/adapter-r2` stays `@tekmemo/adapter-r2`; the stale
+- Public packages use `@memofs/*`; internal tooling stays `@repo/*`.
+- `packages/adapter-r2` stays `@memofs/adapter-r2`; the stale
   `adapter-cloudflare` rename direction is rejected by the reconciliation.
 - Workspace package metadata, repository directories, lockfile references, and
   local SSOT rule docs were aligned to the reconciled package map.
 - Workspace package versions were bumped to `1.0.0-beta.1`.
-- The `@tekmemo/core` / `@tekmemo/testing` workspace dependency cycle warning was
+- The `@memofs/core` / `@memofs/testing` workspace dependency cycle warning was
   removed by dropping the unnecessary testing-package dependency on core.
 
 Local verification passed for package identity/version scans and stale

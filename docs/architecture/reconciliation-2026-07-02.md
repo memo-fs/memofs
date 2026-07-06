@@ -51,9 +51,9 @@ positions and the "`packages/server` fate = fog" entry.
 **Consequence for the database:** D1 is **rejected**; Turso/libSQL stays. The
 concurrency layer (ADR 0010, implemented in `73d2cef` as libSQL `BEGIN IMMEDIATE`)
 is designed against Turso, and — more importantly — D1 would shatter the
-self-hosting thesis: OSS self-hosters running `tekmemo-server` on Node/Fly/Railway
+self-hosting thesis: OSS self-hosters running `memofs-server` on Node/Fly/Railway
 cannot bind a Cloudflare D1. Turso/libSQL is the portable choice that keeps cloud
-and OSS on identical `tekmemo-server` code.
+and OSS on identical `memofs-server` code.
 
 ### K2 — v1 ships the file-replica foundation; the managed runtime is a v1.1 fast-follow
 
@@ -76,7 +76,7 @@ v1 launch."
 - **v1 launch** = file-replica sync + dashboard + Better Auth + Polar billing +
   connector control-plane. Cheap, fast, revenue-generating. This is the D2 thesis,
   sequenced honestly.
-- **v1.1 fast-follow** = `tekmemo-server` runtime Worker + hosted runtime +
+- **v1.1 fast-follow** = `memofs-server` runtime Worker + hosted runtime +
   concurrency-layer completion + Teams writes + SC8 hosted-memory + SC9
   entitlement rows + LLM-enhanced intelligence tier. This is S3-Q9's ambition,
   sequenced honestly — weeks after v1 revenue, not all-at-once.
@@ -120,48 +120,48 @@ outcome 2 is a deletion, not a rewrite.
 charting, left the circular dependency unaddressed).
 
 **Evidence that forced it:**
-- `packages/client` (`@tekmemo/client`) **is the core runtime** — 13 subsystems
+- `packages/client` (`@memofs/client`) **is the core runtime** — 13 subsystems
   (agentfs, ai-runtime, cloud-client, core, fs, graph, recall, rerank, security,
-  testing…). Its own `index.ts` says *"TekMemo core."*
-- `packages/tekmemo` (named like the product) **is the CLI** — `bin: { tekmemo }`,
-  deps `@tekmemo/client` + `commander` + connectors. It is `packages/tekmemo-cli`
+  testing…). Its own `index.ts` says *"Memo FS core."*
+- `packages/memofs` (named like the product) **is the CLI** — `bin: { memofs }`,
+  deps `@memofs/client` + `commander` + connectors. It is `packages/memofs-cli`
   by content.
 - **The dependency is circular:** `client` imports foundational primitives
   (`MemoryPath`, `MemoryStore`, `assertMemoryPath`) from the CLI package
-  (`@tekbreed/tekmemo`) in **18 files**; the CLI imports core in 1 file
+  (`@memofs/core`) in **18 files**; the CLI imports core in 1 file
   (`runner.ts`). Core reaches *up* into a consumer for core primitives — an
   inverted layering that survives today only by pnpm hoisting + build-order
   tolerance.
 
 **The fix (three-part move):**
-1. `packages/client` (`@tekmemo/client`) → `packages/core` (`@tekmemo/core`).
+1. `packages/client` (`@memofs/client`) → `packages/core` (`@memofs/core`).
    The core runtime gets the conventional scoped name and **holds** the primitives.
-2. `packages/tekmemo` **stays** `packages/tekmemo` (`tekmemo`, unscoped) — it is
-   the CLI, and `npm install -g tekmemo` is the install command users expect.
-   The CLI depends on `@tekmemo/core`.
+2. `packages/memofs` **stays** `packages/memofs` (`memofs`, unscoped) — it is
+   the CLI, and `npm install -g memofs` is the install command users expect.
+   The CLI depends on `@memofs/core`.
 3. Move the primitive *definitions* (`MemoryPath`, `MemoryStore`,
    `MemoryStoreError`, `assertMemoryPath`, canonical paths) out of the CLI into
-   `@tekmemo/core`; the CLI re-imports them from `@tekmemo/core`. The 18-file
-   cycle inverts to a clean `@tekmemo/core` ← `tekmemo` (CLI) arrow.
+   `@memofs/core`; the CLI re-imports them from `@memofs/core`. The 18-file
+   cycle inverts to a clean `@memofs/core` ← `memofs` (CLI) arrow.
 
-**Why `@tekmemo/core` over `tekmemo` (unscoped) for the core runtime:** the
-unscoped `tekmemo` name stays on the CLI so `npm install -g tekmemo` and
-`npx tekmemo` keep working as the primary install surface. `@tekmemo/core` is the
+**Why `@memofs/core` over `memofs` (unscoped) for the core runtime:** the
+unscoped `memofs` name stays on the CLI so `npm install -g memofs` and
+`npx memofs` keep working as the primary install surface. `@memofs/core` is the
 conventional, unambiguous name for the core library and avoids consumers
 ambiguous-installng the engine when they meant the tool. (The CONTEXT Q15
 glossary reservation of "core" governs *prose* usage — don't say "core" when you
-mean the product or the memory runtime; a *package name* `@tekmemo/core` does
+mean the product or the memory runtime; a *package name* `@memofs/core` does
 not collide with that.)
 
-**Registry cost: zero.** `@tekmemo/client` is 404 on the public registry
+**Registry cost: zero.** `@memofs/client` is 404 on the public registry
 (verified — pre-launch, unpublished), so the rename + scope flip has no
 downstream-consumer blast radius.
 
-### K5 — Tracker: GitHub Issues on tekbreed/tekmemo
+### K5 — Tracker: GitHub Issues on christophersesugh/memofs
 
 **Replaces:** the local-markdown wayfinder tickets (`docs/wayfinder/tickets/*.md`).
 
-**Why:** the repo has a GitHub remote (`tekbreed/tekmemo`); GitHub Issues give
+**Why:** the repo has a GitHub remote (`christophersesugh/memofs`); GitHub Issues give
 native blocking semantics, frontier queries, parallel-session safety, and OSS
 visibility ahead of the OSS launch. The 13 local tickets migrate to child issues
 of a `wayfinder:map` issue. The local files are cleaned up as part of WF-5.
@@ -174,26 +174,26 @@ Audited this session. All adapters are real implementations, not scaffolds:
 
 | Package | Scope (current) | Status | LoC |
 |---|---|---|---|
-| `client` (→ `core`) | `@tekmemo/client` | **Core runtime** — 13 subsystems | large |
-| `tekmemo` (→ `cli`) | `tekmemo` (unscoped) | **CLI** — depends on core | — |
-| `adapter-openai` | `@tekbreed/tekmemo-adapter-openai` | real | 1349 |
-| `adapter-voyage` | `@tekbreed/tekmemo-adapter-voyage` | real | 2117 |
-| `adapter-transformers` | `@tekbreed/tekmemo-adapter-transformers` | real | 571 |
-| `adapter-workers-ai` | `@tekbreed/tekmemo-adapter-workers-ai` | real | 310 |
-| `adapter-r2` | `@tekbreed/tekmemo-adapter-r2` | real (blob-only per S3-Q3) | 209 |
-| `adapter-ai-sdk` | `@tekbreed/tekmemo-adapter-ai-sdk` | real (extracted S2-Q1) | 1482 |
-| `connectors` | `@tekbreed/tekmemo-connectors` | real — GitHub + Notion built | 2212 |
-| `json-rpc` | `@tekbreed/tekmemo-json-rpc` | real | 364 |
-| `server` | `@tekbreed/tekmemo-server` | real — slice 0 landed | 1238 |
-| `mcp-server` | `@tekbreed/tekmemo-mcp-server` | real | — |
-| `benchmark-kit` | `@tekbreed/tekmemo-benchmark-kit` | real | — |
-| `testing` | `@tekbreed/tekmemo-testing` | real — contract suites + fakes | — |
+| `client` (→ `core`) | `@memofs/client` | **Core runtime** — 13 subsystems | large |
+| `memofs` (→ `cli`) | `memofs` (unscoped) | **CLI** — depends on core | — |
+| `adapter-openai` | `@memofs/adapter-openai` | real | 1349 |
+| `adapter-voyage` | `@memofs/core-adapter-voyage` | real | 2117 |
+| `adapter-transformers` | `@memofs/adapter-transformers` | real | 571 |
+| `adapter-workers-ai` | `@memofs/core-adapter-workers-ai` | real | 310 |
+| `adapter-r2` | `@memofs/adapter-r2` | real (blob-only per S3-Q3) | 209 |
+| `adapter-ai-sdk` | `@memofs/adapter-ai-sdk` | real (extracted S2-Q1) | 1482 |
+| `connectors` | `@memofs/connectors` | real — GitHub + Notion built | 2212 |
+| `json-rpc` | `@memofs/core-json-rpc` | real | 364 |
+| `server` | `@memofs/server` | real — slice 0 landed | 1238 |
+| `mcp-server` | `@memofs/core-mcp-server` | real | — |
+| `benchmark-kit` | `@memofs/core-benchmark-kit` | real | — |
+| `testing` | `@memofs/core-testing` | real — contract suites + fakes | — |
 
 Zero TODO/stub markers found in any adapter. `connectors.json` is already wired
 as the 11th canonical file (`packages/client/src/core/constants/memory-paths.ts:46`).
 
-**Scope flip pending:** all 12 scoped packages are `@tekbreed/tekmemo-*`; K1 +
-WF-2 flip them to `@tekmemo/*`. `@repo/*` internal tooling is unchanged.
+**Scope flip pending:** all 12 scoped packages are `@memofs/core-*`; K1 +
+WF-2 flip them to `@memofs/*`. `@repo/*` internal tooling is unchanged.
 
 ---
 
@@ -225,7 +225,7 @@ working tree is discarded (its fate was tied to this decision; now resolved).
 | Ticket | Action | Reason |
 |---|---|---|
 | WF-1 adapter-cloudflare-contract | **REWRITE** → blob/metadata-decoupled contract (S3-Q3): `adapter-r2` (blob) + `adapter-turso` (metadata), N+M not bundled | MAP's bundled `adapter-cloudflare` (R2+D1) is dead under K1 |
-| WF-2 naming-and-scope-overhaul | **EXPAND** → scope flip **+ K4 layering fix** (client→tekmemo, tekmemo→cli, move primitives down) | The core/cli cycle must die in the same pass as the rename |
+| WF-2 naming-and-scope-overhaul | **EXPAND** → scope flip **+ K4 layering fix** (client→memofs, memofs→cli, move primitives down) | The core/cli cycle must die in the same pass as the rename |
 | WF-3 cloud-rebuild-architecture | **REWRITE** → port `cloud-2` → `cloud` (not rebuild-from-scratch); RRv8+Hono+CF skeleton; **K3: measure bundle first** | `cloud` has the right config; `cloud-2` is the logic source |
 | WF-4 cloud-d1-schema | **RENAME/REWRITE** → cloud-turso-schema (keep Turso); D1 migration cancelled | K1 → Turso is load-bearing for concurrency + self-host portability |
 | WF-5 adr-and-ssot-doc-amendments | **EXPAND** → supersede ADR 0005/0012, mark D2 superseded by K2, fix `decisions.md` Q8 table, reconcile MAP↔S3, delete local WF tickets post-migration | The doc-decay cleanup this session surfaced |
@@ -243,7 +243,7 @@ working tree is discarded (its fate was tied to this decision; now resolved).
 ## Fog (open; graduates as the frontier reaches each)
 
 1. **`@tekmemo` npm org existence.** Registry probe from this environment was
-   auth-gated/inconclusive; `@tekmemo/client` is 404 (unpublished, pre-launch
+   auth-gated/inconclusive; `@memofs/client` is 404 (unpublished, pre-launch
    safe). **Must confirm the org exists or create it** before WF-2 can publish.
    Graduates into WF-2.
 2. **Bundle-measurement outcome (K3).** Single-Worker ≤ 3 MB / ≤ 10 MB / > 10 MB
@@ -255,7 +255,7 @@ working tree is discarded (its fate was tied to this decision; now resolved).
    "verify" work. Graduates into the v1.1 concurrency ticket.
 4. **`cloud-2` deletion timing.** Keep until WF-3 finishes porting its logic into
    `cloud`; delete after. Sequencing note, not a decision.
-5. **`examples/server`.** Exists in `examples/` (the `tekmemo-server` runnable
+5. **`examples/server`.** Exists in `examples/` (the `memofs-server` runnable
    self-host example per slice 1). Needs a once-over for old-name refs during WF-2.
 
 ---

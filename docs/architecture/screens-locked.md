@@ -30,13 +30,13 @@
 ## SC1 — Two front doors (brand separation)
 
 - **Decision:** Two distinct web front doors with a brand split:
-  - **`docs.tekbreed.com` (the `apps/docs` VitePress site)** — owns **OSS
+  - **`docs.memofs.dev` (the `apps/docs` VitePress site)** — owns **OSS
     marketing + documentation.** It is the front door for the open-source
     runtime.
-  - **`memo.tekbreed.com` (the `apps/cloud` RRv8 Worker)** — owns **Cloud
+  - **`memo.memofs.dev` (the `apps/cloud` RRv8 Worker)** — owns **Cloud
     marketing + pricing + auth + the product dashboard.** It is the front door
-    for TekMemo Cloud (the hosted SaaS).
-- **Rationale:** Brand separation "TekMemo" (OSS) vs "TekMemo Cloud" (SaaS),
+    for Memo FS Cloud (the hosted SaaS).
+- **Rationale:** Brand separation "Memo FS" (OSS) vs "Memo FS Cloud" (SaaS),
   the Supabase-style split. The cloud is a *different commercial product*
   (hosted sync, managed runtime later), so it earns its own marketing surface
   and its own home rather than being a section inside the docs site.
@@ -44,7 +44,7 @@
   `apps/cloud/src/routes/_home/index.tsx` is **not** deleted — it is elevated
   into the full Cloud front door (SC2). The docs `HomeLayout.vue` stays as the
   OSS front door; its announcement bar + cloud-client pages keep pointing at
-  `memo.tekbreed.com`.
+  `memo.memofs.dev`.
 
 ---
 
@@ -56,7 +56,7 @@
   |---|---|---|
   | `/` | Landing | The Cloud front door. Hero + preview sections (connectors, pricing, use-cases) each linking to its dedicated page; bottom CTA → `/signup`. |
   | `/pricing` | Dedicated | Full Free / Pro $9 / Teams $24-per-seat-coming-soon table (ADR 0006). Linked from the landing's pricing preview section. |
-  | `/use-cases` | Dedicated | Concrete "what TekMemo Cloud is for" (multi-device sync, connector ingestion, team memory later). |
+  | `/use-cases` | Dedicated | Concrete "what Memo FS Cloud is for" (multi-device sync, connector ingestion, team memory later). |
   | `/privacy` | Legal | Privacy policy (required for any auth + paid product). |
   | `/terms` | Legal | Terms of service (required for paid product + Polar MoR). |
 
@@ -69,27 +69,27 @@
 
 The Cloud landing is **problem-first, mechanics-led**, sequenced like the
 proven OSS `HomeLayout.vue` pattern but adapted to the Cloud positioning (your
-`.tekmemo/` follows you everywhere; connectors feed it; managed tier is later).
+``.memofs/`` follows you everywhere; connectors feed it; managed tier is later).
 Each preview section is a *teaser* that links to its dedicated page.
 
 1. **Hero** — value prop + 2 CTAs (Get started → `/signup`, View docs →
-   `docs.tekbreed.com`).
-2. **Problem** — multi-device memory drift: same `.tekmemo/` edited on laptop +
+   `docs.memofs.dev`).
+2. **Problem** — multi-device memory drift: same ``.memofs/`` edited on laptop +
    CI + workstation diverges; git is manual, Syncthing is fiddly, Dropbox
    conflicts silently.
-3. **Solution** — the one-paragraph thesis: TekMemo Cloud mirrors your
-   `.tekmemo/` files byte-for-byte; the engine stays local; the cloud is a dumb
+3. **Solution** — the one-paragraph thesis: Memo FS Cloud mirrors your
+   ``.memofs/`` files byte-for-byte; the engine stays local; the cloud is a dumb
    file replica. (Projects Q4 thesis directly.)
 4. **How sync works** — 3-step mechanical demo (init → push → pull), echoing the
    OSS docs' "three commands" terminal mockup.
 5. **Connectors preview** — GitHub + Notion at v1, Linear queued (Q10). This is
    a *landing section only* (no dedicated `/connectors` page — SC2 lists the
-   pages). The "learn more" link goes to `docs.tekbreed.com` (the
-   `packages/tekmemo/connectors.md` page the ADR 0008 triage already flags as
+   pages). The "learn more" link goes to `docs.memofs.dev` (the
+   `packages/memofs/connectors.md` page the ADR 0008 triage already flags as
    missing-to-create), so connector detail has one home per ADR 0008 Rule 2.
 6. **Pricing preview** → `/pricing` (Free / Pro $9 / Teams $24/seat-soon — ADR 0006).
 7. **Use-cases preview** → `/use-cases`.
-8. **Comparison** — TekMemo Cloud vs self-hosting (git / Syncthing / Dropbox):
+8. **Comparison** — Memo FS Cloud vs self-hosting (git / Syncthing / Dropbox):
    automatic pre-sync snapshots, content-addressed blobs, one-click rollback,
    zero-config connectors. The honest "when you'd use us vs DIY" framing.
 9. **FAQ** — the v1 cloud FAQ inline (vs the OSS FAQ that lives in docs).
@@ -116,7 +116,7 @@ Each preview section is a *teaser* that links to its dedicated page.
 
 ### SC4.1 — Passwordless (magic-link) auth — supersedes SC4's password flow
 
-- **Decision (locked 2026-06-23):** TekMemo Cloud authenticates users via
+- **Decision (locked 2026-06-23):** Memo FS Cloud authenticates users via
   **email magic links** + OAuth (GitHub/Google), **not** passwords. Better
   Auth's `magicLink` plugin handles issuance/consumption; OAuth handles the
   two social providers already in SC4. SC4's framing ("only the implementation
@@ -182,7 +182,7 @@ source:
 3. **Connectors health** — `N / maxConnectors` active, last-run status per
    connector (from `connectors.json` + the connector run log). Q1/Q2 control
    plane.
-4. **Quick start** — the exact `tekmemo sync` CLI command for the selected
+4. **Quick start** — the exact `memofs sync` CLI command for the selected
    project, copyable. The empty-state version of this card (no project yet)
    is the onboarding nudge.
 
@@ -219,7 +219,7 @@ source:
   `connectors.json`), and **Edit / Remove** actions.
 - **Add flow:** pick from catalog → **OAuth** (preferred for GitHub/Notion) or
   token paste → schedule + source mapping → save. On save: the connector
-  config writes to `.tekmemo/connectors.json` (the 11th canonical file, Q2);
+  config writes to ``.memofs/`connectors.json` (the 11th canonical file, Q2);
   the token is stored server-side (Turso-encrypted column / Workers Secret)
   under the `secretRef` and fetched live by the local runtime at run time.
 - **Trust affordance:** the card's secret-status indicator + a one-line note
@@ -271,7 +271,7 @@ build a billing engine.
 ## Cloud app (`apps/cloud`) — admin (deferred)
 
 - **SC6 — Admin panel: deferred to post-revenue, namespace reserved at v1.**
-  - **Decision (locked 2026-06-23):** TekMemo Cloud ships **no admin/staff panel
+  - **Decision (locked 2026-06-23):** Memo FS Cloud ships **no admin/staff panel
     at v1**. Platform monitoring + control during the broke+ASAP launch phase is
     covered by the existing stack's dashboards: Polar (subscriptions/billing),
     Turso console (DB), Cloudflare dashboard (Workers/R2/observability), Sentry
@@ -403,9 +403,9 @@ build a billing engine.
   surfaces (release notes, dev diaries, OSS FAQ), not cloud marketing. No
   content migration; fixes the contradiction; matches the live site.
 
-- **SC5.1 — Top-level nav (7 items):** Get Started · TekMemo · CLI · MCP · API ·
+- **SC5.1 — Top-level nav (7 items):** Get Started · Memo FS · CLI · MCP · API ·
   **Cloud →** · Blog.
-  - **Cloud →** is a single **external link** to `memo.tekbreed.com` (SC1 —
+  - **Cloud →** is a single **external link** to `memo.memofs.dev` (SC1 —
     plans/pricing/dashboard live there, never duplicated here, ADR 0008 Rule 2).
   - **Changelog** stays as a sidebar entry under its own section (not top nav);
     the top-nav slot goes to Blog (more frequently updated, higher engagement).
@@ -413,16 +413,16 @@ build a billing engine.
   - **Delta vs current code** (verified `config/nav.mts` 2026-06-21): the live
     nav is **6 items** — Get Started · CLI · MCP Server · API · Changelog · Blog.
     To reach the locked 7-item nav: **rename** "Get Started" → keep as the OSS
-    funnel entry (it already points at `/packages/tekmemo`, the core overview);
-    **add** a **TekMemo** item pointing at `/packages/tekmemo` with
-    `activeMatch: "/packages/tekmemo/"` (the core-runtime section, distinct from
+    funnel entry (it already points at `/packages/memofs`, the core overview);
+    **add** a **Memo FS** item pointing at `/packages/memofs` with
+    `activeMatch: "/packages/memofs/"` (the core-runtime section, distinct from
     the Get Started quickstart); **add** a **Cloud →** external link to
-    `https://memo.tekbreed.com`; **demote** Changelog from top nav to a sidebar
+    `https://memo.memofs.dev`; **demote** Changelog from top nav to a sidebar
     entry under its own section (it is already a sidebar section in `sidebar.mts`
     — only the top-nav slot is removed). CLI/MCP/API items are unchanged. The two
-    "TekMemo" vs "Get Started" entries are justified because Get Started stays the
-    marketing-funnel entry while TekMemo is the evergreen core-runtime home; if
-    that doublet reads as redundant in copy review, collapse to one "TekMemo"
+    "Memo FS" vs "Get Started" entries are justified because Get Started stays the
+    marketing-funnel entry while Memo FS is the evergreen core-runtime home; if
+    that doublet reads as redundant in copy review, collapse to one "Memo FS"
     item (decision deferred to `copywriting` — IA-level either is valid).
 
 ### SC5.2 — Docs home (`/`) — the OSS marketing front door
@@ -437,10 +437,10 @@ required to align with locked decisions:
    "Local / Cloud / Hybrid" (a mode flag) to **"Local / Hybrid + sync / Hybrid
    + managed (later)"** — i.e. local-first by default, the sync client adds
    cloud replication, and the managed-runtime tier is future. The code snippet
-   must match the shipped `Tekmemo` constructor (no `mode: "cloud"`).
+   must match the shipped `Memofs` constructor (no `mode: "cloud"`).
 2. **Cloud framing shifts from "a mode flag" to "a separate product →"** (SC1).
    The hero gets a **"Cloud →"** CTA alongside "Get Started", pointing at
-   `memo.tekbreed.com`. The announcement bar already does this — keep it.
+   `memo.memofs.dev`. The announcement bar already does this — keep it.
 
 Everything else (credibility row, problem section, how-it-works 3-command demo,
 audience cards, comparison table) stays — it's the OSS pitch, not cloud
@@ -448,25 +448,25 @@ marketing.
 
 ### SC5.3 — Docs sidebar structure
 
-The sidebar already groups by package (`/packages/tekmemo/`, `/packages/cli/`,
-`/packages/mcp/`, `/api/tekmemo/`, `/blog/`, `/changelog`). The ADR 0008 drift
+The sidebar already groups by package (`/packages/memofs/`, `/packages/cli/`,
+`/packages/mcp/`, `/api/memofs/`, `/blog/`, `/changelog`). The ADR 0008 drift
 triage + locked decisions require these **additions/fixes** (tracked in
 `docs-drift-triage.md`, surfaced here so the screen IA is complete):
 
-- **ADD** `packages/tekmemo/connectors.md` — the missing connectors home
+- **ADD** `packages/memofs/connectors.md` — the missing connectors home
   (ADR 0002 + Q1–Q3). The cloud landing's connectors preview links here (SC2.1).
-- **ADD** `packages/tekmemo/intelligence.md` — the missing v1-intelligence home
+- **ADD** `packages/memofs/intelligence.md` — the missing v1-intelligence home
   (Q5 / ADR 0004): hybrid recall + LLM extraction + consolidation.
 - **FIX** the `mode: "cloud"` / `cloud-only` policy-row sweep across the ~12
   pages (D4, per the triage register).
-- **FIX** the AI-SDK pages → repoint at `@tekmemo/adapter-ai-sdk` +
-  `TekMemoMemoryRuntime` (S2-Q1 / ADR 0007).
-- **REMOVE (already done)** the dead `/api/tekmemo/vector-adapters` sidebar
+- **FIX** the AI-SDK pages → repoint at `@memofs/adapter-ai-sdk` +
+  `MemofsMemoryRuntime` (S2-Q1 / ADR 0007).
+- **REMOVE (already done)** the dead `/api/memofs/vector-adapters` sidebar
   entry — verified **already absent** from `config/sidebar.mts` (2026-06-21).
-  The `tekmemo-adapter-upstash` package removal (Q6 6a) is tracked in the
+  The `memofs-adapter-upstash` package removal (Q6 6a) is tracked in the
   refactor doc; the docs side needs no further action. Kept here as a closed
   item so the triage register reconciles.
-- **NO** `tekmemo-connectors` API page until that package exists (no vapor docs,
+- **NO** `memofs-connectors` API page until that package exists (no vapor docs,
   ADR 0008).
 
 ### SC5.4 — Docs IA verification trail (2026-06-21)
@@ -478,10 +478,10 @@ Each locked item above was checked against the live code on this branch:
 | SC5.1 | Nav is 6 items today, lock to 7 | `config/nav.mts` (6 entries) | **Delta stated** |
 | SC5.2 | HomeLayout shows `mode: "cloud"` | `HomeLayout.vue:50` | **Confirmed drift** |
 | SC5.2 | Announcement bar + Cloud CTA present | `HomeLayout.vue:78-84` | **Already correct** |
-| SC5.3 | `connectors.md` missing | `packages/tekmemo/` listing | **Confirmed missing** |
-| SC5.3 | `intelligence.md` missing | `packages/tekmemo/` listing | **Confirmed missing** |
+| SC5.3 | `connectors.md` missing | `packages/memofs/` listing | **Confirmed missing** |
+| SC5.3 | `intelligence.md` missing | `packages/memofs/` listing | **Confirmed missing** |
 | SC5.3 | `mode: "cloud"` sweep needed | 8 pages incl. `configuration.md:40`, `cloud-client.md:21`, `concepts.md:52`, `faq.md`, `getting-started.md`, `cli/index.md:47` | **Confirmed** |
-| SC5.3 | AI-SDK docs point at wrong package | `ai-sdk/index.md:3` says "built directly into `@tekmemo/core`"; adapter `@tekmemo/adapter-ai-sdk` exists separately | **Confirmed drift (S2-Q1)** |
+| SC5.3 | AI-SDK docs point at wrong package | `ai-sdk/index.md:3` says "built directly into `@memofs/core`"; adapter `@memofs/adapter-ai-sdk` exists separately | **Confirmed drift (S2-Q1)** |
 | SC5.3 | `vector-adapters` sidebar dead | `config/sidebar.mts` | **Already removed** |
 
 - **Status: Docs IA — LOCKED.** Ready for `copywriting` (per-page copy) and
@@ -496,7 +496,7 @@ Each locked item above was checked against the live code on this branch:
 The single map for `copywriting` + `frontend-design` to work from. Every row is
 a screen; every screen points at the `SC-*` decision that locks it.
 
-### Cloud app (`apps/cloud` → `memo.tekbreed.com`)
+### Cloud app (`apps/cloud` → `memo.memofs.dev`)
 
 | # | Route | Type | One-line purpose | Scope | Lock |
 |---|---|---|---|---|---|
@@ -534,21 +534,21 @@ account owns/belongs to a team) and **"Memory"** (SC8, project-scoped, when the
 managed tier is active for the selected project). Lock: SC3 (+ SC7/SC8 for the
 conditional items).
 
-### Docs app (`apps/docs` → `docs.tekbreed.com`)
+### Docs app (`apps/docs` → `docs.memofs.dev`)
 
 | # | Route | Type | One-line purpose | Lock |
 |---|---|---|---|---|
 | 1 | `/` | Home | OSS marketing front door (7-section `HomeLayout.vue`, keep + fix drift) | SC5.2 |
-| 2 | `/packages/tekmemo/*` | Section | Core runtime docs (overview→config→records→fs-layout→…). **ADD** `connectors.md`, `intelligence.md`; **FIX** `mode:"cloud"` sweep | SC5.3 |
+| 2 | `/packages/memofs/*` | Section | Core runtime docs (overview→config→records→fs-layout→…). **ADD** `connectors.md`, `intelligence.md`; **FIX** `mode:"cloud"` sweep | SC5.3 |
 | 3 | `/packages/cli/*` | Section | CLI docs (local + cloud commands, agent workflow) | SC5 |
 | 4 | `/packages/mcp/*` | Section | MCP server docs (hosted/self-hosted/tools/prompts/security) | SC5 |
-| 5 | `/api/tekmemo/*` | Section | API reference (class, modules, integrations) | SC5 |
+| 5 | `/api/memofs/*` | Section | API reference (class, modules, integrations) | SC5 |
 | 6 | `/blog/*` | Blog | OSS dev diaries / release posts (kept here, not cloud CMS) | SC5 |
 | 7 | `/changelog` | Changelog | Release notes (sidebar section, not top nav) | SC5.1 |
 | 8 | `/faqs` | FAQ | OSS FAQ (kept here) | SC5 |
-| 9 | **Cloud →** (external) | Nav link | Single external link to `memo.tekbreed.com`; no cloud content duplicated here | SC1/SC5.1 |
+| 9 | **Cloud →** (external) | Nav link | Single external link to `memo.memofs.dev`; no cloud content duplicated here | SC1/SC5.1 |
 
-**Docs top-nav (locked 7):** Get Started · TekMemo · CLI · MCP · API · **Cloud →**
+**Docs top-nav (locked 7):** Get Started · Memo FS · CLI · MCP · API · **Cloud →**
 · Blog. Delta vs current 6-item nav stated in SC5.1.
 
 ### Counts
@@ -564,5 +564,5 @@ conditional items).
     users. SC9 adds no screens (extends `/pricing` + `/dashboard/billing`).
 - **Docs:** 8 sections + 1 external link; top-nav locked at 7 items.
 - **Cross-app rule (SC1):** cloud marketing/pricing/dashboard live **only** on
-  `memo.tekbreed.com`; OSS docs/blog/changelog live **only** on
-  `docs.tekbreed.com`. No content duplication (ADR 0008 Rule 2).
+  `memo.memofs.dev`; OSS docs/blog/changelog live **only** on
+  `docs.memofs.dev`. No content duplication (ADR 0008 Rule 2).

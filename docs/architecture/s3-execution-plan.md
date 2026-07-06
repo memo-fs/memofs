@@ -22,7 +22,7 @@ Build the **thinnest end-to-end vertical** first, prove the provider-neutral
 factory, then widen each axis. The single biggest risk in the whole grilling is
 the `createHostedRuntime` refactor — if the factory abstraction is wrong,
 *everything* downstream is rework. A thin vertical validates it before 6 adapters
-are built against it. Slices produce a runnable self-hosted TekMemo at slice 1;
+are built against it. Slices produce a runnable self-hosted Memo FS at slice 1;
 "battle-tested" is achieved by *running* the system, not by completing layers.
 
 **Dependency chain (linear, must be honored — see S3-Q9):**
@@ -89,7 +89,7 @@ the moment code changes, the failure mode ADR 0008 Rule 1 forbids).
 
 **Universal bars (apply to every slice):**
 - **Contract tests.** Every provider adapter passes the relevant contract suite
-  from `@tekmemo/testing` (`MemoryEmbedder`, `Reranker`, `Extractor`,
+  from `@memofs/testing` (`MemoryEmbedder`, `Reranker`, `Extractor`,
   `LlmClient`, `BlobClient`, `MetadataStore`). A new interface = a new contract
   suite added to the testing package *first*.
 - **Miniflare + Vitest** for unit/integration/visual-regression, per AGENTS.md.
@@ -108,17 +108,17 @@ the moment code changes, the failure mode ADR 0008 Rule 1 forbids).
 ### Slice 0 — Foundations (contracts + factory skeleton)
 
 **Build:**
-- `LlmClient` core contract in `packages/tekmemo` (the 4th member of the
+- `LlmClient` core contract in `packages/memofs` (the 4th member of the
   embedder/reranker/extractor family). Add its contract suite to
-  `@tekmemo/testing` *first* (the bar the impl must meet).
+  `@memofs/testing` *first* (the bar the impl must meet).
 - The **provider-neutral `createHostedRuntime` factory** in a new
-  `packages/tekmemo-server` package — takes injected
+  `packages/memofs-server` package — takes injected
   `embedder`/`reranker`/`extractor`/`llmClient`/`store`, mirroring how
   `local-strategy` already works. No provider hardcoding. No HTTP yet (slice 1).
 
 **Test bars:**
 - `LlmClient` contract suite (deterministic fake impl) is green.
-- Factory assembles a `Tekmemo` from injected fakes; rejects missing required
+- Factory assembles a `Memofs` from injected fakes; rejects missing required
   slots with a clear error. No real provider calls.
 
 **Defer:** the `LlmClient` *impl* (OpenAI) is slice 4; the HTTP surface is
@@ -129,7 +129,7 @@ slice 1.
 ### Slice 1 — First self-host vertical (HTTP + cloud's provider bundle)
 
 **Build:**
-- `tekmemo-server` HTTP surface (JSON-RPC over HTTP): `recall`, `context`,
+- `memofs-server` HTTP surface (JSON-RPC over HTTP): `recall`, `context`,
   `graph`, `memory` endpoints — the runtime API that is the two-Worker boundary.
 - Wire it with the **cloud's existing bundle** (R2 blob + Turso metadata + the
   existing Voyage embedder/reranker + Workers AI extractor) as the *first*
@@ -138,7 +138,7 @@ slice 1.
 - A runnable example/deploy doc for OSS self-hosters pointing at an R2-compatible
   bucket + Turso/libSQL + OpenAI (the canonical self-host path at launch).
 
-**⚠️ Write-surface gate (enforced by the Hard ordering rule):** `tekmemo-server`
+**⚠️ Write-surface gate (enforced by the Hard ordering rule):** `memofs-server`
 ships its **read** endpoints (`recall`, `context`, graph reads) and the
 **single-writer** write endpoints immediately. The **concurrent-writer**
 endpoints (`writeMemory` / `updateCoreMemory` / graph upserts callable from
@@ -148,7 +148,7 @@ clear reason. **Never ship them unsafely.** The OSS self-host Node deploy has
 the same gate (it serves the identical server code).
 
 **Test bars:**
-- End-to-end: `tekmemo-server` boots against a MinIO (R2-compatible) bucket +
+- End-to-end: `memofs-server` boots against a MinIO (R2-compatible) bucket +
   a local libSQL DB + fakes, serves a `recall` round-trip. Miniflare where the
   target is a Worker; containerized where it's Node.
 - The HTTP surface matches the runtime API the cloud will consume via Service
@@ -167,8 +167,8 @@ Workers AI extractor or the rule-based fallback until then).
 ### Slice 2 — Cloud two-Worker split (ADR 0013)
 
 **Build:**
-- Second Cloudflare Worker: the **runtime Worker** = `tekmemo-server` deployed as
-  a Worker, holding per-project `Tekmemo` instances.
+- Second Cloudflare Worker: the **runtime Worker** = `memofs-server` deployed as
+  a Worker, holding per-project `Memofs` instances.
 - **Commercial Worker** (`apps/cloud`) loses the runtime bundle; hosted-memory
   calls delegate to the runtime Worker over a **Service Binding**.
 - **Delete `apps/cloud/src/server/hosted-runtime.ts`** — replaced by the shared
@@ -230,11 +230,11 @@ slice 1 first proves the server code shape, so keep the order.
 ### Slice 4 — Provider adapter widen (OpenAI extractor + LlmClient impl)
 
 **Build:**
-- **OpenAI `Extractor`** in `tekmemo-adapter-openai` (the `extractor/` role joins
+- **OpenAI `Extractor`** in `memofs-adapter-openai` (the `extractor/` role joins
   `embedder/`). Direct Workers-AI-parity: chat-completion → subject-predicate-
   object facts, same relation vocabulary. This unlocks the canonical OSS
   self-host bundle (S3 + OpenAI for extraction).
-- **OpenAI `LlmClient` impl** in `tekmemo-adapter-openai` (the
+- **OpenAI `LlmClient` impl** in `memofs-adapter-openai` (the
   `LlmClient` column — slice 0's contract, now implemented). Shares the OpenAI
   client with the extractor internally (composition).
 
@@ -253,10 +253,10 @@ Voyage reranker). Workers AI `LlmClient` (defer).
 ### Slice 5 — Store-axis decoupling (R2 blob-only + Turso metadata extraction)
 
 **Build:**
-- **`tekmemo-adapter-r2` → blob-only.** Remove `turso-metadata-store.ts` from it.
-- **`tekmemo-adapter-turso` → new, metadata-only.** The extracted Turso store
+- **`memofs-adapter-r2` → blob-only.** Remove `turso-metadata-store.ts` from it.
+- **`memofs-adapter-turso` → new, metadata-only.** The extracted Turso store
   (replica-aware: reuses the cloud's `project_files` table).
-- `apps/cloud` imports `tekmemo-adapter-r2` + `tekmemo-adapter-turso` (one extra
+- `apps/cloud` imports `memofs-adapter-r2` + `memofs-adapter-turso` (one extra
   import; behavior unchanged).
 
 **Test bars:**
@@ -347,16 +347,16 @@ on when injected):**
 ### Slice 9 — No-legacy cleanup (S3-Q5)
 
 **Build:**
-- Remove `"memory"` mode + `packages/tekmemo/src/tekmemo/memory-strategy.ts`.
+- Remove `"memory"` mode + `packages/memofs/src/memofs/memory-strategy.ts`.
   Volatile store = inject an in-memory `MemoryStore` into `local` mode.
 - Remove `RuntimeReadPolicy` / `RuntimeWritePolicy` from the public API. Hybrid
   mode always reads/writes local; sync is the explicit cloud surface.
 - Delete `apps/cloud/TODO.md` (stale MSW line). Reword the "legacy in-memory
   maps" comment in `local-strategy.ts`. Verify/remove `local-embedder.ts` if
-  dead vs `tekmemo-adapter-transformers`.
+  dead vs `memofs-adapter-transformers`.
 
 **Test bars:**
-- `Tekmemo({ mode: "memory" })` constructor path removed; `local` mode with an
+- `Memofs({ mode: "memory" })` constructor path removed; `local` mode with an
   in-memory store covers the volatile case.
 - No public reference to the policy enums remains; examples updated.
 
@@ -365,7 +365,7 @@ on when injected):**
 ### Slice 10 — Docs reprojection (ADR 0015)
 
 **Build:**
-- **Server nav item** (top-level, parallel to CLI/MCP) + the `tekmemo-server`
+- **Server nav item** (top-level, parallel to CLI/MCP) + the `memofs-server`
   home page.
 - **Mode/policy sweep** across the ~8 pages (drop `"memory"` mode + policy
   tables; constructor shows `local | hybrid`).
@@ -373,8 +373,8 @@ on when injected):**
   pages, folded in.
 - **`configure/intelligence` + `configure/storage` landing pages** — orienting
   indexes (4-role model; 2-axis model), link-not-duplicate discipline.
-- **AI-SDK pages** repoint at `@tekmemo/adapter-ai-sdk` +
-  `TekMemoMemoryRuntime` (the lingering S2-Q1 drift).
+- **AI-SDK pages** repoint at `@memofs/adapter-ai-sdk` +
+  `MemofsMemoryRuntime` (the lingering S2-Q1 drift).
 - The 15 drifted + 8 missing pages from ADR 0008's triage — same class, batched.
 
 **Test bars:**
@@ -392,7 +392,7 @@ on when injected):**
   (full, writes unlocked), SC8 hosted-memory (with provider line), the SC4.1
   OAuth-start inventory fix.
 - **Self-host-vs-Cloud copy** on landing `/` (SC2.1 §8 Comparison) + docs Server
-  page — the "we run the same `tekmemo-server`, minus the ops" framing.
+  page — the "we run the same `memofs-server`, minus the ops" framing.
 - **Coverage hardening:** tighten every slice's test bars to "battle-tested."
   The LLM-enhanced tier gets property/fuzz tests on defensive parsing.
 
@@ -419,7 +419,7 @@ and gated off until it merges.
 
 2. **`RemoteBlobMemoryStore.append` non-atomic read-modify-write (latent,
    discovered during this grilling).** `append()` at
-   `packages/tekmemo/src/fs/remote-blob-memory-store.ts:167` is
+   `packages/memofs/src/fs/remote-blob-memory-store.ts:167` is
    `safeRead → concat → put → upsertEntry` — a read-modify-write with no lock.
    `notes.md` (append-only, the canonical write path) is the hot surface: two
    concurrent agent writes to `notes.md` lose one silently. **Closed by slice 3**:
@@ -454,8 +454,8 @@ adapters are conveniences, not blockers.
 
 | Deferred item | Why deferrable | Resumes when |
 |---|---|---|
-| **`tekmemo-adapter-s3`** (blob) | R2's S3-compatible API serves self-hosters initially ("bring your R2-compatible endpoint"). A native S3 client is a convenience. | Post-launch, first adapter ask. |
-| **`tekmemo-adapter-postgres`** (metadata) | Self-hosters start with Turso/libSQL (free, easy). The standalone-store schema (`tekmemo_files` + `ensureSchema()`) is the real effort. | Post-launch, alongside S3. |
+| **`memofs-adapter-s3`** (blob) | R2's S3-compatible API serves self-hosters initially ("bring your R2-compatible endpoint"). A native S3 client is a convenience. | Post-launch, first adapter ask. |
+| **`memofs-adapter-postgres`** (metadata) | Self-hosters start with Turso/libSQL (free, easy). The standalone-store schema (`memofs_files` + `ensureSchema()`) is the real effort. | Post-launch, alongside S3. |
 | **OpenAI `Reranker`** | No native rerank API; LLM-judge is a worse Voyage reranker. OpenAI users pair with Voyage. | If a user explicitly needs OpenAI-only. |
 | **Workers AI `LlmClient`** | Frontier extraction is its launch role; the LLM-enhanced tier runs on OpenAI's `LlmClient` (slice 4) at launch. | If Workers AI LLM parity is asked for. |
 | **GCS (blob) + D1/SQLite (metadata)** | Further-out store adapters; S3 + Postgres precede them. | Post the S3/Postgres adapters. |
@@ -478,7 +478,7 @@ The launch is done when:
    reachable before its serialization. (This is the no-data-loss guarantee.)
 4. **The four Hazards are proven closed** by the slice-3 concurrency contract
    suite (incl. the `RemoteBlobMemoryStore.append` race fix).
-5. `tekmemo-server` is published and deployable (Node single-process + Worker).
+5. `memofs-server` is published and deployable (Node single-process + Worker).
 6. Docs `check:links` is green and the mode/policy sweep is complete.
 7. The L2 functional spec covers all 16 + SC10/SC7-v1 screens.
 8. The **Deferred** section above is the *only* unshipped locked scope.

@@ -88,7 +88,7 @@ apps/cloud/                  ← Cloudflare Worker(s), MIT.
 ```
 
 Two Workers communicate via **service bindings** (same CF account, same repo).
-The cloud Worker `import`s from `@tekmemo/core` (workspace types, no npm
+The cloud Worker `import`s from `@memofs/core` (workspace types, no npm
 publish pre-launch). It must implement 31 exported types from
 `cloud-client/types.ts`.
 
@@ -174,7 +174,7 @@ contradicting the canonical record:
   amended by K2.
 
 Body references to `@tekbreed/tekmemo` and `apps/tekmemo-cloud/` were updated to
-`@tekmemo/core` and `apps/cloud/` in the same pass.
+`@memofs/core` and `apps/cloud/` in the same pass.
 
 ## References
 

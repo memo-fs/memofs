@@ -19,12 +19,12 @@ dirs (`api/`, `cli/`, `core/`, `mcp/`) are gutted stubs; only `index.md`,
 Decide and produce:
 1. **Information architecture** — follow ADR 0008 (docs IA: four rules + routing
    blueprint) and ADR 0015 (its reprojection). Verify the blueprint still fits
-   the post-overhaul package set (`@tekmemo/core`, `@tekmemo/adapter-cloudflare`,
+   the post-overhaul package set (`@memofs/core`, `@memofs/adapter-cloudflare`,
    etc.) and amend if the rename changed any routes.
 2. **Content per package** — accurate API/reference docs for every published
    package, generated from the *reviewed* code (WF-6/WF-7), not stale memory.
    Use the `copywriting` skill for user-facing prose (AGENTS.md).
-3. **Getting-started / installation** reflecting the new scope (`@tekmemo/*`)
+3. **Getting-started / installation** reflecting the new scope (`@memofs/*`)
    and the single-Worker cloud deploy.
 4. **`README.md` per published package** — AGENTS.md mandates the `copywriting`
    skill for package READMEs.

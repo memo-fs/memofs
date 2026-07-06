@@ -19,7 +19,7 @@ Amend / write:
 1. **ADR 0005 (cloud tech stack):** Turso/libSQL → **D1**. Record rationale +
    the drizzle/D1 choice from WF-1/WF-4.
 2. **ADR 0012 (R2 MemoryStore adapter):** the Turso `MetadataStore` → **D1**;
-   the adapter package is now `@tekmemo/adapter-cloudflare` (R2 + D1); reaffirm
+   the adapter package is now `@memofs/adapter-cloudflare` (R2 + D1); reaffirm
    `BlobClient` / `MetadataStore` stay provider-neutral + portable (WF-1).
 3. **ADR 0013 (two-Worker split):** superseded → **single Worker** via
    `@cloudflare/vite-plugin` (WF-3). Mark Superseded or amend in place.

@@ -24,7 +24,7 @@ Work:
    - `.DS_Store` files — gitignore (verify `.gitignore` covers them).
 2. **Root docs consistency** — `README.md`, `ROADMAP.md`, `CONTRIBUTING.md`,
    `CONTRIBUTORS.md`, `GOOD_FIRST_ISSUES.md`, `GOVERNANCE.md`, `SECURITY.md`:
-   update any `@tekbreed/*` package references → `@tekmemo/*`, and any old dir
+   update any `@tekbreed/*` package references → `@memofs/*`, and any old dir
    names, so the public repo describes the packages users actually install.
 3. **`docs/tekmemo.md`, `docs/runbook.md`, `docs/benchmark.md`,
    `docs/releases.md`** — align package names + the D1/single-Worker reality.

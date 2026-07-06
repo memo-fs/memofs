@@ -29,7 +29,7 @@ Decide — one session, grilling + reference to cloud-2's code:
    two-Worker assumption from ADR 0013, the npm-style config).
 4. **wrangler.jsonc:** fix the name (currently `react-router-hono-fullstack-template`),
    add D1 + R2 bindings, observability, smart-placement decision.
-5. **How `@tekmemo/core` + `@tekmemo/adapter-cloudflare` wire in** — the phase-3
+5. **How `@memofs/core` + `@memofs/adapter-cloudflare` wire in** — the phase-3
    `createLocalStrategy({ store: new RemoteBlobMemoryStore(...) })` path (ADR 0012).
 6. **`apps/cloud-2` removal** — confirm full port, then delete (this is the
    deletion gate).

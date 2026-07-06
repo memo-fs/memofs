@@ -18,7 +18,7 @@ while the cloud is still being built.
 Decide + produce:
 1. **OSS standardization** — polish the public OSS surface for launch:
    - Root `README.md` (use `copywriting` skill — AGENTS.md): clear value prop,
-     install (`@tekmemo/*`), quickstart, link to docs + newsletter.
+     install (`@memofs/*`), quickstart, link to docs + newsletter.
    - `CONTRIBUTING.md`, `GOOD_FIRST_ISSUES.md`, `GOVERNANCE.md`, `SECURITY.md`,
      `LICENSE` consistency (the `opensource-guide-coach` skill fits here).
    - Repo description, topics, sponsor button pointing correctly.

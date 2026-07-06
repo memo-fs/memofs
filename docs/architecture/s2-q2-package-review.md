@@ -46,30 +46,30 @@ target.)
   (a Node SSR server) and a `start: react-router-serve` script. ADR 0005 locks
   **Workers + Static Assets** as the deploy target, via `@react-router/cloudflare`
   — the *opposite* runtime. The dir is also not in `pnpm-workspace.yaml`, and its
-  README is the unmodified Remix/RR starter (no TekMemo code yet).
+  README is the unmodified Remix/RR starter (no Memo FS code yet).
 - **Decision CONFIRMED (user, 2026-06-20):** TekMemo Cloud = **React Router v8 on
   Cloudflare Workers** (`@react-router/cloudflare`) + Static Assets. `apps/cloud`
-  is the intended `apps/tekmemo-cloud` from ADR 0005; its current Node-SSR
+  is the intended `apps/memofs-cloud` from ADR 0005; its current Node-SSR
   scaffold (`@react-router/node` + `@react-router/serve`) must be rebuilt onto
   `@react-router/cloudflare` (Workers runtime, `wrangler.jsonc`, + workspace
   registration). This is a **code task** (Node→Worker runtime migration), tracked
   under S2-Q3. See S2-Q3 (docs/cloud routing is the same question for the
   dashboard half).
 
-### B2 — `apps/mcp-worker/` is the **shelved** `apps/tekmemo-mcp-worker`, re-added
+### B2 — `apps/mcp-worker/` is the **shelved** `apps/memofs-mcp-worker`, re-added
 
-- Decision Q6 (6c) verdict: **`apps/tekmemo-mcp-worker` SHELVE for v1** —
+- Decision Q6 (6c) verdict: **`apps/memofs-mcp-worker` SHELVE for v1** —
   "Currently built on the deleted cloud engine … broken under new arch … remove
-  from deploy path." The committed branch **did** delete `apps/tekmemo-mcp-worker`
+  from deploy path." The committed branch **did** delete `apps/memofs-mcp-worker`
   (−393 lines, visible in `git diff --stat`). But an untracked
   **`apps/mcp-worker/`** now exists with identical purpose and the *same*
   cloud-engine wiring the decision says is dead:
-  - `Env.TEKMEMO_API_KEY` / `TEKMEMO_API_URL` + "cloud-only runtime" (README +
+  - `Env.MEMOFS_API_KEY` / `MEMOFS_API_URL` + "cloud-only runtime" (README +
     `src/index.ts:22`).
   - README still asserts Cloud mode is a supported backing store and points
-    clients at `https://mcp.memo.tekbreed.com/` — exactly the "hosted managed
+    clients at `https://mcp.memo.memofs.dev/` — exactly the "hosted managed
     MCP endpoint" Q4 says to move to "Later."
-  - Not in `pnpm-workspace.yaml` (only `apps/tekmemo-mcp-worker` is listed).
+  - Not in `pnpm-workspace.yaml` (only `apps/memofs-mcp-worker` is listed).
 - **This re-introduces the architecture-contradicting app the refactor removed.**
   Either the shelve decision is reversed (then ADR 0003/0005 + Q4/6c must
   update), or this dir should not exist. Decision needed.
@@ -77,12 +77,12 @@ target.)
 ### B3 — S2-Q1 extraction is **not done** in code (ADR 0007 says it is)
 
 - ADR 0007 + CONTEXT.md + decisions S2-Q1 describe `ai-sdk/` as already
-  extracted to `@tekmemo/adapter-ai-sdk`, with `TekMemoAiRuntime`
-  renamed to `TekMemoMemoryRuntime` and the `ai` peer dep dropped from core.
-- **Code reality:** `packages/tekmemo/src/ai-sdk/` still has all 14 files
-  (runtime, tools, scope, schemas, prepare-call, agent-session). `TekMemoAiRuntime`
-  is still the public name in `types/runtime.ts` + `tekmemo-runtime.ts`. There is
-  **no `packages/tekmemo-adapter-ai-sdk/` package.** S2-Q1 was recorded as
+  extracted to `@memofs/adapter-ai-sdk`, with `MemofsAiRuntime`
+  renamed to `MemofsMemoryRuntime` and the `ai` peer dep dropped from core.
+- **Code reality:** `packages/memofs/src/ai-sdk/` still has all 14 files
+  (runtime, tools, scope, schemas, prepare-call, agent-session). `MemofsAiRuntime`
+  is still the public name in `types/runtime.ts` + `memofs-runtime.ts`. There is
+  **no `packages/memofs-adapter-ai-sdk/` package.** S2-Q1 was recorded as
   "completed" in todos but the migration was never executed — only the decision
   + ADR were drafted. This is the single largest gap between docs and code.
 
@@ -91,15 +91,15 @@ target.)
 > These match the decisions log Q7 findings — listed here because I verified
 > they are *still* pending, not just claimed to be.
 
-### `packages/tekmemo` (core)
+### `packages/memofs` (core)
 
-- 🔴 **D4 not done.** `TekMemoRuntimeMode` in `types.ts:10` **still contains
+- 🔴 **D4 not done.** `MemofsRuntimeMode` in `types.ts:10` **still contains
   `"cloud"`**. `RuntimeReadPolicy`/`WritePolicy` (`types.ts:12-22`) **still
   contain `"cloud-only"`**. `config.ts:276` (`resolveMode`) and `:408`
   (`isRuntimeMode`) still accept `"cloud"`; `isReadPolicy:419` still accepts
   `"cloud-only"`. No test references `"cloud"` mode, so removal is safe.
 - 🔴 **Q2 connectors path not done.** `memory-paths.ts` `CANONICAL_TEKMEMO_FILES`
-  is still **10 files** (lines 69-80); no `.tekmemo/connectors.json`. Q2 locks it
+  is still **10 files** (lines 69-80); no ``.memofs/`connectors.json`. Q2 locks it
   as the 11th canonical file. `computeLocalManifest()` derives from this array,
   so adding it propagates automatically once the constant + schema exist.
 - 🟡 **Q5 Extractor interface not defined** (decision: "define in core now").
@@ -108,20 +108,20 @@ target.)
 - 🟡 **Q5 consolidation pass** — no consolidation/merge/retire code present.
   Decision scoped it to v1.
 
-### `packages/tekmemo-adapter-upstash` — **not removed** (Q6 / 6a)
+### `packages/memofs-adapter-upstash` — **not removed** (Q6 / 6a)
 
 - Decision 6a: **REMOVE**, zero consumers, contradicts D1/D2.
 - **Code reality:** package still fully present (`src/`, `tests/`, `package.json`,
   `tsdown.config.ts`). Referenced by README, `pnpm-lock.yaml`, docs
   (`vector-adapters.md`, `package-boundaries.md`, `llms.txt`). Not yet deleted.
 
-### `apps/tekmemo-mcp-worker` (the *old*, committed path)
+### `apps/memofs-mcp-worker` (the *old*, committed path)
 
 - Deleted in the branch diff (✅ matches 6c's "remove from deploy path" for the
   *committed* copy) — **but superseded by B2** (the untracked `apps/mcp-worker/`
   re-add). Not in pnpm-workspace.
 
-### `benchmarks/` ↔ `tekmemo-benchmark-kit` — **not consolidated** (6b)
+### `benchmarks/` ↔ `memofs-benchmark-kit` — **not consolidated** (6b)
 
 - Not investigated line-level (out of the S2-Q2 critical path); both still
   exist as separate trees. Flagged for follow-up, not a blocker.
@@ -132,10 +132,10 @@ target.)
   MCP `tools/handlers.ts`/`definitions.ts` ~−1000, `factory.ts`,
   `cloud-runtime.ts`, cloud-client types frozen to the four-method contract,
   tests updated. Matches D1/D2/D5 intent.
-- 🎉 `TekMemoCloudClient` trimmed to health/readiness/sync (types.ts:213-229
+- 🎉 `MemofsCloudClient` trimmed to health/readiness/sync (types.ts:213-229
   re-exports confirm).
 - 🎉 Pre-sync snapshot before mutations present (decisions Q3 references it).
-- 🎉 `sha256Hex` now exported from core (`tekmemo/index.ts` +1 line) — supports
+- 🎉 `sha256Hex` now exported from core (`memofs/index.ts` +1 line) — supports
   Q3 content-deterministic connector writes.
 - `docs/adr/0002–0007` exist; `decisions.md` + `CONTEXT.md` are thorough.
 
@@ -148,20 +148,20 @@ target.)
   still enumerate `cloud-only`. This is S2-Q3/Q4 scope but blocks "perfectly
   ready" per the user's bar.
 - 🟡 **CLI + MCP server still surface `cloud-only` policy** in their CLIs /
-  arg parsers (`tekmemo-cli/src/runner.ts:188,192`,
-  `tekmemo-cli/src/config/runtime.ts:30-31`,
-  `tekmemo-mcp-server/src/bin/tekmemo-mcp.ts:142-158`,
+  arg parsers (`memofs-cli/src/runner.ts:188,192`,
+  `memofs-cli/src/config/runtime.ts:30-31`,
+  `memofs-mcp-server/src/bin/memofs-mcp.ts:142-158`,
   `http/index.ts:192`). Must move in lockstep with the D4 type trim or the type
   change breaks them.
-- 🟢 `Tekmemo.ts:13` doc-comment still says four modes incl. `"cloud"` — trivial
+- 🟢 `Memofs.ts:13` doc-comment still says four modes incl. `"cloud"` — trivial
   fix once D4 lands.
 
 ## Proposed execution order (after B1/B2/B3 reconciled)
 
-1. **Resolve B3** (ai-sdk extraction) — biggest, touches `tekmemo-cli`, examples,
+1. **Resolve B3** (ai-sdk extraction) — biggest, touches `memofs-cli`, examples,
    docs, tests. Do this before D4 so core's surface is settled.
 2. **D4 mode/policy trim** — core `types.ts` + `config.ts` + the four CLI/MCP
-   arg-parsers + `Tekmemo.ts` doc-comment + config JSON schemas, in one atomic
+   arg-parsers + `Memofs.ts` doc-comment + config JSON schemas, in one atomic
    change (lockstep or types break).
 3. **Remove upstash** (6a) + drop workspace/lock/README/docs refs.
 4. **Q2 connectors.json** — add 11th canonical file + schema in core.
@@ -213,9 +213,9 @@ apply fixes, otherwise I'd be coding against an unresolved target.
 ### B3 — `ai-sdk/` extraction (S2-Q1) — **RESOLVED (executed + green)**
 
 - **Review-time:** ADR 0007 claimed the extraction was done; code reality was
-  14 files still in core, no adapter package, `TekMemoAiRuntime` un-renamed.
-- **Now:** `packages/tekmemo-adapter-ai-sdk/` **exists**; the interface is
-  `TekMemoMemoryRuntime` in `packages/tekmemo/src/ai-runtime/`; the `ai` peer
+  14 files still in core, no adapter package, `MemofsAiRuntime` un-renamed.
+- **Now:** `packages/memofs-adapter-ai-sdk/` **exists**; the interface is
+  `MemofsMemoryRuntime` in `packages/memofs/src/ai-runtime/`; the `ai` peer
   dep dropped from core. Validated green (typecheck + 507 tests across core /
   adapter / CLI / MCP server). The "recorded complete but never executed" gap is
   closed. (Docs drift on the 3 AI-SDK pages remains — scoped to the triage
@@ -223,7 +223,7 @@ apply fixes, otherwise I'd be coding against an unresolved target.
 
 ### D4 (mode/policy trim) — **RESOLVED (code); docs pending**
 
-- `TekMemoRuntimeMode` is `local | hybrid | memory`; `"cloud"` dropped.
+- `MemofsRuntimeMode` is `local | hybrid | memory`; `"cloud"` dropped.
   `RuntimeReadPolicy` / `WritePolicy` dropped `"cloud-only"`. The four CLI/MCP
   arg-parsers moved in lockstep. **Code green.** The matching docs sweep is the
   D4 section of [`docs-drift-triage.md`](./docs-drift-triage.md) — strictly API
@@ -232,13 +232,13 @@ apply fixes, otherwise I'd be coding against an unresolved target.
 
 ### upstash removal (Q6 6a) — **RESOLVED (code); docs pending**
 
-- `packages/tekmemo-adapter-upstash/` is **gone**; lockfile + 9 ref files pruned.
+- `packages/memofs-adapter-upstash/` is **gone**; lockfile + 9 ref files pruned.
   Two docs references remain (`recall.md`, `installation.md`) — triage §Q6.
 
 ### connectors.json (Q2) — **RESOLVED**
 
 - 11th canonical file landed in `memory-paths.ts` + template + bootstrap +
-  `PathKind`; 369 tests green. Docs gap (`packages/tekmemo/connectors.md`
+  `PathKind`; 369 tests green. Docs gap (`packages/memofs/connectors.md`
   missing) is triage §Missing.
 
 ### S2-Q3 (this section's own deliverables)

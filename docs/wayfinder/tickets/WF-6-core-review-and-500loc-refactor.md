@@ -1,4 +1,4 @@
-# WF-6 — Review + refactor @tekmemo/core (code-reviewer + security-reviewer + 500-LoC)
+# WF-6 — Review + refactor @memofs/core (code-reviewer + security-reviewer + 500-LoC)
 
 > **Premises superseded (2026-07-04).** This ticket's body was charted
 > before the [reconciliation](../../architecture/reconciliation-2026-07-02.md)
@@ -11,7 +11,7 @@
 
 ## Question
 
-Run the **full review pass on `@tekmemo/core`** (the renamed `packages/client` —
+Run the **full review pass on `@memofs/core`** (the renamed `packages/client` —
 the core memory runtime), the package with the heaviest 500-LoC violations, and
 bring it into compliance with AGENTS.md. This is the first review ticket because
 core is the most-depended-on package and sets the review pattern for WF-7.

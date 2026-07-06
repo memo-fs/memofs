@@ -19,7 +19,7 @@ problems were live in the pre-overhaul tree:
    adopters and weakens the `@tekmemo` namespace the product should own.
 
 2. **Inverted core/CLI dependency (K4).** `packages/client`
-   (`@tekmemo/client`) *is* the core runtime — 13 subsystems. `packages/tekmemo`
+   (`@memofs/client`) *is* the core runtime — 13 subsystems. `packages/tekmemo`
    (named like the product) *is* the CLI (`bin: { tekmemo }`, depends on the
    runtime). But the runtime reached **up** into the CLI package for foundational
    primitives: `MemoryPath`, `MemoryStore`, `MemoryStoreError`,
@@ -29,7 +29,7 @@ problems were live in the pre-overhaul tree:
    tolerance. Verified in the reconciliation session.
 
 A third, latent problem: directory names, package names, and published names had
-drifted (`packages/client` → `@tekmemo/client`; `packages/tekmemo` → `tekmemo`),
+drifted (`packages/client` → `@memofs/client`; `packages/tekmemo` → `tekmemo`),
 so the directory did not predict the package name.
 
 ## Decision
@@ -38,7 +38,7 @@ Three locked changes, applied together in WF-2:
 
 ### 1. Scope flip — `@tekbreed` → `@tekmemo`
 
-Every published package's npm scope flips from `@tekbreed/*` to `@tekmemo/*`.
+Every published package's npm scope flips from `@tekbreed/*` to `@memofs/*`.
 The unscoped CLI (`tekmemo`) stays unscoped. Internal workspace tooling stays
 `@repo/*` (it is never published). GitHub org / repo URLs / homepage / funding
 are unchanged — **only the npm package scope changes**.
@@ -50,8 +50,8 @@ public package directory. This is the single source of truth enforced in
 [`.agents/rules/package-naming.md`](../../.agents/rules/package-naming.md) and
 [`.agents/rules/monorepo-structure.md`](../../.agents/rules/monorepo-structure.md).
 
-So `packages/adapter-r2` ↔ `@tekmemo/adapter-r2`, `packages/core` ↔
-`@tekmemo/core`, and `packages/tekmemo` ↔ `tekmemo` (unscoped — the one
+So `packages/adapter-r2` ↔ `@memofs/adapter-r2`, `packages/core` ↔
+`@memofs/core`, and `packages/tekmemo` ↔ `tekmemo` (unscoped — the one
 directory whose name *is* the full published name, because there is no scope to
 strip).
 
@@ -59,35 +59,35 @@ strip).
 
 The three-part move that kills the 18-file circular dependency:
 
-1. **`packages/client` (`@tekmemo/client`) → `packages/core` (`@tekmemo/core`).**
+1. **`packages/client` (`@memofs/client`) → `packages/core` (`@memofs/core`).**
    The core runtime gets the conventional scoped name, holds the primitives, and
    the directory follows the dir-equals-name rule.
 2. **`packages/tekmemo` stays `packages/tekmemo` (`tekmemo`, unscoped).** It is
    the CLI; `npm install -g tekmemo` is the install command users expect. The
-   CLI depends on `@tekmemo/core`.
+   CLI depends on `@memofs/core`.
 3. **Move the primitive *definitions*** (`MemoryPath`, `MemoryStore`,
    `MemoryStoreError`, `assertMemoryPath`, canonical paths) **out of the CLI into
-   `@tekmemo/core`**; the CLI re-imports them from `@tekmemo/core`. The 18-file
-   cycle inverts to a clean `@tekmemo/core` ← `tekmemo` (CLI) arrow.
+   `@memofs/core`**; the CLI re-imports them from `@memofs/core`. The 18-file
+   cycle inverts to a clean `@memofs/core` ← `tekmemo` (CLI) arrow.
 
 The `Tekmemo` class now lives at `packages/core/src/tekmemo/Tekmemo.ts`.
 
-### Why `@tekmemo/core` (not the unscoped `tekmemo`) for the runtime
+### Why `@memofs/core` (not the unscoped `tekmemo`) for the runtime
 
 The unscoped `tekmemo` name stays on the CLI so `npm install -g tekmemo` and
-`npx tekmemo` keep working as the primary install surface. `@tekmemo/core` is the
+`npx tekmemo` keep working as the primary install surface. `@memofs/core` is the
 conventional, unambiguous name for the core library and avoids consumers
 ambiguous-installing the engine when they meant the tool. (The CONTEXT Q15
 glossary reservation of "core" governs *prose* usage — don't say "core" when you
-mean the product or the memory runtime; a *package name* `@tekmemo/core` does
+mean the product or the memory runtime; a *package name* `@memofs/core` does
 not collide with that.)
 
 ## Consequences
 
 **Positive:**
 
-- **One namespace.** The OSS launches under the `@tekmemo/*` namespace the
-  product owns. Adopters see `@tekmemo/core`, `@tekmemo/adapter-r2`, … and the
+- **One namespace.** The OSS launches under the `@memofs/*` namespace the
+  product owns. Adopters see `@memofs/core`, `@memofs/adapter-r2`, … and the
   CLI `tekmemo` — consistent with the product name everywhere else.
 - **Clean layering.** The 18-file inverted dependency is gone. Core holds the
   primitives; the CLI depends on core, never the reverse. Build order and pnpm
@@ -95,7 +95,7 @@ not collide with that.)
 - **Predictable naming.** A new reader finds a package by directory name without
   consulting a map; the dir-equals-name rule removes a class of "where does
   this live?" friction.
-- **Registry cost: zero.** `@tekmemo/client` was 404 on the public registry
+- **Registry cost: zero.** `@memofs/client` was 404 on the public registry
   (verified — pre-launch, unpublished), so the rename + scope flip has no
   downstream-consumer blast radius.
 
@@ -123,7 +123,7 @@ not collide with that.)
    Rejected: breaks `npm install -g tekmemo` / `npx tekmemo`, the install
    command the README and onboarding assume. The unscoped name belongs to the
    CLI.
-4. **Give the CLI a scoped name too (`@tekmemo/cli`).** Rejected: the CLI is the
+4. **Give the CLI a scoped name too (`@memofs/cli`).** Rejected: the CLI is the
    primary install surface; the unscoped `tekmemo` is what users type. Scoping
    it adds friction for no layering benefit.
 
@@ -133,10 +133,10 @@ not collide with that.)
   imported primitives from the CLI package in 18 files; the CLI imported core in
   1. After WF-2, the primitives live in `packages/core` and the CLI imports them
   back down.
-- **`@tekmemo/client` was unpublished** — registry probe in the reconciliation
+- **`@memofs/client` was unpublished** — registry probe in the reconciliation
   session returned 404. No blast radius.
 - **Dir-equals-name holds** — verified against the current tree:
-  `packages/core` → `@tekmemo/core`, `packages/adapter-r2` → `@tekmemo/adapter-r2`,
+  `packages/core` → `@memofs/core`, `packages/adapter-r2` → `@memofs/adapter-r2`,
   `packages/tekmemo` → `tekmemo` (unscoped), `tooling/*` → `@repo/*`.
 
 ## References

@@ -13,18 +13,18 @@ truth); edits require the same review bar as any other docs change.
 These four terms are the product's canonical nouns. Each has exactly one job;
 do not use them as synonyms for each other.
 
-- **TekMemo** — The OSS memory system as a whole (the product).
+- **Memo FS** — The OSS memory system as a whole (the product).
 _Avoid:_ "engine," "the system" when either means the product.
 
 - **memory runtime** — The *function* layer: the code that runs recall,
   extraction, and consolidation against memory. The "it runs, not just stores"
-  claim and the canonical word for code namespaces (`TekMemoRuntimeMode`,
+  claim and the canonical word for code namespaces (`MemofsRuntimeMode`,
   managed-runtime tier). This is the ambition word for positioning.
 _Avoid:_ "engine," "core" (reserved for specific code meanings), "memory"
 when you mean the function layer.
 
 - **file-first** — The *storage/trust* mechanism: memory lives as inspectable
-  files under `.tekmemo/`. The reason the runtime is trustworthy. Never the
+  files under ``.memofs/``. The reason the runtime is trustworthy. Never the
   product category; always the mechanism.
 _Avoid:_ "file-based," "filesystem memory."
 
@@ -33,14 +33,14 @@ _Avoid:_ "file-based," "filesystem memory."
 _Avoid:_ "knowledge," "data" when you mean the memory content.
   "Knowledge graph" is the accepted term of art for the graph structure itself.
 
-> **Headline (locked Q15):** "TekMemo — the file-first memory runtime for AI
+> **Headline (locked Q15):** "Memo FS — the file-first memory runtime for AI
 > agents." *File-first* = why you can trust it; *runtime* = why it's smart;
 > *default* (the positioning goal) is layered on top, not a category change.
 
 ### Code & contracts
 
-- **Tekmemo (class)** — The primary TekMemo client
-  (`packages/core/src/tekmemo/Tekmemo.ts`). Construct it with
+- **Memofs (class)** — The primary Memo FS client
+  (`packages/core/src/memofs/Memofs.ts`). Construct it with
   `{ rootDir, projectId, mode? }`. **Modes: `local` | `hybrid`** (locked S3-Q5 —
   two modes, not three). The legacy `"cloud"` mode was removed per D4 (the cloud
   is a file replica, not a runtime mode); the volatile `"memory"` mode was
@@ -54,49 +54,49 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   explicit sync verbs (`sync.push`/`sync.pull`), never via an implicit read
   policy.
 
-- **recall** — TekMemo's hybrid retrieval: BM25 + fuzzy token matching, a
+- **recall** — Memo FS's hybrid retrieval: BM25 + fuzzy token matching, a
   vector channel (when an embedder is configured), a recency boost, and an
-  optional reranker. Available on the `Tekmemo` class as `memo.recall(query,
+  optional reranker. Available on the `Memofs` class as `memo.recall(query,
   { limit?, filter? })`. There is exactly one recall pipeline; it does not
   degrade to plain text search in any mode.
 
-- **TekMemoMemoryRuntime** — The **framework-neutral runtime contract** (locked
+- **MemofsMemoryRuntime** — The **framework-neutral runtime contract** (locked
   S2-Q1) that lives in **core** (`packages/core/src/ai-runtime/types.ts`).
   Methods: `recall`, `readCoreMemory`, `updateCoreMemory`, `listNotes`,
   `createNote`, and an optional `index`. Each AI-framework adapter implements it
-  (the Vercel AI SDK adapter via `createAiSdkRuntimeFromTekmemo`); future adapters
+  (the Vercel AI SDK adapter via `createAiSdkRuntimeFromMemofs`); future adapters
   (LangChain, OpenAI Agents SDK, Mastra) implement the same contract → identical
-  memory semantics across frameworks. Renamed from `TekMemoAiRuntime` (2026-06-20)
+  memory semantics across frameworks. Renamed from `MemofsAiRuntime` (2026-06-20)
   to drop the AI-SDK-flavored name from a core type. Mirrors the embedder
   interface/impl split. See ADR 0007.
 
-- **createAiSdkRuntimeFromTekmemo** — The supported way to build a
-  `TekMemoMemoryRuntime` for the **Vercel AI SDK**. Takes a `Tekmemo` instance and
+- **createAiSdkRuntimeFromMemofs** — The supported way to build a
+  `MemofsMemoryRuntime` for the **Vercel AI SDK**. Takes a `Memofs` instance and
   delegates every call back to it, so recall always flows through the
-  intelligent engine. Lives in **`@tekmemo/adapter-ai-sdk`** (extracted
+  intelligent engine. Lives in **`@memofs/adapter-ai-sdk`** (extracted
   from core per decisions log S2-Q1). See ADR 0007.
 
 - **AI SDK helpers** — `buildRuntimeMemoryContext()` (context-first system
   prompt: core memory + notes + recall), `buildRuntimeMemoryToolDefinition()`
   (multi-command memory tool for in-turn recall/remember),
   `runRuntimeMemoryTool()` (executes a tool command with scope enforcement).
-  Exported from **`@tekmemo/adapter-ai-sdk`** (not core) per S2-Q1.
+  Exported from **`@memofs/adapter-ai-sdk`** (not core) per S2-Q1.
 
 - **AiMemoryAccessContext** — Scope object (`projectId`, `userId`,
   `conversationId`, `workspaceId`, `tenantId`, `participantIds`) controlling
   read/write visibility. Passed as `access` to the helpers.
 
 - **Connector** — An ingestion source that fetches external data (Notion,
-  GitHub, Slack, …) and writes it into `.tekmemo/` memory. **Runs locally**
+  GitHub, Slack, …) and writes it into ``.memofs/`` memory. **Runs locally**
   (the cloud never ingests — D1/D2; this is permanent, not a v1 limitation —
   see decisions log Q29). Configured from the web dashboard (control plane);
   executed by the local runtime (data plane). The local connector framework is
-  already built (`packages/tekmemo-connectors`); only the dashboard
+  already built (`packages/memofs-connectors`); only the dashboard
   control-plane waits, and it needs just the v1 file replica, not the managed
   tier. See [Decisions log](./architecture/decisions.md) Q1–Q3, Q29.
 
-- **Connector config (`connectors.json`)** — The 11th canonical `.tekmemo/`
-  file (`.tekmemo/connectors.json`). A sync unit holding each connector's type,
+- **Connector config (`connectors.json`)** — The 11th canonical ``.memofs/``
+  file (``.memofs/`connectors.json`). A sync unit holding each connector's type,
   schedule, source mapping, enabled flag, and an opaque `secretRef` — **never**
   the token itself. Credentials live server-side and are fetched over an
   authenticated call at run time (never replicated to R2). See decisions log Q2.
@@ -112,9 +112,9 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   rank higher. Affects ranking only, never storage. Implemented in
   `packages/core/src/recall/hybrid/hybrid-recall.ts`.
 
-- **Managed-runtime tier** — The future cloud tier (v1.x/v2) where TekMemo
-  Cloud runs the *same* local `Tekmemo` engine + an embedder against the user's
-  R2-resident `.tekmemo/` files, exposing recall/memory/graph via API. The
+- **Managed-runtime tier** — The future cloud tier (v1.x/v2) where Memo FS
+  Cloud runs the *same* local `Memofs` engine + an embedder against the user's
+  R2-resident ``.memofs/`` files, exposing recall/memory/graph via API. The
   long-term purpose of the cloud ("host your memory; integrate via API" — the
   Vercel/Supabase model). **v1 is the file-replica foundation for this, not an
   alternative to it:** the files must exist in the cloud before the cloud can
@@ -131,10 +131,10 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
 - **Memory consolidation** — The v1 intelligence feature that merges
   semantically-duplicate notes and retires superseded facts (marks, not
   deletes, preserving the audit trail) via the existing `supersedes` edge type.
-  The differentiator that makes TekMemo feel intelligent rather than just
+  The differentiator that makes Memo FS feel intelligent rather than just
   searchable. See decisions log Q5.
 - **Write intelligence** — The gate applied at write time (the
-  `tekmemo.remember` / `writeMemory` path), distinct from retrieval-time
+  `memofs.remember` / `writeMemory` path), distinct from retrieval-time
   intelligence. Two layers, decided Q22 (shape C): a hard-reject **write
   blocklist** (secrets/PII — the same safety thesis as the connector
   `secretRef` model, applied to memory content) and a soft **durability tier**
@@ -153,7 +153,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   `confidence` + content shape) as the zero-config floor, re-scored by a
   configured LLM/`Extractor` adapter when present — the same deterministic-
   default + adapter-enhanced seam as embedder/reranker/extractor. Locked Q22.
-- **Retrieval strategist** — The read-side intelligence inside `tekmemo.context`
+- **Retrieval strategist** — The read-side intelligence inside `memofs.context`
   (decided Q23, shape C): a 4-stage pipeline that turns one model call into a
   curated briefing. Stages: **rewrite** (lexicon/semantic query expansion),
   **resolve** (collapse fragments to graph entities), **filter** (active-only —
@@ -207,7 +207,7 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   decisions log Q25b.
 - **Entity-centric recall** — The first of two Q17 Tier-2 capabilities that
   Q23's strategist *enables but does not itself define* (locked Q26, shape B).
-  `tekmemo.context` gains an **Entities section**, emitted **after core**
+  `memofs.context` gains an **Entities section**, emitted **after core**
   (Tier-1, always-injected) and **before recall** (unresolved Tier-2 fragments).
   Each resolved entity renders as: label + type + current-state summary (active
   edges only — the Q24 filter is what makes the state "current") + provenance.
@@ -220,14 +220,14 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   recall fragments carry the briefing exactly as today. So entity-centric is an
   *enhancement over* fragment recall, gated by extraction quality (the Q5/Q18
   critical path), never a replacement. Honors Q21's 4-verb surface (lives inside
-  `tekmemo.context`, no 5th verb) and composes with Q24 (active-only) + Q27
+  `memofs.context`, no 5th verb) and composes with Q24 (active-only) + Q27
   (progressive expansion of this section). Entity rendering format (triples vs
   sentences vs key/value) is an implementation/copy detail, not architectural.
   See decisions log Q26.
 - **Progressive recall** — The second of two Q17 Tier-2 capabilities the
   strategist enables but doesn't itself define (locked Q27, shape B). Q17
   called this the **"biggest single cutter"** of the four — the headline
-  delivery of the Q16 cold-start-token north star. Mechanism: `tekmemo.context`
+  delivery of the Q16 cold-start-token north star. Mechanism: `memofs.context`
   returns a **compact briefing with expandable sections**, each carrying an
   opaque expansion token; the agent calls back with `section` + `expand` to pull
   only what it needs. The agent sees the **index** (what exists) before the
@@ -239,18 +239,18 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   no re-rewriting, no re-querying. The one new machinery it introduces: the
   strategist must be **stateful across two calls** (session-scoped cursor
   cache), which today's stateless `buildContext()` is not. Honors Q21's 4-verb
-  surface (expansion is a *parameter* on `tekmemo.context`, not a 5th verb) and
+  surface (expansion is a *parameter* on `memofs.context`, not a 5th verb) and
   composes with Q26 (the Entities section is the highest-value expand target:
   compact summary small, full edges+provenance large). Compact rendering quality
   is load-bearing (a bad index → agent expands the wrong thing) — a copy/format
   problem, deferred to implementation, not architectural. See decisions log Q27.
-- **Local concurrency lock** — The advisory file lock (`.tekmemo/.lock`) at the
+- **Local concurrency lock** — The advisory file lock (``.memofs/`.lock`) at the
   **MemoryStore layer** that serializes local processes writing to the same
-  `.tekmemo/` directory (locked Q28, shape B). Prevents replace-whole-file and
+  ``.memofs/`` directory (locked Q28, shape B). Prevents replace-whole-file and
   read-modify-write races on `core.md` and `graph/*.jsonl` — the real
   corruption vectors (append-only `notes.md` is largely safe under `O_APPEND`).
   Acquired on first mutating write, held process-lifetime or per-op; a second
-  process attempting a mutating op gets a clear error ("another TekMemo process
+  process attempting a mutating op gets a clear error ("another Memo FS process
   holds the lock"). Non-mutating reads don't block. The **git index model**
   (`.git/index.lock`): advisory, not mandatory — survives a crashed process
   because you can remove a stale lock; carries PID + timestamp so a stale lock
@@ -263,13 +263,13 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   file-first": day-one v1 scenario (two Claude Code windows on one repo) no
   longer silently loses a core-memory write. See decisions log Q28.
 
-- **Connector framework (`@tekmemo/connectors`)** — A new published
+- **Connector framework (`@memofs/connectors`)** — A new published
   package (locked Q6) holding the local connector framework + built-in
   connectors (Notion, GitHub, …). Executes ingestion locally per Q1; config
-  syncs via `.tekmemo/connectors.json` per Q2. See decisions log Q6.
+  syncs via ``.memofs/`connectors.json` per Q2. See decisions log Q6.
 
 - **Extractor interface** — The provider-neutral contract for LLM-based graph
-  extraction (locked Q5), to be **defined in core `packages/tekmemo`**. Concrete
+  extraction (locked Q5), to be **defined in core `packages/memofs`**. Concrete
   adapter packages (e.g. a `-transformers`-based local extractor) are added only
   when first implemented — no speculative empty package. See decisions log Q6.
 
@@ -291,16 +291,16 @@ _Avoid:_ "knowledge," "data" when you mean the memory content.
   "adapter" to mean *either* an LLM *or* the `Extractor` was a hedge; this
   resolves it into a precise contract.
 _Avoid:_ `ChatModel` (Vercel-AI-SDK-flavored — that name belongs in the
-`tekmemo-adapter-ai-sdk` package), `Generator` (too generic), "the adapter" when
+`memofs-adapter-ai-sdk` package), `Generator` (too generic), "the adapter" when
 you mean this specific transport contract (say `LlmClient`).
 
 - **Connector (interface)** — The provider-neutral plugin contract in
-  `@tekmemo/connectors` (locked Q7); each connector (GitHub, Notion,
+  `@memofs/connectors` (locked Q7); each connector (GitHub, Notion,
   later Linear/Slack/…) implements it. Adding a connector = writing a new
   adapter, not refactoring the framework. v1 ships GitHub + Notion; Linear is
   queued as #3.
 
-- **Cloud stack** — TekMemo Cloud runs as **one Cloudflare Worker** (v1
+- **Cloud stack** — Memo FS Cloud runs as **one Cloudflare Worker** (v1
   file-replica; the two-Worker split is gated on a K3 bundle measurement — see
   [ADR 0013](./adr/0013-two-worker-split.md) amended): Hono API +
   React Router **v8** framework-mode SSR dashboard, served via Static Assets.
@@ -345,7 +345,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
     deduped, always current, shared across every agent you use, and pre-warmed
     before you even ask."
 
-- **Extractor strategy (locked Q18)** — `tekmemo-adapter-extractor-transformers`
+- **Extractor strategy (locked Q18)** — `memofs-adapter-extractor-transformers`
   is the **v1 default + demo**: extraction+consolidation run 100% locally with
   zero API key, preserving the file-first trust thesis. API-based extractors
   (`-openai`, `-voyage`, …) are opt-in for users wanting frontier quality and
@@ -357,10 +357,10 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   (Merchant of Record — handles global tax; Benefits API maps to entitlements;
   metered for storage overage). See ADR 0006.
 
-- **AI SDK adapter (`@tekmemo/adapter-ai-sdk`)** — A new **published
+- **AI SDK adapter (`@memofs/adapter-ai-sdk`)** — A new **published
   adapter package** (locked S2-Q1) holding the Vercel AI SDK integration that
   previously lived in `packages/core/src/ai-sdk/`. Owns the runtime bridge
-  (`createAiSdkRuntimeFromTekmemo`), the AI SDK tool wrapper
+  (`createAiSdkRuntimeFromMemofs`), the AI SDK tool wrapper
   (`buildMemoryToolDefinition` / `runStructuredMemoryTool`), prepare-call memory
   text, agent-session instructions, and scope policy. The `ai` peer dep is a
   real dep of the adapter, not optional-in-core. Mirrors the embedder/reranker/
@@ -370,7 +370,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
 - **AgentFS** — The **framework-agnostic session-workspace primitive** that
   stays in **core** (`packages/core/src/agentfs/`, locked S2-Q1). Defines
   `AgentfsLikeClient` (readText/writeText/appendText/exists/deleteText +
-  optional sync) and `createTekMemoAgentSession` (isolated per-session
+  optional sync) and `createMemofsAgentSession` (isolated per-session
   workspace: pulls memory in, scaffolds plan/commands/errors/changes/notes,
   extracts curated durable memory → `notes.md`, with checkpoint + sync
   before/after). Imports core only — zero AI-vendor coupling. The session
@@ -390,7 +390,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
      **write** access is the concurrency-gated surface. The first real per-seat
      revenue. Screen: `screens-locked.md` SC7.
   3. **Phase 3 — full managed runtime** (the ADR 0003 moat): run the *same*
-     `Tekmemo` runtime on hosted infra against R2-resident files; exposes
+     `Memofs` runtime on hosted infra against R2-resident files; exposes
      recall/memory/graph via API. Unlocks Q19 intelligence entitlements +
      the Q18 cloud differentiators (A1/A2/B3/C5). Screen: `screens-locked.md`
      SC8.
@@ -400,7 +400,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
 
 - **Remote-blob memory store contract** — The provider-neutral contract (locked
   Q31 / [ADR 0012](./adr/0012-r2-memory-store-adapter.md)) that lets the
-  `Tekmemo` runtime read/write its canonical `.tekmemo/` files against a
+  `Memofs` runtime read/write its canonical ``.memofs/`` files against a
   remote-blob backend instead of a POSIX filesystem. Defined in **core** as
   `RemoteBlobMemoryStore({ blobClient, metadata, rootKey })` over two injected
   interfaces — `BlobClient` (get/put/delete, opaque-keyed) and `MetadataStore`
@@ -412,7 +412,7 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   parallel store — one set of files, the runtime is a new reader/writer over
   them.
 
-- **R2 memory store adapter (`@tekmemo/adapter-r2`)** — The concrete
+- **R2 memory store adapter (`@memofs/adapter-r2`)** — The concrete
   published adapter (locked Q31 / ADR 0012) implementing the
   **`BlobClient`** contract for Cloudflare R2: `createR2BlobClient(binding:
   R2Bucket)`. **Blob-only** (locked S3-Q3 — the blob and metadata axes were
@@ -427,29 +427,29 @@ _Avoid:_ "smart," "intelligent," "super-smart" as unquantified claims.
   orthogonal axes** (`BlobClient` + `MetadataStore`) that a self-hoster picks
   **independently** — there is no single "I use X" for storage the way there is
   for a role provider (OpenAI, Voyage). The original ADR 0012 bundling
-  (`tekmemo-adapter-r2` held both R2 blob **and** Turso metadata) was an accident
+  (`memofs-adapter-r2` held both R2 blob **and** Turso metadata) was an accident
   of the cloud's history (both built at once), not a design decision, and it
   would have forced N×M combo packages (S3×Postgres, S3×Turso, …) to cover the
   matrix. Locked S3-Q3 decouples: **one package per backend**, N+M packages
-  instead of N×M. A future `tekmemo-adapter-s3` / `-gcs` (blob) and
+  instead of N×M. A future `memofs-adapter-s3` / `-gcs` (blob) and
   `-postgres` / `-d1` / `-sqlite` (metadata) implement the same contracts.
-_Avoid:_ "tekmemo-adapter-r2-turso" (the legacy bundled name); combo package
+_Avoid:_ "memofs-adapter-r2-turso" (the legacy bundled name); combo package
 names generally.
-- **`tekmemo-adapter-turso` (`@tekmemo/adapter-turso`)** — The new
+- **`memofs-adapter-turso` (`@memofs/adapter-turso`)** — The new
   **metadata-only** package (locked S3-Q3) holding the Turso/libSQL
   `MetadataStore` extracted out of the old bundled R2 package. A
   **replica-aware** store: reuses the cloud's existing `project_files` table
   (the sync-replica reuse optimization from ADR 0012 — "one set of files").
-  `apps/cloud` imports `tekmemo-adapter-r2` + `tekmemo-adapter-turso` (one extra
+  `apps/cloud` imports `memofs-adapter-r2` + `memofs-adapter-turso` (one extra
   import; behavior unchanged).
-- **`tekmemo-adapter-s3` (`@tekmemo/adapter-s3`)** — The new
+- **`memofs-adapter-s3` (`@memofs/adapter-s3`)** — The new
   **blob-only** package (locked S3-Q3): a `BlobClient` over the S3 API
   (universal — covers AWS S3, MinIO, Backblaze B2, DigitalOcean Spaces, and R2
   via its S3-compatible API). The build-now blob adapter for self-hosters.
-- **`tekmemo-adapter-postgres` (`@tekmemo/adapter-postgres`)** — The
+- **`memofs-adapter-postgres` (`@memofs/adapter-postgres`)** — The
   new **metadata-only** package (locked S3-Q3): a `MetadataStore` over a
   `pg`/Postgres connection. A **standalone** store (no sync replica to reuse),
-  so it owns its **own schema** (`tekmemo_files`) + an `ensureSchema()` migration,
+  so it owns its **own schema** (`memofs_files`) + an `ensureSchema()` migration,
   unlike the replica-aware Turso store. The build-now metadata adapter for
   self-hosters.
 - **Replica-aware vs standalone MetadataStore** — The two flavors of
@@ -457,7 +457,7 @@ names generally.
   **replica-aware** (Turso — reuses the cloud's `project_files` table) vs
   **standalone** (Postgres / D1 / SQLite — owns its table + migration). The
   contract is identical; the difference is purely who owns the schema. A
-  self-hoster running `tekmemo-server` with no sync replica always uses a
+  self-hoster running `memofs-server` with no sync replica always uses a
   standalone store.
 - **Deferred store adapters** — GCS (blob) and D1 / SQLite (metadata) follow the
   same contracts when added; S3 + Postgres cover the overwhelming majority of
@@ -509,7 +509,7 @@ names generally.
   `notes.md` lose one silently) — the concurrency layer must wrap `append`, in
   scope for the concurrency slice, not a follow-up.
 - **Launch-critical (BUILD):** `LlmClient` core contract + OpenAI impl; provider-
-  neutral `createHostedRuntime`; `tekmemo-server` (+ HTTP surface); two-Worker
+  neutral `createHostedRuntime`; `memofs-server` (+ HTTP surface); two-Worker
   split; R2 blob-only split + Turso metadata extraction; OpenAI `Extractor`; the
   LLM-enhanced intelligence tier (strategist Q23 / writer-critic Q25a / staleness
   Q24 v1.x / semantic consolidation Q25a); the concurrency layer (ADR 0010);
@@ -517,8 +517,8 @@ names generally.
   no-legacy cleanup (`"memory"` mode + policies); docs (mode/policy sweep, Server
   page, `configure/*` landing pages, `connectors.md`, `intelligence.md`); SC10
   recent-activity L2 spec; Voyage v4 (incidental to the hosted-runtime deletion).
-- **Deferred (DOCUMENT ONLY, post-launch):** `tekmemo-adapter-s3` (blob); 
-  `tekmemo-adapter-postgres` (metadata). OSS self-hosting launches against the
+- **Deferred (DOCUMENT ONLY, post-launch):** `memofs-adapter-s3` (blob); 
+  `memofs-adapter-postgres` (metadata). OSS self-hosting launches against the
   cloud's R2 + Turso bundle (R2 is S3-compatible; Turso/libSQL is free + easy);
   the native S3/Postgres adapters are *conveniences*, not blockers. GCS (blob)
   + D1/SQLite (metadata) remain further-out.
@@ -551,7 +551,7 @@ under S3-Q9); "defer the intelligence tier" (it ships).
 - **SC8 provider line (open-core honesty)** — The hosted-memory screen
   (`/dashboard/memory`) gains a **read-only "Runtime providers" line** in its
   Runtime-status section ("Embedder: Voyage v4 · Extractor: Workers AI ·
-  Reranker: Voyage"). The honest expression of "we run the same `tekmemo-server`
+  Reranker: Voyage"). The honest expression of "we run the same `memofs-server`
   you could self-host, here's what we chose for you" — reinforces open-core
   trust at near-zero screen cost. Rejected: letting users pick cloud providers
   per-project (managed-runtime-as-platform, breaks the "we run it, you don't
@@ -566,7 +566,7 @@ under S3-Q9); "defer the intelligence tier" (it ships).
 - **Self-host-vs-Cloud framing shifts, no new screen.** SC8/SC9 + the landing
   "Comparison" section (SC2.1 §8) reframe the cloud's hosted memory from "a
   runtime you can't get elsewhere" (now false) to "we run the *same*
-  `tekmemo-server` you could self-host, minus the ops" (managed convenience).
+  `memofs-server` you could self-host, minus the ops" (managed convenience).
   Copy shift (L3), recorded so the copywriter knows. The self-host-vs-cloud
   comparison lives on the **existing landing** + the **docs Server page** — not
   a new cloud screen.
@@ -589,15 +589,15 @@ under S3-Q9); "defer the intelligence tier" (it ships).
   each provider/backend page. It may **not** re-state a provider's signature,
   defaults, or model list — those live on the provider page (Rule 2). A copy is a
   defect.
-- **Server nav item** — `tekmemo-server` gets its **own top-level nav entry**
+- **Server nav item** — `memofs-server` gets its **own top-level nav entry**
   (parallel to CLI/MCP), not nested under a "Self-hosting" group — it is a
   first-class deployable artifact (S3-Q1). Cloud content stays deferred to
-  `memo.tekbreed.com` (SC1); the docs link out, never host a cloud comparison
+  `memo.memofs.dev` (SC1); the docs link out, never host a cloud comparison
   page.
 
 ### No-legacy / public-API trim (locked S3-Q5)
 
-- **Two modes, no policies** — The locked v1 `Tekmemo` client surface has
+- **Two modes, no policies** — The locked v1 `Memofs` client surface has
   **two** runtime modes (`local` | `hybrid`) and **no** read/write policy enum
   (locked S3-Q5, the "no legacy support" cut). Both cuts remove dead API that
   contradicted the locked "cloud = file replica, not engine" thesis (D4 / ADR
@@ -625,13 +625,13 @@ under S3-Q9); "defer the intelligence tier" (it ships).
 ### Self-hosting (locked S3-Q1)
 
 - **Self-hosted runtime** — An **OSS** deployment where a user runs the
-  *hosted-runtime substrate* (the same `Tekmemo` engine the cloud runs over
+  *hosted-runtime substrate* (the same `Memofs` engine the cloud runs over
   remote-resident files) **on their own infra**, with **their own providers**:
   their own blob store, metadata store, embedder, reranker, and extractor. The
   substrate is **provider-neutral by construction** — the cloud simply supplies
   one bundle (R2 + Turso + Voyage + Workers AI); an OSS self-hoster supplies a
   different bundle (e.g. S3/GCS + Postgres/D1 + OpenAI + a local extractor).
-  No vendor lock-in; no TekMemo Cloud dependency. **Distinct from** the
+  No vendor lock-in; no Memo FS Cloud dependency. **Distinct from** the
   **managed runtime** (the cloud runs it) — same substrate, **different
   operator**. The reason `createHostedRuntime` must stop hardcoding providers
   (it becomes a thin config-driven assembler over injected adapters, mirroring
@@ -641,7 +641,7 @@ under S3-Q9); "defer the intelligence tier" (it ships).
 _Avoid:_ "self-hosted cloud," "on-prem runtime" (on-prem implies the cloud
 product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 
-- **tekmemo-server (`@tekmemo/server`)** — The **OSS-deployable
+- **memofs-server (`@memofs/server`)** — The **OSS-deployable
   hosted-runtime server** (locked S3-Q1, shape B). A published package that
   serves the hosted runtime over an API (HTTP/JSON-RPC), built on the
   **provider-neutral** `createHostedRuntime` factory. Deployable two ways: as a
@@ -652,15 +652,15 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   embedder, reranker, extractor). The actual fulfillment of ADR 0003's
   "self-host the same engine free" — a first-class OSS artifact, not "use the
   library." Owns the provider-neutral factory; `apps/cloud` consumes it. The
-  cloud and the OSS self-hoster run **identical `tekmemo-server` code** — the
+  cloud and the OSS self-hoster run **identical `memofs-server` code** — the
   only difference is the deployment target + the providers injected.
-  **Distinct from** `@tekmemo/core` (the core library, in-process only) and
+  **Distinct from** `@memofs/core` (the core library, in-process only) and
   `apps/cloud` (the SaaS = substrate + commercial layer).
 
 ### Self-hosting commercial boundary (locked S3-Q7)
 
-- **Self-hosting scope — runtime only** — TekMemo **blesses self-hosting of the
-  runtime** (`tekmemo-server`), and **only** the runtime (locked S3-Q7). Two
+- **Self-hosting scope — runtime only** — Memo FS **blesses self-hosting of the
+  runtime** (`memofs-server`), and **only** the runtime (locked S3-Q7). Two
   layers stay **cloud-only** and are never self-hostable:
   - **Sync** (cross-device file replication) — inherently *centralized*; "self-
     hosting sync" = running your own cloud replica with no benefit over the
@@ -668,7 +668,7 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   - **The commercial layer** (auth / Better Auth, billing / Polar, the React
     Router dashboard, Teams) — that is `apps/cloud`, the SaaS. Not a self-
     hostable product.
-- **Why bless, not starve.** TekMemo is MIT; users can self-host the runtime
+- **Why bless, not starve.** Memo FS is MIT; users can self-host the runtime
   *anyway* via the library — "not offering it" only guarantees a painful OSS
   experience with no offsetting revenue. Blessing it is the Supabase / Vercel /
   PostHog / Plausible open-core pattern: the self-hostable tier drives trust +
@@ -689,21 +689,21 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 > **K3 (2026-07-04):** the two-Worker split below is the **canonical topology**,
 > but the commitment to actually split is gated on a `wrangler deploy --dry-run`
 > measurement that has not yet run. The "runtime imports do not fit in 3 MB"
-> claim is asserted, never measured — `@tekmemo/server` is a thin factory over
+> claim is asserted, never measured — `@memofs/server` is a thin factory over
 > injected adapters. Three outcomes: ≤ 3 MB → collapse to one Worker; ≤ 10 MB →
 > free-tier-only split; > 10 MB → split stands. WF-3 owns the dry-run. The
 > split's *thesis* (the boundary is the runtime API; cloud and OSS run identical
-> `@tekmemo/server` code) is unchanged by K3.
+> `@memofs/server` code) is unchanged by K3.
 
 - **Two-Worker split** — The cloud deploys as **two** Cloudflare Workers, not
   one (locked S3-Q2; revises ADR 0005's "one Worker" claim). A hard constraint
   on the free plan: a Worker is capped at **3 MB** (compressed), and the
   commercial stack (RRv8 SSR dashboard + Better Auth + Drizzle + Hono sync API)
-  plus the runtime + its adapter imports (Tekmemo core + R2 + Voyage + Workers
+  plus the runtime + its adapter imports (Memofs core + R2 + Voyage + Workers
   AI) do not fit in 3 MB. Splitting achieves 3 + 3. The split is
   architecturally clean — the boundary between the two Workers *is* the runtime
   API (`recall`/`context`/`graph`/`memory`), which is also the boundary an OSS
-  self-hoster gets over HTTP from `tekmemo-server`. **Remains correct after a
+  self-hoster gets over HTTP from `memofs-server`. **Remains correct after a
   future Workers Paid upgrade** (10 MB cap): isolating the runtime lets it
   scale independently (it is the CPU-heavy part — embeddings, extraction,
   consolidation), and keeps the cloud's bundle shape identical to the OSS
@@ -715,9 +715,9 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   Hosted-memory calls delegate to the runtime Worker over a **Service Binding**.
   The only part that is *commercial* (auth, billing, dashboard, sync); the
   intelligence never lives here.
-- **Runtime Worker (`tekmemo-server` deployed as a Cloudflare Worker)** — The
-  cloud's hosted-runtime deployment: runs the same `tekmemo-server` package the
-  OSS self-hoster deploys as a Node process. Holds per-project `Tekmemo`
+- **Runtime Worker (`memofs-server` deployed as a Cloudflare Worker)** — The
+  cloud's hosted-runtime deployment: runs the same `memofs-server` package the
+  OSS self-hoster deploys as a Node process. Holds per-project `Memofs`
   instances; served to the commercial Worker via a **Service Binding**
   (sub-ms hop within a colo; a real but v1-irrelevant cost — sync-only at v1,
   runtime calls land in Phase 3). The CPU-heavy surface (embeddings, extraction,
@@ -728,27 +728,27 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 
 ## Key entry points
 
-- AI SDK runtime: `packages/tekmemo-adapter-ai-sdk/` *(was
-  `packages/core/src/ai-sdk/runtime/tekmemo-runtime.ts`; extracted per
+- AI SDK runtime: `packages/memofs-adapter-ai-sdk/` *(was
+  `packages/core/src/ai-sdk/runtime/memofs-runtime.ts`; extracted per
   decisions log S2-Q1).*
-- `Tekmemo` class: `packages/core/src/tekmemo/Tekmemo.ts`
-- Provider-neutral hosted-runtime factory: `packages/tekmemo-server/` *(new, S3-Q1
+- `Memofs` class: `packages/core/src/memofs/Memofs.ts`
+- Provider-neutral hosted-runtime factory: `packages/memofs-server/` *(new, S3-Q1
   — `createHostedRuntime`, consumed by the OSS server + the cloud's runtime
   Worker).*
 - `LlmClient` contract: `packages/core/src/ai-runtime/` *(new core interface,
   S3-Q4 / ADR 0014 — the 4th member of the embedder/reranker/extractor family).*
 - AgentFS session controller:
   `packages/core/src/agentfs/session/agent-session.ts`
-- AI SDK tests: `packages/tekmemo-adapter-ai-sdk/tests/` *(moved with the
+- AI SDK tests: `packages/memofs-adapter-ai-sdk/tests/` *(moved with the
   package)*
 - Runnable example: `examples/ai-sdk/agent.ts`
-- Docs: `apps/docs/packages/tekmemo/ai-sdk/`, `apps/docs/api/tekmemo/ai-sdk.md`
+- Docs: `apps/docs/packages/memofs/ai-sdk/`, `apps/docs/api/memofs/ai-sdk.md`
 - S3 execution plan (the build worklist): `docs/architecture/s3-execution-plan.md`
 
 ## Decisions
 
 - [ADR 0002](./adr/0002-connectors-run-locally.md) — Connectors run locally;
-  cloud only replicates files. Config syncs via `.tekmemo/connectors.json`
+  cloud only replicates files. Config syncs via ``.memofs/`connectors.json`
   (tokens server-side, never in R2); connector writes isolated +
   content-deterministic.
 - [ADR 0003](./adr/0003-managed-runtime-tier.md) — Cloud's long-term purpose
@@ -765,9 +765,9 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   $24-coming-soon; entitlement-based enforcement (numeric caps, not plan-name
   checks); Polar billing (Merchant of Record).
 - [ADR 0007](./adr/0007-ai-sdk-extraction.md) — Extract the Vercel AI SDK
-  integration out of core into `@tekmemo/adapter-ai-sdk`; keep
+  integration out of core into `@memofs/adapter-ai-sdk`; keep
   framework-agnostic `agentfs/` in core. Runtime interface
-  (`TekMemoMemoryRuntime`, renamed from `TekMemoAiRuntime`) stays in core as the
+  (`MemofsMemoryRuntime`, renamed from `MemofsAiRuntime`) stays in core as the
   framework-neutral contract; the Vercel tool/protocol layer stays in the
   adapter.
 - [ADR 0008](./adr/0008-docs-information-architecture.md) — Docs information
@@ -793,13 +793,13 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
   silent-data-loss bug; the concurrency layer is smaller than the full runtime
   and ships first, unblocking Teams revenue safely. Captures Q32.
 - [ADR 0012](./adr/0012-r2-memory-store-adapter.md) — R2-backed `MemoryStore`
-  as a new adapter `@tekmemo/adapter-r2` + a provider-neutral
+  as a new adapter `@memofs/adapter-r2` + a provider-neutral
   remote-blob store contract (`RemoteBlobMemoryStore`) in core. The hard OSS
   prerequisite for phase 3 (Workers have no Node `fs`). Captures Q31.
 - [ADR 0013](./adr/0013-two-worker-split.md) — The cloud deploys **two**
   Workers (commercial + runtime) joined by a Service Binding, not one. A 3 MB
   free-plan constraint forces it; the runtime-API boundary makes it
-  architecturally clean (identical to the OSS `tekmemo-server` surface).
+  architecturally clean (identical to the OSS `memofs-server` surface).
   Revises ADR 0005. Captures S3-Q2.
 - [ADR 0014](./adr/0014-llm-client-core-interface.md) — A provider-neutral
   **`LlmClient`** transport contract in core (the fourth member of the
@@ -818,7 +818,7 @@ product relocated; self-hosted runtime is the OSS substrate, not the cloud).
 - [Decisions log](./architecture/decisions.md) — Full new-architecture design
   sessions (Q1–Q10 + S2-Q1 + Q11–Q20 + Q21–Q28 + Q29–Q33 all locked): the above
   ADRs plus package triage (remove upstash, consolidate benchmarks, shelve
-  mcp-worker for v1, add `tekmemo-connectors` package, defer extractor adapter
+  mcp-worker for v1, add `memofs-connectors` package, defer extractor adapter
   package), the connector set (GitHub + Notion at v1, Linear queued), the
   license decision (MIT), the full retrieval-model session (Q22 write
   intelligence, Q23 strategist, Q24 staleness loop, Q25a writer-critic,

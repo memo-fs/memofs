@@ -14,10 +14,10 @@
 Apply the same **code-reviewer + security-reviewer + 500-LoC** pass from WF-6 to
 every remaining package, reusing the pattern established on core:
 
-- `@tekmemo/adapter-cloudflare` (the WF-1 result — R2 + D1)
-- `@tekmemo/adapter-{ai-sdk,openai,transformers,voyage,workers-ai}`
-- `@tekmemo/json-rpc`, `@tekmemo/connectors`, `@tekmemo/server`, `@tekmemo/mcp-server`
-- `@tekmemo/benchmark-kit`, `@tekmemo/testing`
+- `@memofs/adapter-cloudflare` (the WF-1 result — R2 + D1)
+- `@memofs/adapter-{ai-sdk,openai,transformers,voyage,workers-ai}`
+- `@memofs/json-rpc`, `@memofs/connectors`, `@memofs/server`, `@memofs/mcp-server`
+- `@memofs/benchmark-kit`, `@memofs/testing`
 - `tekmemo` (the CLI distribution package — `packages/tekmemo`)
 
 Known 500-LoC violation outside core: `packages/mcp-server/src/http/index.ts`

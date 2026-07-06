@@ -5,7 +5,7 @@
 > between this log's Q8 ("ONE Worker", bundled adapter) and the S3 grilling
 > (`s3-execution-plan.md`, ADRs 0013–0015). Where this log's body conflicts with
 > K1–K5, the reconciliation wins. The relevant amendments: scope flipped
-> `@tekbreed/*` → `@tekmemo/*` (recorded as [ADR 0016](../adr/0016-scope-flip-and-dir-equals-name.md));
+> `@memofs/*` → `@memofs/*` (recorded as [ADR 0016](../adr/0016-scope-flip-and-dir-equals-name.md));
 > D1 rejected, Turso/libSQL stays (K1); the two-Worker split is gated on a bundle
 > measurement (K3, [ADR 0013](../adr/0013-two-worker-split.md) amended); D2's
 > sync-only v1 is reinstated, the managed runtime is a v1.1 fast-follow (K2,
@@ -69,7 +69,7 @@
 >   - [ADR 0006](../adr/0006-pricing-and-entitlements.md) — pricing tiers +
 >     Polar + entitlement model (from Q9).
 >   - [ADR 0007](../adr/0007-ai-sdk-extraction.md) — extract the Vercel AI SDK
->     integration to an adapter package; runtime-via-Tekmemo contract origin
+>     integration to an adapter package; runtime-via-Memofs contract origin
 >     (from S2-Q1).
 >   - [ADR 0008](../adr/0008-docs-information-architecture.md) — docs information
 >     architecture: four rules + routing blueprint (from session 2, S2-Q3
@@ -85,7 +85,7 @@
 >     sequencing: concurrency layer → Teams → full managed runtime (from Q32;
 >     revises ADR 0003's two-phase sequence).
 >   - [ADR 0012](../adr/0012-r2-memory-store-adapter.md) — R2-backed MemoryStore
->     as a new adapter `@tekmemo/adapter-r2` + provider-neutral
+>     as a new adapter `@memofs/adapter-r2` + provider-neutral
 >     remote-blob store contract in core (from Q31).
 >   Q10 (connector set) and the license decision (folded into Q8) are captured in
 >   this log; the provider-neutral `Connector` interface from Q10 folds into
@@ -111,7 +111,7 @@
 - **Answer:** **Connectors run locally; the cloud only replicates the resulting
   files.** (User picked Option A, 2026-06-20.)
 - **Rationale:** A connector is an ingestion operation — it fetches, normalizes,
-  chunks, embeds, and extracts into `.tekmemo/`. Ingestion is an engine concern;
+  chunks, embeds, and extracts into ``.memofs/``. Ingestion is an engine concern;
   the engine is local. Hosting connectors server-side would re-open the
   "cloud-as-engine" decision the refactor just closed and would force the cloud
   to embed/extract, contradicting D7 (indexes derived locally). Cloud stays dumb.
@@ -127,13 +127,13 @@
   them from the web? Where does configuration live, and what triggers a run?
 - **Answer:** **Config syncs down from the web dashboard; the local runtime
   executes on schedule/session.** (User picked Option 1, 2026-06-20.)
-  - **Control plane = TekMemo Cloud dashboard** (the future `apps/api` build
+  - **Control plane = Memo FS Cloud dashboard** (the future `apps/api` build
     target): user adds a connector and pastes a token. The cloud stores config
     + a credential pointer. This is the Linear/`.git/config` model — editable
     from the UI, acted on locally.
   - **Data plane = local runtime** (CLI / MCP server / scheduled daemon): pulls
     the connector config down via sync, fetches the external source (Notion,
-    GitHub, …), ingests through the **local** engine into `.tekmemo/`, and the
+    GitHub, …), ingests through the **local** engine into ``.memofs/``, and the
     resulting files sync back up like any other canonical file.
   - **Execution only happens while the local runtime is alive.** Honest for a
     local-first OSS product (like `git` only fetching when you run it).
@@ -144,22 +144,22 @@
 - **Implementation details (both locked, 2026-06-20, user accepted the
   recommended Option A):**
   1. **Connector-config storage shape:** connector config becomes the **11th
-     canonical file** — `.tekmemo/connectors.json` — joining the 10 in
-     `packages/tekmemo/src/core/constants/memory-paths.ts`. It is a sync unit:
+     canonical file** — ``.memofs/`connectors.json` — joining the 10 in
+     `packages/memofs/src/core/constants/memory-paths.ts`. It is a sync unit:
      `computeLocalManifest()` in `file-replication.ts` walks 11 files now
      (10 canonical + snapshots + `connectors.json`). Every device sees the same
      connector setup via the existing file-replication sync.
   2. **Secret handling:** tokens **never** ride in the file-replica (R2 blobs
-     are readable; `packages/tekmemo-cli/src/utils/secrets.ts` is built to catch
-     exactly this). `.tekmemo/connectors.json` holds only an opaque `secretRef`
+     are readable; `packages/memofs-cli/src/utils/secrets.ts` is built to catch
+     exactly this). ``.memofs/`connectors.json` holds only an opaque `secretRef`
      (e.g. `"ss_abc123"`) per connector — type, schedule, source mapping,
      enabled flag, and the ref — **never** the token itself. Tokens live in
-     TekMemo Cloud's server-side secret store (TekAuth / Turso-encrypted or
+     Memo FS Cloud's server-side secret store (MemofsAuth / Turso-encrypted or
      Cloudflare Secret). The local runtime fetches the token over an
      authenticated call right before a run, holds it in memory only, never
      writes it to disk.
 - **Cloud contract additions (to be folded into §7/§12 of the refactor doc):**
-  - One new canonical file: `.tekmemo/connectors.json` (sync unit, no secrets).
+  - One new canonical file: ``.memofs/`connectors.json` (sync unit, no secrets).
   - One new authenticated endpoint on the future cloud for secret retrieval,
     e.g. `GET /v1/projects/:projectId/connectors/:connectorId/secret` → returns
     the decrypted token to an authenticated, scoped client. This is a
@@ -179,7 +179,7 @@
   new rule for connector re-ingestion conflicts.** (Resolved 2026-06-20, user
   accepted the recommended Option A.)
 - **Findings (verified in code):**
-  1. **Recall decay — already implemented.** `packages/tekmemo/src/recall/hybrid/
+  1. **Recall decay — already implemented.** `packages/memofs/src/recall/hybrid/
      hybrid-recall.ts` (lines 89–185) scores
      `finalScore = 0.7·relevance + 0.2·recency + 0.1·confidence`, where `recency`
      is an exponential half-life decay (default 30 days; now→1.0, 30d→0.5,
@@ -187,7 +187,7 @@
      hard-deletes. Smart enough for ranking.
   2. **Human multi-device conflicts — already decided + implemented (D6).**
      Last-writer-wins per file + mandatory pre-sync snapshot.
-     `packages/tekmemo/src/tekmemo/sync/file-replication.ts` calls
+     `packages/memofs/src/memofs/sync/file-replication.ts` calls
      `createPreSyncSnapshot()` before every mutating `push` and `pull` (lines
      204, 226) and fails closed. Correct for single-user multi-device (the
      Dropbox/iCloud model).
@@ -215,17 +215,17 @@
   - `notes.md` is already append-only markdown where every entry carries a
     `source:` field and a content-derived stable `metadata.id` (e.g.
     `mem_d42f34bce417d0e5`).
-  - The schema (`packages/tekmemo-mcp-server/src/schema.ts` `sourceRefSchema`,
+  - The schema (`packages/memofs-mcp-server/src/schema.ts` `sourceRefSchema`,
     line ~110) already enumerates `"connector"` as a valid `sourceType`, with a
     `sourceId` field for the stable external id.
   - So connector notes fit the existing data model **with zero new files**: a
     connector note is just a note with `source: connector`, `sourceId:
     <external-id>`, and a content-derived `id` (so re-ingest of unchanged
     content reproduces the same bytes).
-  - `.tekmemo/connectors.json` (from Q2) holds the *connector config*; the
+  - ``.memofs/`connectors.json` (from Q2) holds the *connector config*; the
     *ingested content* lives in `notes.md` (and derived `chunks.jsonl` /
     `embeddings.jsonl` / graph nodes as usual). Config ≠ content.
-  - Rejected alternative: a new `.tekmemo/sources/` region as extra sync units.
+  - Rejected alternative: a new ``.memofs/`sources/` region as extra sync units.
     More files, more sync surface, no benefit over the existing discriminator
     model that the schema already supports.
 - **Status:** **Locked.**
@@ -235,18 +235,18 @@
   `chunks.jsonl` / `embeddings.jsonl` / `graph/nodes.jsonl`. This is acceptable
   at v1 (single-user scale, R2 is cheap) but is flagged as a future concern
   (retention/TTL/archive policy), not a v1 blocker.
-## Q4 — How does TekMemo Cloud stay unique and relevant long-term?
+## Q4 — How does Memo FS Cloud stay unique and relevant long-term?
 
 - **Question (from `new-architecture.md` open question 3):** how do we make
-  TekMemo Cloud VERY unique and outstanding to capture users' attention and
+  Memo FS Cloud VERY unique and outstanding to capture users' attention and
   remain relevant in the long term?
 - **Contradiction surfaced:** `README.md` lines 145–146 and `ROADMAP.md` lines
   35–37 promise the cloud will host recall/vector/graph/evals ("🌱 early
   access" / "managed versions of the capabilities the OSS runtime computes
   locally"). But the v1 cloud on this branch is a **file replica** — it does
-  not instantiate the `Tekmemo` runtime (verified in code:
-  `packages/tekmemo/src/tekmemo/sync/file-replication.ts`; the trimmed
-  `TekMemoCloudClient` in `cloud-client/types.ts` exposes only
+  not instantiate the `Memofs` runtime (verified in code:
+  `packages/memofs/src/memofs/sync/file-replication.ts`; the trimmed
+  `MemofsCloudClient` in `cloud-client/types.ts` exposes only
   `health`/`readiness`/`sync`). So v1 physically cannot run recall yet.
 - **Answer (locked, 2026-06-20, Option A):** **The cloud's long-term purpose is
   to run the local engine and host memory for API integration. The v1
@@ -257,19 +257,19 @@
     model applied to memory: self-host the runtime free (OSS), or pay us to run
     the *same code* on managed infra.
   - **Why "foundation-first" sequencing is required, not optional:** to run the
-    engine on hosted infra, the cloud first needs the user's `.tekmemo/` files
+    engine on hosted infra, the cloud first needs the user's ``.memofs/`` files
     resident in R2. That is exactly what the v1 file-replica refactor builds.
     Sync is the *prerequisite* for the managed engine, not a competitor to it.
     The files must exist in the cloud before the cloud can run an engine over
     them.
   - **v1 cloud (this refactor):** file-replica sync + dashboard + connector
-    config (Q1–Q3) + health/readiness. Ships soon. The `TekMemoCloudClient`
+    config (Q1–Q3) + health/readiness. Ships soon. The `MemofsCloudClient`
     contract stays at `health`/`readiness`/`sync` (+ the planned
     `connectors/:id/secret` from Q2).
-  - **v1.x / v2 cloud (managed-runtime tier):** spin up the identical `Tekmemo`
+  - **v1.x / v2 cloud (managed-runtime tier):** spin up the identical `Memofs`
     runtime + an embedder (the existing `-transformers` adapter) on Cloudflare
     Workers/Pages against the user's R2-resident files; expose
-    recall/memory/graph by *additively* re-expanding `TekMemoCloudClient` with
+    recall/memory/graph by *additively* re-expanding `MemofsCloudClient` with
     the engine namespaces. Single engine implementation running in two places
     (laptop + managed infra) against the same files → no drift, one source of
     truth. This is when the README's "hosted vector recall / graph / evals"
@@ -301,22 +301,22 @@
   the cloud's long-term product shape), surprising (a "managed engine" that is
   the local engine re-hosted, sequenced foundation-first), real trade-off
   (ship-now vs. hold-for-compute). Promote at end of session.
-## Q5 — How smart/super-intelligent is TekMemo? (v1 intelligence scope)
+## Q5 — How smart/super-intelligent is Memo FS? (v1 intelligence scope)
 
 - **Question (from `new-architecture.md` open question 4):** how smart and
-  super-intelligent is TekMemo?
+  super-intelligent is Memo FS?
 - **Honest current state (audited in code):**
   | Capability | Status | Where |
   |---|---|---|
-  | Hybrid recall (BM25 + fuzzy + optional vector + reranker) | ✅ Strong | `packages/tekmemo/src/recall/hybrid/hybrid-recall.ts`; proven by `tests/intelligence/local-intelligence.test.ts` (zero-config "login auth" → finds "Authentication uses JWT") |
+  | Hybrid recall (BM25 + fuzzy + optional vector + reranker) | ✅ Strong | `packages/memofs/src/recall/hybrid/hybrid-recall.ts`; proven by `tests/intelligence/local-intelligence.test.ts` (zero-config "login auth" → finds "Authentication uses JWT") |
   | Recency-weighted decay | ✅ Real (ranking only) | `hybrid-recall.ts` half-life, 30-day default |
-  | Graph auto-extraction | ⚠️ **Weak / pattern-only** | `packages/tekmemo/src/graph/extraction/rule-based-extractor.ts` — ~7 regex patterns ("X uses Y", "depends_on", "prefers", …). Natural prose yields almost nothing. |
+  | Graph auto-extraction | ⚠️ **Weak / pattern-only** | `packages/memofs/src/graph/extraction/rule-based-extractor.ts` — ~7 regex patterns ("X uses Y", "depends_on", "prefers", …). Natural prose yields almost nothing. |
   | Memory consolidation / merging | ❌ None | Same fact written twice = two notes |
   | Semantic deduplication | ❌ None | — |
   | Reasoning / inference over graph | ❌ None | Traversal + filters only |
   | Proactive surfacing | ❌ None | Recall is query-time only |
   | LLM-based extraction | ❌ None | No LLM in the extraction path |
-- **One-liner:** TekMemo has genuinely strong retrieval, weak pattern-based
+- **One-liner:** Memo FS has genuinely strong retrieval, weak pattern-based
   graph extraction, and no higher-order memory intelligence (consolidation,
   inference, semantic dedup, proactivity). It is "a strong search engine with
   decay," not yet an intelligent memory system in the Mem0/Zep sense.
@@ -344,7 +344,7 @@
   being asked).
 - **Sub-question — extractor shape (locked): pluggable adapter, provider-neutral.**
   - Mirrors the existing embedder/reranker adapter pattern
-    (`@tekmemo/adapter-openai`, `-voyage`, `-transformers`).
+    (`@memofs/adapter-openai`, `-voyage`, `-transformers`).
   - Honors `AGENTS.md`: "Core protocol contracts must be provider-neutral."
   - **Key consequence for the local-first thesis:** the `-transformers` adapter
     already proves an LLM-capable model can run fully in-process (ONNX, zero API
@@ -379,23 +379,23 @@
 
   | Package / App | Verdict | Why (grounded) |
   |---|---|---|
-  | `packages/tekmemo` | **KEEP** (core) | The engine. Non-negotiable; Q4/Q5 depend on it. |
-  | `packages/tekmemo-cli` | **KEEP** | Local execution surface for connectors (Q1/Q2); will grow connector commands. |
-  | `packages/tekmemo-mcp-server` | **KEEP** | Agent integration surface; already mid-refactor on this branch. |
-  | `packages/tekmemo-adapter-openai` | **KEEP** | Embedder adapter; provider-neutral (AGENTS.md). |
-  | `packages/tekmemo-adapter-voyage` | **KEEP** | Embedder + reranker adapter; provider-neutral. |
-  | `packages/tekmemo-adapter-transformers` | **KEEP** (strategic) | Local-first keystone: zero-API-key embeddings, and per Q5 the basis for a local LLM extractor. |
-  | `packages/tekmemo-testing` | **KEEP** | Shared contract tests/fixtures; used by all packages. |
+  | `packages/memofs` | **KEEP** (core) | The engine. Non-negotiable; Q4/Q5 depend on it. |
+  | `packages/memofs-cli` | **KEEP** | Local execution surface for connectors (Q1/Q2); will grow connector commands. |
+  | `packages/memofs-mcp-server` | **KEEP** | Agent integration surface; already mid-refactor on this branch. |
+  | `packages/memofs-adapter-openai` | **KEEP** | Embedder adapter; provider-neutral (AGENTS.md). |
+  | `packages/memofs-adapter-voyage` | **KEEP** | Embedder + reranker adapter; provider-neutral. |
+  | `packages/memofs-adapter-transformers` | **KEEP** (strategic) | Local-first keystone: zero-API-key embeddings, and per Q5 the basis for a local LLM extractor. |
+  | `packages/memofs-testing` | **KEEP** | Shared contract tests/fixtures; used by all packages. |
   | `apps/docs` | **KEEP** | Docs site; update content per Q4/Q5 doc-fix lists. |
   | `tooling/*` (typescript, utils, tsdown) | **KEEP** | Internal `@repo/*` per AGENTS.md; unchanged. |
-  | `packages/tekmemo-adapter-upstash` | **REMOVE** | **6a.** Zero consumers (no src refs outside itself). Cloud vector-store adapter contradicts D1/D2 (cloud = file replica, not a vector DB). Pre-launch (D8) → delete, no deprecation cycle. |
-  | `packages/tekmemo-benchmark-kit` ↔ `benchmarks/` | **CONSOLIDATE (6b)** | Two overlapping benchmark efforts. Keep `tekmemo-benchmark-kit` as the **published** reusable lib (datasets, runners, thresholds); make `benchmarks/` (private `@tekmemo/benchmarks`) **consume** the kit and own only results (`benchmark-results/{full,release,smoke}`). One source of truth: kit owns code, workspace owns results. Matches ROADMAP "Benchmark suite publication." |
-  | `apps/tekmemo-mcp-worker` | **SHELVE for v1 (6c)** | Currently built on the **deleted cloud engine** — its `Env` is `TEKMEMO_API_KEY`/`TEKMEMO_API_URL`/`cloud-only runtime` (verified in `apps/tekmemo-mcp-worker/src/index.ts`). Broken under new arch. Rewriting to run the engine in-Worker = the managed-runtime tier (Q4), sequenced as v1.x/v2. So: shelve for v1, remove from deploy path, reopen as the managed-runtime milestone. README line 145 "Hosted managed MCP endpoint" → "Later." |
-  | `packages/tekmemo-connectors` | **ADD (6d)** | Locked by Q1–Q3. The local connector framework + built-in Notion/GitHub connectors. New published package. |
-  | `packages/tekmemo-adapter-extractor` | **DEFER (6d)** | Q5 locked an LLM extractor as pluggable/provider-neutral, but no implementation exists yet. Don't create an empty package speculatively. **Define the `Extractor` interface in core `packages/tekmemo` now**; add the first concrete adapter package only when built (likely a `-transformers`-based local extractor to preserve zero-config intelligence). |
+  | `packages/memofs-adapter-upstash` | **REMOVE** | **6a.** Zero consumers (no src refs outside itself). Cloud vector-store adapter contradicts D1/D2 (cloud = file replica, not a vector DB). Pre-launch (D8) → delete, no deprecation cycle. |
+  | `packages/memofs-benchmark-kit` ↔ `benchmarks/` | **CONSOLIDATE (6b)** | Two overlapping benchmark efforts. Keep `memofs-benchmark-kit` as the **published** reusable lib (datasets, runners, thresholds); make `benchmarks/` (private `@memofs/benchmarks`) **consume** the kit and own only results (`benchmark-results/{full,release,smoke}`). One source of truth: kit owns code, workspace owns results. Matches ROADMAP "Benchmark suite publication." |
+  | `apps/memofs-mcp-worker` | **SHELVE for v1 (6c)** | Currently built on the **deleted cloud engine** — its `Env` is `MEMOFS_API_KEY`/`MEMOFS_API_URL`/`cloud-only runtime` (verified in `apps/memofs-mcp-worker/src/index.ts`). Broken under new arch. Rewriting to run the engine in-Worker = the managed-runtime tier (Q4), sequenced as v1.x/v2. So: shelve for v1, remove from deploy path, reopen as the managed-runtime milestone. README line 145 "Hosted managed MCP endpoint" → "Later." |
+  | `packages/memofs-connectors` | **ADD (6d)** | Locked by Q1–Q3. The local connector framework + built-in Notion/GitHub connectors. New published package. |
+  | `packages/memofs-adapter-extractor` | **DEFER (6d)** | Q5 locked an LLM extractor as pluggable/provider-neutral, but no implementation exists yet. Don't create an empty package speculatively. **Define the `Extractor` interface in core `packages/memofs` now**; add the first concrete adapter package only when built (likely a `-transformers`-based local extractor to preserve zero-config intelligence). |
 
 - **Net package count change:** 9 → 9 published (remove upstash −1, add
-  tekmemo-connectors +1), plus the deferred extractor adapter later.
+  memofs-connectors +1), plus the deferred extractor adapter later.
 - **Status:** **Locked.**
 - **Candidate for ADR:** yes — shapes the published surface and removes an
   architecture-contradicting package. Promote at end of session.
@@ -406,18 +406,18 @@
   grounded in the actual code state on this branch.
 - **Critical finding (verified on branch):** the refactor is **mid-flight**.
   Despite −4642/+1124 lines changed, two locked items are *not yet done* in
-  code: `TekMemoRuntimeMode` in `packages/tekmemo/src/tekmemo/types.ts:10`
+  code: `MemofsRuntimeMode` in `packages/memofs/src/memofs/types.ts:10`
   **still contains `"cloud"`** (D4 wants it gone), and `memory-paths.ts` has
   **no connectors path yet** (Q2 needs it). So the branch must finish its own
   D-items before any Q1–Q6 work begins.
 
-### `packages/tekmemo` (core runtime) — the bulk of the work
-- **Finish D4 (modes):** `TekMemoRuntimeMode` → `"local" | "hybrid" | "memory"`;
+### `packages/memofs` (core runtime) — the bulk of the work
+- **Finish D4 (modes):** `MemofsRuntimeMode` → `"local" | "hybrid" | "memory"`;
   drop `"cloud"`. `RuntimeReadPolicy`/`WritePolicy` drop `"cloud-only"`. Update
   `config.ts` `resolveMode`/`isRuntimeMode`/`isReadPolicy`/`isWritePolicy`.
 - **Q2 — connectors as 11th canonical file:** add
-  `.tekmemo/connectors.json` to `CANONICAL_TEKMEMO_FILES` in
-  `packages/tekmemo/src/core/constants/memory-paths.ts` (currently 10 files).
+  ``.memofs/`connectors.json` to `CANONICAL_TEKMEMO_FILES` in
+  `packages/memofs/src/core/constants/memory-paths.ts` (currently 10 files).
   `file-replication.ts` `computeLocalManifest()` then walks 11 files + snapshots
   automatically (it derives from the constant). Define the `connectors.json`
   schema: `{ connectors: [{ id, type, enabled, schedule, sourceMapping,
@@ -425,12 +425,12 @@
 - **Q3 — connector-write discipline:** enforce that connector ingest writes
   notes with `source: "connector"`, stable `sourceId` (external id), and a
   content-derived `id` (no wall-clock in hashed bytes). The schema
-  (`packages/tekmemo-mcp-server/src/schema.ts` `sourceRefSchema`) already
+  (`packages/memofs-mcp-server/src/schema.ts` `sourceRefSchema`) already
   accepts `sourceType: "connector"`. The discipline is in the *connector*
-  writer (the new `tekmemo-connectors` package), not core.
+  writer (the new `memofs-connectors` package), not core.
 - **Q5 — intelligence surface:**
   - Define the provider-neutral `Extractor` interface here (mirrors the embedder
-    contract in `packages/tekmemo/src/...`). It does **not** exist yet (verified).
+    contract in `packages/memofs/src/...`). It does **not** exist yet (verified).
   - Add **memory consolidation**: a local pass that (a) merges semantically-dup
     notes, (b) marks superseded facts via the existing `supersedes` edge type +
     `graph/invalidation/invalidate-superseded-edges.ts`, (c) respects decay for
@@ -438,53 +438,53 @@
   - Keep the rule-based extractor as the zero-config fallback; LLM extractor
     layers on top when an adapter is configured.
 - **Acceptance (D-list from refactor doc §15):** `cloud-strategy.ts` deleted
-  (✅ done); `TekMemoCloudClient` trimmed to health/readiness/sync (✅ done);
+  (✅ done); `MemofsCloudClient` trimmed to health/readiness/sync (✅ done);
   mode/policy types trimmed (❌ pending — see above); file-based sync types +
   `file-replication.ts` (✅ done); pre-sync snapshot before mutations (✅ done).
 
-### `packages/tekmemo-cli` — add connector commands
-- **Q1/Q2:** add a `tekmemo connectors` command group — `add`, `remove`, `list`,
-  `run`. `add` writes to `.tekmemo/connectors.json` (local, no token — token is
+### `packages/memofs-cli` — add connector commands
+- **Q1/Q2:** add a `memofs connectors` command group — `add`, `remove`, `list`,
+  `run`. `add` writes to ``.memofs/`connectors.json` (local, no token — token is
   the server-side `secretRef`); `run` invokes the local connector framework.
 - **Q4:** remove any cloud-engine-only commands that assumed hosted recall/graph
   (verify against the in-progress `cloud.ts` diff — already −2000 lines on this
   branch; finish the trim to sync-only commands).
 - Keep all local-engine commands unchanged.
 
-### `packages/tekmemo-mcp-server` — finish the trim, add consolidation tooling
+### `packages/memofs-mcp-server` — finish the trim, add consolidation tooling
 - The branch already cut ~600 lines from `tools/handlers.ts` + `definitions.ts`
   and trimmed `factory.ts`. Finish removing any tool that delegated to the
   deleted cloud engine namespaces.
-- **Q5:** consider exposing a consolidation tool (`tekmemo_consolidate` or an
+- **Q5:** consider exposing a consolidation tool (`memofs_consolidate` or an
   automatic background tick) so MCP clients benefit from the new intelligence
   without code changes.
 - Verify `sourceRefSchema` (`schema.ts`) already supports `connector` — ✅
   confirmed; no schema change needed for Q3.
 
-### `packages/tekmemo-adapter-transformers` — basis for future local extractor
+### `packages/memofs-adapter-transformers` — basis for future local extractor
 - **No changes for v1.** Keep as the zero-API-key embedder.
 - **Q5/Q6 note:** when the first LLM extractor is built, a local implementation
   likely lives here (or a sibling `-adapter-extractor-transformers`) to preserve
   the zero-config-intelligence property. Deferred — do not pre-build.
 
-### `packages/tekmemo-adapter-openai` / `-voyage` — unchanged
+### `packages/memofs-adapter-openai` / `-voyage` — unchanged
 - Provider-neutral embedder/reranker adapters. No changes under Q1–Q6. They are
   also the model for the future extractor-adapter shape (Q5).
 
-### `packages/tekmemo-testing` — extend fixtures
+### `packages/memofs-testing` — extend fixtures
 - Add contract fixtures for: file-based sync over 11 canonical files (incl.
   `connectors.json` with a `secretRef` and no token), connector-write
   determinism (same external content → same sha256), and consolidation
   (supersede + merge). The shared fakes are the right home for these.
 
-### `packages/tekmemo-connectors` — **NEW, build from scratch**
+### `packages/memofs-connectors` — **NEW, build from scratch**
 - The local connector framework + ≥1 built-in connector (Notion or GitHub as
   the reference impl). Executes ingestion locally (Q1), reads config from
-  `.tekmemo/connectors.json` (Q2), resolves `secretRef` → token via the future
+  ``.memofs/`connectors.json` (Q2), resolves `secretRef` → token via the future
   authenticated `GET .../connectors/:id/secret` endpoint, writes notes with
   `source: "connector"` + deterministic ids (Q3).
-- Depends on `@tekmemo/core` (core) for the write path. Published as
-  `@tekmemo/connectors`.
+- Depends on `@memofs/core` (core) for the write path. Published as
+  `@memofs/connectors`.
 
 ### `apps/docs` — content fixes (tracked in Q4/Q5)
 - Rewrite OSS-vs-Cloud framing: v1 cloud = file-replica sync + connectors
@@ -493,19 +493,19 @@
 - Add a "Connectors" doc (local execution, web-config, secret handling) and an
   "Intelligence" doc (hybrid recall + LLM extraction + consolidation).
 
-### `apps/tekmemo-mcp-worker` — **SHELVE (6c)**
+### `apps/memofs-mcp-worker` — **SHELVE (6c)**
 - Remove from the deploy path for v1 (CI/`wrangler deploy`). Document that it
   reopens as the first instance of the managed-runtime tier (Q4). Its current
   `cloud-only runtime` wiring is dead against the new arch and must not ship.
 
-### `packages/tekmemo-adapter-upstash` — **REMOVE (6a)**
+### `packages/memofs-adapter-upstash` — **REMOVE (6a)**
 - Delete the package, drop it from `pnpm-workspace.yaml` glob (covered by
   `packages/*`), and remove any README/package-table references (README line
   115). Pre-launch → no deprecation cycle.
 
-### `benchmarks/` ↔ `packages/tekmemo-benchmark-kit` — **CONSOLIDATE (6b)**
-- `tekmemo-benchmark-kit` owns code (datasets, runners, thresholds);
-  `benchmarks/` (`@tekmemo/benchmarks`, private) consumes it and owns only
+### `benchmarks/` ↔ `packages/memofs-benchmark-kit` — **CONSOLIDATE (6b)**
+- `memofs-benchmark-kit` owns code (datasets, runners, thresholds);
+  `benchmarks/` (`@memofs/benchmarks`, private) consumes it and owns only
   result artifacts under `benchmark-results/`. Remove duplicated suite/dataset
   code from `benchmarks/`.
 
@@ -513,17 +513,17 @@
 - `@repo/typescript`, `@repo/utils`, `@repo/tsdown`. Internal per AGENTS.md.
 
 - **Sequencing note:** finish the in-flight D4/D5 refactor items on
-  `packages/tekmemo` first (they're half-done on this branch), then Q2's
+  `packages/memofs` first (they're half-done on this branch), then Q2's
   connectors.json + Q5's Extractor interface + consolidation, then the new
-  `tekmemo-connectors` package, then docs. Removals (upstash, worker shelving)
+  `memofs-connectors` package, then docs. Removals (upstash, worker shelving)
   can happen in parallel.
 
 ---
 
-## Q8 — Tech stack for TekMemo Cloud (broke + launch-ASAP)
+## Q8 — Tech stack for Memo FS Cloud (broke + launch-ASAP)
 
 - **Question (from `new-architecture.md` new question 8):** what tech stack for
-  TekMemo Cloud? Proposed: Better Auth, Railway, Turso/Drizzle, R2, React Router
+  Memo FS Cloud? Proposed: Better Auth, Railway, Turso/Drizzle, R2, React Router
   v8, Tailwind, Voyage adapter. Constraint: **completely broke, must launch
   ASAP.** Also: what's missing in the stack?
 - **Hard constraints honored:** broke (favor free tiers / zero monthly cost) +
@@ -539,10 +539,10 @@
 | **Auth** | **Better Auth** *(pending capability check)* | Must cleanly handle: (a) `tm_…` API keys for machine-to-machine sync, (b) OAuth callbacks for Notion/GitHub connectors, (c) scoped tokens (`memory:sync`). **Verify before final commit**; if it can't do all three, pick an alternative. |
 | **Static assets / hosting** | **Workers + Static Assets** (NOT Pages) | Cloudflare has announced Pages ↔ Workers are **converging**; Workers + Static Assets is the recommended path for new projects. A single Worker serves SSR HTML + JS/CSS. |
 | **CSS** | **Tailwind CSS** | Standard, fast, zero cost. |
-| **Scheduling / queues / idempotency** | **Upstash QStash + Redis + Workflow** | Serverless, generous free tier (QStash ~10k msg/day free). QStash → connector schedules (Q1/Q2) + consolidation passes (Q5); Redis → rate limit/cursors/idempotency; Workflow → the managed-tier recall/extract pipelines later. **≠ the removed `tekmemo-adapter-upstash` vector adapter (Q6) — different product, no conflict.** |
+| **Scheduling / queues / idempotency** | **Upstash QStash + Redis + Workflow** | Serverless, generous free tier (QStash ~10k msg/day free). QStash → connector schedules (Q1/Q2) + consolidation passes (Q5); Redis → rate limit/cursors/idempotency; Workflow → the managed-tier recall/extract pipelines later. **≠ the removed `memofs-adapter-upstash` vector adapter (Q6) — different product, no conflict.** |
 | **Email** | **Managed Plunk** (account already held, NOT self-hosted) | $0.001/email, 3k free/mo, zero ops. Replaces earlier Resend suggestion. |
 | **Observability (errors)** | **Sentry free tier** | Zero ops. |
-| **Load testing** | **Grafana k6** | CLI, no server; sits beside `tekmemo-benchmark-kit` + `benchmarks/`. (Full Grafana+Prometheus dashboard deferred — overkill for v1.) |
+| **Load testing** | **Grafana k6** | CLI, no server; sits beside `memofs-benchmark-kit` + `benchmarks/`. (Full Grafana+Prometheus dashboard deferred — overkill for v1.) |
 
 ### Corrections made to the original proposal
 
@@ -562,7 +562,7 @@
 3. **Pages → Workers + Static Assets.** Pages is converging into Workers;
    building new infra on it is wrong. One Worker serves SSR + assets.
 4. **Voyage adapter is not a cloud-stack piece.** It's an OSS *runtime* embedder
-   (`tekmemo-adapter-voyage`); v1 cloud does no embedding (D2). It matters again
+   (`memofs-adapter-voyage`); v1 cloud does no embedding (D2). It matters again
    only at the managed-runtime tier.
 
 ### "What's missing?" — gaps that were absent from the proposal
@@ -586,19 +586,19 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   ├── api/                     ← Hono (/v1/sync/*, health, connectors/:id/secret)
   ├── dashboard/               ← React Router v8 framework mode (SSR)
   └── assets binding           ← serves JS/CSS from the same deploy
-# apps/tekmemo-mcp-worker/     ← SHELVED (Q6). Reopens as Worker 2 (managed
+# apps/memofs-mcp-worker/     ← SHELVED (Q6). Reopens as Worker 2 (managed
 #                                 runtime) or as a service-bound companion.
 ```
 
 - Worker 1 (cloud) + Worker 2 (managed runtime, future) communicate via
   **service bindings** — same Cloudflare account, same repo.
-- The cloud Worker `import`s from `@tekmemo/core` (workspace types, no npm
+- The cloud Worker `import`s from `@memofs/core` (workspace types, no npm
   publish needed pre-launch). It must implement 31 exported types from
   `cloud-client/types.ts`.
 
 ### License decision (locked)
 
-- **Whole repo stays MIT** (current state: root + `@tekmemo/core`).
+- **Whole repo stays MIT** (current state: root + `@memofs/core`).
 - **Rejected: AGPL / closed-source on the cloud.** Reasons:
   1. AGPL's copyleft trigger is *distribution*; a hosted SaaS isn't distributed
      (the "ASP loophole"), so it barely protects a service — yet it *does* bite
@@ -613,7 +613,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 - **Real protection comes from:** (a) **trademark** — reserve "TekMemo" /
   "TekMemo Cloud" so nobody else can brand their hosted version; (b) the
   operational moat; (c) **SSOT of the client types** (you publish
-  `@tekmemo/core`, you control protocol evolution — followers stay a step
+  `@memofs/core`, you control protocol evolution — followers stay a step
   behind); (d) data/network-effects once users have memory in *your* cloud.
 - **One legitimate exception (not applicable):** if proprietary/closed third-
   party code were taken into the cloud Worker, that portion would need closing.
@@ -628,7 +628,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 
 ---
 
-## Q9 — Pricing tiers for TekMemo Cloud
+## Q9 — Pricing tiers for Memo FS Cloud
 
 - **Question (from `new-architecture.md` new question 6):** what should the
   actual pricing be and what tiers should we have?
@@ -711,20 +711,20 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 
 - **Question (from `new-architecture.md` new question 7):** are Notion and
   GitHub enough connectors, or which other relevant ones do we need?
-- **Lens:** connectors are how TekMemo proves its "intelligent memory" thesis
+- **Lens:** connectors are how Memo FS proves its "intelligent memory" thesis
   (Q5) in practice — ingested content must get *consolidated, deduped, recallable
   by meaning*, not just dumped. So the third connector is chosen for **demo
   value + overlap with paying users** ($9 Pro ICP), not ease of build.
 - **Answer (locked, 2026-06-20, Option A):**
   - **v1 ships GitHub + Notion.** Both non-negotiable for v1:
-    - **GitHub** — mandatory; TekMemo is "memory for AI apps and coding agents"
+    - **GitHub** — mandatory; Memo FS is "memory for AI apps and coding agents"
       (README). Issues/PRs/discussions/READMEs → recallable context is the
       killer coding-agent demo. OAuth well-trodden.
-    - **Notion** — mandatory; the dominant knowledge base for TekMemo's exact
+    - **Notion** — mandatory; the dominant knowledge base for Memo FS's exact
       startup/indie-hacker/dev-tool audience. Pages/databases → memory is a
       compelling cloud pitch.
   - **Linear is queued as connector #3** (first post-launch addition). Why:
-    maximum audience overlap with paying Pro users (Linear's ICP ≈ TekMemo's);
+    maximum audience overlap with paying Pro users (Linear's ICP ≈ Memo FS's);
     best consolidation demo (Linear issues + GitHub PRs + Notion decisions often
     describe the same thing from different angles → the Q5 consolidation thesis
     made visible); clean GraphQL API + OAuth, buildable within broke+ASAP.
@@ -742,7 +742,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
     are slow/approval-heavy; broke+ASAP hostile.
   - **X/Reddit** — low overlap with paying dev-tool users; noisy.
 - **Framework decision (locked): provider-neutral `Connector` interface from day
-  one.** The new `packages/tekmemo-connectors` (from Q6) defines a shared
+  one.** The new `packages/memofs-connectors` (from Q6) defines a shared
   `Connector` interface; each connector (GitHub, Notion, later Linear/Slack/…) is
   a plugin implementing it — mirroring the embedder/extractor adapter pattern
   everywhere else in the codebase (AGENTS.md: "provider-neutral"). Adding a
@@ -765,13 +765,13 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 > (S2-Q4) root-docs alignment. Numbered `S2-Q*` to avoid collision with the
 > original `Q*` numbering.
 
-- **Question:** `packages/tekmemo/src/ai-sdk/` (Vercel AI SDK integration) and
-  `packages/tekmemo/src/agentfs/` (session-workspace layer) are un-scoped under
+- **Question:** `packages/memofs/src/ai-sdk/` (Vercel AI SDK integration) and
+  `packages/memofs/src/agentfs/` (session-workspace layer) are un-scoped under
   the new architecture. With "composable as possible + extending soon," do they
   stay in core or get extracted?
 - **Grounding (audited in code):**
   - **`ai-sdk/` = a provider integration, not a primitive.** `createAiSdkRuntime
-    FromTekmemo(memo)` bridges a `Tekmemo` into `TekMemoAiRuntime`;
+    FromMemofs(memo)` bridges a `Memofs` into `MemofsAiRuntime`;
     `buildMemoryToolDefinition` / `runStructuredMemoryTool` wrap a **Vercel AI
     SDK** tool (zod discriminated union: view/create/update/search);
     `buildPrepareCallMemoryText` / `buildRuntimeMemoryContext` inject memory
@@ -781,31 +781,31 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
     provider-neutral today.
   - **`agentfs/` = a framework-agnostic primitive.** `AgentfsLikeClient`
     interface (readText/writeText/appendText/exists/deleteText + optional
-    sync). `createTekMemoAgentSession` spins an isolated per-session workspace
+    sync). `createMemofsAgentSession` spins an isolated per-session workspace
     (context/working/output), pulls memory in, scaffolds, extracts curated
     durable memory → `notes.md`, with checkpoint + sync before/after. Imports
     core only (`MemoryStore`, `MemoryPath`, canonical paths). **Zero** AI-SDK
     dep, **zero** AI-vendor dep. It is the session equivalent of `sync/`.
-  - **Consumers:** `packages/tekmemo-cli/src/commands/agent.ts`;
+  - **Consumers:** `packages/memofs-cli/src/commands/agent.ts`;
     `examples/{nextjs,openai-agents-sdk,ai-sdk}/`; `apps/docs` (4 pages).
   - **Contradiction surfaced:** `AGENTS.md` requires "Core protocol contracts
     must be provider-neutral." Every other integration follows the adapter
-    pattern in its own package (`tekmemo-adapter-openai/-voyage/-transformers`,
+    pattern in its own package (`memofs-adapter-openai/-voyage/-transformers`,
     future `-extractor`/`-connectors`). **The Vercel AI SDK integration is the
     one violator living inside core.** `agentfs` is clean.
 - **Answer (locked, 2026-06-20, Option B):** **Extract `ai-sdk/` to a new
   published adapter package; keep `agentfs/` in core.**
-  - `packages/tekmemo/src/ai-sdk/*` → **new `@tekmemo/adapter-ai-sdk`**
+  - `packages/memofs/src/ai-sdk/*` → **new `@memofs/adapter-ai-sdk`**
     (published). It owns the Vercel AI SDK tool wrapper, runtime bridge,
     prepare-call memory text, agent-session instructions, scope policy. The
     `ai` peer dep moves from "optional in core" to "real dep of the adapter"
     (correct: depending on the AI SDK adapter means depending on the AI SDK).
-  - `packages/tekmemo/src/agentfs/` **stays in core.** It is a primitive over
+  - `packages/memofs/src/agentfs/` **stays in core.** It is a primitive over
     the memory store (like `sync/`, `graph/`, `recall/`), not tied to any AI
     vendor.
 - **Rationale:**
   1. **Pattern parity.** Embedder / reranker / extractor / connector all follow
-     "protocol contract in core, provider impl in `tekmemo-adapter-*`." The
+     "protocol contract in core, provider impl in `memofs-adapter-*`." The
      Vercel AI SDK integration is a provider impl — it belongs on the same seam.
   2. **Extensibility is additive.** "Add LangChain / OpenAI Agents SDK / Mastra
      support" = new adapter package, import the runtime contract from core,
@@ -816,13 +816,13 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   4. **`agentfs` correctly stays.** No provider coupling; extracting it (the
      rejected Option C) is fragmentation for its own sake.
 - **Migration footprint (finite, ~1 session):** move `src/ai-sdk/*` → new
-  package; update imports in `packages/tekmemo-cli/src/commands/agent.ts` + the
+  package; update imports in `packages/memofs-cli/src/commands/agent.ts` + the
   three `examples/*` + the 4 `apps/docs` pages; drop the `ai` optional peer dep
   from core `package.json`; republish. No runtime behavior change.
 - **Sub-question (locked, 2026-06-20, Option 2): interface splits into two
   layers with different homes.**
-  - **L1 — runtime interface → core**, renamed `TekMemoAiRuntime` →
-    **`TekMemoMemoryRuntime`**. Methods: `recall`, `readCoreMemory`,
+  - **L1 — runtime interface → core**, renamed `MemofsAiRuntime` →
+    **`MemofsMemoryRuntime`**. Methods: `recall`, `readCoreMemory`,
     `updateCoreMemory`, `listNotes`, `createNote`, optional `index`. Pure
     memory operations, zero framework types. The name change drops the
     AI-SDK-flavored naming so a future reader doesn't assume vendor coupling.
@@ -836,19 +836,19 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   - **Precedent (why this split is correct):** the embedder pattern already does
     exactly this — `Embedder` *interface* is a core type, OpenAI/Voyage/
     transformers *implementations* are adapter packages. The memory-runtime
-    interface follows the identical seam. When `tekmemo-adapter-langchain` (or
+    interface follows the identical seam. When `memofs-adapter-langchain` (or
     OpenAI Agents SDK / Mastra) is built later, it implements the **same**
-    `TekMemoMemoryRuntime` — zero new interface to invent, identical memory
+    `MemofsMemoryRuntime` — zero new interface to invent, identical memory
     semantics across frameworks.
-  - **Rename footprint (bounded):** the interface file, `tekmemo-runtime.ts`,
-    the adapter's exports, `tekmemo-cli/src/commands/agent.ts`,
+  - **Rename footprint (bounded):** the interface file, `memofs-runtime.ts`,
+    the adapter's exports, `memofs-cli/src/commands/agent.ts`,
     `examples/ai-sdk/`, 3 test files, the 4 `apps/docs` pages.
 - **Status:** **Locked** (Option B + sub-question Option 2 + rename).
   **Executed 2026-06-20** — the migration described above is now landed and
   validated in code (not docs-only): the 14 `src/ai-sdk/*` files moved into
-  `packages/tekmemo-adapter-ai-sdk/` (+ tests + README + LICENSE + tsdown/
-  tsconfig/ vitest), `TekMemoAiRuntime` renamed to `TekMemoMemoryRuntime`
-  (framework-neutral L1 contract now in `packages/tekmemo/src/ai-runtime/`),
+  `packages/memofs-adapter-ai-sdk/` (+ tests + README + LICENSE + tsdown/
+  tsconfig/ vitest), `MemofsAiRuntime` renamed to `MemofsMemoryRuntime`
+  (framework-neutral L1 contract now in `packages/memofs/src/ai-runtime/`),
   the `ai` peer dep dropped from core, and the 3 `examples/*` consumers +
   `examples/package.json` updated. **Validated green:** `pnpm install`;
   typecheck on core, adapter, CLI, MCP server, examples; test:run on core
@@ -881,7 +881,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      `viteManifestEnabled` is false — including the **client** manifest — then
      removes the now-empty `build/client/.vite/` directory.
   3. `@cloudflare/vite-plugin@1.42.1` then starts its **own** Worker
-     environment build (`tekmemo_cloud`), whose `react-router:virtual-modules`
+     environment build (`memofs_cloud`), whose `react-router:virtual-modules`
      load hook re-reads `build/client/.vite/manifest.json` to build the inlined
      browser manifest — but step 2 already deleted it → `ENOENT`.
 - **Why this is external, not our bug:** `@react-router/cloudflare@8.0.1`
@@ -1069,14 +1069,14 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   *intelligence* — the runtime must run (recall/extract/consolidate), not just
   store. "Default" is a marketing goal, not a category change.
 - **Answer (locked, 2026-06-21):** four canonical nouns, each with one job:
-  - **TekMemo** — the OSS memory system as a whole (the product).
+  - **Memo FS** — the OSS memory system as a whole (the product).
   - **memory runtime** — the *function* layer (recall/extraction/consolidation
-    that runs). Canonical for code namespaces too (`TekMemoRuntimeMode`,
+    that runs). Canonical for code namespaces too (`MemofsRuntimeMode`,
     managed-runtime tier). The ambition word.
   - **file-first** — the *storage/trust* mechanism (inspectable files under
-    `.tekmemo/`). Never the category; always the mechanism.
+    ``.memofs/``). Never the category; always the mechanism.
   - **memory** — the content (facts, notes, graph, events).
-  - **Headline:** "TekMemo — the file-first memory runtime for AI agents."
+  - **Headline:** "Memo FS — the file-first memory runtime for AI agents."
   - "Engine" is **demoted to a deprecated prose synonym**; it survives only
     where code literally names something.
 - **Rationale:** prevents "runtime / engine / memory / file-first" from drifting
@@ -1106,7 +1106,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   - It sets up the "110%" roadmap: every additional capability is prioritized
     by how much further it cuts tokens / makes the agent smarter per token.
 - **Consequence:** marketing/demo can make a defensible quantitative claim
-  ("session A: 8,200 tokens of pasted context; session B with TekMemo recall:
+  ("session A: 8,200 tokens of pasted context; session B with Memo FS recall:
   640 tokens — same agent, same task"). The README "file-first" promise is
   reframed (not broken): file-first is *why you trust it*; the runtime cutting
   tokens is *why it's smart*.
@@ -1149,7 +1149,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 - **Question:** what makes the cloud unmissable beyond file-replica, and where
   does the first concrete extractor implementation live?
 - **Grounding:** Q4 locked the managed-runtime tier (v1.x/v2: same engine runs
-  on Cloudflare against R2-resident files; `TekMemoCloudClient` additively
+  on Cloudflare against R2-resident files; `MemofsCloudClient` additively
   re-expands to expose recall/memory/graph by API). All differentiators below
   require the managed runtime — none are possible on a dumb file replica.
 - **Answer — cloud differentiators (locked, 2026-06-21):** lock **A1 + A2 + B3 +
@@ -1170,7 +1170,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   - **Headline cloud promise:** "Your memory follows you everywhere — always
     deduped, always current, shared across every agent you use, and pre-warmed
     before you even ask."
-- **Answer — extractor strategy (locked, 2026-06-21):** **(c)** `tekmemo-adapter-extractor-transformers`
+- **Answer — extractor strategy (locked, 2026-06-21):** **(c)** `memofs-adapter-extractor-transformers`
   is the **v1 default + demo** (zero-API-key, runs offline, preserves the
   file-first trust thesis); API extractors (`-openai`, `-voyage`, …) are opt-in
   for frontier quality and the **managed-tier monetization lever** (cloud runs
@@ -1179,7 +1179,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   - Only option that keeps the trust story intact — an API-key-gated extractor
     for the headline intelligence would undercut the thesis the cloud
     differentiators build on.
-  - Matches the embedder precedent (`tekmemo-adapter-transformers` is already
+  - Matches the embedder precedent (`memofs-adapter-transformers` is already
     the zero-API-key embedder keystone per Q6).
   - The API extractor becomes the managed-tier monetization lever — strengthens
     A1/A2/C5 ("consolidation always clean *because the cloud runs frontier
@@ -1243,14 +1243,14 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 
 - **Question:** lock the testing stack boundaries (MSW + Playwright + Vitest).
 - **Grounding (verified on branch, 2026-06-21):**
-  - **Vitest** is universal (v4.x via `tekmemo-testing`'s `createVitestConfig`;
+  - **Vitest** is universal (v4.x via `memofs-testing`'s `createVitestConfig`;
     every package uses `tests/**/*.test.ts`).
   - **MSW** is declared only in `apps/cloud`; its handler file
     (`apps/cloud/tests/mocks/index.ts`) has **every handler commented out** and
     can't run under Vitest (imports `~/utils/env.server`, alias unresolvable per
     `apps/cloud/vitest.config.ts`). Dead scaffold.
   - The *working* HTTP-mock pattern is **fetch-injection**
-    (`createTekMemoCloudClient({ fetch })` in `packages/tekmemo/tests/cloud-client/`).
+    (`createMemofsCloudClient({ fetch })` in `packages/memofs/tests/cloud-client/`).
   - **Playwright** is only in `apps/cloud`; `webServer`/`baseURL` commented out;
     `tests/e2e/example.spec.ts` is the default boilerplate hitting
     `https://playwright.dev`.
@@ -1263,9 +1263,9 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
     (against a local Worker + MSW'd third parties). No browser e2e in packages.
     CLI gets "e2e" via a thin `execa` smoke test in Vitest; MCP gets
     protocol-level tests.
-  - **Grow `tekmemo-testing`** with a `createCloudMockFetch()` helper — the
+  - **Grow `memofs-testing`** with a `createCloudMockFetch()` helper — the
     fetch-injection factory for cloud-client contract tests, so packages stop
-    hand-rolling fakes. **No** shared MSW server in `tekmemo-testing` (MSW stays
+    hand-rolling fakes. **No** shared MSW server in `memofs-testing` (MSW stays
     cloud-app-scoped).
 - **Rationale:**
   - MSW's sweet spot is a standing server with request matching + fixtures for
@@ -1296,24 +1296,24 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   is MCP the primary surface, and is tool calling or MCP more efficient?
 - **Grounding (verified in host architectures + in code):**
   - The locked runtime-first split (ADR 0007 / Q15 / CONTEXT.md) already
-    separates the **runtime** (`TekMemoMemoryRuntime` in core) from its
+    separates the **runtime** (`MemofsMemoryRuntime` in core) from its
     **surfaces** (MCP, AI-SDK adapter, future HTTP/Python). The runtime knows
     nothing about OpenAI/Anthropic/MCP/LangChain. Surfaces are adapters.
   - The MCP server today exposes **~21 model-facing tools**
-    (`packages/tekmemo-mcp-server/src/tools/definitions.ts`): `tekmemo.health`,
+    (`packages/memofs-mcp-server/src/tools/definitions.ts`): `memofs.health`,
     `.context`, `.recall`, `.remember`, `.read_core_memory`,
     `.read_notes_memory`, `.list_recent_memories`, `.validate`, `.snapshot`,
     `.update_core_memory`, `.sync_status`, `.sync_pull`, `.sync_push`,
     `.graph_upsert_nodes`, `.graph_upsert_edges`, `.graph_neighbors`,
     `.graph_path`, `.readiness`, `.consolidate`.
-  - The in-process push path exists in `tekmemo-adapter-ai-sdk`
+  - The in-process push path exists in `memofs-adapter-ai-sdk`
     (`buildRuntimeMemoryContext` / `buildPrepareCallMemoryText`) but its
     retrieval trigger is a pass-through — it recalls on whatever `input.query`
     the caller supplies, with no triggering/rewriting/budgeting/filtering.
 - **Hard constraint surfaced (structural, not preference):** **MCP is
   pull-only.** Claude Code / Codex / Cursor / Cline / Roo Code load an MCP
   server and invoke its *tools* when *they* decide to. There is no hook for
-  TekMemo to inject memory into their prompt *before* the model thinks.
+  Memo FS to inject memory into their prompt *before* the model thinks.
   Push-based retrieval (context injection — the mechanism that makes memory
   *feel* smart, because it's just there) is **impossible through MCP**. It
   requires in-process integration (the SDK/adapter path, ADR 0007). This is the
@@ -1339,20 +1339,20 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      cannot choose intelligently among `graph_upsert_nodes` vs `graph_neighbors`
      vs `graph_path`. For a pull-only channel, **the tool surface *is* the
      intelligence surface.** The 4 verbs:
-     - `tekmemo.context` — the smart briefing composer. Returns a curated,
+     - `memofs.context` — the smart briefing composer. Returns a curated,
        budgeted, active-only briefing for the current task. **Composes** recall
        + entity-resolution + filtering behind one call. (The push-equivalent,
        achieved inside a pull tool.)
-     - `tekmemo.recall` — deep semantic search when the model wants to dig
+     - `memofs.recall` — deep semantic search when the model wants to dig
        deeper than the briefing.
-     - `tekmemo.remember` — write memory.
-     - `tekmemo.consolidate` — the intelligence lever (ADR 0004): merge + retire.
+     - `memofs.remember` — write memory.
+     - `memofs.consolidate` — the intelligence lever (ADR 0004): merge + retire.
      The old tools are **not hidden MCP tools**; they become either (a)
      **runtime methods** the developer calls imperatively
      (`memo.graph.neighbors()`, `memo.sync.push()`, `memo.snapshots.create()` —
-     already the `TekMemoMemoryRuntime` surface), or (b) **parameters** on the 4
+     already the `MemofsMemoryRuntime` surface), or (b) **parameters** on the 4
      verbs (e.g. the active-only filter is a flag on `recall`/`context`). There
-     is no "hidden tool that `tekmemo.context` triggers" — `tekmemo.context`'s
+     is no "hidden tool that `memofs.context` triggers" — `memofs.context`'s
      implementation *calls runtime methods* as steps in building the briefing.
      The model never sees those methods as things it could call.
   4. **Power-tools MCP profile (deferred, optional):** a power-user developer
@@ -1361,7 +1361,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      surface. Keeps the default clean without castrating the runtime. **Not v1.**
   5. **Local HTTP adapter — rejected (not deferred).** A localhost HTTP surface
      over the runtime is **not v1, not v1.x, not ever.** File-first makes it
-     redundant: if memory lives as inspectable files under `.tekmemo/`, every
+     redundant: if memory lives as inspectable files under ``.memofs/``, every
      language already has a driver — `open()`, `os.ReadFile()`,
      `fs::read_to_string()`. A local HTTP server would be a socket wrapper
      around files that are already directly readable — pure overhead that
@@ -1397,7 +1397,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   runtime.**
 - **Status:** **Locked.**
 - **Open sub-questions:** the deferred power-tools profile; the exact parameter
-  shape of `tekmemo.context` (Q22 will inform it). These don't block locking the
+  shape of `memofs.context` (Q22 will inform it). These don't block locking the
   4-verb shape.
 - **Candidate for ADR:** yes — strong candidate. Hard to reverse (defines the
   model-facing surface, which once consumed is hard to shrink); surprising
@@ -1409,7 +1409,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   together with Q22 (write intelligence), Q23 (strategist), Q24-v1 (staleness
   mechanical), Q26 (entity-centric), Q27 (progressive recall). Q22 is captured
   as Component 6 of that ADR (the write-side of the same retrieval model); the
-  `tekmemo.context` parameter shape Q21 deferred to "Q22" is now fully
+  `memofs.context` parameter shape Q21 deferred to "Q22" is now fully
   specified by Components 2–4 (strategist pipeline + Entities section +
   expansion cursors).
 
@@ -1431,10 +1431,10 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 > (Q25b), and an [ADR 0004](../adr/0004-v1-intelligence-extraction-and-consolidation.md)
 > revision (Q24-v1.x + Q25a).
 
-### Q22 — Write intelligence (the gate on `tekmemo.remember`)
+### Q22 — Write intelligence (the gate on `memofs.remember`)
 
 - **Question:** the retrieval model is only as good as the signal it retrieves.
-  `tekmemo.remember` / `writeMemory` today has no gate — it hashes content and
+  `memofs.remember` / `writeMemory` today has no gate — it hashes content and
   appends. How do we keep Tier 2 (`notes.md`) from becoming noise, without
   violating the two sacred properties (file-first: a human can hand-edit
   `notes.md`; audit thesis: mark, never delete)?
@@ -1468,7 +1468,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 - **Status:** **Locked.** Captured as Component 6 of
   [ADR 0009](../adr/0009-intelligent-retrieval-model.md).
 
-### Q23 — The retrieval strategist (the brain inside `tekmemo.context`)
+### Q23 — The retrieval strategist (the brain inside `memofs.context`)
 
 - **Question:** Q21 locked the 4-verb surface and accepted MCP is pull-only, so
   the intelligence must live *inside the tool*. Today `buildContext()` is a flat
@@ -1568,10 +1568,10 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 - **Question:** Q17 locked entity-centric recall ("current state of auth" = one
   resolved node, not N fragments) with mechanism "Graph +
   `resolveCurrentFacts`". The strategist's Resolve stage (Q23) calls it — but
-  *what does `tekmemo.context` return*? Q23 delivered the substrate but not the
+  *what does `memofs.context` return*? Q23 delivered the substrate but not the
   output shape.
 - **Answer (locked 2026-06-22, shape B):** a **separate "Entities" section** in
-  `tekmemo.context`, emitted **after core** (Tier-1, non-negotiable) and
+  `memofs.context`, emitted **after core** (Tier-1, non-negotiable) and
   **before recall** (unresolved Tier-2 fragments). Each resolved entity renders
   as label + type + current-state summary (active edges only — the Q24 filter)
   + provenance. This is the trust ordering: core = what's true; entities =
@@ -1591,7 +1591,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   Q23's Budget stage allocates bytes *one-shot*; progressive means disclosure
   *across calls*. What protocol?
 - **Answer (locked 2026-06-22, shape B):** **per-section expansion cursors via
-  a parameter on `tekmemo.context`.** First call returns a compact briefing
+  a parameter on `memofs.context`.** First call returns a compact briefing
   with expandable sections, each carrying an opaque expansion token; the agent
   calls back with `section` + `expand` to pull only what it needs. Compact ≈
   6kb; full ≈ 80kb; the agent pulls the 2kb it needs and stops — vs ~64kb
@@ -1601,7 +1601,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   (session-scoped cursor cache), which today's stateless `buildContext()` is
   not. This is the one real new piece Q27 introduces.
 - **Rejected:** sequential cursor pagination (loads everything in order — not
-  "expand only what I need"); a `tekmemo.expand` verb (violates 4-verb
+  "expand only what I need"); a `memofs.expand` verb (violates 4-verb
   discipline); LLM-decided agentic expansion (the industry-review anti-pattern
   — re-introduces the judgment load the strategist exists to remove).
 - **Status:** **Locked.** Captured as Component 4 of
@@ -1615,7 +1615,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   `core.md` silently loses a write, and the pre-sync snapshot (D6) is for *sync*
   recovery, not local-race recovery. What enforces the local contract?
 - **Answer (locked 2026-06-22, shape B):** **advisory file lock at the
-  MemoryStore layer** (`.tekmemo/.lock`), the git-index model. Acquired on
+  MemoryStore layer** (``.memofs/`.lock`), the git-index model. Acquired on
   first mutating write, held process-lifetime or per-op; a second process
   attempting a mutating op gets a clear error. Non-mutating reads don't block.
   Carries PID + timestamp so a stale lock (crashed process) is detectable and
@@ -1655,12 +1655,12 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   the cloud-as-engine door that D1/D2 closed. The managed-runtime tier changes
   *nothing* about where/how connectors run.
 - **Grounding (verified 2026-06-24):**
-  - **Local ingestion is already fully built.** `packages/tekmemo-connectors`
+  - **Local ingestion is already fully built.** `packages/memofs-connectors`
     ships a provider-neutral `Connector` interface + two real connectors
     (GitHub GraphQL fetcher, Notion fetcher) with normalize + tests. Not a stub,
     not waiting on anything.
   - **The only unstarted connector work is the dashboard control-plane**: write
-    `.tekmemo/connectors.json` (the 11th canonical file) + the authenticated
+    ``.memofs/`connectors.json` (the 11th canonical file) + the authenticated
     `GET /v1/projects/:projectId/connectors/:connectorId/secret` endpoint (ADR
     0002's contract additions). This needs **only the v1 file-replica cloud** —
     *not* the managed runtime. It is currently an honest empty state
@@ -1710,7 +1710,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      package** (see sub-decision below).
   2. **A concrete extractor adapter.** The provider-neutral `Extractor`
      interface + the rule-based deterministic floor exist, but **no concrete
-     LLM extractor adapter ships yet** (`tekmemo-adapter-extractor-transformers`
+     LLM extractor adapter ships yet** (`memofs-adapter-extractor-transformers`
      for OSS zero-config per Q18; a frontier/API impl for the cloud's
      monetization lever). Without it the hosted runtime is "a *worse* engine
      than competitors'" (ADR 0004).
@@ -1718,7 +1718,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      **zero code** today. The first cloud-only capability; required for B3.
      Sequenced as phase 1 by Q32.
 - **Sub-decision — R2 store home (locked): a new adapter package
-  `@tekmemo/adapter-r2` with a provider-neutral *remote-blob store*
+  `@memofs/adapter-r2` with a provider-neutral *remote-blob store*
   contract in core.** Mirrors the `Embedder` / `Extractor` / `Connector` pattern
   (interface-in-core, impl-in-adapter). Chosen because ADR 0003's "self-host the
   same engine free" thesis genuinely needs the store reusable outside the cloud
@@ -1802,8 +1802,8 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
 
 The product/architecture decisions above are projected into a frozen screen
 map in [`screens-locked.md`](./screens-locked.md) — the locked information
-architecture for the Cloud app (`memo.tekbreed.com`) and the Docs app
-(`docs.tekbreed.com`). Screen-level decisions are numbered `SC-*` there and
+architecture for the Cloud app (`memo.memofs.dev`) and the Docs app
+(`docs.memofs.dev`). Screen-level decisions are numbered `SC-*` there and
 trace back to the decisions in this log and ADRs 0002–0012. The IA is frozen;
 `copywriting` + `frontend-design` refine per-page prose and layout without
 re-opening a screen decision (ADR 0008 Rule 3). SC1–SC6 are v1; SC7 (Teams),

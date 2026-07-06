@@ -76,7 +76,7 @@ adapter (packages/tekmemo-adapter-ai-sdk)   ← NEW, published
 
 ### Three sub-decisions
 
-1. **`ai-sdk/` → `@tekmemo/adapter-ai-sdk` (new published package).**
+1. **`ai-sdk/` → `@memofs/adapter-ai-sdk` (new published package).**
    The Vercel AI SDK integration is a *provider implementation*, so it goes on
    the same seam as the other adapters. The `ai` peer dep moves from
    "optional in core" to a real dep of the adapter (correct: depending on the

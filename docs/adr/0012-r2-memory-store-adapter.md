@@ -27,7 +27,7 @@ R2-resident files" — does not exist. Verified in code (2026-06-24):
   in a Worker unmodified. You cannot "just point the runtime at R2."
 - The cloud today is a **pure file replica**: `apps/cloud` exposes only
   `/v1/health`, `/v1/readiness`, `/v1/projects/:id/sync/*`. It imports
-  `@tekmemo/core` **only for `cloud-client` types** (`api/json.ts`,
+  `@memofs/core` **only for `cloud-client` types** (`api/json.ts`,
   `api/sync/shared.ts`, `api/errors.ts`) — never `createTekmemo` /
   `createLocalStrategy`. R2 holds content-addressed blobs
   (`apps/cloud/src/api/sync/index.ts`).
@@ -46,7 +46,7 @@ Azure Blobs, or R2 in their own account.
 ## Decision
 
 **Two parts: a provider-neutral *remote-blob memory store* contract in core, and
-the R2 implementation in a new adapter package `@tekmemo/adapter-r2`.**
+the R2 implementation in a new adapter package `@memofs/adapter-r2`.**
 
 ### 1. Contract in core — `RemoteBlobMemoryStore`
 
@@ -66,18 +66,18 @@ adapter-r2:  createR2BlobClient(binding: R2Bucket): BlobClient
   `chunks.jsonl`, `embeddings.jsonl`, `connectors.json`, snapshots, …). The
   runtime is unaware whether bytes land on disk or in a bucket.
 - `BlobClient` and `MetadataStore` are **interfaces**, not Cloudflare types — so
-  a future `@tekmemo/adapter-s3` (or GCS, MinIO) implements the same
+  a future `@memofs/adapter-s3` (or GCS, MinIO) implements the same
   `BlobClient` and the runtime is unchanged. Mirrors exactly the
   `Embedder` / `Extractor` / `Connector` provider-neutral pattern already locked
   (AGENTS.md: "Core protocol contracts must be provider-neutral").
 
-### 2. Implementation in a new adapter — `@tekmemo/adapter-r2`
+### 2. Implementation in a new adapter — `@memofs/adapter-r2`
 
-- A new **published** package `@tekmemo/adapter-r2` (MIT), holding
+- A new **published** package `@memofs/adapter-r2` (MIT), holding
   `createR2BlobClient(binding: R2Bucket): BlobClient` (+ a Turso-backed
   `MetadataStore` impl reusing the cloud's existing `project_files` /
   `sync_cursors` tables).
-- Depends on `@tekmemo/core` for the contract; depends on the Cloudflare
+- Depends on `@memofs/core` for the contract; depends on the Cloudflare
   `R2Bucket` type (a `@cloudflare/workers-types` peer). The Cloudflare coupling
   lives in the adapter, never in core.
 - The cloud Worker (`apps/cloud`) phase-3 wiring: `createLocalStrategy({ store:
@@ -118,7 +118,7 @@ truth.
 
 **Negative:**
 
-- **One more package to maintain.** `@tekmemo/adapter-r2` is a real
+- **One more package to maintain.** `@memofs/adapter-r2` is a real
   published surface with its own tests/tsdown/tsconfig. Accepted: the
   reusability + thesis-integrity payoff justifies it, and the adapter pattern is
   already the house style.
@@ -180,22 +180,22 @@ This ADR's original decision held the R2 **blob** implementation and the Turso
 S3-Q3 decoupling (carried forward under K1) splits that into **two independent
 adapter packages** — the N×M coupled shape becomes N+M:
 
-- **`@tekmemo/adapter-r2`** — **blob-only.** Implements `BlobClient` against a
+- **`@memofs/adapter-r2`** — **blob-only.** Implements `BlobClient` against a
   Cloudflare R2 binding (`createR2BlobClient`). No metadata logic.
-- **`@tekmemo/adapter-turso`** — **metadata-only** *(new)*. Implements
+- **`@memofs/adapter-turso`** — **metadata-only** *(new)*. Implements
   `MetadataStore` against Turso/libSQL (the cloud's existing `project_files` /
   `sync_cursors` tables). No blob logic.
 
 The two provider-neutral interfaces — **`BlobClient`** and **`MetadataStore`** —
-stay in core (`@tekmemo/core`), unchanged in shape, so a future
-`@tekmemo/adapter-s3` (or GCS/MinIO) implements `BlobClient` and pairs with
+stay in core (`@memofs/core`), unchanged in shape, so a future
+`@memofs/adapter-s3` (or GCS/MinIO) implements `BlobClient` and pairs with
 *any* `MetadataStore`. The runtime composes them:
 `new RemoteBlobMemoryStore({ blobClient, metadata, rootKey })`.
 
 This decoupling does not change the ADR's thesis (provider-neutral contract in
 core, provider impls in adapters); it refines the packaging so the blob and
 metadata axes vary independently. Body package-name references
-(`@tekbreed/*`) were flipped to `@tekmemo/*` in the same pass; the code-path
+(`@tekbreed/*`) were flipped to `@memofs/*` in the same pass; the code-path
 reference to `packages/tekmemo/src/fs/node-fs-memory-store.ts` is now
 `packages/core/src/fs/node-fs-memory-store.ts` after the K4 rename (see the
 references below).

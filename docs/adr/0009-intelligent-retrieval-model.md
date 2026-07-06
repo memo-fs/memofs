@@ -95,7 +95,7 @@ re-expose them for power users building custom agents; **not v1.**
 **MCP is pull-only; this is accepted, not worked around.** Push-based
 retrieval (context injection before the model thinks) is impossible through
 MCP by host architecture. It remains available on the in-process adapter path
-(`@tekmemo/adapter-ai-sdk` / `TekMemoMemoryRuntime`). Both surfaces
+(`@memofs/adapter-ai-sdk` / `TekMemoMemoryRuntime`). Both surfaces
 are first-class; the runtime is one, the surfaces are many.
 
 ### Component 2 — The retrieval strategist (Q23) is a 4-stage pipeline inside `tekmemo.context`

@@ -12,21 +12,21 @@
 ## Question
 
 Design the reconciled remote-blob storage contract after WF-2's package rename.
-The old bundled `@tekmemo/adapter-cloudflare` / D1 direction is superseded by
+The old bundled `@memofs/adapter-cloudflare` / D1 direction is superseded by
 K1 and S3-Q3: keep storage provider roles decoupled so the package set is N+M,
 not N×M.
 
 Decide the contract and package responsibilities for:
 
-1. **`@tekmemo/adapter-r2`** — Cloudflare R2 blob storage only. Confirm the
+1. **`@memofs/adapter-r2`** — Cloudflare R2 blob storage only. Confirm the
    public factory shape, streaming behavior, error mapping, and test coverage
    for the `BlobClient` side of `RemoteBlobMemoryStore`.
-2. **`@tekmemo/adapter-turso`** — Turso/libSQL metadata storage only. Decide
+2. **`@memofs/adapter-turso`** — Turso/libSQL metadata storage only. Decide
    whether this should be a new package now or remain temporarily inside
-   `@tekmemo/adapter-r2` until extraction. Define the table shape and migration
+   `@memofs/adapter-r2` until extraction. Define the table shape and migration
    ownership for `project_files` / `sync_cursors`.
 3. **Core interfaces** — keep `BlobClient` and `MetadataStore` provider-neutral
-   in `@tekmemo/core` so Node self-hosters can implement S3/GCS/MinIO/etc.
+   in `@memofs/core` so Node self-hosters can implement S3/GCS/MinIO/etc.
    without Cloudflare coupling.
 4. **Drizzle vs raw libSQL** for the metadata layer. Pick the smallest durable
    API for the manifest while staying consistent with existing Turso/libSQL
@@ -59,16 +59,16 @@ decision when its stale D1 premise is rewritten.
 ## Resolution
 
 Designed **and implemented** the blob/metadata-decoupled contract (S3-Q3 N+M
-shape). The bundled `@tekmemo/adapter-r2` (R2 blob + Turso metadata) is split
+shape). The bundled `@memofs/adapter-r2` (R2 blob + Turso metadata) is split
 into two packages that compose through core's provider-neutral
 `RemoteBlobMemoryStore`.
 
 ### 1. Package ownership (Q1, Q2)
 
-- **`@tekmemo/adapter-r2`** — **blob-only**. `createR2BlobClient({ binding })`
+- **`@memofs/adapter-r2`** — **blob-only**. `createR2BlobClient({ binding })`
   over an `R2Bucket`. Dropped the `@libsql/client` peer; `R2Bucket` coupling
   quarantined here, never in core.
-- **`@tekmemo/adapter-turso`** (**new**) — **metadata-only**.
+- **`@memofs/adapter-turso`** (**new**) — **metadata-only**.
   `createTursoMetadataStore({ client, projectId })` moved verbatim from
   `adapter-r2`. Implements `MetadataStore` over `project_files`; `@libsql/client`
   optional peer.
@@ -76,7 +76,7 @@ into two packages that compose through core's provider-neutral
 ### 2. Core interfaces (Q3) — already done, no change
 
 `BlobClient`, `MetadataStore`, `BlobEntry`, and `RemoteBlobMemoryStore` were
-already provider-neutral and Cloudflare-free in `@tekmemo/core`
+already provider-neutral and Cloudflare-free in `@memofs/core`
 (`src/fs/remote-blob-memory-store.ts`). Q3 required no code change; the split is
 purely a package-boundary correction. Doc comments in core were updated to name
 both decoupled adapter packages.
@@ -95,7 +95,7 @@ both decoupled adapter packages.
 
 ### 4. Tests (Q5)
 
-- **Contract suites** added to `@tekmemo/testing`:
+- **Contract suites** added to `@memofs/testing`:
   `defineBlobClientContractTests` + `defineMetadataStoreContractTests` + the
   `MinimalBlobClient` / `MinimalBlobEntry` / `MinimalMetadataStore` structural
   types (no core dep — preserves the cycle WF-2 removed). Mirrors the

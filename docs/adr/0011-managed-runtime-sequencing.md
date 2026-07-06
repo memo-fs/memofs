@@ -242,7 +242,7 @@ work rather than the moat blocking revenue.
   it ships, not *whether*.
 - **The managed runtime has zero code presence today** — `apps/cloud` exposes
   only `/v1/health`, `/v1/readiness`, `/v1/projects/:id/sync/*`; it imports
-  `@tekmemo/core` only for `cloud-client` types, never `createTekmemo`. The
+  `@memofs/core` only for `cloud-client` types, never `createTekmemo`. The
   R2-backed `MemoryStore` does not exist (→ [ADR 0012](./0012-r2-memory-store-adapter.md)).
 - **Pricing is unaffected** by the sequence — ADR 0006 prices stand; Q33
   reaffirms the managed-tier differentiation is *entitlements* (caps), not
@@ -261,7 +261,7 @@ back on the prudent sequencing:
 
 - **v1 launch = file-replica sync + dashboard + connector control-plane.** No
   hosted memory runtime. This is D2's thesis, sequenced honestly.
-- **v1.1 fast-follow = `@tekmemo/server` runtime Worker + hosted runtime +
+- **v1.1 fast-follow = `@memofs/server` runtime Worker + hosted runtime +
   concurrency-layer completion + Teams writes + SC8 hosted-memory + SC9
   entitlement rows + LLM intelligence tier.** This is S3-Q9's ambition,
   sequenced honestly — weeks after v1 revenue, not all-at-once.
