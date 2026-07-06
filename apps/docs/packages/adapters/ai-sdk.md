@@ -1,13 +1,13 @@
-# Vercel AI SDK Adapter (`@tekmemo/adapter-ai-sdk`)
+# Vercel AI SDK Adapter (`@memofs/adapter-ai-sdk`)
 
-The `@tekmemo/adapter-ai-sdk` adapter provides a runtime bridge and tool definitions to seamlessly integrate TekMemo memory into Vercel AI SDK applications.
+The `@memofs/adapter-ai-sdk` adapter provides a runtime bridge and tool definitions to seamlessly integrate Memo FS memory into Vercel AI SDK applications.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @tekmemo/adapter-ai-sdk
+npm install @memofs/adapter-ai-sdk
 ```
 
 ---
@@ -17,14 +17,14 @@ npm install @tekmemo/adapter-ai-sdk
 Use the adapter to compile memory tools and instructions, then inject them into Vercel AI SDK's `generateText` or `streamText` function:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
+import { Tekmemo } from "@memofs/core";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import {
   createAiSdkRuntimeFromTekmemo,
   buildRuntimeMemoryToolDefinition,
   buildAgentSessionInstructions,
-} from "@tekmemo/adapter-ai-sdk";
+} from "@memofs/adapter-ai-sdk";
 
 const memo = new Tekmemo({ /* config */ });
 

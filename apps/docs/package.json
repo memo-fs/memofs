@@ -1,5 +1,5 @@
 {
-	"name": "@tekmemo/docs",
+	"name": "@memofs/docs",
 	"version": "1.0.0-beta.1",
 	"private": true,
 	"type": "module",
@@ -18,9 +18,9 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "apps/docs"
 	},
-	"description": "TekMemo documentation site.",
+	"description": "Memo FS documentation site.",
 	"homepage": "https://docs.memo.tekbreed.com/"
 }

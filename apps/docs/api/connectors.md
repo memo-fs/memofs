@@ -1,6 +1,6 @@
-# `@tekmemo/connectors` API
+# `@memofs/connectors` API
 
-The `@tekmemo/connectors` package manages ingestion pipelines from external databases and repositories.
+The `@memofs/connectors` package manages ingestion pipelines from external databases and repositories.
 
 ## Functions
 

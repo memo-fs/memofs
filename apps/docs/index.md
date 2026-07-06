@@ -2,8 +2,8 @@
 layout: home
 
 hero:
-  name: "TekMemo"
-  text: "Your AI agents forget. TekMemo doesn’t."
+  name: "Memo FS"
+  text: "Your AI agents forget. Memo FS doesn’t."
   image: /logo.svg
   tagline: "Local-first memory for AI agents — versioned, portable, and always there when the next session starts."
   actions:
@@ -12,13 +12,13 @@ hero:
       link: /packages/core/
     - theme: alt
       text: "Star on GitHub"
-      link: https://github.com/tekbreed/tekmemo
+      link: https://github.com/christophersesugh/memofs
 
 features:
   - title: Memory you can read
     icon: 📁
     link: /packages/core/agentfs
-    details: Every memory is a markdown file in `.tekmemo/`. Read it in your editor, review it in PRs, track it in Git — alongside your source code.
+    details: Every memory is a markdown file in `.memofs/`. Read it in your editor, review it in PRs, track it in Git — alongside your source code.
   - title: Local by default
     icon: 🔒
     link: /packages/core/configuration

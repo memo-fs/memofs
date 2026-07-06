@@ -1,6 +1,6 @@
 ---
-title: "Introducing TekMemo: File-first Memory for AI Agents"
-description: The launch of TekMemo — a memory layer built for AI agents that need durable, queryable context across sessions.
+title: "Introducing Memo FS: File-first Memory for AI Agents"
+description: The launch of Memo FS — a memory layer built for AI agents that need durable, queryable context across sessions.
 date: 2026-01-15
 author: Christopher S. Aondona
 tags: [product, launch, memory, ai-agents]
@@ -9,7 +9,7 @@ sidebar: false
 outline: deep
 ---
 
-Today we're launching **TekMemo** — a memory layer designed specifically for AI agents that need durable, queryable context across sessions.
+Today we're launching **Memo FS** — a memory layer designed specifically for AI agents that need durable, queryable context across sessions.
 
 ## The Problem
 
@@ -22,7 +22,7 @@ AI agents today suffer from amnesia. Every conversation starts from zero. Contex
 
 ## The Solution
 
-TekMemo gives agents a **persistent memory layer** with:
+Memo FS gives agents a **persistent memory layer** with:
 
 | Capability | What It Means |
 |------------|---------------|
@@ -36,18 +36,18 @@ TekMemo gives agents a **persistent memory layer** with:
 
 ## Quick Start
 
-Install TekMemo:
+Install Memo FS:
 
 ```bash
-npm install @tekmemo/core
+npm install @memofs/core
 ```
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Tekmemo } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new Tekmemo({
-  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "my-app",
 });
 
@@ -80,4 +80,4 @@ const hits = await memo.recall({ query: "What does the user prefer for UI?" });
 
 ---
 
-*Have questions? [Open a discussion](https://github.com/tekbreed/tekmemo/discussions) or [file an issue](https://github.com/tekbreed/tekmemo/issues).*
+*Have questions? [Open a discussion](https://github.com/christophersesugh/memofs/discussions) or [file an issue](https://github.com/christophersesugh/memofs/issues).*

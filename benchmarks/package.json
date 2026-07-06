@@ -1,5 +1,5 @@
 {
-	"name": "@tekmemo/benchmarks",
+	"name": "@memofs/benchmarks",
 	"version": "1.0.0-beta.1",
 	"private": true,
 	"type": "module",
@@ -15,8 +15,8 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:*",
-		"@tekmemo/benchmark-kit": "workspace:*"
+		"@memofs/core": "workspace:*",
+		"@memofs/benchmark-kit": "workspace:*"
 	},
 	"devDependencies": {
 		"@repo/typescript": "workspace:*",
@@ -25,8 +25,8 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "benchmarks"
 	},
-	"description": "Private workspace runner for TekMemo benchmark suites."
+	"description": "Private workspace runner for Memo FS benchmark suites."
 }

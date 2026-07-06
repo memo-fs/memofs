@@ -1,13 +1,13 @@
-# Voyage AI Adapter (`@tekmemo/adapter-voyage`)
+# Voyage AI Adapter (`@memofs/adapter-voyage`)
 
-The Voyage AI adapter integrates Voyage's high-performance, domain-optimized vector embedding and reranking endpoints into TekMemo's hybrid recall system.
+The Voyage AI adapter integrates Voyage's high-performance, domain-optimized vector embedding and reranking endpoints into Memo FS's hybrid recall system.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @tekmemo/adapter-voyage
+npm install @memofs/adapter-voyage
 ```
 
 ---
@@ -17,12 +17,12 @@ npm install @tekmemo/adapter-voyage
 Inject both the Voyage embedder and Voyage reranker to boost semantic query relevance:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createVoyageEmbedder, createVoyageReranker } from "@tekmemo/adapter-voyage";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Tekmemo } from "@memofs/core";
+import { createVoyageEmbedder, createVoyageReranker } from "@memofs/adapter-voyage";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new Tekmemo({
-  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "voyage-project",
   
   // Vector generation

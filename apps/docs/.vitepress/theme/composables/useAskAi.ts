@@ -37,7 +37,7 @@ function useClickOutside(elRef: Ref<HTMLElement | null>, callback: () => void) {
 }
 
 function getRawMarkdownUrl(path: string): string | null {
-	const repo = "https://github.com/tekbreed/tekmemo";
+	const repo = "https://github.com/christophersesugh/memofs";
 	const branch = "main";
 	const docsPath = "apps/docs";
 

@@ -1,30 +1,30 @@
-# TekMemo Docs App
+# Memo FS Docs App
 
-Developer documentation for the TekMemo OSS workspace.
+Developer documentation for the Memo FS OSS workspace.
 
 ## Scope
 
-This VitePress app documents the TekMemo OSS workspace:
+This VitePress app documents the Memo FS OSS workspace:
 
-- `@tekmemo/core` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
-- `tekmemo` (CLI distribution)
-- `@tekmemo/mcp-server` (Model Context Protocol server)
+- `@memofs/core` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
+- `memofs` (CLI distribution)
+- `@memofs/mcp-server` (Model Context Protocol server)
 - examples and architecture
 
 It also hosts the engineering blog (`/blog/`), changelog (`/changelog/`), and
 FAQs (`/faqs/`) — engineering content lives where developers already read it
 (per the ADR 0008 docs-IA decision, 2026-06-20). **Commercial pages — pricing,
-billing, legal, roadmap, competitor content — belong in the TekMemo Cloud app,
+billing, legal, roadmap, competitor content — belong in the Memo FS Cloud app,
 not here**, and are blocked from the OSS docs by `scripts/check-doc-links.mjs`.
 
-**TekMemo Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
+**Memo FS Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
 and sync content is documented here too — not deferred to a separate CMS. Per
 [ADR 0008][adr8], every doc claim must be derivable from code/tests/ADRs; when
 code and docs disagree, code wins and the doc is the bug. The drift worklist
 lives in [`docs/architecture/docs-drift-triage.md`][triage].
 
-[adr8]: https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0008-docs-information-architecture.md
-[triage]: https://github.com/tekbreed/tekmemo/blob/main/docs/architecture/docs-drift-triage.md
+[adr8]: https://github.com/christophersesugh/memofs/blob/main/docs/adr/0008-docs-information-architecture.md
+[triage]: https://github.com/christophersesugh/memofs/blob/main/docs/architecture/docs-drift-triage.md
 
 > **Note on repeated content:** shared prose (install snippets, the OSS-vs-Cloud
 > framing, canonical-files tables) lives under `apps/docs/includes/` and is pulled
@@ -34,10 +34,10 @@ lives in [`docs/architecture/docs-drift-triage.md`][triage].
 ## Commands
 
 ```bash
-pnpm --filter @tekmemo/docs dev
-pnpm --filter @tekmemo/docs build
-pnpm --filter @tekmemo/docs preview
-pnpm --filter @tekmemo/docs check:links
+pnpm --filter @memofs/docs dev
+pnpm --filter @memofs/docs build
+pnpm --filter @memofs/docs preview
+pnpm --filter @memofs/docs check:links
 ```
 
 ## Environment

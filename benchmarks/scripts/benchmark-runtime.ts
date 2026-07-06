@@ -1,7 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { RecallDocument } from "@tekmemo/core";
 import {
 	BenchmarkRunner,
 	type BenchmarkSuite,
@@ -12,7 +11,8 @@ import {
 	evaluateBenchmarkThresholds,
 	jsonBenchmarkReport,
 	markdownBenchmarkReport,
-} from "@tekmemo/benchmark-kit";
+} from "@memofs/benchmark-kit";
+import type { RecallDocument } from "@memofs/core";
 
 const BENCHMARK_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),

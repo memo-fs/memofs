@@ -12,16 +12,16 @@
  */
 
 import { createOpenAI } from "@ai-sdk/openai";
-import { Tekmemo } from "@tekmemo/core";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
 	createAiSdkRuntimeFromTekmemo,
-} from "@tekmemo/adapter-ai-sdk";
+} from "@memofs/adapter-ai-sdk";
+import { Tekmemo } from "@memofs/core";
 import { streamText } from "ai";
 
 // In production, persist these per conversation (a Map keyed by conversationId,
-// a DB row, etc.). One Tekmemo instance = one .tekmemo/ project dir.
+// a DB row, etc.). One Tekmemo instance = one .memofs/ project dir.
 function getMemo(_conversationId: string): Tekmemo {
 	return new Tekmemo({ rootDir: "./.tekmemo", projectId: "next-app" });
 }

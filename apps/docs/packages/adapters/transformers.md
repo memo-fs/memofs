@@ -1,13 +1,13 @@
-# Transformers.js Adapter (`@tekmemo/adapter-transformers`)
+# Transformers.js Adapter (`@memofs/adapter-transformers`)
 
-The `@tekmemo/adapter-transformers` adapter enables vector embeddings to run completely locally, offline, and browser/worker-safely using ONNX runtimes and Xenova's Transformers.js.
+The `@memofs/adapter-transformers` adapter enables vector embeddings to run completely locally, offline, and browser/worker-safely using ONNX runtimes and Xenova's Transformers.js.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @tekmemo/adapter-transformers
+npm install @memofs/adapter-transformers
 ```
 
 ---
@@ -17,12 +17,12 @@ npm install @tekmemo/adapter-transformers
 Configure the client to use local embeddings. The model is downloaded on first run and cached locally:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createTransformersEmbedder } from "@tekmemo/adapter-transformers";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Tekmemo } from "@memofs/core";
+import { createTransformersEmbedder } from "@memofs/adapter-transformers";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new Tekmemo({
-  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "local-project",
   embedder: createTransformersEmbedder({
     model: "Xenova/all-MiniLM-L6-v2", // Run locally with Xenova models

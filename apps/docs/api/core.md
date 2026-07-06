@@ -1,6 +1,6 @@
-# `@tekmemo/core` API
+# `@memofs/core` API
 
-The `@tekmemo/core` package provides the unified `Tekmemo` client and baseline runtime engine.
+The `@memofs/core` package provides the unified `Tekmemo` client and baseline runtime engine.
 
 ## Classes
 

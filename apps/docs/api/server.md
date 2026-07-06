@@ -1,6 +1,6 @@
-# `@tekmemo/server` API
+# `@memofs/server` API
 
-The `@tekmemo/server` package exports the hosted runtime assembly factories and HTTP handlers.
+The `@memofs/server` package exports the hosted runtime assembly factories and HTTP handlers.
 
 ## Functions
 

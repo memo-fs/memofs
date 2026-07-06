@@ -68,7 +68,7 @@ export default createContentLoader("blog/*.md", {
 					url,
 					title: frontmatter.title ?? "Untitled",
 					description: frontmatter.description ?? "",
-					author: frontmatter.author ?? "TekMemo",
+					author: frontmatter.author ?? "Memo FS",
 					tags: frontmatter.tags ?? [],
 					cover: frontmatter.cover ?? null,
 					date,

@@ -1,6 +1,6 @@
 # TekMemo Examples
 
-Runnable, end-to-end examples for building memory-augmented agents with TekMemo.
+Runnable, end-to-end examples for building memory-augmented agents with Memo FS.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ pnpm --filter @tekbreed/examples ai-sdk:agent
 pnpm --filter @tekbreed/examples ai-sdk:agent "How should we handle session auth?"
 ```
 
-Memory is written to `examples/.tekmemo/`. Re-run the example and it will
+Memory is written to `examples/.memofs/`. Re-run the example and it will
 recall what it learned on the previous run — that's durable, compounding
 memory.
 
@@ -67,8 +67,8 @@ a Next.js app — see [`nextjs/README.md`](./nextjs/README.md) for setup.
 ### MCP coding-agent setup — [`mcp-coding-agent/`](./mcp-coding-agent/)
 
 Give your daily coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
-persistent TekMemo memory over MCP. Covers `tekmemo init`, `tekmemo generate
-agent-rules` for each agent, and the per-platform MCP config. This is TekMemo's
+persistent TekMemo memory over MCP. Covers `memofs init`, `memofs generate
+agent-rules` for each agent, and the per-platform MCP config. This is Memo FS's
 differentiator for **local daily builders** — memory that lives in your repo,
 not a vendor database. See [`mcp-coding-agent/README.md`](./mcp-coding-agent/README.md).
 

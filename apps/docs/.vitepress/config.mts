@@ -7,7 +7,7 @@ import { site } from "./config/site.mts";
 export default defineConfig({
 	lang: "en-US",
 	title: site.title,
-	titleTemplate: ":title | TekMemo",
+	titleTemplate: ":title | Memo FS",
 	description: site.description,
 	base: "/",
 	cleanUrls: true,
@@ -24,15 +24,15 @@ export default defineConfig({
 		},
 	},
 	themeConfig: {
-		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "TekMemo" },
-		siteTitle: "TekMemo",
+		logo: { light: "/logo.svg", dark: "/logo.svg", alt: "Memo FS" },
+		siteTitle: "Memo FS",
 		nav,
 		sidebar,
 		search: { provider: "local" },
 		outline: { level: [2, 3], label: "On this page" },
 		socialLinks: [
-			{ icon: "github", link: site.repo, ariaLabel: "TekMemo on GitHub" },
-			{ icon: "npm", link: site.npm, ariaLabel: "TekMemo on npm" },
+			{ icon: "github", link: site.repo, ariaLabel: "Memo FS on GitHub" },
+			{ icon: "npm", link: site.npm, ariaLabel: "Memo FS on npm" },
 			{ icon: "x", link: site.x, ariaLabel: "TekBreed on X" },
 		],
 		editLink: {
@@ -46,7 +46,7 @@ export default defineConfig({
 		docFooter: { prev: "Previous", next: "Next" },
 		footer: {
 			message: `Released under the ${site.license} License.`,
-			copyright: "Copyright © 2026-present TekMemo",
+			copyright: "Copyright © 2026-present Memo FS",
 		},
 	},
 });

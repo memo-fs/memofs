@@ -2,7 +2,7 @@
  * Runnable example: a memory-augmented agent built with the Vercel AI SDK.
  *
  * Run it:
- *   pnpm --filter @tekmemo/examples ai-sdk:agent
+ *   pnpm --filter @memofs/examples ai-sdk:agent
  *
  * Requires:
  *   OPENAI_API_KEY  — for the model
@@ -18,12 +18,12 @@
  */
 
 import { openai } from "@ai-sdk/openai";
-import { Tekmemo } from "@tekmemo/core";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
 	createAiSdkRuntimeFromTekmemo,
-} from "@tekmemo/adapter-ai-sdk";
+} from "@memofs/adapter-ai-sdk";
+import { Tekmemo } from "@memofs/core";
 import { generateText, stepCountIs } from "ai";
 
 const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });

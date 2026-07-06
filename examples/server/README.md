@@ -50,11 +50,11 @@ wire the real self-host bundle, build the runtime from your adapters and pass it
 to the same `handleRuntimeRequest` core the bin uses:
 
 ```ts
-import { createHostedRuntime, handleRuntimeRequest } from "@tekmemo/server";
+import { createHostedRuntime, handleRuntimeRequest } from "@memofs/server";
 import { createServer } from "node:http";
-import { createR2BlobClient } from "@tekmemo/adapter-r2";
-import { createTursoMetadataStore } from "@tekmemo/adapter-turso";
-import { createVoyageEmbedder } from "@tekmemo/adapter-voyage";
+import { createR2BlobClient } from "@memofs/adapter-r2";
+import { createTursoMetadataStore } from "@memofs/adapter-turso";
+import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
 const runtime = createHostedRuntime({
   store: yourStore,           // RemoteBlobMemoryStore over R2 + Turso
@@ -89,7 +89,7 @@ Binding (the two-Worker split — ADR 0013). The Worker entry is
 `packages/tekmemo-server/src/worker.ts`:
 
 ```ts
-import { createRuntimeFetchHandler } from "@tekmemo/server/worker";
+import { createRuntimeFetchHandler } from "@memofs/server/worker";
 
 export default {
   fetch: createRuntimeFetchHandler({
@@ -135,7 +135,7 @@ the *concurrent-over-HTTP* path is gated).
 
 ## See also
 
-- [`@tekmemo/server` README](../../packages/server/README.md)
+- [`@memofs/server` README](../../packages/server/README.md)
 - [The execution plan](https://github.com/tekbreed/tekmemo/blob/main/docs/architecture/s3-execution-plan.md)
 - [ADR 0013 — two-Worker split](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0013-two-worker-split.md)
 - [ADR 0003 — the self-host thesis](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0003-managed-runtime-tier.md)

@@ -1,6 +1,6 @@
 # Model Context Protocol (MCP) Server
 
-`@tekmemo/mcp-server` allows AI coding agents (such as Claude Desktop, Cursor, and Zed) to securely interact with TekMemo memory layers using standard Model Context Protocol (MCP) tools.
+`@memofs/mcp-server` allows AI coding agents (such as Claude Desktop, Cursor, and Zed) to securely interact with Memo FS memory layers using standard Model Context Protocol (MCP) tools.
 
 ---
 
@@ -14,11 +14,11 @@ Add the server definition to your `claude_desktop_config.json` configuration fil
 ```json
 {
   "mcpServers": {
-    "tekmemo": {
+    "memofs": {
       "command": "npx",
       "args": [
         "-y",
-        "@tekmemo/mcp-server",
+        "@memofs/mcp-server",
         "--runtime", "local",
         "--root", "/absolute/path/to/your/project"
       ]
@@ -31,9 +31,9 @@ Add the server definition to your `claude_desktop_config.json` configuration fil
 1. Go to **Settings** > **Features** > **MCP**.
 2. Click **+ Add New MCP Server**.
 3. Configure the fields:
-   - **Name:** `tekmemo`
+   - **Name:** `memofs`
    - **Type:** `command`
-   - **Command:** `npx -y @tekmemo/mcp-server --runtime local --root /path/to/project`
+   - **Command:** `npx -y @memofs/mcp-server --runtime local --root /path/to/project`
 
 ---
 
@@ -43,7 +43,7 @@ Customize the server instantiation using standard flags:
 
 | Flag | Default | Description |
 |---|---|---|
-| `--root <dir>` | Current directory | The absolute path to the project root containing `.tekmemo/`. |
+| `--root <dir>` | Current directory | The absolute path to the project root containing `.memofs/`. |
 | `--runtime <mode>`| `"local"` | Core runtime mode: `local`, `hybrid`, or `memory`. |
 | `--read-only` | `false` | Disables mutating tools (e.g. `write_memory`, `snapshot_create`). |
 | `--cloud-key <key>`| `undefined` | The remote API key override. |

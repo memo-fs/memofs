@@ -1,6 +1,6 @@
-# Testing Framework (`@tekmemo/testing`)
+# Testing Framework (`@memofs/testing`)
 
-`@tekmemo/testing` provides a shared framework containing contract tests, fakes, fixtures, and assertion helpers to ensure all custom or provider-specific adapters (embedders, rerankers, stores) satisfy TekMemo's runtime specifications.
+`@memofs/testing` provides a shared framework containing contract tests, fakes, fixtures, and assertion helpers to ensure all custom or provider-specific adapters (embedders, rerankers, stores) satisfy Memo FS's runtime specifications.
 
 ---
 
@@ -9,7 +9,7 @@
 Install the testing utilities as a development dependency:
 
 ```bash
-npm install -D @tekmemo/testing
+npm install -D @memofs/testing
 ```
 
 ---
@@ -20,9 +20,9 @@ The package exposes specialized entry points:
 
 | Import Path | Purpose |
 |---|---|
-| `@tekmemo/testing/contracts` | Automated test suites validating adapter API conformance. |
-| `@tekmemo/testing/fakes` | Zero-dependency mock implementations for unit testing. |
-| `@tekmemo/testing/fixtures` | Standardized mock datasets (vectors, text chunks, documents). |
+| `@memofs/testing/contracts` | Automated test suites validating adapter API conformance. |
+| `@memofs/testing/fakes` | Zero-dependency mock implementations for unit testing. |
+| `@memofs/testing/fixtures` | Standardized mock datasets (vectors, text chunks, documents). |
 
 ---
 
@@ -36,7 +36,7 @@ Create a test file in your adapter package (e.g. `vitest.config.ts` powered):
 
 ```ts
 import { describe } from "vitest";
-import { embedderContractTests } from "@tekmemo/testing/contracts";
+import { embedderContractTests } from "@memofs/testing/contracts";
 import { createCustomEmbedder } from "./my-embedder";
 
 describe("Custom Embedder Contract Compliance", () => {
@@ -61,7 +61,7 @@ Fakes allow you to test your application logic without calling external model pr
 ### Example: Mocking vector generation
 
 ```ts
-import { createFakeEmbedder } from "@tekmemo/testing/fakes";
+import { createFakeEmbedder } from "@memofs/testing/fakes";
 
 const embedder = createFakeEmbedder({
   dimensions: 1536,

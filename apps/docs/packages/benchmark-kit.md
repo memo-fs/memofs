@@ -1,13 +1,13 @@
-# Benchmark Kit (`@tekmemo/benchmark-kit`)
+# Benchmark Kit (`@memofs/benchmark-kit`)
 
-`@tekmemo/benchmark-kit` is a reusable testing framework that provides benchmarks, runners, statistical analysis, and markdown reporters to measure the throughput, latency, and quality of TekMemo adapters.
+`@memofs/benchmark-kit` is a reusable testing framework that provides benchmarks, runners, statistical analysis, and markdown reporters to measure the throughput, latency, and quality of Memo FS adapters.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @tekmemo/benchmark-kit
+npm install @memofs/benchmark-kit
 ```
 
 ---
@@ -18,7 +18,7 @@ npm install @tekmemo/benchmark-kit
 Groups benchmarks under test. Each benchmark corresponds to a target (such as an embedder or reranker) and a list of workload tasks.
 
 ```ts
-import { BenchmarkSuite } from "@tekmemo/benchmark-kit";
+import { BenchmarkSuite } from "@memofs/benchmark-kit";
 
 const suite = new BenchmarkSuite("embedder-benchmarks")
   .setIterations(5);
@@ -28,7 +28,7 @@ const suite = new BenchmarkSuite("embedder-benchmarks")
 Orchestrates execution of the workloads, handles warmup iterations, and aggregates latencies.
 
 ```ts
-import { BenchmarkRunner } from "@tekmemo/benchmark-kit";
+import { BenchmarkRunner } from "@memofs/benchmark-kit";
 
 const runner = new BenchmarkRunner({
   warmupIterations: 1,
@@ -38,7 +38,7 @@ const results = await runner.runSuite(suite);
 ```
 
 ### 3. Built-In Workloads
-Provides preset workloads for common TekMemo interfaces:
+Provides preset workloads for common Memo FS interfaces:
 - `createEmbedderWorkloads(embedder)`: Measures vector computing performance.
 - `createRerankWorkloads(reranker)`: Measures reranking performance.
 - `createRecallWorkloads(recallStore)`: Measures upsert and query latency.
@@ -51,10 +51,10 @@ Provides preset workloads for common TekMemo interfaces:
 Compare the latency of OpenAI vs. Voyage AI embedders:
 
 ```ts
-import { BenchmarkSuite, BenchmarkRunner, MarkdownReporter } from "@tekmemo/benchmark-kit";
-import { createEmbedderWorkloads } from "@tekmemo/benchmark-kit/workloads";
-import { createOpenAIEmbedder } from "@tekmemo/adapter-openai";
-import { createVoyageEmbedder } from "@tekmemo/adapter-voyage";
+import { BenchmarkSuite, BenchmarkRunner, MarkdownReporter } from "@memofs/benchmark-kit";
+import { createEmbedderWorkloads } from "@memofs/benchmark-kit/workloads";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
+import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
 // 1. Initialize targets
 const targets = {

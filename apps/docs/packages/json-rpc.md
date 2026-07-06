@@ -1,6 +1,6 @@
-# JSON-RPC Primitives (`@tekmemo/json-rpc`)
+# JSON-RPC Primitives (`@memofs/json-rpc`)
 
-`@tekmemo/json-rpc` is a shared protocol package containing the message parsers, serializers, and validation schemas for JSON-RPC 2.0.
+`@memofs/json-rpc` is a shared protocol package containing the message parsers, serializers, and validation schemas for JSON-RPC 2.0.
 
 This package is utilized internally by both the Model Context Protocol (MCP) server and the self-hostable memory server to ensure consistent and type-safe command dispatching.
 
@@ -9,7 +9,7 @@ This package is utilized internally by both the Model Context Protocol (MCP) ser
 ## Installation
 
 ```bash
-npm install @tekmemo/json-rpc
+npm install @memofs/json-rpc
 ```
 
 ---
@@ -20,7 +20,7 @@ npm install @tekmemo/json-rpc
 Includes Zod schemas for validating incoming request objects:
 
 ```ts
-import { jsonRpcRequestSchema } from "@tekmemo/json-rpc";
+import { jsonRpcRequestSchema } from "@memofs/json-rpc";
 
 const request = {
   jsonrpc: "2.0",

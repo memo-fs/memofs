@@ -1,6 +1,6 @@
 # TekMemo + Next.js (App Router)
 
-A memory-augmented chat API built with TekMemo and the [Vercel AI SDK](https://sdk.vercel.ai),
+A memory-augmented chat API built with Memo FS and the [Vercel AI SDK](https://sdk.vercel.ai),
 exposed as a Next.js App Router **route handler**. Demonstrates the recommended
 "context-first + tool-augmented" pattern in a real HTTP server context.
 
@@ -33,7 +33,7 @@ This example is meant to be copied into a Next.js app. From a fresh
 [Next.js](https://nextjs.org) project (App Router):
 
 ```bash
-npm install @tekmemo/core ai @ai-sdk/openai
+npm install @memofs/core ai @ai-sdk/openai
 ```
 
 Add `app/api/chat/route.ts` from this folder, then:

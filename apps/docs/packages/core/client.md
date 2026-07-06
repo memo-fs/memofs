@@ -3,7 +3,7 @@
 The `Tekmemo` class is the central entry point for all memory operations in your application.
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
+import { Tekmemo } from "@memofs/core";
 ```
 
 ---
@@ -21,7 +21,7 @@ const memo = new Tekmemo(config?: TekmemoConfig);
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `store` | `MemoryStore` | (Required) | Memory store adapter (filesystem or in-memory). |
-| `mode` | `TekMemoRuntimeMode` | `"local"` | Runtime mode: `"local" \| "hybrid" \| "memory"`. |
+| `mode` | `MemofsRuntimeMode` | `"local"` | Runtime mode: `"local" \| "hybrid" \| "memory"`. |
 | `projectId` | `string` | `undefined` | Unique identifier for the project workspace. |
 | `readPolicy` | `RuntimeReadPolicy` | `"local-first"` | Read policy for hybrid syncing. |
 | `writePolicy`| `RuntimeWritePolicy`| `"local-first"` | Write policy for hybrid syncing. |

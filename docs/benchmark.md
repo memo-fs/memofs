@@ -1,6 +1,6 @@
 ## Benchmark policy
 
-TekMemo uses tiered benchmarks.
+Memo FS uses tiered benchmarks.
 
 Smoke benchmarks run in CI and before package publishing. They are deterministic, local-only, and designed to catch obvious regressions in storage, chunking, recall, and context packing.
 
@@ -10,10 +10,10 @@ A package should not be published if smoke benchmarks fail. Full benchmark regre
 
 ## Workspace layout
 
-TekMemo keeps benchmark infrastructure in two places:
+Memo FS keeps benchmark infrastructure in two places:
 
-- `packages/tekmemo/src/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
-- `benchmarks` is the private workspace package that owns TekMemo-specific suites, thresholds, reports, and release scripts.
+- `packages/memofs/src/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
+- `benchmarks` is the private workspace package that owns Memo FS-specific suites, thresholds, reports, and release scripts.
 
 Generated output is written to `benchmark-results/` and ignored by Git.
 

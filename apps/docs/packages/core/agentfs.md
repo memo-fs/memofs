@@ -1,15 +1,15 @@
 # AgentFS
 
-AgentFS is the custom virtual filesystem layer built into the `@tekmemo/core` runtime. It abstracts directory access, file reading, writing, and synchronization into a single interface.
+AgentFS is the custom virtual filesystem layer built into the `@memofs/core` runtime. It abstracts directory access, file reading, writing, and synchronization into a single interface.
 
 ---
 
 ## Canonical Memory Path Structure
 
-Inside the project root directory, AgentFS manages memory assets within the `.tekmemo/` subfolder:
+Inside the project root directory, AgentFS manages memory assets within the `.memofs/` subfolder:
 
 ```
-.tekmemo/
+.memofs/
 ├── config.json              # Workspace configuration file
 ├── manifest.json            # Versioned manifest of all tracked memory assets
 ├── memory/

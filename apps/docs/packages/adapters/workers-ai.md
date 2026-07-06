@@ -1,13 +1,13 @@
-# Cloudflare Workers AI Adapter (`@tekmemo/adapter-workers-ai`)
+# Cloudflare Workers AI Adapter (`@memofs/adapter-workers-ai`)
 
-The `@tekmemo/adapter-workers-ai` adapter utilizes Cloudflare's serverless GPUs to perform graph extraction on Cloudflare Workers without incurring API key setup friction.
+The `@memofs/adapter-workers-ai` adapter utilizes Cloudflare's serverless GPUs to perform graph extraction on Cloudflare Workers without incurring API key setup friction.
 
 ---
 
 ## Installation
 
 ```bash
-npm install @tekmemo/adapter-workers-ai
+npm install @memofs/adapter-workers-ai
 ```
 
 ---
@@ -17,9 +17,9 @@ npm install @tekmemo/adapter-workers-ai
 Use the Cloudflare Workers AI binding environment `env.AI` to initialize the extractor:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createWorkersAiExtractor } from "@tekmemo/adapter-workers-ai";
-import { createR2BlobClient } from "@tekmemo/adapter-r2";
+import { Tekmemo } from "@memofs/core";
+import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
+import { createR2BlobClient } from "@memofs/adapter-r2";
 
 export default {
   async fetch(request, env) {

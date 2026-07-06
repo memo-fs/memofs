@@ -2,6 +2,12 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import {
+	createBenchmarkSuite,
+	createMemoryReadBenchmarkCase,
+	createMemoryWriteBenchmarkCase,
+	createRecallQueryBenchmarkCase,
+} from "@memofs/benchmark-kit";
+import {
 	CORE_MEMORY_PATH,
 	chunkText,
 	createDeterministicFallbackReranker,
@@ -10,13 +16,7 @@ import {
 	NOTES_MEMORY_PATH,
 	readCoreMemory,
 	writeCoreMemory,
-} from "@tekmemo/core";
-import {
-	createBenchmarkSuite,
-	createMemoryReadBenchmarkCase,
-	createMemoryWriteBenchmarkCase,
-	createRecallQueryBenchmarkCase,
-} from "@tekmemo/benchmark-kit";
+} from "@memofs/core";
 import {
 	createMemoryText,
 	createRecallDocuments,
@@ -53,7 +53,7 @@ try {
 						iterations: 10,
 						warmupIterations: 1,
 						async run() {
-							await import("@tekmemo/core");
+							await import("@memofs/core");
 						},
 					},
 					createMemoryWriteBenchmarkCase({

@@ -1,4 +1,3 @@
-import { CORE_MEMORY_PATH, chunkText } from "@tekmemo/core";
 import {
 	createBenchmarkSuite,
 	createFakeMemoryStore,
@@ -9,7 +8,8 @@ import {
 	createRecallQueryBenchmarkCase,
 	createRecallUpsertBenchmarkCase,
 	createRerankBenchmarkCase,
-} from "@tekmemo/benchmark-kit";
+} from "@memofs/benchmark-kit";
+import { CORE_MEMORY_PATH, chunkText } from "@memofs/core";
 import {
 	createMemoryText,
 	createRecallDocuments,

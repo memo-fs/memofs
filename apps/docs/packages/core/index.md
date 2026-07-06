@@ -1,6 +1,6 @@
-# `@tekmemo/core`
+# `@memofs/core`
 
-`@tekmemo/core` is the core memory runtime and provider-neutral contract engine for TekMemo. It provides the architectural foundation for local-first, versioned, and semantic memory for AI agents.
+`@memofs/core` is the core memory runtime and provider-neutral contract engine for Memo FS. It provides the architectural foundation for local-first, versioned, and semantic memory for AI agents.
 
 ## Features
 
@@ -15,23 +15,23 @@
 Install the core package using your preferred package manager:
 
 ```bash
-npm install @tekmemo/core
+npm install @memofs/core
 ```
 
 > [!NOTE]
-> Since `@tekmemo/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@tekmemo/core/node-fs`.
+> Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.
 
 ## Quick Start
 
 Initialize memory in your project and read the core memory:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Tekmemo } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Initialize a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
-  rootDir: "./.tekmemo",
+  rootDir: "./.memofs",
 });
 
 // Create the unified client
@@ -51,7 +51,7 @@ console.log(context.content);
 
 ## Package Architecture
 
-The `@tekmemo/core` codebase is organized around a strict layering model:
+The `@memofs/core` codebase is organized around a strict layering model:
 
 1. **`core`**: Canonical schemas, documents, events, and in-memory stores.
 2. **`agentfs`**: Virtual file matching and leases.
@@ -62,10 +62,10 @@ The `@tekmemo/core` codebase is organized around a strict layering model:
 
 ## Boundaries
 
-As a public open-source core package, `@tekmemo/core` remains strictly neutral:
+As a public open-source core package, `@memofs/core` remains strictly neutral:
 - It **does not** import or bundle any provider-specific packages (e.g., OpenAI, Voyage, or Turso).
 - It **does not** contain proprietary cloud tenancy, pricing models, or dashboard features.
-- All public capabilities are exported directly from the package root or the Node-only `@tekmemo/core/node-fs` subpath.
+- All public capabilities are exported directly from the package root or the Node-only `@memofs/core/node-fs` subpath.
 
 ## License
 

@@ -1,6 +1,6 @@
 # Configure Storage
 
-TekMemo uses a **2-axis storage architecture** that decouples file-based content storage from query-based index and metadata tracking. This split ensures high durability and performance across local and cloud environments.
+Memo FS uses a **2-axis storage architecture** that decouples file-based content storage from query-based index and metadata tracking. This split ensures high durability and performance across local and cloud environments.
 
 ---
 
@@ -10,7 +10,7 @@ Storage is separated into two independent systems:
 
 ```mermaid
 graph TD
-    A[TekMemo Engine] --> B[Blob Storage Axis]
+    A[Memo FS Engine] --> B[Blob Storage Axis]
     A --> C[Metadata Storage Axis]
     
     B --> D[Filesystem / R2 / S3]
@@ -19,7 +19,7 @@ graph TD
 
 ### 1. Blob Storage Axis (`BlobClient` / File Store)
 Handles raw file storage (markdown memory blocks, raw event streams, and snapshot payloads).
-- **Default:** In local mode, files are written directly to your disk under `.tekmemo/`.
+- **Default:** In local mode, files are written directly to your disk under `.memofs/`.
 - **Cloud/Distributed:** In hybrid mode or self-hosted server tiers, files are stored in blob storages like Cloudflare R2 or Amazon S3.
 - **Relevant Adapters:**
   - [Cloudflare R2](../packages/adapters/r2)
@@ -37,15 +37,15 @@ Tracks indexes, relational graphs, transactional status, and search schemas. It 
 
 ## Local Development vs. Cloud Deployments
 
-- **Local Development:** When executing locally with `mode: "local"`, you do not need to configure anything. TekMemo automatically uses standard filesystem storage.
+- **Local Development:** When executing locally with `mode: "local"`, you do not need to configure anything. Memo FS automatically uses standard filesystem storage.
 - **Cloud Deployments:** For production services or distributed teams, you configure the axes independently in your initialization script.
 
 ### Configuration Example
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createR2BlobClient } from "@tekmemo/adapter-r2";
-import { createTursoMetadataStore } from "@tekmemo/adapter-turso";
+import { Tekmemo } from "@memofs/core";
+import { createR2BlobClient } from "@memofs/adapter-r2";
+import { createTursoMetadataStore } from "@memofs/adapter-turso";
 
 const memo = new Tekmemo({
   projectId: "prod-workspace",

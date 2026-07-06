@@ -1,4 +1,4 @@
-# OpenAI Adapter (`@tekmemo/adapter-openai`)
+# OpenAI Adapter (`@memofs/adapter-openai`)
 
 The OpenAI adapter provides vector embedding capabilities utilizing OpenAI's embeddings API endpoint.
 
@@ -9,7 +9,7 @@ The OpenAI adapter provides vector embedding capabilities utilizing OpenAI's emb
 Install the adapter package in your workspace:
 
 ```bash
-npm install @tekmemo/adapter-openai
+npm install @memofs/adapter-openai
 ```
 
 ---
@@ -19,12 +19,12 @@ npm install @tekmemo/adapter-openai
 Use `createOpenAIEmbedder` to instantiate an embedder for the `Tekmemo` client:
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createOpenAIEmbedder } from "@tekmemo/adapter-openai";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Tekmemo } from "@memofs/core";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new Tekmemo({
-  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "openai-project",
   embedder: createOpenAIEmbedder({
     apiKey: process.env.OPENAI_API_KEY,

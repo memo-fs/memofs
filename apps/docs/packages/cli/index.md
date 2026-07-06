@@ -1,6 +1,6 @@
 # Command Line Interface (CLI)
 
-The `tekmemo` package provides the primary command-line tool for managing local, cloud, and hybrid memory workflows. 
+The `memofs` package provides the primary command-line tool for managing local, cloud, and hybrid memory workflows. 
 
 ---
 
@@ -10,67 +10,67 @@ Install the CLI globally or as a development dependency in your project:
 
 ```bash
 # Globally
-npm install -g tekmemo
+npm install -g memofs
 
 # As a devDependency
-npm install -D tekmemo
+npm install -D memofs
 ```
 
 You can also run it on demand without installation:
 
 ```bash
-npx tekmemo --help
+npx memofs --help
 ```
 
 ---
 
 ## CLI Commands
 
-### `tekmemo init`
-Initializes a new TekMemo memory workspace in the current directory, generating the `.tekmemo/` structure and template files.
+### `memofs init`
+Initializes a new Memo FS memory workspace in the current directory, generating the `.memofs/` structure and template files.
 
 ```bash
-tekmemo init
+memofs init
 ```
 
-### `tekmemo remember`
+### `memofs remember`
 Stores a new memory fragment or note in the workspace.
 
-- **Usage:** `tekmemo remember <text> [options]`
+- **Usage:** `memofs remember <text> [options]`
 - **Options:**
   - `--kind <type>`: The kind of memory (`decision`, `constraint`, `goal`, `preference`, `reference`, `summary`, `note`). Default: `note`.
 
 ```bash
-tekmemo remember "Use VoyageAI for vector embeddings" --kind decision
+memofs remember "Use VoyageAI for vector embeddings" --kind decision
 ```
 
-### `tekmemo context`
+### `memofs context`
 Queries the memory layers using hybrid recall to generate a condensed context payload for agents.
 
-- **Usage:** `tekmemo context --query <query> [options]`
+- **Usage:** `memofs context --query <query> [options]`
 - **Options:**
   - `--json`: Output as structured JSON (useful for piping into agents).
 
 ```bash
-tekmemo context --query "deployment steps"
+memofs context --query "deployment steps"
 ```
 
-### `tekmemo inspect`
+### `memofs inspect`
 Displays a status dashboard of the current memory filesystem, including counts of tracked notes, local snapshots, and sync status.
 
 ```bash
-tekmemo inspect
+memofs inspect
 ```
 
-### `tekmemo sync`
+### `memofs sync`
 Synchronizes local memory changes with the configured remote replica.
 
-- **Usage:** `tekmemo sync [push|pull|status]`
+- **Usage:** `memofs sync [push|pull|status]`
 
 ```bash
 # Push local memories
-tekmemo sync push
+memofs sync push
 
 # Pull remote changes
-tekmemo sync pull
+memofs sync pull
 ```

@@ -1,16 +1,16 @@
-# `@tekmemo/mcp-server` API
+# `@memofs/mcp-server` API
 
-The `@tekmemo/mcp-server` package implements standard stdio transport servers following the Model Context Protocol (MCP) spec.
+The `@memofs/mcp-server` package implements standard stdio transport servers following the Model Context Protocol (MCP) spec.
 
 ## Classes
 
-### `TekMemoMcpServer`
+### `MemofsMcpServer`
 The main class initializing the stdio JSON-RPC transport and registering tools.
 
 #### Constructor
 
 ```ts
-const server = new TekMemoMcpServer(options: McpServerOptions);
+const server = new MemofsMcpServer(options: McpServerOptions);
 ```
 
 #### Methods

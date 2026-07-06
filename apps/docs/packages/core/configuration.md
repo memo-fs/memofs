@@ -1,9 +1,9 @@
 # Configuration
 
-TekMemo uses a clear priority chain to resolve configuration settings:
+Memo FS uses a clear priority chain to resolve configuration settings:
 1. **Constructor Options** (Highest priority)
 2. **Environment Variables**
-3. **Workspace Configuration File** (`.tekmemo/config.json`)
+3. **Workspace Configuration File** (`.memofs/config.json`)
 4. **Default Fallbacks** (Lowest priority)
 
 ---
@@ -15,7 +15,7 @@ When initializing `Tekmemo`, you can select one of three runtime modes:
 | Mode | Target | Description |
 |---|---|---|
 | `local` | Off-grid / Zero Config | All reads and writes occur directly on the local filesystem. Zero cloud dependencies. |
-| `hybrid` | Cloud Sync Enabled | Reads and writes are mirrored to a remote replica (e.g. TekMemo Cloud) using sync policies. |
+| `hybrid` | Cloud Sync Enabled | Reads and writes are mirrored to a remote replica (e.g. Memo FS Cloud) using sync policies. |
 | `memory` | In-Memory Only | No disk access. Primitives are read and written to memory. Great for transient tests. |
 
 ```ts
@@ -46,9 +46,9 @@ const memo = new Tekmemo({
 
 ---
 
-## Workspace Config (`.tekmemo/config.json`)
+## Workspace Config (`.memofs/config.json`)
 
-The `.tekmemo/config.json` allows team-wide settings to be committed alongside code:
+The `.memofs/config.json` allows team-wide settings to be committed alongside code:
 
 ```json
 {
@@ -75,5 +75,5 @@ The following environment variables are recognized:
 | `TEKMEMO_MODE` | Overrides the runtime mode (`local`, `hybrid`, `memory`). |
 | `TEKMEMO_READ_POLICY` | Overrides the read policy (`local-first`, `cloud-first`, `local-only`). |
 | `TEKMEMO_WRITE_POLICY` | Overrides the write policy (`local-first`, `cloud-first`, `local-only`). |
-| `TEKMEMO_CLOUD_API_KEY`| The API key used to authenticate with TekMemo Cloud. |
+| `TEKMEMO_CLOUD_API_KEY`| The API key used to authenticate with Memo FS Cloud. |
 | `TEKMEMO_PROJECT_ID` | The unique ID of the target project workspace. |
