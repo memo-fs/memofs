@@ -1,42 +1,39 @@
+import { parseWithZod } from "@conform-to/zod/v4";
+import { eq } from "drizzle-orm";
+import { StatusCodes } from "http-status-codes";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { useFetcher, useRouteLoaderData } from "react-router";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { redirect, useFetcher, useRouteLoaderData } from "react-router";
+import { env } from "cloudflare:workers";
+import { getDB } from "~/.server/db";
+import { user } from "~/.server/db/schema";
+import { purgeAccount } from "~/.server/queries/account-deletion";
+import { createAuthFromEnv, requireUser } from "~/.server/session";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "~/components/ui/dialog";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { createDb } from "~/db/index.server";
-import { getEnv } from "~/server/context.server";
-import { createAuthFromEnv, requireUser } from "~/server/session.server";
-import { formatRelative, userInitials } from "~/utils/format";
+import { formatRelative } from "~/utils/misc";
+import { DeleteAccountDialog } from "./+components/delete-account-dialog";
 import { PageHeader } from "./+components/page-header";
+import { ProfileForm } from "./+components/profile-form";
 import type { Route as DashboardRoute } from "./+types/_layout";
 import type { Route } from "./+types/settings";
+import { ProfileSchema } from "./+utils/settings";
 
 /**
- * Settings (SC3.6). Account-wide. The profile is read live from the signed-in
- * user (name / email / avatar). Under passwordless auth (SC4.1) there is NO
- * password to change — the Security section reflects that honestly: real active
- * sessions (Better Auth `listSessions`, revocable via `revokeSession`), and an
- * explicit "2FA is N/A under passwordless" note rather than a fake toggle.
+ * Settings (SC3.6). Account-wide. The profile is editable (name via Conform +
+ * Zod v4; email is read-only — it's the passwordless login identity, SC4.1).
+ * Security shows real active sessions (Better Auth `listSessions`, revocable
+ * via `revokeSession`) + an honest "2FA is N/A under passwordless" note.
  *
- * Danger-zone account deletion is surfaced as an honest "not yet wired" state:
- * the R2 blob-purge + cascade path doesn't exist yet (it lands with the deploy
- * unblock work), so the button is disabled rather than silently doing nothing.
+ * Danger-zone account deletion is wired: R2 blob purge (content-addressed
+ * aware — shared blobs survive) + DB cascade + Better Auth user deletion,
+ * gated by typed confirmation ("DELETE") re-validated server-side.
  */
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "Settings — TekMemo Cloud" }];
+	return [{ title: "Settings — Memo FS Cloud" }];
 }
 
 /**
@@ -66,12 +63,10 @@ export interface SettingsLoaderData {
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<SettingsLoaderData> {
-	const user = await requireUser(request, getEnv(context));
-	const env = getEnv(context);
-	const db = createDb(env);
-	const auth = createAuthFromEnv(env, db);
+	const user = await requireUser(request);
+	const db = getDB();
+	const auth = createAuthFromEnv();
 
 	// The active session's token (from the cookie) identifies the current row.
 	const cookieToken = parseSessionToken(request);
@@ -99,24 +94,74 @@ export async function loader({
 }
 
 /**
- * Revokes a session by token. The auth instance resolves ownership from the
- * cookie, so a token from another user's session is rejected by Better Auth —
- * we don't trust the client-supplied token beyond using it as the selector.
+ * Handles two intents:
+ *
+ * - `update-profile`: validates the name via the shared `ProfileSchema`
+ *   (Conform + Zod v4) and forwards to Better Auth `updateUser`. Email is
+ *   never mutated here — it's the passwordless login identity (SC4.1).
+ * - `revoke-session`: revokes a session by token. The auth instance resolves
+ *   ownership from the cookie, so a token from another user's session is
+ *   rejected by Better Auth.
  */
 export async function action({
 	request,
-	context,
-}: Route.ActionArgs): Promise<{ ok: boolean }> {
-	await requireUser(request, getEnv(context));
-	const env = getEnv(context);
-	const db = createDb(env);
-	const auth = createAuthFromEnv(env, db);
+}: Route.ActionArgs): Promise<{ ok: boolean; error?: string } | Response> {
+	const db = getDB();
+	const auth = createAuthFromEnv();
+	const sessionUser = await requireUser(request);
 	const form = await request.formData();
-	const token = String(form.get("token") ?? "");
-	if (!token) return { ok: false };
+	const intent = String(form.get("intent") ?? "");
 
-	await auth.api.revokeSession({ headers: request.headers, body: { token } });
-	return { ok: true };
+	if (intent === "update-profile") {
+		const submission = parseWithZod(form, { schema: ProfileSchema });
+		if (submission.status !== "success") {
+			return Response.json(
+				{ ok: false, error: submission.error?.name?.[0] ?? "Invalid name." },
+				{ status: StatusCodes.BAD_REQUEST },
+			);
+		}
+		await auth.api.updateUser({
+			headers: request.headers,
+			body: { name: submission.value.name },
+		});
+		return { ok: true };
+	}
+
+	if (intent === "revoke-session") {
+		const token = String(form.get("token") ?? "");
+		if (!token) return { ok: false };
+		await auth.api.revokeSession({ headers: request.headers, body: { token } });
+		return { ok: true };
+	}
+
+	if (intent === "delete-account") {
+		// Server-side re-validation of the typed confirmation (client can't bypass).
+		const confirm = String(form.get("confirm") ?? "");
+		if (confirm !== "DELETE") {
+			return Response.json(
+				{ ok: false, error: 'Type "DELETE" to confirm.' },
+				{ status: StatusCodes.BAD_REQUEST },
+			);
+		}
+		const accountId = sessionUser.accountId;
+		if (!accountId) {
+			return Response.json(
+				{ ok: false, error: "No account found to delete." },
+				{ status: StatusCodes.NOT_FOUND },
+			);
+		}
+		if (!env.BLOBS) {
+			throw new Error("R2 BLOBS bucket is not bound to the worker.");
+		}
+		await purgeAccount(db, env.BLOBS, accountId);
+		await db.delete(user).where(eq(user.id, sessionUser.id));
+		throw redirect("/login");
+	}
+
+	return Response.json(
+		{ ok: false, error: "Unknown intent." },
+		{ status: StatusCodes.BAD_REQUEST },
+	);
 }
 
 export default function SettingsPage({ loaderData }: Route.ComponentProps) {
@@ -129,7 +174,6 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 	>("routes/dashboard/_layout");
 
 	const [showDelete, setShowDelete] = useState(false);
-	const initials = userInitials(user.name);
 
 	// Drop a session optimistically the moment its revoke submission fires.
 	const revokingToken = revokeFetcher.formData?.get("token");
@@ -145,57 +189,14 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 				subtitle="Account-wide identity and security."
 			/>
 
-			{/* Profile (read-only at v1) */}
+			{/* Profile (name editable via Conform + Zod v4; email read-only) */}
 			<section className="mb-8 space-y-4">
 				<h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
 					Profile
 				</h3>
 				<Card>
 					<CardContent className="space-y-4 p-5">
-						<div className="flex items-center gap-4">
-							<Avatar className="h-12 w-12">
-								<AvatarFallback className="bg-primary/20 text-sm text-primary">
-									{initials}
-								</AvatarFallback>
-							</Avatar>
-							<div>
-								<p className="text-xs font-semibold text-foreground">
-									{user.name}
-								</p>
-								<p className="text-[11px] text-muted-foreground">
-									{user.email}
-								</p>
-							</div>
-						</div>
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<div className="space-y-1.5">
-								<Label htmlFor="name" className="text-xs">
-									Name
-								</Label>
-								<Input
-									id="name"
-									defaultValue={user.name}
-									className="h-9 text-xs"
-									disabled
-								/>
-							</div>
-							<div className="space-y-1.5">
-								<Label htmlFor="email" className="text-xs">
-									Email
-								</Label>
-								<Input
-									id="email"
-									type="email"
-									defaultValue={user.email}
-									className="h-9 text-xs"
-									disabled
-								/>
-							</div>
-						</div>
-						<p className="text-[10px] text-muted-foreground">
-							Profile editing isn't wired at v1. Email is your login identity
-							(passwordless, SC4.1).
-						</p>
+						<ProfileForm name={user.name} email={user.email} />
 					</CardContent>
 				</Card>
 			</section>
@@ -265,7 +266,7 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 											className="h-8 text-xs text-destructive hover:bg-destructive/5 hover:text-destructive"
 											onClick={() =>
 												revokeFetcher.submit(
-													{ token: s.token },
+													{ intent: "revoke-session", token: s.token },
 													{ method: "post" },
 												)
 											}
@@ -329,47 +330,12 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 				</Card>
 			</section>
 
-			{/* Delete — honest "not yet wired" dialog (R2 purge path lands with deploy unblock) */}
-			<Dialog open={showDelete} onOpenChange={setShowDelete}>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle className="text-base font-semibold">
-							Delete your account?
-						</DialogTitle>
-						<DialogDescription className="text-xs">
-							Self-serve account deletion isn't wired at v1 — the R2 blob-purge
-							+ cascade path ships with the deploy-unblock work. Contact us and
-							we'll complete it for you within 24 hours.
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-3 py-2 text-[11px] text-muted-foreground">
-						<p>
-							Email{" "}
-							<a
-								href="mailto:privacy@tekbreed.com"
-								className="text-primary hover:underline"
-							>
-								privacy@tekbreed.com
-							</a>{" "}
-							from {user.email} and we'll purge all projects, files, connector
-							configs, and API keys.
-						</p>
-						{dashboard?.account && (
-							<p className="font-mono text-[10px]">
-								Account: {dashboard.account.id}
-							</p>
-						)}
-					</div>
-					<Button
-						variant="outline"
-						size="sm"
-						className="h-9 text-xs"
-						onClick={() => setShowDelete(false)}
-					>
-						Close
-					</Button>
-				</DialogContent>
-			</Dialog>
+			{/* Danger zone — real R2 purge + DB cascade (SC3.6) */}
+			<DeleteAccountDialog
+				open={showDelete}
+				onOpenChange={setShowDelete}
+				accountId={dashboard?.account?.id ?? null}
+			/>
 		</div>
 	);
 }

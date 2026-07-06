@@ -22,7 +22,7 @@ export function SyncStepsSection() {
 				{SYNC_STEPS.map((item) => (
 					<Card
 						key={item.step}
-						className="flex flex-col justify-between min-h-full"
+						className="flex flex-col justify-between min-h-full rounded-none border border-border bg-card/40 transition-colors hover:border-primary/30"
 					>
 						<div>
 							<CardHeader>
@@ -32,7 +32,7 @@ export function SyncStepsSection() {
 									</span>
 									<Terminal className="w-4 h-4 text-primary" />
 								</div>
-								<code className="font-mono text-xs bg-muted px-2 py-1 rounded block mt-2 text-primary border border-border/30">
+								<code className="font-mono text-xs bg-muted px-2 py-1 rounded-none block mt-2 text-primary border border-border/30">
 									{item.cmd}
 								</code>
 							</CardHeader>

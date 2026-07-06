@@ -1,6 +1,10 @@
 import { FolderOpen, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
+import { getDB } from "~/.server/db";
+import type { ProjectSummary } from "~/.server/queries";
+import { deleteProject, listProjectsForAccount } from "~/.server/queries";
+import { requireUserWithAccount } from "~/.server/session";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
@@ -11,11 +15,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import { getEnv } from "~/server/context.server";
-import type { ProjectSummary } from "~/server/queries";
-import { deleteProject, listProjectsForAccount } from "~/server/queries";
-import { requireUserWithAccount } from "~/server/session.server";
-import { formatBytes, formatRelative } from "~/utils/format";
+import { formatBytes, formatRelative } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { NewProjectDialog } from "./+components/new-project-dialog";
 import { PageHeader } from "./+components/page-header";
@@ -32,7 +32,7 @@ import type { Route } from "./+types/projects";
  */
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "Projects — TekMemo Cloud" }];
+	return [{ title: "Projects — Memo FS Cloud" }];
 }
 
 /** Server data: the account's projects, newest-updated first. */
@@ -42,12 +42,9 @@ export interface ProjectsLoaderData {
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<ProjectsLoaderData> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const projects = account ? await listProjectsForAccount(db, account.id) : [];
 	return { projects };
 }
@@ -60,12 +57,9 @@ export async function loader({
  */
 export async function action({
 	request,
-	context,
 }: Route.ActionArgs): Promise<{ ok: boolean }> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const form = await request.formData();
 	const projectId = String(form.get("projectId") ?? "");
 	if (!projectId) return { ok: false };
@@ -125,7 +119,7 @@ export default function ProjectsPage({ loaderData }: Route.ComponentProps) {
 							</p>
 							<p className="max-w-sm text-xs text-muted-foreground">
 								Projects appear here after your first{" "}
-								<code className="font-mono text-[10px]">tekmemo push</code>.
+								<code className="font-mono text-[10px]">memofs push</code>.
 								Push from the CLI to provision one.
 							</p>
 						</div>

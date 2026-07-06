@@ -1,5 +1,9 @@
 import { Loader2 } from "lucide-react";
 import { data, useFetcher } from "react-router";
+import { getCtx, getEnv } from "~/.server/context";
+import { enabledOAuthProviders } from "~/.server/oauth-providers";
+import { consumeMagicLinkToken, rateLimitMessage } from "~/.server/rate-limit";
+import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -8,17 +12,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { createDb } from "~/db/index.server";
-import { getCtx, getEnv } from "~/server/context.server";
-import { enabledOAuthProviders } from "~/server/oauth-providers.server";
-import {
-	consumeMagicLinkToken,
-	rateLimitMessage,
-} from "~/server/rate-limit.server";
-import {
-	createAuthFromEnv,
-	safeRelativeRedirect,
-} from "~/server/session.server";
 import {
 	AuthSwitchLink,
 	EmailField,
@@ -33,8 +26,8 @@ import { useAuthRedirect } from "./hooks/use-auth-redirect";
 
 export function meta() {
 	return [
-		{ title: "Log in — TekMemo Cloud" },
-		{ name: "description", content: "Log in to your TekMemo Cloud account" },
+		{ title: "Log in — Memo FS Cloud" },
+		{ name: "description", content: "Log in to your Memo FS Cloud account" },
 	];
 }
 
@@ -43,7 +36,7 @@ export function meta() {
  * render iff `createAuth` will accept them (A2). No DB hit — pure env check.
  */
 export async function loader({ context }: Route.LoaderArgs) {
-	return { providers: enabledOAuthProviders(getEnv(context)) };
+	return { providers: enabledOAuthProviders() };
 }
 
 /**
@@ -61,12 +54,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 	const email = String(formData.get("email")).trim();
 	const callbackURL = safeRelativeRedirect(formData.get("callbackURL"));
 
-	const env = getEnv(context);
-
 	// Rate-limit before any DB/email work so a flood never reaches Plunk. Login
 	// omits the MX check (unlike signup) so a transient DoH failure can't lock a
 	// returning user out of their account.
-	const limited = await consumeMagicLinkToken(env, request, getCtx(context));
+	const limited = await consumeMagicLinkToken(request, getCtx(context));
 	const limitedMessage = rateLimitMessage(limited);
 	if (limitedMessage) {
 		return data({ ok: false, error: limitedMessage.error }, { status: 429 });
@@ -81,8 +72,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		);
 	}
 
-	const db = createDb(env);
-	const auth = createAuthFromEnv(env, db);
+	const auth = createAuthFromEnv(getCtx(context).waitUntil);
 
 	await auth.api.signInMagicLink({
 		body: { email, callbackURL },

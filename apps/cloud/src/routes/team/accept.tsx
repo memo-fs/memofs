@@ -1,5 +1,13 @@
+import { env } from "cloudflare:workers";
 import { XCircle } from "lucide-react";
 import { redirect } from "react-router";
+import { getDB } from "~/.server/db";
+import {
+	acceptInvitation,
+	getInvitationByToken,
+	TeamMutationError,
+} from "~/.server/queries";
+import { requireUser } from "~/.server/session";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -8,14 +16,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { createDb } from "~/db/index.server";
-import { getEnv } from "~/server/context.server";
-import {
-	acceptInvitation,
-	getInvitationByToken,
-	TeamMutationError,
-} from "~/server/queries";
-import { requireUser } from "~/server/session.server";
 import type { Route } from "./+types/accept";
 
 /**
@@ -43,7 +43,7 @@ import type { Route } from "./+types/accept";
  */
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "Accept invitation — TekMemo Cloud" }];
+	return [{ title: "Accept invitation — Memo FS Cloud" }];
 }
 
 /** The terminal outcome the component renders (success redirects in the loader). */
@@ -61,13 +61,11 @@ export interface AcceptLoaderData {
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<AcceptLoaderData> {
-	const env = getEnv(context);
 	const url = new URL(request.url);
 	const rawToken = url.searchParams.get("token") ?? "";
-	const salt = env.TEKMEMO_API_KEY_SALT ?? "";
-	const db = createDb(env);
+	const salt = env.API_KEY_SALT ?? "";
+	const db = getDB();
 
 	// A missing/blank token renders not_found (no leak of whether an email is
 	// invited). Resolve the invite before requiring auth so a bad/expired token
@@ -88,7 +86,7 @@ export async function loader({
 
 	// Require auth. An unauthenticated viewer bounces to login with this URL as
 	// the redirect target, so they land back here after signing up/signing in.
-	const user = await requireUser(request, env);
+	const user = await requireUser(request);
 
 	// Anti-hijack: the signed-in email must match the invite email.
 	if (user.email.toLowerCase() !== invitation.email.toLowerCase()) {

@@ -1,7 +1,7 @@
+import type { OAuthProviderId } from "~/.server/oauth-providers";
 import { GithubMark, GoogleMark } from "~/components/site/brand-icons";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import type { OAuthProviderId } from "~/server/oauth-providers.server";
 
 /**
  * Shared OAuth provider buttons + "or" divider (SC4.1, A2). Both login and

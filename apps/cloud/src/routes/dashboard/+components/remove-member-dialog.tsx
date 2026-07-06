@@ -1,4 +1,5 @@
 import { useFetcher } from "react-router";
+import type { TeamMemberView } from "~/.server/queries";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -8,7 +9,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
-import type { TeamMemberView } from "~/server/queries";
 import type { TeamActionData } from "../team";
 
 /**

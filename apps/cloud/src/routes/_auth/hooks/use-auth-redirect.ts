@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router";
-// import { safeRelativeRedirect } from "~/server/redirect";
+import { safeRelativeRedirect } from "~/.server/redirect";
 
 /**
  * Get the `redirect` or `next` query param as a validated same-origin path.
@@ -11,13 +11,12 @@ import { useSearchParams } from "react-router";
  * (VULN-001). `safeRelativeRedirect` rejects anything not starting with a single
  * `/`, falling back to `/dashboard`.
  *
- * @returns A safe same-origin redirect route.
+ * @returns A safe same-origin redirect route (always defined; defaults to
+ *   `/dashboard` when the param is missing or unsafe).
  */
-export function useAuthRedirect() {
+export function useAuthRedirect(): string {
 	const [params] = useSearchParams();
-	return params.get("redirect") ?? params.get("next") ?? undefined;
-
-	// safeRelativeRedirect(
-	// params.get("redirect") ?? params.get("next") ?? undefined
-	// );
+	return safeRelativeRedirect(
+		params.get("redirect") ?? params.get("next") ?? undefined,
+	);
 }

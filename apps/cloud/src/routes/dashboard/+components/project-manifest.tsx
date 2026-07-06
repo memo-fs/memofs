@@ -1,3 +1,4 @@
+import type { CursorHistoryView, ProjectFileView } from "~/.server/queries";
 import {
 	Card,
 	CardContent,
@@ -5,8 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import type { CursorHistoryView, ProjectFileView } from "~/server/queries";
-import { formatBytes, formatRelative } from "~/utils/format";
+import { formatBytes, formatRelative } from "~/utils/misc";
 
 /**
  * Project detail body (SC3.2): the read-only file manifest + cursor history.

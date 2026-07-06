@@ -1,6 +1,4 @@
-import { redirect } from "react-router";
-import { getEnv } from "~/server/context.server";
-import { getSessionUser } from "~/server/session.server";
+import { getSessionUser, safeRedirect } from "~/.server/session";
 import type { Route } from "./+types/verify";
 
 /**
@@ -12,7 +10,7 @@ import type { Route } from "./+types/verify";
  * endpoint: authenticated users are bounced to the dashboard, everyone else to
  * login. It renders nothing of its own.
  */
-export async function loader({ request, context }: Route.LoaderArgs) {
-	const user = await getSessionUser(request, getEnv(context));
-	throw redirect(user ? "/dashboard" : "/login");
+export async function loader({ request }: Route.LoaderArgs) {
+	const user = await getSessionUser(request);
+	throw safeRedirect(user ? "/dashboard" : "/login");
 }

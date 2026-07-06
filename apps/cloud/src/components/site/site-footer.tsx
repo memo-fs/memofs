@@ -19,7 +19,7 @@ const COLS = [
 		links: [
 			{ label: "Use cases", to: "/use-cases" },
 			{ label: "Pricing", to: "/pricing" },
-			{ label: "OSS docs ↗", href: SITE_LINKS.docs },
+			{ label: "Documentation ↗", href: SITE_LINKS.docs },
 			{ label: "GitHub ↗", href: SITE_LINKS.github },
 		],
 	},

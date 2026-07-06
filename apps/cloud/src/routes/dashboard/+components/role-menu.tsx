@@ -1,5 +1,6 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useFetcher } from "react-router";
+import type { TeamMemberView } from "~/.server/queries";
 import { Button } from "~/components/ui/button";
 import {
 	DropdownMenu,
@@ -10,7 +11,6 @@ import {
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
-import type { TeamMemberView } from "~/server/queries";
 import type { TeamActionData } from "../team";
 
 /**

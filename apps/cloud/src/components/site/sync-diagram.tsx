@@ -2,7 +2,7 @@
  * Sync architecture diagram (Signal aesthetic).
  *
  * An inline SVG that visualizes the file-replica model from ADR 0002 / the
- * locked positioning: the local `.tekmemo/` engine (recall, graph, extraction)
+ * locked positioning: the local `.memofs/` engine (recall, graph, extraction)
  * on the left, the cloud file replica (content-addressed R2 blobs + manifest) on
  * the right, connected by the three-command sync protocol. The cloud node is
  * drawn deliberately "dumb" — just storage glyphs, no engine — to reinforce the
@@ -11,14 +11,14 @@
  * Pure-presentational, aria-hidden, scales to its container.
  */
 export function SyncDiagram({ className }: { className?: string }) {
-	const gid = "tekmemo-sync-grad";
+	const gid = "memofs-sync-grad";
 	return (
 		<svg
 			viewBox="0 0 720 280"
 			fill="none"
 			className={className}
 			role="img"
-			aria-label="The local TekMemo engine syncs .tekmemo files to the cloud file replica via three commands."
+			aria-label="The local Memo FS engine syncs .memofs files to the cloud file replica via three commands."
 		>
 			<defs>
 				<linearGradient
@@ -33,6 +33,15 @@ export function SyncDiagram({ className }: { className?: string }) {
 					<stop offset="0.5" stopColor="oklch(0.62 0.17 248)" />
 					<stop offset="1" stopColor="oklch(0.58 0.19 295)" />
 				</linearGradient>
+				<filter id="glow-blue" x="-20%" y="-20%" width="140%" height="140%">
+					<feDropShadow
+						dx="0"
+						dy="0"
+						stdDeviation="4"
+						floodColor="oklch(0.62 0.17 248)"
+						floodOpacity="0.4"
+					/>
+				</filter>
 			</defs>
 
 			{/* ── Local engine panel ─────────────────────────────────────────── */}
@@ -41,7 +50,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 				y="40"
 				width="240"
 				height="200"
-				rx="14"
+				rx="0"
 				stroke="oklch(1 0 0 / 0.10)"
 				strokeWidth="1"
 				fill="oklch(0.16 0.008 264 / 0.6)"
@@ -51,7 +60,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 				y="40"
 				width="240"
 				height="200"
-				rx="14"
+				rx="0"
 				stroke={`url(#${gid})`}
 				strokeWidth="1"
 				opacity="0.25"
@@ -82,7 +91,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 			<EngineBlock x={36} y={108} label="Recall" />
 			<EngineBlock x={136} y={108} label="Graph" />
 			<EngineBlock x={36} y={164} label="Extraction" />
-			<EngineBlock x={136} y={164} label=".tekmemo/" highlight />
+			<EngineBlock x={136} y={164} label=".memofs/" highlight />
 
 			{/* ── Cloud replica panel ────────────────────────────────────────── */}
 			<rect
@@ -90,7 +99,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 				y="40"
 				width="240"
 				height="200"
-				rx="14"
+				rx="0"
 				stroke="oklch(1 0 0 / 0.10)"
 				strokeWidth="1"
 				fill="oklch(0.16 0.008 264 / 0.6)"
@@ -100,7 +109,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 				y="40"
 				width="240"
 				height="200"
-				rx="14"
+				rx="0"
 				stroke={`url(#${gid})`}
 				strokeWidth="1"
 				opacity="0.25"
@@ -114,7 +123,7 @@ export function SyncDiagram({ className }: { className?: string }) {
 				fontSize="13"
 				fontWeight="600"
 			>
-				TekMemo Cloud
+				Memo FS Cloud
 			</text>
 			<text
 				x="584"
@@ -155,6 +164,8 @@ export function SyncDiagram({ className }: { className?: string }) {
 				stroke={`url(#${gid})`}
 				strokeWidth="2"
 				strokeDasharray="4 4"
+				className="animate-sync-dash"
+				filter="url(#glow-blue)"
 			/>
 			{/* arrowhead */}
 			<path d="M 454 140 L 446 135 L 446 145 Z" fill="oklch(0.62 0.17 248)" />
@@ -206,12 +217,13 @@ function EngineBlock({
 				y={y}
 				width="84"
 				height="40"
-				rx="8"
+				rx="0"
 				stroke={
 					highlight ? "oklch(0.62 0.17 248 / 0.5)" : "oklch(1 0 0 / 0.10)"
 				}
 				strokeWidth="1"
 				fill={highlight ? "oklch(0.62 0.17 248 / 0.08)" : "oklch(1 0 0 / 0.02)"}
+				filter={highlight ? "url(#glow-blue)" : undefined}
 			/>
 			<text
 				x={x + 42}
@@ -236,7 +248,7 @@ function Blob({ x, y }: { x: number; y: number }) {
 				y={y}
 				width="36"
 				height="28"
-				rx="6"
+				rx="0"
 				stroke="oklch(1 0 0 / 0.10)"
 				strokeWidth="1"
 				fill="oklch(1 0 0 / 0.02)"
@@ -246,7 +258,7 @@ function Blob({ x, y }: { x: number; y: number }) {
 				y={y + 8}
 				width="20"
 				height="3"
-				rx="1.5"
+				rx="0"
 				fill="oklch(0.62 0.17 248 / 0.5)"
 			/>
 			<rect
@@ -254,7 +266,7 @@ function Blob({ x, y }: { x: number; y: number }) {
 				y={y + 15}
 				width="14"
 				height="3"
-				rx="1.5"
+				rx="0"
 				fill="oklch(1 0 0 / 0.12)"
 			/>
 		</g>

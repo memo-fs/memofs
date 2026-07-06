@@ -7,7 +7,7 @@ import type { Route } from "./+types/terms";
  * Terms of service (SC2).
  *
  * Required for a paid product + Polar as Merchant of Record. Reflects the
- * actual service boundary: TekMemo Cloud is a file-replica + sync service, not
+ * actual service boundary: Memo FS Cloud is a file-replica + sync service, not
  * a compute or AI provider; the local-first engine is open-source and MIT
  * licensed; billing is handled by Polar. Living legal text — review with
  * counsel before launch.
@@ -18,13 +18,13 @@ const SECTIONS = [
 		h: "1. The service",
 		body: (
 			<p>
-				TekMemo Cloud is a{" "}
+				Memo FS Cloud is a{" "}
 				<strong className="text-foreground">
 					file-replica and sync service
 				</strong>
 				. It stores byte-for-byte copies of your{" "}
 				<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-					.tekmemo/
+					.memofs/
 				</code>{" "}
 				files and mirrors them across your devices. It does not run the memory
 				engine — recall, graph, and extraction execute locally in the
@@ -36,7 +36,7 @@ const SECTIONS = [
 		h: "2. The open-source runtime",
 		body: (
 			<p>
-				The TekMemo runtime (the local engine) is open-source software licensed
+				The Memo FS runtime (the local engine) is open-source software licensed
 				under the MIT License, provided "as is" without warranty. These terms
 				govern your use of the hosted Cloud service only; your use of the
 				runtime is governed by its MIT license.
@@ -132,7 +132,7 @@ const SECTIONS = [
 		h: "10. Governing law",
 		body: (
 			<p>
-				These terms and your use of TekMemo Cloud are governed by the laws of
+				These terms and your use of Memo FS Cloud are governed by the laws of
 				the jurisdiction in which{" "}
 				<strong className="text-foreground">TekBreed</strong> is established.
 				The specific governing law and venue will be confirmed with counsel
@@ -161,11 +161,11 @@ const SECTIONS = [
 
 export function meta(_: Route.MetaArgs) {
 	return [
-		{ title: "Terms of Service — TekMemo Cloud" },
+		{ title: "Terms of Service — Memo FS Cloud" },
 		{
 			name: "description",
 			content:
-				"TekMemo Cloud terms of service. A file-replica sync service; the local-first runtime is MIT-licensed open source.",
+				"Memo FS Cloud terms of service. A file-replica sync service; the local-first runtime is MIT-licensed open source.",
 		},
 	];
 }
@@ -227,7 +227,7 @@ export default function Terms(_props: Route.ComponentProps) {
 			</div>
 
 			<p className="mt-8 max-w-3xl border-t border-border pt-6 text-xs text-muted-foreground mx-auto">
-				Living legal text reflecting the shipped TekMemo Cloud service as of
+				Living legal text reflecting the shipped Memo FS Cloud service as of
 				June 2026. Review with counsel before any commercial launch.
 			</p>
 		</Section>

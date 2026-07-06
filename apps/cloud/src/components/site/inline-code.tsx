@@ -3,7 +3,7 @@ import { cn } from "~/lib/utils";
 
 /**
  * InlineCode — the standard inline `<code>` chip used across the public pages:
- * a muted rounded background over a monospace token (e.g. `.tekmemo/`).
+ * a muted rounded background over a monospace token (e.g. `.memofs/`).
  *
  * One shared component so the treatment never drifts between sections. Pass a
  * smaller `size="sm"` variant inside dense copy where the default looks heavy.

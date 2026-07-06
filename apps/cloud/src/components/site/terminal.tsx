@@ -24,7 +24,7 @@ function Dot({ className }: { className?: string }) {
 }
 
 export function TerminalWindow({
-	title = "tekmemo — zsh",
+	title = "memofs — zsh",
 	commands,
 	className,
 	animated = false,

@@ -14,16 +14,16 @@ const USE_CASES = [
 	{
 		icon: Server,
 		title: "CI/CD pipelines",
-		desc: "Give your CI runner the same TekMemo context as your local machine. Pull before every run.",
+		desc: "Give your CI runner the same Memo FS context as your local machine. Pull before every run.",
 	},
 	{
 		icon: Boxes,
 		title: "Connector ingestion",
-		desc: "Centralized ingestion from GitHub, Notion, and Linear — all flowing into one canonical .tekmemo/ replica.",
+		desc: "Centralized ingestion from GitHub, Notion, and Linear — all flowing into one canonical .memofs/ replica.",
 	},
 ];
 
-/** "Who TekMemo Cloud is for" — three summary cards. Deep dives live on /use-cases. */
+/** "Who Memo FS Cloud is for" — three summary cards. Deep dives live on /use-cases. */
 export function UseCasesSection() {
 	return (
 		<Section className="py-20">
@@ -31,7 +31,7 @@ export function UseCasesSection() {
 				<SectionHeading
 					align="center"
 					eyebrow="Use cases"
-					title={<>Who TekMemo Cloud is for</>}
+					title={<>Who Memo FS Cloud is for</>}
 				/>
 			</div>
 			<div className="grid gap-5 sm:grid-cols-3">

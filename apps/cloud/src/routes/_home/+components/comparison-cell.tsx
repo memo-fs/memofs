@@ -4,7 +4,7 @@ import type { Cell } from "../+utils/landing-content";
 
 /**
  * Renders one comparison-table cell as a lucide icon (no emoji): a check for
- * "yes", a minus for "partial", and an x for "no". `highlight` tints the TekMemo
+ * "yes", a minus for "partial", and an x for "no". `highlight` tints the Memo FS
  * column with the primary accent; the other columns stay muted.
  */
 export function StatusCell({

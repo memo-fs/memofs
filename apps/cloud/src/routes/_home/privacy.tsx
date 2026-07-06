@@ -21,11 +21,11 @@ const SECTIONS = [
 		h: "1. The short version",
 		body: (
 			<p>
-				TekMemo Cloud is a{" "}
+				Memo FS Cloud is a{" "}
 				<strong className="text-foreground">file replica</strong>. When you
 				sync, we receive byte-for-byte copies of your{" "}
 				<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-					.tekmemo/
+					.memofs/
 				</code>{" "}
 				files and store them so your other devices can pull them. We never
 				parse, embed, index, or run recall on your memory — that engine runs
@@ -41,7 +41,7 @@ const SECTIONS = [
 				<strong className="text-foreground">File blobs</strong> — the raw bytes
 				of your synced{" "}
 				<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
-					.tekmemo/
+					.memofs/
 				</code>{" "}
 				files, stored content-addressed in Cloudflare R2 under their sha256
 				hash.
@@ -137,7 +137,7 @@ const SECTIONS = [
 		h: "9. Contact",
 		body: (
 			<p>
-				TekMemo Cloud is operated by{" "}
+				Memo FS Cloud is operated by{" "}
 				<strong className="text-foreground">TekBreed</strong>, the data
 				controller. For questions about this policy, or to access, correct, or
 				delete your personal data, email{" "}
@@ -155,11 +155,11 @@ const SECTIONS = [
 
 export function meta(_: Route.MetaArgs) {
 	return [
-		{ title: "Privacy Policy — TekMemo Cloud" },
+		{ title: "Privacy Policy — Memo FS Cloud" },
 		{
 			name: "description",
 			content:
-				"TekMemo Cloud privacy policy. The cloud stores file bytes and metadata only — it never parses or indexes your memory.",
+				"Memo FS Cloud privacy policy. The cloud stores file bytes and metadata only — it never parses or indexes your memory.",
 		},
 	];
 }
@@ -221,7 +221,7 @@ export default function Privacy(_props: Route.ComponentProps) {
 			</div>
 
 			<p className="mt-8 max-w-2xl border-t border-border pt-6 text-xs text-muted-foreground mx-auto">
-				This policy reflects the shipped TekMemo Cloud architecture as of June
+				This policy reflects the shipped Memo FS Cloud architecture as of June
 				2026. It is living legal text — review with counsel before any
 				commercial launch.
 			</p>

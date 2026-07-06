@@ -1,5 +1,6 @@
 import {
 	ArrowUpRight,
+	Brain,
 	CheckCircle2,
 	Copy,
 	HardDrive,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
+import type { AccountView, ProjectSummary } from "~/.server/queries";
 import {
 	Card,
 	CardContent,
@@ -17,15 +19,13 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
-import type { AccountView, ProjectSummary } from "~/server/queries";
-import { formatBytes, formatRelative } from "~/utils/format";
+import { cn } from "~/lib/utils";
+import { formatBytes, formatRelative } from "~/utils/misc";
 
 /**
- * The four SC3.1 overview cards, project-scoped. Each maps to a real data
+ * The five SC3.1 overview cards, project-scoped. Each maps to a real data
  * source: sync status, storage usage (entitlement gate visible), connectors
- * health (honest empty state — there is no `connectors` table; connectors run
- * locally per ADR Q1, so the cloud always reports 0 of N), and the copyable
- * quick-start CLI command.
+ * health, hosted memory runtime, and the copyable quick-start CLI command.
  *
  * Storage usage is account-wide (entitlement cap), surfaced from the layout
  * loader's `usage`/`account` — the project's own storage is shown in the sync
@@ -45,7 +45,7 @@ export function OverviewCards({
 		maxStorage > 0 ? (usage.storageBytes / maxStorage) * 100 : 0;
 
 	return (
-		<div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		<div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
 			<SyncStatusCard project={project} />
 			<StorageCard
 				usedBytes={usage.storageBytes}
@@ -55,6 +55,7 @@ export function OverviewCards({
 				plan={account?.plan ?? "free"}
 			/>
 			<ConnectorsCard max={account?.maxConnectors ?? 0} />
+			<HostedMemoryCard plan={account?.plan ?? "free"} />
 			<QuickStartCard projectName={project?.name ?? "your-project"} />
 		</div>
 	);
@@ -158,7 +159,7 @@ function ConnectorsCard({ max }: { max: number }) {
 
 function QuickStartCard({ projectName }: { projectName: string }) {
 	const [copied, setCopied] = useState(false);
-	const command = `tekmemo pull --project ${projectName}`;
+	const command = `memofs pull --project ${projectName}`;
 
 	const copy = () => {
 		navigator.clipboard.writeText(command).catch(() => {});
@@ -194,6 +195,38 @@ function QuickStartCard({ projectName }: { projectName: string }) {
 			>
 				Manage API keys →
 			</Link>
+		</CardShell>
+	);
+}
+
+function HostedMemoryCard({ plan }: { plan: string }) {
+	const isFree = plan === "free";
+	return (
+		<CardShell label="Hosted memory" icon={Brain}>
+			<div className="flex flex-col gap-1.5">
+				<div className="flex items-center gap-1.5">
+					<span
+						className={cn(
+							"size-1.5 rounded-none",
+							isFree ? "bg-yellow-500" : "bg-green-500",
+						)}
+					/>
+					<span className="font-mono text-[10px] text-foreground font-medium uppercase tracking-wider">
+						{isFree ? "Deterministic Floor" : "Frontier Active"}
+					</span>
+				</div>
+				<span className="text-[10px] text-muted-foreground leading-normal">
+					{isFree
+						? "1 nightly consolidation run. Pre-warming inactive."
+						: `${plan === "teams" ? "Unlimited" : "24"} consolidation runs/day. Pre-warming active.`}
+				</span>
+				<Link
+					to="/dashboard/memory"
+					className="mt-1 inline-block text-[10px] text-primary hover:underline"
+				>
+					View runtime →
+				</Link>
+			</div>
 		</CardShell>
 	);
 }

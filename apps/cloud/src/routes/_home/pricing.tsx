@@ -37,7 +37,7 @@ const FAQS = [
 	},
 	{
 		q: "Who handles billing?",
-		a: "Polar acts as our Merchant of Record and handles checkout, taxes, invoices, and cancellation. You'll see 'Polar · TekMemo' on your statement.",
+		a: "Polar acts as our Merchant of Record and handles checkout, taxes, invoices, and cancellation. You'll see 'Polar · Memo FS' on your statement.",
 	},
 	{
 		q: "Is there an annual discount?",
@@ -47,7 +47,7 @@ const FAQS = [
 
 export function meta(_: Route.MetaArgs) {
 	return [
-		{ title: "Pricing — TekMemo Cloud" },
+		{ title: "Pricing — Memo FS Cloud" },
 		{
 			name: "description",
 			content:
@@ -87,8 +87,8 @@ function PricingHeader() {
 				Simple, transparent pricing
 			</h1>
 			<p className="mx-auto max-w-xl text-base leading-relaxed text-muted-foreground">
-				Pay for storage and the features you use. The Teams tier is billed per
-				active seat.
+				Launching soon — lock in your rate by joining the waitlist. The Teams
+				tier is billed per active seat.
 			</p>
 		</header>
 	);
@@ -187,8 +187,8 @@ function TeamsNotify() {
 						Get notified when Teams launches
 					</CardTitle>
 					<CardDescription className="text-sm">
-						Teams is coming. Leave your email and we'll notify you when it goes
-						live — list price locked at{" "}
+						Teams is coming. Join the waitlist and we'll notify you when it
+						goes live — list price locked at{" "}
 						{teams ? `${teams.price}${teams.period}` : "$24/seat/mo"}.
 					</CardDescription>
 				</CardHeader>

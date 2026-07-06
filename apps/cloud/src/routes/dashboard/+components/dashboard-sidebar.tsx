@@ -1,4 +1,5 @@
 import {
+	Brain,
 	ChevronDown,
 	CreditCard,
 	FolderOpen,
@@ -10,7 +11,9 @@ import {
 	Settings,
 	Users,
 } from "lucide-react";
+import { useMemo } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
+import type { AccountView, ProjectSummary } from "~/.server/queries";
 import { Logo } from "~/components/site/logo";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
@@ -21,23 +24,7 @@ import {
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
-import type { ProjectSummary } from "~/server/queries";
-import { userInitials } from "~/utils/format";
-
-const NAV_ITEMS = [
-	{ to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
-	{
-		to: "/dashboard/projects",
-		label: "Projects",
-		icon: FolderOpen,
-		end: false,
-	},
-	{ to: "/dashboard/connectors", label: "Connectors", icon: Plug, end: false },
-	{ to: "/dashboard/team", label: "Team", icon: Users, end: false },
-	{ to: "/dashboard/api-keys", label: "API Keys", icon: Key, end: false },
-	{ to: "/dashboard/billing", label: "Billing", icon: CreditCard, end: false },
-	{ to: "/dashboard/settings", label: "Settings", icon: Settings, end: false },
-] as const;
+import { userInitials } from "~/utils/misc";
 
 /** Minimal user shape the sidebar needs (a slice of the loader's user). */
 interface SidebarUser {
@@ -56,14 +43,51 @@ export function DashboardSidebar({
 	projects,
 	selectedProject,
 	onSelectProject,
+	account,
 }: {
 	user: SidebarUser;
 	projects: ProjectSummary[];
 	selectedProject: ProjectSummary | null;
 	onSelectProject: (project: ProjectSummary) => void;
+	account: AccountView | null;
 }) {
 	const navigate = useNavigate();
 	const initials = userInitials(user.name);
+
+	const items = useMemo(() => {
+		return [
+			{ to: "/dashboard", label: "Overview", icon: LayoutDashboard, end: true },
+			{
+				to: "/dashboard/projects",
+				label: "Projects",
+				icon: FolderOpen,
+				end: false,
+			},
+			{ to: "/dashboard/memory", label: "Memory", icon: Brain, end: false },
+			{
+				to: "/dashboard/connectors",
+				label: "Connectors",
+				icon: Plug,
+				end: false,
+			},
+			...(account?.plan === "teams"
+				? [{ to: "/dashboard/team", label: "Team", icon: Users, end: false }]
+				: []),
+			{ to: "/dashboard/api-keys", label: "API Keys", icon: Key, end: false },
+			{
+				to: "/dashboard/billing",
+				label: "Billing",
+				icon: CreditCard,
+				end: false,
+			},
+			{
+				to: "/dashboard/settings",
+				label: "Settings",
+				icon: Settings,
+				end: false,
+			},
+		];
+	}, [account]);
 
 	return (
 		<aside className="flex h-full w-56 shrink-0 flex-col border-r bg-card">
@@ -80,14 +104,14 @@ export function DashboardSidebar({
 			/>
 
 			<nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
-				{NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+				{items.map(({ to, label, icon: Icon, end }) => (
 					<NavLink
 						key={to}
 						to={to}
 						end={end}
 						className={({ isActive }) =>
 							cn(
-								"flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors",
+								"flex items-center gap-2.5 rounded-none px-2 py-1.5 text-sm transition-colors",
 								{
 									"bg-primary/10 font-medium text-primary": isActive,
 									"text-muted-foreground hover:bg-muted/50 hover:text-foreground":

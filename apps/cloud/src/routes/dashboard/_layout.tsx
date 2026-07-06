@@ -1,10 +1,10 @@
 import { Menu, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Outlet } from "react-router";
-import { getEnv } from "~/server/context.server";
-import type { AccountView, ProjectSummary } from "~/server/queries";
-import { getAccountUsage, listProjectsForAccount } from "~/server/queries";
-import { requireUserWithAccount } from "~/server/session.server";
+import { getDB } from "~/.server/db";
+import type { AccountView, ProjectSummary } from "~/.server/queries";
+import { getAccountUsage, listProjectsForAccount } from "~/.server/queries";
+import { requireUserWithAccount } from "~/.server/session";
 import { DashboardSidebar } from "./+components/dashboard-sidebar";
 import type { Route } from "./+types/_layout";
 
@@ -34,7 +34,12 @@ export interface DashboardLoaderData {
 	};
 	projects: ProjectSummary[];
 	account: AccountView | null;
-	usage: { storageBytes: number; connectorsUsed: number };
+	usage: {
+		storageBytes: number;
+		connectorsUsed: number;
+		consolidationUsedToday: number;
+		preWarmUsedToday: number;
+	};
 }
 
 /** Typed shape passed via `<Outlet context={…} />` to nested dashboard routes. */
@@ -43,17 +48,19 @@ export interface DashboardOutletContext {
 	selectedProject: ProjectSummary | null;
 	setSelectedProject: (project: ProjectSummary) => void;
 	account: AccountView | null;
-	usage: { storageBytes: number; connectorsUsed: number };
+	usage: {
+		storageBytes: number;
+		connectorsUsed: number;
+		consolidationUsedToday: number;
+		preWarmUsedToday: number;
+	};
 }
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<DashboardLoaderData> {
-	const { user, db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { user, account } = await requireUserWithAccount(request);
+	const db = getDB();
 
 	// Provisioning is best-effort: an account may be missing only if signup
 	// provisioning raced. Degrade gracefully (null account → zeroed usage) rather
@@ -64,7 +71,12 @@ export async function loader({
 			: Promise.resolve([] as ProjectSummary[]),
 		account
 			? getAccountUsage(db, account.id)
-			: Promise.resolve({ storageBytes: 0, connectorsUsed: 0 }),
+			: Promise.resolve({
+					storageBytes: 0,
+					connectorsUsed: 0,
+					consolidationUsedToday: 0,
+					preWarmUsedToday: 0,
+				}),
 	]);
 
 	return {
@@ -110,6 +122,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 					projects={projects}
 					selectedProject={current}
 					onSelectProject={setSelectedProject}
+					account={account}
 				/>
 			</div>
 
@@ -130,6 +143,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 								setSelectedProject(p);
 								setSidebarOpen(false);
 							}}
+							account={account}
 						/>
 					</div>
 				</div>
@@ -144,7 +158,7 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 					>
 						<Menu className="h-5 w-5" />
 					</button>
-					<span className="text-sm font-semibold">TekMemo Cloud</span>
+					<span className="text-sm font-semibold">Memo FS Cloud</span>
 					{sidebarOpen && (
 						<button
 							type="button"

@@ -1,6 +1,15 @@
 import { AlertTriangle, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import { env } from "cloudflare:workers";
+import { getDB } from "~/.server/db";
+import type { ApiKeyView } from "~/.server/queries";
+import {
+	createApiKey,
+	listApiKeysForAccount,
+	revokeApiKey,
+} from "~/.server/queries";
+import { requireUserWithAccount } from "~/.server/session";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
@@ -12,15 +21,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
-import { getEnv } from "~/server/context.server";
-import type { ApiKeyView } from "~/server/queries";
-import {
-	createApiKey,
-	listApiKeysForAccount,
-	revokeApiKey,
-} from "~/server/queries";
-import { requireUserWithAccount } from "~/server/session.server";
-import { formatDate } from "~/utils/format";
+import { formatDate } from "~/utils/misc";
 import { CreateKeyDialog } from "./+components/create-key-dialog";
 import { PageHeader } from "./+components/page-header";
 import { RevealKeyDialog } from "./+components/reveal-key-dialog";
@@ -40,7 +41,7 @@ import type { Route } from "./+types/api-keys";
  */
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "API Keys — TekMemo Cloud" }];
+	return [{ title: "API Keys — Memo FS Cloud" }];
 }
 
 /** Server data: the account's API keys, newest first. */
@@ -56,12 +57,9 @@ export type ApiKeyActionData =
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<ApiKeysLoaderData> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const keys = account ? await listApiKeysForAccount(db, account.id) : [];
 	return { keys };
 }
@@ -74,10 +72,9 @@ export async function loader({
  */
 export async function action({
 	request,
-	context,
 }: Route.ActionArgs): Promise<ApiKeyActionData> {
-	const env = getEnv(context);
-	const { db, account } = await requireUserWithAccount(request, env);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const form = await request.formData();
 	const intent = String(form.get("intent") ?? "");
 
@@ -90,7 +87,7 @@ export async function action({
 		const { rawKey, row } = await createApiKey(db, {
 			accountId: account.id,
 			label,
-			salt: env.TEKMEMO_API_KEY_SALT ?? "",
+			salt: env.API_KEY_SALT ?? "",
 		});
 		return { intent: "create", rawKey, row };
 	}
@@ -162,7 +159,7 @@ export default function ApiKeysPage({ loaderData }: Route.ComponentProps) {
 							</p>
 							<p className="max-w-sm text-xs text-muted-foreground">
 								Create a key to authenticate{" "}
-								<code className="font-mono text-[10px]">tekmemo push</code> from
+								<code className="font-mono text-[10px]">memofs push</code> from
 								your machines and CI.
 							</p>
 						</div>

@@ -1,6 +1,19 @@
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
+import { getDB } from "~/.server/db";
+import type {
+	CursorHistoryView,
+	ProjectFileView,
+	ProjectSummary,
+} from "~/.server/queries";
+import {
+	deleteProject,
+	getProjectForAccount,
+	listProjectCursorHistory,
+	listProjectFiles,
+} from "~/.server/queries";
+import { requireUserWithAccount } from "~/.server/session";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -10,20 +23,7 @@ import {
 	CardHeader,
 } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-import { getEnv } from "~/server/context.server";
-import type {
-	CursorHistoryView,
-	ProjectFileView,
-	ProjectSummary,
-} from "~/server/queries";
-import {
-	deleteProject,
-	getProjectForAccount,
-	listProjectCursorHistory,
-	listProjectFiles,
-} from "~/server/queries";
-import { requireUserWithAccount } from "~/server/session.server";
-import { formatBytes, formatRelative } from "~/utils/format";
+import { formatBytes, formatRelative } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { ProjectManifest } from "./+components/project-manifest";
 import type { Route } from "./+types/projects.$projectId";
@@ -40,7 +40,7 @@ import type { Route } from "./+types/projects.$projectId";
  */
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "Project Details — TekMemo Cloud" }];
+	return [{ title: "Project Details — Memo FS Cloud" }];
 }
 
 /** Server data for the project detail page. */
@@ -52,13 +52,10 @@ export interface ProjectDetailLoaderData {
 
 export async function loader({
 	request,
-	context,
 	params,
 }: Route.LoaderArgs): Promise<ProjectDetailLoaderData> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const projectId = params.projectId ?? "";
 
 	// Ownership gate: a project id from the URL that isn't owned by the signed-in
@@ -86,13 +83,10 @@ export async function loader({
  */
 export async function action({
 	request,
-	context,
 	params,
 }: Route.ActionArgs): Promise<{ ok: true }> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 	const projectId = params.projectId ?? "";
 	if (account) {
 		await deleteProject(db, account.id, projectId);

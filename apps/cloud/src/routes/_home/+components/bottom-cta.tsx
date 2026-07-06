@@ -6,37 +6,45 @@ import { Button } from "~/components/ui/button";
 import { SITE_LINKS } from "~/lib/site";
 
 const TRUST = [
-	{ icon: Check, label: "Free forever tier" },
-	{ icon: Check, label: "No credit card required" },
+	{ icon: Check, label: "Early access perks" },
 	{ icon: Shield, label: "Open-source engine" },
 	{ icon: RefreshCw, label: "Cancel anytime" },
+	{ icon: GitBranch, label: "Local-first by design" },
 ];
 
 /** Final conversion section — the glass CTA card plus trust badges. */
 export function BottomCta() {
 	return (
 		<Section className="py-24">
-			<div className="relative overflow-hidden rounded-2xl border border-border bg-card/40 px-6 py-16 text-center glass">
+			<div className="relative overflow-hidden border border-border bg-card/40 px-6 py-16 text-center">
 				<div className="relative">
-					<div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
+					<div className="w-12 h-12 bg-primary/5 border border-primary/10 flex items-center justify-center mx-auto mb-6">
 						<GitBranch className="w-6 h-6 text-primary" />
 					</div>
 					<h2 className="font-heading font-bold tracking-[-0.03em] leading-[1.02] mx-auto max-w-xl text-balance text-3xl text-foreground sm:text-4xl">
-						Ready to sync?
+						Be first to sync.
 					</h2>
 					<p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-						Free tier. No credit card. Three commands and your{" "}
-						<InlineCode className="text-xs">.tekmemo/</InlineCode> is
-						everywhere.
+						Early access, open-source at the core. Reserve your spot and get
+						your{" "}
+						<InlineCode className="text-xs">.memofs/</InlineCode> synced the
+						day we launch.
 					</p>
 					<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+						{/* Get started — hidden while in waitlist-only mode */}
+						{/* <Button asChild size="lg" className="h-10 gap-2 rounded-none px-6 text-sm">
+							<Link to="/signup">
+								Get started free
+								<ArrowRight className="size-4" />
+							</Link>
+						</Button> */}
 						<Button
 							asChild
 							size="lg"
-							className="h-10 gap-2 rounded-md px-6 text-sm"
+							className="h-10 gap-2 rounded-none px-6 text-sm"
 						>
-							<Link to="/signup">
-								Get started free
+							<Link to="/waitlist">
+								Join the waitlist
 								<ArrowRight className="size-4" />
 							</Link>
 						</Button>
@@ -44,7 +52,7 @@ export function BottomCta() {
 							asChild
 							size="lg"
 							variant="outline"
-							className="h-10 rounded-md px-5 text-sm"
+							className="h-10 rounded-none px-5 text-sm"
 						>
 							<a href={SITE_LINKS.docs} rel="noreferrer" target="_blank">
 								Read the docs

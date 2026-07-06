@@ -1,5 +1,5 @@
 /**
- * Pricing plans — the single source of truth for TekMemo Cloud pricing.
+ * Pricing plans — the single source of truth for Memo FS Cloud pricing.
  *
  * Both the landing page (`_home/index.tsx` → `+components/pricing-section.tsx`)
  * and the dedicated pricing page (`_home/pricing.tsx`) derive their views from
@@ -7,15 +7,18 @@
  * caps, or feature copy anywhere else — edit them here.
  *
  * The numeric storage/connector caps are NOT re-typed here: they come from
- * `PLAN_ENTITLEMENTS` (`server/entitlements.ts`), the one source the data path
+ * `PLAN_ENTITLEMENTS` (`lib/entitlements.ts`), the one source the data path
  * (provisioning, Polar webhook) and this catalog both read — so marketing copy
  * and the enforced limits can never drift (AGENTS.md DRY/SSOT).
  *
  * Reference: docs/architecture/decisions.md (pricing tiers).
  */
 
-import type { PlanTier } from "~/db/schema";
-import { type EntitlementCaps, PLAN_ENTITLEMENTS } from "~/server/entitlements";
+import {
+	type EntitlementCaps,
+	PLAN_ENTITLEMENTS,
+} from "~/lib/entitlements";
+import type { PlanTier } from "~/.server/db/schema";
 
 export type PlanFeature = { text: string; included: boolean };
 
@@ -57,7 +60,7 @@ export const PLANS: Plan[] = [
 		price: "$0",
 		period: "forever",
 		desc: "For individual developers getting started.",
-		cta: { label: "Get started", href: "/signup" },
+		cta: { label: "Join waitlist", href: "/waitlist" },
 		highlight: false,
 		soon: false,
 		features: [
@@ -81,7 +84,7 @@ export const PLANS: Plan[] = [
 		price: "$9",
 		period: "/mo",
 		desc: "For developers who live in the terminal and push often.",
-		cta: { label: "Upgrade to Pro", href: "/signup" },
+		cta: { label: "Join waitlist", href: "/waitlist" },
 		highlight: true,
 		soon: false,
 		features: [
@@ -103,11 +106,8 @@ export const PLANS: Plan[] = [
 	{
 		name: "Teams",
 		price: "$24",
-		// Per-seat billing is locked in ADR 0006 (Q9): "$24/seat/mo".
-		// Implementation (seats, shared workspace, SCIM) is deferred until Teams
-		// ships; the public copy must still state the per-seat model honestly.
 		period: "/seat/mo",
-		desc: "For teams sharing a canonical .tekmemo/ across all members.",
+		desc: "For teams sharing a canonical .memofs/ across all members.",
 		cta: { label: "Coming soon", href: "#teams-notify" },
 		highlight: false,
 		soon: true,

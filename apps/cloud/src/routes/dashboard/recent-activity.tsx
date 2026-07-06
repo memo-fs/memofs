@@ -1,11 +1,23 @@
-import { getEnv } from "~/server/context.server";
-import { listProjectsForAccount, recentSyncActivity } from "~/server/queries";
-import { requireUserWithAccount } from "~/server/session.server";
+import { getDB } from "~/.server/db";
+import {
+	listProjectsForAccount,
+	recentMemoryActivity,
+	recentSyncActivity,
+} from "~/.server/queries";
+import { requireUserWithAccount } from "~/.server/session";
 import type { Route } from "./+types/recent-activity";
 
 /**
- * Recent-activity resource route — the "last N sync cursors" feed for the
- * overview, project-scoped.
+ * Recent-activity resource route — the project-scoped activity feed for the
+ * overview, merging the two event streams the cloud produces:
+ *   - **Sync activity** (`recentSyncActivity`): byte-level replica commits —
+ *     "your files synced", keyed off `sync_cursors`.
+ *   - **Memory activity** (`recentMemoryActivity`): semantic runtime events —
+ *     "consolidation retired 3 duplicate nodes", keyed off `memory_events`
+ *     (SC10). The hosted-runtime audit trail; absent on sync-only v1 projects.
+ *
+ * Both are project-scoped and returned in one merged, newest-first list so the
+ * overview shows the full picture of what's happening to a project.
  *
  * Why a resource route + `fetcher.load` instead of a nested loader: the project
  * selection lives in client state (the sidebar switches it without navigating),
@@ -22,12 +34,9 @@ import type { Route } from "./+types/recent-activity";
 
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<Response> {
-	const { db, account } = await requireUserWithAccount(
-		request,
-		getEnv(context),
-	);
+	const { account } = await requireUserWithAccount(request);
+	const db = getDB();
 
 	const url = new URL(request.url);
 	const projectId = url.searchParams.get("projectId");
@@ -45,6 +54,9 @@ export async function loader({
 		return Response.json({ activity: [] });
 	}
 
-	const activity = await recentSyncActivity(db, projectId, 3);
-	return Response.json({ activity });
+	const [syncActivity, memoryActivity] = await Promise.all([
+		recentSyncActivity(db, projectId, 3),
+		recentMemoryActivity(db, projectId, 3),
+	]);
+	return Response.json({ activity: { syncActivity, memoryActivity } });
 }

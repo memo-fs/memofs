@@ -1,5 +1,10 @@
 import { Loader2 } from "lucide-react";
 import { data, useFetcher } from "react-router";
+import { getCtx, getEnv } from "~/.server/context";
+import { hasMxRecord } from "~/.server/mx-check";
+import { enabledOAuthProviders } from "~/.server/oauth-providers";
+import { consumeMagicLinkToken, rateLimitMessage } from "~/.server/rate-limit";
+import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
 import { Button } from "~/components/ui/button";
 import {
 	Card,
@@ -10,18 +15,6 @@ import {
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { createDb } from "~/db/index.server";
-import { getCtx, getEnv } from "~/server/context.server";
-import { hasMxRecord } from "~/server/mx-check.server";
-import { enabledOAuthProviders } from "~/server/oauth-providers.server";
-import {
-	consumeMagicLinkToken,
-	rateLimitMessage,
-} from "~/server/rate-limit.server";
-import {
-	createAuthFromEnv,
-	safeRelativeRedirect,
-} from "~/server/session.server";
 import {
 	AuthSwitchLink,
 	EmailField,
@@ -41,8 +34,8 @@ import { useAuthRedirect } from "./hooks/use-auth-redirect";
 
 export function meta() {
 	return [
-		{ title: "Sign up — TekMemo Cloud" },
-		{ name: "description", content: "Create your free TekMemo Cloud account" },
+		{ title: "Sign up — Memo FS Cloud" },
+		{ name: "description", content: "Create your free Memo FS Cloud account" },
 	];
 }
 
@@ -51,7 +44,7 @@ export function meta() {
  * render iff `createAuth` will accept them (A2). No DB hit — pure env check.
  */
 export async function loader({ context }: Route.LoaderArgs) {
-	return { providers: enabledOAuthProviders(getEnv(context)) };
+	return { providers: enabledOAuthProviders() };
 }
 
 /**
@@ -77,12 +70,10 @@ export async function action({ request, context }: Route.ActionArgs) {
 		);
 	}
 
-	const env = getEnv(context);
-
 	// Rate-limit BEFORE any DB/DoH work so a flood never reaches Plunk or the
 	// DNS resolver. 429-style outcome surfaces the same as a validation error
 	// (inline, no navigation) — the message tells the user when to retry.
-	const limited = await consumeMagicLinkToken(env, request, getCtx(context));
+	const limited = await consumeMagicLinkToken(request, getCtx(context));
 	const limitedMessage = rateLimitMessage(limited);
 	if (limitedMessage) {
 		return data({ ok: false, error: limitedMessage.error }, { status: 429 });
@@ -110,8 +101,7 @@ export async function action({ request, context }: Route.ActionArgs) {
 		);
 	}
 
-	const db = createDb(env);
-	const auth = createAuthFromEnv(env, db);
+	const auth = createAuthFromEnv(getCtx(context).waitUntil);
 
 	await auth.api.signInMagicLink({
 		body: { email, name, callbackURL },

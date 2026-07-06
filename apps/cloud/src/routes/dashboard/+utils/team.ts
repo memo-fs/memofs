@@ -8,7 +8,7 @@
  * selected team from the request URL.
  *
  * The token format is `tmi_<32 random base64url bytes>` — the `tmi_` prefix
- * (tekmemo-invite) mirrors the API-key `tm_` convention so tokens are
+ * (memofs-invite) mirrors the API-key `tm_` convention so tokens are
  * recognizable in logs/links without revealing their purpose to a casual
  * observer. The raw token is hashed via the SSOT `hashToken` before persisting
  * (see `queries/teams.ts`); it appears only in the email link.
@@ -16,8 +16,8 @@
  * @see {@link ../../../server/queries/teams} — the query layer this wraps.
  */
 
-import type { TeamMutationErrorCode } from "~/server/queries";
-import { hashToken } from "~/server/queries";
+import type { TeamMutationErrorCode } from "~/.server/queries";
+import { hashToken } from "~/.server/queries";
 
 /** The number of random bytes (base64url-encoded) after the prefix. */
 const TOKEN_RANDOM_BYTES = 32;

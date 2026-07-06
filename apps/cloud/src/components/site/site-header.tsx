@@ -12,6 +12,9 @@ import { Logo } from "./logo";
  *
  * Shared chrome for the marketing + legal pages. Responsive drawer navigation
  * on mobile screens, sticky glass header on desktops, and clean brand actions.
+ *
+ * NOTE: Login and "Get started" buttons are commented out while the app is in
+ * waitlist-only mode. Re-enable them when public sign-ups open.
  */
 
 const NAV = [
@@ -29,7 +32,7 @@ export function SiteHeader() {
 				<div className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-6 py-1.5 text-center">
 					<span className="size-1.5  animate-pulse" aria-hidden />
 					<span className="font-mono text-xs text-muted-foreground">
-						TekMemo Cloud sync is live —{" "}
+						Memo FS Cloud sync is live —{" "}
 						<Link
 							to="/signup"
 							className="text-foreground underline-offset-4 hover:underline"
@@ -81,7 +84,6 @@ export function SiteHeader() {
 						</a>
 						<a
 							href={SITE_LINKS.github}
-							// className="mt-4 inline-flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
 							rel="noreferrer"
 							target="_blank"
 							aria-label="GitHub"
@@ -89,19 +91,27 @@ export function SiteHeader() {
 							<GithubMark className="size-4" />
 						</a>
 						<span aria-hidden className="mx-2 h-5 w-px bg-border" />
-						<NavLink
+						{/* Login — hidden while in waitlist-only mode */}
+						{/* <NavLink
 							to="/login"
 							className="rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
 						>
 							Login
-						</NavLink>
+						</NavLink> */}
+						{/* Get started — hidden while in waitlist-only mode */}
+						{/* <Button asChild size="sm" className="ml-1 h-8 rounded-md px-3 text-sm">
+							<Link to="/signup">
+								Get started
+								<ArrowRight className="size-3.5" />
+							</Link>
+						</Button> */}
 						<Button
 							asChild
 							size="sm"
 							className="ml-1 h-8 rounded-md px-3 text-sm"
 						>
-							<Link to="/signup">
-								Get started
+							<Link to="/waitlist">
+								Join waitlist
 								<ArrowRight className="size-3.5" />
 							</Link>
 						</Button>
@@ -146,7 +156,6 @@ export function SiteHeader() {
 						</a>
 						<a
 							href={SITE_LINKS.github}
-							// className="mt-4 inline-flex size-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
 							rel="noreferrer"
 							target="_blank"
 							aria-label="GitHub"
@@ -155,20 +164,28 @@ export function SiteHeader() {
 						</a>
 						<span aria-hidden className="h-px bg-border/40 my-1" />
 
-						<Link
+						{/* Login — hidden while in waitlist-only mode */}
+						{/* <Link
 							to="/login"
 							className="text-sm font-medium py-1.5 text-muted-foreground hover:text-foreground transition-colors"
 							onClick={() => setMobileOpen(false)}
 						>
 							Login
-						</Link>
+						</Link> */}
+						{/* Get started — hidden while in waitlist-only mode */}
+						{/* <Button asChild size="sm" className="h-9 rounded-md w-full justify-center text-sm">
+							<Link to="/signup" onClick={() => setMobileOpen(false)}>
+								Get started
+								<ArrowRight className="size-4 ml-1.5" />
+							</Link>
+						</Button> */}
 						<Button
 							asChild
 							size="sm"
 							className="h-9 rounded-md w-full justify-center text-sm"
 						>
-							<Link to="/signup" onClick={() => setMobileOpen(false)}>
-								Get started
+							<Link to="/waitlist" onClick={() => setMobileOpen(false)}>
+								Join waitlist
 								<ArrowRight className="size-4 ml-1.5" />
 							</Link>
 						</Button>

@@ -1,16 +1,11 @@
 import { redirect } from "react-router";
-
-import { createDb } from "~/db/index.server";
-import { getEnv } from "~/server/context.server";
+import { getDB } from "~/.server/db";
 import {
 	enabledOAuthProviders,
 	OAUTH_PROVIDER_IDS,
 	type OAuthProviderId,
-} from "~/server/oauth-providers.server";
-import {
-	createAuthFromEnv,
-	safeRelativeRedirect,
-} from "~/server/session.server";
+} from "~/.server/oauth-providers";
+import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
 import type { Route } from "./+types/start.$provider";
 
 /**
@@ -28,7 +23,6 @@ import type { Route } from "./+types/start.$provider";
 export async function loader({
 	request,
 	params,
-	context,
 }: Route.LoaderArgs): Promise<Response> {
 	const provider = String(params.provider);
 
@@ -37,10 +31,9 @@ export async function loader({
 	if (!OAUTH_PROVIDER_IDS.includes(provider as OAuthProviderId)) {
 		throw new Response("Unknown OAuth provider", { status: 404 });
 	}
-	const env = getEnv(context);
 	// A known-but-unconfigured provider also 404s — `enabledOAuthProviders` is
 	// the same predicate `createAuth` uses, so the two never disagree.
-	if (!enabledOAuthProviders(env).includes(provider as OAuthProviderId)) {
+	if (!enabledOAuthProviders().includes(provider as OAuthProviderId)) {
 		throw new Response("OAuth provider not configured", { status: 404 });
 	}
 
@@ -48,8 +41,8 @@ export async function loader({
 	const url = new URL(request.url);
 	const callbackURL = safeRelativeRedirect(url.searchParams.get("callbackURL"));
 
-	const db = createDb(env);
-	const auth = createAuthFromEnv(env, db);
+	const db = getDB();
+	const auth = createAuthFromEnv();
 
 	const result = await auth.api.signInSocial({
 		body: { provider, callbackURL },

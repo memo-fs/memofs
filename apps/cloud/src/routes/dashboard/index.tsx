@@ -1,6 +1,7 @@
 import { RefreshCw } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useFetcher, useOutletContext } from "react-router";
+import type { SyncActivity } from "~/.server/queries";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -10,8 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import type { SyncActivity } from "~/server/queries";
-import { formatRelative } from "~/utils/format";
+import { formatRelative } from "~/utils/misc";
 import type { DashboardOutletContext } from "./_layout";
 import { OverviewCards } from "./+components/overview-cards";
 import { PageHeader } from "./+components/page-header";
@@ -21,7 +21,7 @@ import type { Route } from "./+types/index";
 type RecentActivityResponse = { activity: SyncActivity[] };
 
 export function meta(_: Route.MetaArgs) {
-	return [{ title: "Dashboard — TekMemo Cloud" }];
+	return [{ title: "Dashboard — Memo FS Cloud" }];
 }
 
 export default function OverviewPage() {

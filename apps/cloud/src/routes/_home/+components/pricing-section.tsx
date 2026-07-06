@@ -25,8 +25,8 @@ export function PricingSection() {
 			<SectionHeading
 				align="center"
 				eyebrow="Pricing"
-				title={<>Start free. Upgrade when you need more.</>}
-				lede="Simple, transparent pricing with no seat surprises."
+				title={<>Launching soon. Reserve your spot.</>}
+				lede="Simple, transparent pricing. Lock in your rate when early access opens."
 			/>
 			<div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
 				{PLANS.map((plan) => {

@@ -95,7 +95,7 @@ export function LinearMark({
  * Google "G" mark. Unlike the monochrome brand marks above, Google's logo is
  * only recognizable in its four-color form, so this keeps the brand colors
  * (the one place raw non-accent colors are allowed — it's a vendor's own mark,
- * not TekMemo UI).
+ * not Memo FS UI).
  */
 export function GoogleMark({
 	size = 16,

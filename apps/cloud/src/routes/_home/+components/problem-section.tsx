@@ -43,7 +43,7 @@ export function ProblemSection() {
 				title={<>Multi-device memory drift is real</>}
 				lede={
 					<>
-						You edit <InlineCode className="text-xs">.tekmemo/</InlineCode> on
+						You edit <InlineCode className="text-xs">.memofs/</InlineCode> on
 						your laptop. CI pushes a run log on the server. A teammate is still
 						on last week's snapshot. They've silently diverged.
 					</>

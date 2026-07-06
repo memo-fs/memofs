@@ -1,10 +1,9 @@
 import { redirect } from "react-router";
-import { getEnv } from "~/server/context.server";
-import { getSessionUser } from "~/server/session.server";
+import { getSessionUser } from "~/.server/session";
 import type { Route } from "./+types/callback";
 
 export function meta() {
-	return [{ title: "Completing Sign-in — TekMemo Cloud" }];
+	return [{ title: "Completing Sign-in — Memo FS Cloud" }];
 }
 
 /**
@@ -18,8 +17,7 @@ export function meta() {
  */
 export async function loader({
 	request,
-	context,
 }: Route.LoaderArgs): Promise<Response> {
-	const user = await getSessionUser(request, getEnv(context));
+	const user = await getSessionUser(request);
 	throw redirect(user ? "/dashboard" : "/login");
 }

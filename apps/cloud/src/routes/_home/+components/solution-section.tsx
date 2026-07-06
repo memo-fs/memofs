@@ -22,11 +22,11 @@ export function SolutionSection() {
 						title={<>One source of truth. Zero overhead.</>}
 						lede={
 							<>
-								TekMemo Cloud mirrors your{" "}
-								<InlineCode className="text-xs">.tekmemo/</InlineCode> files
-								byte-for-byte. The TekMemo engine runs locally for full privacy, while the
-								cloud acts as a replica and a hosted serverless query runtime
-								for remote recall.
+								Memo FS Cloud mirrors your{" "}
+								<InlineCode className="text-xs">.memofs/</InlineCode> files
+								byte-for-byte. The Memo FS engine runs locally for full privacy,
+								while the cloud acts as a replica and a hosted serverless query
+								runtime for remote recall.
 							</>
 						}
 					/>
@@ -42,12 +42,12 @@ export function SolutionSection() {
 				<Card>
 					<CardHeader>
 						<div className="flex items-center gap-3">
-							<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+							<div className="w-8 h-8 rounded-none bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0">
 								<Cloud className="w-4 h-4 text-primary" />
 							</div>
 							<div>
 								<CardTitle className="font-semibold text-sm text-foreground">
-									TekMemo Cloud
+									Memo FS Cloud
 								</CardTitle>
 								<CardDescription className="text-xs text-muted-foreground">
 									Secure replica & hosted runtime
