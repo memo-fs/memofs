@@ -1,56 +1,81 @@
 "$schema" = "./node_modules/wrangler/config-schema.json"
-name = "tekmemo-cloud"
+name = "memofs-cloud"
 compatibility_date = "2026-06-24"
-compatibility_flags = ["nodejs_compat"]
+compatibility_flags = ["nodejs_compat", "no_handle_cross_request_promise_resolution"]
 main = "./workers/app.ts"
 
 [assets]
 directory = "./build/client"
 binding = "ASSETS"
 
-# Databases
-[[d1_databases]]
-binding = "DB"
-database_name = "tekmemo-database"
-database_id = "<unique-ID-for-your-database>"
-migrations_dir = "drizzle"
+[[ratelimits]]
+name = "SESSION_RATE_LIMIT"
+namespace_id = "1001"
 
-[[env.dev.d1_databases]]
-binding = "DB"
-database_name = "tekmemo-database"
-database_id = "<unique-ID-for-your-database>"
-migrations_dir = "drizzle"
+  [ratelimits.simple]
+  limit = 3
+  period = 60
 
-# Memory blobs
 [[r2_buckets]]
 binding = "BLOBS"
-bucket_name = "tekmemo-blobs"
+bucket_name = "memofs-blobs"
 
-[[env.dev.r2_buckets]]
-binding = "BLOBS"
-bucket_name = "tekmemo-blobs"
-
-# AI
 [ai]
 binding = "AI"
 
 [observability]
 enabled = true
 
+# [secrets]
+# required = [ 
+#   "DATABASE_URL", 
+#   "DATABASE_AUTH_TOKEN", 
+
+#   "API_KEY_SALT", 
+#   "ENCRYPTION_KEY",
+
+#   "SESSION_SECRET", 
+#   "BETTER_AUTH_SECRET", 
+
+#   "VOYAGE_API_KEY",
+
+#   "R2_S3_ACCESS_KEY_ID",
+#   "R2_S3_SECRET_ACCESS_KEY",
+#   "R2_S3_ENDPOINT",
+#   "R2_BUCKET_NAME",
+
+#   "GITHUB_CLIENT_ID",
+#   "GITHUB_CLIENT_SECRET",
+#   "GOOGLE_CLIENT_ID",
+#   "GOOGLE_CLIENT_SECRET"
+# ]
+
 [vars]
-ENVIRONMENT = "development"
-CLOUD_PUBLIC_BASE_URL = "http://localhost:5173"
-BETTER_AUTH_URL = "http://localhost:5173"
-RESEND_FROM = "TekMemo Cloud <team@tekbreed.com>"
-PRESIGN_TTL_SECONDS = "900"
-R2_BUCKET_NAME = "tekmemo-blobs"
+ENV = "development"
 POLAR_ENV = "sandbox"
+PRESIGN_TTL_SECONDS = "900"
+BETTER_AUTH_URL = "http://localhost:5173"
+RESEND_FROM = "Memo FS Team <team@mail.tekbreed.com>"
+RESEND_SEGMENT_ID = "mock-segment-id"
+POLAR_PRO_PRODUCT_ID = "mockproduct-id"
+POLAR_TEAMS_PRODUCT_ID = "mock-teams-id"
 
 [env.dev.vars]
-ENVIRONMENT = "development"
-CLOUD_PUBLIC_BASE_URL = "http://localhost:5173"
-BETTER_AUTH_URL = "http://localhost:5173"
-RESEND_FROM = "TekMemo Cloud <team@tekbreed.com>"
-PRESIGN_TTL_SECONDS = "900"
-R2_BUCKET_NAME = "tekmemo-blobs"
+ENV = "production"
 POLAR_ENV = "sandbox"
+PRESIGN_TTL_SECONDS = "900"
+BETTER_AUTH_URL = "https://dev.memo.tekbreed.com"
+RESEND_FROM = "Memo FS Team <team@mail.tekbreed.com>"
+RESEND_SEGMENT_ID = "cc85b44a-6c4a-4f50-80a3-a88c41aa5616"
+POLAR_PRO_PRODUCT_ID="mockproduct-id"
+POLAR_TEAMS_PRODUCT_ID="mock-teams-id"
+
+[env.production.vars]
+ENV = "production"
+POLAR_ENV = "production"
+PRESIGN_TTL_SECONDS = "900"
+BETTER_AUTH_URL = "https://memo.tekbreed.com"
+RESEND_FROM = "Memo FS Team <team@mail.tekbreed.com>"
+RESEND_SEGMENT_ID = "cc85b44a-6c4a-4f50-80a3-a88c41aa5616"
+POLAR_PRO_PRODUCT_ID="mockproduct-id"
+POLAR_TEAMS_PRODUCT_ID="mock-teams-id"

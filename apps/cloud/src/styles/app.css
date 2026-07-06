@@ -8,47 +8,53 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  /*
-   * Brand-blue accent. Bright enough to double as text/link color on the dark
-   * background (WCAG-AA) — unified with --sidebar-primary so there is one
-   * accent blue. Paired with a dark foreground for legible button fills.
-   */
-  --primary: oklch(0.685 0.169 237.323);
-  --primary-foreground: oklch(0.293 0.066 243.157);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.855 0.138 181.071);
-  --chart-2: oklch(0.704 0.14 182.503);
-  --chart-3: oklch(0.6 0.118 184.704);
-  --chart-4: oklch(0.511 0.096 186.391);
-  --chart-5: oklch(0.437 0.078 188.216);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.685 0.169 237.323);
-  --sidebar-primary-foreground: oklch(0.293 0.066 243.157);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Zero border-radius globally for a sharp, premium broadsheet/technical look */
+  --radius: 0px;
+
+  /* Ported exactly from nexus-dev app/globals.css hex system */
+  --background: #0B0C0E;
+  --foreground: #CBD5E1;
+  --card: #141518;
+  --card-foreground: #CBD5E1;
+  --popover: #141518;
+  --popover-foreground: #CBD5E1;
+  --primary: #FFFFFF;
+  --primary-foreground: #0B0C0E;
+  --secondary: #1C1E23;
+  --secondary-foreground: #FFFFFF;
+  --muted: #141518;
+  --muted-foreground: #6B7280;
+  --accent: #1C1E23;
+  --accent-foreground: #FFFFFF;
+  --destructive: #F87171;
+  --destructive-foreground: #FFFFFF;
+  --border: #27282F;
+  --input: #27282F;
+  --ring: #5E6AD2;
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: #141518;
+  --sidebar-foreground: #CBD5E1;
+  --sidebar-primary: #FFFFFF;
+  --sidebar-primary-foreground: #0B0C0E;
+  --sidebar-accent: #1C1E23;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #27282F;
+  --sidebar-ring: #5E6AD2;
+
+  /* Gold sync/encryption glow accent */
+  --accent-gold: oklch(0.77 0.17 70);
+
+  /* Hyper-cyan AI/neural intelligence glow accent */
+  --accent-ai: oklch(0.78 0.16 205);
 }
 
 @theme inline {
   --font-sans: 'Sora Variable', sans-serif;
-  --font-heading: 'Geist Mono Variable', monospace;
+  --font-heading: 'Sora Variable', monospace;
   --font-sentient: 'Sentient', sans-serif;
   --shadow-glow: 0 0 8px 2px var(--tw-shadow-color);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -82,18 +88,21 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-ai: var(--accent-ai);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    border-radius: 0px !important;
   }
   body {
     @apply bg-background text-foreground;
@@ -109,8 +118,34 @@
   }
   html {
     @apply font-sans;
-
   }
+}
+
+/* Faint dot matrix pattern */
+@utility bg-dot-grid {
+  background-image: radial-gradient(circle, oklch(1 0 0 / 5%) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Ported from nexus-dev grid-bg */
+@utility bg-grid-pattern {
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  opacity: 0.15;
+}
+
+/* Animating connection paths (marching dash line) */
+@keyframes sync-dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+@utility animate-sync-dash {
+  animation: sync-dash 2s linear infinite;
 }
 
 /* Hard, terminal-style caret blink (sharper than the soft animate-pulse). */
@@ -121,4 +156,44 @@
 
 @utility animate-caret-blink {
   animation: caret-blink 1s steps(1) infinite;
+}
+
+/* Ambient gold glow in background */
+@utility bg-radial-glow-gold {
+  background-image: radial-gradient(circle, oklch(0.77 0.17 70 / 10%) 0%, transparent 65%);
+}
+
+/* Ambient blue glow in background */
+@utility bg-radial-glow-blue {
+  background-image: radial-gradient(circle, oklch(0.58 0.19 295 / 8%) 0%, transparent 70%);
+}
+
+/* Ambient cyan AI glow in background */
+@utility bg-radial-glow-ai {
+  background-image: radial-gradient(circle, oklch(0.78 0.16 205 / 8%) 0%, transparent 70%);
+}
+
+/* Premium translucent card style */
+@utility bg-premium-card {
+  background-color: oklch(0.14 0.008 264 / 45%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 8%);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Gold border glow on hover */
+@utility hover-glow-gold {
+  &:hover {
+    border-color: oklch(0.77 0.17 70 / 40%) !important;
+    box-shadow: 0 0 20px 2px oklch(0.77 0.17 70 / 6%) !important;
+  }
+}
+
+/* Primary border/white glow on hover */
+@utility hover-glow-primary {
+  &:hover {
+    border-color: oklch(1 0 0 / 25%) !important;
+    box-shadow: 0 0 20px 2px oklch(1 0 0 / 4%) !important;
+  }
 }

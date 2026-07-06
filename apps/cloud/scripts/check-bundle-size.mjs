@@ -33,10 +33,14 @@ const ASSETS_DIR = "build/client";
  */
 function dryRunGzipSize(config) {
 	try {
-		const output = execFileSync("npx", ["wrangler", "deploy", "--dry-run", "--config", config], {
-			encoding: "utf8",
-			stderr: "pipe",
-		});
+		const output = execFileSync(
+			"npx",
+			["wrangler", "deploy", "--dry-run", "--config", config],
+			{
+				encoding: "utf8",
+				stderr: "pipe",
+			},
+		);
 		// wrangler prints "Total Upload: 584.73 KiB / gzip: 122.00 KiB".
 		const match = output.match(/gzip:\s*([\d.]+)\s*(KiB|MiB)/i);
 		if (!match) return undefined;
@@ -62,24 +66,38 @@ function fmt(bytes) {
  */
 function main() {
 	const checks = [
-		{ name: "runtime (tekmemo-cloud-runtime)", config: "wrangler.runtime.jsonc", requiresAssets: false },
-		{ name: "commercial (tekmemo-cloud)", config: "wrangler.jsonc", requiresAssets: true },
+		{
+			name: "runtime (tekmemo-cloud-runtime)",
+			config: "wrangler.runtime.jsonc",
+			requiresAssets: false,
+		},
+		{
+			name: "commercial (tekmemo-cloud)",
+			config: "wrangler.jsonc",
+			requiresAssets: true,
+		},
 	];
 	let failed = false;
 	for (const { name, config, requiresAssets } of checks) {
 		if (requiresAssets && !existsSync(ASSETS_DIR)) {
-			console.log(`  - ${name}: skipped (run \`pnpm build\` first — ${ASSETS_DIR} absent)`);
+			console.log(
+				`  - ${name}: skipped (run \`pnpm build\` first — ${ASSETS_DIR} absent)`,
+			);
 			continue;
 		}
 		const size = dryRunGzipSize(config);
 		if (size === undefined) {
-			console.log(`  ? ${name}: could not parse wrangler output (check manually)`);
+			console.log(
+				`  ? ${name}: could not parse wrangler output (check manually)`,
+			);
 			continue;
 		}
 		const pct = ((size / CAP_BYTES) * 100).toFixed(0);
 		const ok = size < CAP_BYTES;
 		failed = failed || !ok;
-		console.log(`  ${ok ? "✓" : "✗"} ${name}: ${fmt(size)} — ${pct}% of the 3 MB cap`);
+		console.log(
+			`  ${ok ? "✓" : "✗"} ${name}: ${fmt(size)} — ${pct}% of the 3 MB cap`,
+		);
 	}
 	if (failed) {
 		console.error("\n✗ A Worker bundle exceeds the 3 MB free-plan cap.");

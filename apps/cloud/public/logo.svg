@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" role="img" aria-label="TekMemo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%" role="img" aria-label="Memo FS">
   <defs>
     <style>
       .blue-stroke { stroke: #258acb; }
@@ -12,20 +12,17 @@
         .layer-stop-bottom { stop-color: #5bd473; }
       }
     </style>
-    <!-- The layered stack fades blue -> green, tying the two bracket colors together -->
-    <linearGradient id="tekmemo-layers" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="memofs-layers" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" class="layer-stop-top" />
       <stop offset="1" class="layer-stop-bottom" />
     </linearGradient>
   </defs>
 
   <g stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <!-- Brackets: the TekBreed lineage (blue left, green right) -->
     <polyline points="25,25 5,50 25,75" class="blue-stroke" stroke-width="6" />
     <polyline points="75,25 95,50 75,75" class="green-stroke" stroke-width="6" />
 
-    <!-- Isometric layered stack: the TekMemo mark (memory in layers) -->
-    <g stroke="url(#tekmemo-layers)" stroke-width="6">
+    <g stroke="url(#memofs-layers)" stroke-width="6">
       <polygon points="50,28 66,37 50,46 34,37" />
       <polyline points="34,45 50,54 66,45" />
       <polyline points="34,53 50,62 66,53" />

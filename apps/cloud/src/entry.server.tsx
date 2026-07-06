@@ -1,6 +1,6 @@
 import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
-import type { AppLoadContext, EntryContext } from "react-router";
+import type { EntryContext } from "react-router";
 import { ServerRouter } from "react-router";
 
 export default async function handleRequest(
@@ -8,7 +8,10 @@ export default async function handleRequest(
 	responseStatusCode: number,
 	responseHeaders: Headers,
 	routerContext: EntryContext,
-	_loadContext: AppLoadContext,
+	// React Router v8 dropped the `AppLoadContext` type; the load context is
+	// typed via `RouterContextProvider` (see `workers/app.ts` `getLoadContext`).
+	// Unused here — the default streaming handler only needs the entry context.
+	_loadContext: unknown,
 ) {
 	let shellRendered = false;
 	const userAgent = request.headers.get("user-agent");

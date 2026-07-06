@@ -15,13 +15,10 @@
 import { createRequestHandler } from "@react-router/cloudflare";
 import { Hono } from "hono";
 import { RouterContextProvider } from "react-router";
-import { createApiApp } from "../src/api";
-import { createDb } from "../src/db/index.server";
-import { createAuth } from "../src/server/auth";
-import { createMagicLinkMailer } from "../src/server/email";
-import type { CloudWorkerEnv } from "../src/server/env";
+import { createApiApp } from "../src/.server/api";
+import { createAuth } from "../src/.server/auth";
 
-const app = new Hono<{ Bindings: CloudWorkerEnv }>();
+const app = new Hono<{ Bindings: Env }>();
 
 // 1. Mount the Hono API sub-app
 const api = createApiApp();
@@ -29,8 +26,7 @@ app.route("/", api);
 
 // 2. Mount the Better Auth sub-app
 app.all("/api/auth/*", (c) => {
-	const db = createDb(c.env);
-	const auth = createAuth(c.env, db, createMagicLinkMailer(c.env));
+	const auth = createAuth(c.executionCtx.waitUntil.bind(c.executionCtx));
 	return auth.handler(c.req.raw);
 });
 
@@ -54,7 +50,7 @@ app.all("*", (c) => {
 		passThroughOnException: c.executionCtx.passThroughOnException
 			? c.executionCtx.passThroughOnException.bind(c.executionCtx)
 			: () => {},
-	});
+	} as Parameters<typeof requestHandler>[0]);
 });
 
 export default app;
