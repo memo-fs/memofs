@@ -10,8 +10,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { Tekmemo } from "../../src/index";
+import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempTekMemoDir } from "../../src/testing/temp-dir";
 
 async function seedMemo() {

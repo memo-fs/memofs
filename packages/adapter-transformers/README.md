@@ -1,42 +1,42 @@
-# `@tekmemo/adapter-transformers`
+# `@memofs/adapter-transformers`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-transformers"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-transformers?label=%40tekmemo%2Fadapter-transformers&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-transformers"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-transformers?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/adapter-transformers"><img src="https://img.shields.io/npm/v/%40memofs%2Fadapter-transformers?label=%40memofs%2Fadapter-transformers&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/adapter-transformers"><img src="https://img.shields.io/npm/dm/%40memofs%2Fadapter-transformers?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Local Transformers.js ONNX embedder adapter for TekMemo with no API key or cloud dependency.
+Local Transformers.js ONNX embedder adapter for Memo FS with no API key or cloud dependency.
 
 ## What is this?
 
-**Zero-config local embedder adapter for TekMemo.** Runs a small
+**Zero-config local embedder adapter for Memo FS.** Runs a small
 sentence-embedding model **in process** via [Transformers.js](https://huggingface.co/docs/transformers.js)
 (ONNX runtime) — **no API key, no cloud, and no network after the first model
 download.**
 
-This is what powers TekMemo's *zero-API-key hybrid recall*: install it (or let
+This is what powers Memo FS's *zero-API-key hybrid recall*: install it (or let
 the runtime lazy-load it) and `recall()` gains a semantic vector path on top of
 the default lexical (BM25 + fuzzy) path, with nothing leaving your machine.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-adapter-transformers @tekbreed/tekmemo
+npm install @memofs/adapter-transformers @memofs
 ```
 
 This pulls in `@huggingface/transformers` and ships an ONNX-compatible embedder
-that implements TekMemo's provider-neutral `MemoryEmbedder` contract.
+that implements Memo FS's provider-neutral `MemoryEmbedder` contract.
 
 ## Quick Start
 
 ### Standalone
 
 ```ts
-import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
 const embedder = createTransformersEmbedder({
   model: "Xenova/all-MiniLM-L6-v2",
@@ -44,7 +44,7 @@ const embedder = createTransformersEmbedder({
 
 // Embed a batch of texts (mean-pooled + L2-normalized vectors)
 const { embeddings } = await embedder.embedTexts({
-  texts: ["TekMemo gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
+  texts: ["Memo FS gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
 });
 
 console.log(embeddings[0].embedding.length); // 384
@@ -54,16 +54,16 @@ console.log(embeddings[0].model);            // "Xenova/all-MiniLM-L6-v2"
 The first call downloads the ONNX weights once and caches them; subsequent calls
 are fully offline.
 
-### With TekMemo core
+### With Memo FS core
 
-Plug the adapter straight into `Tekmemo` for hybrid recall with your own embedder:
+Plug the adapter straight into `Memofs` for hybrid recall with your own embedder:
 
 ```ts
-import { Tekmemo } from "@tekbreed/tekmemo";
-import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+import { Memofs } from "@memofs";
+import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
-const memo = new Tekmemo({
-  rootDir: "./.tekmemo",
+const memo = new Memofs({
+  rootDir: "./`.memofs`",
   projectId: "my-app",
   embedder: createTransformersEmbedder(),
   recall: { engine: "auto" }, // upgrades to hybrid since an embedder is present
@@ -75,7 +75,7 @@ const hits = await memo.recall("coding language preference"); // semantic match
 
 ### Zero-config (no code)
 
-You usually do **not** need to touch this package directly. The TekMemo runtime
+You usually do **not** need to touch this package directly. The Memo FS runtime
 can lazy-load it for you — just enable local embeddings:
 
 ```bash
@@ -83,19 +83,19 @@ export TEKMEMO_LOCAL_EMBEDDINGS=true
 export TEKMEMO_RECALL_ENGINE=auto
 ```
 
-or in `.tekmemo/config.json`:
+or in ``.memofs/`config.json`:
 
 ```json
 {
-  "$schema": "https://docs.memo.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+  "$schema": "https://docs.memo.memofs.dev/1.0.0-alpha.0/config.schema.json",
   "runtime": "local",
   "recall": { "engine": "auto", "localEmbeddings": true }
 }
 ```
 
-The runtime imports `@tekbreed/tekmemo-adapter-transformers` only when the first
+The runtime imports `@memofs/adapter-transformers` only when the first
 embedding is actually requested, so boot stays fast. If the adapter is missing or
-fails to load, TekMemo falls back to lexical (BM25 + fuzzy) recall — memory stays
+fails to load, Memo FS falls back to lexical (BM25 + fuzzy) recall — memory stays
 discoverable and writes are never broken.
 
 ## Configuration
@@ -126,11 +126,11 @@ createTransformersEmbedder({ model: "Xenova/all-MiniLM-L12-v2" });
 | Need | Use |
 |------|-----|
 | Offline / private / zero-cost semantic recall | **This package** (local ONNX) |
-| Highest-quality embeddings, can call an API | [`@tekbreed/tekmemo-adapter-openai`](../tekmemo-adapter-openai) or [`-voyage`](../tekmemo-adapter-voyage) |
-| Persistent local vector recall | pair any embedder with `createFsRecallStore` from `@tekbreed/tekmemo` |
+| Highest-quality embeddings, can call an API | [`@memofs/adapter-openai`](../memofs-adapter-openai) or [`-voyage`](../memofs-adapter-voyage) |
+| Persistent local vector recall | pair any embedder with `createFsRecallStore` from `@memofs` |
 
-The local embedder pairs with TekMemo's built-in filesystem recall store
-(`createFsRecallStore`, backed by `.tekmemo/indexes/embeddings.jsonl`) for a
+The local embedder pairs with Memo FS's built-in filesystem recall store
+(`createFsRecallStore`, backed by ``.memofs/`indexes/embeddings.jsonl`) for a
 fully local vector memory. For large shared indices, prefer a provider embedder
 plus a managed vector store.
 
@@ -142,7 +142,7 @@ the bundled fake factory from `src/testing`:
 
 ```ts
 import { createFakePipelineFactory } from "./src/testing";
-import { createTransformersEmbedder } from "@tekbreed/tekmemo-adapter-transformers";
+import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
 const embedder = createTransformersEmbedder({
   pipelineFactory: createFakePipelineFactory({ dimensions: 384 }),
@@ -159,7 +159,7 @@ exercise recall merging without the real model.
 ## Boundary
 
 This package owns the Transformers.js local embedder adapter. It does **not** own
-the TekMemo core `MemoryEmbedder` contract, other provider adapters, or the
+the Memo FS core `MemoryEmbedder` contract, other provider adapters, or the
 Transformers.js runtime itself.
 
 ## Contributing

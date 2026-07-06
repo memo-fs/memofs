@@ -1,10 +1,10 @@
-import type { StoredNote } from "./types";
 import type {
-	RecallInput,
-	RecallResult,
-	RecallItem,
 	JsonObject,
+	RecallInput,
+	RecallItem,
+	RecallResult,
 } from "../types";
+import type { StoredNote } from "./types";
 
 export function memoryRecall(
 	notes: Map<string, StoredNote>,

@@ -1,4 +1,4 @@
-import { createVitestConfig } from "@tekmemo/testing/vitest";
+import { createVitestConfig } from "@memofs/testing/vitest";
 
 export default createVitestConfig({
 	test: {

@@ -14,23 +14,23 @@
  * provider calls), mirroring the slice-0 factory test.
  */
 import {
-	type Extractor,
 	type ExtractionInput,
 	type ExtractionResult,
+	type Extractor,
 	InMemoryMemoryStore,
 	type MemoryEmbedder,
-	Tekmemo,
-} from "@tekmemo/core";
-import { JSON_RPC_ERRORS } from "@tekmemo/json-rpc";
+	type Tekmemo,
+} from "@memofs/core";
+import { JSON_RPC_ERRORS } from "@memofs/json-rpc";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createHostedRuntime } from "../src";
+import { GATED_METHODS, RUNTIME_METHOD } from "../src/protocol/methods";
 import {
 	CONCURRENCY_GATE_ERROR_CODE,
 	CONCURRENCY_GATE_HTTP_STATUS,
 	dispatchRuntimeMessage,
 	dispatchRuntimeText,
 } from "../src/runtime-api/dispatch";
-import { GATED_METHODS, RUNTIME_METHOD } from "../src/protocol/methods";
 
 describe("runtime-API dispatch — slice 1", () => {
 	let tek: Tekmemo;
@@ -106,29 +106,26 @@ describe("runtime-API dispatch — slice 1", () => {
 
 		// The headline bar: "a second concurrent writer gets 503, not a silent
 		// lost write." Proven trivially-correct: no write path is reachable at all.
-		it.each([...GATED_METHODS])(
-			"gated method %s returns the 503 concurrency-gate failure",
-			async (method) => {
-				const response = (await dispatchRuntimeMessage(tek, {
-					jsonrpc: "2.0",
-					id: 7,
-					method,
-					params: {},
-				})) as unknown as {
-					error: {
-						code: number;
-						message: string;
-						data: { httpStatus: number; reason: string };
-					};
+		it.each([
+			...GATED_METHODS,
+		])("gated method %s returns the 503 concurrency-gate failure", async (method) => {
+			const response = (await dispatchRuntimeMessage(tek, {
+				jsonrpc: "2.0",
+				id: 7,
+				method,
+				params: {},
+			})) as unknown as {
+				error: {
+					code: number;
+					message: string;
+					data: { httpStatus: number; reason: string };
 				};
+			};
 
-				expect(response.error.code).toBe(CONCURRENCY_GATE_ERROR_CODE);
-				expect(response.error.data.httpStatus).toBe(
-					CONCURRENCY_GATE_HTTP_STATUS,
-				);
-				expect(response.error.data.reason).toBe("concurrency_layer_required");
-			},
-		);
+			expect(response.error.code).toBe(CONCURRENCY_GATE_ERROR_CODE);
+			expect(response.error.data.httpStatus).toBe(CONCURRENCY_GATE_HTTP_STATUS);
+			expect(response.error.data.reason).toBe("concurrency_layer_required");
+		});
 
 		it("the gate message references slice 3", async () => {
 			const response = (await dispatchRuntimeMessage(tek, {

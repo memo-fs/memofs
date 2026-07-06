@@ -1,19 +1,19 @@
-# `@tekmemo/json-rpc`
+# `@memofs/json-rpc`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/json-rpc"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fjson-rpc?label=%40tekmemo%2Fjson-rpc&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/json-rpc"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fjson-rpc?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/json-rpc"><img src="https://img.shields.io/npm/v/%40memofs%2Fjson-rpc?label=%40memofs%2Fjson-rpc&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/json-rpc"><img src="https://img.shields.io/npm/dm/%40memofs%2Fjson-rpc?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Dependency-free JSON-RPC 2.0 protocol primitives shared by TekMemo transports.
+Dependency-free JSON-RPC 2.0 protocol primitives shared by Memo FS transports.
 
 ## Why a separate package?
 
-Two TekMemo packages speak JSON-RPC over the wire. Before this package, both
+Two Memo FS packages speak JSON-RPC over the wire. Before this package, both
 shipped near-identical copies of the same ~200 lines of spec types and helpers,
 and one was coupled to the other's error classes. That violates the workspace
 DRY/SSOT rule and the package-boundaries rule (no transport in core, no
@@ -38,7 +38,7 @@ dependency-free package fixes both:
 ## Install
 
 ```sh
-npm install @tekbreed/tekmemo-json-rpc
+npm install @memofs/json-rpc
 ```
 
 ## Usage
@@ -51,7 +51,7 @@ import {
 	parseJsonRpcPayload,
 	success,
 	validateJsonRpcRequest,
-} from "@tekbreed/tekmemo-json-rpc";
+} from "@memofs/json-rpc";
 
 // 1. Parse the incoming wire payload (throws JsonRpcProtocolError on bad JSON).
 const payload = parseJsonRpcPayload(await request.text());
@@ -76,7 +76,7 @@ A package with its own error hierarchy re-throws in its own type — the protoco
 layer never imports a consumer's classes:
 
 ```ts
-import { JsonRpcProtocolError, JSON_RPC_ERRORS } from "@tekbreed/tekmemo-json-rpc";
+import { JsonRpcProtocolError, JSON_RPC_ERRORS } from "@memofs/json-rpc";
 
 try {
 	validateJsonRpcRequest(payload);

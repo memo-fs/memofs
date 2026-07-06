@@ -8,7 +8,7 @@
  * @public
  */
 
-import type { JsonObject } from "@tekmemo/core";
+import type { JsonObject } from "@memofs/core";
 import type {
 	Connector,
 	ConnectorIngestContext,

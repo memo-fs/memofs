@@ -14,7 +14,7 @@
  * @public
  */
 
-import type { BlobClient } from "@tekmemo/core";
+import type { BlobClient } from "@memofs/core";
 
 /**
  * Options for {@link createR2BlobClient}.
@@ -31,7 +31,7 @@ export interface CreateR2BlobClientOptions {
  *
  * @example
  * ```ts
- * import { createR2BlobClient } from "@tekmemo/adapter-r2";
+ * import { createR2BlobClient } from "@memofs/adapter-r2";
  *
  * const blobClient = createR2BlobClient({ binding: env.BLOBS });
  * ```

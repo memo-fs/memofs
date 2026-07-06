@@ -1,5 +1,5 @@
-import type { MinimalReranker } from "@tekmemo/testing/contracts";
-import { defineRerankerContractTests } from "@tekmemo/testing/contracts";
+import type { MinimalReranker } from "@memofs/testing/contracts";
+import { defineRerankerContractTests } from "@memofs/testing/contracts";
 import { FakeReranker } from "../../src/rerank/testing";
 
 function createReranker(): MinimalReranker {

@@ -1,8 +1,8 @@
 import type {
 	ConsolidateMemoryInput,
 	ConsolidateMemoryResult,
-	GraphNodeInput,
 	GraphEdgeInput,
+	GraphNodeInput,
 } from "../types";
 
 export function memoryConsolidateMemory(

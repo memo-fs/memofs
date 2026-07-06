@@ -16,8 +16,8 @@
  * @public
  */
 
-import type { JsonObject, SourceRef, Tekmemo } from "@tekmemo/core";
-import { readMemoryEvents } from "@tekmemo/core";
+import type { JsonObject, SourceRef, Tekmemo } from "@memofs/core";
+import { readMemoryEvents } from "@memofs/core";
 import { readConnectorsFile, selectConnectors } from "./config";
 import { connectorNoteId } from "./id";
 import {

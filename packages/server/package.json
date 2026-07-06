@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/server",
+	"name": "@memofs/server",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Self-hostable TekMemo runtime server for Node and Cloudflare Workers deployments.",
+	"description": "Self-hostable Memo FS runtime server for Node and Cloudflare Workers deployments.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/server"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/server/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -41,7 +41,7 @@
 		}
 	},
 	"bin": {
-		"tekmemo-server": "./dist/bin/tekmemo-server.mjs"
+		"memofs-server": "./dist/bin/memofs-server.mjs"
 	},
 	"files": [
 		"dist",
@@ -72,7 +72,7 @@
 		"self-host",
 		"runtime",
 		"server",
-		"tekmemo",
+		"memofs",
 		"adapter",
 		"typescript"
 	],
@@ -84,14 +84,14 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:^",
-		"@tekmemo/json-rpc": "workspace:^"
+		"@memofs/core": "workspace:^",
+		"@memofs/json-rpc": "workspace:^"
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.17.0",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
-		"@tekmemo/testing": "workspace:^",
+		"@memofs/testing": "workspace:^",
 		"@types/node": "^25.9.2",
 		"vitest": "^4.1.8"
 	}

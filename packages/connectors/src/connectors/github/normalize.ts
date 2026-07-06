@@ -6,7 +6,7 @@
  * @internal
  */
 
-import type { JsonObject } from "@tekmemo/core";
+import type { JsonObject } from "@memofs/core";
 import type { ConnectorRecord } from "../../types";
 import type { GitHubNode, GitHubSourceMapping } from "./types";
 

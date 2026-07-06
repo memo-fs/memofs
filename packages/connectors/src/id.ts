@@ -4,7 +4,7 @@
  * @public
  */
 
-import { sha256Hex } from "@tekmemo/core";
+import { sha256Hex } from "@memofs/core";
 import type { ConnectorRecord } from "./types";
 
 /**

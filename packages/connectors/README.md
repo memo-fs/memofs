@@ -1,41 +1,41 @@
-# `@tekmemo/connectors`
+# `@memofs/connectors`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/connectors"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fconnectors?label=%40tekmemo%2Fconnectors&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/connectors"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fconnectors?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/connectors"><img src="https://img.shields.io/npm/v/%40memofs%2Fconnectors?label=%40memofs%2Fconnectors&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/connectors"><img src="https://img.shields.io/npm/dm/%40memofs%2Fconnectors?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Local connector framework for ingesting external sources into TekMemo memory.
+Local connector framework for ingesting external sources into Memo FS memory.
 
 ## What is this?
 
-**The local connector framework for TekMemo.** Connectors ingest external sources (GitHub, Notion, …) into `.tekmemo/` through the **local** engine. The cloud only replicates the resulting files — connectors never run server-side. This is the [`git`/GitHub-Actions model](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0002-connectors-run-locally.md): the *config* is synced, the *credential* is fetched live, the *work* happens on your machine.
+**The local connector framework for Memo FS.** Connectors ingest external sources (GitHub, Notion, …) into ``.memofs/`` through the **local** engine. The cloud only replicates the resulting files — connectors never run server-side. This is the [`git`/GitHub-Actions model](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0002-connectors-run-locally.md): the *config* is synced, the *credential* is fetched live, the *work* happens on your machine.
 
-Each source is a plugin implementing the provider-neutral `Connector` interface — the same adapter pattern TekMemo uses for embedders and extractors. Adding a connector later means writing a new adapter, not refactoring the framework.
+Each source is a plugin implementing the provider-neutral `Connector` interface — the same adapter pattern Memo FS uses for embedders and extractors. Adding a connector later means writing a new adapter, not refactoring the framework.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-connectors @tekbreed/tekmemo
+npm install @memofs/connectors @memofs
 ```
 
 ## Quick Start
 
 ```ts
-import { Tekmemo } from "@tekbreed/tekmemo";
-import { runConnectors, EnvSecretResolver } from "@tekbreed/tekmemo-connectors";
+import { Memofs } from "@memofs";
+import { runConnectors, EnvSecretResolver } from "@memofs/connectors";
 
-// The host owns the Tekmemo instance (single-writer per .tekmemo/ root).
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "my-app" });
+// The host owns the Memofs instance (single-writer per `.memofs/` root).
+const memo = new Memofs({ rootDir: "./`.memofs`", projectId: "my-app" });
 
 const result = await runConnectors({
- rootDir: "./.tekmemo",
+ rootDir: "./`.memofs`",
  memo,
- secretResolver: new EnvSecretResolver({ rootDir: "./.tekmemo" }),
+ secretResolver: new EnvSecretResolver({ rootDir: "./`.memofs`" }),
 });
 
 console.log(result.written); // ["conn_...", ...] — newly ingested note ids
@@ -45,12 +45,12 @@ console.log(result.skipped); // ["issue:42", ...] — already ingested (dedup)
 ## How it works
 
 ```
-.tekmemo/connectors.json ──► runConnectors() ──► .tekmemo/notes.md (+ derived indexes)
+`.memofs/`connectors.json ──► runConnectors() ──► `.memofs/`notes.md (+ derived indexes)
  (config, no tokens) (local engine) (source: "connector")
 ```
 
-1. **Config** lives in `.tekmemo/connectors.json` — one of TekMemo's 11 canonical sync units. Each connector row carries an opaque `secretRef`, **never** the token.
-2. **Secrets** are resolved at run time through an injected `SecretResolver`. The token lives in memory only and is never written to disk. The v1 dev fallback reads `.tekmemo/secrets.json` (a separate, gitignored, non-synced file); production wires a `CloudSecretResolver` against `GET /v1/projects/:projectId/connectors/:connectorId/secret` when the cloud app ships.
+1. **Config** lives in ``.memofs/`connectors.json` — one of Memo FS's 11 canonical sync units. Each connector row carries an opaque `secretRef`, **never** the token.
+2. **Secrets** are resolved at run time through an injected `SecretResolver`. The token lives in memory only and is never written to disk. The v1 dev fallback reads ``.memofs/`secrets.json` (a separate, gitignored, non-synced file); production wires a `CloudSecretResolver` against `GET /v1/projects/:projectId/connectors/:connectorId/secret` when the cloud app ships.
 3. **Ingestion** runs locally: each connector fetches its source, normalizes items into `ConnectorRecord`s, and the runner writes them through the local engine with the connector-write discipline (see below).
 4. **The resulting files** sync back to the cloud like any other memory file.
 
@@ -64,7 +64,7 @@ Every connector-emitted note is written with three guarantees:
 | `sourceRefs[0].sourceId` | stable external id (`"issue:42"`) | The dedup key — re-ingest skips already-seen items. |
 | `id` | `conn_<sha256(externalId:content)[:16]>` | Content-derived, **no wall-clock**. Re-ingesting identical content reproduces identical bytes → the sync manifest reports "no change" → no phantom conflict, no needless upload. |
 
-## `.tekmemo/connectors.json`
+## ``.memofs/`connectors.json`
 
 ```json
 {
@@ -86,11 +86,11 @@ The schema (`{ id, type, enabled, schedule, sourceMapping, secretRef }`) is lock
 ## Secret resolution
 
 ```ts
-import { EnvSecretResolver, StaticSecretResolver } from "@tekbreed/tekmemo-connectors";
+import { EnvSecretResolver, StaticSecretResolver } from "@memofs/connectors";
 
-// Dev/local fallback: reads .tekmemo/secrets.json (gitignored, NOT synced)
+// Dev/local fallback: reads `.memofs/`secrets.json (gitignored, NOT synced)
 // { "ss_abc123": "ghp_..." }
-const resolver = new EnvSecretResolver({ rootDir: "./.tekmemo" });
+const resolver = new EnvSecretResolver({ rootDir: "./`.memofs`" });
 
 // Tests / programmatic
 const testResolver = new StaticSecretResolver({ ss_abc123: "test-token" });
@@ -108,7 +108,7 @@ Implement the `SecretResolver` interface to wire any backend (a cloud fetch, a v
 ### GitHub
 
 ```ts
-import { GitHubConnector, createConnectorRegistry } from "@tekbreed/tekmemo-connectors";
+import { GitHubConnector, createConnectorRegistry } from "@memofs/connectors";
 
 // Default registry already includes GitHub; this is how you'd add a custom one.
 const registry = createConnectorRegistry();
@@ -144,7 +144,7 @@ The token is a Notion internal integration token (`ntn_…` / `secret_…`) with
 ## Writing a connector
 
 ```ts
-import { type Connector, type ConnectorRecord, type ConnectorIngestContext } from "@tekbreed/tekmemo-connectors";
+import { type Connector, type ConnectorRecord, type ConnectorIngestContext } from "@memofs/connectors";
 
 class LinearConnector implements Connector {
  readonly type = "linear";
@@ -168,11 +168,11 @@ class LinearConnector implements Connector {
 
 ## Boundary
 
-This package owns the connector framework + the built-in connectors. It does **not** own the TekMemo core write path (`@tekbreed/tekmemo`), the MCP server, or the CLI command group. It depends on core for writes and accepts the host's `Tekmemo` instance (single-writer contract — see `AGENTS.md`).
+This package owns the connector framework + the built-in connectors. It does **not** own the Memo FS core write path (`@memofs`), the MCP server, or the CLI command group. It depends on core for writes and accepts the host's `Memofs` instance (single-writer contract — see `AGENTS.md`).
 
 ## What's not here yet (v1 deferrals)
 
-- **CLI `tekmemo connectors {add|remove|list|run}`** — lives in `packages/tekmemo-cli`; wires to this package.
+- **CLI `memofs connectors {add|remove|list|run}`** — lives in `packages/memofs-cli`; wires to this package.
 - **Cloud `GET .../connectors/:id/secret` resolver** — ships when the cloud app does.
 - **Schedule enforcement** — `schedule` is stored but not acted on; execution happens only while the local runtime is alive (CLI / MCP session / daemon).
 

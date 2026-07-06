@@ -1,5 +1,5 @@
 /**
- * `@tekmemo/connectors` — the local connector framework for TekMemo.
+ * `@memofs/connectors` — the local connector framework for TekMemo.
  *
  * Connectors ingest external sources (GitHub, Notion, …) into `.tekmemo/`
  * through the local engine. Each source is a plugin implementing the
@@ -28,10 +28,15 @@ export { ConnectorRegistry, createConnectorRegistry } from "./registry";
 export type { RunConnectorsOptions, RunConnectorsResult } from "./runner";
 export { runConnectors } from "./runner";
 export type {
+	CloudSecretResolverOptions,
 	FileSecretResolverOptions,
 	SecretResolver,
 } from "./secret-resolver";
-export { EnvSecretResolver, StaticSecretResolver } from "./secret-resolver";
+export {
+	CloudSecretResolver,
+	EnvSecretResolver,
+	StaticSecretResolver,
+} from "./secret-resolver";
 export type {
 	Connector,
 	ConnectorConfig,

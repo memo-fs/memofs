@@ -13,19 +13,19 @@ import { createTempTekMemoDir } from "../../src/testing/temp-dir";
  * graph accumulates automatically, and recall returns ranked, recent results.
  */
 describe("local-first intelligence (zero config)", () => {
-		it("recalls a written memory via lexical hybrid recall with no embedder", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("recalls a written memory via lexical hybrid recall with no embedder", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "intel",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "intel",
+				mode: "local",
+			});
 
 			await memo.notes.record({
 				content: "Authentication uses JWT tokens issued by the login flow.",
@@ -42,19 +42,19 @@ describe("local-first intelligence (zero config)", () => {
 		}
 	});
 
-		it("auto-extracts graph facts from written memory", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("auto-extracts graph facts from written memory", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "intel",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "intel",
+				mode: "local",
+			});
 
 			// The rule-based extractor recognizes "X uses Y" patterns.
 			await memo.notes.record({
@@ -114,19 +114,19 @@ describe("local-first intelligence (zero config)", () => {
 		}
 	});
 
-		it("returns ranked results ordered by score", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("returns ranked results ordered by score", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "intel",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "intel",
+				mode: "local",
+			});
 
 			await memo.notes.record({
 				content: "The deployment pipeline runs on GitHub Actions.",
@@ -262,19 +262,19 @@ describe("best-effort write path (failing embedder)", () => {
  * (the audit trail is preserved).
  */
 describe("consolidation (end-to-end)", () => {
-		it("previews the plan without persisting when apply is false", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("previews the plan without persisting when apply is false", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "consolidate",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
 
 			// The rule-based extractor emits a `supersedes` edge from this prose.
 			await memo.notes.record({
@@ -294,19 +294,19 @@ describe("consolidation (end-to-end)", () => {
 		}
 	});
 
-		it("retires a superseded fact and preserves the audit trail when applied", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("retires a superseded fact and preserves the audit trail when applied", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "consolidate",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
 
 			await memo.notes.record({
 				content: "OAuth2 supersedes JWT for authentication.",
@@ -324,19 +324,19 @@ describe("consolidation (end-to-end)", () => {
 		}
 	});
 
-		it("reports an unchanged plan when there is nothing to consolidate", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("reports an unchanged plan when there is nothing to consolidate", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "consolidate",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "consolidate",
+				mode: "local",
+			});
 			// No supersession, no duplicates.
 			await memo.notes.record({
 				content: "TekMemo uses BM25 for lexical recall.",
@@ -361,19 +361,19 @@ describe("consolidation (end-to-end)", () => {
  * `graph:*` hit whose node is `deprecated` (safety net for manual deprecations).
  */
 describe("staleness loop — recall honors consolidation retirements", () => {
-		it("does not surface a superseded graph fact in recall after consolidation", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("does not surface a superseded graph fact in recall after consolidation", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "staleness",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "staleness",
+				mode: "local",
+			});
 
 			// The rule-based extractor emits a `supersedes` edge (JWT → retired)
 			// and indexes both nodes into the lexical store under `graph:{id}`.
@@ -410,19 +410,19 @@ describe("staleness loop — recall honors consolidation retirements", () => {
 		}
 	});
 
-		it("drops a manually deprecated graph node from lexical recall", async () => {
-			const { rootDir, cleanup } = await createTempTekMemoDir();
-			try {
-				const memo = new Tekmemo({
-					store: createNodeFsMemoryStore({
-						rootDir,
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
+	it("drops a manually deprecated graph node from lexical recall", async () => {
+		const { rootDir, cleanup } = await createTempTekMemoDir();
+		try {
+			const memo = new Tekmemo({
+				store: createNodeFsMemoryStore({
 					rootDir,
-					projectId: "staleness",
-					mode: "local",
-				});
+					createRoot: true,
+					missingFileBehavior: "empty",
+				}),
+				rootDir,
+				projectId: "staleness",
+				mode: "local",
+			});
 
 			// "uses" triggers the rule-based extractor so a Fly.io node exists to
 			// deprecate. (A sentence with no relation verb extracts nothing.)

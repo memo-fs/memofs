@@ -25,8 +25,8 @@ import {
 	type RuntimeWorkerEnv,
 } from "./http/fetch-handler";
 
-export type { RuntimeExecutionContext, RuntimeWorkerEnv };
 export { createRuntimeFetchHandler } from "./http/fetch-handler";
+export type { RuntimeExecutionContext, RuntimeWorkerEnv };
 
 /**
  * The Worker fetch handler. Slice 2 wires `createRuntime` to the real

@@ -1,23 +1,23 @@
-import type { LocalStrategyContext } from "./types";
 import {
-	type GraphNodeInput,
-	type GraphEdgeInput,
-	type GraphNeighborsInput,
-	type GraphPathInput,
-	type GraphPathResult,
-	type ListGraphInput,
-	type ConsolidateMemoryInput,
-	type ConsolidateMemoryResult,
-} from "../types";
-import { stableEdgeKey, toGraphNodeInput, toGraphEdgeInput } from "./helpers";
-import { paginateArray } from "../helpers";
-import {
-	consolidateGraph,
 	applyConsolidation,
-	type GraphNode,
+	consolidateGraph,
 	type GraphEdge,
+	type GraphNode,
 	type JsonObject,
 } from "../../index";
+import { paginateArray } from "../helpers";
+import type {
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
+	GraphEdgeInput,
+	GraphNeighborsInput,
+	GraphNodeInput,
+	GraphPathInput,
+	GraphPathResult,
+	ListGraphInput,
+} from "../types";
+import { stableEdgeKey, toGraphEdgeInput, toGraphNodeInput } from "./helpers";
+import type { LocalStrategyContext } from "./types";
 
 export function edgeId(edge: GraphEdgeInput): string {
 	return (

@@ -1,24 +1,24 @@
-# `@tekmemo/adapter-voyage`
+# `@memofs/adapter-voyage`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-voyage"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-voyage?label=%40tekmemo%2Fadapter-voyage&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-voyage"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-voyage?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/adapter-voyage"><img src="https://img.shields.io/npm/v/%40memofs%2Fadapter-voyage?label=%40memofs%2Fadapter-voyage&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/adapter-voyage"><img src="https://img.shields.io/npm/dm/%40memofs%2Fadapter-voyage?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Voyage AI embedder and reranker adapter for TekMemo.
+Voyage AI embedder and reranker adapter for Memo FS.
 
 ## What is this?
 
-**Voyage AI Embedder and Reranker adapter for TekMemo.** Provides first-class integration with Voyage AI's embedding models (voyage-3, voyage-3-large, voyage-3-lite, voyage-code-3) and reranking models (rerank-2, rerank-2-lite) through TekMemo's provider-neutral embedder and reranker contracts.
+**Voyage AI Embedder and Reranker adapter for Memo FS.** Provides first-class integration with Voyage AI's embedding models (voyage-3, voyage-3-large, voyage-3-lite, voyage-code-3) and reranking models (rerank-2, rerank-2-lite) through Memo FS's provider-neutral embedder and reranker contracts.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-adapter-voyage
+npm install @memofs/adapter-voyage
 ```
 
 You also need a Voyage AI API key from [voyageai.com](https://www.voyageai.com/).
@@ -28,7 +28,7 @@ You also need a Voyage AI API key from [voyageai.com](https://www.voyageai.com/)
 ### Embeddings
 
 ```ts
-import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
+import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
 const embedder = createVoyageEmbedder({
  apiKey: process.env.VOYAGE_API_KEY!,
@@ -37,7 +37,7 @@ const embedder = createVoyageEmbedder({
 
 // Embed a batch of texts
 const result = await embedder.embed([
- "TekMemo provides unified memory runtime for AI agents",
+ "Memo FS provides unified memory runtime for AI agents",
  "Voyage AI offers state-of-the-art embedding models",
 ]);
 
@@ -48,7 +48,7 @@ console.log(result.usage); // { promptTokens, totalTokens }
 ### Reranking
 
 ```ts
-import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
+import { createVoyageReranker } from "@memofs/adapter-voyage";
 
 const reranker = createVoyageReranker({
  apiKey: process.env.VOYAGE_API_KEY!,
@@ -58,7 +58,7 @@ const reranker = createVoyageReranker({
 const result = await reranker.rerank({
  query: "memory runtime for AI agents",
  documents: [
- "TekMemo is a memory layer for AI agents",
+ "Memo FS is a memory layer for AI agents",
  "Voyage AI provides embedding models",
  "Upstash Vector is a serverless vector database",
  ],
@@ -105,23 +105,23 @@ console.log(result.results); // RerankResult[] with relevance scores
 - `rerank-2` — High-quality reranking
 - `rerank-2-lite` — Faster, cost-effective reranking
 
-## Integration with TekMemo Core
+## Integration with Memo FS Core
 
 ```ts
-import { bootstrapMemoryStore, createFsRecallStore } from "@tekbreed/tekmemo";
-import { createVoyageEmbedder } from "@tekbreed/tekmemo-adapter-voyage";
+import { bootstrapMemoryStore, createFsRecallStore } from "@memofs";
+import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
-const store = await bootstrapMemoryStore({ rootDir: "./.tekmemo" });
+const store = await bootstrapMemoryStore({ rootDir: "./`.memofs`" });
 
 const embedder = createVoyageEmbedder({
  apiKey: process.env.VOYAGE_API_KEY!,
  model: "voyage-3-large",
 });
 
-// Local-first persistent recall store backed by .tekmemo/indexes/embeddings.jsonl
+// Local-first persistent recall store backed by `.memofs/`indexes/embeddings.jsonl
 const recallStore = createFsRecallStore({ store });
 
-// Now use with TekMemo's memory operations
+// Now use with Memo FS's memory operations
 ```
 
 ## Testing
@@ -129,7 +129,7 @@ const recallStore = createFsRecallStore({ store });
 The package exports fake implementations for testing:
 
 ```ts
-import { createFakeVoyageClient } from "@tekbreed/tekmemo-adapter-voyage/testing";
+import { createFakeVoyageClient } from "@memofs/adapter-voyage/testing";
 
 const fakeClient = createFakeVoyageClient({
  embeddings: [[0.1, 0.2, 0.3]],
@@ -139,7 +139,7 @@ const fakeClient = createFakeVoyageClient({
 
 ## Boundary
 
-This package owns the Voyage AI embedder and reranker adapter implementations. It does not own the TekMemo core contracts, other provider adapters, or the Voyage AI service itself.
+This package owns the Voyage AI embedder and reranker adapter implementations. It does not own the Memo FS core contracts, other provider adapters, or the Voyage AI service itself.
 
 ## Contributing
 

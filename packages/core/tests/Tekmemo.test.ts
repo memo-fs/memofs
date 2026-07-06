@@ -1,4 +1,4 @@
-import { FakeEmbedder } from "@tekmemo/testing";
+import { FakeEmbedder } from "@memofs/testing";
 import { describe, expect, it } from "vitest";
 import {
 	CORE_MEMORY_PATH,

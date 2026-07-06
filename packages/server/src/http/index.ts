@@ -24,8 +24,8 @@
  * @module http
  */
 
-import type { Tekmemo } from "@tekmemo/core";
-import type { JsonRpcResponse } from "@tekmemo/json-rpc";
+import type { Tekmemo } from "@memofs/core";
+import type { JsonRpcResponse } from "@memofs/json-rpc";
 import {
 	type DispatchOptions,
 	dispatchRuntimeText,

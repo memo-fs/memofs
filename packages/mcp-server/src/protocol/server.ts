@@ -25,9 +25,9 @@ import {
 	failure,
 	isNotification,
 	JSON_RPC_ERRORS,
+	JsonRpcProtocolError,
 	type JsonRpcRequest,
 	type JsonRpcResponse,
-	JsonRpcProtocolError,
 	parseJsonRpcPayload,
 	success,
 	validateJsonRpcRequest,
@@ -186,7 +186,7 @@ class DefaultTekMemoMcpProtocolServer implements TekMemoMcpProtocolServer {
 			request = validateJsonRpcRequest(message);
 		} catch (error) {
 			// The protocol layer throws a neutral `JsonRpcProtocolError` (from
-			// `@tekmemo/json-rpc`). Translate it into this package's own
+			// `@memofs/json-rpc`). Translate it into this package's own
 			// `McpValidationError` via the shared `toMcpError` helper, preserving
 			// the spec `jsonRpcCode` in `details` so `errorCodeFrom` maps it to the
 			// right JSON-RPC code. Unknown throws pass straight through.
@@ -358,7 +358,7 @@ function optionalCursor(value: unknown): string | undefined {
 
 /**
  * Translates a neutral {@link JsonRpcProtocolError} (thrown by the shared
- * `@tekmemo/json-rpc` protocol layer) into this package's own
+ * `@memofs/json-rpc` protocol layer) into this package's own
  * {@link McpValidationError}, preserving the spec `jsonRpcCode` in `details`.
  *
  * Used at both protocol-error catch sites (`handleJsonRpcText` parse failures +

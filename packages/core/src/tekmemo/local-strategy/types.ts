@@ -1,20 +1,20 @@
-import type { Extractor } from "../../graph/extraction/extractor";
 import type { MemoryEmbedder } from "../../core/types/embeddings";
 import type { MemoryStore } from "../../core/types/memory-store";
-import type { Reranker } from "../../rerank";
-import type { RecallStore } from "../../recall/types";
-import type { FileSyncLayer } from "../sync/file-replication";
+import type { Extractor } from "../../graph/extraction/extractor";
 import type {
 	AgentfsLikeClient,
-	GraphNodeInput,
 	GraphEdgeInput,
-	SnapshotMemoryInput,
-	SnapshotMemoryResult,
+	GraphNodeInput,
 	InMemoryGraphStore,
 	LlmClient,
+	SnapshotMemoryInput,
+	SnapshotMemoryResult,
 } from "../../index";
 import type { BM25Store } from "../../recall/lexical/bm25";
+import type { RecallStore } from "../../recall/types";
+import type { Reranker } from "../../rerank";
 import type { ContextCache } from "../progressive";
+import type { FileSyncLayer } from "../sync/file-replication";
 
 export type LocalGraphStore = Pick<
 	InMemoryGraphStore,

@@ -9,7 +9,7 @@ import type {
 	EmbedTextsInput,
 	EmbedTextsResult,
 	MemoryEmbedder,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 export type {
 	EmbeddingRecord,

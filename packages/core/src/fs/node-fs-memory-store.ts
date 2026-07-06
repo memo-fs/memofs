@@ -11,8 +11,8 @@ import fs from "node:fs/promises";
  */
 
 import { PathLock } from "@repo/utils";
-import type { MemoryPath, MemoryStore } from "@tekmemo/core";
-import { MemoryNotFoundError, TEKMEMO_DIR } from "@tekmemo/core";
+import type { MemoryPath, MemoryStore } from "@memofs/core";
+import { MemoryNotFoundError, TEKMEMO_DIR } from "@memofs/core";
 import { assertString } from "../core/validation/assertions";
 import { isNotFoundError, wrapFsError } from "./errors/fs-memory-store-error";
 import type {

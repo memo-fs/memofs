@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/connectors",
+	"name": "@memofs/connectors",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Local connector framework for ingesting external sources into TekMemo memory.",
+	"description": "Local connector framework for ingesting external sources into Memo FS memory.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/connectors"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/connectors/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -61,7 +61,7 @@
 		"ai",
 		"agents",
 		"memory",
-		"tekmemo",
+		"memofs",
 		"adapter",
 		"typescript"
 	],
@@ -73,12 +73,12 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:^"
+		"@memofs/core": "workspace:^"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
-		"@tekmemo/testing": "workspace:^",
+		"@memofs/testing": "workspace:^",
 		"@types/node": "^22.20.0"
 	}
 }

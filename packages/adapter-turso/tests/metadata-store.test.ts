@@ -1,14 +1,13 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createClient } from "@libsql/client";
-import { defineMetadataStoreContractTests } from "@tekmemo/testing";
-import { beforeAll, beforeEach, describe } from "vitest";
+import { defineMetadataStoreContractTests } from "@memofs/testing";
+import { afterAll, beforeAll, beforeEach, describe } from "vitest";
 import { createTursoMetadataStore } from "../src/index";
 
-/**
- * The `project_files` table this adapter consumes — owned by the cloud's
- * drizzle schema territory); the adapter is a consumer, not the owner.
- * Recreated here as the smallest durable DDL the manifest needs, mirroring the
- * cloud layout + unique `(project_id, path)` index exactly.
- */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const PROJECT_FILES_DDL = [
 	`CREATE TABLE project_files (
 		id TEXT PRIMARY KEY,
@@ -22,12 +21,20 @@ const PROJECT_FILES_DDL = [
 	`CREATE UNIQUE INDEX project_files_project_path_uq ON project_files (project_id, path)`,
 ];
 
+let dbFile: string;
 let client: ReturnType<typeof createClient>;
 
-beforeAll(() => {
-	// `:memory:` is fine — this suite exercises metadata CRUD, not the
-	// interactive `BEGIN IMMEDIATE` transactions that need a file-backed DB.
-	client = createClient({ url: ":memory:" });
+beforeAll(async () => {
+	dbFile = path.resolve(
+		__dirname,
+		`../test-${Math.random().toString(36).slice(2)}.db`,
+	);
+	client = createClient({ url: `file:${dbFile}`, timeout: 5000 });
+});
+
+afterAll(async () => {
+	client.close();
+	await fs.rm(dbFile, { force: true });
 });
 
 beforeEach(async () => {

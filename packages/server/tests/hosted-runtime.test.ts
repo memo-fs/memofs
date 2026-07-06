@@ -1,7 +1,7 @@
 import {
-	type Extractor,
 	type ExtractionInput,
 	type ExtractionResult,
+	type Extractor,
 	InMemoryMemoryStore,
 	type LlmClient,
 	type LlmCompletionInput,
@@ -11,7 +11,7 @@ import {
 	type RerankInput,
 	type RerankResult,
 	Tekmemo,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createHostedRuntime } from "../src";
 

@@ -5,7 +5,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/connectors": ["./src/index.ts"]
+			"@memofs/connectors": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

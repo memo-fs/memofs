@@ -9,10 +9,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	failure,
-	JSON_RPC_ERRORS,
-	JsonRpcProtocolError,
 	isNotification,
 	isPlainObject,
+	JSON_RPC_ERRORS,
+	JsonRpcProtocolError,
 	parseJsonRpcPayload,
 	success,
 	validateJsonRpcRequest,
@@ -142,21 +142,19 @@ describe("validateJsonRpcRequest", () => {
 
 describe("isNotification", () => {
 	it("is true when id is absent", () => {
-		expect(
-			isNotification({ jsonrpc: "2.0", method: "ping" }),
-		).toBe(true);
+		expect(isNotification({ jsonrpc: "2.0", method: "ping" })).toBe(true);
 	});
 
 	it("is false when id is present", () => {
-		expect(
-			isNotification({ jsonrpc: "2.0", id: 5, method: "ping" }),
-		).toBe(false);
+		expect(isNotification({ jsonrpc: "2.0", id: 5, method: "ping" })).toBe(
+			false,
+		);
 	});
 
 	it("is false when id is null (spec: null id is still an id)", () => {
-		expect(
-			isNotification({ jsonrpc: "2.0", id: null, method: "ping" }),
-		).toBe(false);
+		expect(isNotification({ jsonrpc: "2.0", id: null, method: "ping" })).toBe(
+			false,
+		);
 	});
 });
 

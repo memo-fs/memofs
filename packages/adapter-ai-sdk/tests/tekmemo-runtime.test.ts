@@ -1,8 +1,8 @@
-import { Tekmemo } from "@tekmemo/core";
+import { Tekmemo } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
 	createTempTekMemoDir,
-} from "@tekmemo/core/node-fs";
+} from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
 import {
 	buildRuntimeMemoryToolDefinition,

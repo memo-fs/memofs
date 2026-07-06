@@ -1,10 +1,10 @@
 import { GraphNotFoundError } from "../errors/graph-errors";
 import type {
 	GraphPath,
-	GraphShortestPathQuery,
 	GraphPathStep,
-	StoredGraphNode,
+	GraphShortestPathQuery,
 	StoredGraphEdge,
+	StoredGraphNode,
 } from "../types";
 import { cloneJson } from "../utils/clone";
 import { validateDepth } from "../utils/validation";

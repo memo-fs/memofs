@@ -152,7 +152,7 @@ export function createScopeMetadata(input: {
 				? input.context.participantIds
 				: undefined,
 		actorId: input.context.actorId,
-		createdByPackage: "@tekmemo/adapter-ai-sdk",
+		createdByPackage: "@memofs/adapter-ai-sdk",
 		// compactObject has stripped undefined values and empty arrays, so the
 		// runtime object is a valid JsonObject. The cast bridges the strict
 		// core JsonObject index to this package's named-field metadata type.

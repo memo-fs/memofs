@@ -1,5 +1,5 @@
 import path from "node:path";
-import { MemoryPathError } from "@tekmemo/core";
+import { MemoryPathError } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
 	normalizeOptions,

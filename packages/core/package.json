@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/core",
+	"name": "@memofs/core",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "TekMemo core memory runtime and provider-neutral contracts for AI apps and agents.",
+	"description": "Memo FS core memory runtime and provider-neutral contracts for AI apps and agents.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/core"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/core/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -80,11 +80,11 @@
 		"recall",
 		"graph",
 		"agentfs",
-		"tekmemo",
+		"memofs",
 		"typescript"
 	],
 	"devDependencies": {
-		"@tekmemo/testing": "workspace:^",
+		"@memofs/testing": "workspace:^",
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",

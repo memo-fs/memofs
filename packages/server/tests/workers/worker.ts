@@ -1,4 +1,4 @@
-import { InMemoryMemoryStore, Tekmemo } from "@tekmemo/core";
+import { InMemoryMemoryStore, Tekmemo } from "@memofs/core";
 import { createRuntimeFetchHandler } from "../../src/http/fetch-handler";
 
 const runtime = new Tekmemo({

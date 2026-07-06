@@ -1,4 +1,4 @@
-import { defineRerankerContractTests } from "@tekmemo/testing/contracts";
+import { defineRerankerContractTests } from "@memofs/testing/contracts";
 import { createVoyageReranker } from "../../src";
 import { createFakeVoyageRerankClient } from "../../src/reranker/testing";
 

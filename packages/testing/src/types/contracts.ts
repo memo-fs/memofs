@@ -7,7 +7,7 @@ export interface MinimalMemoryStore {
 
 /**
  * Structural mirror of core's `BlobEntry` — the canonical-file manifest row.
- * Kept structural (not imported from `@tekmemo/core`) so the contract carries
+ * Kept structural (not imported from `@memofs/core`) so the contract carries
  * no core dependency, matching the rest of the `Minimal*` family.
  */
 export interface MinimalBlobEntry {
@@ -49,12 +49,13 @@ export interface MinimalMetadataStore {
 		path: string,
 	): Promise<MinimalBlobEntry | undefined> | MinimalBlobEntry | undefined;
 	/** Upserts a path → entry row (insert-or-replace). */
-	upsertEntry(
-		path: string,
-		entry: MinimalBlobEntry,
-	): Promise<void> | void;
+	upsertEntry(path: string, entry: MinimalBlobEntry): Promise<void> | void;
 	/** Removes a manifest row for a path. Idempotent. */
 	removeEntry(path: string): Promise<void> | void;
+	/** Runs fn inside a serialized transaction. */
+	withTransaction?<T>(
+		fn: (tx: MinimalMetadataStore) => Promise<T>,
+	): Promise<T> | T;
 }
 
 export interface MinimalEmbedder {
@@ -146,7 +147,7 @@ export interface MinimalReranker {
 /**
  * Structural subset of the graph source-ref every extractor stamps onto the
  * nodes/edges it emits. Kept minimal so adapter packages don't need to depend
- * on `@tekmemo/core` to satisfy the contract — the real `GraphSourceRef`
+ * on `@memofs/core` to satisfy the contract — the real `GraphSourceRef`
  * (a strict superset) is assignable to this.
  */
 export interface MinimalGraphSourceRef {
@@ -228,7 +229,7 @@ export interface MinimalExtractionResult {
 /**
  * Provider-neutral graph extractor contract — the minimal surface adapter
  * packages must satisfy (mirrors the embedder/reranker pattern). Any concrete
- * `Extractor` from `@tekmemo/core` is assignable to this.
+ * `Extractor` from `@memofs/core` is assignable to this.
  */
 export interface MinimalExtractor {
 	readonly name: string;
@@ -239,7 +240,7 @@ export interface MinimalExtractor {
  * A JSON Schema describing the desired structured output of an LLM completion.
  * Provider-neutral — typed as a plain object so the contract carries no
  * schema-library dependency. Any concrete `LlmStructuredSchema` from
- * `@tekmemo/core` is assignable to this.
+ * `@memofs/core` is assignable to this.
  */
 export interface MinimalLlmStructuredSchema {
 	[key: string]: unknown;
@@ -267,7 +268,7 @@ export interface MinimalLlmCompletionResult {
 /**
  * Provider-neutral LLM transport contract — the minimal surface adapter
  * packages must satisfy (the fourth member of the embedder/reranker/extractor
- * family). Any concrete `LlmClient` from `@tekmemo/core` is assignable to
+ * family). Any concrete `LlmClient` from `@memofs/core` is assignable to
  * this. Has no core default impl: the deterministic-default seam is "field
  * absent → feature runs its deterministic path".
  */

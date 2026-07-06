@@ -1,4 +1,4 @@
-import { defineRecallStoreContractTests } from "@tekmemo/testing/contracts";
+import { defineRecallStoreContractTests } from "@memofs/testing/contracts";
 import { createInMemoryRecallStore } from "../../src/index";
 
 defineRecallStoreContractTests({

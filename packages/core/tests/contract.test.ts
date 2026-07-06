@@ -1,4 +1,4 @@
-import { defineMemoryStoreContractTests } from "@tekmemo/testing/contracts";
+import { defineMemoryStoreContractTests } from "@memofs/testing/contracts";
 import { InMemoryMemoryStore } from "../src/index";
 
 defineMemoryStoreContractTests({

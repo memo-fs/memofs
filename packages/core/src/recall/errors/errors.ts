@@ -1,5 +1,5 @@
 /**
- * @file Error classes for the @tekmemo/core/recall package.
+ * @file Error classes for the @memofs/core/recall package.
  *
  * @remarks
  * Provides a hierarchy of error classes for different failure modes

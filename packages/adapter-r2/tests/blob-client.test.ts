@@ -1,4 +1,4 @@
-import { defineBlobClientContractTests } from "@tekmemo/testing";
+import { defineBlobClientContractTests } from "@memofs/testing";
 import { describe } from "vitest";
 import { createR2BlobClient } from "../src/index";
 

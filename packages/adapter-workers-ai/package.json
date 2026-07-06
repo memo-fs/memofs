@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/adapter-workers-ai",
+	"name": "@memofs/adapter-workers-ai",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Cloudflare Workers AI extractor adapter for TekMemo.",
+	"description": "Cloudflare Workers AI extractor adapter for Memo FS.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/adapter-workers-ai"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-workers-ai/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -59,7 +59,7 @@
 		"llm",
 		"extractor",
 		"graph",
-		"tekmemo",
+		"memofs",
 		"adapter",
 		"typescript"
 	],
@@ -71,7 +71,7 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:^"
+		"@memofs/core": "workspace:^"
 	},
 	"peerDependencies": {
 		"@cloudflare/workers-types": "^4.20250617.0"
@@ -86,6 +86,6 @@
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@tekmemo/testing": "workspace:^"
+		"@memofs/testing": "workspace:^"
 	}
 }

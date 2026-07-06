@@ -6,7 +6,7 @@ import {
 	DEFAULT_NOTES_MEMORY,
 	InMemoryMemoryStore,
 	NOTES_MEMORY_PATH,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { expect, test, vi } from "vitest";
 import {
 	buildPrepareCallMemoryText,

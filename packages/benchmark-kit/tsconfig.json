@@ -4,7 +4,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/benchmark-kit": ["./src/index.ts"]
+			"@memofs/benchmark-kit": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts"],

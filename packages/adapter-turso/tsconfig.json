@@ -5,7 +5,7 @@
 		"rootDir": ".",
 		"types": ["node"],
 		"paths": {
-			"@tekmemo/adapter-turso": ["./src/index.ts"]
+			"@memofs/adapter-turso": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

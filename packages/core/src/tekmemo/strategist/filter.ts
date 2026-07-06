@@ -1,5 +1,5 @@
-import type { FilterInput } from "./types";
 import type { RecallItem } from "../types";
+import type { FilterInput } from "./types";
 
 export function filterCandidates(input: FilterInput): RecallItem[] {
 	const retired = input.retiredGraphDocIds ?? new Set<string>();

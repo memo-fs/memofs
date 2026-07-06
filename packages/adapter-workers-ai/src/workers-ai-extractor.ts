@@ -31,7 +31,7 @@ import type {
 	GraphNode,
 	GraphNodeType,
 	GraphSourceRef,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 /** Default Workers AI text-generation model (overridable via options). */
 const DEFAULT_MODEL = "@cf/meta/llama-3.1-8b-instruct";
@@ -75,7 +75,7 @@ export interface CreateWorkersAiExtractorOptions {
  *
  * @example
  * ```ts
- * import { createWorkersAiExtractor } from "@tekmemo/adapter-workers-ai";
+ * import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
  *
  * const extractor = createWorkersAiExtractor({ ai: env.AI });
  * ```

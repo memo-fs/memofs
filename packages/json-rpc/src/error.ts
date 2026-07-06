@@ -22,12 +22,7 @@ import type { JsonValue } from "./types";
  * (`-32700`, `-32600`, `-32602`, …). Consumers read this to build their own
  * error envelope without re-deriving the mapping.
  */
-export type JsonRpcErrorCode =
-	| -32700
-	| -32600
-	| -32601
-	| -32602
-	| -32603;
+export type JsonRpcErrorCode = -32700 | -32600 | -32601 | -32602 | -32603;
 
 /**
  * Structured extra context attached to a {@link JsonRpcProtocolError}.

@@ -2,7 +2,7 @@ import {
 	bootstrapMemoryStore,
 	InMemoryMemoryStore,
 	writeCoreMemory,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { expect, test } from "vitest";
 
 import { buildPrepareCallMemoryText } from "../src";

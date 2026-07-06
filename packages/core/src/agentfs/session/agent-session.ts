@@ -4,41 +4,40 @@
  * @packageDocumentation
  */
 
-import { assertWriteAllowed } from "../../security/secret-blocklist";
 import { NOTES_MEMORY_PATH } from "../../index";
+import { assertWriteAllowed } from "../../security/secret-blocklist";
 import { syncAfterSession } from "../sync/sync-after-session";
 import { syncBeforeSession } from "../sync/sync-before-session";
 import { validateSafeSegment } from "../utils/validate-safe-segment";
 import { createDefaultSessionId, formatDurableMemoryNote } from "./helpers";
 import {
-	createAgentWorkspacePaths,
 	createAgentWorkspaceFiles,
+	createAgentWorkspacePaths,
 	extractSessionMemory,
 } from "./scaffolding";
 import type {
-	CreateTekMemoAgentSessionOptions,
-	TekMemoAgentSession,
-	PrepareTekMemoAgentSessionResult,
-	ExtractedSessionMemory,
 	CompleteTekMemoAgentSessionOptions,
 	CompleteTekMemoAgentSessionResult,
-} from "./types";
-
-export type {
-	TekMemoAgentSessionPaths,
 	CreateTekMemoAgentSessionOptions,
-	PrepareTekMemoAgentSessionResult,
 	ExtractedSessionMemory,
-	CompleteTekMemoAgentSessionOptions,
-	CompleteTekMemoAgentSessionResult,
+	PrepareTekMemoAgentSessionResult,
 	TekMemoAgentSession,
 } from "./types";
 
 export {
-	createAgentWorkspacePaths,
 	createAgentWorkspaceFiles,
+	createAgentWorkspacePaths,
 	extractSessionMemory,
 } from "./scaffolding";
+export type {
+	CompleteTekMemoAgentSessionOptions,
+	CompleteTekMemoAgentSessionResult,
+	CreateTekMemoAgentSessionOptions,
+	ExtractedSessionMemory,
+	PrepareTekMemoAgentSessionResult,
+	TekMemoAgentSession,
+	TekMemoAgentSessionPaths,
+} from "./types";
 
 /**
  * Creates a high-level TekMemo agent session backed by AgentFS files.

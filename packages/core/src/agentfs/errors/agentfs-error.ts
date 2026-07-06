@@ -1,5 +1,5 @@
 /**
- * @file Error classes for the @tekmemo/core/agentfs package.
+ * @file Error classes for the @memofs/core/agentfs package.
  *
  * @remarks
  * All errors in this package extend the base {@link AgentfsError} class,

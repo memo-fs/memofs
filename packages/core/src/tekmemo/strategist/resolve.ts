@@ -1,8 +1,8 @@
 import type {
-	ResolveGraphNode,
-	ResolveGraphEdge,
-	ResolvedEntity,
 	EntityState,
+	ResolvedEntity,
+	ResolveGraphEdge,
+	ResolveGraphNode,
 } from "./types";
 
 export function resolveEntities(

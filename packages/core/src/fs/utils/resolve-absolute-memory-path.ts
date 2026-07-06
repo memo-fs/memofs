@@ -8,7 +8,7 @@
  */
 
 import path from "node:path";
-import { assertMemoryPath, type MemoryPath } from "@tekmemo/core";
+import { assertMemoryPath, type MemoryPath } from "@memofs/core";
 import { FsMemoryStoreError } from "../errors/fs-memory-store-error";
 import type { NormalizedNodeFsMemoryStoreOptions } from "../types/options";
 

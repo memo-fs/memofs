@@ -49,7 +49,7 @@ import {
 	type RecallStore,
 	type Reranker,
 	Tekmemo,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 /**
  * The injected adapter bundle the hosted runtime assembles from.

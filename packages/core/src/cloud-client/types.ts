@@ -1,5 +1,5 @@
 /**
- * Public types for @tekmemo/core/cloud.
+ * Public types for @memofs/core/cloud.
  *
  * TekMemo Cloud is a **file replica**, not an engine. The cloud stores
  * byte-for-byte replicas of the canonical `.tekmemo/` files and syncs them by

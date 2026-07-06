@@ -11,7 +11,7 @@
  *
  * The runtime is an injected fake bundle (no real provider calls).
  */
-import { InMemoryMemoryStore } from "@tekmemo/core";
+import { InMemoryMemoryStore } from "@memofs/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createHostedRuntime } from "../src";
 import { handleRuntimeRequest } from "../src/http";
@@ -41,7 +41,9 @@ async function post(
 		}),
 		{
 			runtime,
-			...(init?.requireAuth === undefined ? {} : { requireAuth: init.requireAuth }),
+			...(init?.requireAuth === undefined
+				? {}
+				: { requireAuth: init.requireAuth }),
 			...(init?.token === undefined ? {} : { bearerToken: init.token }),
 		},
 	);

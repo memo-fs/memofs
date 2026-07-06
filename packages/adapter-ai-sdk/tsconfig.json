@@ -4,7 +4,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/adapter-ai-sdk": ["./src/index.ts"]
+			"@memofs/adapter-ai-sdk": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

@@ -28,15 +28,15 @@ import type {
 	RecentMemoryResult,
 	TekMemoMemoryRuntime,
 	Tekmemo,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 /**
  * Build an AI SDK runtime backed by a {@link Tekmemo} client.
  *
  * @example
  * ```ts
- * import { Tekmemo } from "@tekmemo/core";
- * import { createAiSdkRuntimeFromTekmemo } from "@tekmemo/adapter-ai-sdk";
+ * import { Tekmemo } from "@memofs/core";
+ * import { createAiSdkRuntimeFromTekmemo } from "@memofs/adapter-ai-sdk";
  *
  * const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
  * const runtime = createAiSdkRuntimeFromTekmemo(memo);

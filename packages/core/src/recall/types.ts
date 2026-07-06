@@ -1,5 +1,5 @@
 /**
- * @file Type definitions for the @tekmemo/core/recall package.
+ * @file Type definitions for the @memofs/core/recall package.
  *
  * @remarks
  * This module defines the core data structures used throughout the recall package

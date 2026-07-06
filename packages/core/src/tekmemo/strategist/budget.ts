@@ -86,14 +86,16 @@ function compressSectionContent(
 	const omitted: string[] = [...items];
 
 	for (let i = 0; i < items.length; i++) {
-		const nextIncluded = [...included, items[i]];
+		const item = items[i];
+		if (item === undefined) continue;
+		const nextIncluded = [...included, item];
 		const nextOmitted = items.slice(i + 1);
 
 		const nextIncludedText = nextIncluded.join(delimiter);
 		if (nextOmitted.length === 0) {
 			if (Buffer.byteLength(nextIncludedText, "utf8") <= bodyBudget) {
 				currentText = nextIncludedText;
-				included.push(items[i]);
+				included.push(item);
 				omitted.shift();
 			}
 			break;
@@ -122,7 +124,7 @@ function compressSectionContent(
 		);
 		if (totalBytes <= bodyBudget) {
 			currentText = nextIncludedText;
-			included.push(items[i]);
+			included.push(item);
 			omitted.shift();
 		} else {
 			break;

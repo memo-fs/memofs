@@ -3,7 +3,7 @@
  *
  * @remarks
  * This helper intentionally accepts a structural path object instead of
- * importing `@tekmemo/core`'s `agentfs`, so this adapter keeps AgentFS optional.
+ * importing `@memofs/core`'s `agentfs`, so this adapter keeps AgentFS optional.
  *
  * @packageDocumentation
  */

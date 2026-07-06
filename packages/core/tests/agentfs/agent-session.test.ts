@@ -1,4 +1,4 @@
-import { InMemoryMemoryStore, NOTES_MEMORY_PATH } from "@tekmemo/core";
+import { InMemoryMemoryStore, NOTES_MEMORY_PATH } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
 	createAgentWorkspacePaths,

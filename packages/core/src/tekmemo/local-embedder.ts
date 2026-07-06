@@ -1,6 +1,6 @@
 /**
  * @file Lazy local embedder — a {@link MemoryEmbedder} proxy that defers the
- * (optional) `@tekmemo/adapter-transformers` runtime to the first call.
+ * (optional) `@memofs/adapter-transformers` runtime to the first call.
  *
  * @remarks
  * This keeps the core package dependency-free: the transformers adapter is an
@@ -34,7 +34,7 @@ export interface LazyLocalEmbedderOptions {
 	model?: string;
 	/**
 	 * Module specifier of the adapter to dynamically import. Overridable for tests.
-	 * @defaultValue `"@tekmemo/adapter-transformers"`
+	 * @defaultValue `"@memofs/adapter-transformers"`
 	 */
 	adapterModule?: string;
 	/**
@@ -67,7 +67,7 @@ export function createLazyLocalEmbedder(
 ): MemoryEmbedder {
 	const model = options.model ?? "Xenova/all-MiniLM-L6-v2";
 	const adapterModule =
-		options.adapterModule ?? "@tekmemo/adapter-transformers";
+		options.adapterModule ?? "@memofs/adapter-transformers";
 
 	let embedderPromise: Promise<MemoryEmbedder> | undefined;
 

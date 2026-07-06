@@ -8,4 +8,4 @@ export type {
 	MinimalRerankDocument,
 	MinimalReranker,
 	MinimalRerankResult,
-} from "@tekmemo/testing/contracts";
+} from "@memofs/testing/contracts";

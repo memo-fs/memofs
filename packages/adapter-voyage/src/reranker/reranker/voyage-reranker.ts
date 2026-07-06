@@ -15,7 +15,7 @@ import {
 	type Reranker,
 	type RerankInput,
 	type RerankResult,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { createVoyageRerankClient } from "../client/voyage-rerank-client";
 import {
 	VoyageRerankConfigError,

@@ -14,7 +14,7 @@ import type {
 	EmbedTextsInput,
 	EmbedTextsResult,
 	MemoryEmbedder,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import {
 	TransformersInferenceError,
 	TransformersValidationError,

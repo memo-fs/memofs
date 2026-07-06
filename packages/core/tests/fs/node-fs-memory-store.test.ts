@@ -4,7 +4,7 @@ import {
 	CORE_MEMORY_PATH,
 	MemoryNotFoundError,
 	MemoryPathError,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import { FsMemoryStoreError } from "../../src/index";
 import { createNodeFsMemoryStore, NodeFsMemoryStore } from "../../src/node-fs";

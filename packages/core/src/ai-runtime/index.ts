@@ -3,8 +3,8 @@
  *
  * @remarks
  * Re-exported from the package root so adapter packages can
- * `import type { TekMemoMemoryRuntime } from "@tekmemo/core"`. The
- * Vercel AI SDK adapter (`@tekmemo/adapter-ai-sdk`) and any future
+ * `import type { TekMemoMemoryRuntime } from "@memofs/core"`. The
+ * Vercel AI SDK adapter (`@memofs/adapter-ai-sdk`) and any future
  * framework adapter implement this contract.
  *
  * @public

@@ -14,7 +14,7 @@
  * the Miniflare test, and the OSS self-hoster uses the Node bin (no Worker).
  */
 
-import type { Tekmemo } from "@tekmemo/core";
+import type { Tekmemo } from "@memofs/core";
 import { handleRuntimeRequest, type RuntimeHttpOptions } from "./index";
 
 /**
@@ -76,7 +76,9 @@ export function createRuntimeFetchHandler(
 		const runtime = await options.createRuntime(request, env);
 		const httpOptions: RuntimeHttpOptions = {
 			runtime,
-			...(options.requireAuth === undefined ? {} : { requireAuth: options.requireAuth }),
+			...(options.requireAuth === undefined
+				? {}
+				: { requireAuth: options.requireAuth }),
 			...(env.TEKMEMO_SERVER_TOKEN === undefined
 				? {}
 				: { bearerToken: env.TEKMEMO_SERVER_TOKEN }),

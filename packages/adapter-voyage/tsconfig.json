@@ -4,7 +4,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/adapter-voyage": ["./src/index.ts"]
+			"@memofs/adapter-voyage": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

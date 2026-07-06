@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { MinimalBlobEntry, MinimalMetadataStore } from "../types/contracts";
+import type {
+	MinimalBlobEntry,
+	MinimalMetadataStore,
+} from "../types/contracts";
 
 export interface MetadataStoreContractOptions {
 	name: string;
@@ -90,6 +93,30 @@ export function defineMetadataStoreContractTests(
 				await store.upsertEntry(path, makeEntry());
 				await store.removeEntry(path);
 				expect(await store.getEntry(path)).toBeUndefined();
+			} finally {
+				await options.cleanup?.();
+			}
+		});
+
+		it("serializes concurrent transactions if supported", async () => {
+			const store = await options.createMetadataStore();
+			if (typeof store.withTransaction !== "function") {
+				// Not supported/noop for this implementation (e.g. in-memory test store)
+				return;
+			}
+			try {
+				const order: string[] = [];
+				const tx1 = store.withTransaction(async (tx) => {
+					order.push("start1");
+					await new Promise((resolve) => setTimeout(resolve, 50));
+					order.push("end1");
+				});
+				const tx2 = store.withTransaction(async (tx) => {
+					order.push("start2");
+					order.push("end2");
+				});
+				await Promise.all([tx1, tx2]);
+				expect(order).toEqual(["start1", "end1", "start2", "end2"]);
 			} finally {
 				await options.cleanup?.();
 			}

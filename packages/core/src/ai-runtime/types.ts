@@ -3,7 +3,7 @@
  *
  * @remarks
  * This is the single memory-runtime interface every TekMemo AI-framework
- * adapter implements (Vercel AI SDK today via `@tekmemo/adapter-ai-sdk`;
+ * adapter implements (Vercel AI SDK today via `@memofs/adapter-ai-sdk`;
  * LangChain / OpenAI Agents SDK / Mastra later). It lives in core so that:
  *
  * 1. Core's public surface stays **provider-neutral** (AGENTS.md: "Core

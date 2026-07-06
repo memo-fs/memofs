@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/testing",
+	"name": "@memofs/testing",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Shared contract tests, fixtures, and fakes for TekMemo packages.",
+	"description": "Shared contract tests, fixtures, and fakes for Memo FS packages.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/testing"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/testing/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -102,7 +102,7 @@
 		"ai",
 		"agents",
 		"memory",
-		"tekmemo",
+		"memofs",
 		"typescript"
 	],
 	"engines": {

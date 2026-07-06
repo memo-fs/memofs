@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { cloneForMutationCheck, expectNoMutation } from "../assertions/assertions";
+import {
+	cloneForMutationCheck,
+	expectNoMutation,
+} from "../assertions/assertions";
 import type {
 	MinimalLlmClient,
 	MinimalLlmCompletionInput,
@@ -143,9 +146,7 @@ export function defineLlmClientContractTests(
 }
 
 /** Structural check that a value is a valid {@link MinimalLlmCompletionResult}. */
-function isValidResult(
-	value: unknown,
-): value is MinimalLlmCompletionResult {
+function isValidResult(value: unknown): value is MinimalLlmCompletionResult {
 	if (typeof value !== "object" || value === null) return false;
 	const v = value as Record<string, unknown>;
 	return typeof v.text === "string";

@@ -1,4 +1,4 @@
-import { MemoryStoreError } from "@tekmemo/core";
+import { MemoryStoreError } from "@memofs/core";
 
 /**
  * Error class for filesystem memory store errors.

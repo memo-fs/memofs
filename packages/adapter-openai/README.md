@@ -1,24 +1,24 @@
-# `@tekmemo/adapter-openai`
+# `@memofs/adapter-openai`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-openai"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-openai?label=%40tekmemo%2Fadapter-openai&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-openai"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-openai?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/adapter-openai"><img src="https://img.shields.io/npm/v/%40memofs%2Fadapter-openai?label=%40memofs%2Fadapter-openai&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/adapter-openai"><img src="https://img.shields.io/npm/dm/%40memofs%2Fadapter-openai?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-OpenAI embeddings adapter for TekMemo.
+OpenAI embeddings adapter for Memo FS.
 
 ## What is this?
 
-**OpenAI Embedder adapter for TekMemo.** Provides first-class integration with OpenAI's embedding models (text-embedding-3-small, text-embedding-3-large, text-embedding-ada-002) through TekMemo's provider-neutral embedder contract.
+**OpenAI Embedder adapter for Memo FS.** Provides first-class integration with OpenAI's embedding models (text-embedding-3-small, text-embedding-3-large, text-embedding-ada-002) through Memo FS's provider-neutral embedder contract.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-adapter-openai
+npm install @memofs/adapter-openai
 ```
 
 You also need an OpenAI API key from [platform.openai.com](https://platform.openai.com/).
@@ -26,7 +26,7 @@ You also need an OpenAI API key from [platform.openai.com](https://platform.open
 ## Quick Start
 
 ```ts
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
 const embedder = createOpenAIEmbedder({
  apiKey: process.env.OPENAI_API_KEY!,
@@ -35,7 +35,7 @@ const embedder = createOpenAIEmbedder({
 
 // Embed a batch of texts
 const result = await embedder.embed([
- "TekMemo provides unified memory runtime for AI agents",
+ "Memo FS provides unified memory runtime for AI agents",
  "OpenAI offers state-of-the-art embedding models",
 ]);
 
@@ -66,13 +66,13 @@ console.log(result.usage); // { promptTokens, totalTokens }
 | `text-embedding-3-small` | 1536 (configurable) | 8191 | Balanced quality/speed |
 | `text-embedding-ada-002` | 1536 | 8191 | Legacy, cost-effective |
 
-## Integration with TekMemo Core
+## Integration with Memo FS Core
 
 ```ts
-import { bootstrapMemoryStore, createFsRecallStore } from "@tekbreed/tekmemo";
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+import { bootstrapMemoryStore, createFsRecallStore } from "@memofs";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
-const store = await bootstrapMemoryStore({ rootDir: "./.tekmemo" });
+const store = await bootstrapMemoryStore({ rootDir: "./`.memofs`" });
 
 const embedder = createOpenAIEmbedder({
  apiKey: process.env.OPENAI_API_KEY!,
@@ -80,17 +80,17 @@ const embedder = createOpenAIEmbedder({
  dimensions: 1536, // Optional: reduce dimensions for speed
 });
 
-// Local-first persistent recall store backed by .tekmemo/indexes/embeddings.jsonl
+// Local-first persistent recall store backed by `.memofs/`indexes/embeddings.jsonl
 const recallStore = createFsRecallStore({ store });
 
-// Now use with TekMemo's memory operations
+// Now use with Memo FS's memory operations
 ```
 
 ## Advanced: Custom Client
 
 ```ts
 import { OpenAI } from "openai";
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
 const customClient = new OpenAI({
  apiKey: process.env.OPENAI_API_KEY!,
@@ -109,7 +109,7 @@ const embedder = createOpenAIEmbedder({
 The package exports fake implementations for testing:
 
 ```ts
-import { createFakeOpenAIClient } from "@tekbreed/tekmemo-adapter-openai/testing";
+import { createFakeOpenAIClient } from "@memofs/adapter-openai/testing";
 
 const fakeClient = createFakeOpenAIClient({
  embeddings: [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
@@ -119,7 +119,7 @@ const fakeClient = createFakeOpenAIClient({
 
 ## Boundary
 
-This package owns the OpenAI embedder adapter implementation. It does not own the TekMemo core contracts, other provider adapters, or the OpenAI service itself.
+This package owns the OpenAI embedder adapter implementation. It does not own the Memo FS core contracts, other provider adapters, or the OpenAI service itself.
 
 ## Contributing
 

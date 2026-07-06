@@ -4,7 +4,7 @@
  * @remarks
  * This is the dedicated Node entry for the filesystem-backed `MemoryStore` and
  * its `node:fs`/`node:path` utils. It is **deliberately** split out of the root
- * `@tekmemo/core` barrel so that importing the root barrel never pulls
+ * `@memofs/core` barrel so that importing the root barrel never pulls
  * `node:fs`/`node:path` at module-eval time. The `tekmemo-server` runtime
  * Worker cannot evaluate `node:fs` even under `nodejs_compat`, so
  * keeping it behind this subpath lets the Worker load the real `Tekmemo` +
@@ -12,7 +12,7 @@
  * the MCP server, OSS self-hosters) opt into the filesystem store explicitly:
  *
  * ```ts
- * import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+ * import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
  * const memo = new Tekmemo({ store: createNodeFsMemoryStore({ rootDir }), projectId });
  * ```
  *

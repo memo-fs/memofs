@@ -1,5 +1,5 @@
 /**
- * @tekmemo/adapter-workers-ai — Cloudflare Workers AI frontier
+ * @memofs/adapter-workers-ai — Cloudflare Workers AI frontier
  * extractor adapter for TekMemo.
  *
  * Implements core's provider-neutral {@link Extractor} contract against a

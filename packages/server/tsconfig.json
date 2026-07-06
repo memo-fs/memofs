@@ -5,11 +5,11 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/server": ["./src/index.ts"],
+			"@memofs/server": ["./src/index.ts"],
 			// Ambient module declarations for the `cloudflare:test` imports used by
 			// the workers-pool integration tests (`tests/workers/**`).
 			"cloudflare:test": [
-				"./node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts",
+				"./node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts"
 			]
 		}
 	},

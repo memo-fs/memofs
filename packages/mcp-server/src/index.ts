@@ -1,5 +1,5 @@
 /**
- * @tekmemo/mcp-server — Model Context Protocol server for exposing TekMemo.
+ * @memofs/mcp-server — Model Context Protocol server for exposing TekMemo.
  * Exposes core, notes, and graph memories via standard protocol transports.
  *
  * @public

@@ -13,11 +13,11 @@ import {
 	type RuntimeWritePolicy,
 	Tekmemo,
 	type TekmemoConfig,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
 	readTekMemoConfigFileSync,
-} from "@tekmemo/core/node-fs";
+} from "@memofs/core/node-fs";
 import type { TekMemoMcpRuntime, TekMemoRuntimeMode } from "../types";
 
 /**
@@ -89,7 +89,7 @@ export function createTekMemoMcpRuntimeFromConfig(
 
 	const memo = new Tekmemo({
 		// The MCP server is Node-only: inject the filesystem-backed store
-		// explicitly. The root `@tekmemo/core` barrel is Worker-safe (no
+		// explicitly. The root `@memofs/core` barrel is Worker-safe (no
 		// `node:fs` default), so a `local`/`hybrid` runtime requires a `store`.
 		// The volatile "memory" mode defaults to an in-memory store inside the
 		// constructor.

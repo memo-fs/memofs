@@ -15,7 +15,7 @@
  *
  * The concrete implementations live in published adapter packages (mirrors
  * the Embedder/Extractor/Connector interface-in-core + impl-in-adapter seam):
- * `@tekmemo/adapter-r2` (Cloudflare R2 blobs) + `@tekmemo/adapter-turso`
+ * `@memofs/adapter-r2` (Cloudflare R2 blobs) + `@memofs/adapter-turso`
  * (Turso/libSQL metadata), decoupled as not a bundled N×M adapter.
  * A future `tekmemo-adapter-s3` / `-gcs` implements the same `BlobClient` and
  * the runtime is unchanged.
@@ -81,6 +81,15 @@ export interface BlobClient {
  * which files exist and where their bytes live. A remote-blob backend has no
  * directory listing, so this manifest *is* existence.
  *
+ * ## Transactional serialization (ADR 0010 — slice 3)
+ *
+ * An implementation MAY provide {@link MetadataStore.withTransaction} to
+ * serialize mutating ops. When present, {@link RemoteBlobMemoryStore} wraps
+ * every `write` / `append` / `delete` inside it so concurrent multi-agent
+ * writers to one project cannot interleave (the D6 lost-write hazard). The
+ * Turso/libSQL adapter implements it via `BEGIN IMMEDIATE`; in-memory and
+ * file-backed test stores omit it (no concurrency → no serialization needed).
+ *
  * @public
  */
 export interface MetadataStore {
@@ -90,6 +99,26 @@ export interface MetadataStore {
 	upsertEntry(path: string, entry: BlobEntry): Promise<void>;
 	/** Removes a manifest row for a path. Idempotent. */
 	removeEntry(path: string): Promise<void>;
+	/**
+	 * Runs `fn` inside a serialized transaction. The `tx` argument is a
+	 * transaction-scoped {@link MetadataStore} whose `getEntry` / `upsertEntry`
+	 * / `removeEntry` calls are atomic with each other — concurrent callers
+	 * queue (e.g. libSQL `BEGIN IMMEDIATE`) so two mutating ops to the same
+	 * project cannot interleave.
+	 *
+	 * When a backend does not support transactions (in-memory, file-backed
+	 * test stores), this property is `undefined` and
+	 * {@link RemoteBlobMemoryStore} runs the function directly against the
+	 * store — correct for single-writer scenarios, the no-op serialization
+	 * case.
+	 *
+	 * @param fn - The work to run inside the transaction. Receives a
+	 *   transaction-scoped manifest. R2/blob reads/writes inside `fn` are fine
+	 *   — blob ops are content-addressed and idempotent, so they don't need
+	 *   2PC; only the manifest read + upsert must be atomic.
+	 * @returns whatever `fn` returns (committed).
+	 */
+	withTransaction?<T>(fn: (tx: MetadataStore) => Promise<T>): Promise<T>;
 }
 
 /** Options for constructing a {@link RemoteBlobMemoryStore}. */
@@ -156,33 +185,42 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 	async write(path: MemoryPath, content: string): Promise<void> {
 		assertMemoryPath(path);
 		assertString(content, "content");
-		const bytes = encodeUtf8(content);
-		const sha256 = await hashBytesHex(bytes);
-		await this.blobClient.put(sha256, bytes);
-		await this.metadata.upsertEntry(path, {
-			sha256,
-			blobKey: sha256,
-			sizeBytes: bytes.byteLength,
-		});
+		const mutate = async (meta: MetadataStore): Promise<void> => {
+			const bytes = encodeUtf8(content);
+			const sha256 = await hashBytesHex(bytes);
+			await this.blobClient.put(sha256, bytes);
+			await meta.upsertEntry(path, {
+				sha256,
+				blobKey: sha256,
+				sizeBytes: bytes.byteLength,
+			});
+		};
+		await this.runSerialized(mutate);
 	}
 
 	async append(path: MemoryPath, content: string): Promise<void> {
 		assertMemoryPath(path);
 		assertString(content, "content");
 		if (content.length === 0) return;
-		// Remote blobs are immutable + content-addressed, so append is a
-		// read-modify-write: fetch the current bytes (empty if absent), concat,
-		// write the new blob, upsert the manifest row.
-		const existing = await this.safeRead(path);
-		const merged = existing + content;
-		const bytes = encodeUtf8(merged);
-		const sha256 = await hashBytesHex(bytes);
-		await this.blobClient.put(sha256, bytes);
-		await this.metadata.upsertEntry(path, {
-			sha256,
-			blobKey: sha256,
-			sizeBytes: bytes.byteLength,
-		});
+		const mutate = async (meta: MetadataStore): Promise<void> => {
+			// Remote blobs are immutable + content-addressed, so append is a
+			// read-modify-write: fetch the current bytes (empty if absent),
+			// concat, write the new blob, upsert the manifest row. The manifest
+			// read + upsert MUST be inside the same transaction so two
+			// concurrent appends serialize — the second read sees the first
+			// commit (ADR 0010, slice 3).
+			const existing = await this.safeReadVia(meta, path);
+			const merged = existing + content;
+			const bytes = encodeUtf8(merged);
+			const sha256 = await hashBytesHex(bytes);
+			await this.blobClient.put(sha256, bytes);
+			await meta.upsertEntry(path, {
+				sha256,
+				blobKey: sha256,
+				sizeBytes: bytes.byteLength,
+			});
+		};
+		await this.runSerialized(mutate);
 	}
 
 	async exists(path: MemoryPath): Promise<boolean> {
@@ -193,18 +231,47 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 
 	async delete(path: MemoryPath): Promise<void> {
 		assertMemoryPath(path);
-		// The blob is content-addressed and may be shared by other paths/projects,
-		// so deletion removes only the manifest row — the blob is never inline-GC'd
-		// (same policy as the cloud file replica; GC is an operational concern).
-		await this.metadata.removeEntry(path);
+		const mutate = async (meta: MetadataStore): Promise<void> => {
+			// The blob is content-addressed and may be shared by other
+			// paths/projects, so deletion removes only the manifest row — the
+			// blob is never inline-GC'd (same policy as the cloud file replica;
+			// GC is an operational concern).
+			await meta.removeEntry(path);
+		};
+		await this.runSerialized(mutate);
 	}
 
 	/**
-	 * Reads a path as a string, returning "" when the manifest has no entry. Used
-	 * internally by {@link append}; not part of the {@link MemoryStore} contract.
+	 * Runs a mutating metadata operation, serializing it through
+	 * {@link MetadataStore.withTransaction} when the backend supports it
+	 * (ADR 0010). When `withTransaction` is absent (in-memory, file-backed test
+	 * stores), the function runs directly — correct for single-writer
+	 * scenarios with no concurrency.
+	 *
+	 * R2/blob reads/writes inside `fn` are safe: blob ops are content-addressed
+	 * and idempotent, so they don't participate in 2PC; only the manifest
+	 * read + upsert must be atomic, and that's what the transaction provides.
 	 */
-	private async safeRead(path: MemoryPath): Promise<string> {
-		const entry = await this.metadata.getEntry(path);
+	private async runSerialized(
+		fn: (meta: MetadataStore) => Promise<void>,
+	): Promise<void> {
+		if (typeof this.metadata.withTransaction === "function") {
+			await this.metadata.withTransaction(fn);
+		} else {
+			await fn(this.metadata);
+		}
+	}
+
+	/**
+	 * Reads a path as a string, returning "" when the manifest has no entry.
+	 * Used internally by {@link append} via a transaction-scoped metadata
+	 * store; not part of the {@link MemoryStore} contract.
+	 */
+	private async safeReadVia(
+		meta: MetadataStore,
+		path: MemoryPath,
+	): Promise<string> {
+		const entry = await meta.getEntry(path);
 		if (!entry) return "";
 		const bytes = await this.blobClient.get(entry.blobKey);
 		return bytes === null ? "" : new TextDecoder().decode(bytes);

@@ -5,20 +5,19 @@
  * @packageDocumentation
  */
 
+export { allocateBudget, SECTION_WEIGHTS } from "./strategist/budget";
+export { filterCandidates } from "./strategist/filter";
+export { resolveEntities, resolveEntityState } from "./strategist/resolve";
+export { rewriteQuery, tokenize } from "./strategist/rewrite";
 export type {
-	ResolveGraphNode,
+	BudgetInput,
+	BudgetSection,
+	EntityState,
+	FilterInput,
+	ResolvedEntity,
 	ResolveGraphEdge,
+	ResolveGraphNode,
 	ResolveGraphSourceRef,
 	RewriteInput,
 	RewriteResult,
-	ResolvedEntity,
-	EntityState,
-	FilterInput,
-	BudgetSection,
-	BudgetInput,
 } from "./strategist/types";
-
-export { tokenize, rewriteQuery } from "./strategist/rewrite";
-export { resolveEntities, resolveEntityState } from "./strategist/resolve";
-export { filterCandidates } from "./strategist/filter";
-export { allocateBudget, SECTION_WEIGHTS } from "./strategist/budget";

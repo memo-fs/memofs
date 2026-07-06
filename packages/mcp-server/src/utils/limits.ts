@@ -25,7 +25,7 @@ export function enforceOutputLimit(
 ): string {
 	const bytes = byteLength(text);
 	if (bytes <= maxBytes) return text;
-	const suffix = `\n\n[Output truncated by @tekmemo/core/mcp: ${bytes} bytes exceeded ${maxBytes} bytes for ${operation}.]`;
+	const suffix = `\n\n[Output truncated by @memofs/core/mcp: ${bytes} bytes exceeded ${maxBytes} bytes for ${operation}.]`;
 	const suffixBytes = byteLength(suffix);
 	if (suffixBytes >= maxBytes)
 		throw new McpOutputLimitError(

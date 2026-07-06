@@ -1,4 +1,4 @@
-import { defineExtractorContractTests } from "@tekmemo/testing/contracts";
+import { defineExtractorContractTests } from "@memofs/testing/contracts";
 import { describe, expect, it } from "vitest";
 import { createWorkersAiExtractor } from "../src";
 

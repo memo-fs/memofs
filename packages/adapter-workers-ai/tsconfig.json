@@ -5,7 +5,7 @@
 		"rootDir": ".",
 		"types": ["@cloudflare/workers-types"],
 		"paths": {
-			"@tekmemo/adapter-workers-ai": ["./src/index.ts"]
+			"@memofs/adapter-workers-ai": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

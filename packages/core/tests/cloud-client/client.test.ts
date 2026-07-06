@@ -27,7 +27,7 @@ function jsonResponse(
 	};
 }
 
-describe("@tekmemo/core/cloud — file-replica contract", () => {
+describe("@memofs/core/cloud — file-replica contract", () => {
 	describe("health & readiness", () => {
 		it("GET /health is project-agnostic and does not require an API key", async () => {
 			const calls: Array<{ url: string; requireApiKey?: boolean }> = [];

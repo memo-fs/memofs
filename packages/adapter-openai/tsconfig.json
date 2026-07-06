@@ -4,7 +4,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/adapter-openai": ["./src/index.ts"]
+			"@memofs/adapter-openai": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

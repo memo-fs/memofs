@@ -5,6 +5,10 @@
  */
 
 import { assertString } from "@repo/utils";
+import type {
+	CreateTekMemoAgentSessionOptions,
+	TekMemoAgentSession,
+} from "../agentfs/session/agent-session";
 import type { LlmClient } from "../ai-runtime/llm-client";
 import type { BootstrapMemoryStoreOptions } from "../core/bootstrap/bootstrap-memory-store";
 import type { ReadConversationHistoryOptions } from "../core/documents/conversations-memory";
@@ -20,18 +24,14 @@ import type { Extractor } from "../graph/extraction/extractor";
 import type { AgentfsLikeClient, AgentfsMemoryStoreConfig } from "../index";
 import {
 	AgentfsMemoryStore,
+	applyTopK,
 	bootstrapMemoryStore,
+	createTekMemoCloudClient,
+	DeterministicFallbackReranker,
 	runMemoryCommand,
 	stableSortRerankResults,
-	applyTopK,
-	DeterministicFallbackReranker,
 	type TekMemoCloudClient,
-	createTekMemoCloudClient,
 } from "../index";
-import type {
-	CreateTekMemoAgentSessionOptions,
-	TekMemoAgentSession,
-} from "../agentfs/session/agent-session";
 import type { RecallFilter, RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
 import {
@@ -41,16 +41,16 @@ import {
 } from "./config";
 import type { createLocalStrategy } from "./local-strategy";
 import {
+	agentfsCreateSession,
+	conversationsAppend,
+	conversationsRead,
 	coreRead,
 	coreUpdate,
+	createStrategy,
 	notesRead,
 	notesRecord,
-	conversationsRead,
-	conversationsAppend,
 	snapshotsList,
 	snapshotsRestore,
-	agentfsCreateSession,
-	createStrategy,
 } from "./Tekmemo/delegates";
 import type {
 	AgentSessionCompleteInput,
@@ -350,6 +350,17 @@ export class Tekmemo {
 		}
 
 		this.strategy = createStrategy(this, this.resolved);
+	}
+
+	/**
+	 * Returns the resolved cloud configuration options, if any.
+	 *
+	 * @internal
+	 */
+	getCloudOptions():
+		| import("../cloud-client/types").TekMemoCloudClientOptions
+		| undefined {
+		return this.resolved.cloud;
 	}
 
 	async recall(

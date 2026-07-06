@@ -23,7 +23,7 @@
  * @module dispatch
  */
 
-import type { Tekmemo } from "@tekmemo/core";
+import type { Tekmemo } from "@memofs/core";
 import {
 	failure,
 	isNotification,
@@ -34,7 +34,7 @@ import {
 	parseJsonRpcPayload,
 	success,
 	validateJsonRpcRequest,
-} from "@tekmemo/json-rpc";
+} from "@memofs/json-rpc";
 import { GATED_METHODS, RUNTIME_METHOD } from "../protocol/methods";
 import { RUNTIME_HANDLERS } from "./handlers";
 
@@ -111,9 +111,7 @@ export async function dispatchRuntimeText(
 		// mandates `null`.
 		const message =
 			error instanceof Error ? error.message : "Invalid JSON payload.";
-		return JSON.stringify(
-			failure(null, JSON_RPC_ERRORS.parseError, message),
-		);
+		return JSON.stringify(failure(null, JSON_RPC_ERRORS.parseError, message));
 	}
 	const response = await dispatchRuntimeMessage(tek, payload, options);
 	return response === undefined ? undefined : JSON.stringify(response);
@@ -249,9 +247,7 @@ function errorCodeFor(error: unknown): number {
  * stacks or internal details).
  */
 function messageFor(error: unknown): string {
-	return error instanceof TypeError
-		? error.message
-		: "Internal runtime error.";
+	return error instanceof TypeError ? error.message : "Internal runtime error.";
 }
 
 /**

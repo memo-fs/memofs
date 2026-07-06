@@ -6,7 +6,7 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { CONNECTORS_PATH } from "@tekmemo/core";
+import { CONNECTORS_PATH } from "@memofs/core";
 import { ConnectorConfigError } from "./errors";
 import type { ConnectorConfig, ConnectorsFile } from "./types";
 
@@ -263,12 +263,12 @@ function optionalObject(
 	value: unknown,
 	field: string,
 	id: string,
-): import("@tekmemo/core").JsonObject | undefined {
+): import("@memofs/core").JsonObject | undefined {
 	if (value === undefined) return undefined;
 	if (!isObject(value)) {
 		throw new ConnectorConfigError(
 			`Connector "${id}" field "${field}" must be an object.`,
 		);
 	}
-	return value as import("@tekmemo/core").JsonObject;
+	return value as import("@memofs/core").JsonObject;
 }

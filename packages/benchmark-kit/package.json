@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/benchmark-kit",
+	"name": "@memofs/benchmark-kit",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Reusable benchmark workloads, runners, and reporters for TekMemo.",
+	"description": "Reusable benchmark workloads, runners, and reporters for Memo FS.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/benchmark-kit"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/benchmark-kit/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -61,7 +61,7 @@
 		"ai",
 		"agents",
 		"memory",
-		"tekmemo",
+		"memofs",
 		"typescript"
 	],
 	"engines": {
@@ -72,8 +72,8 @@
 		"url": "https://github.com/sponsors/christophersesugh"
 	},
 	"dependencies": {
-		"@tekmemo/core": "workspace:^",
-		"@tekmemo/testing": "workspace:^"
+		"@memofs/core": "workspace:^",
+		"@memofs/testing": "workspace:^"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",

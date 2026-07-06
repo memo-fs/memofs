@@ -20,7 +20,7 @@
  *
  * NOTE: requires `pnpm build` to have produced `dist/bin/tekmemo-server.mjs`.
  */
-import { spawn, type ChildProcess } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -71,9 +71,7 @@ function waitForListening(proc: ChildProcess): Promise<void> {
 		});
 		proc.on("exit", (code) => {
 			clearTimeout(timer);
-			reject(
-				new Error(`bin exited before listening (code=${String(code)})`),
-			);
+			reject(new Error(`bin exited before listening (code=${String(code)})`));
 		});
 	});
 }
@@ -123,9 +121,7 @@ describe("server-bin: Node single-process deploy", () => {
 	it("POST / dispatches a read method over real sockets", async () => {
 		const { status, body } = await rpc("memory.readCore", {});
 		expect(status).toBe(200);
-		expect(
-			(body as { result: { content: string } }).result,
-		).toBeDefined();
+		expect((body as { result: { content: string } }).result).toBeDefined();
 	});
 
 	it("a gated write returns HTTP 503 over real sockets", async () => {

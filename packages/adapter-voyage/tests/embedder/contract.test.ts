@@ -1,4 +1,4 @@
-import { defineEmbedderContractTests } from "@tekmemo/testing/contracts";
+import { defineEmbedderContractTests } from "@memofs/testing/contracts";
 import { createVoyageEmbedder } from "../../src";
 import { createFakeVoyageClient } from "../../src/embedder/testing";
 

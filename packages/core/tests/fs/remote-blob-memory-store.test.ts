@@ -39,6 +39,7 @@ function createFakeMetadataStore(): MetadataStore & {
 	entries: Map<string, BlobEntry>;
 } {
 	const entries = new Map<string, BlobEntry>();
+	let pendingTx: Promise<unknown> = Promise.resolve();
 	return {
 		entries,
 		async getEntry(path) {
@@ -49,6 +50,19 @@ function createFakeMetadataStore(): MetadataStore & {
 		},
 		async removeEntry(path) {
 			entries.delete(path);
+		},
+		async withTransaction(fn) {
+			const current = pendingTx;
+			let resolveTx: () => void;
+			pendingTx = new Promise<void>((resolve) => {
+				resolveTx = resolve;
+			});
+			await current;
+			try {
+				return await fn(this);
+			} finally {
+				resolveTx!();
+			}
 		},
 	};
 }
@@ -198,6 +212,24 @@ describe("RemoteBlobMemoryStore", () => {
 		await expect(
 			store.exists(".tekmemo/memory/core.md\0" as typeof CORE_MEMORY_PATH),
 		).rejects.toBeInstanceOf(MemoryPathError);
+	});
+
+	it("handles concurrent appends cleanly without lost writes", async () => {
+		const { store } = createStore();
+		await store.write(CORE_MEMORY_PATH, "start\n");
+
+		// Run 20 concurrent appends
+		await Promise.all(
+			Array.from({ length: 20 }, (_, i) =>
+				store.append(CORE_MEMORY_PATH, `line-${i}\n`),
+			),
+		);
+
+		const result = await store.read(CORE_MEMORY_PATH);
+		expect(result).toContain("start\n");
+		for (let i = 0; i < 20; i++) {
+			expect(result).toContain(`line-${i}\n`);
+		}
 	});
 });
 

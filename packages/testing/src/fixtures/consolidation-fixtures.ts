@@ -4,7 +4,7 @@
  * All shapes are structural subsets of the real graph types
  * (`GraphNode`/`GraphEdge`/`StoredGraphNode`/`StoredGraphEdge`/`GraphSnapshot`)
  * so they're assignable at the contract boundary without forcing this package
- * to depend on `@tekmemo/core`. Stored* fields (`status`, `createdAt`,
+ * to depend on `@memofs/core`. Stored* fields (`status`, `createdAt`,
  * `updatedAt`) are filled with deterministic defaults so consolidation passes
  * are replayable across runs.
  */

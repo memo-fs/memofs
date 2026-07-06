@@ -1,11 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import {
-	CONNECTORS_PATH,
-	InMemoryMemoryStore,
-	Tekmemo,
-} from "@tekmemo/core";
+import { CONNECTORS_PATH, InMemoryMemoryStore, Tekmemo } from "@memofs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	type Connector,

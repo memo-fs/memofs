@@ -4,7 +4,7 @@
  * @remarks
  * Mirrors the embedder/reranker adapter pattern: the {@link Extractor}
  * interface is defined here in core, and concrete implementations live in
- * adapter packages (e.g. a future `@tekmemo/adapter-extractor-
+ * adapter packages (e.g. a future `@memofs/adapter-extractor-
  * transformers` for zero-API-key local extraction, or `-openai`/`-voyage` for
  * hosted frontier quality). Honors `AGENTS.md`: "Core protocol contracts must
  * be provider-neutral."

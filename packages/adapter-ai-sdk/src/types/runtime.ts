@@ -3,7 +3,7 @@
  *
  * @remarks
  * The framework-neutral runtime contract (`TekMemoMemoryRuntime` and its
- * `MemoryRuntime*` value types) lives in `@tekmemo/core` core and is
+ * `MemoryRuntime*` value types) lives in `@memofs/core` core and is
  * re-exported here for adapter consumers. This file owns only the **L2
  * tool-layer** types — memory scopes, access contexts, and the options that
  * shape the AI SDK memory tool / context builders. These are Vercel-AI-SDK-
@@ -34,11 +34,11 @@ export type {
 	MemoryRuntimeRecallResult,
 	MemoryRuntimeRecallStrategy,
 	TekMemoMemoryRuntime,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 // Imported locally (not just re-exported) so the L2 interfaces below can
 // reference the runtime contract without importing it again from core.
-import type { JsonObject, TekMemoMemoryRuntime } from "@tekmemo/core";
+import type { JsonObject, TekMemoMemoryRuntime } from "@memofs/core";
 
 export type AiMemoryScope =
 	| "project"
@@ -69,7 +69,7 @@ export interface AiMemoryScopeMetadata {
 	conversationId?: string;
 	participantIds?: string[];
 	actorId?: string;
-	createdByPackage?: "@tekmemo/adapter-ai-sdk";
+	createdByPackage?: "@memofs/adapter-ai-sdk";
 }
 
 export interface AiMemoryAccessContext {

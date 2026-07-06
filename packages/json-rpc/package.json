@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/json-rpc",
+	"name": "@memofs/json-rpc",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by TekMemo transports.",
+	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by Memo FS transports.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/json-rpc"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/json-rpc/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -60,7 +60,7 @@
 		"json-rpc-2",
 		"protocol",
 		"rpc",
-		"tekmemo",
+		"memofs",
 		"typescript"
 	],
 	"engines": {

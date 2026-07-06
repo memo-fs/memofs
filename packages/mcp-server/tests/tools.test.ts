@@ -1,4 +1,4 @@
-import type { TekMemoCloudClient } from "@tekmemo/core/cloud-client";
+import type { TekMemoCloudClient } from "@memofs/core/cloud-client";
 import { describe, expect, it } from "vitest";
 import { createTekMemoCloudMcpRuntime } from "../src/http/cloud-runtime";
 import {

@@ -4,7 +4,7 @@
 		"outDir": "dist",
 		"rootDir": ".",
 		"paths": {
-			"@tekmemo/adapter-transformers": ["./src/index.ts"]
+			"@memofs/adapter-transformers": ["./src/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "tests/**/*.ts"],

@@ -1,5 +1,5 @@
 /**
- * `@tekmemo/server` — the OSS-deployable hosted-memory server.
+ * `@memofs/server` — the OSS-deployable hosted-memory server.
  *
  * @remarks
  * Runs the **same** TekMemo memory engine the cloud runs, over a caller-supplied
@@ -26,29 +26,10 @@ export {
 	createHostedRuntime,
 	type HostedRuntimeOptions,
 } from "./hosted-runtime";
-
-export {
-	CONCURRENCY_GATE_ERROR_CODE,
-	CONCURRENCY_GATE_HTTP_STATUS,
-	CONCURRENCY_GATE_MESSAGE,
-	concurrencyGateFailure,
-	dispatchRuntimeMessage,
-	dispatchRuntimeText,
-	type ConcurrencyLayer,
-	type DispatchOptions,
-} from "./runtime-api/dispatch";
-
-export {
-	GATED_METHODS,
-	LIVE_METHODS,
-	RUNTIME_METHOD,
-} from "./protocol/methods";
-
 export {
 	handleRuntimeRequest,
 	type RuntimeHttpOptions,
 } from "./http";
-
 export {
 	createRuntimeFetchHandler,
 	type RuntimeExecutionContext,
@@ -56,3 +37,18 @@ export {
 	type RuntimeFetchHandlerOptions,
 	type RuntimeWorkerEnv,
 } from "./http/fetch-handler";
+export {
+	GATED_METHODS,
+	LIVE_METHODS,
+	RUNTIME_METHOD,
+} from "./protocol/methods";
+export {
+	CONCURRENCY_GATE_ERROR_CODE,
+	CONCURRENCY_GATE_HTTP_STATUS,
+	CONCURRENCY_GATE_MESSAGE,
+	type ConcurrencyLayer,
+	concurrencyGateFailure,
+	type DispatchOptions,
+	dispatchRuntimeMessage,
+	dispatchRuntimeText,
+} from "./runtime-api/dispatch";

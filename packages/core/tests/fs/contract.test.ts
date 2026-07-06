@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { defineMemoryStoreContractTests } from "@tekmemo/testing/contracts";
+import { defineMemoryStoreContractTests } from "@memofs/testing/contracts";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 
 async function createStore() {

@@ -39,42 +39,42 @@ import {
 import type { BM25Store } from "../recall/lexical/bm25";
 import type { RecallStore } from "../recall/types";
 import { buildContext } from "./helpers";
+import { createLocalAgentfsClient } from "./local-strategy/client";
+import {
+	consolidateMemory,
+	graphNeighbors,
+	graphPath,
+	listGraphEdges,
+	listGraphNodes,
+	upsertGraphEdges,
+	upsertGraphNodes,
+} from "./local-strategy/graph";
+import {
+	hash,
+	message,
+	snapshotId,
+	stableEdgeKey,
+	toGraphEdgeInput,
+	toGraphNodeInput,
+} from "./local-strategy/helpers";
+import { localRecall } from "./local-strategy/recall";
+import {
+	appendAgentSessionFile,
+	completeAgentSession,
+	extractAgentSession,
+	readAgentSessionFile,
+	startAgentSession,
+	writeAgentSessionFile,
+} from "./local-strategy/session";
+import type {
+	LocalGraphStore,
+	LocalStrategyContext,
+	LocalStrategyOptions,
+} from "./local-strategy/types";
+import { updateCoreMemory, writeMemory } from "./local-strategy/write";
 import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
 import type { FileSyncLayer } from "./sync/file-replication";
-import { createLocalAgentfsClient } from "./local-strategy/client";
-import {
-	hash,
-	toGraphNodeInput,
-	toGraphEdgeInput,
-	snapshotId,
-	message,
-	stableEdgeKey,
-} from "./local-strategy/helpers";
-import {
-	type LocalGraphStore,
-	type LocalStrategyOptions,
-	type LocalStrategyContext,
-} from "./local-strategy/types";
-import {
-	startAgentSession,
-	readAgentSessionFile,
-	writeAgentSessionFile,
-	appendAgentSessionFile,
-	extractAgentSession,
-	completeAgentSession,
-} from "./local-strategy/session";
-import {
-	upsertGraphNodes,
-	upsertGraphEdges,
-	graphNeighbors,
-	graphPath,
-	listGraphNodes,
-	listGraphEdges,
-	consolidateMemory,
-} from "./local-strategy/graph";
-import { writeMemory, updateCoreMemory } from "./local-strategy/write";
-import { localRecall } from "./local-strategy/recall";
 
 export type { LocalGraphStore, LocalStrategyOptions };
 

@@ -1,5 +1,5 @@
 /**
- * @file Test fixtures for the @tekmemo/core/recall package.
+ * @file Test fixtures for the @memofs/core/recall package.
  *
  * @remarks
  * Provides factory functions to create test documents with sensible defaults.

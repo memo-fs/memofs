@@ -1,5 +1,5 @@
 /**
- * Core types for the @tekmemo/core/openai package.
+ * Core types for the @memofs/core/openai package.
  *
  * @remarks
  * Defines configuration, request/response, and embedder types
@@ -14,7 +14,7 @@ import type {
 } from "./models/models";
 
 /**
- * @file Type definitions for @tekmemo/core/openai.
+ * @file Type definitions for @memofs/core/openai.
  *
  * @remarks
  * This module defines the core types used throughout the package including
@@ -198,7 +198,7 @@ import type {
 	EmbeddingRecord,
 	EmbedTextsResult,
 	MemoryEmbedder,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 export interface EmbedTextsInput extends BaseEmbedTextsInput {
 	model?: OpenAIEmbeddingModel | undefined;

@@ -1,5 +1,5 @@
 /**
- * @file Testing utilities for @tekmemo/core/openai.
+ * @file Testing utilities for @memofs/core/openai.
  *
  * @remarks
  * This module exports fake/mock implementations of OpenAI clients

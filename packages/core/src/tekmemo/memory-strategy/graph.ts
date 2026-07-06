@@ -1,11 +1,11 @@
+import { paginateArray } from "../helpers";
 import type {
-	GraphNodeInput,
 	GraphEdgeInput,
 	GraphNeighborsInput,
+	GraphNodeInput,
 	GraphPathInput,
 	GraphPathResult,
 } from "../types";
-import { paginateArray } from "../helpers";
 
 export function edgeId(edge: GraphEdgeInput): string {
 	return (

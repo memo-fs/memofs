@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { MemoryStore, MemoryPath } from "../../index";
+import type { MemoryPath, MemoryStore } from "../../index";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import { AgentfsClientError } from "../errors/agentfs-error";
 import { isNotFoundError } from "../utils/is-not-found-error";

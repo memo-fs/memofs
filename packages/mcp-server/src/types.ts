@@ -1,7 +1,7 @@
 /**
  * Type declarations and interface definitions for MCP Server execution.
  *
- * Memory/recall/graph/sync types are imported from @tekmemo/core to avoid duplication.
+ * Memory/recall/graph/sync types are imported from @memofs/core to avoid duplication.
  * Only MCP-protocol-specific types (tool results, definitions, options) are defined here.
  *
  * The runtime surface mirrors the v1.0.0-alpha.0 contract: every operation runs in the
@@ -59,7 +59,7 @@ export type {
 	ValidateMemoryResult,
 	WriteMemoryInput,
 	WriteMemoryResult,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 import type {
 	AgentSessionCompleteInput,
@@ -97,7 +97,7 @@ import type {
 	ValidateMemoryResult,
 	WriteMemoryInput,
 	WriteMemoryResult,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 export type ToolSafety = "read" | "write" | "destructive" | "external";
 export type McpRole = "user" | "assistant";
@@ -303,4 +303,4 @@ export interface TekMemoMcpRuntime {
 	): Promise<ConsolidateMemoryResult>;
 }
 
-import type { Page } from "@tekmemo/core";
+import type { Page } from "@memofs/core";

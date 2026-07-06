@@ -22,12 +22,13 @@
  * exposed publicly — set `requireAuth` off only behind a private network).
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { InMemoryMemoryStore, Tekmemo } from "@tekmemo/core";
 import {
-	createHostedRuntime,
-	handleRuntimeRequest,
-} from "../src/index";
+	createServer,
+	type IncomingMessage,
+	type ServerResponse,
+} from "node:http";
+import { InMemoryMemoryStore, type Tekmemo } from "@memofs/core";
+import { createHostedRuntime, handleRuntimeRequest } from "../src/index";
 
 const PORT = parsePort(process.env.PORT);
 const TOKEN = process.env.TEKMEMO_SERVER_TOKEN;
@@ -69,7 +70,8 @@ async function main(): Promise<void> {
 	server.maxConnections = 100;
 
 	server.listen(PORT, () => {
-		const auth = REQUIRE_AUTH && TOKEN ? " (auth on)" : TOKEN ? "" : " (auth off)";
+		const auth =
+			REQUIRE_AUTH && TOKEN ? " (auth on)" : TOKEN ? "" : " (auth off)";
 		// Defense-in-depth posture warning (security review VULN-003): when the
 		// port is public and auth is off, every read method is wide open. The
 		// bin binds 0.0.0.0 by default, so surface this loudly rather than let a
@@ -81,9 +83,7 @@ async function main(): Promise<void> {
 					`or run behind a private network / Service Binding.`,
 			);
 		}
-		console.log(
-			`[tekmemo-server] listening on http://0.0.0.0:${PORT}${auth}`,
-		);
+		console.log(`[tekmemo-server] listening on http://0.0.0.0:${PORT}${auth}`);
 	});
 
 	// Graceful shutdown on SIGTERM/SIGINT (container hosts send these).
@@ -108,7 +108,10 @@ async function serve(
 	runtime: Tekmemo,
 ): Promise<void> {
 	const method = req.method ?? "GET";
-	const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+	const url = new URL(
+		req.url ?? "/",
+		`http://${req.headers.host ?? "localhost"}`,
+	);
 	const headers = new Headers();
 	for (const [key, value] of Object.entries(req.headers)) {
 		if (Array.isArray(value)) {

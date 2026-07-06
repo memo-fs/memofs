@@ -10,7 +10,7 @@
  * @public
  */
 
-import type { JsonObject, Tekmemo } from "@tekmemo/core";
+import type { JsonObject, Tekmemo } from "@memofs/core";
 
 /**
  * A single connector row in `.tekmemo/connectors.json`.

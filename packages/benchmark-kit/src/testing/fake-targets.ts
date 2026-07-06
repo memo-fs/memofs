@@ -7,4 +7,4 @@ export {
 	FakeMemoryStore,
 	FakeRecallStore,
 	FakeReranker,
-} from "@tekmemo/testing/fakes";
+} from "@memofs/testing/fakes";

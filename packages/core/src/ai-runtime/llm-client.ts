@@ -33,7 +33,7 @@
  * one provider client internally (composition).
  *
  * Implementations live in adapter packages (e.g.
- * `@tekmemo/adapter-openai`). Honors `AGENTS.md`: "Core protocol
+ * `@memofs/adapter-openai`). Honors `AGENTS.md`: "Core protocol
  * contracts must be provider-neutral."
  *
  * @see — the decision to add `LlmClient` as a contract distinct from

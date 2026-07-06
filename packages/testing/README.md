@@ -1,36 +1,36 @@
-# `@tekmemo/testing`
+# `@memofs/testing`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/testing"><img src="https://img.shields.io/npm/v/%40tekmemo%2Ftesting?label=%40tekmemo%2Ftesting&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/testing"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Ftesting?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/testing"><img src="https://img.shields.io/npm/v/%40memofs%2Ftesting?label=%40memofs%2Ftesting&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/testing"><img src="https://img.shields.io/npm/dm/%40memofs%2Ftesting?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Shared contract tests, fixtures, and fakes for TekMemo packages.
+Shared contract tests, fixtures, and fakes for Memo FS packages.
 
 ## What is this?
 
-**Shared contract tests, fixtures, and fakes for TekMemo packages.** Ensures all provider adapters (embedders, rerankers, recall stores, memory stores) satisfy TekMemo's core contracts with consistent behavior.
+**Shared contract tests, fixtures, and fakes for Memo FS packages.** Ensures all provider adapters (embedders, rerankers, recall stores, memory stores) satisfy Memo FS's core contracts with consistent behavior.
 
 ## Installation
 
 ```bash
-npm install -D @tekbreed/tekmemo-testing
+npm install -D @memofs/testing
 ```
 
-You also need `vitest` and `@tekbreed/tekmemo` as peer dependencies.
+You also need `vitest` and `@memofs` as peer dependencies.
 
 ## What's Included
 
 | Entrypoint | Purpose |
 |------------|---------|
-| `@tekbreed/tekmemo-testing/contracts` | Shared contract test suites |
-| `@tekbreed/tekmemo-testing/fakes` | Fake implementations for testing |
-| `@tekbreed/tekmemo-testing/fixtures` | Test data fixtures |
-| `@tekbreed/tekmemo-testing/vitest` | Vitest-specific utilities |
+| `@memofs/testing/contracts` | Shared contract test suites |
+| `@memofs/testing/fakes` | Fake implementations for testing |
+| `@memofs/testing/fixtures` | Test data fixtures |
+| `@memofs/testing/vitest` | Vitest-specific utilities |
 
 ## Quick Start
 
@@ -38,8 +38,8 @@ You also need `vitest` and `@tekbreed/tekmemo` as peer dependencies.
 
 ```ts
 import { describe } from "vitest";
-import { embedderContractTests } from "@tekbreed/tekmemo-testing/contracts";
-import { createOpenAIEmbedder } from "@tekbreed/tekmemo-adapter-openai";
+import { embedderContractTests } from "@memofs/testing/contracts";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
 // Define your adapter under test
 const target = () => createOpenAIEmbedder({
@@ -57,8 +57,8 @@ describe("OpenAI Embedder Contract", () => {
 
 ```ts
 import { describe } from "vitest";
-import { recallStoreContractTests } from "@tekbreed/tekmemo-testing/contracts";
-import { createInMemoryRecallStore } from "@tekbreed/tekmemo";
+import { recallStoreContractTests } from "@memofs/testing/contracts";
+import { createInMemoryRecallStore } from "@memofs";
 
 const target = () => createInMemoryRecallStore();
 
@@ -75,8 +75,8 @@ describe("In-Memory Recall Store Contract", () => {
 
 ```ts
 import { describe } from "vitest";
-import { rerankerContractTests } from "@tekbreed/tekmemo-testing/contracts";
-import { createVoyageReranker } from "@tekbreed/tekmemo-adapter-voyage";
+import { rerankerContractTests } from "@memofs/testing/contracts";
+import { createVoyageReranker } from "@memofs/adapter-voyage";
 
 const target = () => createVoyageReranker({
  apiKey: process.env.VOYAGE_API_KEY!,
@@ -92,8 +92,8 @@ describe("Voyage Reranker Contract", () => {
 
 ```ts
 import { describe } from "vitest";
-import { memoryStoreContractTests } from "@tekbreed/tekmemo-testing/contracts";
-import { createNodeFsMemoryStore } from "@tekbreed/tekmemo";
+import { memoryStoreContractTests } from "@memofs/testing/contracts";
+import { createNodeFsMemoryStore } from "@memofs";
 
 describe("NodeFs Memory Store Contract", () => {
  memoryStoreContractTests(() => createNodeFsMemoryStore({ rootDir: ".test" }));
@@ -107,7 +107,7 @@ Pre-built fakes for unit testing without external API dependencies:
 ### Fake Embedder
 
 ```ts
-import { createFakeEmbedder } from "@tekbreed/tekmemo-testing/fakes";
+import { createFakeEmbedder } from "@memofs/testing/fakes";
 
 const embedder = createFakeEmbedder({
  dimensions: 1536,
@@ -122,7 +122,7 @@ const result = await embedder.embed(["hello"]);
 ### Fake Reranker
 
 ```ts
-import { createFakeReranker } from "@tekbreed/tekmemo-testing/fakes";
+import { createFakeReranker } from "@memofs/testing/fakes";
 
 const reranker = createFakeReranker({
  scores: [0.95, 0.8, 0.6, 0.4, 0.2], // Scores mapped by index
@@ -133,7 +133,7 @@ const reranker = createFakeReranker({
 ### Fake Recall Store
 
 ```ts
-import { createFakeRecallStore } from "@tekbreed/tekmemo-testing/fakes";
+import { createFakeRecallStore } from "@memofs/testing/fakes";
 
 const recallStore = createFakeRecallStore();
 
@@ -146,7 +146,7 @@ const results = await recallStore.query({ query: "test", topK: 5 });
 ### Fake Memory Store
 
 ```ts
-import { createFakeMemoryStore } from "@tekbreed/tekmemo-testing/fakes";
+import { createFakeMemoryStore } from "@memofs/testing/fakes";
 
 const store = createFakeMemoryStore({
  records: { "mem-1": { content: "Hello", metadata: {} } },
@@ -166,7 +166,7 @@ import {
  rerankFixtures,
  recallFixtures,
  memoryFixtures,
-} from "@tekbreed/tekmemo-testing/fixtures";
+} from "@memofs/testing/fixtures";
 
 // Embedding fixtures
 const { singleText, batchTexts, expectedDimensions } = embeddingFixtures;
@@ -192,7 +192,7 @@ import {
  expectFiniteNumber,
  expectNoMutation,
  cloneForMutationCheck,
-} from "@tekbreed/tekmemo-testing";
+} from "@memofs/testing";
 
 // Verify embedding vector shape
 expectVector(embedding, { dimensions: 1024 });
@@ -215,7 +215,7 @@ Setup vitest custom matchers and lifecycle hooks:
 
 ```ts
 // In vitest.setup.ts
-import "@tekbreed/tekmemo-testing/vitest";
+import "@memofs/testing/vitest";
 ```
 
 This registers custom timeout handling and integration test helpers for vitest.
@@ -261,9 +261,9 @@ Complete test file pattern for an adapter package:
 ```ts
 // packages/my-adapter/src/embedder/my-embedder.test.ts
 import { describe, it, expect } from "vitest";
-import { embedderContractTests } from "@tekbreed/tekmemo-testing/contracts";
-import { createFakeEmbedder } from "@tekbreed/tekmemo-testing/fakes";
-import { embeddingFixtures } from "@tekbreed/tekmemo-testing/fixtures";
+import { embedderContractTests } from "@memofs/testing/contracts";
+import { createFakeEmbedder } from "@memofs/testing/fakes";
+import { embeddingFixtures } from "@memofs/testing/fixtures";
 import { createMyEmbedder } from "./my-embedder";
 
 // Contract compliance
@@ -283,7 +283,7 @@ describe("My Embedder Consumer", () => {
 
 ## Boundary
 
-This package owns contract test suites, fake implementations, fixtures, assertion helpers, and vitest integration utilities. It does not own the TekMemo core contracts themselves, specific provider adapter implementations, or the testing framework infrastructure.
+This package owns contract test suites, fake implementations, fixtures, assertion helpers, and vitest integration utilities. It does not own the Memo FS core contracts themselves, specific provider adapter implementations, or the testing framework infrastructure.
 
 ## Contributing
 

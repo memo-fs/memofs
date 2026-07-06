@@ -1,17 +1,17 @@
 {
-	"name": "@tekmemo/adapter-transformers",
+	"name": "@memofs/adapter-transformers",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Local Transformers.js ONNX embedder adapter for TekMemo with no API key or cloud dependency.",
+	"description": "Local Transformers.js ONNX embedder adapter for Memo FS with no API key or cloud dependency.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/tekbreed/tekmemo.git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/adapter-transformers"
 	},
 	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-transformers/",
 	"bugs": {
-		"url": "https://github.com/tekbreed/tekmemo/issues"
+		"url": "https://github.com/christophersesugh/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,
@@ -64,7 +64,7 @@
 		"ai",
 		"agents",
 		"memory",
-		"tekmemo",
+		"memofs",
 		"adapter",
 		"typescript"
 	],
@@ -77,11 +77,11 @@
 	},
 	"dependencies": {
 		"@huggingface/transformers": "^3.7.6",
-		"@tekmemo/core": "workspace:^"
+		"@memofs/core": "workspace:^"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
-		"@tekmemo/testing": "workspace:^"
+		"@memofs/testing": "workspace:^"
 	}
 }

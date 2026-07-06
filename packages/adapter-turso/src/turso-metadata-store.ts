@@ -15,7 +15,7 @@
  * `apps/cloud/src/db/index.server.ts`. Column names are the documented contract.
  *
  * This package owns metadata storage only; the matching Cloudflare R2 blob
- * client lives in `@tekmemo/adapter-r2`. The two are intentionally decoupled
+ * client lives in `@memofs/adapter-r2`. The two are intentionally decoupled
  * , not a bundled N×M adapter) so a Node self-hoster can pair this
  * metadata store with any `BlobClient` (S3, GCS, MinIO) and so the runtime
  * composes them through core's provider-neutral `RemoteBlobMemoryStore`.
@@ -24,7 +24,7 @@
  */
 
 import type { Client } from "@libsql/client";
-import type { BlobEntry, MetadataStore } from "@tekmemo/core";
+import type { BlobEntry, MetadataStore } from "@memofs/core";
 
 /** Column names on the `project_files` table (the documented layout contract). */
 const TABLE = "project_files";
@@ -47,7 +47,7 @@ export interface CreateTursoMetadataStoreOptions {
  *
  * @example
  * ```ts
- * import { createTursoMetadataStore } from "@tekmemo/adapter-turso";
+ * import { createTursoMetadataStore } from "@memofs/adapter-turso";
  *
  * const metadata = createTursoMetadataStore({
  * client: db.$client,
@@ -61,6 +61,7 @@ export function createTursoMetadataStore(
 	options: CreateTursoMetadataStoreOptions,
 ): MetadataStore {
 	const { client, projectId } = options;
+	let pendingTx: Promise<unknown> = Promise.resolve();
 
 	return {
 		async getEntry(path) {
@@ -106,6 +107,72 @@ export function createTursoMetadataStore(
 				 WHERE project_id = ? AND path = ?`,
 				args: [projectId, path],
 			});
+		},
+
+		async withTransaction(fn) {
+			const current = pendingTx;
+			let resolveTx: () => void;
+			pendingTx = new Promise<void>((resolve) => {
+				resolveTx = resolve;
+			});
+			await current;
+
+			try {
+				const tx = await client.transaction("write");
+				try {
+					const txStore: MetadataStore = {
+						async getEntry(path) {
+							const rs = await tx.execute({
+								sql: `SELECT sha256, r2_key, size_bytes FROM ${TABLE}
+								 WHERE project_id = ? AND path = ?
+								 LIMIT 1`,
+								args: [projectId, path],
+							});
+							const row = rs.rows[0];
+							if (!row) return undefined;
+							return toEntry(row);
+						},
+
+						async upsertEntry(path, entry) {
+							await tx.execute({
+								sql: `INSERT INTO ${TABLE} (id, project_id, path, sha256, r2_key, size_bytes)
+								 VALUES (?, ?, ?, ?, ?, ?)
+								 ON CONFLICT (project_id, path) DO UPDATE SET
+								 sha256 = excluded.sha256,
+								 r2_key = excluded.r2_key,
+								 size_bytes = excluded.size_bytes,
+								 updated_at = current_timestamp`,
+								args: [
+									newId(),
+									projectId,
+									path,
+									entry.sha256,
+									entry.blobKey,
+									entry.sizeBytes,
+								],
+							});
+						},
+
+						async removeEntry(path) {
+							await tx.execute({
+								sql: `DELETE FROM ${TABLE}
+								 WHERE project_id = ? AND path = ?`,
+								args: [projectId, path],
+							});
+						},
+					};
+					const result = await fn(txStore);
+					await tx.commit();
+					return result;
+				} catch (err) {
+					await tx.rollback();
+					throw err;
+				} finally {
+					tx.close();
+				}
+			} finally {
+				resolveTx!();
+			}
 		},
 	};
 }

@@ -1,11 +1,11 @@
 /**
- * @tekmemo/adapter-turso — Turso/libSQL metadata adapter for TekMemo's
+ * @memofs/adapter-turso — Turso/libSQL metadata adapter for TekMemo's
  * remote-blob memory store.
  *
  * Implements core's provider-neutral {@link MetadataStore} contract
  * over the cloud's existing `project_files` table: `createTursoMetadataStore`.
  * Metadata storage only — the matching Cloudflare R2 blob client lives in
- * `@tekmemo/adapter-r2`. The Turso/libSQL coupling lives
+ * `@memofs/adapter-r2`. The Turso/libSQL coupling lives
  * here, never in core.
  *
  * @packageDocumentation

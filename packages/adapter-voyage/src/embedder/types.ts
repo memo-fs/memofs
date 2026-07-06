@@ -1,5 +1,5 @@
 /**
- * Core types for the @tekmemo/core/voyageai package.
+ * Core types for the @memofs/core/voyageai package.
  *
  * @remarks
  * Defines configuration, request/response, and embedder types
@@ -94,14 +94,20 @@ import type {
 	EmbedTextsInput as BaseEmbedTextsInput,
 	EmbedTextsResult as BaseEmbedTextsResult,
 	MemoryEmbedder,
-} from "@tekmemo/core";
+} from "@memofs/core";
 
 export interface EmbedTextsInput extends BaseEmbedTextsInput {
 	inputType?: VoyageInputType;
 	truncation?: boolean;
 	outputDimension?: number;
 	outputDtype?: VoyageOutputDtype;
-	encodingFormat?: "base64";
+	// `encodingFormat` is inherited unchanged from `BaseEmbedTextsInput`
+	// (`string | undefined`). Narrowing it here to `"base64"` would make
+	// `VoyageEmbedder.embedTexts` unsatisfiable as a `MemoryEmbedder` — a caller
+	// passing core's wider type (the contract) would be rejected by the narrower
+	// adapter type, breaking the "core is the contract" SSOT (LSP). The
+	// impl narrows internally: only `"base64"` is forwarded to the API; any other
+	// value is ignored (default base64). See `voyage-embedder.ts`.
 }
 
 export interface EmbeddingRecord extends BaseEmbeddingRecord {

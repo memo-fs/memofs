@@ -1,4 +1,4 @@
-import { defineEmbedderContractTests } from "@tekmemo/testing/contracts";
+import { defineEmbedderContractTests } from "@memofs/testing/contracts";
 import { createOpenAIEmbedder } from "../src";
 import { createFakeOpenAIClient } from "../src/testing";
 

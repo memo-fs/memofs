@@ -20,8 +20,8 @@
  * @module handlers
  */
 
-import type { Tekmemo } from "@tekmemo/core";
-import type { JsonObject, JsonValue } from "@tekmemo/json-rpc";
+import type { Tekmemo } from "@memofs/core";
+import type { JsonObject, JsonValue } from "@memofs/json-rpc";
 import { RUNTIME_METHOD } from "../protocol/methods";
 
 /**
@@ -34,10 +34,7 @@ export type RuntimeMethodHandler = (
 ) => Promise<JsonValue>;
 
 /** Extracts an optional string field from params, or `undefined`. */
-function optionalString(
-	params: JsonObject,
-	key: string,
-): string | undefined {
+function optionalString(params: JsonObject, key: string): string | undefined {
 	const value = params[key];
 	return typeof value === "string" ? value : undefined;
 }
@@ -52,10 +49,7 @@ function requiredString(params: JsonObject, key: string): string {
 }
 
 /** Extracts an optional number field from params, or `undefined`. */
-function optionalNumber(
-	params: JsonObject,
-	key: string,
-): number | undefined {
+function optionalNumber(params: JsonObject, key: string): number | undefined {
 	const value = params[key];
 	return typeof value === "number" && Number.isFinite(value)
 		? value
@@ -63,10 +57,7 @@ function optionalNumber(
 }
 
 /** Extracts an optional boolean field from params, or `undefined`. */
-function optionalBoolean(
-	params: JsonObject,
-	key: string,
-): boolean | undefined {
+function optionalBoolean(params: JsonObject, key: string): boolean | undefined {
 	const value = params[key];
 	return typeof value === "boolean" ? value : undefined;
 }
@@ -115,9 +106,7 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 	},
 
 	async [RUNTIME_METHOD.context](tek, params) {
-		return (await tek.context(
-			params as never,
-		)) as unknown as JsonValue;
+		return (await tek.context(params as never)) as unknown as JsonValue;
 	},
 
 	async [RUNTIME_METHOD.readCore](tek) {
@@ -163,15 +152,11 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 	},
 
 	async [RUNTIME_METHOD.graphNeighbors](tek, params) {
-		return (await tek.graph.neighbors(
-			params as never,
-		)) as unknown as JsonValue;
+		return (await tek.graph.neighbors(params as never)) as unknown as JsonValue;
 	},
 
 	async [RUNTIME_METHOD.graphPath](tek, params) {
-		return (await tek.graph.path(
-			params as never,
-		)) as unknown as JsonValue;
+		return (await tek.graph.path(params as never)) as unknown as JsonValue;
 	},
 
 	async [RUNTIME_METHOD.listSnapshots](tek) {
@@ -181,9 +166,7 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 	// ── Writes (gated on slice 3 — refused with 503 until the concurrency
 	// layer merges; handlers exist so the slice-3 flip drops the gate) ──
 	async [RUNTIME_METHOD.write](tek, params) {
-		return (await tek.writeMemory(
-			params as never,
-		)) as unknown as JsonValue;
+		return (await tek.writeMemory(params as never)) as unknown as JsonValue;
 	},
 
 	async [RUNTIME_METHOD.recordNote](tek, params) {

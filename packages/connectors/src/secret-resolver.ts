@@ -14,7 +14,7 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { TEKMEMO_DIR } from "@tekmemo/core";
+import { TEKMEMO_DIR } from "@memofs/core";
 import { ConnectorSecretError } from "./errors";
 
 /**
@@ -168,5 +168,74 @@ export class StaticSecretResolver implements SecretResolver {
 			);
 		}
 		return token;
+	}
+}
+
+/**
+ * Constructor options for {@link CloudSecretResolver}.
+ *
+ * @public
+ */
+export interface CloudSecretResolverOptions {
+	/** The project ID on the cloud. */
+	readonly projectId: string;
+	/** The Bearer API key (`tm_...`) to authenticate requests. */
+	readonly apiKey: string;
+	/** The cloud application base URL (e.g. `https://memo.tekbreed.com`). */
+	readonly cloudBaseUrl: string;
+}
+
+/**
+ * Production secret resolver that fetches decrypted tokens from the cloud API.
+ *
+ * Calls `GET /v1/projects/:projectId/connectors/secret?ref=:secretRef` using
+ * the configured Bearer API key.
+ *
+ * @public
+ */
+export class CloudSecretResolver implements SecretResolver {
+	private readonly projectId: string;
+	private readonly apiKey: string;
+	private readonly cloudBaseUrl: string;
+
+	constructor(options: CloudSecretResolverOptions) {
+		this.projectId = options.projectId;
+		this.apiKey = options.apiKey;
+		this.cloudBaseUrl = options.cloudBaseUrl;
+	}
+
+	async resolve(secretRef: string): Promise<string> {
+		const url = `${this.cloudBaseUrl}/v1/projects/${this.projectId}/connectors/secret?ref=${encodeURIComponent(secretRef)}`;
+		try {
+			const res = await fetch(url, {
+				headers: {
+					Authorization: `Bearer ${this.apiKey}`,
+					Accept: "application/json",
+				},
+			});
+			if (!res.ok) {
+				throw new ConnectorSecretError(
+					secretRef,
+					`Cloud secret resolution returned status ${res.status}: GET ${url}`,
+				);
+			}
+			const body = (await res.json()) as {
+				data: { secret: string };
+			};
+			if (!body?.data?.secret) {
+				throw new ConnectorSecretError(
+					secretRef,
+					`Cloud secret resolution returned an invalid response envelope structure from GET ${url}`,
+				);
+			}
+			return body.data.secret;
+		} catch (error) {
+			if (error instanceof ConnectorSecretError) throw error;
+			throw new ConnectorSecretError(
+				secretRef,
+				`Failed to contact cloud for secret resolution: GET ${url}`,
+				{ cause: error },
+			);
+		}
 	}
 }

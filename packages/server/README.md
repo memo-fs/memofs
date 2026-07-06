@@ -1,40 +1,40 @@
-# `@tekmemo/server`
+# `@memofs/server`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/server"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fserver?label=%40tekmemo%2Fserver&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/server"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fserver?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/server"><img src="https://img.shields.io/npm/v/%40memofs%2Fserver?label=%40memofs%2Fserver&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/server"><img src="https://img.shields.io/npm/dm/%40memofs%2Fserver?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Self-hostable TekMemo runtime server for Node and Cloudflare Workers deployments.
+Self-hostable Memo FS runtime server for Node and Cloudflare Workers deployments.
 
 ## What is this?
 
-**The OSS-deployable hosted-memory server for TekMemo.** Runs the *same* memory
-engine TekMemo Cloud runs, over a memory store you bring, with **no provider
-hardcoding**. TekMemo Cloud runs this package as its runtime worker; you can run
+**The OSS-deployable hosted-memory server for Memo FS.** Runs the *same* memory
+engine Memo FS Cloud runs, over a memory store you bring, with **no provider
+hardcoding**. Memo FS Cloud runs this package as its runtime worker; you can run
 the identical code on your own infra as a single Node process — the only
 difference is which adapters you inject ( /).
 
 Bring your own blob store, metadata store, embedder, reranker, extractor, and LLM
-client. No vendor lock-in. No TekMemo Cloud dependency.
+client. No vendor lock-in. No Memo FS Cloud dependency.
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-server
+npm install @memofs/server
 ```
 
 ## Quick Start
 
 ```ts
-import { createHostedRuntime } from "@tekbreed/tekmemo-server";
+import { createHostedRuntime } from "@memofs/server";
 import {
  InMemoryMemoryStore,
-} from "@tekbreed/tekmemo";
+} from "@memofs";
 
 const tek = createHostedRuntime({
  // The only required slot: the memory store (your file replica).
@@ -57,7 +57,7 @@ const hits = await tek.recall("self-hosted");
 ## The one required slot: `store`
 
 A memory runtime needs files to read and write. That is the `store` — your
-memory store (the file replica). TekMemo Cloud builds it from Cloudflare R2 +
+memory store (the file replica). Memo FS Cloud builds it from Cloudflare R2 +
 Turso; you build it from whatever you run (S3 + Postgres, GCS + D1, or anything
 else that implements `MemoryStore`). There is no default to fall back on.
 
@@ -77,7 +77,7 @@ The same runtime works zero-config or fully enhanced. Inject only what you need.
 
 ## Boundary
 
-This package assembles a `Tekmemo` instance from adapters you provide. It never
+This package assembles a `Memofs` instance from adapters you provide. It never
 reads environment variables, never imports an adapter package, and never hardcodes
 a provider. The store and provider choices belong to you (or to the cloud, when
 it consumes this same factory).
@@ -85,20 +85,20 @@ it consumes this same factory).
 ## The HTTP runtime API (JSON-RPC over HTTP)
 
 The same engine is reachable over HTTP — the two-Worker boundary. An
-OSS self-hoster deploys it as a **Node single process**; TekMemo Cloud deploys it
+OSS self-hoster deploys it as a **Node single process**; Memo FS Cloud deploys it
 as the **runtime Worker** behind a Service Binding. Both run identical code.
 
 ### Deploy targets
 
 ```bash
 # Node single process (Fly / Railway / VPS) — the bin boots a node:http server.
-PORT=8787 node dist/bin/tekmemo-server.mjs
+PORT=8787 node dist/bin/memofs-server.mjs
 curl http://127.0.0.1:8787/health # {"ok":true,...}
 ```
 
 ```ts
 // Cloudflare Worker — the runtime Worker entry.
-import { createRuntimeFetchHandler } from "@tekbreed/tekmemo-server/worker";
+import { createRuntimeFetchHandler } from "@memofs/server/worker";
 
 export default {
  fetch: createRuntimeFetchHandler({
@@ -108,7 +108,7 @@ export default {
 };
 ```
 
-See [`examples/server/`](https://github.com/tekbreed/tekmemo/tree/main/examples/server)
+See [`examples/server/`](https://github.com/christophersesugh/memofs/tree/main/examples/server)
 for the full self-host deploy guide (the canonical R2-compatible + Turso + OpenAI
 bundle, auth, and the Worker topology).
 
@@ -132,14 +132,14 @@ gated** (see below).
 ### The write-gate (important)
 
 Every mutating method returns **`503`** until the concurrency layer ships
-(slice 3 / [](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0010-cloud-concurrency-control-for-b3.md)).
+(slice 3 / [](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0010-cloud-concurrency-control-for-b3.md)).
 This is deliberate: concurrent writes to the same project would silently lose
 data under last-writer-wins, so **no write surface is reachable before the
 serialization layer that makes writes safe exists**. The gate is "method
 rejects," never "method present unsafely."
 
 Reads work fully today. To write memory programmatically before the gate lifts,
-use the `Tekmemo` client directly in-process.
+use the `Memofs` client directly in-process.
 
 ## Status
 
@@ -151,7 +151,7 @@ use the `Tekmemo` client directly in-process.
 - **Slice 3** — the concurrency layer lands; the write-gate flips to live routes.
 
 See the
-[execution plan](https://github.com/tekbreed/tekmemo/blob/main/docs/architecture/s3-execution-plan.md)
+[execution plan](https://github.com/christophersesugh/memofs/blob/main/docs/architecture/s3-execution-plan.md)
 for the full roadmap.
 
 ## License

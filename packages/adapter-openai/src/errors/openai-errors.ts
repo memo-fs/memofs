@@ -1,5 +1,5 @@
 /**
- * @file Error classes for the @tekmemo/core/openai package.
+ * @file Error classes for the @memofs/core/openai package.
  *
  * @remarks
  * This module defines a hierarchy of error classes for different failure modes

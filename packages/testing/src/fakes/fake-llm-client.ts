@@ -22,9 +22,7 @@ export class FakeLlmClient implements MinimalLlmClient {
 	readonly name = "fake-llm-client";
 	readonly calls: MinimalLlmCompletionInput[] = [];
 
-	private readonly resolveText: (
-		input: MinimalLlmCompletionInput,
-	) => string;
+	private readonly resolveText: (input: MinimalLlmCompletionInput) => string;
 	private readonly model: string;
 
 	constructor(options?: {

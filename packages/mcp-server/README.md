@@ -1,30 +1,30 @@
-# `@tekmemo/mcp-server`
+# `@memofs/mcp-server`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/mcp-server"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fmcp-server?label=%40tekmemo%2Fmcp-server&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/mcp-server"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fmcp-server?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/mcp-server"><img src="https://img.shields.io/npm/v/%40memofs%2Fmcp-server?label=%40memofs%2Fmcp-server&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/mcp-server"><img src="https://img.shields.io/npm/dm/%40memofs%2Fmcp-server?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Model Context Protocol server for TekMemo agent integrations.
+Model Context Protocol server for Memo FS agent integrations.
 
 ## What is this?
 
-The `@tekmemo/mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 40+ standardized tools for memory operations, cloud syncing, graph search, and AgentFS sandboxing.
+The `@memofs/mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 40+ standardized tools for memory operations, cloud syncing, graph search, and AgentFS sandboxing.
 
 ## Installation
 
 ```bash
-npm install -D @tekmemo/mcp-server
+npm install -D @memofs/mcp-server
 ```
 
 Or use directly via `npx` in your client's configuration:
 
 ```bash
-npx -y @tekmemo/mcp-server --help
+npx -y @memofs/mcp-server --help
 ```
 
 ## Quick Start
@@ -36,11 +36,11 @@ You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the 
 ```json
 {
  "mcpServers": {
- "tekmemo": {
+ "memofs": {
  "command": "npx",
  "args": [
  "-y",
- "@tekmemo/mcp-server",
+ "@memofs/mcp-server",
  "--runtime", "local",
  "--root", "/absolute/path/to/project"
  ]
@@ -53,7 +53,7 @@ You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the 
 
 The server supports advanced runtime modes (`local`, `cloud`, `hybrid`, `memory`), customizable read/write policies, and a strict `--read-only` flag to block mutating tools when used with untrusted clients.
 
-For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://docs.memo.tekbreed.com/packages/mcp/).
+For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://docs.memo.memofs.dev/packages/mcp/).
 
 ## Contributing
 

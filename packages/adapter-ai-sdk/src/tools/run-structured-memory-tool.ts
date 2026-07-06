@@ -7,8 +7,8 @@
  * @internal
  */
 
-import type { MemoryCommand } from "@tekmemo/core";
-import { runMemoryCommand } from "@tekmemo/core";
+import type { MemoryCommand } from "@memofs/core";
+import { runMemoryCommand } from "@memofs/core";
 import type { MemoryToolInput } from "../schemas/memory-tool-schema";
 import type { MemoryToolExecutionContext } from "../types/ai-sdk-memory";
 

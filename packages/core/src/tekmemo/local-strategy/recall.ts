@@ -1,12 +1,12 @@
-import type { LocalStrategyContext } from "./types";
-import type { RecallInput, RecallResult } from "../types";
-import { hash, candidateShape } from "./helpers";
 import {
+	mergeHybridCandidates,
 	readCoreMemory,
 	readNotesMemory,
 	searchMemoryText,
-	mergeHybridCandidates,
 } from "../../index";
+import type { RecallInput, RecallResult } from "../types";
+import { candidateShape, hash } from "./helpers";
+import type { LocalStrategyContext } from "./types";
 
 export async function localRecall(
 	ctx: LocalStrategyContext,

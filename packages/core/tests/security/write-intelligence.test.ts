@@ -8,12 +8,12 @@ import {
 	MemoryWriteBlockedError,
 	Tekmemo,
 } from "../../src/index";
+import { createNodeFsMemoryStore } from "../../src/node-fs";
 import {
 	classifyDurability,
 	TRANSIENT_CONFIDENCE_THRESHOLD,
 	TRANSIENT_CONTENT_MIN_LENGTH,
 } from "../../src/security/durability-tier";
-import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempTekMemoDir } from "../../src/testing/temp-dir";
 
 /**

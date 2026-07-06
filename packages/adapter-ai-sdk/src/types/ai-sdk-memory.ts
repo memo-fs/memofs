@@ -8,7 +8,7 @@
  * @internal
  */
 
-import type { MemoryPath, MemoryStore } from "@tekmemo/core";
+import type { MemoryPath, MemoryStore } from "@memofs/core";
 import type { MemoryHit, RetrievalPlan } from "./retrieval";
 
 /**

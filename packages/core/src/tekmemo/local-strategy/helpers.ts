@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import type {
-	GraphNode,
 	GraphEdge,
-	GraphNodeInput,
 	GraphEdgeInput,
+	GraphNode,
+	GraphNodeInput,
 } from "../../index";
 
 export function hash(value: string): string {

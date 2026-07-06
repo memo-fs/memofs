@@ -7,7 +7,6 @@
  * @module http
  */
 
-import type { JsonRpcResponse } from "../protocol/json-rpc";
 import { failure, JSON_RPC_ERRORS } from "../protocol/json-rpc";
 import { createTekMemoMcpProtocolServer } from "../protocol/server";
 import type { TekMemoMcpOptions, TekMemoMcpRuntime } from "../types";
@@ -16,20 +15,20 @@ import {
 	type TekMemoCloudMcpRuntimeOptions,
 } from "./cloud-runtime";
 import {
-	validateAcceptHeader,
-	validateContentTypeHeader,
-	validateProtocolVersion,
-	validateOrigin,
+	bearerTokenFromRequest,
+	emptyResponse,
 	isJsonRpcResponsePayload,
 	jsonResponse,
-	emptyResponse,
-	withCors,
-	responseHeaders,
-	textResponse,
-	bearerTokenFromRequest,
-	timingSafeEqual,
 	parsePositiveInteger,
 	requiredString,
+	responseHeaders,
+	textResponse,
+	timingSafeEqual,
+	validateAcceptHeader,
+	validateContentTypeHeader,
+	validateOrigin,
+	validateProtocolVersion,
+	withCors,
 } from "./helpers";
 
 /**

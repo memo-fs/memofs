@@ -5,7 +5,7 @@ import {
 	MemoryNotFoundError,
 	MemoryPathError,
 	TEKMEMO_PATHS,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
 	AgentfsClientError,

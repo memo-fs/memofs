@@ -1,20 +1,17 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createClient } from "@libsql/client";
-import { createR2BlobClient } from "@tekmemo/adapter-r2";
+import { createR2BlobClient } from "@memofs/adapter-r2";
 import {
 	CORE_MEMORY_PATH,
 	NOTES_MEMORY_PATH,
 	RemoteBlobMemoryStore,
-} from "@tekmemo/core";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+} from "@memofs/core";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createTursoMetadataStore } from "../src/index";
 
-/**
- * Integration: proves the two **decoupled** adapter packages (`@tekmemo/adapter-r2`
- * blob + `@tekmemo/adapter-turso` metadata) compose cleanly through core's
- * provider-neutral `RemoteBlobMemoryStore` — the shape, not a bundled
- * adapter. This is the only place the two packages meet in tests; there is no
- * runtime coupling between them.
- */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const PROJECT_FILES_DDL = [
 	`CREATE TABLE project_files (
@@ -58,10 +55,20 @@ async function toArrayBuffer(body: BodyInit): Promise<ArrayBuffer> {
 	throw new Error("Unsupported body type in fake R2 bucket");
 }
 
+let dbFile: string;
 let client: ReturnType<typeof createClient>;
 
-beforeAll(() => {
-	client = createClient({ url: ":memory:" });
+beforeAll(async () => {
+	dbFile = path.resolve(
+		__dirname,
+		`../test-integration-${Math.random().toString(36).slice(2)}.db`,
+	);
+	client = createClient({ url: `file:${dbFile}`, timeout: 5000 });
+});
+
+afterAll(async () => {
+	client.close();
+	await fs.rm(dbFile, { force: true });
 });
 
 beforeEach(async () => {

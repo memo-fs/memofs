@@ -11,15 +11,15 @@ import { NOTES_MEMORY_PATH } from "../core/constants/memory-paths";
 import { classifyDurability } from "../security/durability-tier";
 import { assertWriteAllowed } from "../security/secret-blocklist";
 import { buildContext, paginateArray } from "./helpers";
-import { ContextCache } from "./progressive";
+import { memoryConsolidateMemory } from "./memory-strategy/consolidate";
 import {
 	edgeId,
 	memoryGraphNeighbors,
 	memoryGraphPath,
 } from "./memory-strategy/graph";
-import { memoryConsolidateMemory } from "./memory-strategy/consolidate";
 import { memoryRecall } from "./memory-strategy/recall";
 import type { StoredNote } from "./memory-strategy/types";
+import { ContextCache } from "./progressive";
 import type {
 	AgentSessionCompleteInput,
 	AgentSessionExtractResult,
@@ -33,6 +33,7 @@ import type {
 	GraphNodeInput,
 	GraphPathInput,
 	GraphPathResult,
+	JsonObject,
 	ListGraphInput,
 	MemoryContextInput,
 	MemoryContextResult,
@@ -54,7 +55,6 @@ import type {
 	ValidateMemoryResult,
 	WriteMemoryInput,
 	WriteMemoryResult,
-	JsonObject,
 } from "./types";
 
 export interface MemoryStrategyOptions {

@@ -54,9 +54,7 @@ export function defineBlobClientContractTests(
 				await client.put("dup", new TextEncoder().encode("first"));
 				await client.put("dup", new TextEncoder().encode("second"));
 				const got = await client.get("dup");
-				expect(new TextDecoder().decode(got as ArrayBuffer)).toBe(
-					"second",
-				);
+				expect(new TextDecoder().decode(got as ArrayBuffer)).toBe("second");
 			} finally {
 				await options.cleanup?.();
 			}

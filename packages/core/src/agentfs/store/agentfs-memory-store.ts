@@ -5,7 +5,7 @@ import {
 	type MemoryPath,
 	type MemoryStore,
 	MemoryStoreError,
-} from "@tekmemo/core";
+} from "@memofs/core";
 import {
 	type AgentfsLikeClient,
 	assertAgentfsLikeClient,

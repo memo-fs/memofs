@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CONNECTORS_PATH } from "@tekmemo/core";
+import { CONNECTORS_PATH } from "@memofs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { ConnectorsFile } from "../src/index";
 import {

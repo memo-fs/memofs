@@ -1,4 +1,4 @@
-import { TEKMEMO_PATHS } from "@tekmemo/core";
+import { TEKMEMO_PATHS } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import { AgentfsMemoryStore } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";

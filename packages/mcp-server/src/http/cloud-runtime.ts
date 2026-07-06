@@ -23,7 +23,7 @@ import {
 	createTekMemoCloudClient,
 	type TekMemoCloudClient,
 	type TekMemoCloudClientOptions,
-} from "@tekmemo/core/cloud-client";
+} from "@memofs/core/cloud-client";
 import type { TekMemoHealthResult, TekMemoMcpRuntime } from "../types";
 
 /**

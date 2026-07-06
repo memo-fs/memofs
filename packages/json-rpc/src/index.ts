@@ -1,5 +1,5 @@
 /**
- * `@tekmemo/json-rpc` — a dependency-free, product-neutral JSON-RPC 2.0
+ * `@memofs/json-rpc` — a dependency-free, product-neutral JSON-RPC 2.0
  * protocol SSOT for the TekMemo workspace.
  *
  * @remarks

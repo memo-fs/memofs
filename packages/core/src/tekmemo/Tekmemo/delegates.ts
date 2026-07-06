@@ -1,36 +1,36 @@
 import { assertString } from "@repo/utils";
-import type { Tekmemo } from "../Tekmemo";
+import type {
+	CreateTekMemoAgentSessionOptions,
+	TekMemoAgentSession,
+} from "../../agentfs/session/agent-session";
+import type { ReadConversationHistoryOptions } from "../../core/documents/conversations-memory";
 import type {
 	ConversationEntry,
 	SnapshotRecord,
 	TimestampedNote,
 } from "../../core/types/memory-documents";
-import type { ReadConversationHistoryOptions } from "../../core/documents/conversations-memory";
-import type {
-	WriteMemoryInput,
-	WriteMemoryResult,
-	SnapshotMemoryInput,
-} from "../types";
 import {
-	readConversationHistory,
 	appendConversationEntry,
-	MemoryNotFoundError,
-	readSnapshotRecords,
+	bootstrapMemoryStore,
 	createSnapshotPath,
-	writeCoreMemory,
-	NOTES_MEMORY_PATH,
-	MEMORY_EVENTS_PATH,
 	createTekMemoAgentSession,
+	MEMORY_EVENTS_PATH,
+	MemoryNotFoundError,
+	NOTES_MEMORY_PATH,
+	readConversationHistory,
+	readSnapshotRecords,
+	writeCoreMemory,
 } from "../../index";
-import type {
-	CreateTekMemoAgentSessionOptions,
-	TekMemoAgentSession,
-} from "../../agentfs/session/agent-session";
+import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
 import { createMemoryStrategy } from "../memory-strategy";
-import { createHybridStrategy } from "../hybrid-strategy";
 import { createFileSyncLayer } from "../sync/file-replication";
-import { bootstrapMemoryStore } from "../../index";
+import type { Tekmemo } from "../Tekmemo";
+import type {
+	SnapshotMemoryInput,
+	WriteMemoryInput,
+	WriteMemoryResult,
+} from "../types";
 
 export async function coreRead(
 	self: Tekmemo,

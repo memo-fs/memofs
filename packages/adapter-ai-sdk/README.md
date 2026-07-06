@@ -1,32 +1,32 @@
-# `@tekmemo/adapter-ai-sdk`
+# `@memofs/adapter-ai-sdk`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-ai-sdk"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fadapter-ai-sdk?label=%40tekmemo%2Fadapter-ai-sdk&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/@tekmemo/adapter-ai-sdk"><img src="https://img.shields.io/npm/dm/%40tekmemo%2Fadapter-ai-sdk?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
+  <a href="https://www.npmjs.com/package/@memofs/adapter-ai-sdk"><img src="https://img.shields.io/npm/v/%40memofs%2Fadapter-ai-sdk?label=%40memofs%2Fadapter-ai-sdk&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/adapter-ai-sdk"><img src="https://img.shields.io/npm/dm/%40memofs%2Fadapter-ai-sdk?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Vercel AI SDK adapter for TekMemo memory tools, runtime bridging, and context builders.
+Vercel AI SDK adapter for Memo FS memory tools, runtime bridging, and context builders.
 
 ## What is this?
 
-**Vercel AI SDK adapter for TekMemo.** Bridges a TekMemo memory engine into the
-framework-neutral [`TekMemoMemoryRuntime`](https://www.npmjs.com/package/@tekbreed/tekmemo)
+**Vercel AI SDK adapter for Memo FS.** Bridges a Memo FS memory engine into the
+framework-neutral [`MemofsMemoryRuntime`](https://www.npmjs.com/package/@memofs)
 contract and exposes a ready-to-use Vercel AI SDK **memory tool**, prompt
 context builders, and agent-session instructions.
 
-This package is the provider implementation of TekMemo's AI-framework runtime
+This package is the provider implementation of Memo FS's AI-framework runtime
 contract — the runtime equivalent of the embedder interface/impl split
-(`Embedder` in core; `tekmemo-adapter-openai`, `-voyage`, `-transformers` as
+(`Embedder` in core; `memofs-adapter-openai`, `-voyage`, `-transformers` as
 provider packages). See [ADR 0007](../../docs/adr/0007-ai-sdk-extraction.md).
 
 ## Installation
 
 ```bash
-npm install @tekbreed/tekmemo-adapter-ai-sdk
+npm install @memofs/adapter-ai-sdk
 ```
 
 This package has a required peer dependency on the
@@ -41,14 +41,14 @@ npm install ai
 ### 1. Build the runtime
 
 ```ts
-import { Tekmemo } from "@tekbreed/tekmemo";
-import { createAiSdkRuntimeFromTekmemo } from "@tekbreed/tekmemo-adapter-ai-sdk";
+import { Memofs } from "@memofs";
+import { createAiSdkRuntimeFromMemofs } from "@memofs/adapter-ai-sdk";
 
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
-const runtime = createAiSdkRuntimeFromTekmemo(memo);
+const memo = new Memofs({ rootDir: "./`.memofs`", projectId: "demo" });
+const runtime = createAiSdkRuntimeFromMemofs(memo);
 ```
 
-Every `recall` goes through `Tekmemo.recall` (the single hybrid engine:
+Every `recall` goes through `Memofs.recall` (the single hybrid engine:
 BM25 + fuzzy + embeddings + recency boost + optional reranker), so recall
 quality never changes between local, cloud, and hybrid modes.
 
@@ -56,7 +56,7 @@ quality never changes between local, cloud, and hybrid modes.
 
 ```ts
 import { generateText, tool } from "ai";
-import { buildRuntimeMemoryToolDefinition } from "@tekbreed/tekmemo-adapter-ai-sdk";
+import { buildRuntimeMemoryToolDefinition } from "@memofs/adapter-ai-sdk";
 
 const memoryTool = buildRuntimeMemoryToolDefinition({
   runtime,
@@ -79,7 +79,7 @@ The tool accepts a zod discriminated union of commands: `read_core_memory`,
 ### 3. Inject memory into the prompt
 
 ```ts
-import { buildRuntimeMemoryContext } from "@tekbreed/tekmemo-adapter-ai-sdk";
+import { buildRuntimeMemoryContext } from "@memofs/adapter-ai-sdk";
 
 const { text } = await buildRuntimeMemoryContext({
   runtime,
@@ -97,7 +97,7 @@ const { text } = await buildRuntimeMemoryContext({
 
 | Export | Description |
 |--------|-------------|
-| `createAiSdkRuntimeFromTekmemo(memo)` | Bridges a `Tekmemo` client into a `TekMemoMemoryRuntime`. |
+| `createAiSdkRuntimeFromMemofs(memo)` | Bridges a `Memofs` client into a `MemofsMemoryRuntime`. |
 | `buildRuntimeMemoryToolDefinition(options)` | A `{ description, inputSchema, execute }` tool for the Vercel AI SDK. |
 | `runRuntimeMemoryTool(options, input)` | Runs a single validated tool command (used by the tool definition; also callable directly). |
 | `buildRuntimeMemoryContext(input)` | Builds a prompt-ready memory text (core memory + notes + recall). |
@@ -120,8 +120,8 @@ This package owns the **Vercel AI SDK** integration only: the runtime bridge,
 the zod memory tool, the prompt/context builders, the agent-session
 instructions, and the scope policy. It does **not** own:
 
-- The framework-neutral `TekMemoMemoryRuntime` contract (that lives in
-  `@tekbreed/tekmemo` core).
+- The framework-neutral `MemofsMemoryRuntime` contract (that lives in
+  `@memofs` core).
 - The memory engine, stores, recall, or `agentfs/` (also core).
 - Other framework adapters (LangChain / OpenAI Agents SDK / Mastra are future
   sibling packages that will implement the same contract).
