@@ -19,6 +19,47 @@ const TOKEN_LEAK_FIELDS = [
 	"access_token",
 ] as const;
 
+const SECRET_PATTERNS = [
+	/secret_[a-zA-Z0-9]{30,60}/i, // Notion
+	/gh[pousr]_[a-zA-Z0-9]{36,40}/i, // GitHub
+	/tm_[a-zA-Z0-9]{30,60}/i, // TekMemo
+	/ey[a-zA-Z0-9_-]{10,}\.ey[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/, // JWT
+	/(sk|pk|rk)_(live|test)_[a-zA-Z0-9]{24,60}/i, // Stripe
+];
+
+function scanForRawSecrets(value: unknown, path: string): void {
+	if (typeof value === "string") {
+		for (const pattern of SECRET_PATTERNS) {
+			if (pattern.test(value)) {
+				throw new ConnectorConfigError(
+					`Connector configuration at "${path}" contains a value that matches a raw token pattern. Raw tokens must not appear in connectors.json. Use "secretRef" instead.`,
+				);
+			}
+		}
+	} else if (Array.isArray(value)) {
+		for (let i = 0; i < value.length; i++) {
+			scanForRawSecrets(value[i], `${path}[${i}]`);
+		}
+	} else if (value && typeof value === "object") {
+		for (const [key, val] of Object.entries(value)) {
+			const lowerKey = key.toLowerCase();
+			if (
+				lowerKey !== "secretref" &&
+				(lowerKey.includes("token") ||
+					lowerKey.includes("secret") ||
+					lowerKey.includes("apikey") ||
+					lowerKey.includes("api_key") ||
+					lowerKey.includes("password"))
+			) {
+				throw new ConnectorConfigError(
+					`Connector configuration contains a forbidden key "${key}" at "${path}". Tokens and secrets must not be stored in connectors.json. Use "secretRef" instead.`,
+				);
+			}
+			scanForRawSecrets(val, `${path}.${key}`);
+		}
+	}
+}
+
 /** Empty default — a missing connectors file degrades gracefully (no connectors run). */
 export const EMPTY_CONNECTORS_FILE: ConnectorsFile = Object.freeze({
 	connectors: [],
@@ -91,6 +132,7 @@ export async function readConnectorsFile(
  * @param raw the parsed JSON value
  */
 export function validateConnectorsFile(raw: unknown): ConnectorsFile {
+	scanForRawSecrets(raw, "root");
 	if (!isObject(raw)) {
 		throw new ConnectorConfigError(
 			`Connectors file must be an object with a "connectors" array.`,

@@ -204,6 +204,23 @@ describe("AdvisoryFileLock", () => {
 		await lock.release();
 	});
 
+	test("reclaims a stale lock if the PID belongs to a recycled/reused PID", async () => {
+		const rootDir = await createTempRoot();
+		const lockPath = path.join(rootDir, ".lock");
+
+		await writeLockFile(lockPath, {
+			pid: process.pid,
+			startedAt: new Date().toISOString(),
+			processStartedAt: "Wed Dec 31 16:00:00 1969",
+		});
+
+		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		await expect(lock.acquire()).resolves.toBeUndefined();
+		expect(lock.isHeld).toBe(true);
+
+		await lock.release();
+	});
+
 	test("concurrent acquire from the same instance shares one in-flight attempt", async () => {
 		const rootDir = await createTempRoot();
 		const lockPath = path.join(rootDir, ".lock");

@@ -23,6 +23,7 @@
  * @internal
  */
 
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import { LockHeldError } from "../errors/fs-memory-store-error";
@@ -33,6 +34,39 @@ export interface LockFileContents {
 	pid: number;
 	/** ISO timestamp of when the lock was acquired. */
 	startedAt: string;
+	/** The unique process start time from the OS to guard against PID reuse. */
+	processStartedAt?: string;
+}
+
+/**
+ * Retrieves the start time signature of a process from the OS.
+ */
+export function getProcessStartTime(pid: number): string | null {
+	if (process.platform === "linux") {
+		try {
+			const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
+			const lastParen = stat.lastIndexOf(")");
+			if (lastParen === -1) return null;
+			const afterName = stat.substring(lastParen + 2);
+			const fields = afterName.split(" ");
+			const starttimeTicks = fields[19];
+			return starttimeTicks ? starttimeTicks.trim() : null;
+		} catch {
+			return null;
+		}
+	} else if (process.platform === "darwin") {
+		try {
+			const stdout = execSync(`ps -p ${pid} -o lstart=`, {
+				stdio: ["pipe", "pipe", "ignore"],
+				encoding: "utf8",
+			});
+			const trimmed = stdout.trim();
+			return trimmed || null;
+		} catch {
+			return null;
+		}
+	}
+	return null;
 }
 
 /** Options for {@link AdvisoryFileLock}. */
@@ -173,6 +207,7 @@ export class AdvisoryFileLock {
 		const contents: LockFileContents = {
 			pid: process.pid,
 			startedAt: new Date().toISOString(),
+			processStartedAt: getProcessStartTime(process.pid) ?? undefined,
 		};
 
 		const created = await this.tryWriteLockFile(contents);
@@ -243,6 +278,14 @@ export class AdvisoryFileLock {
 			return true;
 		}
 		if (!isProcessAlive(contents.pid)) return true;
+
+		// Verify PID reuse:
+		if (contents.processStartedAt) {
+			const currentStartTime = getProcessStartTime(contents.pid);
+			if (currentStartTime && currentStartTime !== contents.processStartedAt) {
+				return true;
+			}
+		}
 
 		const startedAt = Date.parse(contents.startedAt);
 		if (Number.isNaN(startedAt)) return true;

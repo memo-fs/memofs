@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 /**
  * Filesystem-backed memory store implementation.
@@ -36,6 +37,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 	/** @internal */
 	private readonly locks = new PathLock();
 	private readonly lock: AdvisoryFileLock | null;
+	private readonly readHashes = new Map<string, string>();
 
 	/**
 	 * Creates a new filesystem-backed memory store.
@@ -127,7 +129,10 @@ export class NodeFsMemoryStore implements MemoryStore {
 		try {
 			await ensureRootDir(this.options);
 			await assertNoSymlinkPath(absolutePath, this.options);
-			return await fs.readFile(absolutePath, "utf8");
+			const content = await fs.readFile(absolutePath, "utf8");
+			const hash = createHash("sha256").update(content, "utf8").digest("hex");
+			this.readHashes.set(absolutePath, hash);
+			return content;
 		} catch (error) {
 			if (isNotFoundError(error)) {
 				if (this.options.missingFileBehavior === "empty") {
@@ -167,8 +172,41 @@ export class NodeFsMemoryStore implements MemoryStore {
 				await ensureRootDir(this.options);
 				await ensureParentDir(absolutePath, this.options);
 				await assertNoSymlinkPath(absolutePath, this.options);
+
+				// Optimistic concurrency check:
+				const lastReadHash = this.readHashes.get(absolutePath);
+				if (lastReadHash !== undefined) {
+					let currentDiskContent: string | null = null;
+					try {
+						currentDiskContent = await fs.readFile(absolutePath, "utf8");
+					} catch {
+						// Ignored (e.g. file deleted or missing, okay to write)
+					}
+					if (currentDiskContent !== null) {
+						const currentDiskHash = createHash("sha256")
+							.update(currentDiskContent, "utf8")
+							.digest("hex");
+						if (currentDiskHash !== lastReadHash) {
+							throw new Error(
+								`Conflict detected: the memory file "${path}" was modified externally since it was last read. ` +
+									"To prevent clobbering manual edits, this write operation has been aborted.",
+							);
+						}
+					}
+				}
+
 				await writeFileAtomic(absolutePath, content, this.options);
+				const newHash = createHash("sha256")
+					.update(content, "utf8")
+					.digest("hex");
+				this.readHashes.set(absolutePath, newHash);
 			} catch (error) {
+				if (
+					error instanceof Error &&
+					error.message.includes("Conflict detected")
+				) {
+					throw error;
+				}
 				throw wrapFsError(
 					"Failed to write memory file.",
 					{ path, absolutePath },
@@ -205,6 +243,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 					mode: this.options.fileMode,
 					flag: "a",
 				});
+				this.readHashes.delete(absolutePath);
 			} catch (error) {
 				throw wrapFsError(
 					"Failed to append memory file.",
@@ -259,6 +298,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 				await ensureRootDir(this.options);
 				await assertNoSymlinkPath(absolutePath, this.options);
 				await fs.rm(absolutePath, { force: true });
+				this.readHashes.delete(absolutePath);
 			} catch (error) {
 				if (isNotFoundError(error)) {
 					return;

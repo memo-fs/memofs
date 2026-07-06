@@ -51,11 +51,11 @@ export function allocateBudget(input: BudgetInput): {
 			remaining -= cost;
 			packed.push(section);
 		} else {
-			const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes]`;
-			const noticeBytes = Buffer.byteLength(NOTICE, "utf8");
-			const sliceable = Math.max(0, bodyBudget - noticeBytes);
-			const sliced = sliceUtf8(section.content, sliceable).trimEnd();
-			const truncatedContent = `${sliced}${NOTICE}`;
+			const truncatedContent = compressSectionContent(
+				section.type,
+				section.content,
+				bodyBudget,
+			);
 			const cost = headingBytes + Buffer.byteLength(truncatedContent, "utf8");
 			used += cost;
 			remaining -= cost;
@@ -69,6 +69,107 @@ export function allocateBudget(input: BudgetInput): {
 		.join("\n\n");
 
 	return { sections: packed, text, truncated };
+}
+
+function compressSectionContent(
+	type: string | undefined,
+	content: string,
+	bodyBudget: number,
+): string {
+	const delimiter = type === "recall" ? "\n\n" : "\n";
+	const items = content
+		.split(delimiter)
+		.filter((item) => item.trim().length > 0);
+
+	let currentText = "";
+	const included: string[] = [];
+	const omitted: string[] = [...items];
+
+	for (let i = 0; i < items.length; i++) {
+		const nextIncluded = [...included, items[i]];
+		const nextOmitted = items.slice(i + 1);
+
+		const nextIncludedText = nextIncluded.join(delimiter);
+		if (nextOmitted.length === 0) {
+			if (Buffer.byteLength(nextIncludedText, "utf8") <= bodyBudget) {
+				currentText = nextIncludedText;
+				included.push(items[i]);
+				omitted.shift();
+			}
+			break;
+		}
+
+		const nextOutlineLines = nextOmitted.map((item) => {
+			const firstLine = item.split("\n")[0] || "";
+			let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
+			if (summary.length > 80) {
+				summary = `${summary.slice(0, 77)}...`;
+			}
+			return `[Omitted: "${summary}"]`;
+		});
+
+		const maxOutlineItems = 5;
+		const nextOutlineToShow = nextOutlineLines.slice(0, maxOutlineItems);
+		const nextHiddenCount = nextOutlineLines.length - maxOutlineItems;
+		const nextSuffix =
+			nextHiddenCount > 0 ? `\n ↳ [and ${nextHiddenCount} more items...]` : "";
+
+		const nextOutlineText = `\n\n[Omitted ${nextOmitted.length} items to fit context budget:\n${nextOutlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${nextSuffix}\nTo view these, run recall with specific search terms]`;
+
+		const totalBytes = Buffer.byteLength(
+			nextIncludedText + nextOutlineText,
+			"utf8",
+		);
+		if (totalBytes <= bodyBudget) {
+			currentText = nextIncludedText;
+			included.push(items[i]);
+			omitted.shift();
+		} else {
+			break;
+		}
+	}
+
+	if (omitted.length === 0) {
+		return content;
+	}
+
+	// Build the final outline for the items that remain omitted
+	const outlineLines = omitted.map((item) => {
+		const firstLine = item.split("\n")[0] || "";
+		let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
+		if (summary.length > 80) {
+			summary = `${summary.slice(0, 77)}...`;
+		}
+		return `[Omitted: "${summary}"]`;
+	});
+
+	const maxOutlineItems = 5;
+	const outlineToShow = outlineLines.slice(0, maxOutlineItems);
+	const hiddenCount = outlineLines.length - maxOutlineItems;
+	const suffix =
+		hiddenCount > 0 ? `\n ↳ [and ${hiddenCount} more items...]` : "";
+
+	const outlineText = `\n\n[Omitted ${omitted.length} items to fit context budget:\n${outlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${suffix}\nTo view these, run recall with specific search terms]`;
+
+	const totalBytes = Buffer.byteLength(currentText + outlineText, "utf8");
+	if (totalBytes <= bodyBudget) {
+		return currentText + outlineText;
+	}
+
+	const fallbackOutline = `\n\n[Omitted ${omitted.length} items due to context budget limits]`;
+	const fallbackBytes = Buffer.byteLength(
+		currentText + fallbackOutline,
+		"utf8",
+	);
+	if (fallbackBytes <= bodyBudget) {
+		return currentText + fallbackOutline;
+	}
+
+	const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes]`;
+	const noticeBytes = Buffer.byteLength(NOTICE, "utf8");
+	const sliceable = Math.max(0, bodyBudget - noticeBytes);
+	const sliced = sliceUtf8(content, sliceable).trimEnd();
+	return `${sliced}${NOTICE}`;
 }
 
 function sliceUtf8(text: string, maxBytes: number): string {

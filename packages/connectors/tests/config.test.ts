@@ -166,6 +166,34 @@ describe("validateConnectorsFile", () => {
 		expect(file.connectors[0]?.enabled).toBe(false);
 	});
 
+	it("rejects raw tokens or custom password/token fields", () => {
+		expect(() =>
+			validateConnectorsFile({
+				connectors: [
+					{
+						id: "x",
+						type: "github",
+						secretRef: "ss_a",
+						description: "ghp_123456789012345678901234567890123456",
+					},
+				],
+			}),
+		).toThrow(/contains a value that matches a raw token pattern/i);
+
+		expect(() =>
+			validateConnectorsFile({
+				connectors: [
+					{
+						id: "x",
+						type: "notion",
+						secretRef: "ss_a",
+						githubToken: "some-harmless-value",
+					},
+				],
+			}),
+		).toThrow(/contains a forbidden key/i);
+	});
+
 	it("EMPTY_CONNECTORS_FILE is frozen and empty", () => {
 		expect(EMPTY_CONNECTORS_FILE.connectors).toEqual([]);
 		expect(Object.isFrozen(EMPTY_CONNECTORS_FILE)).toBe(true);

@@ -376,7 +376,7 @@ describe("allocateBudget (stage 4)", () => {
 		expect(result.text).toContain(coreContent);
 		// Recall was truncated.
 		expect(result.truncated).toBe(true);
-		expect(result.text).toMatch(/Section truncated/);
+		expect(result.text).toMatch(/Omitted/);
 	});
 
 	it("divides remaining budget across negotiable sections by weight", () => {
@@ -461,5 +461,34 @@ describe("allocateBudget (stage 4)", () => {
 			maxBytes: 500,
 		});
 		expect(Buffer.byteLength(result.text, "utf8")).toBeLessThanOrEqual(500);
+	});
+
+	it("generates an adaptive compaction outline for truncated items", () => {
+		const itemsText = Array.from(
+			{ length: 20 },
+			(_, i) => `${i + 1}. Item ${String.fromCharCode(65 + i)} description`,
+		).join("\n\n");
+		const result = allocateBudget({
+			sections: [
+				{
+					type: "directive",
+					title: "Directive",
+					content: "d",
+					nonNegotiable: true,
+				},
+				{
+					type: "recall",
+					title: "Recall",
+					content: itemsText,
+					weight: 1,
+				},
+			],
+			maxBytes: 400,
+		});
+		expect(result.truncated).toBe(true);
+		expect(result.text).toMatch(/Omitted \d+ items to fit context budget/);
+		expect(result.text).toMatch(/↳ \[Omitted: "Item C description"\]/);
+		expect(result.text).toMatch(/↳ \[Omitted: "Item G description"\]/);
+		expect(result.text).toMatch(/↳ \[and 13 more items...\]/);
 	});
 });

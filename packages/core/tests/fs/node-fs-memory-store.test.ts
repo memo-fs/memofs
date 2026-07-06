@@ -145,4 +145,33 @@ describe("NodeFsMemoryStore", () => {
 		await store.write(CORE_MEMORY_PATH, "# URL root\n");
 		await expect(store.read(CORE_MEMORY_PATH)).resolves.toBe("# URL root\n");
 	});
+
+	test("prevents out-of-band edit clobbering via optimistic concurrency hash check", async () => {
+		const rootDir = await createTempRoot();
+		const store = createNodeFsMemoryStore({ rootDir });
+
+		await store.write(CORE_MEMORY_PATH, "original version");
+		const readVal = await store.read(CORE_MEMORY_PATH);
+		expect(readVal).toBe("original version");
+
+		const filePath = path.join(rootDir, CORE_MEMORY_PATH);
+		await fs.writeFile(filePath, "manual external modification", "utf8");
+
+		await expect(
+			store.write(CORE_MEMORY_PATH, "agent attempt to overwrite"),
+		).rejects.toThrow(
+			/Conflict detected: the memory file .* was modified externally/,
+		);
+
+		const updatedVal = await store.read(CORE_MEMORY_PATH);
+		expect(updatedVal).toBe("manual external modification");
+
+		await expect(
+			store.write(CORE_MEMORY_PATH, "agent successfully writes after reload"),
+		).resolves.toBeUndefined();
+
+		expect(await store.read(CORE_MEMORY_PATH)).toBe(
+			"agent successfully writes after reload",
+		);
+	});
 });
