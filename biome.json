@@ -10,7 +10,6 @@
 		"ignoreUnknown": false,
 		"includes": [
 			"**",
-			"!**/mockServiceWorker.js",
 			"!**/*.css",
 			"!**/worker-configuration.d.ts",
 			"!skills-lock.json",

@@ -40,10 +40,10 @@ pnpm lint:package
 pnpm validate:workspace
 ```
 
-### Package scripts (e.g. `packages/tekmemo`)
+### Package scripts (e.g. `packages/memofs`)
 
 ```bash
-cd packages/tekmemo
+cd packages/memofs
 
 # Build (tsdown — dual ESM + CJS)
 pnpm build

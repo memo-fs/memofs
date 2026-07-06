@@ -1,4 +1,5 @@
 .agents/skills/
+.memofs
 skills-lock.json
 social
 .opencode
@@ -57,3 +58,14 @@ packages/**/.tekmemo/
 
 # Wrangler build cache
 .wrangler/
+
+# Internal docs - not tracked
+docs/adr/
+docs/wayfinder/
+docs/architecture/
+docs/CONTEXT.md
+# Internal tooling - not tracked
+research/
+opencode.json
+skills-lock.json
+.agents/skills/

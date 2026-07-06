@@ -100,7 +100,7 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 - **⚠️ Important**: Strictly adhere to React Router v8 recommended best practices when working with React Router on the client.
 - **⚠️ Important**: Aim for performance, optimistic UI, database query optimization, clean and highly organized and maintainable code.
 - **⚠️ Important**: Your code must be well organized, clean and maintainable.
-- **⚠️ Always use** [miniflare](https://developers.cloudflare.com/workers/testing/miniflare/get-started/) together with playwright for mocks and e2e tests.
+- **⚠️ Always use** Playwright for e2e tests.
 - **⚠️ Always use** StatusCodes from `http-status-codes` for consistent HTTP status code handling.
 
 ## General Rules
@@ -109,22 +109,6 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 - **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
 - **⚠️ Always use** the `cloudflare` skill when working with Cloudflare or building on the server for best practices.
 - **⚠️ Avoid** adding adding adr and wf related nameings to code documentation and avoid pointing to ADRs and WF in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation. Do not track ADRs and WFs in git history.
-
-## References
-
-### Vitest
-- [Vitest best practices](https://vitest.dev/guide/learn/writing-tests-with-ai.html)
-- [Debugging tests](https://vitest.dev/guide/learn/debugging-tests.html)
-- [Visual regression testing](https://vitest.dev/guide/browser/visual-regression-testing.html)
-
-### Cloudflare
-- [Service bindings](https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings)
-- [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
-- [All cloudflare configuration](https://developers.cloudflare.com/workers/configuration/)
-- [Multiple workers](https://developers.cloudflare.com/workers/local-development/multi-workers/)
-- [Static assets](https://developers.cloudflare.com/workers/static-assets/)
-- [Testing guide](https://developers.cloudflare.com/workers/testing/)
-- [Observability](https://developers.cloudflare.com/workers/observability/)
 
 ## Pointers
 

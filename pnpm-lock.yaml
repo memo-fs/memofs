@@ -20,7 +20,7 @@ importers:
       '@changesets/types':
         specifier: ^6.1.0
         version: 6.1.0
-      '@tekmemo/mcp-server':
+      '@memofs/mcp-server':
         specifier: workspace:^
         version: link:packages/mcp-server
       '@types/node':
@@ -32,12 +32,12 @@ importers:
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
+      memofs:
+        specifier: workspace:^
+        version: link:packages/tekmemo
       publint:
         specifier: ^0.3.21
         version: 0.3.21
-      tekmemo:
-        specifier: workspace:^
-        version: link:packages/tekmemo
       tsdown:
         specifier: ^0.22.2
         version: 0.22.2(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)
@@ -65,6 +65,12 @@ importers:
       '@better-auth/utils':
         specifier: ^0.4.2
         version: 0.4.2
+      '@conform-to/react':
+        specifier: ^1.19.4
+        version: 1.19.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@conform-to/zod':
+        specifier: ^1.19.4
+        version: 1.19.4(zod@4.4.3)
       '@elithrar/workers-hono-rate-limit':
         specifier: ^0.5.1
         version: 0.5.1(hono@4.12.26)
@@ -83,6 +89,27 @@ importers:
       '@libsql/client':
         specifier: ^0.17.4
         version: 0.17.4
+      '@memofs/adapter-r2':
+        specifier: workspace:^
+        version: link:../../packages/adapter-r2
+      '@memofs/adapter-turso':
+        specifier: workspace:^
+        version: link:../../packages/adapter-turso
+      '@memofs/adapter-voyage':
+        specifier: workspace:^
+        version: link:../../packages/adapter-voyage
+      '@memofs/adapter-workers-ai':
+        specifier: workspace:^
+        version: link:../../packages/adapter-workers-ai
+      '@memofs/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@memofs/json-rpc':
+        specifier: workspace:^
+        version: link:../../packages/json-rpc
+      '@memofs/server':
+        specifier: workspace:^
+        version: link:../../packages/server
       '@paralleldrive/cuid2':
         specifier: ^3.3.0
         version: 3.3.0
@@ -92,27 +119,6 @@ importers:
       '@polar-sh/sdk':
         specifier: ^0.48.1
         version: 0.48.1
-      '@tekmemo/adapter-r2':
-        specifier: workspace:^
-        version: link:../../packages/adapter-r2
-      '@tekmemo/adapter-turso':
-        specifier: workspace:^
-        version: link:../../packages/adapter-turso
-      '@tekmemo/adapter-voyage':
-        specifier: workspace:^
-        version: link:../../packages/adapter-voyage
-      '@tekmemo/adapter-workers-ai':
-        specifier: workspace:^
-        version: link:../../packages/adapter-workers-ai
-      '@tekmemo/core':
-        specifier: workspace:^
-        version: link:../../packages/core
-      '@tekmemo/json-rpc':
-        specifier: workspace:^
-        version: link:../../packages/json-rpc
-      '@tekmemo/server':
-        specifier: workspace:^
-        version: link:../../packages/server
       aws4fetch:
         specifier: ^1.0.20
         version: 1.0.20
@@ -191,6 +197,9 @@ importers:
       remix-utils:
         specifier: ^10.0.0
         version: 10.0.0(@standard-schema/spec@1.1.0)(react-router@8.1.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
+      resend:
+        specifier: ^6.17.1
+        version: 6.17.1(@react-email/render@2.0.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -276,10 +285,10 @@ importers:
 
   benchmarks:
     dependencies:
-      '@tekmemo/benchmark-kit':
+      '@memofs/benchmark-kit':
         specifier: workspace:*
         version: link:../packages/benchmark-kit
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:*
         version: link:../packages/core
     devDependencies:
@@ -298,15 +307,15 @@ importers:
       '@ai-sdk/openai':
         specifier: ^2.0.0
         version: 2.0.108(zod@3.25.76)
+      '@memofs/adapter-ai-sdk':
+        specifier: workspace:*
+        version: link:../packages/adapter-ai-sdk
+      '@memofs/core':
+        specifier: workspace:*
+        version: link:../packages/core
       '@openai/agents':
         specifier: ^0.11.0
         version: 0.11.8(ws@8.21.0)(zod@3.25.76)
-      '@tekmemo/adapter-ai-sdk':
-        specifier: workspace:*
-        version: link:../packages/adapter-ai-sdk
-      '@tekmemo/core':
-        specifier: workspace:*
-        version: link:../packages/core
       ai:
         specifier: ^6.0.0
         version: 6.0.174(zod@3.25.76)
@@ -329,7 +338,7 @@ importers:
 
   packages/adapter-ai-sdk:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
       ai:
@@ -339,25 +348,28 @@ importers:
         specifier: ^4.4.2
         version: 4.4.3
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-openai:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
       openai:
         specifier: ^6.10.0
         version: 6.36.0(ws@8.21.0)(zod@4.4.3)
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -367,76 +379,76 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-r2:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250617.0
         version: 4.20260630.1
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-transformers:
     dependencies:
       '@huggingface/transformers':
         specifier: ^3.7.6
         version: 3.8.1
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-turso:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
       '@libsql/client':
         specifier: ^0.17.4
         version: 0.17.4
+      '@memofs/adapter-r2':
+        specifier: workspace:^
+        version: link:../adapter-r2
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/adapter-r2':
-        specifier: workspace:^
-        version: link:../adapter-r2
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-voyage:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -446,19 +458,19 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/adapter-workers-ai:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250617.0
         version: 4.20260630.1
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -468,16 +480,13 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
 
   packages/benchmark-kit:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
-      '@tekmemo/testing':
+      '@memofs/testing':
         specifier: workspace:^
         version: link:../testing
     devDependencies:
@@ -490,19 +499,19 @@ importers:
 
   packages/connectors:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
       '@types/node':
         specifier: ^22.20.0
         version: 22.20.0
@@ -516,6 +525,9 @@ importers:
         specifier: ^4.4.2
         version: 4.4.3
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -525,9 +537,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
@@ -543,20 +552,23 @@ importers:
 
   packages/mcp-server:
     dependencies:
+      '@memofs/core':
+        specifier: workspace:^
+        version: link:../core
+      '@memofs/json-rpc':
+        specifier: workspace:^
+        version: link:../json-rpc
       '@modelcontextprotocol/sdk':
         specifier: '>=1.29.0'
         version: 1.29.0(zod@4.4.3)
-      '@tekmemo/core':
-        specifier: workspace:^
-        version: link:../core
-      '@tekmemo/json-rpc':
-        specifier: workspace:^
-        version: link:../json-rpc
     optionalDependencies:
-      '@tekmemo/adapter-transformers':
+      '@memofs/adapter-transformers':
         specifier: workspace:^
         version: link:../adapter-transformers
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -566,34 +578,31 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
 
   packages/server:
     dependencies:
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
-      '@tekmemo/json-rpc':
+      '@memofs/json-rpc':
         specifier: workspace:^
         version: link:../json-rpc
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.17.0
         version: 0.17.0(@cloudflare/workers-types@4.20260630.1)(@vitest/runner@4.1.9)(@vitest/snapshot@4.1.9)(vitest@4.1.9)
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
@@ -603,16 +612,19 @@ importers:
 
   packages/tekmemo:
     dependencies:
-      '@tekmemo/connectors':
+      '@memofs/connectors':
         specifier: workspace:^
         version: link:../connectors
-      '@tekmemo/core':
+      '@memofs/core':
         specifier: workspace:^
         version: link:../core
       commander:
         specifier: ^14.0.3
         version: 14.0.3
     devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
       '@repo/tsdown':
         specifier: workspace:*
         version: link:../../tooling/tsdown
@@ -622,9 +634,6 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../tooling/utils
-      '@tekmemo/testing':
-        specifier: workspace:^
-        version: link:../testing
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.3
@@ -1182,6 +1191,20 @@ packages:
 
   '@cloudflare/workers-types@4.20260630.1':
     resolution: {integrity: sha512-yl+c9vwvko9UZ0frmtsHuwOh3BRHvNjLrfelAp5Akpqe1+Ho1UWekr3nmjJ1D64CH0Yb0K0oRMV4i7npOFzsog==}
+
+  '@conform-to/dom@1.19.4':
+    resolution: {integrity: sha512-P/mBdVRl946iE74TXmF5YLY9+1IDrQzxKdj9A7qv7Cd4l/O02EvJskg3X7cHwhmFFIXXgNzSmf/y4B597SS4gg==}
+
+  '@conform-to/react@1.19.4':
+    resolution: {integrity: sha512-Xyw4hbD9467q8PTWW+Nvmf523y814w70eeABRJzVvfnpghGOAWAGt1lpOboAs6sqaKG/eouqifibz/r+PDFZLg==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+
+  '@conform-to/zod@1.19.4':
+    resolution: {integrity: sha512-g80QtotXLcXWCF86Xou/VpI6i+NBOQxYgLS9YCQYrgV27yilZFJYpgWWBsA8YwodmJVBIYm9RawJba7WnUoddA==}
+    peerDependencies:
+      zod: ^3.21.0 || ^4.0.0
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -4934,7 +4957,6 @@ packages:
 
   libsql@0.5.29:
     resolution: {integrity: sha512-8lMP8iMgiBzzoNbAPQ59qdVcj6UaE/Vnm+fiwX4doX4Narook0a4GPKWBEv+CR8a1OwbfkgL18uBfBjWdF0Fzg==}
-    cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
   lightningcss-android-arm64@1.32.0:
@@ -5379,6 +5401,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  postal-mime@2.7.4:
+    resolution: {integrity: sha512-0WdnFQYUrPGGTFu1uOqD2s7omwua8xaeYGdO6rb88oD5yJ/4pPHDA4sdWqfD8wQVfCny563n/HQS7zTFft+f/g==}
+
   postcss@8.5.13:
     resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
     engines: {node: ^10 || ^12 || >=14}
@@ -5648,6 +5673,15 @@ packages:
 
   reselect@5.2.0:
     resolution: {integrity: sha512-AgZ3UOZm3YndfrJ4OYjgrT7bmCm/1iqkjvEfH/oYjzh6PD2qw4QuT3jjnXIrpdt4MTpMXclMT3lXbmRY+XRakw==}
+
+  resend@6.17.1:
+    resolution: {integrity: sha512-QhHHIRPPM9Tq2uilWmNF8C8kd6nLkUmiFgDQCt1v4eR4o+6p86qrK+Vn12jnAs0jR8Gf6ABdxI18/90LGQ7GVA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@react-email/render': '*'
+    peerDependenciesMeta:
+      '@react-email/render':
+        optional: true
 
   resolve-from@5.0.0:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
@@ -7043,6 +7077,19 @@ snapshots:
     optional: true
 
   '@cloudflare/workers-types@4.20260630.1': {}
+
+  '@conform-to/dom@1.19.4': {}
+
+  '@conform-to/react@1.19.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      '@conform-to/dom': 1.19.4
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
+  '@conform-to/zod@1.19.4(zod@4.4.3)':
+    dependencies:
+      '@conform-to/dom': 1.19.4
+      zod: 4.4.3
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -10845,6 +10892,8 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.2
 
+  postal-mime@2.7.4: {}
+
   postcss@8.5.13:
     dependencies:
       nanoid: 3.3.12
@@ -11148,6 +11197,13 @@ snapshots:
   reselect@5.1.1: {}
 
   reselect@5.2.0: {}
+
+  resend@6.17.1(@react-email/render@2.0.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)):
+    dependencies:
+      postal-mime: 2.7.4
+      standardwebhooks: 1.0.0
+    optionalDependencies:
+      '@react-email/render': 2.0.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
 
   resolve-from@5.0.0: {}
 

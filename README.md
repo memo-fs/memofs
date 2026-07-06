@@ -1,31 +1,31 @@
 <div align="center">
 
-<img src="./assets/images/logo.svg" alt="TekMemo Logo" width="120" />
+<img src="./assets/images/logo.svg" alt="Memo FS Logo" width="120" />
 
-# TekMemo
+# Memo FS
 
 Open-source, file-first memory for AI applications and agents.
 
 </div>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@tekmemo/core"><img src="https://img.shields.io/npm/v/%40tekmemo%2Fcore?label=%40tekmemo%2Fcore&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Project status: Alpha" /></a> &nbsp;
-  <a href="https://github.com/tekbreed/tekmemo/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tekbreed/tekmemo/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI status" /></a> &nbsp;
-  <a href="https://docs.memo.tekbreed.com/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/core"><img src="https://img.shields.io/npm/v/%40memofs%2Fcore?label=%40memofs%2Fcore&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Project status: Alpha" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI status" /></a> &nbsp;
+  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
 ---
 
-## What is TekMemo?
+## What is Memo FS?
 
 **File-first memory for AI applications and agents.** Store, recall, and synchronize memory using plain files on disk — local-first by default, with optional cloud sync.
 
-Most AI memory systems are database-first, vendor-locked, hard to inspect, and hard to version. TekMemo inverts that: your agent's memory lives as Markdown and JSONL under a `.tekmemo/` directory you can `cat`, `git diff`, and roll back.
+Most AI memory systems are database-first, vendor-locked, hard to inspect, and hard to version. Memo FS inverts that: your agent's memory lives as Markdown and JSONL under a `.memofs/` directory you can `cat`, `git diff`, and roll back.
 
 ```text
-.tekmemo/
+.memofs/
 ├── config.json       # Workspace settings and engine routing
 ├── manifest.json     # Asset registry tracking and hashes
 ├── memory/
@@ -47,20 +47,20 @@ Most AI memory systems are database-first, vendor-locked, hard to inspect, and h
 Reach first success in under a minute. No API keys, no database setup, no cloud required.
 
 ```bash
-npm install @tekmemo/core
+npm install @memofs/core
 ```
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { Memofs } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Initialize a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
-  rootDir: "./.tekmemo",
+  rootDir: "./.memofs",
 });
 
 // Create the unified client
-const memo = new Tekmemo({
+const memo = new Memofs({
   store,
   projectId: "my-app",
   mode: "local",
@@ -82,9 +82,9 @@ const hits = await memo.recall({
 });
 ```
 
-To upgrade to semantic/vector search, plug in an embedder adapter like OpenAI (`@tekmemo/adapter-openai`) or Voyage AI (`@tekmemo/adapter-voyage`). For **zero-API-key local vector search**, enable the ONNX embedder (`@tekmemo/adapter-transformers`) to run embeddings completely in-process.
+To upgrade to semantic/vector search, plug in an embedder adapter like OpenAI (`@memofs/adapter-openai`) or Voyage AI (`@memofs/adapter-voyage`). For **zero-API-key local vector search**, enable the ONNX embedder (`@memofs/adapter-transformers`) to run embeddings completely in-process.
 
-To connect your coding agent (Cursor, Claude Code, etc.), use the stdio-compatible [@tekmemo/mcp-server](packages/mcp-server).
+To connect your coding agent (Cursor, Claude Code, etc.), use the stdio-compatible [@memofs/mcp-server](packages/mcp-server).
 
 ---
 
@@ -94,7 +94,7 @@ To connect your coding agent (Cursor, Claude Code, etc.), use the stdio-compatib
 Your App / Agent / MCP client
         │
         ▼
-    Tekmemo   (local-first runtime)
+    Memofs   (local-first runtime)
       ├─ .read() / .write() / .recall()
       ├─ .snapshot.create() / .restore()
       ├─ AgentFS  (lease-locking & virtual paths)
@@ -103,63 +103,63 @@ Your App / Agent / MCP client
    read() / write() / recall() — core client methods
         │
         ▼
-   .tekmemo/   (plain files on disk)
+   .memofs/   (plain files on disk)
      ├─ memory/core.md      ├─ memory/notes.md
      ├─ events/*.jsonl      ├─ graph/{nodes,edges}.jsonl
      └─ snapshots/  manifest.json
         │   git-friendly, inspectable, versionable
         ▼   (optional)
-   TekMemo Cloud
+   Memo FS Cloud
 ```
 
-The runtime resolves configuration from constructor options → env vars → `.tekmemo/config.json`.
+The runtime resolves configuration from constructor options → env vars → `.memofs/config.json`.
 Three runtime modes are supported: **`local`** (filesystem-only, default), **`hybrid`** (local + cloud sync with read/write policies), and **`memory`** (in-memory volatile, ideal for tests).
 
 ---
 
 ## Packages
 
-TekMemo is structured as a monorepo containing 15 published public packages under the `@tekmemo/` scope (with the unscoped `tekmemo` CLI).
+Memo FS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope (with the unscoped `memofs` CLI).
 
 ### Core Engine & Servers
 
 | Package | Purpose |
 | --- | --- |
-| [`@tekmemo/core`](packages/core) | Core runtime, virtual AgentFS, graph engine, and hybrid recall router. |
-| [`tekmemo`](packages/tekmemo) | CLI tool for local and cloud memory workflows (`npx tekmemo`). |
-| [`@tekmemo/server`](packages/server) | Self-hostable, OSS-deployable memory server for Node and Workers. |
-| [`@tekmemo/mcp-server`](packages/mcp-server) | Model Context Protocol server exposing memory tools to AI agents. |
-| [`@tekmemo/connectors`](packages/connectors) | Local ingestion framework plugins (Notion, GitHub). |
-| [`@tekmemo/json-rpc`](packages/json-rpc) | Message schemas and validation for JSON-RPC 2.0. |
+| [`@memofs/core`](packages/core) | Core runtime, virtual AgentFS, graph engine, and hybrid recall router. |
+| [`memofs`](packages/tekmemo) | CLI tool for local and cloud memory workflows (`npx memofs`). |
+| [`@memofs/server`](packages/server) | Self-hostable, OSS-deployable memory server for Node and Workers. |
+| [`@memofs/mcp-server`](packages/mcp-server) | Model Context Protocol server exposing memory tools to AI agents. |
+| [`@memofs/connectors`](packages/connectors) | Local ingestion framework plugins (Notion, GitHub). |
+| [`@memofs/json-rpc`](packages/json-rpc) | Message schemas and validation for JSON-RPC 2.0. |
 
 ### Providers & Adapters
 
 | Package | Purpose |
 | --- | --- |
-| [`@tekmemo/adapter-ai-sdk`](packages/adapter-ai-sdk) | Vercel AI SDK integration, runtime bridges, and tool definitions. |
-| [`@tekmemo/adapter-openai`](packages/adapter-openai) | OpenAI embeddings adapter. |
-| [`@tekmemo/adapter-voyage`](packages/adapter-voyage) | Voyage AI embedder and reranker adapter. |
-| [`@tekmemo/adapter-transformers`](packages/adapter-transformers) | ONNX local embedder (Transformers.js) for zero-API-key hybrid recall. |
-| [`@tekmemo/adapter-workers-ai`](packages/adapter-workers-ai) | Cloudflare Workers AI graph extractor adapter. |
-| [`@tekmemo/adapter-r2`](packages/adapter-r2) | Cloudflare R2 Blob storage adapter. |
-| [`@tekmemo/adapter-turso`](packages/adapter-turso) | Turso / libSQL metadata store adapter. |
+| [`@memofs/adapter-ai-sdk`](packages/adapter-ai-sdk) | Vercel AI SDK integration, runtime bridges, and tool definitions. |
+| [`@memofs/adapter-openai`](packages/adapter-openai) | OpenAI embeddings adapter. |
+| [`@memofs/adapter-voyage`](packages/adapter-voyage) | Voyage AI embedder and reranker adapter. |
+| [`@memofs/adapter-transformers`](packages/adapter-transformers) | ONNX local embedder (Transformers.js) for zero-API-key hybrid recall. |
+| [`@memofs/adapter-workers-ai`](packages/adapter-workers-ai) | Cloudflare Workers AI graph extractor adapter. |
+| [`@memofs/adapter-r2`](packages/adapter-r2) | Cloudflare R2 Blob storage adapter. |
+| [`@memofs/adapter-turso`](packages/adapter-turso) | Turso / libSQL metadata store adapter. |
 
 ### Development Tooling
 
 | Package | Purpose |
 | --- | --- |
-| [`@tekmemo/testing`](packages/testing) | Shared contract tests, mocks, fakes, and fixtures. |
-| [`@tekmemo/benchmark-kit`](packages/benchmark-kit) | Benchmark workloads and runners. |
+| [`@memofs/testing`](packages/testing) | Shared contract tests, mocks, fakes, and fixtures. |
+| [`@memofs/benchmark-kit`](packages/benchmark-kit) | Benchmark workloads and runners. |
 
 ---
 
-## Open Source vs. TekMemo Cloud
+## Open Source vs. Memo FS Cloud
 
-The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run TekMemo.
+The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run Memo FS.
 
-**TekMemo Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
+**Memo FS Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
 
-| Feature | Open source (this repo) | TekMemo Cloud |
+| Feature | Open source (this repo) | Memo FS Cloud |
 | --- | --- | --- |
 | Local file-first memory | ✅ | ✅ |
 | CLI + stdio MCP server | ✅ | ✅ |
@@ -176,11 +176,11 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 ## Repository Structure
 
 ```text
-tekmemo/
+memofs/
 ├── apps/
-│   ├── docs/         # VitePress documentation (docs.memo.tekbreed.com)
-│   └── cloud/        # TekMemo Cloud dashboard (Cloudflare Worker app)
-├── packages/         # 15 published @tekmemo/* packages
+│   ├── docs/         # VitePress documentation (docs.memo.memofs.dev)
+│   └── cloud/        # Memo FS Cloud dashboard (Cloudflare Worker app)
+├── packages/         # 15 published @memofs/* packages
 ├── tooling/          # Private @repo/* workspace build packages
 ├── benchmarks/       # Workspace benchmarking suite
 ├── examples/         # Runnable examples
