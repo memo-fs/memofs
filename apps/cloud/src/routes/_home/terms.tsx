@@ -225,11 +225,6 @@ export default function Terms(_props: Route.ComponentProps) {
 					</CardContent>
 				</Card>
 			</div>
-
-			<p className="mt-8 max-w-3xl border-t border-border pt-6 text-xs text-muted-foreground mx-auto">
-				Living legal text reflecting the shipped Memo FS Cloud service as of
-				June 2026. Review with counsel before any commercial launch.
-			</p>
 		</Section>
 	);
 }

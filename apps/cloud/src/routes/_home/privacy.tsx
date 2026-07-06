@@ -145,7 +145,7 @@ const SECTIONS = [
 					href={SITE_LINKS.privacyEmail}
 					className="text-primary underline-offset-4 hover:underline"
 				>
-					privacy@tekbreed.com
+					privacy@memofs.dev
 				</a>
 				. We never route personal-data requests through public channels.
 			</p>
@@ -219,12 +219,6 @@ export default function Privacy(_props: Route.ComponentProps) {
 					</CardContent>
 				</Card>
 			</div>
-
-			<p className="mt-8 max-w-2xl border-t border-border pt-6 text-xs text-muted-foreground mx-auto">
-				This policy reflects the shipped Memo FS Cloud architecture as of June
-				2026. It is living legal text — review with counsel before any
-				commercial launch.
-			</p>
 		</Section>
 	);
 }

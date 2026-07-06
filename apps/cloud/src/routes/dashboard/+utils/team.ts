@@ -44,7 +44,7 @@ export function buildAcceptUrl(baseUrl: string, rawToken: string): string {
  * Hashes an invite token for persistence. Thin wrapper over the SSOT `hashToken`
  * so the route doesn't import crypto helpers directly.
  *
- * @param salt  `TEKMEMO_API_KEY_SALT`.
+ * @param salt  `MEMOFS_API_KEY_SALT`.
  */
 export async function hashInviteToken(
 	rawToken: string,

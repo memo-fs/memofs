@@ -5,13 +5,13 @@
  */
 export const SITE_LINKS = {
 	/** Hosted serverless query API. */
-	apiUrl: "https://memo.tekbreed.com/api/v1",
+	apiUrl: "https://memofs.dev/api/v1",
 	/** OSS documentation front door. */
-	docs: "https://docs.memo.memofs.dev",
+	docs: "https://docs.memofs.dev",
 	/** Public source repository. */
 	github: "https://github.com/christophersesugh/memofs",
 	/** Private channel for data-access / erasure / privacy requests. */
-	privacyEmail: "mailto:privacy@tekbreed.com",
+	privacyEmail: "mailto:privacy@memofs.dev",
 	/** Billing + subscription support. */
-	billingEmail: "mailto:support@tekbreed.com",
+	billingEmail: "mailto:support@memofs.dev",
 } as const;

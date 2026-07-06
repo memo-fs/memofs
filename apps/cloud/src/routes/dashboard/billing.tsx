@@ -364,7 +364,7 @@ export default function BillingPage({ loaderData }: Route.ComponentProps) {
 							href={SITE_LINKS.billingEmail}
 							className="text-primary hover:underline"
 						>
-							billing@tekbreed.com
+							billing@memofs.dev
 						</a>
 					</p>
 				</CardContent>

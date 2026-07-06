@@ -9,8 +9,8 @@ import { LogoMark, Wordmark } from "./logo";
  * Premium Signal treatment over the original two-column structure: a large
  * faded wordmark backdrop, the product + project columns, and a bottom bar with
  * the copyright + API status link. Keeps the cross-app rule (SC1): cloud
- * marketing stays on `memo.tekbreed.com`, the OSS front door lives at
- * `docs.memo.tekbreed.com` — linked, not duplicated.
+ * marketing stays on `memofs.dev`, the OSS front door lives at
+ * `docs.memofs.dev` — linked, not duplicated.
  */
 
 const COLS = [
