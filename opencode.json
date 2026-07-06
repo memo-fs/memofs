@@ -6,7 +6,7 @@
 			"command": [
 				"npx",
 				"-y",
-				"@tekmemo/mcp-server",
+				"@memofs/mcp-server",
 				"--runtime",
 				"local",
 				"--root",
