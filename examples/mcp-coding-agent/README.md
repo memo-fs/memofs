@@ -164,6 +164,6 @@ git commit -m "chore: record auth-session decision"
 
 ## See also
 
-- [MCP server docs](https://docs.memo.tekbreed.com/packages/mcp/)
-- [CLI docs](https://docs.memo.tekbreed.com/packages/cli/)
-- [File-first memory](https://docs.memo.tekbreed.com/packages/tekmemo/file-first-memory)
+- [MCP server docs](https://docs.memofs.dev/packages/mcp/)
+- [CLI docs](https://docs.memofs.dev/packages/cli/)
+- [File-first memory](https://docs.memofs.dev/packages/tekmemo/file-first-memory)

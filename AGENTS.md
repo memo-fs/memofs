@@ -1,4 +1,4 @@
-# AGENTS.md - TekMemo
+# AGENTS.md - MemoFS
 
 This is an open-source software (OSS) project.
 
@@ -113,8 +113,8 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 ## Pointers
 
 - Workspace rules: [.agents/rules](./.agents/rules)
-  - [monorepo-structure.md](./.agents/rules/monorepo-structure.md): The official directory structure of the TekMemo monorepo.
-  - [package-naming.md](./.agents/rules/package-naming.md): Scope conventions (`@tekbreed` vs `@repo`) and package naming requirements.
+  - [monorepo-structure.md](./.agents/rules/monorepo-structure.md): The official directory structure of the Memo FS monorepo.
+  - [package-naming.md](./.agents/rules/package-naming.md): Scope conventions (`@memofs` vs `@repo`) and package naming requirements.
   - [package-boundaries.md](./.agents/rules/package-boundaries.md): Rules governing imports and dependencies between different packages and zones (core vs optional).
   - [package-build-rules.md](./.agents/rules/package-build-rules.md): Guidelines for building packages with `tsdown` and standard export maps.
   - [adding-new-package.md](./.agents/rules/adding-new-package.md): Checklist/steps for adding a new package to the monorepo.
@@ -124,6 +124,6 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
   - [development-commands.md](./.agents/rules/development-commands.md): Crucial scripts to install, lint, test, and build.
   - [git-conventions.md](./.agents/rules/git-conventions.md): Conventions for branching and conventional commit formats.
   - [testing.md](./.agents/rules/testing.md) / [testing-requirements.md](./.agents/rules/testing-requirements.md): Unit testing instructions using Vitest.
-  - [core-concepts.md](./.agents/rules/core-concepts.md): High-level architectural overview of TekMemo memory layers.
+  - [core-concepts.md](./.agents/rules/core-concepts.md): High-level architectural overview of MemoFS memory layers.
 - Global skills: `~/.agents/skills/`
 

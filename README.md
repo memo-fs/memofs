@@ -12,7 +12,7 @@ Open-source, file-first memory for AI applications and agents.
   <a href="https://www.npmjs.com/package/@memofs/core"><img src="https://img.shields.io/npm/v/%40memofs%2Fcore?label=%40memofs%2Fcore&style=for-the-badge" alt="npm version" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Project status: Alpha" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI status" /></a> &nbsp;
-  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://docs.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
@@ -169,7 +169,7 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 | Team Workspaces & Access Control | — | Planned |
 | Managed-runtime (Recall/Graph host) | — | Roadmap |
 
-[Join the Cloud waitlist →](https://memo.tekbreed.com)
+[Join the Cloud waitlist →](https://memofs.dev)
 
 ---
 
@@ -178,7 +178,7 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 ```text
 memofs/
 ├── apps/
-│   ├── docs/         # VitePress documentation (docs.memo.memofs.dev)
+│   ├── docs/         # VitePress documentation (docs.memofs.dev)
 │   └── cloud/        # Memo FS Cloud dashboard (Cloudflare Worker app)
 ├── packages/         # 15 published @memofs/* packages
 ├── tooling/          # Private @repo/* workspace build packages

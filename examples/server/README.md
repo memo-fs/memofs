@@ -1,7 +1,7 @@
 # Self-host the `tekmemo-server` runtime
 
-Run the **same** memory engine TekMemo Cloud runs, on your own infra. No vendor
-lock-in, no TekMemo Cloud dependency — you bring the storage and the providers,
+Run the **same** memory engine MemoFS Cloud runs, on your own infra. No vendor
+lock-in, no MemoFS Cloud dependency — you bring the storage and the providers,
 `tekmemo-server` runs the engine.
 
 This example covers the two deploy targets (ADR 0013): a **single Node process**
@@ -58,7 +58,7 @@ import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
 const runtime = createHostedRuntime({
   store: yourStore,           // RemoteBlobMemoryStore over R2 + Turso
-  projectId: process.env.TEKMEMO_PROJECT_ID!,
+  projectId: process.env.MEMOFS_PROJECT_ID!,
   embedder: createVoyageEmbedder({ apiKey: process.env.VOYAGE_API_KEY! }),
   // reranker, extractor, llmClient — inject what you need
 });
@@ -75,10 +75,10 @@ createServer(async (req, res) => {
 If the port is public, require a bearer token:
 
 ```bash
-TEKMEMO_SERVER_TOKEN="your-secret" node dist/bin/tekmemo-server.mjs
+MEMOFS_SERVER_TOKEN="your-secret" node dist/bin/tekmemo-server.mjs
 ```
 
-Setting `TEKMEMO_SERVER_TOKEN` auto-enables auth. Clients send
+Setting `MEMOFS_SERVER_TOKEN` auto-enables auth. Clients send
 `Authorization: Bearer your-secret`. Leave auth off only behind a private
 network or a Service Binding.
 
@@ -136,6 +136,6 @@ the *concurrent-over-HTTP* path is gated).
 ## See also
 
 - [`@memofs/server` README](../../packages/server/README.md)
-- [The execution plan](https://github.com/tekbreed/tekmemo/blob/main/docs/architecture/s3-execution-plan.md)
-- [ADR 0013 — two-Worker split](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0013-two-worker-split.md)
-- [ADR 0003 — the self-host thesis](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0003-managed-runtime-tier.md)
+- [The execution plan](https://github.com/christophersesugh/memofs/blob/main/docs/architecture/s3-execution-plan.md)
+- [ADR 0013 — two-Worker split](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0013-two-worker-split.md)
+- [ADR 0003 — the self-host thesis](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0003-managed-runtime-tier.md)

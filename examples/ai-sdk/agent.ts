@@ -13,7 +13,7 @@
  *  - Tool-augmented: `buildRuntimeMemoryToolDefinition` lets the model recall
  *    and remember during multi-step reasoning.
  *  - The runtime is built with `createAiSdkRuntimeFromTekmemo`, so every
- *    recall goes through the TekMemo hybrid engine (BM25 + fuzzy + embeddings +
+ *    recall goes through the MemoFS hybrid engine (BM25 + fuzzy + embeddings +
  *    recency + reranker) — not a naive search.
  */
 
@@ -26,7 +26,7 @@ import {
 import { Tekmemo } from "@memofs/core";
 import { generateText, stepCountIs } from "ai";
 
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
+const memo = new Tekmemo({ rootDir: "./.memofs", projectId: "demo" });
 const runtime = createAiSdkRuntimeFromTekmemo(memo);
 const access = { projectId: "demo", userId: "user_demo" };
 

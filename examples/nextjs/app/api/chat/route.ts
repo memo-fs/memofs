@@ -1,7 +1,7 @@
 /**
  * Next.js App Router route handler: POST /api/chat
  *
- * A memory-augmented chat endpoint using TekMemo + the Vercel AI SDK.
+ * A memory-augmented chat endpoint using MemoFS + the Vercel AI SDK.
  *
  * Context-first: `buildRuntimeMemoryContext` reads core memory + recent notes
  * and runs a hybrid recall over the incoming message BEFORE generation.
@@ -23,7 +23,7 @@ import { streamText } from "ai";
 // In production, persist these per conversation (a Map keyed by conversationId,
 // a DB row, etc.). One Tekmemo instance = one .memofs/ project dir.
 function getMemo(_conversationId: string): Tekmemo {
-	return new Tekmemo({ rootDir: "./.tekmemo", projectId: "next-app" });
+	return new Tekmemo({ rootDir: "./.memofs", projectId: "next-app" });
 }
 
 interface ChatRequestBody {
@@ -53,7 +53,7 @@ export async function POST(request: Request): Promise<Response> {
 		access,
 		query: message,
 		baseInstructions:
-			"You are a helpful assistant with persistent TekMemo memory. " +
+			"You are a helpful assistant with persistent MemoFS memory. " +
 			"Use the `memory` tool to recall or remember during the turn. " +
 			"Only persist durable, non-secret facts.",
 	});

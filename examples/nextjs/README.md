@@ -1,4 +1,4 @@
-# TekMemo + Next.js (App Router)
+# MemoFS + Next.js (App Router)
 
 A memory-augmented chat API built with Memo FS and the [Vercel AI SDK](https://sdk.vercel.ai),
 exposed as a Next.js App Router **route handler**. Demonstrates the recommended
@@ -6,14 +6,14 @@ exposed as a Next.js App Router **route handler**. Demonstrates the recommended
 
 ## What it shows
 
-- **Per-conversation memory** — each conversation gets its own scoped TekMemo
+- **Per-conversation memory** — each conversation gets its own scoped MemoFS
   instance, so memory is isolated by `conversationId`.
 - **Context-first** — `buildRuntimeMemoryContext` reads core memory + recent
   notes + a hybrid recall of the user's message *before* generation, and folds
   it into the system prompt.
 - **Tool-augmented** — `buildRuntimeMemoryToolDefinition` lets the model recall
   more and record durable facts during multi-step reasoning.
-- **One intelligent engine** — recall always flows through the TekMemo hybrid
+- **One intelligent engine** — recall always flows through the MemoFS hybrid
   engine (BM25 + fuzzy + embeddings + recency + reranker), never a naive search.
 
 ## Files
@@ -58,10 +58,10 @@ const access = { projectId: "my-next-app", userId, conversationId };
 
 The `AiMemoryAccessContext` (`projectId`, `userId`, `conversationId`,
 `workspaceId`, `tenantId`) controls read/write visibility. Pass it as `access`
-to both helpers — TekMemo enforces the scope on every read and write.
+to both helpers — MemoFS enforces the scope on every read and write.
 
 ## See also
 
-- [The `Tekmemo` client](https://docs.memo.tekbreed.com/packages/tekmemo/client)
-- [AI SDK tools guide](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/tools)
-- [AI SDK agent patterns](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/agent-patterns)
+- [The `Tekmemo` client](https://docs.memofs.dev/packages/tekmemo/client)
+- [AI SDK tools guide](https://docs.memofs.dev/packages/tekmemo/ai-sdk/tools)
+- [AI SDK agent patterns](https://docs.memofs.dev/packages/tekmemo/ai-sdk/agent-patterns)
