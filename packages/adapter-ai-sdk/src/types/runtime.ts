@@ -1,8 +1,8 @@
 /**
- * Tool-layer types for the TekMemo Vercel AI SDK adapter.
+ * Tool-layer types for the MemoFS Vercel AI SDK adapter.
  *
  * @remarks
- * The framework-neutral runtime contract (`TekMemoMemoryRuntime` and its
+ * The framework-neutral runtime contract (`MemoFSMemoryRuntime` and its
  * `MemoryRuntime*` value types) lives in `@memofs/core` core and is
  * re-exported here for adapter consumers. This file owns only the **L2
  * tool-layer** types — memory scopes, access contexts, and the options that
@@ -33,12 +33,12 @@ export type {
 	MemoryRuntimeRecallInput,
 	MemoryRuntimeRecallResult,
 	MemoryRuntimeRecallStrategy,
-	TekMemoMemoryRuntime,
+	MemoFSMemoryRuntime,
 } from "@memofs/core";
 
 // Imported locally (not just re-exported) so the L2 interfaces below can
 // reference the runtime contract without importing it again from core.
-import type { JsonObject, TekMemoMemoryRuntime } from "@memofs/core";
+import type { JsonObject, MemoFSMemoryRuntime } from "@memofs/core";
 
 export type AiMemoryScope =
 	| "project"
@@ -122,7 +122,7 @@ export interface ScopedMemoryWriteInput {
 
 export interface BuildRuntimeMemoryContextInput {
 	baseInstructions?: string;
-	runtime: TekMemoMemoryRuntime;
+	runtime: MemoFSMemoryRuntime;
 	access: AiMemoryAccessContext;
 	query?: string;
 	includeCoreMemory?: boolean;
@@ -145,7 +145,7 @@ export interface BuildRuntimeMemoryContextResult {
 }
 
 export interface RuntimeMemoryToolOptions {
-	runtime: TekMemoMemoryRuntime;
+	runtime: MemoFSMemoryRuntime;
 	access: AiMemoryAccessContext;
 	allowWrites?: boolean;
 	allowCoreUpdates?: boolean;

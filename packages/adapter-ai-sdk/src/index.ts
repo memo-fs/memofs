@@ -2,7 +2,7 @@ export * from "./agent-session/build-agent-session-instructions";
 export * from "./prepare-call/build-prepare-call-memory-text";
 export * from "./prepare-call/safe-read-memory-path";
 export * from "./runtime/build-runtime-memory-context";
-export * from "./runtime/tekmemo-runtime";
+export * from "./runtime/memofs-runtime";
 export * from "./schemas/memory-tool-schema";
 export * from "./schemas/runtime-memory-tool-schema";
 export * from "./scope/scope-policy";

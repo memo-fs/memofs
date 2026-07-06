@@ -1,13 +1,13 @@
 /**
- * Bridge runtime: exposes a {@link Tekmemo} client as a
- * {@link TekMemoMemoryRuntime}.
+ * Bridge runtime: exposes a {@link MemoFS} client as a
+ * {@link MemoFSMemoryRuntime}.
  *
  * @remarks
  * This is the recommended way to build an AI SDK runtime. Every recall goes
- * through {@link Tekmemo.recall} (the single, intelligent hybrid engine:
+ * through {@link MemoFS.recall} (the single, intelligent hybrid engine:
  * BM25 + fuzzy + embeddings + recency boost + optional reranker), instead of
  * a parallel naive text-search implementation. Local, cloud, and hybrid
- * `Tekmemo` modes are all supported — the runtime is a thin adapter, so the
+ * `MemoFS` modes are all supported — the runtime is a thin adapter, so the
  * underlying strategy (and therefore the recall quality) never changes.
  *
  * @public
@@ -26,25 +26,25 @@ import type {
 	RecallFilter,
 	RecallItem,
 	RecentMemoryResult,
-	TekMemoMemoryRuntime,
-	Tekmemo,
+	MemoFSMemoryRuntime,
+	MemoFS,
 } from "@memofs/core";
 
 /**
- * Build an AI SDK runtime backed by a {@link Tekmemo} client.
+ * Build an AI SDK runtime backed by a {@link MemoFS} client.
  *
  * @example
  * ```ts
- * import { Tekmemo } from "@memofs/core";
- * import { createAiSdkRuntimeFromTekmemo } from "@memofs/adapter-ai-sdk";
+ * import { MemoFS } from "@memofs/core";
+ * import { createAiSdkRuntimeFromMemoFS } from "@memofs/adapter-ai-sdk";
  *
- * const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
- * const runtime = createAiSdkRuntimeFromTekmemo(memo);
+ * const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
+ * const runtime = createAiSdkRuntimeFromMemoFS(memo);
  * ```
  */
-export function createAiSdkRuntimeFromTekmemo(
-	memo: Tekmemo,
-): TekMemoMemoryRuntime {
+export function createAiSdkRuntimeFromMemoFS(
+	memo: MemoFS,
+): MemoFSMemoryRuntime {
 	return {
 		async readCoreMemory(signal) {
 			const content = await memo.core.read(signal);
@@ -109,7 +109,7 @@ export function createAiSdkRuntimeFromTekmemo(
 		async recall(
 			input: MemoryRuntimeRecallInput,
 		): Promise<MemoryRuntimeRecallResult> {
-			// Route through the Tekmemo class's intelligent recall engine, not a
+			// Route through the MemoFS class's intelligent recall engine, not a
 			// naive text-search shim. The scope filters built by the tool layer
 			// are forwarded as-is.
 			const result = await memo.recall(input.query, {
@@ -124,7 +124,7 @@ export function createAiSdkRuntimeFromTekmemo(
 			};
 		},
 
-		// `index` is intentionally omitted: the Tekmemo class has no public
+		// `index` is intentionally omitted: the MemoFS class has no public
 		// re-index API (indexing is implicit and best-effort on every write).
 		// The AI SDK tool's `index` command throws a clear "not supported"
 		// error when this method is absent.

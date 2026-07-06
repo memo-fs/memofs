@@ -1,5 +1,5 @@
 /**
- * Builds model-facing instructions for an AgentFS-backed TekMemo session.
+ * Builds model-facing instructions for an AgentFS-backed MemoFS session.
  *
  * @remarks
  * This helper intentionally accepts a structural path object instead of
@@ -65,7 +65,7 @@ export function buildAgentSessionInstructions(
 	options: BuildAgentSessionInstructionsOptions,
 ): string {
 	return [
-		"# TekMemo Agent Session",
+		"# MemoFS Agent Session",
 		`Session: ${options.sessionId}`,
 		`Task: ${options.task}`,
 		"",

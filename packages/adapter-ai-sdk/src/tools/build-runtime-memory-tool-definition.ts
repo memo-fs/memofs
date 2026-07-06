@@ -15,7 +15,7 @@ export function buildRuntimeMemoryToolDefinition(
 ) {
 	return {
 		description:
-			"Use TekMemo memory with safe project/user/conversation scope boundaries. Supports local, cloud, or hybrid runtimes.",
+			"Use MemoFS memory with safe project/user/conversation scope boundaries. Supports local, cloud, or hybrid runtimes.",
 		inputSchema: runtimeMemoryToolInputSchema,
 		execute: async (input: unknown) => {
 			const parsed = runtimeMemoryToolInputSchema.parse(input);
@@ -133,7 +133,7 @@ export async function runRuntimeMemoryTool(
 			}
 			if (!options.runtime.index) {
 				throw new Error(
-					"The configured TekMemo runtime does not support indexing.",
+					"The configured MemoFS runtime does not support indexing.",
 				);
 			}
 			const result = await options.runtime.index({
@@ -161,7 +161,7 @@ function assertSafeContent(
 	const secretPatterns = [
 		/-----BEGIN [A-Z ]*PRIVATE KEY-----/,
 		/\b(?:sk|pk|tk|tm)_(?:live|test|selfhosted)_[A-Za-z0-9_-]{8,}\b/,
-		/\b(?:OPENAI|VOYAGE|UPSTASH|TEKMEMO)_[A-Z0-9_]*KEY\s*=/,
+		/\b(?:OPENAI|VOYAGE|UPSTASH|MEMOFS)_[A-Z0-9_]*KEY\s*=/,
 	];
 	for (const pattern of secretPatterns) {
 		if (pattern.test(content)) {

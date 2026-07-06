@@ -9,10 +9,10 @@ import {
 	type MemoryRuntimeRecallInput,
 	type MemoryRuntimeRecallResult,
 	normalizeAccessContext,
-	type TekMemoMemoryRuntime,
+	type MemoFSMemoryRuntime,
 } from "../src";
 
-function createFakeRuntime(): TekMemoMemoryRuntime & {
+function createFakeRuntime(): MemoFSMemoryRuntime & {
 	notes: MemoryRuntimeNote[];
 	recallInput?: MemoryRuntimeRecallInput;
 } {
@@ -156,7 +156,7 @@ test("runtime tool blocks likely secrets by default", async () => {
 	await expect(
 		tool.execute({
 			command: "remember",
-			content: "TEKMEMO_API_KEY=tm_secret123456789",
+			content: "MEMOFS_API_KEY=tm_secret123456789",
 		}),
 	).rejects.toThrow(/Potential secret/);
 });

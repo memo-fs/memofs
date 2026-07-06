@@ -98,7 +98,7 @@ test("memory tool schema rejects invalid command type", () => {
 test("memory tool schema rejects empty content for create", () => {
 	const result = memoryToolInputSchema.safeParse({
 		command: "create",
-		path: ".tekmemo/memory/core.md",
+		path: ".memofs/memory/core.md",
 		content: "",
 	});
 	expect(result.success).toBe(false);
@@ -129,7 +129,7 @@ test.skip("runStructuredMemoryTool handles view command", async () => {
 	await store.write(CORE_MEMORY_PATH, "# Core Memory\nTest");
 	const result = await runStructuredMemoryTool(
 		{ store },
-		{ command: "view", path: ".tekmemo/memory/core.md" },
+		{ command: "view", path: ".memofs/memory/core.md" },
 	);
 	expect(result).toContain("Test");
 });
@@ -141,7 +141,7 @@ test.skip("runStructuredMemoryTool handles update command", async () => {
 		{ store },
 		{
 			command: "update",
-			path: ".tekmemo/memory/core.md",
+			path: ".memofs/memory/core.md",
 			content: "updated",
 			mode: "overwrite",
 		},
@@ -156,7 +156,7 @@ test.skip("runStructuredMemoryTool handles search command", async () => {
 		{ store },
 		{
 			command: "search",
-			path: ".tekmemo/memory/notes.md",
+			path: ".memofs/memory/notes.md",
 			query: "content",
 			limit: 10,
 		},

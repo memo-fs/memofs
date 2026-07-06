@@ -2,7 +2,7 @@
  * Safely reads a memory path, returning a default value if not found.
  *
  * @remarks
- * Wraps store.read() and catches common TekMemo/storage not-found errors.
+ * Wraps store.read() and catches common MemoFS/storage not-found errors.
  * Other errors are propagated.
  *
  * @internal

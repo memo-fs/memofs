@@ -18,14 +18,14 @@ const ALLOWED_SCOPES = new Set<AiMemoryScope>([
 
 const DEFAULT_PROJECT_SCOPES: AiMemoryScope[] = ["project", "workspace"];
 
-export class TekMemoScopeError extends Error {
-	readonly code = "tekmemo_scope_error";
+export class MemoFSScopeError extends Error {
+	readonly code = "memofs_scope_error";
 	constructor(
 		message: string,
 		readonly details: Record<string, unknown> = {},
 	) {
 		super(message);
-		this.name = "TekMemoScopeError";
+		this.name = "MemoFSScopeError";
 	}
 }
 
@@ -62,7 +62,7 @@ export function assertMemoryScope(scope: unknown): AiMemoryScope {
 		typeof scope !== "string" ||
 		!ALLOWED_SCOPES.has(scope as AiMemoryScope)
 	) {
-		throw new TekMemoScopeError("Invalid memory scope.", { scope });
+		throw new MemoFSScopeError("Invalid memory scope.", { scope });
 	}
 	return scope as AiMemoryScope;
 }
@@ -72,7 +72,7 @@ export function assertScopeAllowed(
 	context: NormalizedAiMemoryAccessContext,
 ): void {
 	if (!context.allowedScopes.includes(scope)) {
-		throw new TekMemoScopeError(
+		throw new MemoFSScopeError(
 			"Memory scope is not allowed for this operation.",
 			{
 				scope,
@@ -82,20 +82,20 @@ export function assertScopeAllowed(
 	}
 
 	if (scope === "user" && !context.userId) {
-		throw new TekMemoScopeError("userId is required for user-scoped memory.", {
+		throw new MemoFSScopeError("userId is required for user-scoped memory.", {
 			scope,
 		});
 	}
 
 	if (scope === "conversation" && !context.conversationId) {
-		throw new TekMemoScopeError(
+		throw new MemoFSScopeError(
 			"conversationId is required for conversation-scoped memory.",
 			{ scope },
 		);
 	}
 
 	if (scope === "participant-shared" && context.participantIds.length === 0) {
-		throw new TekMemoScopeError(
+		throw new MemoFSScopeError(
 			"participantIds are required for participant-shared memory.",
 			{ scope },
 		);

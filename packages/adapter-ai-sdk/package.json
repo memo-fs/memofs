@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/adapter-ai-sdk"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-ai-sdk/",
+	"homepage": "https://docs.memofs.dev/packages/adapter-ai-sdk/",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"
 	},

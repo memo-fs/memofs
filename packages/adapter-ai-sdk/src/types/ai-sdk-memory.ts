@@ -1,5 +1,5 @@
 /**
- * Core types for the TekMemo AI SDK integration.
+ * Core types for the MemoFS AI SDK integration.
  *
  * @remarks
  * Defines memory stores, retrieval plans, and execution contexts

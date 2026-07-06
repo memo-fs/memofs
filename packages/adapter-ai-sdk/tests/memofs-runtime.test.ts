@@ -1,25 +1,25 @@
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
-	createTempTekMemoDir,
+	createTempMemoFsDir,
 } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
 import {
 	buildRuntimeMemoryToolDefinition,
-	createAiSdkRuntimeFromTekmemo,
+	createAiSdkRuntimeFromMemoFS,
 	runRuntimeMemoryTool,
 } from "../src";
 
 /**
- * The bridge runtime (`createAiSdkRuntimeFromTekmemo`) must route recall
- * through the Tekmemo class's intelligent engine, not a naive text-search
+ * The bridge runtime (`createAiSdkRuntimeFromMemoFS`) must route recall
+ * through the MemoFS class's intelligent engine, not a naive text-search
  * shim. These tests prove that and cover the other delegated commands.
  */
-describe("createAiSdkRuntimeFromTekmemo", () => {
+describe("createAiSdkRuntimeFromMemoFS", () => {
 	it("routes recall through the smart hybrid engine (not naive term search)", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -43,7 +43,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 				kind: "note",
 			});
 
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 			const result = await runtime.recall({ query: "login auth", topK: 5 });
 
 			expect(result.items.length).toBeGreaterThan(0);
@@ -58,9 +58,9 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 	});
 
 	it("recall returns scored, ranked items", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -79,7 +79,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 				kind: "decision",
 			});
 
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 			const result = await runtime.recall({ query: "database", topK: 2 });
 
 			expect(result.items.length).toBeGreaterThan(0);
@@ -96,9 +96,9 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 	});
 
 	it("readCoreMemory delegates to memo.core", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -110,7 +110,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 			});
 			await memo.core.update("# Core Memory\n\n- Always use TypeScript.");
 
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 			const doc = await runtime.readCoreMemory();
 			expect(doc.content).toMatch(/TypeScript/);
 		} finally {
@@ -119,9 +119,9 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 	});
 
 	it("listNotes returns recorded notes mapped to MemoryRuntimeNote", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -137,7 +137,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 				tags: ["auth", "security"],
 			});
 
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 			const page = await runtime.listNotes();
 			expect(page.items.length).toBeGreaterThan(0);
 			const note = page.items.find((n) => /cookies/i.test(n.content));
@@ -149,9 +149,9 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 	});
 
 	it("createNote delegates to memo.notes.record", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -161,7 +161,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 				projectId: "demo",
 				mode: "local",
 			});
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 
 			const created = await runtime.createNote({
 				content: "Deployments go through blue-green.",
@@ -179,15 +179,15 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 		}
 	});
 
-	it("does not expose an index() method (Tekmemo has no public re-index API)", () => {
-		const memo = new Tekmemo({ projectId: "demo", mode: "memory" });
-		const runtime = createAiSdkRuntimeFromTekmemo(memo);
+	it("does not expose an index() method (MemoFS has no public re-index API)", () => {
+		const memo = new MemoFS({ projectId: "demo", mode: "memory" });
+		const runtime = createAiSdkRuntimeFromMemoFS(memo);
 		expect(runtime.index).toBeUndefined();
 	});
 
 	it("the AI SDK tool's index command throws a clear 'not supported' error", async () => {
-		const memo = new Tekmemo({ projectId: "demo", mode: "memory" });
-		const runtime = createAiSdkRuntimeFromTekmemo(memo);
+		const memo = new MemoFS({ projectId: "demo", mode: "memory" });
+		const runtime = createAiSdkRuntimeFromMemoFS(memo);
 		const tool = buildRuntimeMemoryToolDefinition({
 			runtime,
 			access: { projectId: "demo" },
@@ -199,9 +199,9 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 	});
 
 	it("runRuntimeMemoryTool recall returns the same smart results as the runtime", async () => {
-		const { rootDir, cleanup } = await createTempTekMemoDir();
+		const { rootDir, cleanup } = await createTempMemoFsDir();
 		try {
-			const memo = new Tekmemo({
+			const memo = new MemoFS({
 				store: createNodeFsMemoryStore({
 					rootDir,
 					createRoot: true,
@@ -216,7 +216,7 @@ describe("createAiSdkRuntimeFromTekmemo", () => {
 				kind: "decision",
 			});
 
-			const runtime = createAiSdkRuntimeFromTekmemo(memo);
+			const runtime = createAiSdkRuntimeFromMemoFS(memo);
 			const raw = await runRuntimeMemoryTool(
 				{ runtime, access: { projectId: "demo" } },
 				{ command: "recall", query: "rate limiting", topK: 5 },
