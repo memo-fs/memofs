@@ -17,16 +17,16 @@ npm install @memofs/adapter-ai-sdk
 Use the adapter to compile memory tools and instructions, then inject them into Vercel AI SDK's `generateText` or `streamText` function:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import {
-  createAiSdkRuntimeFromTekmemo,
+  createAiSdkRuntimeFromMemoFS,
   buildRuntimeMemoryToolDefinition,
   buildAgentSessionInstructions,
 } from "@memofs/adapter-ai-sdk";
 
-const memo = new Tekmemo({ /* config */ });
+const memo = new MemoFS({ /* config */ });
 
 // 1. Build runtime context instructions
 const instructions = buildAgentSessionInstructions({
@@ -57,8 +57,8 @@ console.log(response.text);
 
 ## Core Functions
 
-### `createAiSdkRuntimeFromTekmemo`
-Wraps a `Tekmemo` client to provide Vercel AI SDK bridge helper functions.
+### `createAiSdkRuntimeFromMemoFS`
+Wraps a `MemoFS` client to provide Vercel AI SDK bridge helper functions.
 
 ### `buildRuntimeMemoryToolDefinition`
 Generates a structured Zod schema tool definition ready to be passed to Vercel AI SDK functions.

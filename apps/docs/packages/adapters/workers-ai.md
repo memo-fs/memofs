@@ -17,13 +17,13 @@ npm install @memofs/adapter-workers-ai
 Use the Cloudflare Workers AI binding environment `env.AI` to initialize the extractor:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
 import { createR2BlobClient } from "@memofs/adapter-r2";
 
 export default {
   async fetch(request, env) {
-    const memo = new Tekmemo({
+    const memo = new MemoFS({
       store: createR2BlobClient({ bucket: env.BUCKET }),
       projectId: "worker-ai-project",
       extractor: createWorkersAiExtractor({

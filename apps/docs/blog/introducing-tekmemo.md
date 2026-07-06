@@ -43,10 +43,10 @@ npm install @memofs/core
 ```
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "my-app",
 });

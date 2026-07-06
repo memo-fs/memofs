@@ -16,7 +16,7 @@ async function main() {
 
 	const schemaData = await fs.readFile(schemaSrc, "utf-8");
 	const schema = JSON.parse(schemaData);
-	schema.$id = `https://docs.memo.tekbreed.com/${version}/config.schema.json`;
+	schema.$id = `https://docs.memofs.dev/${version}/config.schema.json`;
 
 	await fs.mkdir(targetDir, { recursive: true });
 	await fs.writeFile(

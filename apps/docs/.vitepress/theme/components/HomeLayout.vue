@@ -16,7 +16,7 @@ const isBlogPost = computed(() => frontmatter.value.blog === "post");
 
 /**
  * Deploys is the live mode-toggle shown in the feature showcase. It reflects
- * the shipped `Tekmemo` constructor (D4): there is no `mode: "cloud"` flag.
+ * the shipped `MemoFS` constructor (D4): there is no `mode: "cloud"` flag.
  * Cloud is a *sync transport*, reached via the cloud client / hosted
  * endpoints — not a runtime mode. Managed-runtime-as-a-service is future.
  */
@@ -55,7 +55,7 @@ const modes = [
 	},
 	{
 		label: "Managed (later)",
-		kicker: "TekMemo Cloud runs the engine.",
+		kicker: "MemoFS Cloud runs the engine.",
 	},
 ];
 </script>
@@ -66,7 +66,7 @@ const modes = [
       <div class="alpha-announcement-bar">
         <span class="alpha-badge">Cloud</span>
         <span class="alpha-text">
-          The core runtime is open source and free. TekMemo Cloud (hosted sync, managed MCP, team features) is in early access.
+          The core runtime is open source and free. MemoFS Cloud (hosted sync, managed MCP, team features) is in early access.
           <a href="https://memo.tekbreed.com" class="alpha-link" target="_blank" rel="noopener noreferrer">Join the waitlist →</a>
         </span>
       </div>
@@ -146,7 +146,7 @@ const modes = [
                       <span class="terminal-dot green"></span>
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npm install -D tekmemo
+                      <span class="terminal-prompt">$</span> npm install -D memofs
                     </div>
                   </div>
                 </div>
@@ -162,8 +162,8 @@ const modes = [
                       <span class="terminal-dot green"></span>
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npx tekmemo init<br />
-                      <span class="terminal-success">✓ Created .tekmemo/ with core memory, notes, recall indexes, and graph files.</span>
+                      <span class="terminal-prompt">$</span> npx memofs init<br />
+                      <span class="terminal-success">✓ Created .memofs/ with core memory, notes, recall indexes, and graph files.</span>
                     </div>
                   </div>
                 </div>
@@ -179,7 +179,7 @@ const modes = [
                       <span class="terminal-dot green"></span>
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npx tekmemo remember "Auth uses JWT with refresh rotation" --kind decision<br />
+                      <span class="terminal-prompt">$</span> npx memofs remember "Auth uses JWT with refresh rotation" --kind decision<br />
                       <span class="terminal-success">✓ Saved to core memory.</span>
                     </div>
                   </div>
@@ -202,7 +202,7 @@ const modes = [
                 <h3>Open it. Diff it. Commit it.</h3>
                 <p>
                   Every decision, convention, and note sits in plain text under
-                  <code>.tekmemo/</code>. Open it in your editor. Diff it in review. Commit it with
+                  <code>.memofs/</code>. Open it in your editor. Diff it in review. Commit it with
                   your code. Memory stops being a black box.
                 </p>
                 <a href="/packages/core/agentfs" class="showcase-link">
@@ -211,7 +211,7 @@ const modes = [
               </div>
               <div class="feature-showcase-visual">
                 <div class="file-tree-mockup">
-                  <div class="file-tree-header">.tekmemo/</div>
+                  <div class="file-tree-header">.memofs/</div>
                   <div class="file-tree-body">
                     <div class="file-tree-item indent-1">manifest.json</div>
                     <div class="file-tree-item indent-1 folder">memory/</div>
@@ -237,7 +237,7 @@ const modes = [
                 <span class="section-kicker">Recall</span>
                 <h3>The right memory, fetched for you</h3>
                 <p>
-                  Stop scrolling through old prompts. TekMemo indexes your memory and returns the
+                  Stop scrolling through old prompts. MemoFS indexes your memory and returns the
                   fragment that fits the task — semantically, not by keyword. Hybrid recall merges
                   lexical and vector search, then reranks.
                 </p>
@@ -312,42 +312,42 @@ const modes = [
                   </div>
                   <div class="mode-toggle-kicker">{{ modes[activeMode].kicker }}</div>
                   <div class="mode-toggle-code">
-                    <pre v-show="activeMode === 0"><code><span class="token keyword">import</span> { <span class="token class">Tekmemo</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core"</span>;
-<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core/node-fs"</span>;
+                    <pre v-show="activeMode === 0"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>;
+<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>;
 
-<span class="token comment">// Default. Memory lives in .tekmemo/ as markdown + JSON.</span>
+<span class="token comment">// Default. Memory lives in .memofs/ as markdown + JSON.</span>
 <span class="token comment">// No API keys, no network. Read it, diff it, commit it.</span>
-<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">Tekmemo</span>({
-  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.tekmemo"</span> }),
+<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
+  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.memofs"</span> }),
   projectId: <span class="token string">"my-app"</span>,
   mode: <span class="token string">"local"</span>,
 });</code></pre>
 
-                    <pre v-show="activeMode === 1"><code><span class="token keyword">import</span> { <span class="token class">Tekmemo</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core"</span>;
-<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@tekmemo/core/node-fs"</span>;
+                    <pre v-show="activeMode === 1"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>;
+<span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>;
 
 <span class="token comment">// Same engine, same files — plus a cloud replica for other machines.</span>
-<span class="token comment">// Reads/writes hit local first; sync.push / sync.pull mirror .tekmemo/.</span>
-<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">Tekmemo</span>({
-  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.tekmemo"</span> }),
+<span class="token comment">// Reads/writes hit local first; sync.push / sync.pull mirror .memofs/.</span>
+<span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
+  store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.memofs"</span> }),
   projectId: <span class="token string">"my-app"</span>,
   mode: <span class="token string">"hybrid"</span>,
   cloud: {
-    baseUrl: process.env.TEKMEMO_CLOUD_URL!,
-    apiKey: process.env.TEKMEMO_API_KEY!,
+    baseUrl: process.env.MEMOFS_CLOUD_URL!,
+    apiKey: process.env.MEMOFS_API_KEY!,
   },
   readPolicy: <span class="token string">"local-first"</span>,
   writePolicy: <span class="token string">"local-first"</span>,
 });</code></pre>
 
-                    <pre v-show="activeMode === 2"><code><span class="token comment">// TekMemo Cloud can host the runtime so thin clients (CI, dashboards)</span>
+                    <pre v-show="activeMode === 2"><code><span class="token comment">// MemoFS Cloud can host the runtime so thin clients (CI, dashboards)</span>
 <span class="token comment">// read memory over HTTPS without a local checkout.</span>
 <span class="token comment">//</span>
 <span class="token comment">//   • Cloud client: a file-sync transport today</span>
 <span class="token comment">//     (push / complete / pull / status).</span>
 <span class="token comment">//   • Managed runtime: coming after early access.</span>
 <span class="token comment">//</span>
-<span class="token comment">// Same data model either way — .tekmemo/ is always the source of truth.</span></code></pre>
+<span class="token comment">// Same data model either way — .memofs/ is always the source of truth.</span></code></pre>
                   </div>
                 </div>
               </div>
@@ -365,7 +365,7 @@ const modes = [
                 <span class="audience-emoji">🧩</span>
                 <h3>Building AI apps</h3>
                 <p>
-                  Give your app durable memory. Import <code>@tekmemo/core</code> — the same API
+                  Give your app durable memory. Import <code>@memofs/core</code> — the same API
                   whether memory lives in local files, the cloud, or both. The AI SDK runtime ships
                   recall, context-building, and a tool definition ready to wire into any agent.
                 </p>
@@ -389,10 +389,10 @@ const modes = [
         <section class="comparison-section tek-reveal">
           <div class="container">
             <span class="section-kicker">Why file-first</span>
-            <h2>TekMemo vs. hosted memory tools</h2>
+            <h2>MemoFS vs. hosted memory tools</h2>
             <p>
-              Most memory tools hide your data in a dashboard you can't inspect. TekMemo stores
-              everything as plain text and JSON in your project's <code>.tekmemo/</code> directory —
+              Most memory tools hide your data in a dashboard you can't inspect. MemoFS stores
+              everything as plain text and JSON in your project's <code>.memofs/</code> directory —
               alongside the code it describes.
             </p>
             <div class="comparison-table-wrapper">
@@ -400,7 +400,7 @@ const modes = [
                 <thead>
                   <tr>
                     <th>Feature</th>
-                    <th>TekMemo</th>
+                    <th>MemoFS</th>
                     <th>Hosted Memory Tools</th>
                   </tr>
                 </thead>
@@ -442,15 +442,15 @@ const modes = [
             <p class="oss-badge">MIT Licensed · 100% open source</p>
             <h2>One command. Your agent never forgets.</h2>
             <div class="code-snippet large">
-              <code>npx tekmemo init</code>
+              <code>npx memofs init</code>
             </div>
             <div class="cta-buttons">
               <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
               <a href="https://memo.tekbreed.com" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
-                Explore TekMemo Cloud →
+                Explore MemoFS Cloud →
               </a>
             </div>
-            <a href="https://github.com/tekbreed/tekmemo" class="bottom-cta-link">
+            <a href="https://github.com/tekbreed/memofs" class="bottom-cta-link">
               View on GitHub
             </a>
           </div>

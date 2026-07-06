@@ -47,7 +47,7 @@ target.)
   **Workers + Static Assets** as the deploy target, via `@react-router/cloudflare`
   — the *opposite* runtime. The dir is also not in `pnpm-workspace.yaml`, and its
   README is the unmodified Remix/RR starter (no Memo FS code yet).
-- **Decision CONFIRMED (user, 2026-06-20):** TekMemo Cloud = **React Router v8 on
+- **Decision CONFIRMED (user, 2026-06-20):** MemoFS Cloud = **React Router v8 on
   Cloudflare Workers** (`@react-router/cloudflare`) + Static Assets. `apps/cloud`
   is the intended `apps/memofs-cloud` from ADR 0005; its current Node-SSR
   scaffold (`@react-router/node` + `@react-router/serve`) must be rebuilt onto
@@ -98,7 +98,7 @@ target.)
   contain `"cloud-only"`**. `config.ts:276` (`resolveMode`) and `:408`
   (`isRuntimeMode`) still accept `"cloud"`; `isReadPolicy:419` still accepts
   `"cloud-only"`. No test references `"cloud"` mode, so removal is safe.
-- 🔴 **Q2 connectors path not done.** `memory-paths.ts` `CANONICAL_TEKMEMO_FILES`
+- 🔴 **Q2 connectors path not done.** `memory-paths.ts` `CANONICAL_MEMOFS_FILES`
   is still **10 files** (lines 69-80); no ``.memofs/`connectors.json`. Q2 locks it
   as the 11th canonical file. `computeLocalManifest()` derives from this array,
   so adding it propagates automatically once the constant + schema exist.
@@ -185,7 +185,7 @@ apply fixes, otherwise I'd be coding against an unresolved target.
 
 ### B1 — `apps/cloud/` runtime (Node vs Worker) — **OPEN, decoupled as a code task**
 
-- **Decision:** TekMemo Cloud = React Router **v8** on Cloudflare Workers
+- **Decision:** MemoFS Cloud = React Router **v8** on Cloudflare Workers
   (`@react-router/cloudflare`) + Static Assets (ADR 0005 rev 2; user-confirmed).
 - **Working tree now:** `apps/cloud/package.json` still pins `@react-router/node`
   + `@react-router/serve` (a **Node SSR server**) with a `start:

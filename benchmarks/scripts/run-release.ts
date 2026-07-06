@@ -111,7 +111,7 @@ try {
 						query: {
 							embedding: createVector(12, 10),
 							topK: 10,
-							filter: { projectId: "tekbreed-tekmemo" },
+							filter: { projectId: "memofs" },
 						},
 						iterations: 75,
 						warmupIterations: 5,

@@ -43,11 +43,11 @@ Tracks indexes, relational graphs, transactional status, and search schemas. It 
 ### Configuration Example
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createR2BlobClient } from "@memofs/adapter-r2";
 import { createTursoMetadataStore } from "@memofs/adapter-turso";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   projectId: "prod-workspace",
   mode: "hybrid",
   

@@ -5,10 +5,10 @@ The `@memofs/server` package exports the hosted runtime assembly factories and H
 ## Functions
 
 ### `createHostedRuntime`
-Assembles a unified `Tekmemo` client using an injected storage and optional intelligence adapters.
+Assembles a unified `MemoFS` client using an injected storage and optional intelligence adapters.
 
 ```ts
-function createHostedRuntime(options: HostedRuntimeOptions): Tekmemo;
+function createHostedRuntime(options: HostedRuntimeOptions): MemoFS;
 ```
 
 ### `handleRuntimeRequest`

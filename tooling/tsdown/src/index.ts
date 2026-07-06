@@ -1,5 +1,5 @@
 /**
- * Shared tsdown configuration for TekMemo packages.
+ * Shared tsdown configuration for MemoFS packages.
  *
  * @remarks
  * Provides the base build configuration for all packages.

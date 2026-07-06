@@ -34,11 +34,11 @@ Injecting an adapter upgrades specific capabilities on top of these baselines.
 ## Configuration Example
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createOpenAIEmbedder, createOpenAiLlmClient } from "@memofs/adapter-openai";
 import { createVoyageReranker } from "@memofs/adapter-voyage";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   projectId: "agent-session",
   
   // Inject OpenAI for vector generation

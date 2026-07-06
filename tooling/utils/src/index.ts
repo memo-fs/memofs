@@ -1,10 +1,10 @@
 /**
- * Internal utility functions for the TekMemo monorepo.
+ * Internal utility functions for the MemoFS monorepo.
  *
  * @remarks
  * This package provides shared utilities including retry logic, error classes,
  * object manipulation, path locking, and validation helpers.
- * Used by all TekMemo packages (both OSS and internal).
+ * Used by all MemoFS packages (both OSS and internal).
  *
  * @internal
  */

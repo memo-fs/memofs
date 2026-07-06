@@ -416,7 +416,7 @@
   drop `"cloud"`. `RuntimeReadPolicy`/`WritePolicy` drop `"cloud-only"`. Update
   `config.ts` `resolveMode`/`isRuntimeMode`/`isReadPolicy`/`isWritePolicy`.
 - **Q2 — connectors as 11th canonical file:** add
-  ``.memofs/`connectors.json` to `CANONICAL_TEKMEMO_FILES` in
+  ``.memofs/`connectors.json` to `CANONICAL_MEMOFS_FILES` in
   `packages/memofs/src/core/constants/memory-paths.ts` (currently 10 files).
   `file-replication.ts` `computeLocalManifest()` then walks 11 files + snapshots
   automatically (it derives from the constant). Define the `connectors.json`
@@ -610,8 +610,8 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
   3. The cloud `import`s MIT types from the core; a restrictive license on the
      cloud half would force a clean-room boundary inside one repo — friction that
      breaks "ship ASAP."
-- **Real protection comes from:** (a) **trademark** — reserve "TekMemo" /
-  "TekMemo Cloud" so nobody else can brand their hosted version; (b) the
+- **Real protection comes from:** (a) **trademark** — reserve "MemoFS" /
+  "MemoFS Cloud" so nobody else can brand their hosted version; (b) the
   operational moat; (c) **SSOT of the client types** (you publish
   `@memofs/core`, you control protocol evolution — followers stay a step
   behind); (d) data/network-effects once users have memory in *your* cloud.
@@ -1327,7 +1327,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      Agents SDK, LangGraph, Mastra), governed by ADR 0007. Both surfaces are
      first-class; neither is legacy. The runtime is one; the surfaces are many.
   2. **Accept the pull-only constraint for MCP and design around it.** Since the
-     model must *decide* to retrieve, TekMemo's job is to make that one decision
+     model must *decide* to retrieve, MemoFS's job is to make that one decision
      maximally productive: the tool the model calls runs query-rewriting +
      entity-centric resolution + progressive delivery + active-only filtering
      *inside itself*, so one call returns a curated briefing, not a raw search
@@ -1367,7 +1367,7 @@ apps/cloud/                    ← Cloudflare Worker(s), MIT.
      around files that are already directly readable — pure overhead that
      reintroduces the exact problem file-first was chosen to solve. The
      PostgreSQL-driver analogy does not transfer: Postgres needs drivers
-     because it lives behind a socket; TekMemo's "database" *is* the
+     because it lives behind a socket; MemoFS's "database" *is* the
      filesystem. Two access paths cover everything:
      - **Direct file read** — any language, zero dep, for raw facts (the
        trust/audit layer; a consumer that only wants known facts reads files).

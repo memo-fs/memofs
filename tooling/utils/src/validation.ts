@@ -1,9 +1,9 @@
 /**
- * Validation utilities for TekMemo packages.
+ * Validation utilities for MemoFS packages.
  *
  * @remarks
  * Provides assertion functions for common types (strings, numbers, URLs, etc.).
- * Supports custom error classes for different packages (TekMemoError vs BaseError).
+ * Supports custom error classes for different packages (MemoFsError vs BaseError).
  *
  * @internal
  */

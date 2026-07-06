@@ -1,9 +1,9 @@
 # Client API Reference
 
-The `Tekmemo` class is the central entry point for all memory operations in your application.
+The `MemoFS` class is the central entry point for all memory operations in your application.
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 ```
 
 ---
@@ -13,10 +13,10 @@ import { Tekmemo } from "@memofs/core";
 Instantiates a new unified client:
 
 ```ts
-const memo = new Tekmemo(config?: TekmemoConfig);
+const memo = new MemoFS(config?: MemoFsConfig);
 ```
 
-### Configuration Options (`TekmemoConfig`)
+### Configuration Options (`MemoFsConfig`)
 
 | Option | Type | Default | Description |
 |---|---|---|---|

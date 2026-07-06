@@ -3,9 +3,9 @@ import { onMounted, ref } from "vue";
 
 /**
  * HeroVisual component displays an astonishing, interactive, high-tech SVG diagram
- * representing the TekMemo memory infrastructure (Core, Archival, Recall, and Sync).
+ * representing the MemoFS memory infrastructure (Core, Archival, Recall, and Sync).
  * Features:
- * - Central node containing the TekMemo logo (brackets + layered memory stack).
+ * - Central node containing the MemoFS logo (brackets + layered memory stack).
  * - Concentric orbiting circular nodes representing the four memory layers.
  * - Flowing data pulse animations running along curved bezier connection paths.
  * - 3D parallax hover tilt effect reacting dynamically to the mouse cursor.
@@ -111,7 +111,7 @@ const handleMouseLeave = () => {
           <stop offset="100%" stop-color="#f97316" />
         </linearGradient>
 
-        <!-- Vertical blue -> green gradient for the embedded TekMemo layered stack -->
+        <!-- Vertical blue -> green gradient for the embedded MemoFS layered stack -->
         <linearGradient id="grad-mem-layers" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#4fb2f3" />
           <stop offset="100%" stop-color="#5bd473" />
@@ -192,7 +192,7 @@ const handleMouseLeave = () => {
           <polyline points="25,25 5,50 25,75" stroke="#4fb2f3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-left" />
           <polyline points="75,25 95,50 75,75" stroke="#5bd473" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-right" />
 
-          <!-- Isometric layered stack (the TekMemo mark) -->
+          <!-- Isometric layered stack (the MemoFS mark) -->
           <g stroke="url(#grad-mem-layers)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
             <polygon points="50,28 66,37 50,46 34,37" class="mem-layer ml1" />
             <polyline points="34,45 50,54 66,45" class="mem-layer ml2" />

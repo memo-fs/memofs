@@ -34,7 +34,7 @@ importers:
         version: 17.4.2
       memofs:
         specifier: workspace:^
-        version: link:packages/tekmemo
+        version: link:packages/memofs
       publint:
         specifier: ^0.3.21
         version: 0.3.21
@@ -222,9 +222,6 @@ importers:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.17.0
         version: 0.17.0(@cloudflare/workers-types@4.20260630.1)(@vitest/runner@4.1.9)(@vitest/snapshot@4.1.9)(vitest@4.1.9)
-      '@cloudflare/workers-types':
-        specifier: ^4.20260630.1
-        version: 4.20260630.1
       '@playwright/test':
         specifier: ^1.61.0
         version: 1.61.0
@@ -582,6 +579,34 @@ importers:
         specifier: ^25.9.2
         version: 25.9.3
 
+  packages/memofs:
+    dependencies:
+      '@memofs/connectors':
+        specifier: workspace:^
+        version: link:../connectors
+      '@memofs/core':
+        specifier: workspace:^
+        version: link:../core
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
+    devDependencies:
+      '@memofs/testing':
+        specifier: workspace:^
+        version: link:../testing
+      '@repo/tsdown':
+        specifier: workspace:*
+        version: link:../../tooling/tsdown
+      '@repo/typescript':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../tooling/utils
+      '@types/node':
+        specifier: ^25.9.2
+        version: 25.9.3
+
   packages/server:
     dependencies:
       '@memofs/core':
@@ -609,34 +634,6 @@ importers:
       vitest:
         specifier: ^4.1.8
         version: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@25.9.3)(@vitest/coverage-v8@4.1.9)(msw@2.14.6(@types/node@25.9.3)(typescript@6.0.3))(vite@8.0.16(@types/node@25.9.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4))
-
-  packages/tekmemo:
-    dependencies:
-      '@memofs/connectors':
-        specifier: workspace:^
-        version: link:../connectors
-      '@memofs/core':
-        specifier: workspace:^
-        version: link:../core
-      commander:
-        specifier: ^14.0.3
-        version: 14.0.3
-    devDependencies:
-      '@memofs/testing':
-        specifier: workspace:^
-        version: link:../testing
-      '@repo/tsdown':
-        specifier: workspace:*
-        version: link:../../tooling/tsdown
-      '@repo/typescript':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@repo/utils':
-        specifier: workspace:*
-        version: link:../../tooling/utils
-      '@types/node':
-        specifier: ^25.9.2
-        version: 25.9.3
 
   packages/testing:
     dependencies:
@@ -768,10 +765,6 @@ packages:
     resolution: {integrity: sha512-brcMGQaVzIeUb+6/bs1Av0f8YuNNjKY2JyvfRCsFuFsdKccEQ5Ges2y74D74NZ1Rz8lKJ9ksJkfqwQFJ/iNEyQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-string-parser@7.27.1':
-    resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
-    engines: {node: '>=6.9.0'}
-
   '@babel/helper-string-parser@7.29.7':
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
     engines: {node: '>=6.9.0'}
@@ -779,10 +772,6 @@ packages:
   '@babel/helper-string-parser@8.0.0-rc.6':
     resolution: {integrity: sha512-BCkFy+zN6kXQed3YOT7aJl93NfDSzQc3pBfsvTVPs9gU9X3V0aefEF5kwBT0E+mDWH9QgKaZstYUQN9VdQZT4g==}
     engines: {node: ^22.18.0 || >=24.11.0}
-
-  '@babel/helper-validator-identifier@7.28.5':
-    resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.29.7':
     resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
@@ -802,11 +791,6 @@ packages:
 
   '@babel/parser@7.27.0':
     resolution: {integrity: sha512-iaepho73/2Pz7w2eMS0Q5f83+0RKI7i4xmiYeBmDzfRVbQtTOG7Ts0S4HzJVsTMGI9keU8rNfuZr8DKfSt7Yyg==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
-  '@babel/parser@7.29.3':
-    resolution: {integrity: sha512-b3ctpQwp+PROvU/cttc4OYl4MzfJUWy6FZg+PMXfzmt/+39iHVF0sDfqay8TQM3JA2EUOyKcFZt75jWriQijsA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -864,10 +848,6 @@ packages:
 
   '@babel/traverse@7.29.7':
     resolution: {integrity: sha512-EhlfNQtZ+NK22w5BM61ciuiq1m58ed33Wr1Xan//ZRTy6hgjnwyCffRYwzsGXdASJSUJ1guZILsErh1eQcl+zw==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/types@7.29.0':
-    resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
   '@babel/types@7.29.7':
@@ -6612,13 +6592,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helper-string-parser@7.27.1': {}
-
   '@babel/helper-string-parser@7.29.7': {}
 
   '@babel/helper-string-parser@8.0.0-rc.6': {}
-
-  '@babel/helper-validator-identifier@7.28.5': {}
 
   '@babel/helper-validator-identifier@7.29.7': {}
 
@@ -6634,10 +6610,6 @@ snapshots:
   '@babel/parser@7.27.0':
     dependencies:
       '@babel/types': 7.29.7
-
-  '@babel/parser@7.29.3':
-    dependencies:
-      '@babel/types': 7.29.0
 
   '@babel/parser@7.29.7':
     dependencies:
@@ -6718,11 +6690,6 @@ snapshots:
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-
-  '@babel/types@7.29.0':
-    dependencies:
-      '@babel/helper-string-parser': 7.27.1
-      '@babel/helper-validator-identifier': 7.28.5
 
   '@babel/types@7.29.7':
     dependencies:
@@ -10556,8 +10523,8 @@ snapshots:
 
   magicast@0.5.2:
     dependencies:
-      '@babel/parser': 7.29.3
-      '@babel/types': 7.29.0
+      '@babel/parser': 7.29.7
+      '@babel/types': 7.29.7
       source-map-js: 1.2.1
 
   make-dir@4.0.0:

@@ -23,6 +23,6 @@ export const nav: DefaultTheme.NavItem[] = [
 	},
 	{
 		text: "Cloud",
-		link: "https://memo.tekbreed.com",
+		link: "https://memofs.dev",
 	},
 ];

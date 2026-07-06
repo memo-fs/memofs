@@ -15,4 +15,4 @@ Updates, insights, and deep dives from the team building Memo FS — file-first 
 
 ---
 
-**Stay in the loop** — follow [@memofs](https://x.com/tekbreed) on X or watch the [GitHub repo](https://github.com/christophersesugh/memofs).
+**Stay in the loop** — follow [@memofs](https://x.com/memofss) on X or watch the [GitHub repo](https://github.com/christophersesugh/memofs).

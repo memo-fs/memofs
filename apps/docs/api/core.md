@@ -1,16 +1,16 @@
 # `@memofs/core` API
 
-The `@memofs/core` package provides the unified `Tekmemo` client and baseline runtime engine.
+The `@memofs/core` package provides the unified `MemoFS` client and baseline runtime engine.
 
 ## Classes
 
-### `Tekmemo`
+### `MemoFS`
 The central manager orchestrating all storage axes and intelligence roles.
 
 #### Constructor
 
 ```ts
-const memo = new Tekmemo(config?: TekmemoConfig);
+const memo = new MemoFS(config?: MemoFsConfig);
 ```
 
 #### Methods

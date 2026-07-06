@@ -1,5 +1,5 @@
 /**
- * Shared tsdown configuration for TekMemo packages.
+ * Shared tsdown configuration for MemoFS packages.
  *
  * @internal
  */

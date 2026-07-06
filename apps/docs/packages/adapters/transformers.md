@@ -17,11 +17,11 @@ npm install @memofs/adapter-transformers
 Configure the client to use local embeddings. The model is downloaded on first run and cached locally:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "local-project",
   embedder: createTransformersEmbedder({

@@ -71,10 +71,10 @@ export function createRecallDocuments(
 ): RecallDocument[] {
 	return Array.from({ length: count }, (_value, index) => ({
 		id: `memory-${index}`,
-		text: `TekMemo memory record ${index} about layered agent memory.`,
+		text: `MemoFS memory record ${index} about layered agent memory.`,
 		embedding: createVector(dimensions, index + 1),
 		metadata: {
-			projectId: "tekbreed-tekmemo",
+			projectId: "memofs",
 			sourceType: "benchmark",
 			sourceId: `source-${index % 5}`,
 			memoryType: index % 2 === 0 ? "core" : "notes",
@@ -89,7 +89,7 @@ export function createMemoryText(records: number): string {
 	return Array.from(
 		{ length: records },
 		(_value, index) =>
-			`Record ${index}. TekMemo keeps core memory compact, archival notes durable, and recall fragments searchable for agent context.`,
+			`Record ${index}. MemoFS keeps core memory compact, archival notes durable, and recall fragments searchable for agent context.`,
 	).join("\n\n");
 }
 
@@ -144,7 +144,7 @@ async function writeReports({
 	);
 
 	const markdown = [
-		`# TekMemo ${mode} benchmarks`,
+		`# MemoFS ${mode} benchmarks`,
 		"",
 		`Status: ${summary.ok ? "pass" : "fail"}`,
 		"",

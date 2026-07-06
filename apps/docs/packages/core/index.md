@@ -4,7 +4,7 @@
 
 ## Features
 
-- **Unified Core Runtime:** Provides the main `Tekmemo` client orchestrating storage and intelligence.
+- **Unified Core Runtime:** Provides the main `MemoFS` client orchestrating storage and intelligence.
 - **Provider-Neutral Contracts:** Interfaces for embedders, rerankers, extractors, and LLM clients.
 - **AgentFS:** Virtual filesystem abstraction for project memory files.
 - **Hybrid Recall:** Out-of-the-box local BM25, fuzzy, and semantic search routing.
@@ -26,7 +26,7 @@ npm install @memofs/core
 Initialize memory in your project and read the core memory:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Initialize a Node.js filesystem-backed memory store
@@ -35,7 +35,7 @@ const store = createNodeFsMemoryStore({
 });
 
 // Create the unified client
-const memo = new Tekmemo({
+const memo = new MemoFS({
   store,
   projectId: "my-project",
   mode: "local",

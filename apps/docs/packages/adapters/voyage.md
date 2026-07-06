@@ -17,11 +17,11 @@ npm install @memofs/adapter-voyage
 Inject both the Voyage embedder and Voyage reranker to boost semantic query relevance:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createVoyageEmbedder, createVoyageReranker } from "@memofs/adapter-voyage";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "voyage-project",
   

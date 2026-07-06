@@ -1,5 +1,5 @@
 /**
- * Base error class for all TekMemo packages.
+ * Base error class for all MemoFS packages.
  *
  * @remarks
  * Provides structured error handling with code, status, details, and cause support.
@@ -42,7 +42,7 @@ export class BaseError extends Error {
 }
 
 /**
- * Common error codes used across TekMemo packages.
+ * Common error codes used across MemoFS packages.
  */
 export const ErrorCodes = {
 	CONFIG: "CONFIG",

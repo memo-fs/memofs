@@ -16,14 +16,14 @@ npm install @memofs/adapter-openai
 
 ## Usage
 
-Use `createOpenAIEmbedder` to instantiate an embedder for the `Tekmemo` client:
+Use `createOpenAIEmbedder` to instantiate an embedder for the `MemoFS` client:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-const memo = new Tekmemo({
+const memo = new MemoFS({
   store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "openai-project",
   embedder: createOpenAIEmbedder({

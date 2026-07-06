@@ -10,7 +10,7 @@ Memo FS uses a clear priority chain to resolve configuration settings:
 
 ## Runtime Modes
 
-When initializing `Tekmemo`, you can select one of three runtime modes:
+When initializing `MemoFS`, you can select one of three runtime modes:
 
 | Mode | Target | Description |
 |---|---|---|
@@ -19,7 +19,7 @@ When initializing `Tekmemo`, you can select one of three runtime modes:
 | `memory` | In-Memory Only | No disk access. Primitives are read and written to memory. Great for transient tests. |
 
 ```ts
-const memo = new Tekmemo({
+const memo = new MemoFS({
   mode: "local", // or "hybrid", "memory"
 });
 ```
@@ -37,7 +37,7 @@ In `hybrid` mode, read and write operations are guided by policies:
 | `local-only` | Prevent all remote network calls for this execution, keeping operations strictly local. |
 
 ```ts
-const memo = new Tekmemo({
+const memo = new MemoFS({
   mode: "hybrid",
   readPolicy: "local-first",
   writePolicy: "local-first",
@@ -59,7 +59,7 @@ The `.memofs/config.json` allows team-wide settings to be committed alongside co
     "embeddingModel": "openai/text-embedding-3-small"
   },
   "cloud": {
-    "baseUrl": "https://memo.tekbreed.com"
+    "baseUrl": "https://memo.memofs.dev"
   }
 }
 ```
@@ -72,8 +72,8 @@ The following environment variables are recognized:
 
 | Variable | Description |
 |---|---|
-| `TEKMEMO_MODE` | Overrides the runtime mode (`local`, `hybrid`, `memory`). |
-| `TEKMEMO_READ_POLICY` | Overrides the read policy (`local-first`, `cloud-first`, `local-only`). |
-| `TEKMEMO_WRITE_POLICY` | Overrides the write policy (`local-first`, `cloud-first`, `local-only`). |
-| `TEKMEMO_CLOUD_API_KEY`| The API key used to authenticate with Memo FS Cloud. |
-| `TEKMEMO_PROJECT_ID` | The unique ID of the target project workspace. |
+| `MEMOFS_MODE` | Overrides the runtime mode (`local`, `hybrid`, `memory`). |
+| `MEMOFS_READ_POLICY` | Overrides the read policy (`local-first`, `cloud-first`, `local-only`). |
+| `MEMOFS_WRITE_POLICY` | Overrides the write policy (`local-first`, `cloud-first`, `local-only`). |
+| `MEMOFS_CLOUD_API_KEY`| The API key used to authenticate with Memo FS Cloud. |
+| `MEMOFS_PROJECT_ID` | The unique ID of the target project workspace. |

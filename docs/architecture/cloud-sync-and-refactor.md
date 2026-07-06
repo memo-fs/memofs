@@ -154,7 +154,7 @@ Plus dynamic snapshots: ``.memofs/`snapshots/<safe-name>.json` (`memory-paths.ts
 
 ### 4.2 The sync manifest (local, computed)
 
-Before any push or pull, the runtime computes a **local file manifest**: a map of `{ canonicalPath → sha256 }` over every file that currently exists in ``.memofs/`` (canonical files that exist + snapshot files). This is derived, not stored — computed by walking `CANONICAL_TEKMEMO_FILES` + matching the snapshot pattern, hashing each present file.
+Before any push or pull, the runtime computes a **local file manifest**: a map of `{ canonicalPath → sha256 }` over every file that currently exists in ``.memofs/`` (canonical files that exist + snapshot files). This is derived, not stored — computed by walking `CANONICAL_MEMOFS_FILES` + matching the snapshot pattern, hashing each present file.
 
 ### 4.3 The cloud manifest (stored in Turso)
 

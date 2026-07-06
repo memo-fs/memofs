@@ -1,6 +1,6 @@
 # @repo/typescript
 
-Shared TypeScript configurations for TekMemo packages.
+Shared TypeScript configurations for MemoFS packages.
 
 This internal package provides the base TypeScript configurations that all packages extend. It ensures consistent TypeScript settings across the monorepo.
 

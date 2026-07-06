@@ -32,12 +32,12 @@ npm install @memofs/connectors
 Run connectors programmatically in your workspace:
 
 ```ts
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { runConnectors, EnvSecretResolver } from "@memofs/connectors";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
-const memo = new Tekmemo({ store, projectId: "my-app" });
+const memo = new MemoFS({ store, projectId: "my-app" });
 
 const result = await runConnectors({
   rootDir: "./.memofs",

@@ -16,9 +16,9 @@
 		}
 	},
 	"references": {
-		"tekbreed-local": {
+		"memofs-local": {
 			"path": "../workspace",
-			"description": "use this whenever you need any details about tekbreed local"
+			"description": "use this whenever you need any details about memofs local"
 		}
 	}
 }
