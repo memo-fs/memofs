@@ -1,0 +1,21 @@
+interface Env {
+	DATABASE_URL: string;
+	DATABASE_AUTH_TOKEN: string;
+	API_KEY_SALT: string;
+	ENCRYPTION_KEY: string;
+	SESSION_SECRET: string;
+	BETTER_AUTH_SECRET: string;
+	VOYAGE_API_KEY: string;
+	R2_S3_ACCESS_KEY_ID: string;
+	R2_S3_SECRET_ACCESS_KEY: string;
+	R2_S3_ENDPOINT: string;
+	R2_BUCKET_NAME: string;
+	GITHUB_CLIENT_ID: string;
+	GITHUB_CLIENT_SECRET: string;
+	GOOGLE_CLIENT_ID: string;
+	GOOGLE_CLIENT_SECRET: string;
+	CLOUD_PUBLIC_BASE_URL: string;
+	POLAR_WEBHOOK_SECRET: string;
+	POLAR_ACCESS_TOKEN: string;
+	RESEND_API_KEY: string;
+}
