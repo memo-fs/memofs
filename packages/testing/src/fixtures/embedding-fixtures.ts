@@ -1,5 +1,5 @@
 export const EMBEDDING_TEXTS_FIXTURE = [
-	"TekMemo starts with local .tekmemo files.",
+	"MemoFS starts with local .memofs files.",
 	"Recall uses vectors and optional reranking.",
 	"Cloud sync adds teams, restore, and production controls.",
 ] as const;

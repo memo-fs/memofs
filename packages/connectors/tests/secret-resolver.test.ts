@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { TEKMEMO_DIR } from "@memofs/core";
+import { MEMOFS_DIR } from "@memofs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	ConnectorSecretError,
@@ -9,10 +9,10 @@ import {
 	StaticSecretResolver,
 } from "../src/index";
 
-/** Write `.tekmemo/secrets.json` with the given JSON under rootDir. */
+/** Write `.memofs/secrets.json` with the given JSON under rootDir. */
 async function writeSecretsFile(rootDir: string, json: string): Promise<void> {
-	await mkdir(join(rootDir, TEKMEMO_DIR), { recursive: true });
-	await writeFile(join(rootDir, TEKMEMO_DIR, "secrets.json"), json, "utf8");
+	await mkdir(join(rootDir, MEMOFS_DIR), { recursive: true });
+	await writeFile(join(rootDir, MEMOFS_DIR, "secrets.json"), json, "utf8");
 }
 
 describe("StaticSecretResolver", () => {
@@ -44,14 +44,14 @@ describe("EnvSecretResolver", () => {
 	let rootDir: string;
 
 	beforeEach(async () => {
-		rootDir = await mkdtemp(join(tmpdir(), "tekmemo-sec-"));
+		rootDir = await mkdtemp(join(tmpdir(), "memofs-sec-"));
 	});
 
 	afterEach(async () => {
 		await rm(rootDir, { recursive: true, force: true });
 	});
 
-	it("resolves a ref present in `.tekmemo/secrets.json`", async () => {
+	it("resolves a ref present in `.memofs/secrets.json`", async () => {
 		await writeSecretsFile(rootDir, JSON.stringify({ ss_abc: "tok-123" }));
 		const resolver = new EnvSecretResolver({ rootDir });
 		await expect(resolver.resolve("ss_abc")).resolves.toBe("tok-123");

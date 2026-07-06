@@ -46,7 +46,7 @@ export function defineMemoryStoreContractTests(
 			const store = await options.createStore();
 			try {
 				const result = Promise.resolve(
-					store.read(".tekmemo/memory/missing.md"),
+					store.read(".memofs/memory/missing.md"),
 				);
 
 				if (options.missingReadBehavior === "empty") {
@@ -88,7 +88,7 @@ export function defineMemoryStoreContractTests(
 					Promise.resolve(store.exists(MEMORY_FIXTURE_PATHS.core)),
 				).resolves.toBe(true);
 				const missingResult = Promise.resolve(
-					store.exists(".tekmemo/memory/missing.md"),
+					store.exists(".memofs/memory/missing.md"),
 				);
 				const resolved = await missingResult.catch(() => "threw");
 				expect(resolved === false || resolved === "threw").toBe(true);

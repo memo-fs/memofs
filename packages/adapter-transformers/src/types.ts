@@ -49,7 +49,7 @@ export interface TransformersEmbedderOptions {
 	model?: string;
 	/**
 	 * Directory used to cache downloaded ONNX weights. Defaults to a
-	 * `.tekmemo/models` directory when resolved by the runtime, or the
+	 * `.memofs/models` directory when resolved by the runtime, or the
 	 * Transformers.js default cache otherwise.
 	 */
 	cacheDir?: string;

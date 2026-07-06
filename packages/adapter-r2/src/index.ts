@@ -1,5 +1,5 @@
 /**
- * @memofs/adapter-r2 — Cloudflare R2 blob adapter for TekMemo's remote-blob
+ * @memofs/adapter-r2 — Cloudflare R2 blob adapter for MemoFS's remote-blob
  * memory store.
  *
  * Implements core's provider-neutral {@link BlobClient} contract:

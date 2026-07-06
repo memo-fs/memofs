@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/adapter-turso"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-turso/",
+	"homepage": "https://docs.memofs.dev/packages/adapter-turso/",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"
 	},

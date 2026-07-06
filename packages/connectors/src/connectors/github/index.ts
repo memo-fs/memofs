@@ -1,7 +1,7 @@
 /**
  * GitHub connector — the reference {@link Connector} implementation.
  *
- * Ingests a repository's issues / PRs / discussions into `.tekmemo/` as
+ * Ingests a repository's issues / PRs / discussions into `.memofs/` as
  * connector notes. The runner handles the Q3 write discipline; this connector
  * only fetches + normalizes.
  *

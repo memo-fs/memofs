@@ -101,7 +101,7 @@ export class VoyageEmbedder implements MemoryEmbedder {
 			this.config.encodingFormat === "base64"
 		) {
 			throw new VoyageValidationError(
-				"base64 encoding_format is not supported by VoyageEmbedder because TekMemo expects numeric vectors.",
+				"base64 encoding_format is not supported by VoyageEmbedder because MemoFS expects numeric vectors.",
 			);
 		}
 

@@ -1,10 +1,10 @@
 /**
- * `@memofs/connectors` — the local connector framework for TekMemo.
+ * `@memofs/connectors` — the local connector framework for MemoFS.
  *
- * Connectors ingest external sources (GitHub, Notion, …) into `.tekmemo/`
+ * Connectors ingest external sources (GitHub, Notion, …) into `.memofs/`
  * through the local engine. Each source is a plugin implementing the
  * provider-neutral {@link Connector} interface. See `README.md` and
- * [](https://github.com/tekbreed/tekmemo/blob/main/docs/adr/0002-connectors-run-locally.md).
+ * [](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0002-connectors-run-locally.md).
  *
  * @public
  */

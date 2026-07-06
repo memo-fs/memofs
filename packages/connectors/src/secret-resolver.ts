@@ -1,11 +1,11 @@
 /**
  * Secret resolution — the Q2 credential plane.
  *
- * Tokens never ride in the file replica. `.tekmemo/connectors.json` carries only
+ * Tokens never ride in the file replica. `.memofs/connectors.json` carries only
  * an opaque `secretRef`; the framework resolves it to a live token through an
  * injected {@link SecretResolver} at run time, holds it in memory only, and never
  * writes it to disk. The v1 dev fallback reads a separate, gitignored, non-synced
- * `.tekmemo/secrets.json`; production wires a `CloudSecretResolver` against the
+ * `.memofs/secrets.json`; production wires a `CloudSecretResolver` against the
  * locked `GET /v1/projects/:projectId/connectors/:connectorId/secret` endpoint
  * when the cloud app ships.
  *
@@ -14,7 +14,7 @@
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { TEKMEMO_DIR } from "@memofs/core";
+import { MEMOFS_DIR } from "@memofs/core";
 import { ConnectorSecretError } from "./errors";
 
 /**
@@ -42,21 +42,21 @@ export interface SecretResolver {
  */
 export interface FileSecretResolverOptions {
 	/**
-	 * The `.tekmemo/` parent directory (same rootDir passed to Tekmemo). The
-	 * secrets file lives at `${rootDir}/.tekmemo/secrets.json` — a separate,
+	 * The `.memofs/` parent directory (same rootDir passed to MemoFS). The
+	 * secrets file lives at `${rootDir}/.memofs/secrets.json` — a separate,
 	 * gitignored, non-synced file (NOT one of the 11 canonical sync units).
 	 */
 	readonly rootDir: string;
 }
 
-/** Resolve `${rootDir}/${TEKMEMO_DIR}/secrets.json` (kept out of the sync replica). */
+/** Resolve `${rootDir}/${MEMOFS_DIR}/secrets.json` (kept out of the sync replica). */
 function secretsFilePath(rootDir: string): string {
-	return path.join(rootDir, TEKMEMO_DIR, "secrets.json");
+	return path.join(rootDir, MEMOFS_DIR, "secrets.json");
 }
 
 /**
  * Dev/local fallback resolver: reads a map of `{ secretRef: token }` from
- * `.tekmemo/secrets.json`.
+ * `.memofs/secrets.json`.
  *
  * This file is **not** a canonical sync unit — it's a local convenience for
  * development and self-hosted setups. Add it to `.gitignore`. Production
@@ -181,7 +181,7 @@ export interface CloudSecretResolverOptions {
 	readonly projectId: string;
 	/** The Bearer API key (`tm_...`) to authenticate requests. */
 	readonly apiKey: string;
-	/** The cloud application base URL (e.g. `https://memo.tekbreed.com`). */
+	/** The cloud application base URL (e.g. `https://memofs.dev`). */
 	readonly cloudBaseUrl: string;
 }
 

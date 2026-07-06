@@ -1,5 +1,5 @@
 /**
- * `.tekmemo/connectors.json` reader + validator.
+ * `.memofs/connectors.json` reader + validator.
  *
  * @public
  */
@@ -22,7 +22,7 @@ const TOKEN_LEAK_FIELDS = [
 const SECRET_PATTERNS = [
 	/secret_[a-zA-Z0-9]{30,60}/i, // Notion
 	/gh[pousr]_[a-zA-Z0-9]{36,40}/i, // GitHub
-	/tm_[a-zA-Z0-9]{30,60}/i, // TekMemo
+	/tm_[a-zA-Z0-9]{30,60}/i, // MemoFS
 	/ey[a-zA-Z0-9_-]{10,}\.ey[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/, // JWT
 	/(sk|pk|rk)_(live|test)_[a-zA-Z0-9]{24,60}/i, // Stripe
 ];
@@ -66,24 +66,24 @@ export const EMPTY_CONNECTORS_FILE: ConnectorsFile = Object.freeze({
 }) as ConnectorsFile;
 
 /**
- * Resolve the absolute path to `.tekmemo/connectors.json` for a given root.
+ * Resolve the absolute path to `.memofs/connectors.json` for a given root.
  *
- * `rootDir` is the *parent* of `.tekmemo/` (memory paths always start with
- * `.tekmemo/`), so this is `path.join(rootDir, CONNECTORS_PATH)`.
+ * `rootDir` is the *parent* of `.memofs/` (memory paths always start with
+ * `.memofs/`), so this is `path.join(rootDir, CONNECTORS_PATH)`.
  */
 function connectorsFilePath(rootDir: string): string {
 	return path.join(rootDir, CONNECTORS_PATH);
 }
 
 /**
- * Read `.tekmemo/connectors.json` from disk.
+ * Read `.memofs/connectors.json` from disk.
  *
  * A missing file resolves to an empty connector set (degrades gracefully — no
  * connectors run). A malformed file or an invalid row throws
  * {@link ConnectorConfigError}.
  *
  * @public
- * @param rootDir the `.tekmemo/` parent directory (same rootDir passed to Tekmemo)
+ * @param rootDir the `.memofs/` parent directory (same rootDir passed to MemoFS)
  */
 export async function readConnectorsFile(
 	rootDir: string,
@@ -125,7 +125,7 @@ export async function readConnectorsFile(
  *
  * Structural (zod-free) checks: top-level shape, required per-row fields, non-empty
  * `id`/`type`/`secretRef`, and rejection of any token-shaped field leak (the
- * `packages/tekmemo-cli/src/utils/secrets.ts` guardrail intent — tokens never
+ * `packages/memofs-cli/src/utils/secrets.ts` guardrail intent — tokens never
  * ride in the file replica).
  *
  * @public

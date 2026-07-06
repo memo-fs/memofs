@@ -1,5 +1,5 @@
 /**
- * Zero-config local embedder for TekMemo, backed by Transformers.js (ONNX in
+ * Zero-config local embedder for MemoFS, backed by Transformers.js (ONNX in
  * process — no API key, no network after the first model download).
  *
  * The heavy runtime is imported lazily on the first `embedTexts` call so that
@@ -100,7 +100,7 @@ function batch<T>(items: T[], size: number): T[][] {
 }
 
 /**
- * Local ONNX embedder implementing TekMemo's {@link MemoryEmbedder} contract.
+ * Local ONNX embedder implementing MemoFS's {@link MemoryEmbedder} contract.
  *
  * @public
  */

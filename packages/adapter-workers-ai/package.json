@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/adapter-workers-ai"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/adapter-workers-ai/",
+	"homepage": "https://docs.memofs.dev/packages/adapter-workers-ai/",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"
 	},

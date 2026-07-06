@@ -1,7 +1,7 @@
 /**
  * @memofs/adapter-transformers
  *
- * Zero-config local embedder for TekMemo. Runs a small sentence-embedding
+ * Zero-config local embedder for MemoFS. Runs a small sentence-embedding
  * model in process via Transformers.js (ONNX runtime) — no API key, no cloud,
  * no network after the first model download.
  *

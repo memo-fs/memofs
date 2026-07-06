@@ -140,7 +140,7 @@ export function createOpenAIClient(
 }
 
 /**
- * Maps an unknown error from the OpenAI SDK to a typed TekMemo error.
+ * Maps an unknown error from the OpenAI SDK to a typed MemoFS error.
  *
  * @param error - The unknown error from the OpenAI SDK.
  * @returns A typed error (OpenAIAPIError, OpenAITimeoutError, or OpenAINetworkError).

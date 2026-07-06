@@ -21,7 +21,7 @@ export class ConnectorError extends Error {
 }
 
 /**
- * Thrown when `.tekmemo/connectors.json` is missing, malformed, or contains an
+ * Thrown when `.memofs/connectors.json` is missing, malformed, or contains an
  * invalid connector row (e.g. a leaked token field).
  *
  * @public

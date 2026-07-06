@@ -55,7 +55,7 @@ describe("VoyageEmbedder", () => {
 		});
 	});
 
-	it("rejects base64 encoding because TekMemo expects numeric vectors", async () => {
+	it("rejects base64 encoding because MemoFS expects numeric vectors", async () => {
 		const embedder = createVoyageEmbedder({
 			client: createFakeVoyageClient(),
 			encodingFormat: "base64",

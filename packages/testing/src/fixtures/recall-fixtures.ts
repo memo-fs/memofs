@@ -7,7 +7,7 @@ export function createRecallDocumentsFixture(
 	return [
 		{
 			id: "chunk_core",
-			text: "TekMemo starts with local .tekmemo files.",
+			text: "MemoFS starts with local .memofs files.",
 			embedding: createOrthogonalishVector(dimensions, 0),
 			metadata: {
 				projectId: "proj_1",

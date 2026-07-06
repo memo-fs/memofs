@@ -5,7 +5,7 @@
   <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
   <a href="https://www.npmjs.com/package/@memofs/adapter-transformers"><img src="https://img.shields.io/npm/dm/%40memofs%2Fadapter-transformers?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
-  <a href="https://docs.memo.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
+  <a href="https://docs.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
@@ -79,15 +79,15 @@ You usually do **not** need to touch this package directly. The Memo FS runtime
 can lazy-load it for you — just enable local embeddings:
 
 ```bash
-export TEKMEMO_LOCAL_EMBEDDINGS=true
-export TEKMEMO_RECALL_ENGINE=auto
+export MEMOFS_LOCAL_EMBEDDINGS=true
+export MEMOFS_RECALL_ENGINE=auto
 ```
 
 or in ``.memofs/`config.json`:
 
 ```json
 {
-  "$schema": "https://docs.memo.memofs.dev/1.0.0-alpha.0/config.schema.json",
+  "$schema": "https://docs.memofs.dev/1.0.0-alpha.0/config.schema.json",
   "runtime": "local",
   "recall": { "engine": "auto", "localEmbeddings": true }
 }

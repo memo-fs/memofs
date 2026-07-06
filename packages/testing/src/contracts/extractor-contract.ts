@@ -40,7 +40,7 @@ export interface ExtractorContractOptions {
 /**
  * Contract every {@link MinimalExtractor} implementation must satisfy.
  *
- * Generalizes the rule-based extractor's own suite (see `tekmemo`'s
+ * Generalizes the rule-based extractor's own suite (see `memofs`'s
  * `extractor-contract.test.ts`) so adapter packages can reuse the same
  * invariants: a stable name, one result per call, provenance stamping, and the
  * `supersedes` → `contradictions` seam consolidation depends on. The rule-based
@@ -98,7 +98,7 @@ export function defineExtractorContractTests(
 						sourceId: "core",
 					};
 					const result = await extractor.extract({
-						text: "TekMemo uses BM25",
+						text: "MemoFS uses BM25",
 						sourceRef,
 					});
 					for (const node of result.nodes) {
@@ -132,7 +132,7 @@ export function defineExtractorContractTests(
 				const extractor = await options.createExtractor();
 				try {
 					const result = await extractor.extract({
-						text: "TekMemo uses BM25",
+						text: "MemoFS uses BM25",
 					});
 					expect(result.contradictions).toBeUndefined();
 				} finally {

@@ -3,7 +3,7 @@
  * {@link MetadataStore} over the cloud's existing `project_files` table.
  *
  * Reuses the file-replica sync infra rather than inventing a parallel store
- * ( reuse sub-decision): the runtime's canonical `.tekmemo/` files are
+ * ( reuse sub-decision): the runtime's canonical `.memofs/` files are
  * the *same* files the replica holds. `project_files (project_id, path, sha256,
  * r2_key, size_bytes, updated_at)` — with its unique `(project_id, path)` index
  * — is the single source of truth for which paths exist and where their bytes

@@ -8,7 +8,7 @@
 /**
  * The `sourceMapping` object on a GitHub connector config row.
  *
- * Carried verbatim from `.tekmemo/connectors.json` (typed here for the
+ * Carried verbatim from `.memofs/connectors.json` (typed here for the
  * connector's own use; the framework treats `sourceMapping` as opaque).
  *
  * @internal

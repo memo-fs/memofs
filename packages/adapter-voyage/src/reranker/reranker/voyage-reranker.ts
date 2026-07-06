@@ -1,8 +1,8 @@
 /**
- * @file Voyage AI reranker implementation for TekMemo.
+ * @file Voyage AI reranker implementation for MemoFS.
  *
  * @remarks
- * This module provides a Voyage AI-based implementation of the TekMemo Reranker
+ * This module provides a Voyage AI-based implementation of the MemoFS Reranker
  * interface. It handles document normalization, model validation, and response
  * validation before returning ranked results.
  *
@@ -31,7 +31,7 @@ import {
 } from "../utils/validation";
 
 /**
- * Voyage AI implementation of the TekMemo Reranker interface.
+ * Voyage AI implementation of the MemoFS Reranker interface.
  *
  * @public
  * @remarks

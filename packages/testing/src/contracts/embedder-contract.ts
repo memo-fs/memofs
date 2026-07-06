@@ -42,7 +42,7 @@ export function defineEmbedderContractTests(
 		it("handles query input type", async () => {
 			const embedder = await options.createEmbedder();
 			const result = await embedder.embedTexts({
-				texts: ["What is TekMemo memory?"],
+				texts: ["What is MemoFS memory?"],
 				inputType: "query",
 				expectedDimensions: options.expectedDimensions,
 			});
@@ -70,7 +70,7 @@ export function defineEmbedderContractTests(
 					throw new Error("Expected embedder.embedText to be available.");
 				}
 
-				const result = await embedder.embedText("TekMemo", {
+				const result = await embedder.embedText("MemoFS", {
 					inputType: "query",
 					expectedDimensions: options.expectedDimensions,
 				});

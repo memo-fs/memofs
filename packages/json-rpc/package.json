@@ -9,7 +9,7 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "packages/json-rpc"
 	},
-	"homepage": "https://docs.memo.tekbreed.com/packages/json-rpc/",
+	"homepage": "https://docs.memofs.dev/packages/json-rpc/",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"
 	},

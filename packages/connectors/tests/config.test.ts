@@ -12,12 +12,12 @@ import {
 	validateConnectorsFile,
 } from "../src/index";
 
-/** Write a `.tekmemo/connectors.json` with the given JSON string under rootDir. */
+/** Write a `.memofs/connectors.json` with the given JSON string under rootDir. */
 async function writeConnectorsFile(
 	rootDir: string,
 	json: string,
 ): Promise<void> {
-	const dir = join(rootDir, ".tekmemo");
+	const dir = join(rootDir, ".memofs");
 	await mkdir(dir, { recursive: true });
 	await writeFile(join(rootDir, CONNECTORS_PATH), json, "utf8");
 }
@@ -26,7 +26,7 @@ describe("readConnectorsFile", () => {
 	let rootDir: string;
 
 	beforeEach(async () => {
-		rootDir = await mkdtemp(join(tmpdir(), "tekmemo-cfg-"));
+		rootDir = await mkdtemp(join(tmpdir(), "memofs-cfg-"));
 	});
 
 	afterEach(async () => {

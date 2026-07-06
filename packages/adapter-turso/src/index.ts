@@ -1,5 +1,5 @@
 /**
- * @memofs/adapter-turso — Turso/libSQL metadata adapter for TekMemo's
+ * @memofs/adapter-turso — Turso/libSQL metadata adapter for MemoFS's
  * remote-blob memory store.
  *
  * Implements core's provider-neutral {@link MetadataStore} contract

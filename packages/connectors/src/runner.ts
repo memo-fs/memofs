@@ -2,12 +2,12 @@
  * The connector runner — orchestrates a single connector run.
  *
  * Flow ( / decisions Q1–Q3):
- * 1. Read `.tekmemo/connectors.json`, select enabled connectors.
+ * 1. Read `.memofs/connectors.json`, select enabled connectors.
  * 2. For each: resolve the token via the injected {@link SecretResolver}
  * (in-memory only — never written to disk, never logged).
  * 3. Look up the {@link Connector} by `type`; call `ingest()` to get records.
  * 4. Dedupe by `externalId` against already-ingested connector notes.
- * 5. Write new records through the host's `Tekmemo` instance with the Q3
+ * 5. Write new records through the host's `MemoFS` instance with the Q3
  * connector-write discipline (`source: "connector"`, stable
  * `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock).
  * 6. Aggregate `{ written, skipped, errors }`. A single connector error never
@@ -16,7 +16,7 @@
  * @public
  */
 
-import type { JsonObject, SourceRef, Tekmemo } from "@memofs/core";
+import type { JsonObject, SourceRef, MemoFS } from "@memofs/core";
 import { readMemoryEvents } from "@memofs/core";
 import { readConnectorsFile, selectConnectors } from "./config";
 import { connectorNoteId } from "./id";
@@ -40,13 +40,13 @@ import type {
  * @public
  */
 export interface RunConnectorsOptions {
-	/** The `.tekmemo/` parent directory (same rootDir passed to Tekmemo). */
+	/** The `.memofs/` parent directory (same rootDir passed to MemoFS). */
 	readonly rootDir: string;
 	/**
-	 * The host's Tekmemo instance. The runner never constructs its own — the
-	 * `.tekmemo/` root is single-writer (AGENTS.md, decision Q28).
+	 * The host's MemoFS instance. The runner never constructs its own — the
+	 * `.memofs/` root is single-writer (AGENTS.md, decision Q28).
 	 */
-	readonly memo: Tekmemo;
+	readonly memo: MemoFS;
 	/** Resolves `secretRef` → token at run time. Tokens never touch disk. */
 	readonly secretResolver: SecretResolver;
 	/** Connector registry. Defaults to the built-ins (GitHub). */
@@ -74,7 +74,7 @@ export interface RunConnectorsResult {
 }
 
 /**
- * Run all enabled connectors configured in `.tekmemo/connectors.json`.
+ * Run all enabled connectors configured in `.memofs/connectors.json`.
  *
  * @public
  */
@@ -173,7 +173,7 @@ async function runOne(
 }
 
 /**
- * Write one connector record through the host's Tekmemo instance with the Q3
+ * Write one connector record through the host's MemoFS instance with the Q3
  * connector-write discipline. The note id is precomputed by the caller (so the
  * dedup check and the write agree on the same id).
  */
@@ -225,7 +225,7 @@ async function writeConnectorRecord(
  * back to `listRecentMemories` keeps this working on hosts whose store does
  * not expose the events log directly (e.g. a minimal in-memory fake).
  */
-async function loadExistingNoteIds(memo: Tekmemo): Promise<Set<string>> {
+async function loadExistingNoteIds(memo: MemoFS): Promise<Set<string>> {
 	const ids = new Set<string>();
 
 	// Primary path: the complete events log. The note id lands at

@@ -1,19 +1,19 @@
 /**
  * Provider-neutral connector framework types.
  *
- * Connectors ingest external sources (GitHub, Notion, …) into `.tekmemo/`
+ * Connectors ingest external sources (GitHub, Notion, …) into `.memofs/`
  * through the local engine. Each source is a plugin implementing {@link Connector}.
- * This mirrors the embedder/extractor adapter pattern used across TekMemo:
+ * This mirrors the embedder/extractor adapter pattern used across MemoFS:
  * adding a connector = writing a new adapter, not refactoring the framework
  * (decision Q10 /).
  *
  * @public
  */
 
-import type { JsonObject, Tekmemo } from "@memofs/core";
+import type { JsonObject, MemoFS } from "@memofs/core";
 
 /**
- * A single connector row in `.tekmemo/connectors.json`.
+ * A single connector row in `.memofs/connectors.json`.
  *
  * Locked schema (decision Q7): `{ id, type, enabled, schedule, sourceMapping,
  * secretRef }`. The `secretRef` is an opaque pointer to a token stored
@@ -48,7 +48,7 @@ export interface ConnectorConfig {
 }
 
 /**
- * The on-disk shape of `.tekmemo/connectors.json` (the 11th canonical sync unit).
+ * The on-disk shape of `.memofs/connectors.json` (the 11th canonical sync unit).
  *
  * @public
  */
@@ -57,7 +57,7 @@ export interface ConnectorsFile {
 }
 
 /**
- * A normalized external item before it becomes a TekMemo note. The connector
+ * A normalized external item before it becomes a MemoFS note. The connector
  * produces these; the runner handles dedup + the write discipline.
  *
  * @public
@@ -95,10 +95,10 @@ export interface ConnectorIngestContext {
 	 */
 	readonly token: string;
 	/**
-	 * The host's Tekmemo instance. Single-writer contract (AGENTS.md): the
-	 * connector must not construct its own `Tekmemo` on this root.
+	 * The host's MemoFS instance. Single-writer contract (AGENTS.md): the
+	 * connector must not construct its own `MemoFS` on this root.
 	 */
-	readonly memo: Tekmemo;
+	readonly memo: MemoFS;
 	/** Optional abort signal propagated from {@link RunConnectorsOptions.signal}. */
 	readonly signal?: AbortSignal;
 }

@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CONNECTORS_PATH, InMemoryMemoryStore, Tekmemo } from "@memofs/core";
+import { CONNECTORS_PATH, InMemoryMemoryStore, MemoFS } from "@memofs/core";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
 	type Connector,
@@ -82,7 +82,7 @@ async function writeConnectorsFile(
 	rootDir: string,
 	connectors: ConnectorConfig[],
 ): Promise<void> {
-	await mkdir(join(rootDir, ".tekmemo"), { recursive: true });
+	await mkdir(join(rootDir, ".memofs"), { recursive: true });
 	await writeFile(
 		join(rootDir, CONNECTORS_PATH),
 		JSON.stringify({ connectors }),
@@ -92,13 +92,13 @@ async function writeConnectorsFile(
 
 describe("runConnectors", () => {
 	let rootDir: string;
-	let memo: Tekmemo;
+	let memo: MemoFS;
 	let store: InMemoryMemoryStore;
 
 	beforeEach(async () => {
-		rootDir = await mkdtemp(join(tmpdir(), "tekmemo-runner-"));
+		rootDir = await mkdtemp(join(tmpdir(), "memofs-runner-"));
 		store = new InMemoryMemoryStore();
-		memo = new Tekmemo({ mode: "memory", store });
+		memo = new MemoFS({ mode: "memory", store });
 	});
 
 	afterEach(async () => {

@@ -23,7 +23,7 @@ import {
 } from "../utils/validation";
 
 /**
- * @file OpenAI Embedder implementation for TekMemo's memory system.
+ * @file OpenAI Embedder implementation for MemoFS's memory system.
  *
  * @remarks
  * This module provides the {@link OpenAIEmbedder} class that implements the
@@ -154,7 +154,7 @@ export class OpenAIEmbedder implements MemoryEmbedder {
 
 		if (encodingFormat === "base64") {
 			throw new OpenAIValidationError(
-				"base64 encoding_format is not supported by OpenAIEmbedder because TekMemo expects numeric vectors.",
+				"base64 encoding_format is not supported by OpenAIEmbedder because MemoFS expects numeric vectors.",
 			);
 		}
 

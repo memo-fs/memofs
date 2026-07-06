@@ -16,7 +16,7 @@ export interface MetadataStoreContractOptions {
 	samplePath?: string;
 }
 
-const DEFAULT_PATH = ".tekmemo/memory/core.md";
+const DEFAULT_PATH = ".memofs/memory/core.md";
 
 function makeEntry(sha = "a".repeat(64)): MinimalBlobEntry {
 	return { sha256: sha, blobKey: sha, sizeBytes: 42 };

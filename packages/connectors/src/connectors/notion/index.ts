@@ -2,7 +2,7 @@
  * Notion connector.
  *
  * Ingests Notion pages from a database (`POST /v1/databases/:id/query`) or a
- * workspace search (`POST /v1/search`) into `.tekmemo/` as connector notes.
+ * workspace search (`POST /v1/search`) into `.memofs/` as connector notes.
  * The runner handles the Q3 write discipline; this connector only fetches +
  * normalizes.
  *

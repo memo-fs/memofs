@@ -4,8 +4,8 @@
  * @remarks
  * A dependency-free, product-neutral implementation of the JSON-RPC 2.0 spec
  * ({@link https://www.jsonrpc.org/specification}). Extracted as a shared SSOT
- * so every JSON-RPC-speaking package in the workspace (`tekmemo-server`'s
- * runtime API, `tekmemo-mcp-server`'s MCP transport) shares one set of types
+ * so every JSON-RPC-speaking package in the workspace (`memofs-server`'s
+ * runtime API, `memofs-mcp-server`'s MCP transport) shares one set of types
  * + helpers instead of each vendoring a copy (AGENTS.md: DRY & SSOT
  * everywhere; `.agents/rules/package-boundaries.md`: no transport in core, no
  * distribution→distribution import).

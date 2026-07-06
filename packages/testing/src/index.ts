@@ -1,9 +1,9 @@
 /**
- * Testing utilities for TekMemo packages.
+ * Testing utilities for MemoFS packages.
  *
  * @remarks
  * Provides contract tests, fake implementations, fixtures, and assertion helpers
- * used across all TekMemo package tests.
+ * used across all MemoFS package tests.
  *
  * @internal
  */

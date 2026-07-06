@@ -1,8 +1,8 @@
 /**
  * JSON-RPC 2.0 spec conformance for the shared protocol primitives.
  *
- * Covers the shapes + behaviors both consumers (`tekmemo-server` runtime API,
- * `tekmemo-mcp-server` transport) rely on: parse/validate/success/failure,
+ * Covers the shapes + behaviors both consumers (`memofs-server` runtime API,
+ * `memofs-mcp-server` transport) rely on: parse/validate/success/failure,
  * notifications, batch arrays, and the five spec error codes. Spec citations
  * reference https://www.jsonrpc.org/specification.
  */

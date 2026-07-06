@@ -10,7 +10,7 @@
  */
 
 export const EXTRACTION_FACTS_TEXT_FIXTURE =
-	"TekMemo uses BM25\nTekMemo depends on TypeScript";
+	"MemoFS uses BM25\nMemoFS depends on TypeScript";
 
 export const EXTRACTION_SUPERSEDES_TEXT_FIXTURE = "OAuth2 supersedes JWT";
 
@@ -27,13 +27,13 @@ export const FIXED_NOW = "2026-06-21T00:00:00.000Z";
 export function createDuplicateLabelNodesFixture(): ConsolidationNodeFixture[] {
 	return [
 		storedNode({
-			id: "project:tekmemo-a",
-			label: "TekMemo",
+			id: "project:memofs-a",
+			label: "MemoFS",
 			createdAt: "2026-05-04T00:00:00.000Z",
 		}),
 		storedNode({
-			id: "project:tekmemo-b",
-			label: " tekmemo ", // case + whitespace differ; canonical key matches
+			id: "project:memofs-b",
+			label: " memofs ", // case + whitespace differ; canonical key matches
 			createdAt: "2026-05-05T00:00:00.000Z",
 		}),
 	];
@@ -45,11 +45,11 @@ export function createDuplicateLabelNodesFixture(): ConsolidationNodeFixture[] {
  */
 export function createAliasMergeNodesFixture(): ConsolidationNodeFixture[] {
 	return [
-		storedNode({ id: "project:tekmemo", label: "TekMemo", aliases: [] }),
+		storedNode({ id: "project:memofs", label: "MemoFS", aliases: [] }),
 		storedNode({
-			id: "project:tekmemo-dup",
-			label: "TekMemo copy",
-			aliases: ["project:tekmemo"],
+			id: "project:memofs-dup",
+			label: "MemoFS copy",
+			aliases: ["project:memofs"],
 			createdAt: "2026-05-05T00:00:00.000Z",
 		}),
 	];
@@ -69,7 +69,7 @@ export function createSupersessionGraphFixture(): {
 		nodes: [
 			storedNode({ id: "auth:jwt", label: "JWT" }),
 			storedNode({ id: "auth:oauth", label: "OAuth2" }),
-			storedNode({ id: "project:tekmemo", label: "TekMemo" }),
+			storedNode({ id: "project:memofs", label: "MemoFS" }),
 		],
 		edges: [
 			storedEdge({
@@ -80,7 +80,7 @@ export function createSupersessionGraphFixture(): {
 			}),
 			storedEdge({
 				id: "edge:uses-jwt",
-				from: "project:tekmemo",
+				from: "project:memofs",
 				to: "auth:jwt",
 				type: "uses",
 			}),
@@ -154,7 +154,7 @@ export function storedEdge(
 ): ConsolidationEdgeFixture {
 	return {
 		id: overrides?.id ?? "edge:1",
-		from: overrides?.from ?? "project:tekmemo",
+		from: overrides?.from ?? "project:memofs",
 		to: overrides?.to ?? "concept:local-first",
 		type: overrides?.type ?? "uses",
 		directed: overrides?.directed ?? true,

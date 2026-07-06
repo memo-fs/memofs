@@ -77,7 +77,7 @@ describe("workers-ai extractor — defensive parsing", () => {
 		const extractor = createWorkersAiExtractor({
 			ai: createFakeAi("sorry, I cannot help with that."),
 		});
-		const result = await extractor.extract({ text: "TekMemo uses BM25" });
+		const result = await extractor.extract({ text: "MemoFS uses BM25" });
 		expect(result.nodes).toEqual([]);
 		expect(result.edges).toEqual([]);
 	});

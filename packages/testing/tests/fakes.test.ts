@@ -54,7 +54,7 @@ describe("fakes", () => {
 	it("fake extractor emits nodes, edges, and contradictions", async () => {
 		const extractor = createFakeExtractor();
 		const result = await extractor.extract({
-			text: "TekMemo uses BM25\nOAuth2 supersedes JWT",
+			text: "MemoFS uses BM25\nOAuth2 supersedes JWT",
 			sourceRef: { sourceType: "document", sourceId: "core" },
 		});
 
