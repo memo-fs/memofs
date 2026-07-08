@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { idColumn } from "./helpers";
 
 // Better Auth core tables: user, session, account, verification
 //
@@ -23,7 +24,7 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
  * storage. `emailVerified` flips true when the magic link is consumed.
  */
 export const user = sqliteTable("user", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	/** Display name; seeded from the email local-part at signup. */
 	name: text("name").notNull(),
 	/** Login identity, unique, lower-cased by Better Auth. */
@@ -44,7 +45,7 @@ export const user = sqliteTable("user", {
  * loader's current user.
  */
 export const session = sqliteTable("session", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	/** Same value carried in the `better-auth.session_token` cookie. */
 	token: text("token").notNull().unique(),
 	userId: text("user_id")
@@ -69,7 +70,7 @@ export const session = sqliteTable("session", {
  * DO NOT confuse with the billing `accounts` table.
  */
 export const account = sqliteTable("account", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	/** The owning authenticated user. */
 	userId: text("user_id")
 		.notNull()
@@ -106,7 +107,7 @@ export const account = sqliteTable("account", {
  * creates the session. `expiresAt` governs the link lifetime.
  */
 export const verification = sqliteTable("verification", {
-	id: text("id").primaryKey(),
+	id: idColumn(),
 	/** The opaque token embedded in the magic link. */
 	value: text("value").notNull(),
 	/** What this verification is for (typically the user's email). */

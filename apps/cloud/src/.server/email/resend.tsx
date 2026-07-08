@@ -1,11 +1,9 @@
 import { env } from "cloudflare:workers";
 import type React from "react";
 import { Resend } from "resend";
-import { MagicLinkTemplate } from "./templates/magic-link";
 import { INVITATION_TTL_DAYS, MAGIC_LINK_TTL_MINUTES } from "./constants";
-import {
-	TeamInvitationTemplate,
-} from "./templates/team-invitation";
+import { MagicLinkTemplate } from "./templates/magic-link";
+import { TeamInvitationTemplate } from "./templates/team-invitation";
 import { WaitlistTemplate } from "./templates/waitlist";
 
 let resendInstance: Resend | null = null;
@@ -51,9 +49,8 @@ export function sendMail({
 }: {
 	to: string | [string];
 	subject: string;
-	html?: string;
 	react: React.ReactElement;
-}): any {
+}) {
 	const client = getResendClient();
 	if (env.ENV === "development") {
 		console.info("[email:dev] send", { to, subject, html });
@@ -63,7 +60,6 @@ export function sendMail({
 		from: env.RESEND_FROM,
 		to,
 		subject,
-		html,
 		react,
 	});
 }
@@ -82,23 +78,27 @@ export function sendWaitlistEmail(email: string, name?: string) {
 /**
  * Builds the magic-link mailer object Better Auth expects.
  */
-export function sendMagicLinkMail() {
-	return {
-		sendMagicLink: async ({ email, url }: { email: string; url: string }) => {
-			if (env.ENV === "development") {
-				console.info("[email:dev] magic link", { to: email, url });
-				return;
-			}
-			const res = await sendMail({
-				to: email,
-				subject: "Sign in to Memo FS Cloud",
-				react: <MagicLinkTemplate url={url} expiresInMinutes={MAGIC_LINK_TTL_MINUTES} />,
-			});
-			if (res?.error) {
-				throw new Error(`Resend magic link failed: ${res.error.message}`);
-			}
-		},
-	};
+export async function sendMagicLinkMail({
+	email,
+	url,
+}: {
+	email: string;
+	url: string;
+}) {
+	if (env.ENV === "development") {
+		console.info("[email:dev] magic link", { to: email, url });
+		return;
+	}
+	const res = await sendMail({
+		to: email,
+		subject: "Sign in to Memo FS Cloud",
+		react: (
+			<MagicLinkTemplate url={url} expiresInMinutes={MAGIC_LINK_TTL_MINUTES} />
+		),
+	});
+	if (res?.error) {
+		throw new Error(`Resend magic link failed: ${res.error.message}`);
+	}
 }
 
 export async function sendTeamInvitationMail(mail: {
