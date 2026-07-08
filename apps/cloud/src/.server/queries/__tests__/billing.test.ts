@@ -50,26 +50,26 @@ afterEach(async () => {
 
 describe("getAccountByPolarCustomerId + getAccountById", () => {
 	it("resolves an account by its Polar customer id once linked", async () => {
-		await setPolarCustomerId(db, "acct_a", POLAR_CUST);
-		const found = await getAccountByPolarCustomerId(db, POLAR_CUST);
+		await setPolarCustomerId("acct_a", POLAR_CUST);
+		const found = await getAccountByPolarCustomerId(POLAR_CUST);
 		expect(found?.id).toBe("acct_a");
 		expect(found?.plan).toBe("free");
 	});
 
 	it("returns null for an unlinked customer id", async () => {
-		expect(await getAccountByPolarCustomerId(db, "nobody")).toBeNull();
+		expect(await getAccountByPolarCustomerId("nobody")).toBeNull();
 	});
 
 	it("getAccountById resolves by Memo FS account id", async () => {
-		const found = await getAccountById(db, "acct_b");
+		const found = await getAccountById("acct_b");
 		expect(found?.plan).toBe("pro");
-		expect(await getAccountById(db, "ghost")).toBeNull();
+		expect(await getAccountById("ghost")).toBeNull();
 	});
 });
 
 describe("setPolarCustomerId", () => {
 	it("records the link when none exists", async () => {
-		await setPolarCustomerId(db, "acct_a", POLAR_CUST);
+		await setPolarCustomerId("acct_a", POLAR_CUST);
 		const row = await db
 			.select({ polarCustomerId: accounts.polarCustomerId })
 			.from(accounts)
@@ -79,9 +79,9 @@ describe("setPolarCustomerId", () => {
 	});
 
 	it("is idempotent — never clobbers an existing link", async () => {
-		await setPolarCustomerId(db, "acct_a", "first");
+		await setPolarCustomerId("acct_a", "first");
 		// A re-delivered customer.created with a different id must NOT overwrite.
-		await setPolarCustomerId(db, "acct_a", "second");
+		await setPolarCustomerId("acct_a", "second");
 		const row = await db
 			.select({ polarCustomerId: accounts.polarCustomerId })
 			.from(accounts)
@@ -94,7 +94,7 @@ describe("setPolarCustomerId", () => {
 describe("applyPlanToAccount — the SSOT entitlement mutation", () => {
 	it("writes the plan AND the matching caps (no drift)", async () => {
 		// acct_a starts free; bump to pro and assert both columns moved together.
-		const updated = await applyPlanToAccount(db, "acct_a", "pro");
+		const updated = await applyPlanToAccount("acct_a", "pro");
 		expect(updated?.plan).toBe("pro");
 		expect(updated?.maxHostedStorageBytes).toBe(
 			PLAN_ENTITLEMENTS.pro.maxHostedStorageBytes,
@@ -103,7 +103,7 @@ describe("applyPlanToAccount — the SSOT entitlement mutation", () => {
 	});
 
 	it("applies teams caps (unlimited connectors, 50GB)", async () => {
-		const updated = await applyPlanToAccount(db, "acct_a", "teams");
+		const updated = await applyPlanToAccount("acct_a", "teams");
 		expect(updated?.plan).toBe("teams");
 		expect(updated?.maxConnectors).toBe(Infinity);
 		expect(updated?.maxHostedStorageBytes).toBe(
@@ -113,7 +113,7 @@ describe("applyPlanToAccount — the SSOT entitlement mutation", () => {
 
 	it("downgrade to free re-applies the free caps (cancellation path)", async () => {
 		// acct_b starts pro; a subscription.canceled webhook re-applies free.
-		const downgraded = await applyPlanToAccount(db, "acct_b", "free");
+		const downgraded = await applyPlanToAccount("acct_b", "free");
 		expect(downgraded?.plan).toBe("free");
 		expect(downgraded?.maxHostedStorageBytes).toBe(
 			PLAN_ENTITLEMENTS.free.maxHostedStorageBytes,
@@ -123,7 +123,7 @@ describe("applyPlanToAccount — the SSOT entitlement mutation", () => {
 	});
 
 	it("returns null for a nonexistent account", async () => {
-		expect(await applyPlanToAccount(db, "ghost", "pro")).toBeNull();
+		expect(await applyPlanToAccount("ghost", "pro")).toBeNull();
 	});
 });
 

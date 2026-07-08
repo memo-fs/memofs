@@ -14,6 +14,7 @@
 
 import { createRequestHandler } from "@react-router/cloudflare";
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { RouterContextProvider } from "react-router";
 import { createApi } from "~/.server/api/index";
 import { getDB } from "~/.server/db/index";
@@ -22,14 +23,20 @@ import { createAuth } from "../src/.server/auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
+// Request/response logging — method, path, status, and elapsed time.
+app.use("*", logger());
+
 // 1. Mount the Hono API sub-app
 const api = createApi();
 app.route("/v1", api);
 
 // 2. Mount the Better Auth sub-app
+let cachedAuth: ReturnType<typeof createAuth> | null = null;
 app.all("/api/auth/*", (c) => {
-	const auth = createAuth(c.executionCtx.waitUntil.bind(c.executionCtx));
-	return auth.handler(c.req.raw);
+	if (!cachedAuth) {
+		cachedAuth = createAuth(c.executionCtx.waitUntil.bind(c.executionCtx));
+	}
+	return cachedAuth.handler(c.req.raw);
 });
 
 // 3. Mount React Router SSR handler fallback
@@ -45,7 +52,7 @@ const requestHandler = createRequestHandler({
 });
 
 app.all("*", (c) => {
-	invariant(getDB, "DB is required for app startup.");
+	invariant(getDB(), "DB is required for app startup.");
 	return requestHandler({
 		request: c.req.raw,
 		env: c.env,

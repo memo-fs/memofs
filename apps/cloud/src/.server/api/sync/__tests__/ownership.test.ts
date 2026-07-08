@@ -19,7 +19,7 @@ import { assertOwns } from "../shared";
  * The sync handlers gate every write through `assertOwns`, which delegates to
  * `canWriteProject`: an account may write to a project iff it created the
  * project OR is an accepted member of the project's team. WS4 made that check
- * team-aware; this test exercises it end-to-end through the real `assertOwns`
+ * team-aware; this test exercises it end-to-end through the real `assertOwns(`
  * seam (the function the push/pull/complete handlers call), seeding the full
  * `user → accounts → teams → team_members → projects` chain so the join the
  * query layer performs is exercised — not mocked.
@@ -81,8 +81,8 @@ beforeEach(async () => {
 	});
 });
 
-describe("assertOwns — team-scoped access (ADR 0011 Phase 2)", () => {
-	/** The SyncProject shape assertOwns reads, built from the seeded row. */
+describe("assertOwns( — team-scoped access (ADR 0011 Phase 2)", () => {
+	/** The SyncProject shape assertOwns( reads, built from the seeded row. */
 	const project: SyncProject = {
 		id: PROJECT,
 		accountId: CREATOR,
@@ -91,16 +91,16 @@ describe("assertOwns — team-scoped access (ADR 0011 Phase 2)", () => {
 	};
 
 	it("lets the creator write (baseline)", async () => {
-		await expect(assertOwns(db, project, CREATOR)).resolves.toBeUndefined();
+		await expect(assertOwns(project, CREATOR)).resolves.toBeUndefined();
 	});
 
 	it("lets an accepted team member write (collaboration)", async () => {
 		// TEAMMATE did not create the project, but is an accepted member of its team.
-		await expect(assertOwns(db, project, TEAMMATE)).resolves.toBeUndefined();
+		await expect(assertOwns(project, TEAMMATE)).resolves.toBeUndefined();
 	});
 
 	it("refuses an outsider with PermissionError", async () => {
-		await expect(assertOwns(db, project, OUTSIDER)).rejects.toBeInstanceOf(
+		await expect(assertOwns(project, OUTSIDER)).rejects.toBeInstanceOf(
 			PermissionError,
 		);
 	});
@@ -108,7 +108,7 @@ describe("assertOwns — team-scoped access (ADR 0011 Phase 2)", () => {
 	it("refuses a pending (not-yet-accepted) invitee", async () => {
 		// PENDING has a membership row but acceptedAt is null — they haven't joined,
 		// so access is withheld until the accept route stamps acceptedAt.
-		await expect(assertOwns(db, project, PENDING)).rejects.toBeInstanceOf(
+		await expect(assertOwns(project, PENDING)).rejects.toBeInstanceOf(
 			PermissionError,
 		);
 	});
@@ -121,7 +121,7 @@ describe("assertOwns — team-scoped access (ADR 0011 Phase 2)", () => {
 			.where(
 				and(eq(teamMembers.teamId, TEAM), eq(teamMembers.accountId, PENDING)),
 			);
-		await expect(assertOwns(db, project, PENDING)).resolves.toBeUndefined();
+		await expect(assertOwns(project, PENDING)).resolves.toBeUndefined();
 	});
 });
 

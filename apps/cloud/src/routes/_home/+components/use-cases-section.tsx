@@ -31,7 +31,13 @@ export function UseCasesSection() {
 				<SectionHeading
 					align="center"
 					eyebrow="Use cases"
-					title={<>Who Memo FS Cloud is for</>}
+					title={
+						<>
+							Who{" "}
+							<span className="text-accent-ai font-semibold"> Memo FS </span>{" "}
+							Cloud is for{" "}
+						</>
+					}
 				/>
 			</div>
 			<div className="grid gap-5 sm:grid-cols-3">

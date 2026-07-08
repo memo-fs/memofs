@@ -3,12 +3,12 @@ import { getCtx } from "~/.server/context";
 import { hasMxRecord } from "~/.server/mx-check";
 import { consumeMagicLinkToken, rateLimitMessage } from "~/.server/rate-limit";
 import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
-import type { Route } from "../+types/signup";
 import {
 	emailDomain,
 	emailIssueMessage,
 	validateEmail,
 } from "../+utils/email-validation";
+import type { Route } from "./+types/index";
 import { SignupSchema } from "./+utils";
 
 /**
@@ -67,11 +67,17 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const auth = createAuthFromEnv(getCtx(context).waitUntil);
 
-	await auth.api.signInMagicLink({
-		body: { email, name, callbackURL },
-		// Request headers carry IP/UA so Better Auth's rate-limiting has context.
-		headers: request.headers,
-	});
+	try {
+		await auth.api.signInMagicLink({
+			body: { email, name, callbackURL },
+			// Request headers carry IP/UA so Better Auth's rate-limiting has context.
+			headers: request.headers,
+		});
+	} catch {
+		return submission.reply({
+			formErrors: ["Something went wrong. Please try again."],
+		});
+	}
 
 	return { status: "success", email };
 }

@@ -9,7 +9,7 @@ import { z } from "zod/v4";
  */
 export const WaitlistSchema = z.object({
 	email: z
-		.string()
+		.string("Email is required.")
 		.trim()
 		.min(1, "Email is required.")
 		.email("Enter a valid email address."),

@@ -15,8 +15,8 @@ import {
 } from "../+components/form-parts";
 import { MagicLinkSent } from "../+components/magic-link-sent";
 import { OAuthButtons } from "../+components/oauth-buttons";
-import type { Route } from "../+types/signup";
 import { useAuthRedirect } from "../hooks/use-auth-redirect";
+import type { Route } from "./+types/index";
 import { type SignupResult, SignupSchema } from "./+utils";
 
 export const meta = () => buildNoindexMeta("Sign up — Memo FS Cloud");
@@ -53,7 +53,6 @@ export default function SignupPage({ loaderData }: Route.ComponentProps) {
 			</CardHeader>
 			<CardContent>
 				<OAuthButtons providers={providers} callbackURL={next} />
-
 				<fetcher.Form
 					{...getFormProps(form)}
 					method="post"
@@ -90,7 +89,6 @@ export default function SignupPage({ loaderData }: Route.ComponentProps) {
 					</Button>
 					{form.errors && <FormError errors={form.errors} />}
 				</fetcher.Form>
-
 				<LegalNotice />
 				<AuthSwitchLink
 					to="/login"

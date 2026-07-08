@@ -26,29 +26,36 @@ binding = "AI"
 [observability]
 enabled = true
 
-# [secrets]
-# required = [ 
-#   "DATABASE_URL", 
-#   "DATABASE_AUTH_TOKEN", 
+[secrets]
+required = [
+  "DATABASE_URL",
+  "DATABASE_AUTH_TOKEN",
 
-#   "API_KEY_SALT", 
-#   "ENCRYPTION_KEY",
+  "API_KEY_SALT",
+  "ENCRYPTION_KEY",
 
-#   "SESSION_SECRET", 
-#   "BETTER_AUTH_SECRET", 
+  "SESSION_SECRET",
+  "BETTER_AUTH_SECRET",
 
-#   "VOYAGE_API_KEY",
+  "VOYAGE_API_KEY",
 
-#   "R2_S3_ACCESS_KEY_ID",
-#   "R2_S3_SECRET_ACCESS_KEY",
-#   "R2_S3_ENDPOINT",
-#   "R2_BUCKET_NAME",
+  "R2_S3_ACCESS_KEY_ID",
+  "R2_S3_SECRET_ACCESS_KEY",
+  "R2_S3_ENDPOINT",
+  "R2_BUCKET_NAME",
 
-#   "GITHUB_CLIENT_ID",
-#   "GITHUB_CLIENT_SECRET",
-#   "GOOGLE_CLIENT_ID",
-#   "GOOGLE_CLIENT_SECRET"
-# ]
+  "GITHUB_CLIENT_ID",
+  "GITHUB_CLIENT_SECRET",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+
+  "RESEND_API_KEY",
+
+  "POLAR_ACCESS_TOKEN",
+  "POLAR_WEBHOOK_SECRET",
+
+  "CLOUD_PUBLIC_BASE_URL",
+]
 
 [vars]
 ENV = "development"

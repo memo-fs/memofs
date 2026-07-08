@@ -1,7 +1,6 @@
 import { env } from "cloudflare:workers";
 import { XCircle } from "lucide-react";
 import { redirect } from "react-router";
-import { getDB } from "~/.server/db";
 import {
 	acceptInvitation,
 	getInvitationByToken,
@@ -16,8 +15,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import type { Route } from "./+types/accept";
 import { buildNoindexMeta } from "~/lib/seo";
+import type { Route } from "./+types/accept";
 
 /**
  * Team-invitation accept route — `/team/accept?token=…` (SC7).
@@ -65,7 +64,15 @@ export async function loader({
 }: Route.LoaderArgs): Promise<AcceptLoaderData> {
 	const url = new URL(request.url);
 	const rawToken = url.searchParams.get("token") ?? "";
-	const salt = env.API_KEY_SALT ?? "";
+	const salt = env.API_KEY_SALT;
+	if (!salt) {
+		return {
+			outcome: {
+				kind: "error",
+				message: "Server configuration error. Please try again later.",
+			},
+		};
+	}
 
 	// A missing/blank token renders not_found (no leak of whether an email is
 	// invited). Resolve the invite before requiring auth so a bad/expired token

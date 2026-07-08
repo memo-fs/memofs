@@ -15,9 +15,9 @@
  *     route as a URL-encoded JSON query param.
  *   - `GET  /v1/billing/portal` — redirects to the Polar customer portal.
  *
- * Mounted in `src/api/index.ts` under `/v1/billing`. The webhook + portal need
- * the per-request DB (`dbMiddleware`, same as sync); checkout is a Polar-side
- * redirect and does not touch the DB.
+ * Mounted in `src/api/index.ts` under `/v1/billing`. DB access is handled via
+ * `getDB()` calls in the query functions — no middleware needed since `getDB()`
+ * is memoized per isolate.
  *
  * @see docs/adr/0006-pricing-and-entitlements.md — tiers, caps, Polar (MoR).
  * @see {@link ../../server/queries/billing} — account-lookup + plan-apply helpers.
@@ -30,9 +30,11 @@ import {
 	WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
 import { eq } from "drizzle-orm";
-import { type Context, Hono, type MiddlewareHandler } from "hono";
+import { type Context, Hono } from "hono";
+import { secret } from "../../../lib/env";
 import { getDB } from "../../db";
 import { accounts, type PlanTier } from "../../db/schema";
+import { getAccountForUser } from "../../queries/account";
 import {
 	applyPlanToAccount,
 	getAccountById,
@@ -40,14 +42,27 @@ import {
 	isPlanMetadataValue,
 	setPolarCustomerId,
 } from "../../queries/billing";
+import { createAuthFromEnv } from "../../session";
 import type { ApiEnv } from "../index";
 import { json, jsonError } from "../json";
+import { requestIdMiddleware } from "../middleware/request-id";
 
-/** Per-request drizzle client, mirroring the sync router's `dbMiddleware`. */
-const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
-	if (!c.get("db")) c.set("db", getDB());
-	await next();
-};
+/**
+ * Session-based auth guard for checkout/portal routes.
+ *
+ * Verifies the request carries a valid Better Auth session and that the
+ * `account_id` query parameter (if present) belongs to that session's user.
+ * This prevents IDOR: an attacker cannot access another user's billing portal.
+ */
+async function requireSessionAccount(
+	c: Context<ApiEnv>,
+): Promise<string | null> {
+	const auth = createAuthFromEnv();
+	const result = await auth.api.getSession({ headers: c.req.raw.headers });
+	if (!result) return null;
+	const account = await getAccountForUser(result.user.id);
+	return account?.id ?? null;
+}
 
 /** Read the plan tier from subscription metadata (`memofs_plan`), or null. */
 function planFromMetadata(
@@ -84,15 +99,15 @@ async function handleSubscriptionEvent(
 }
 
 export const billingApp = new Hono<ApiEnv>()
-	.use("*", dbMiddleware)
+	.use("*", requestIdMiddleware)
 
 	// --- POST /webhook --------------------------------------------------------
 	// Polar-authenticated by signature: validateEvent checks the webhook secret
 	// and throws WebhookVerificationError on a mismatch (→ 403). The body must be
 	// the raw bytes (not JSON-parsed) so the signature verifies.
 	.post("/webhook", async (c) => {
-		const secret = c.env.POLAR_WEBHOOK_SECRET;
-		if (!secret) {
+		const webhookSecret = secret("POLAR_WEBHOOK_SECRET");
+		if (!webhookSecret) {
 			return jsonError(
 				c,
 				500,
@@ -109,7 +124,7 @@ export const billingApp = new Hono<ApiEnv>()
 					string,
 					string
 				>,
-				secret,
+				webhookSecret,
 			);
 		} catch (err) {
 			if (err instanceof WebhookVerificationError) {
@@ -134,7 +149,7 @@ export const billingApp = new Hono<ApiEnv>()
 			case "subscription.updated":
 			case "subscription.active": {
 				if (data.customerId) {
-					await handleSubscriptionEvent(db, event, planFromMetadata(metadata));
+					await handleSubscriptionEvent(event, planFromMetadata(metadata));
 				}
 				break;
 			}
@@ -142,7 +157,7 @@ export const billingApp = new Hono<ApiEnv>()
 			case "subscription.revoked": {
 				// Cancellation/revocation → downgrade to free (re-apply free caps).
 				if (data.customerId) {
-					await handleSubscriptionEvent(db, event, "free");
+					await handleSubscriptionEvent(event, "free");
 				}
 				break;
 			}
@@ -154,7 +169,7 @@ export const billingApp = new Hono<ApiEnv>()
 						? metadata.memofs_account_id
 						: undefined;
 				if (metaAccountId && data.id) {
-					await setPolarCustomerId(db, metaAccountId, data.id);
+					await setPolarCustomerId(metaAccountId, data.id);
 				}
 				break;
 			}
@@ -168,9 +183,16 @@ export const billingApp = new Hono<ApiEnv>()
 	// --- GET /checkout --------------------------------------------------------
 	// Polar checkout redirect. Built per-request so the token/server come from
 	// c.env. The dashboard supplies ?products=&customerId=&metadata=<json>.
+	// Session-authenticated: the caller must be signed in (the dashboard loader
+	// handles the redirect-to-login bounce, but we re-check here to prevent
+	// direct API hits from bypassing auth).
 	.get("/checkout", async (c: Context<ApiEnv>) => {
+		const accountId = await requireSessionAccount(c);
+		if (!accountId) {
+			return jsonError(c, 401, "unauthorized", "Authentication required.");
+		}
 		const handler = Checkout({
-			accessToken: c.env.POLAR_ACCESS_TOKEN,
+			accessToken: secret("POLAR_ACCESS_TOKEN"),
 			successUrl: c.env.CLOUD_PUBLIC_BASE_URL
 				? `${c.env.CLOUD_PUBLIC_BASE_URL}/dashboard/billing?upgraded=1`
 				: undefined,
@@ -182,19 +204,26 @@ export const billingApp = new Hono<ApiEnv>()
 	// --- GET /portal ----------------------------------------------------------
 	// Polar customer portal. getCustomerId resolves the Polar id from the account
 	// linked to ?account_id=<id> (the dashboard route supplies it after auth).
+	// Session-authenticated: the account_id must belong to the signed-in user.
 	.get("/portal", async (c: Context<ApiEnv>) => {
+		const sessionAccountId = await requireSessionAccount(c);
+		if (!sessionAccountId) {
+			return jsonError(c, 401, "unauthorized", "Authentication required.");
+		}
 		const handler = CustomerPortal({
-			accessToken: c.env.POLAR_ACCESS_TOKEN,
+			accessToken: secret("POLAR_ACCESS_TOKEN"),
 			getCustomerId: async (ctx: Context<ApiEnv>) => {
-				const db = ctx.get("db");
-				const accountId = ctx.req.query("account_id");
-				if (!db || !accountId) return "";
+				const db = getDB();
+				const requestedAccountId = ctx.req.query("account_id");
+				if (!requestedAccountId) return "";
+				// IDOR guard: the requested account must belong to the session user.
+				if (requestedAccountId !== sessionAccountId) return "";
 				// The Polar customer id was recorded on the account by the webhook
 				// when the subscription started; the portal needs that id.
 				const row = await db
 					.select({ polarCustomerId: accounts.polarCustomerId })
 					.from(accounts)
-					.where(eq(accounts.id, accountId))
+					.where(eq(accounts.id, requestedAccountId))
 					.limit(1);
 				return row[0]?.polarCustomerId ?? "";
 			},

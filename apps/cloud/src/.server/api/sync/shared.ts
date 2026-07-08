@@ -23,7 +23,12 @@ import type {
 import { createId } from "@paralleldrive/cuid2";
 import { desc, eq, sql } from "drizzle-orm";
 import { getDB } from "../../db";
-import { projectFiles, projects, syncCursors } from "../../db/schema";
+import {
+	type Project,
+	projectFiles,
+	projects,
+	syncCursors,
+} from "../../db/schema";
 import { canWriteProject, getPersonalTeam } from "../../queries/teams";
 import { ConflictError, PermissionError } from "../errors";
 
@@ -32,13 +37,13 @@ import { ConflictError, PermissionError } from "../errors";
  * `loadProject` / `ensureProject` so handlers don't reach back into the table
  * consts. `teamId` is the access-control boundary (ADR 0011 Phase 2); null for a
  * pre-migration row not yet backfilled onto a team.
+ *
+ * Derived from the schema's `Project` type via `Pick<>`.
  */
-export interface SyncProject {
-	id: string;
-	accountId: string;
-	teamId: string | null;
-	totalStorageBytes: number;
-}
+export type SyncProject = Pick<
+	Project,
+	"id" | "accountId" | "teamId" | "totalStorageBytes"
+>;
 
 /** The cursor value returned for a project that has never been pushed ("0"). */
 export const INITIAL_CURSOR = "0";

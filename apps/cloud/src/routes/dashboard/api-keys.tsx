@@ -1,8 +1,7 @@
+import { env } from "cloudflare:workers";
 import { AlertTriangle, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
-import { env } from "cloudflare:workers";
-import { getDB } from "~/.server/db";
 import type { ApiKeyView } from "~/.server/queries";
 import {
 	createApiKey,
@@ -21,13 +20,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
+import { buildNoindexMeta } from "~/lib/seo";
 import { formatDate } from "~/utils/misc";
 import { CreateKeyDialog } from "./+components/create-key-dialog";
 import { PageHeader } from "./+components/page-header";
 import { RevealKeyDialog } from "./+components/reveal-key-dialog";
 import { RevokeKeyDialog } from "./+components/revoke-key-dialog";
 import type { Route } from "./+types/api-keys";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * API keys (SC3.x). Real DB-backed provisioning + revocation. The cloud stores

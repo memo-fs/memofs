@@ -1,12 +1,9 @@
-import { Hono } from "hono";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../../tests/utils/db";
-import { encryptToken } from "../../utils";
 import type { Database } from "../../db";
 import { accounts, apiKeys, connectors, projects } from "../../db/schema";
-import { hashApiKey } from "../../utils";
-import type { ApiEnv } from "..";
-import { createApiApp } from "..";
+import { encryptToken, hashApiKey } from "../../utils";
+import { createApi } from "..";
 
 const SALT = "test-salt";
 const ENCRYPTION_KEY = "test-encryption-key-must-be-long-enough-32-bytes";
@@ -16,21 +13,19 @@ let db: Database;
 
 beforeEach(async () => {
 	db = await createTestDb();
+	vi.mock("../../db", () => ({
+		getDB: () => db,
+	}));
 });
 
 afterEach(async () => {
+	vi.restoreAllMocks();
 	// biome-ignore lint/suspicious/noExplicitAny: drizzle client is untyped
 	await (db as any).$client.close?.();
 });
 
 function testApp() {
-	const outer = new Hono<ApiEnv>();
-	outer.use("*", (c, next) => {
-		c.set("db", db);
-		return next();
-	});
-	outer.route("/", createApiApp());
-	return outer;
+	return createApi();
 }
 
 describe("Connectors API - Secret Resolution", () => {

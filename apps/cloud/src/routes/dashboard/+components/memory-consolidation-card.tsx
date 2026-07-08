@@ -48,7 +48,8 @@ export function MemoryConsolidationCard({
 
 	// Disable the button when consolidating, or when the daily budget is
 	// exhausted. `consolidationResult` only gates the optimistic label flip.
-	const budgetExhausted = runsToday >= PLAN_ENTITLEMENTS[plan].maxConsolidationRuns;
+	const budgetExhausted =
+		runsToday >= PLAN_ENTITLEMENTS[plan].maxConsolidationRuns;
 
 	return (
 		<Card className="flex flex-col justify-between">
@@ -79,7 +80,8 @@ export function MemoryConsolidationCard({
 					<div className="flex items-center justify-between text-xs mb-1">
 						<span className="text-muted-foreground">Runs Today</span>
 						<span className="font-mono text-white font-medium">
-							{consolidationResult ? runsToday + 1 : runsToday} / {info.limitLabel}
+							{consolidationResult ? runsToday + 1 : runsToday} /{" "}
+							{info.limitLabel}
 						</span>
 					</div>
 					<Progress value={info.progress} className="h-1.5 rounded-none" />

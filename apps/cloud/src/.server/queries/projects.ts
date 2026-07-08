@@ -17,6 +17,7 @@ import { and, count, desc, eq, inArray, or } from "drizzle-orm";
 import { currentCursor, lastSyncAt } from "../api/sync/shared";
 import { getDB } from "../db";
 import {
+	type MemoryEvent,
 	memoryEvents,
 	projectFiles,
 	projects,
@@ -149,8 +150,8 @@ export async function getProjectForAccount(
 		name: row.name,
 		storageBytes: row.storageBytes,
 		fileCount: countRows[0]?.n ?? 0,
-		lastSyncAt: (await lastSyncAt(db, projectId)) ?? null,
-		cursor: await currentCursor(db, projectId),
+		lastSyncAt: (await lastSyncAt(projectId)) ?? null,
+		cursor: await currentCursor(projectId),
 		isDefault: row.isDefault,
 	};
 }
@@ -231,7 +232,7 @@ export async function recentMemoryActivity(
  */
 export async function logMemoryEvent(input: {
 	projectId: string;
-	kind: "consolidation" | "write" | "core_update";
+	kind: MemoryEvent["kind"];
 	summary: string;
 	actor: string;
 }): Promise<void> {

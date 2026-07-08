@@ -2,9 +2,7 @@ import type { MemoFS } from "@memofs/core";
 import { describe, expect, it } from "vitest";
 import { createRuntimeClient, type RuntimeFactory } from "../runtime-client";
 
-function fakeRuntime(
-	calls: Array<{ method: string; value: unknown }>,
-): MemoFS {
+function fakeRuntime(calls: Array<{ method: string; value: unknown }>): MemoFS {
 	return {
 		async recall(query: string, options?: { limit?: number }) {
 			calls.push({ method: "recall", value: { query, options } });

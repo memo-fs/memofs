@@ -7,11 +7,14 @@
  * Returns the decrypted credential token for the given project + secretRef.
  * Secured via the request bearer token: only authenticated accounts that own
  * or have write access to the project can fetch its connector secrets.
+ *
+ * DB access is handled via `getDB()` calls — no middleware needed since
+ * `getDB()` is memoized per isolate.
  */
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { invariant } from "../../utils/misc";
+import { secret } from "../../lib/env";
 import { getDB } from "../db";
 import { connectors } from "../db/schema";
 import { decryptToken } from "../utils";
@@ -23,16 +26,15 @@ import { assertOwns, loadProject } from "./sync/shared";
 
 export const connectorsApp = new Hono<ApiEnv>();
 
-// Middleware spine: bind request-wide db and auth.
+// Middleware spine: bind auth.
 connectorsApp.use("*", async (c, next) => {
-	c.set("db", c.get("db") ?? getDB());
-	const salt = c.env.API_KEY_SALT;
+	const salt = secret("API_KEY_SALT");
 	const auth = createAuthMiddleware(salt);
 	return auth(c, next);
 });
 
 connectorsApp.get("/secret", async (c) => {
-	const db = c.get("db");
+	const db = getDB();
 	const account = c.get("account")!;
 	const projectId = c.req.param("projectId");
 	const ref = c.req.query("ref");
@@ -44,7 +46,7 @@ connectorsApp.get("/secret", async (c) => {
 		throw new ValidationError("Query parameter 'ref' is required.");
 	}
 
-	const project = await loadProject(db, projectId);
+	const project = await loadProject(projectId);
 	if (!project) {
 		throw new NotFoundError(`Project not found: ${projectId}`);
 	}
@@ -66,9 +68,8 @@ connectorsApp.get("/secret", async (c) => {
 		throw new NotFoundError(`Secret not found for ref: ${ref}`);
 	}
 
-	const encryptionKey = c.env.ENCRYPTION_KEY;
-	invariant(encryptionKey, "ENCRYPTION_KEY secret is not set on the server.");
-	const secret = await decryptToken(row.encryptedSecret, encryptionKey);
+	const encryptionKey = secret("ENCRYPTION_KEY");
+	const decrypted = await decryptToken(row.encryptedSecret, encryptionKey);
 
-	return json(c, { secret });
+	return json(c, { secret: decrypted });
 });

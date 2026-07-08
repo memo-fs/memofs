@@ -11,12 +11,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
+import { buildNoindexMeta } from "~/lib/seo";
 import { formatRelative } from "~/utils/misc";
 import type { DashboardOutletContext } from "./_layout";
 import { OverviewCards } from "./+components/overview-cards";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/index";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /** Shape returned by the `recent-activity` resource route. */
 type RecentActivityResponse = { activity: SyncActivity[] };

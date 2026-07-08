@@ -3,17 +3,14 @@ import { cn } from "~/lib/utils";
 /**
  * Memo FS brand mark.
  *
- * Derived from the TekBreed identity (the `< >` brackets + blue→green palette),
- * but with the parent's DNA helix replaced by stacked memory layers — Memo FS is
- * layered memory. Same glyph as the shared `logo.svg` / `favicon.ico` so the
- * brand reads consistently across the docs and cloud apps. The brighter brand
- * variants (#4fb2f3 / #5bd473) stay legible on both light and dark surfaces.
- *
- * `Wordmark` pairs the glyph with the mono "Memo FS" / "Cloud" treatment.
+ * Three stacked isometric memory layers with data-burst accent dots —
+ * matches `public/logo.svg` / `assets/images/logo.svg`. Uses `currentColor`
+ * for the top layer and a gradient to `--muted-foreground` for the lower
+ * layers so the glyph adapts to any context (header, sidebar, footer).
  */
 
-const BRAND_PRIMARY = "currentColor";
-const BRAND_SECONDARY = "var(--muted-foreground)";
+const LAYER_TOP = "currentColor";
+const LAYER_BTM = "var(--muted-foreground)";
 
 export function LogoMark({
 	className,
@@ -35,27 +32,21 @@ export function LogoMark({
 		>
 			<defs>
 				<linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-					<stop stopColor={BRAND_PRIMARY} />
-					<stop offset="1" stopColor={BRAND_SECONDARY} />
+					<stop stopColor={LAYER_TOP} />
+					<stop offset="1" stopColor={LAYER_BTM} />
 				</linearGradient>
 			</defs>
-			<g strokeLinecap="round" strokeLinejoin="round" fill="none">
-				<polyline
-					points="25,25 5,50 25,75"
-					stroke={BRAND_PRIMARY}
-					strokeWidth="6"
-				/>
-				<polyline
-					points="75,25 95,50 75,75"
-					stroke={BRAND_SECONDARY}
-					strokeWidth="6"
-				/>
-				<g stroke={`url(#${gid})`} strokeWidth="6">
-					<polygon points="50,28 66,37 50,46 34,37" />
-					<polyline points="34,45 50,54 66,45" />
-					<polyline points="34,53 50,62 66,53" />
-				</g>
-			</g>
+			{/* Bottom layer */}
+			<polygon fill={LAYER_BTM} points="50,82 12,62 50,45 88,62" />
+			{/* Middle layer */}
+			<polygon fill={`url(#${gid})`} points="50,63 12,43 50,26 88,43" />
+			{/* Top layer */}
+			<polygon fill={LAYER_TOP} points="50,45 12,25 50,8 88,25" />
+			{/* Data burst accent */}
+			<circle fill={LAYER_TOP} cx="50" cy="23" r="3.5" />
+			<circle fill={LAYER_TOP} cx="35" cy="30" r="1.5" opacity="0.6" />
+			<circle fill={LAYER_TOP} cx="65" cy="30" r="1.5" opacity="0.6" />
+			<circle fill={LAYER_TOP} cx="50" cy="37" r="1.5" opacity="0.6" />
 		</svg>
 	);
 }

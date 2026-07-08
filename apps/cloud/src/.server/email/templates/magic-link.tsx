@@ -16,7 +16,9 @@ export function MagicLinkTemplate({
 }) {
 	return (
 		<EmailLayout previewText="Sign in to Memo FS Cloud">
-			<EmailHeading style={emailStyles.heading}>Sign in to Memo FS Cloud</EmailHeading>
+			<EmailHeading style={emailStyles.heading}>
+				Sign in to Memo FS Cloud
+			</EmailHeading>
 			<EmailText style={emailStyles.paragraph}>
 				Click the button below to sign in. This link expires in{" "}
 				{expiresInMinutes} minutes and can only be used once.

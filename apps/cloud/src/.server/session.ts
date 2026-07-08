@@ -98,11 +98,14 @@ export async function getSessionUser(
 	};
 }
 /**
- * Constructs and returns aa redirect URL params
- * @param request
- * @returns {string}
+ * Builds a query-string containing the current request path as a `redirect`
+ * param, so login/signup can bounce back after authentication.
+ *
+ * @param request - The incoming HTTP request whose URL is used to derive the
+ *                  current path and search string.
+ * @returns A URL-encoded query string (e.g. `redirect=%2Fdashboard%2Fsettings`).
  */
-export function getRedirectParams(request) {
+export function getRedirectParams(request: Request) {
 	const { pathname, search } = new URL(request.url);
 	const params = new URLSearchParams({
 		redirect: `${pathname}${search}`,

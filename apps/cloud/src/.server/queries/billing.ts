@@ -23,21 +23,23 @@ import { and, eq, isNull } from "drizzle-orm";
 import { capsForStorage, resolveCaps } from "../../lib/entitlements";
 import { getDB } from "../db";
 import { accounts, type PlanTier } from "../db/schema";
+import type { EntitlementSnapshot } from "./types";
 
 /**
- * Memo FS plan tier as carried in Polar subscription metadata. Mirror of
- * {@link PlanTier} so the webhook validates the metadata value before writing.
+ * Memo FS plan tier as carried in Polar subscription metadata. Uses the
+ * schema-derived `PlanTier` type directly.
  */
-export const PLAN_METADATA_VALUES = ["free", "pro", "teams"] as const;
-export type PlanMetadataValue = (typeof PLAN_METADATA_VALUES)[number];
+export const PLAN_METADATA_VALUES: readonly PlanTier[] = [
+	"free",
+	"pro",
+	"teams",
+] as const;
 
 /** True if `value` is a valid plan tier carried in Polar metadata. */
-export function isPlanMetadataValue(
-	value: unknown,
-): value is PlanMetadataValue {
+export function isPlanMetadataValue(value: unknown): value is PlanTier {
 	return (
 		typeof value === "string" &&
-		PLAN_METADATA_VALUES.includes(value as PlanMetadataValue)
+		PLAN_METADATA_VALUES.includes(value as PlanTier)
 	);
 }
 
@@ -133,13 +135,8 @@ export async function applyPlanToAccount(
 }
 
 /**
- * The account shape {@link applyPlanToAccount} returns — the {@link AccountView}
+ * The account shape {@link applyPlanToAccount} returns — the {@link EntitlementSnapshot}
  * fields (id, plan, caps). Declared here so the webhook + tests import it from
  * the billing module that owns it, without a circular dep on `./account`.
  */
-export interface AppliedAccount {
-	id: string;
-	plan: PlanTier;
-	maxHostedStorageBytes: number;
-	maxConnectors: number;
-}
+export type AppliedAccount = EntitlementSnapshot;

@@ -1,6 +1,6 @@
 import { Heading, Text } from "react-email";
-import { COLORS, emailStyles } from "../constants";
 import { PLANS } from "../../../routes/_home/+utils/plans";
+import { COLORS, emailStyles } from "../constants";
 import { EmailLayout } from "./index";
 
 const EmailHeading = Heading as any;
@@ -14,7 +14,9 @@ export function WaitlistTemplate({ name }: { name?: string }) {
 
 	return (
 		<EmailLayout previewText="You're on the Memo FS Cloud waitlist!">
-			<EmailHeading style={emailStyles.heading}>Welcome to the Waitlist</EmailHeading>
+			<EmailHeading style={emailStyles.heading}>
+				Welcome to the Waitlist
+			</EmailHeading>
 			<EmailText style={emailStyles.paragraph}>{greeting}</EmailText>
 			<EmailText style={emailStyles.paragraph}>
 				Thanks for joining the Memo FS Cloud waitlist! As we gear up for our OSS

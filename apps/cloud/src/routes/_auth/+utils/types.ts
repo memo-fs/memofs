@@ -1,3 +1,1 @@
-export type FetcherResult =
-	| { ok: true; email: string }
-	| { ok: false; error: string };
+// Unused types removed — see login/+utils and signup/+utils for result types.

@@ -30,8 +30,9 @@ export function HeroSection() {
 				<p className="mx-auto mt-2 max-w-2xl text-balance text-base md:text-lg leading-relaxed text-muted-foreground font-light">
 					Memo FS Cloud mirrors your local{" "}
 					<InlineCode className="text-xs">.memofs/</InlineCode> across every
-					machine and runs a secure serverless query engine — giving you semantic
-					recall, knowledge graphs, and note access via a fast cloud API.
+					machine and runs a secure serverless query engine — giving you
+					semantic recall, knowledge graphs, and note access via a fast cloud
+					API.
 				</p>
 				<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
 					{/* Get started — hidden while in waitlist-only mode */}

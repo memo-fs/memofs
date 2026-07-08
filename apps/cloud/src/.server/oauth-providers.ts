@@ -22,9 +22,7 @@ export const OAUTH_PROVIDER_IDS = ["github", "google"] as const;
 export type OAuthProviderId = (typeof OAUTH_PROVIDER_IDS)[number];
 
 /** True when `env` has both the client id + secret bound for `provider`. */
-export function isProviderConfigured(
-	provider: OAuthProviderId,
-): boolean {
+export function isProviderConfigured(provider: OAuthProviderId): boolean {
 	switch (provider) {
 		case "github":
 			return Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);

@@ -1,11 +1,6 @@
 import { getFormProps, getInputProps, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod/v4";
-import {
-	ArrowRight,
-	CheckCircle2,
-	Loader2,
-	Sparkles,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { useFetcher } from "react-router";
 import { Section } from "~/components/site/visuals";
 import { Button } from "~/components/ui/button";
@@ -13,12 +8,11 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildMeta } from "~/lib/seo";
 import { FormError } from "../../_auth/+components/form-parts";
-import type { Route } from "./+types/index";
 import { type WaitlistResult, WaitlistSchema } from "./+utils";
 
 export { action } from "./+action.server";
 
-export function meta(_: Route.MetaArgs) {
+export function meta() {
 	return buildMeta({
 		title: "Join the waitlist — Memo FS Cloud",
 		description:
@@ -34,11 +28,8 @@ const PERKS = [
 	"Open-source — own your data, forever",
 ];
 
-export { action } from "./+actions.server";
-
-
 /** Waitlist landing page — captures an email, calls Resend via the action. */
-export default function WaitlistPage(_props: Route.ComponentProps) {
+export default function WaitlistPage() {
 	const fetcher = useFetcher<WaitlistResult>();
 	const submitting = fetcher.state === "submitting";
 	const result = fetcher.data;
@@ -134,7 +125,9 @@ export default function WaitlistPage(_props: Route.ComponentProps) {
 									)}
 								</Button>
 							</div>
-							{fields.email.errors && <FormError errors={fields.email.errors} />}
+							{fields.email.errors && (
+								<FormError errors={fields.email.errors} />
+							)}
 						</div>
 						{form.errors && <FormError errors={form.errors} />}
 						<p className="text-[11px] text-muted-foreground/60 text-center">

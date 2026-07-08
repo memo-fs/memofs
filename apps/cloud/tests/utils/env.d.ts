@@ -18,11 +18,14 @@
  * @see {@link ./db} `createTestDb` — the per-test libSQL DB these fakes pair with.
  */
 export interface FakeR2Store {
-    /** `sha256 → { body, size }`. Shared by reference so the test can assert on it. */
-    blobs: Map<string, {
-        body: Uint8Array;
-        size: number;
-    }>;
+	/** `sha256 → { body, size }`. Shared by reference so the test can assert on it. */
+	blobs: Map<
+		string,
+		{
+			body: Uint8Array;
+			size: number;
+		}
+	>;
 }
 /**
  * Builds a fake R2 `BLOBS` bucket backed by a fresh `Map`.
@@ -36,8 +39,8 @@ export interface FakeR2Store {
  * @returns the bucket binding + its backing Map (for assertions).
  */
 export declare function createFakeR2Bucket(): {
-    bucket: Env["BLOBS"];
-    blobs: FakeR2Store["blobs"];
+	bucket: Env["BLOBS"];
+	blobs: FakeR2Store["blobs"];
 };
 /**
  * Options for {@link createTestEnv}. Every field is optional — the base env

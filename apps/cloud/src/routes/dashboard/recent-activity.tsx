@@ -1,7 +1,5 @@
-import { getDB } from "~/.server/db";
 import {
 	listProjectsForAccount,
-	recentMemoryActivity,
 	recentSyncActivity,
 } from "~/.server/queries";
 import { requireUserWithAccount } from "~/.server/session";
@@ -32,9 +30,7 @@ import type { Route } from "./+types/recent-activity";
  * scan. An unowned/missing project returns an empty list (no leak).
  */
 
-export async function loader({
-	request,
-}: Route.LoaderArgs): Promise<Response> {
+export async function loader({ request }: Route.LoaderArgs): Promise<Response> {
 	const { account } = await requireUserWithAccount(request);
 
 	const url = new URL(request.url);
@@ -53,9 +49,6 @@ export async function loader({
 		return Response.json({ activity: [] });
 	}
 
-	const [syncActivity, memoryActivity] = await Promise.all([
-		recentSyncActivity(projectId, 3),
-		recentMemoryActivity(projectId, 3),
-	]);
-	return Response.json({ activity: { syncActivity, memoryActivity } });
+	const syncActivity = await recentSyncActivity(projectId, 3);
+	return Response.json({ activity: syncActivity });
 }

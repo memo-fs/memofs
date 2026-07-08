@@ -93,7 +93,7 @@ export async function createApiKey({
 			lastFour,
 			revokedAt: null,
 		})
-		.returning({ id: apiKeys.id });
+		.returning({ id: apiKeys.id, createdAt: apiKeys.createdAt });
 
 	return {
 		rawKey,
@@ -101,7 +101,7 @@ export async function createApiKey({
 			id: row.id,
 			label: label.trim() || null,
 			lastFour,
-			createdAt: new Date().toISOString(),
+			createdAt: row.createdAt,
 			revokedAt: null,
 		},
 	};

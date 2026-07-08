@@ -78,6 +78,16 @@ export function ConnectorFormFields({
 	);
 }
 
+/**
+ * Reusable form field with label, input, and inline error display. Used by
+ * connector credential forms to keep field layout consistent.
+ *
+ * @param label - Visible label text above the input.
+ * @param field - Conform `FieldMetadata` providing id, value, errors, and key.
+ * @param placeholder - Placeholder text shown when the input is empty.
+ * @param type - HTML input type (defaults to `"text"`).
+ * @param isPending - When `true`, the input is disabled (submit in progress).
+ */
 function Field({
 	label,
 	field,

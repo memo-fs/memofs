@@ -1,13 +1,12 @@
 import type { MemoFsCloudFetch } from "@memofs/core/cloud-client";
 import { createMemoFsCloudClient } from "@memofs/core/cloud-client";
-import { Hono } from "hono";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../../../tests/utils/db";
 import { createFakeR2Bucket } from "../../../../../tests/utils/env";
 import type { Database } from "../../../db";
 import { accounts, apiKeys } from "../../../db/schema";
 import { hashApiKey, sha256Hex } from "../../../utils";
-import { type ApiEnv, createApiApp } from "../..";
+import { createApi } from "../..";
 
 /**
  * @file Client ↔ server wire-parity round-trip.
@@ -19,7 +18,7 @@ import { type ApiEnv, createApiApp } from "../..";
  * real client driving the real server round-trips a file set end-to-end.
  *
  * The seam is a `fetch` adapter: the client is constructed with a custom
- * `fetch` that forwards every outgoing request into `createApiApp().fetch()`.
+ * `fetch` that forwards every outgoing request into `createApi().fetch()`.
  * No network, no Worker runtime — the HTTP layer is the only thing mocked, and
  * even that is a thin pass-through so the client's real URL building, header
  * construction, envelope unwrapping, and error decoding all run.
@@ -60,12 +59,16 @@ let blobs: ReturnType<typeof createFakeR2Bucket>["blobs"];
 
 beforeEach(async () => {
 	db = await createTestDb();
+	vi.mock("../../../db", () => ({
+		getDB: () => db,
+	}));
 	const fake = createFakeR2Bucket();
 	bucket = fake.bucket;
 	blobs = fake.blobs;
 });
 
 afterEach(async () => {
+	vi.restoreAllMocks();
 	// Release the in-process sqlite3 handle backing the libSQL `:memory:` client.
 	// biome-ignore lint/suspicious/noExplicitAny: drizzle's client accessor is untyped
 	(await (db as any).$client.close?.()) ?? undefined;
@@ -85,18 +88,11 @@ function testEnv(): Env {
 }
 
 /**
- * The server, with the test DB injected via an outer app so the sync router's
- * `dbMiddleware` honors the pre-set `c.var.db` (see sync.test.ts for the
- * ordering rationale — appending to `createApiApp()` runs too late).
+ * The server for testing. DB access is handled via mocked `getDB()` which
+ * returns the test DB.
  */
 function server() {
-	const outer = new Hono<ApiEnv>();
-	outer.use("*", (c, next) => {
-		c.set("db", db);
-		return next();
-	});
-	outer.route("/", createApiApp());
-	return outer;
+	return createApi();
 }
 
 /**
@@ -217,7 +213,9 @@ describe("client ↔ server wire parity (round-trip)", () => {
 		const pullResult = await c.sync.pull({});
 		expect(pullResult.cursor).toBe("1");
 		expect(pullResult.files).toHaveLength(2);
-		const pulledPaths = pullResult.files.map((f: { path: string }) => f.path).sort();
+		const pulledPaths = pullResult.files
+			.map((f: { path: string }) => f.path)
+			.sort();
 		expect(pulledPaths).toEqual([".memofs/core.md", ".memofs/notes.md"]);
 		for (const file of pullResult.files) {
 			expect(file.presignedGetUrl).toContain(

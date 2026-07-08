@@ -23,6 +23,8 @@
 
 import type { PlanTier } from "../.server/db/schema";
 
+export type { PlanTier };
+
 /** The megabyte constant — keeps the map below readable and free of magic numbers. */
 const MB = 1024 ** 2;
 /** The gigabyte constant. */

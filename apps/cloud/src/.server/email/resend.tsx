@@ -44,7 +44,6 @@ export function subscribeUser(email: string) {
 export function sendMail({
 	to,
 	subject,
-	html,
 	react,
 }: {
 	to: string | [string];
@@ -53,7 +52,7 @@ export function sendMail({
 }) {
 	const client = getResendClient();
 	if (env.ENV === "development") {
-		console.info("[email:dev] send", { to, subject, html });
+		console.info("[email:dev] send", { to, subject });
 		return;
 	}
 	return client.emails.send({

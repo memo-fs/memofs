@@ -18,27 +18,14 @@
 import { and, eq, inArray, sql, sum } from "drizzle-orm";
 import { normalizeCaps } from "../../lib/entitlements";
 import { getDB } from "../db";
-import {
-	accounts,
-	connectors,
-	memoryEvents,
-	type PlanTier,
-	projects,
-} from "../db/schema";
+import { accounts, connectors, memoryEvents, projects } from "../db/schema";
+import type { EntitlementSnapshot } from "./types";
 
 /**
  * The entitlement snapshot for a billing account, as the dashboard reads it.
- * Mirrors the `accounts` row's entitlement columns (ADR 0006). `maxConnectors`
- * is rehydrated to `Infinity` for the Teams "unlimited" sentinel (stored as a
- * large finite integer in the column) via `normalizeCaps`, so consumers compare
- * `connectorsUsed < maxConnectors` against a finite-or-Infinity number.
+ * Derived from the shared `EntitlementSnapshot` type.
  */
-export interface AccountView {
-	id: string;
-	plan: PlanTier;
-	maxHostedStorageBytes: number;
-	maxConnectors: number;
-}
+export type AccountView = EntitlementSnapshot;
 
 /**
  * Looks up the billing account for `userId`, or `null` if none exists yet.
@@ -52,7 +39,7 @@ export async function getAccountForUser(
 	userId: string,
 ): Promise<AccountView | null> {
 	const db = getDB();
-	const rows = db
+	const rows = await db
 		.select({
 			id: accounts.id,
 			plan: accounts.plan,
@@ -86,9 +73,7 @@ export async function getAccountForUser(
  * Connectors is `COUNT(connectors)` across all the account's projects — the
  * account-wide count checked against `maxConnectors` (ADR 0006).
  */
-export async function getAccountUsage(
-	accountId: string,
-): Promise<{
+export async function getAccountUsage(accountId: string): Promise<{
 	storageBytes: number;
 	connectorsUsed: number;
 	consolidationUsedToday: number;

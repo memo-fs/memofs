@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
-import type { Hono } from "hono";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { Context, Hono } from "hono";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../../tests/utils/db";
 import type { Database } from "../../db";
 import { accounts, apiKeys } from "../../db/schema";
 import { hashApiKey } from "../../utils";
-import { type ApiEnv, createApiApp, json } from "..";
+import { type ApiEnv, createApi, json } from "..";
 import { createAuthMiddleware } from "../middleware/auth";
 
 /**
@@ -14,7 +14,7 @@ import { createAuthMiddleware } from "../middleware/auth";
  * These run the REAL salted-hash + Drizzle join against an in-memory libSQL DB
  * seeded with accounts + api_keys rows — so they assert the actual SQL the ORM
  * emits and the actual lookup logic, not a mocked contract. The middleware is
- * mounted on a throwaway Hono app under the real `createApiApp()` spine so the
+ * mounted on a throwaway Hono app under the real `createApi()` spine so the
  * global onError/notFound + envelope contract are exercised end-to-end.
  *
  * §12.4 contract covered:
@@ -37,9 +37,13 @@ let db: Database;
 
 beforeEach(async () => {
 	db = await createTestDb();
+	vi.mock("../../db", () => ({
+		getDB: () => db,
+	}));
 });
 
 afterEach(async () => {
+	vi.restoreAllMocks();
 	// libSQL `:memory:` clients hold no durable state; closing releases the
 	// in-process sqlite3 handle. Drizzle exposes the underlying client via
 	// `.$client`.
@@ -53,10 +57,10 @@ afterEach(async () => {
  * failure path (401) through the real envelope/error serialization.
  */
 function appWithAuth() {
-	const app = createApiApp();
+	const app = createApi();
 	app
-		.use("/v1/projects/:projectId/*", createAuthMiddleware(db, SALT))
-		.get("/v1/projects/:projectId/me", (c) => {
+		.use("/v1/projects/:projectId/*", createAuthMiddleware(SALT))
+		.get("/v1/projects/:projectId/me", (c: Context) => {
 			const account = c.get("account");
 			return json(c, account);
 		});

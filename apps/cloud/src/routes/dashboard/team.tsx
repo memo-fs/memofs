@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { useState } from "react";
-import { getDB } from "~/.server/db";
+import type { PlanTier, TeamRole } from "~/.server/db/schema";
 import { INVITATION_TTL_DAYS, sendTeamInvitationMail } from "~/.server/email";
 import {
 	createInvitation,
@@ -18,6 +18,7 @@ import {
 } from "~/.server/queries";
 import { requireUserWithAccount } from "~/.server/session";
 import { resolveCaps } from "~/lib/entitlements";
+import { buildNoindexMeta } from "~/lib/seo";
 import { EmptyTeamState } from "./+components/empty-team-state";
 import { MembersSection } from "./+components/members-section";
 import { PageHeader } from "./+components/page-header";
@@ -34,7 +35,6 @@ import {
 	resolveRequestedTeamId,
 	teamErrorMessage,
 } from "./+utils/team";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Team management (SC7). The `/dashboard/team` route: a team switcher (owned +
@@ -66,12 +66,12 @@ export interface TeamLoaderData {
 	selectedTeamId: string | null;
 	selectedTeamName: string;
 	/** The signed-in account's role on the selected team (drives admin actions). */
-	myRole: "owner" | "admin" | "member" | null;
+	myRole: TeamRole | null;
 	members: TeamMemberView[];
 	invitations: PendingInvitationView[];
 	seatsUsed: number;
 	maxSeats: number;
-	plan: "free" | "pro" | "teams";
+	plan: PlanTier;
 }
 
 /** Action response — a discriminated union over `intent`. */

@@ -10,7 +10,7 @@
  *
  * @see {@link https://reactrouter.com/explanation/meta#meta | React Router `meta`}
  */
-import type { Route } from "~/+types/root";
+import type { Route } from "../+types/root";
 
 /**
  * Site-wide metadata constants.
@@ -121,9 +121,7 @@ export function buildMeta(options: BuildMetaOptions): Route.MetaDescriptors {
 			? [{ name: "twitter:site", content: `@${SITE_META.twitterHandle}` }]
 			: []),
 		// Indexing directive
-		...(noindex
-			? [{ name: "robots", content: "noindex, nofollow" }]
-			: []),
+		...(noindex ? [{ name: "robots", content: "noindex, nofollow" }] : []),
 	];
 }
 
@@ -134,8 +132,5 @@ export function buildMeta(options: BuildMetaOptions): Route.MetaDescriptors {
  * and would bloat the head for no benefit.
  */
 export function buildNoindexMeta(title: string): Route.MetaDescriptors {
-	return [
-		{ title },
-		{ name: "robots", content: "noindex, nofollow" },
-	];
+	return [{ title }, { name: "robots", content: "noindex, nofollow" }];
 }

@@ -66,8 +66,8 @@ const VOYAGE_RERANK_MODEL = "rerank-2";
 /** Builds a hosted `MemoFS` runtime for one project in the single Worker. */
 function createCloudRuntime(projectId: string): MemoFS {
 	const client = createClient({
-		url: env.DATABASE_URL,
-		authToken: env.DATABASE_AUTH_TOKEN,
+		url: env.DATABASE_URL!,
+		authToken: env.DATABASE_AUTH_TOKEN!,
 	});
 
 	const store = new RemoteBlobMemoryStore({
@@ -82,7 +82,7 @@ function createCloudRuntime(projectId: string): MemoFS {
 		store,
 		projectId,
 		recallStore: createFsRecallStore({ store }),
-		...((env.VOYAGE_API_KEY !== undefined || env.VOYAGE_API_KEY.length > 0) && {
+		...(env.VOYAGE_API_KEY && {
 			embedder: createVoyageEmbedder({
 				apiKey: env.VOYAGE_API_KEY,
 				model: VOYAGE_EMBED_MODEL,
@@ -101,22 +101,35 @@ function createCloudRuntime(projectId: string): MemoFS {
 	return runtime;
 }
 
-/**
- * Builds the typed runtime client bound to a Worker env.
- *
- * @param options - Optional test seams.
- * @returns The hosted-memory read client.
- */
+/** Maximum number of cached runtime instances per Worker isolate. */
+const MAX_CACHE_SIZE = 64;
+
+/** Builds the typed runtime client bound to a Worker env. */
 export function createRuntimeClient(
 	options: RuntimeClientOptions = {},
 ): RuntimeClient {
 	const createRuntime = options.createRuntime ?? createCloudRuntime;
 	const clientRuntimeCache = new Map<string, Promise<MemoFS>>();
+	const accessOrder: string[] = [];
 
 	function runtime(projectId: string): Promise<MemoFS> {
 		const cached = clientRuntimeCache.get(projectId);
 		if (cached) return cached;
-		const created = Promise.resolve(createRuntime(projectId));
+
+		// Evict least-recently-used entry when cache is full.
+		if (clientRuntimeCache.size >= MAX_CACHE_SIZE) {
+			const evictKey = accessOrder.shift();
+			if (evictKey) clientRuntimeCache.delete(evictKey);
+		}
+		accessOrder.push(projectId);
+
+		const created = Promise.resolve(createRuntime(projectId)).catch((err) => {
+			// On failure, remove from cache so the next call can retry.
+			clientRuntimeCache.delete(projectId);
+			const idx = accessOrder.indexOf(projectId);
+			if (idx !== -1) accessOrder.splice(idx, 1);
+			throw err;
+		});
 		clientRuntimeCache.set(projectId, created);
 		return created;
 	}
@@ -159,7 +172,7 @@ export function createRuntimeClient(
 				const merges = result.mergesApplied;
 				const retirements = result.retirementsApplied;
 				const summary = `Consolidation merged ${merges} node${merges === 1 ? "" : "s"} and retired ${retirements} relation${retirements === 1 ? "" : "s"}.`;
-				await logMemoryEvent(getDB(), {
+				await logMemoryEvent({
 					projectId,
 					kind: "consolidation",
 					summary,

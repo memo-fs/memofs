@@ -90,56 +90,50 @@ afterEach(async () => {
 
 describe("canWriteProject", () => {
 	it("lets the creator write", async () => {
-		expect(await canWriteProject(db, TEAM_A, ACCT_OWNER, ACCT_OWNER)).toBe(
-			true,
-		);
+		expect(await canWriteProject(TEAM_A, ACCT_OWNER, ACCT_OWNER)).toBe(true);
 	});
 
 	it("lets any accepted team member write (role-agnostic)", async () => {
-		expect(await canWriteProject(db, TEAM_A, ACCT_OWNER, ACCT_ADMIN)).toBe(
-			true,
-		);
-		expect(await canWriteProject(db, TEAM_A, ACCT_OWNER, ACCT_MEMBER)).toBe(
-			true,
-		);
+		expect(await canWriteProject(TEAM_A, ACCT_OWNER, ACCT_ADMIN)).toBe(true);
+		expect(await canWriteProject(TEAM_A, ACCT_OWNER, ACCT_MEMBER)).toBe(true);
 	});
 
 	it("rejects an outsider", async () => {
-		expect(await canWriteProject(db, TEAM_A, ACCT_OWNER, ACCT_OUTSIDER)).toBe(
+		expect(await canWriteProject(TEAM_A, ACCT_OWNER, ACCT_OUTSIDER)).toBe(
 			false,
 		);
 	});
 
 	it("rejects when there is no team (pre-migration row)", async () => {
-		expect(await canWriteProject(db, null, ACCT_OWNER, ACCT_ADMIN)).toBe(false);
+		expect(await canWriteProject(null, ACCT_OWNER, ACCT_ADMIN)).toBe(false);
 	});
 });
 
 describe("accessibleTeamIds + isAcceptedMember", () => {
 	it("unions the personal team + joined teams", async () => {
-		const ids = await accessibleTeamIds(db, ACCT_ADMIN);
+		const ids = await accessibleTeamIds(ACCT_ADMIN);
 		expect(ids).toContain(TEAM_A); // joined
 		expect(ids).not.toContain(TEAM_B); // not a member
 	});
 
 	it("isAcceptedMember is true for joined members, false for outsiders", async () => {
-		expect(await isAcceptedMember(db, TEAM_A, ACCT_MEMBER)).toBe(true);
-		expect(await isAcceptedMember(db, TEAM_A, ACCT_OUTSIDER)).toBe(false);
+		expect(await isAcceptedMember(TEAM_A, ACCT_MEMBER)).toBe(true);
+		expect(await isAcceptedMember(TEAM_A, ACCT_OUTSIDER)).toBe(false);
 	});
 });
 
 describe("getPersonalTeam + getMembership", () => {
 	it("resolves the personal team for an owner", async () => {
-		const personal = await getPersonalTeam(db, ACCT_OWNER);
+		const personal = await getPersonalTeam(ACCT_OWNER);
 		expect(personal?.id).toBe(TEAM_A);
 	});
 
 	it("returns null for an account that owns no team", async () => {
-		expect(await getPersonalTeam(db, ACCT_ADMIN)).toBeNull();
+		expect(await getPersonalTeam(ACCT_ADMIN)).toBeNull();
 	});
 
 	it("getMembership includes the role + acceptedAt", async () => {
-		const m = await getMembership(db, TEAM_A, ACCT_ADMIN);
+		const m = await getMembership(TEAM_A, ACCT_ADMIN);
 		expect(m?.role).toBe("admin");
 		expect(m?.acceptedAt).not.toBeNull();
 	});
@@ -149,12 +143,12 @@ describe("getPersonalTeam + getMembership", () => {
 
 describe("listTeamsForAccount", () => {
 	it("lists teams the account owns or joined, with role + isOwner", async () => {
-		const ownerTeams = await listTeamsForAccount(db, ACCT_OWNER);
+		const ownerTeams = await listTeamsForAccount(ACCT_OWNER);
 		expect(ownerTeams).toEqual([
 			expect.objectContaining({ id: TEAM_A, role: "owner", isOwner: true }),
 		]);
 
-		const adminTeams = await listTeamsForAccount(db, ACCT_ADMIN);
+		const adminTeams = await listTeamsForAccount(ACCT_ADMIN);
 		expect(adminTeams).toEqual([
 			expect.objectContaining({ id: TEAM_A, role: "admin", isOwner: false }),
 		]);
@@ -163,7 +157,7 @@ describe("listTeamsForAccount", () => {
 
 describe("listTeamMembers", () => {
 	it("returns accepted members with name/email joined, owners first", async () => {
-		const members = await listTeamMembers(db, TEAM_A);
+		const members = await listTeamMembers(TEAM_A);
 		expect(members.map((m) => m.role)).toEqual(["owner", "admin", "member"]);
 		const admin = members.find((m) => m.accountId === ACCT_ADMIN);
 		expect(admin?.email).toBe("admin@x.test");
@@ -171,7 +165,7 @@ describe("listTeamMembers", () => {
 	});
 
 	it("resolves seats used = accepted member count", async () => {
-		expect(await resolveSeatsUsed(db, TEAM_A)).toBe(3); // owner + admin + member
+		expect(await resolveSeatsUsed(TEAM_A)).toBe(3); // owner + admin + member
 	});
 });
 
@@ -180,7 +174,7 @@ describe("listTeamMembers", () => {
 describe("createInvitation", () => {
 	it("mints an invitation and returns the raw token once", async () => {
 		const expiresAt = futureISO(60);
-		const { rawToken, invitation } = await createInvitation(db, {
+		const { rawToken, invitation } = await createInvitation({
 			teamId: TEAM_A,
 			email: "new@x.test",
 			role: "member",
@@ -208,7 +202,7 @@ describe("createInvitation", () => {
 
 	it("rejects an invite by a plain member (not_authorized)", async () => {
 		await expect(
-			createInvitation(db, {
+			createInvitation({
 				teamId: TEAM_A,
 				email: "new@x.test",
 				role: "member",
@@ -223,7 +217,7 @@ describe("createInvitation", () => {
 
 	it("rejects an invite by an outsider (not_authorized)", async () => {
 		await expect(
-			createInvitation(db, {
+			createInvitation({
 				teamId: TEAM_A,
 				email: "new@x.test",
 				role: "member",
@@ -238,7 +232,7 @@ describe("createInvitation", () => {
 
 	it("rejects when the email is already an accepted member", async () => {
 		await expect(
-			createInvitation(db, {
+			createInvitation({
 				teamId: TEAM_A,
 				email: "admin@x.test", // already a member
 				role: "member",
@@ -254,7 +248,7 @@ describe("createInvitation", () => {
 	it("rejects when the team is at the seat cap", async () => {
 		// TEAM_A has 3 accepted members; set the cap to 3 → seat_limit_reached.
 		await expect(
-			createInvitation(db, {
+			createInvitation({
 				teamId: TEAM_A,
 				email: "new@x.test",
 				role: "member",
@@ -268,7 +262,7 @@ describe("createInvitation", () => {
 	});
 
 	it("re-issues (upserts) a pending invite to the same email with a fresh token", async () => {
-		await createInvitation(db, {
+		await createInvitation({
 			teamId: TEAM_A,
 			email: "new@x.test",
 			role: "member",
@@ -279,7 +273,7 @@ describe("createInvitation", () => {
 			expiresAt: futureISO(60),
 		});
 		// A second invite to the same email replaces the token, doesn't 500.
-		const second = await createInvitation(db, {
+		const second = await createInvitation({
 			teamId: TEAM_A,
 			email: "new@x.test",
 			role: "admin",
@@ -291,7 +285,7 @@ describe("createInvitation", () => {
 		});
 		expect(second.rawToken).toBe("tok_second");
 
-		const pending = await listPendingInvitations(db, TEAM_A);
+		const pending = await listPendingInvitations(TEAM_A);
 		expect(pending).toHaveLength(1); // upserted, not duplicated
 		expect(pending[0].role).toBe("admin"); // refreshed role
 	});
@@ -305,7 +299,7 @@ describe("acceptInvitation", () => {
 		// The invitee must be a real user with that email to accept.
 		await seedAccount(db, "acct_invitee", "invitee@x.test");
 
-		const result = await acceptInvitation(db, {
+		const result = await acceptInvitation({
 			rawToken,
 			accepterId: "acct_invitee",
 			accepterEmail: "invitee@x.test",
@@ -314,10 +308,10 @@ describe("acceptInvitation", () => {
 		expect(result).toEqual({ teamId: TEAM_A, role: "member" });
 
 		// The membership exists and is accepted (writable).
-		const m = await getMembership(db, TEAM_A, "acct_invitee");
+		const m = await getMembership(TEAM_A, "acct_invitee");
 		expect(m?.role).toBe("member");
 		expect(m?.acceptedAt).not.toBeNull();
-		expect(await canWriteProject(db, TEAM_A, ACCT_OWNER, "acct_invitee")).toBe(
+		expect(await canWriteProject(TEAM_A, ACCT_OWNER, "acct_invitee")).toBe(
 			true,
 		);
 	});
@@ -325,27 +319,27 @@ describe("acceptInvitation", () => {
 	it("is idempotent on a replay of the same token", async () => {
 		const { rawToken } = await invite("invitee@x.test", "admin");
 		await seedAccount(db, "acct_invitee", "invitee@x.test");
-		await acceptInvitation(db, {
+		await acceptInvitation({
 			rawToken,
 			accepterId: "acct_invitee",
 			accepterEmail: "invitee@x.test",
 			salt: SALT,
 		});
 		// A second accept of the now-accepted token doesn't throw or duplicate.
-		const again = await acceptInvitation(db, {
+		const again = await acceptInvitation({
 			rawToken,
 			accepterId: "acct_invitee",
 			accepterEmail: "invitee@x.test",
 			salt: SALT,
 		});
 		expect(again.role).toBe("admin");
-		expect(await resolveSeatsUsed(db, TEAM_A)).toBe(4); // not double-counted
+		expect(await resolveSeatsUsed(TEAM_A)).toBe(4); // not double-counted
 	});
 
 	it("rejects an unknown token (not_found)", async () => {
 		await seedAccount(db, "acct_invitee", "invitee@x.test");
 		await expect(
-			acceptInvitation(db, {
+			acceptInvitation({
 				rawToken: "nonexistent",
 				accepterId: "acct_invitee",
 				accepterEmail: "invitee@x.test",
@@ -358,7 +352,7 @@ describe("acceptInvitation", () => {
 		const { rawToken } = await invite("invitee@x.test", "member", -1); // past
 		await seedAccount(db, "acct_invitee", "invitee@x.test");
 		await expect(
-			acceptInvitation(db, {
+			acceptInvitation({
 				rawToken,
 				accepterId: "acct_invitee",
 				accepterEmail: "invitee@x.test",
@@ -371,7 +365,7 @@ describe("acceptInvitation", () => {
 		const { rawToken } = await invite("invitee@x.test", "member");
 		// A different, already-existing user gets hold of the token.
 		await expect(
-			acceptInvitation(db, {
+			acceptInvitation({
 				rawToken,
 				accepterId: ACCT_OUTSIDER, // outsider@x.test, not invitee@x.test
 				accepterEmail: "outsider@x.test",
@@ -381,7 +375,7 @@ describe("acceptInvitation", () => {
 
 		// The outsider was NOT joined.
 		expect(
-			await getMembership(db, TEAM_A, ACCT_OUTSIDER)?.then((m) => m?.role),
+			await getMembership(TEAM_A, ACCT_OUTSIDER)?.then((m) => m?.role),
 		).toBe(undefined);
 	});
 });
@@ -391,22 +385,22 @@ describe("acceptInvitation", () => {
 describe("revokeInvitation + listPendingInvitations", () => {
 	it("deletes a pending invite (owner)", async () => {
 		const { invitation } = await invite("new@x.test", "member");
-		await revokeInvitation(db, TEAM_A, invitation.id, ACCT_OWNER);
-		expect(await listPendingInvitations(db, TEAM_A)).toHaveLength(0);
+		await revokeInvitation(TEAM_A, invitation.id, ACCT_OWNER);
+		expect(await listPendingInvitations(TEAM_A)).toHaveLength(0);
 	});
 
 	it("rejects a revoke by a plain member", async () => {
 		const { invitation } = await invite("new@x.test", "member");
 		await expect(
-			revokeInvitation(db, TEAM_A, invitation.id, ACCT_MEMBER),
+			revokeInvitation(TEAM_A, invitation.id, ACCT_MEMBER),
 		).rejects.toMatchObject({ code: "not_authorized" });
 		// Still pending.
-		expect(await listPendingInvitations(db, TEAM_A)).toHaveLength(1);
+		expect(await listPendingInvitations(TEAM_A)).toHaveLength(1);
 	});
 
 	it("is idempotent — revoking a nonexistent invite is a no-op", async () => {
 		await expect(
-			revokeInvitation(db, TEAM_A, "ghost", ACCT_OWNER),
+			revokeInvitation(TEAM_A, "ghost", ACCT_OWNER),
 		).resolves.toBeUndefined();
 	});
 });
@@ -415,44 +409,44 @@ describe("revokeInvitation + listPendingInvitations", () => {
 
 describe("updateMemberRole", () => {
 	it("changes a member's role (owner action)", async () => {
-		await updateMemberRole(db, TEAM_A, ACCT_MEMBER, "admin", ACCT_OWNER);
-		expect((await getMembership(db, TEAM_A, ACCT_MEMBER))?.role).toBe("admin");
+		await updateMemberRole(TEAM_A, ACCT_MEMBER, "admin", ACCT_OWNER);
+		expect((await getMembership(TEAM_A, ACCT_MEMBER))?.role).toBe("admin");
 	});
 
 	it("rejects a role change by a plain member", async () => {
 		await expect(
-			updateMemberRole(db, TEAM_A, ACCT_ADMIN, "member", ACCT_MEMBER),
+			updateMemberRole(TEAM_A, ACCT_ADMIN, "member", ACCT_MEMBER),
 		).rejects.toMatchObject({ code: "not_authorized" });
 	});
 
 	it("refuses to demote the only owner (last_owner)", async () => {
 		// ACCT_OWNER is the sole owner; demoting is refused.
 		await expect(
-			updateMemberRole(db, TEAM_A, ACCT_OWNER, "member", ACCT_OWNER),
+			updateMemberRole(TEAM_A, ACCT_OWNER, "member", ACCT_OWNER),
 		).rejects.toMatchObject({ code: "last_owner" });
 	});
 });
 
 describe("removeTeamMember", () => {
 	it("removes a member (owner action)", async () => {
-		await removeTeamMember(db, TEAM_A, ACCT_MEMBER, ACCT_OWNER);
-		expect(await getMembership(db, TEAM_A, ACCT_MEMBER)).toBeNull();
+		await removeTeamMember(TEAM_A, ACCT_MEMBER, ACCT_OWNER);
+		expect(await getMembership(TEAM_A, ACCT_MEMBER)).toBeNull();
 	});
 
 	it("allows a member to leave (self-remove)", async () => {
-		await removeTeamMember(db, TEAM_A, ACCT_MEMBER, ACCT_MEMBER);
-		expect(await getMembership(db, TEAM_A, ACCT_MEMBER)).toBeNull();
+		await removeTeamMember(TEAM_A, ACCT_MEMBER, ACCT_MEMBER);
+		expect(await getMembership(TEAM_A, ACCT_MEMBER)).toBeNull();
 	});
 
 	it("rejects removal of another by a plain member", async () => {
 		await expect(
-			removeTeamMember(db, TEAM_A, ACCT_ADMIN, ACCT_MEMBER),
+			removeTeamMember(TEAM_A, ACCT_ADMIN, ACCT_MEMBER),
 		).rejects.toMatchObject({ code: "not_authorized" });
 	});
 
 	it("refuses to remove the only owner (last_owner)", async () => {
 		await expect(
-			removeTeamMember(db, TEAM_A, ACCT_OWNER, ACCT_OWNER),
+			removeTeamMember(TEAM_A, ACCT_OWNER, ACCT_OWNER),
 		).rejects.toMatchObject({ code: "last_owner" });
 	});
 
@@ -462,27 +456,19 @@ describe("removeTeamMember", () => {
 			.update(teamMembers)
 			.set({ role: "owner" })
 			.where(eq(teamMembers.id, `${TEAM_A}_${ACCT_ADMIN}`));
-		await removeTeamMember(db, TEAM_A, ACCT_OWNER, ACCT_OWNER);
-		expect(await getMembership(db, TEAM_A, ACCT_OWNER)).toBeNull();
+		await removeTeamMember(TEAM_A, ACCT_OWNER, ACCT_OWNER);
+		expect(await getMembership(TEAM_A, ACCT_OWNER)).toBeNull();
 	});
 });
 
 describe("assertCanAdmin", () => {
 	it("passes for owner + admin, throws for member + outsider", async () => {
-		await expect(
-			assertCanAdmin(db, TEAM_A, ACCT_OWNER),
-		).resolves.toBeUndefined();
-		await expect(
-			assertCanAdmin(db, TEAM_A, ACCT_ADMIN),
-		).resolves.toBeUndefined();
-		await expect(assertCanAdmin(db, TEAM_A, ACCT_MEMBER)).rejects.toMatchObject(
-			{
-				code: "not_authorized",
-			},
-		);
-		await expect(
-			assertCanAdmin(db, TEAM_A, ACCT_OUTSIDER),
-		).rejects.toMatchObject({
+		await expect(assertCanAdmin(TEAM_A, ACCT_OWNER)).resolves.toBeUndefined();
+		await expect(assertCanAdmin(TEAM_A, ACCT_ADMIN)).resolves.toBeUndefined();
+		await expect(assertCanAdmin(TEAM_A, ACCT_MEMBER)).rejects.toMatchObject({
+			code: "not_authorized",
+		});
+		await expect(assertCanAdmin(TEAM_A, ACCT_OUTSIDER)).rejects.toMatchObject({
 			code: "not_authorized",
 		});
 	});
@@ -563,7 +549,7 @@ async function invite(
 	role: "admin" | "member",
 	expiresInMinutes = 60,
 ) {
-	return createInvitation(db, {
+	return createInvitation({
 		teamId: TEAM_A,
 		email,
 		role,

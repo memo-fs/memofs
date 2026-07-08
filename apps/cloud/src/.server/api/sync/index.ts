@@ -6,14 +6,11 @@
  * (push + push/complete), §4.5 (pull), §4.6 (status) of the locked cloud-sync
  * spec, composed from the pure helpers in `./shared` + the R2 presigner.
  *
- * The router carries its own middleware spine (auth + db) because both need
- * `c.env`, and mounting them here keeps the project-scoped contract obvious:
- * every `/sync/*` request authenticates an account AND binds a per-request
- * drizzle client before any handler runs. Health/readiness stay env-light and
- * never pay this cost (they mount directly in `createApiApp`).
+ * The router carries its own auth middleware because it needs `c.env` for the
+ * API key salt. DB access is handled via `getDB()` calls in the shared helper
+ * functions — no middleware needed since `getDB()` is memoized per isolate.
  *
- *   1. `dbMiddleware`     — builds `createDb(c.env)`, sets `c.var.db`.
- *   2. `authMiddleware`   — resolves the Bearer key → `c.var.account`.
+ *   1. `authMiddleware`   — resolves the Bearer key → `c.var.account`.
  *
  * Handlers then resolve the project (`:projectId`), assert ownership, and run
  * the request-specific logic. Every response goes through `json()` so the wire
@@ -52,8 +49,8 @@ import type {
 } from "@memofs/core/cloud-client";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
+import { secret } from "../../../lib/env";
 import { invariant } from "../../../utils/misc";
-import { getDB } from "../../db";
 import { ConflictError, EntitlementError, ValidationError } from "../errors";
 import type { ApiEnv, ApiVariables } from "../index";
 import { json } from "../json";
@@ -110,44 +107,18 @@ interface PullBody {
 }
 
 // ---------------------------------------------------------------------------
-// Middleware: db + auth, both built per-request from `c.env`
+// Middleware: auth, built per-request from `c.env`
 // ---------------------------------------------------------------------------
 
 /**
- * Builds `createDb(c.env)` once per request and stamps it on `c.var.db`.
- *
- * A fresh drizzle client per request matches how the Worker runtime works —
- * the libSQL HTTP client is connectionless, so this is cheap. Keeping the
- * construction in middleware (not inside each handler) means the handlers stay
- * pure "read `c.get("db")`" and the binding→client mapping lives in one place.
- *
- * If `c.var.db` is already set (tests pre-seed a migrated in-memory DB this
- * way via a tiny `use("*", (c) => c.set("db", testDb))` mounted before this
- * router), we honor it and skip construction — so integration tests run the
- * real handlers against a real libSQL client without a Worker binding.
- */
-const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
-	if (!c.get("db")) c.set("db", getDB());
-	await next();
-};
-
-/**
- * Bearer auth, resolving the per-request deps from `c.env` + `c.get("db")`.
+ * Bearer auth, resolving the per-request deps from `c.env`.
  *
  * `resolveAccount` is the pure core of `createAuthMiddleware`; calling it
  * directly here avoids re-creating a middleware closure per request while
  * keeping the same validation + error paths (it throws `AuthError` → 401).
- *
- * `db` MUST be set first (by `dbMiddleware`) — auth joins `api_keys` →
- * `accounts`, so it needs the client. Router ordering below guarantees this.
  */
 const authMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
-	const db = c.get("db");
-	// Defensive: the router mounts db before auth, so this is unreachable in
-	// normal operation. Failing loudly surfaces a wiring bug rather than
-	// letting an unauthenticated request slip past.
-	invariant(db, "db middleware must run before auth middleware");
-	const salt = c.env.API_KEY_SALT;
+	const salt = secret("API_KEY_SALT");
 	const account = await resolveAccount(salt, c.req.header("authorization"));
 	c.set("account", account);
 	await next();
@@ -158,7 +129,6 @@ const authMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
 // ---------------------------------------------------------------------------
 
 export const syncApp = new Hono<ApiEnv>()
-	.use("*", dbMiddleware)
 	.use("*", authMiddleware)
 
 	// --- POST /push ----------------------------------------------------------
@@ -184,7 +154,7 @@ export const syncApp = new Hono<ApiEnv>()
 
 		// Issue one presigned PUT per changed/missing path. Keys are content-
 		// addressed (the sha256), so identical content across paths shares one URL.
-		const config = presignConfigFromEnv(c.env);
+		const config = presignConfigFromEnv();
 		const urls = await presignMany(
 			config,
 			targets.map((t) => t.sha256),
@@ -329,7 +299,7 @@ export const syncApp = new Hono<ApiEnv>()
 		const targets = diffPullTargets(cloud, client);
 		const removed = diffRemoved(client, cloud);
 
-		const config = presignConfigFromEnv(c.env);
+		const config = presignConfigFromEnv();
 		const urls = await presignMany(
 			config,
 			targets.map((t) => t.sha256),
@@ -516,7 +486,7 @@ function emptyPull() {
  */
 function presignExpiry(env: Env): string | undefined {
 	const raw = env.PRESIGN_TTL_SECONDS;
-	const ttl = raw && raw !== "" && Number(raw) > 0 ? Number(raw) : 900;
+	const ttl = raw && Number(raw) > 0 ? Number(raw) : 900;
 	return new Date(Date.now() + ttl * 1000).toISOString();
 }
 

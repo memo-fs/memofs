@@ -51,20 +51,24 @@ describe("presignConfigFromEnv", () => {
 	});
 
 	it("parses PRESIGN_TTL_SECONDS into a number", () => {
-		const cfg = presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "300" as any }));
+		const cfg = presignConfigFromEnv(
+			mockEnv({ PRESIGN_TTL_SECONDS: "300" as any }),
+		);
 		expect(cfg.ttlSeconds).toBe(300);
 	});
 
 	it("returns undefined ttl for blank/invalid PRESIGN_TTL_SECONDS", () => {
 		expect(
-			presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "" as any })).ttlSeconds,
+			presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "" as any }))
+				.ttlSeconds,
 		).toBeUndefined();
 		expect(
 			presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "garbage" as any }))
 				.ttlSeconds,
 		).toBeUndefined();
 		expect(
-			presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "-5" as any })).ttlSeconds,
+			presignConfigFromEnv(mockEnv({ PRESIGN_TTL_SECONDS: "-5" as any }))
+				.ttlSeconds,
 		).toBeUndefined();
 	});
 });

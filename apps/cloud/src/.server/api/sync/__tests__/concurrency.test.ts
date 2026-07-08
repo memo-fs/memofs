@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
-import { Hono } from "hono";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../../../tests/utils/db";
 import { createFakeR2Bucket } from "../../../../../tests/utils/env";
 import type { Database } from "../../../db";
@@ -11,7 +10,7 @@ import {
 	syncCursors,
 } from "../../../db/schema";
 import { hashApiKey, sha256Hex } from "../../../utils";
-import { type ApiEnv, createApiApp } from "../..";
+import { createApi } from "../..";
 import { ConcurrencyError, isApiError } from "../../errors";
 import { classify, isLockTimeout } from "../concurrency";
 
@@ -70,12 +69,16 @@ function testEnv(): Env {
 
 beforeEach(async () => {
 	db = await createTestDb();
+	vi.mock("../../../db", () => ({
+		getDB: () => db,
+	}));
 	const fake = createFakeR2Bucket();
 	bucket = fake.bucket;
 	blobs = fake.blobs;
 });
 
 afterEach(async () => {
+	vi.restoreAllMocks();
 	// Release the in-process sqlite3 handle backing the libSQL `:memory:` client.
 	// biome-ignore lint/suspicious/noExplicitAny: drizzle's client accessor is untyped
 	(await (db as any).$client.close?.()) ?? undefined;
@@ -100,18 +103,11 @@ async function seedOwner(): Promise<void> {
 }
 
 /**
- * The real `createApiApp()` wrapped in an outer app that pre-seeds `c.var.db`.
- * Mirrors the seam in sync.test.ts (see its JSDoc): the outer `use()` runs first
- * so the sync router's `dbMiddleware` sees the test DB already bound.
+ * The real `createApi()` for testing. DB access is handled via mocked
+ * `getDB()` which returns the test DB.
  */
 function app() {
-	const outer = new Hono<ApiEnv>();
-	outer.use("*", (c, next) => {
-		c.set("db", db);
-		return next();
-	});
-	outer.route("/", createApiApp());
-	return outer;
+	return createApi();
 }
 
 async function syncFetch(

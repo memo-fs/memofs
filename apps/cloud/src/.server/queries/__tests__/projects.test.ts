@@ -80,7 +80,7 @@ async function seedFile(
 
 describe("listProjectsForAccount", () => {
 	it("returns only the account's projects", async () => {
-		const result = await listProjectsForAccount(db, ACCT_A);
+		const result = await listProjectsForAccount(ACCT_A);
 		expect(result.map((p) => p.id).sort()).toEqual([PROJ_EMPTY, PROJ_OWNED]);
 	});
 
@@ -109,7 +109,7 @@ describe("listProjectsForAccount", () => {
 			.set({ totalStorageBytes: 1536 })
 			.where(eq(projects.id, PROJ_OWNED));
 
-		const result = await listProjectsForAccount(db, ACCT_A);
+		const result = await listProjectsForAccount(ACCT_A);
 		const owned = result.find((p) => p.id === PROJ_OWNED);
 		expect(owned).toBeDefined();
 		expect(owned?.fileCount).toBe(2);
@@ -117,7 +117,7 @@ describe("listProjectsForAccount", () => {
 	});
 
 	it("reports null lastSyncAt and cursor '0' for a never-pushed project", async () => {
-		const result = await listProjectsForAccount(db, ACCT_A);
+		const result = await listProjectsForAccount(ACCT_A);
 		const empty = result.find((p) => p.id === PROJ_EMPTY);
 		expect(empty).toBeDefined();
 		expect(empty?.lastSyncAt).toBeNull();
@@ -130,7 +130,7 @@ describe("listProjectsForAccount", () => {
 		await seedCursor(PROJ_OWNED, 3, "2026-06-22T14:30:00Z");
 		await seedCursor(PROJ_OWNED, 2, "2026-06-21T09:00:00Z");
 
-		const result = await listProjectsForAccount(db, ACCT_A);
+		const result = await listProjectsForAccount(ACCT_A);
 		const owned = result.find((p) => p.id === PROJ_OWNED);
 		expect(owned).toBeDefined();
 		expect(owned?.cursor).toBe("3");
@@ -138,26 +138,26 @@ describe("listProjectsForAccount", () => {
 	});
 
 	it("returns [] for an account with no projects", async () => {
-		const result = await listProjectsForAccount(db, "acct_nobody");
+		const result = await listProjectsForAccount("acct_nobody");
 		expect(result).toEqual([]);
 	});
 });
 
 describe("getProjectForAccount", () => {
 	it("returns the project when owned", async () => {
-		const result = await getProjectForAccount(db, ACCT_A, PROJ_OWNED);
+		const result = await getProjectForAccount(ACCT_A, PROJ_OWNED);
 		expect(result?.id).toBe(PROJ_OWNED);
 		expect(result?.name).toBe("owned");
 		expect(result?.isDefault).toBe(true);
 	});
 
 	it("returns null for a project owned by another account (no cross leak)", async () => {
-		const result = await getProjectForAccount(db, ACCT_A, PROJ_OTHER);
+		const result = await getProjectForAccount(ACCT_A, PROJ_OTHER);
 		expect(result).toBeNull();
 	});
 
 	it("returns null for a nonexistent project", async () => {
-		const result = await getProjectForAccount(db, ACCT_A, "ghost");
+		const result = await getProjectForAccount(ACCT_A, "ghost");
 		expect(result).toBeNull();
 	});
 });
@@ -168,7 +168,7 @@ describe("recentSyncActivity", () => {
 		await seedCursor(PROJ_OWNED, 3, "2026-06-22T14:30:00Z");
 		await seedCursor(PROJ_OWNED, 2, "2026-06-21T09:00:00Z");
 
-		const activity = await recentSyncActivity(db, PROJ_OWNED);
+		const activity = await recentSyncActivity(PROJ_OWNED);
 		expect(activity.map((a) => a.cursor)).toEqual(["3", "2", "1"]);
 		expect(activity[0].at).toBe("2026-06-22T14:30:00Z");
 	});
@@ -178,12 +178,12 @@ describe("recentSyncActivity", () => {
 		await seedCursor(PROJ_OWNED, 2, "2026-06-21T09:00:00Z");
 		await seedCursor(PROJ_OWNED, 3, "2026-06-22T14:30:00Z");
 
-		const activity = await recentSyncActivity(db, PROJ_OWNED, 2);
+		const activity = await recentSyncActivity(PROJ_OWNED, 2);
 		expect(activity).toHaveLength(2);
 	});
 
 	it("returns [] for a project with no cursors", async () => {
-		const activity = await recentSyncActivity(db, PROJ_EMPTY);
+		const activity = await recentSyncActivity(PROJ_EMPTY);
 		expect(activity).toEqual([]);
 	});
 });
@@ -194,7 +194,7 @@ describe("listProjectFiles", () => {
 		await seedFile(PROJ_OWNED, ".memofs/alpha.md", 1024, "a".repeat(64));
 		await seedFile(PROJ_OTHER, ".memofs/other.md", 2048, "c".repeat(64));
 
-		const files = await listProjectFiles(db, PROJ_OWNED);
+		const files = await listProjectFiles(PROJ_OWNED);
 		expect(files.map((f) => f.path)).toEqual([
 			".memofs/alpha.md",
 			".memofs/zeta.md",
@@ -207,13 +207,13 @@ describe("listProjectFiles", () => {
 		await seedFile(PROJ_OWNED, ".memofs/owned.md");
 		await seedFile(PROJ_OTHER, ".memofs/other.md");
 
-		const files = await listProjectFiles(db, PROJ_OWNED);
+		const files = await listProjectFiles(PROJ_OWNED);
 		expect(files).toHaveLength(1);
 		expect(files[0].path).toBe(".memofs/owned.md");
 	});
 
 	it("returns [] for a project with no files", async () => {
-		expect(await listProjectFiles(db, PROJ_EMPTY)).toEqual([]);
+		expect(await listProjectFiles(PROJ_EMPTY)).toEqual([]);
 	});
 });
 
@@ -223,14 +223,14 @@ describe("listProjectCursorHistory", () => {
 		await seedCursor(PROJ_OWNED, 3, "2026-06-22T14:30:00Z");
 		await seedCursor(PROJ_OWNED, 2, "2026-06-21T09:00:00Z");
 
-		const history = await listProjectCursorHistory(db, PROJ_OWNED);
+		const history = await listProjectCursorHistory(PROJ_OWNED);
 		expect(history.map((c) => c.cursor)).toEqual(["3", "2", "1"]);
 		expect(history[0].kind).toBe("push");
 		expect(history[0].createdAt).toBe("2026-06-22T14:30:00Z");
 	});
 
 	it("returns [] for a never-pushed project", async () => {
-		expect(await listProjectCursorHistory(db, PROJ_EMPTY)).toEqual([]);
+		expect(await listProjectCursorHistory(PROJ_EMPTY)).toEqual([]);
 	});
 });
 
@@ -239,7 +239,7 @@ describe("deleteProject", () => {
 		await seedFile(PROJ_OWNED, ".memofs/a.md");
 		await seedCursor(PROJ_OWNED, 1, "2026-06-20T10:00:00Z");
 
-		const deleted = await deleteProject(db, ACCT_A, PROJ_OWNED);
+		const deleted = await deleteProject(ACCT_A, PROJ_OWNED);
 		expect(deleted).toBe(true);
 
 		// The project row is gone.
@@ -264,15 +264,15 @@ describe("deleteProject", () => {
 
 	it("returns false for a project owned by another account (no cross delete)", async () => {
 		// ACCT_A tries to delete ACCT_B's project.
-		const deleted = await deleteProject(db, ACCT_A, PROJ_OTHER);
+		const deleted = await deleteProject(ACCT_A, PROJ_OTHER);
 		expect(deleted).toBe(false);
 
 		// The other account's project is untouched.
-		const stillThere = await getProjectForAccount(db, ACCT_B, PROJ_OTHER);
+		const stillThere = await getProjectForAccount(ACCT_B, PROJ_OTHER);
 		expect(stillThere?.id).toBe(PROJ_OTHER);
 	});
 
 	it("returns false for a nonexistent project", async () => {
-		expect(await deleteProject(db, ACCT_A, "ghost")).toBe(false);
+		expect(await deleteProject(ACCT_A, "ghost")).toBe(false);
 	});
 });

@@ -25,48 +25,42 @@
  * `acquireWriteLock` reaches below drizzle for (`db.$client.transaction("write")`).
  */
 
-import { env } from "cloudflare:workers";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
+import { secret } from "../../lib/env";
 import * as schema from "./schema";
 
 export type Database = ReturnType<typeof getDB>;
 
 /**
- * Connection-key → libSQL client cache, scoped to the Worker isolate.
+ * Memoized drizzle client scoped to the Worker isolate.
  *
- * One underlying TCP/HTTP connection serves every request the isolate handles;
- * drizzle clients are cheap wrappers allocated per `createDb` call on top. The
- * key is the unique (URL, token) pair so rotating the Turso token via secret
- * rotation picks up a fresh client rather than reusing the stale one.
+ * The underlying `@libsql/client` `Client` is created once per (url, token)
+ * pair and reused across requests; drizzle wraps it on top. `db.$client`
+ * exposes the raw libSQL client, which is what `acquireWriteLock` reaches
+ * below drizzle for (`db.$client.transaction("write")`).
  */
-/**
- * Builds a drizzle client bound to the env's Turso/libSQL database.
- *
- * @param env - The Worker env (`DATABASE_URL` / `DATABASE_AUTH_TOKEN`).
- * @returns a drizzle `Database` whose `.$client` is the raw libSQL `Client`
- *          (used by the concurrency layer's `transaction("write")`).
- */
-// export function getDB() {
-// 	const client = createClient({
-// 		url: env.DATABASE_URL,
-// 		authToken: env.DATABASE_AUTH_TOKEN,
-// 	});
-// 	return drizzle({ schema, client });
-// }
-
 let db: ReturnType<typeof drizzle> | undefined;
 
+/**
+ * Returns the singleton drizzle client for this isolate.
+ *
+ * On first call, creates a libSQL client from the Worker env credentials and
+ * wraps it with drizzle. Subsequent calls return the cached instance. The
+ * connection-key cache ensures rotating the Turso token via secret rotation
+ * picks up a fresh client rather than reusing the stale one.
+ *
+ * @returns A drizzle `Database` whose `.$client` is the raw libSQL `Client`.
+ */
 export function getDB() {
 	if (!db) {
 		db = drizzle({
 			client: createClient({
-				url: env.DATABASE_URL,
-				authToken: env.DATABASE_AUTH_TOKEN,
+				url: secret("DATABASE_URL"),
+				authToken: secret("DATABASE_AUTH_TOKEN"),
 			}),
 			schema,
 		});
 	}
 	return db;
 }
-

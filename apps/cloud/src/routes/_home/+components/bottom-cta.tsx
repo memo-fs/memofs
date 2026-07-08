@@ -26,9 +26,8 @@ export function BottomCta() {
 					</h2>
 					<p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
 						Early access, open-source at the core. Reserve your spot and get
-						your{" "}
-						<InlineCode className="text-xs">.memofs/</InlineCode> synced the
-						day we launch.
+						your <InlineCode className="text-xs">.memofs/</InlineCode> synced
+						the day we launch.
 					</p>
 					<div className="mt-8 flex flex-wrap items-center justify-center gap-3">
 						{/* Get started — hidden while in waitlist-only mode */}

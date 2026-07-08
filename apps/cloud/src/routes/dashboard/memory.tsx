@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFetcher, useOutletContext } from "react-router";
 import { getEnv } from "~/.server/context";
+import { buildNoindexMeta } from "~/lib/seo";
 import type { DashboardOutletContext } from "./_layout";
 import type { ConsolidationResult } from "./+components/consolidation-run-log";
 import { ConsolidationRunLog } from "./+components/consolidation-run-log";
@@ -11,7 +12,6 @@ import { MemoryPreWarmingCard } from "./+components/memory-pre-warming-card";
 import { MemoryStatusCard } from "./+components/memory-status-card";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/memory";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Which hosted-runtime providers are actually bound in this deployment.

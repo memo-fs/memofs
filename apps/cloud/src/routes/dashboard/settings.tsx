@@ -1,10 +1,10 @@
+import { env } from "cloudflare:workers";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { redirect, useFetcher, useRouteLoaderData } from "react-router";
-import { env } from "cloudflare:workers";
 import { getDB } from "~/.server/db";
 import { user } from "~/.server/db/schema";
 import { purgeAccount } from "~/.server/queries/account-deletion";
@@ -13,6 +13,7 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
+import { buildNoindexMeta } from "~/lib/seo";
 import { formatRelative } from "~/utils/misc";
 import { DeleteAccountDialog } from "./+components/delete-account-dialog";
 import { PageHeader } from "./+components/page-header";
@@ -20,7 +21,6 @@ import { ProfileForm } from "./+components/profile-form";
 import type { Route as DashboardRoute } from "./+types/_layout";
 import type { Route } from "./+types/settings";
 import { ProfileSchema } from "./+utils/settings";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Settings (SC3.6). Account-wide. The profile is editable (name via Conform +
@@ -167,15 +167,11 @@ export async function action({
 export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 	const { user, sessions } = loaderData;
 	const revokeFetcher = useFetcher<{ ok: boolean }>();
-
-	// Reuse the layout's already-resolved account/usage for the danger-zone note.
 	const dashboard = useRouteLoaderData<
 		DashboardRoute.ComponentProps["loaderData"]
 	>("routes/dashboard/_layout");
-
 	const [showDelete, setShowDelete] = useState(false);
 
-	// Drop a session optimistically the moment its revoke submission fires.
 	const revokingToken = revokeFetcher.formData?.get("token");
 	const visibleSessions =
 		revokingToken != null
@@ -188,8 +184,6 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 				title="Settings"
 				subtitle="Account-wide identity and security."
 			/>
-
-			{/* Profile (name editable via Conform + Zod v4; email read-only) */}
 			<section className="mb-8 space-y-4">
 				<h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
 					Profile
@@ -200,108 +194,12 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 					</CardContent>
 				</Card>
 			</section>
-
 			<Separator className="my-8" />
-
-			{/* Security */}
-			<section className="mb-8 space-y-6">
-				<h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-					Security
-				</h3>
-
-				{/* Passwordless explainer (replaces the old fake password-change form) */}
-				<Card>
-					<CardContent className="flex items-center gap-3 p-5">
-						<ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
-						<div>
-							<p className="text-xs font-semibold text-foreground">
-								Passwordless authentication
-							</p>
-							<p className="mt-0.5 text-[10px] leading-normal text-muted-foreground">
-								You sign in via email magic link or GitHub/Google. There's no
-								password to change or forget.
-							</p>
-						</div>
-					</CardContent>
-				</Card>
-
-				{/* Active sessions (real, revocable) */}
-				<Card>
-					<CardHeader className="pb-3">
-						<CardTitle className="text-xs font-semibold">
-							Active sessions
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="divide-y divide-border/40 border-t border-border/40 p-0">
-						{visibleSessions.length === 0 ? (
-							<p className="px-5 py-6 text-center text-xs text-muted-foreground">
-								No active sessions.
-							</p>
-						) : (
-							visibleSessions.map((s) => (
-								<div
-									key={s.id}
-									className="flex items-center justify-between px-5 py-3 text-xs"
-								>
-									<div>
-										<div className="flex items-center gap-2">
-											<p className="font-semibold text-foreground">
-												{s.device}
-											</p>
-											{s.current && (
-												<Badge className="h-4 px-1 py-0 text-[9px] border-primary/20 bg-primary/10 text-primary hover:bg-primary/15">
-													Current
-												</Badge>
-											)}
-										</div>
-										<p className="mt-0.5 text-[10px] text-muted-foreground">
-											{s.ipAddress ?? "IP unknown"} ·{" "}
-											{formatRelative(s.createdAt)}
-										</p>
-									</div>
-									{!s.current && (
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-8 text-xs text-destructive hover:bg-destructive/5 hover:text-destructive"
-											onClick={() =>
-												revokeFetcher.submit(
-													{ intent: "revoke-session", token: s.token },
-													{ method: "post" },
-												)
-											}
-										>
-											Revoke
-										</Button>
-									)}
-								</div>
-							))
-						)}
-					</CardContent>
-				</Card>
-
-				{/* 2FA — honest N/A note under passwordless */}
-				<Card>
-					<CardContent className="flex items-center justify-between p-5">
-						<div>
-							<p className="text-xs font-semibold text-foreground">
-								Two-factor authentication
-							</p>
-							<p className="mt-0.5 text-[10px] text-muted-foreground">
-								N/A under passwordless — the magic link is the possession
-								factor, email is the knowledge factor.
-							</p>
-						</div>
-						<Badge variant="secondary" className="h-5 px-1 py-0 text-[9px]">
-							Not applicable
-						</Badge>
-					</CardContent>
-				</Card>
-			</section>
-
+			<SecuritySection
+				visibleSessions={visibleSessions}
+				revokeFetcher={revokeFetcher}
+			/>
 			<Separator className="my-8" />
-
-			{/* Danger zone */}
 			<section className="space-y-4">
 				<div className="flex items-center gap-2">
 					<ShieldAlert className="h-4 w-4 text-destructive" />
@@ -329,14 +227,109 @@ export default function SettingsPage({ loaderData }: Route.ComponentProps) {
 					</CardContent>
 				</Card>
 			</section>
-
-			{/* Danger zone — real R2 purge + DB cascade (SC3.6) */}
 			<DeleteAccountDialog
 				open={showDelete}
 				onOpenChange={setShowDelete}
 				accountId={dashboard?.account?.id ?? null}
 			/>
 		</div>
+	);
+}
+
+function SecuritySection({
+	visibleSessions,
+	revokeFetcher,
+}: {
+	visibleSessions: SessionView[];
+	revokeFetcher: ReturnType<typeof useFetcher<{ ok: boolean }>>;
+}) {
+	return (
+		<section className="mb-8 space-y-6">
+			<h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+				Security
+			</h3>
+			<Card>
+				<CardContent className="flex items-center gap-3 p-5">
+					<ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
+					<div>
+						<p className="text-xs font-semibold text-foreground">
+							Passwordless authentication
+						</p>
+						<p className="mt-0.5 text-[10px] leading-normal text-muted-foreground">
+							You sign in via email magic link or GitHub/Google. There's no
+							password to change or forget.
+						</p>
+					</div>
+				</CardContent>
+			</Card>
+			<Card>
+				<CardHeader className="pb-3">
+					<CardTitle className="text-xs font-semibold">
+						Active sessions
+					</CardTitle>
+				</CardHeader>
+				<CardContent className="divide-y divide-border/40 border-t border-border/40 p-0">
+					{visibleSessions.length === 0 ? (
+						<p className="px-5 py-6 text-center text-xs text-muted-foreground">
+							No active sessions.
+						</p>
+					) : (
+						visibleSessions.map((s) => (
+							<div
+								key={s.id}
+								className="flex items-center justify-between px-5 py-3 text-xs"
+							>
+								<div>
+									<div className="flex items-center gap-2">
+										<p className="font-semibold text-foreground">{s.device}</p>
+										{s.current && (
+											<Badge className="h-4 px-1 py-0 text-[9px] border-primary/20 bg-primary/10 text-primary hover:bg-primary/15">
+												Current
+											</Badge>
+										)}
+									</div>
+									<p className="mt-0.5 text-[10px] text-muted-foreground">
+										{s.ipAddress ?? "IP unknown"} ·{" "}
+										{formatRelative(s.createdAt)}
+									</p>
+								</div>
+								{!s.current && (
+									<Button
+										size="sm"
+										variant="ghost"
+										className="h-8 text-xs text-destructive hover:bg-destructive/5 hover:text-destructive"
+										onClick={() =>
+											revokeFetcher.submit(
+												{ intent: "revoke-session", token: s.token },
+												{ method: "post" },
+											)
+										}
+									>
+										Revoke
+									</Button>
+								)}
+							</div>
+						))
+					)}
+				</CardContent>
+			</Card>
+			<Card>
+				<CardContent className="flex items-center justify-between p-5">
+					<div>
+						<p className="text-xs font-semibold text-foreground">
+							Two-factor authentication
+						</p>
+						<p className="mt-0.5 text-[10px] text-muted-foreground">
+							N/A under passwordless — the magic link is the possession factor,
+							email is the knowledge factor.
+						</p>
+					</div>
+					<Badge variant="secondary" className="h-5 px-1 py-0 text-[9px]">
+						Not applicable
+					</Badge>
+				</CardContent>
+			</Card>
+		</section>
 	);
 }
 

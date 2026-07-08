@@ -38,6 +38,11 @@ const CATALOG = [
 	},
 ] as const;
 
+/**
+ * Renders the static connector catalog grid — informational cards for each
+ * available connector (GitHub, Notion, Linear). The "+ Add" button lives on
+ * the page header, not here.
+ */
 export function ConnectorCatalog() {
 	return (
 		<section className="mb-8">

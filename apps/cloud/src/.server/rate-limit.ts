@@ -73,9 +73,8 @@ export async function consumeMagicLinkToken(
 		if (!limitResult.success) {
 			return { ok: false, reset: Date.now() + 60000 };
 		}
-	} catch (error) {
+	} catch {
 		// Fallback gracefully on rate limiting service errors to avoid lockouts.
-		console.error("[rate-limit] Cloudflare limit call failed", error);
 	}
 
 	return { ok: true };

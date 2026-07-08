@@ -6,9 +6,10 @@
  */
 
 import { z } from "zod/v4";
+import type { ConnectorType } from "~/.server/db/schema";
 
-/** The connector types available at v1. */
-const CONNECTOR_TYPES = ["github", "notion"] as const;
+/** The connector types available at v1 — derived from schema. */
+const CONNECTOR_TYPES: readonly ConnectorType[] = ["github", "notion"];
 
 /** Create-connector form schema. */
 export const CreateConnectorSchema = z.object({

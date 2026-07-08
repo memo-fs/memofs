@@ -52,6 +52,7 @@
  * client rather than a local re-declaration.
  */
 import type { Transaction } from "@libsql/client";
+import { getDB } from "../../db";
 import { type ApiErrorHeaders, ConcurrencyError } from "../errors";
 
 /**
@@ -91,7 +92,7 @@ export async function acquireWriteLock<T>(
 	// (driver-core.js: `db.$client = client`). `transaction("write")` opens an
 	// interactive transaction with `BEGIN IMMEDIATE`, which queues — see the
 	// module header for why this beats drizzle's deferred default.
-	const tx = await db.$client.transaction("write");
+	const tx = await getDB().$client.transaction("write");
 	try {
 		const result = await fn(tx);
 		await tx.commit();

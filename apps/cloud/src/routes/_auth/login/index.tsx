@@ -14,39 +14,23 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildNoindexMeta } from "~/lib/seo";
-import {
-	AuthSwitchLink,
-	FormError,
-} from "../+components/form-parts";
+import { AuthSwitchLink, FormError } from "../+components/form-parts";
 import { MagicLinkSent } from "../+components/magic-link-sent";
 import { OAuthButtons } from "../+components/oauth-buttons";
-import type { Route } from "../+types/login";
 import { useAuthRedirect } from "../hooks/use-auth-redirect";
+import type { Route } from "./+types/index";
 import { type LoginResult, LoginSchema } from "./+utils";
-
-export { action } from "./+actions.server";
 
 export function meta() {
 	return buildNoindexMeta("Log in — Memo FS Cloud");
 }
 
-/**
- * Exposes the server-derived set of enabled OAuth providers so the buttons
- * render iff `createAuth` will accept them (A2). No DB hit — pure env check.
- */
 export async function loader() {
 	return { providers: enabledOAuthProviders() };
 }
 
-
 export { action } from "./+actions.server";
 
-/**
- * Login page (SC4.1). Passwordless: the user enters an email, the server
- * action calls Better Auth's `signInMagicLink`, and the link in their email is
- * the only factor. The form uses `useFetcher` (no navigation) so the "sending…"
- * pending state and the "check inbox" result both render inline.
- */
 export default function LoginPage({ loaderData }: Route.ComponentProps) {
 	const { providers } = loaderData;
 	const next = useAuthRedirect();
@@ -76,7 +60,6 @@ export default function LoginPage({ loaderData }: Route.ComponentProps) {
 			</CardHeader>
 			<CardContent>
 				<OAuthButtons providers={providers} callbackURL={next} />
-
 				<fetcher.Form
 					{...getFormProps(form)}
 					method="post"
@@ -100,7 +83,6 @@ export default function LoginPage({ loaderData }: Route.ComponentProps) {
 					</Button>
 					{form.errors && <FormError errors={form.errors} />}
 				</fetcher.Form>
-
 				<AuthSwitchLink
 					to="/signup"
 					question="No account?"

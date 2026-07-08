@@ -13,6 +13,25 @@
  *   so they survive JSON over the wire (loader data → client) losslessly.
  */
 
+import type {
+	ApiKey,
+	BillingAccount,
+	Connector,
+	MemoryEvent,
+	Project,
+	ProjectFile,
+	SyncCursor,
+} from "../db/schema/control-plane";
+
+/**
+ * Account entitlement snapshot — the fields that gate dashboard access.
+ * Derived from the schema's `BillingAccount` type via `Pick<>`.
+ */
+export type EntitlementSnapshot = Pick<
+	BillingAccount,
+	"id" | "plan" | "maxHostedStorageBytes" | "maxConnectors"
+>;
+
 /**
  * A project row shaped for the dashboard list/detail views.
  *
@@ -41,17 +60,13 @@ export interface ProjectSummary {
  * The raw key is NEVER returned here — it is shown once at creation and then
  * only the `lastFour` fingerprint is available. `revokedAt` is `null` for an
  * active key. There is no `lastSeen` field yet (tracking is deferred).
+ *
+ * Derived from the schema's `ApiKey` type via `Pick<>`.
  */
-export interface ApiKeyView {
-	id: string;
-	label: string | null;
-	/** Last 4 chars of the raw key, for recognition without the key itself. */
-	lastFour: string | null;
-	/** ISO timestamp of provisioning. */
-	createdAt: string;
-	/** ISO timestamp of soft-delete, or `null` for an active key. */
-	revokedAt: string | null;
-}
+export type ApiKeyView = Pick<
+	ApiKey,
+	"id" | "label" | "lastFour" | "createdAt" | "revokedAt"
+>;
 
 /**
  * A `sync_cursors` row surfaced as "recent activity" on the overview.
@@ -77,7 +92,7 @@ export interface SyncActivity {
 export interface MemoryActivityView {
 	id: string;
 	/** The runtime event kind. */
-	kind: "consolidation" | "write" | "core_update" | "pre_warm";
+	kind: MemoryEvent["kind"];
 	/** Human-readable summary, e.g. "Retired 3 duplicate nodes". */
 	summary: string;
 	/** Who triggered it: an api-key id, "hosted", or "system". */
@@ -93,18 +108,13 @@ export interface MemoryActivityView {
  * canonical `.memofs/` path to its content-addressed blob. `r2Key` is NOT
  * surfaced to the dashboard — it's an internal storage detail; callers that
  * need it (sync) read from the sync layer directly.
+ *
+ * Derived from the schema's `ProjectFile` type via `Pick<>`.
  */
-export interface ProjectFileView {
-	id: string;
-	/** Canonical `.memofs/` path, e.g. `.memofs/memory/core.md`. */
-	path: string;
-	/** sha256 hex digest — the identity/version primitive. */
-	sha256: string;
-	/** Content size in bytes. */
-	sizeBytes: number;
-	/** ISO timestamp of the last commit to this path. */
-	updatedAt: string;
-}
+export type ProjectFileView = Pick<
+	ProjectFile,
+	"id" | "path" | "sha256" | "sizeBytes" | "updatedAt"
+>;
 
 /**
  * One `sync_cursors` history row, shaped for the project-detail cursor list.
@@ -115,7 +125,7 @@ export interface CursorHistoryView {
 	/** The cursor value (`String(seq)`) at this commit point. */
 	cursor: string;
 	/** What produced the cursor — observability only, not read by sync logic. */
-	kind: "push" | "pull" | "init";
+	kind: SyncCursor["kind"];
 	/** ISO timestamp of the commit. */
 	createdAt: string;
 }

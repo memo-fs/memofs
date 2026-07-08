@@ -1,16 +1,15 @@
-import { Hono } from "hono";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb } from "../../../../../tests/utils/db";
 import { createFakeR2Bucket } from "../../../../../tests/utils/env";
 import type { Database } from "../../../db";
 import { accounts, apiKeys } from "../../../db/schema";
 import { hashApiKey, sha256Hex } from "../../../utils";
-import { type ApiEnv, createApiApp } from "../..";
+import { createApi } from "../..";
 
 /**
  * Sync handler tests — the four file-replication endpoints end-to-end.
  *
- * These run the REAL router (mounted through `createApiApp`) against an
+ * These run the REAL router (mounted through `createApi`) against an
  * in-memory libSQL DB seeded with accounts + api_keys, plus a fake R2 bucket
  * that stores blobs in a `Map` so the content-addressing verify step
  * (`verifyUploaded`) reads real bytes. The presign config uses throwaway creds;
@@ -58,12 +57,16 @@ function testEnv(): Env {
 
 beforeEach(async () => {
 	db = await createTestDb();
+	vi.mock("../../../db", () => ({
+		getDB: () => db,
+	}));
 	const fake = createFakeR2Bucket();
 	bucket = fake.bucket;
 	blobs = fake.blobs;
 });
 
 afterEach(async () => {
+	vi.restoreAllMocks();
 	// Release the in-process sqlite3 handle backing the libSQL `:memory:` client.
 	// biome-ignore lint/suspicious/noExplicitAny: drizzle's client accessor is untyped
 	(await (db as any).$client.close?.()) ?? undefined;
@@ -95,32 +98,11 @@ async function seedAccount(opts: {
 }
 
 /**
- * The real `createApiApp()` wrapped in an outer app that pre-seeds `c.var.db`
- * with our migrated in-memory test DB BEFORE the sync router runs.
- *
- * Ordering is load-bearing: `createApiApp()` registers `syncApp` (which carries
- * its own `dbMiddleware`) via `.route(...)`. A `use()` appended to that same
- * instance runs AFTER the matched sub-app's middleware — Hono dispatches in
- * registration order, and a `.route()` match short-circuits to its own chain
- * first. So `api.use("*", dbSetter)` added post-`createApiApp` runs too late:
- * the sync router's `dbMiddleware` has already called `createDb(c.env)` and
- * thrown on the `:memory:` URL.
- *
- * Mounting the setter on an OUTER app that then delegates to `createApiApp()`
- * runs it first in the dispatch chain. The sync router's `dbMiddleware` then
- * sees `c.get("db")` already set and skips `createDb(c.env)` (its documented
- * seam), so handlers run against the real libSQL client the tests seed, not a
- * Worker-binding client. Production mounts only `createApiApp()` — this outer
- * wrapper is a test-only seam for DB injection.
+ * The real `createApi()` for testing. DB access is handled via mocked
+ * `getDB()` which returns the test DB.
  */
 function app() {
-	const outer = new Hono<ApiEnv>();
-	outer.use("*", (c, next) => {
-		c.set("db", db);
-		return next();
-	});
-	outer.route("/", createApiApp());
-	return outer;
+	return createApi();
 }
 
 /** Fetches a sync route as the owner (authed). */

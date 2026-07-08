@@ -75,7 +75,14 @@ export async function purgeAccount(
 	//    project_files rows are the index that tells us which keys are shared).
 	const orphanedKeys = await collectOrphanedR2Keys(accountId);
 	await Promise.all(
-		orphanedKeys.map((key) => blobs.delete(key).catch(() => {})),
+		orphanedKeys.map((key) =>
+			blobs.delete(key).catch((err) => {
+				// R2 returns an error for non-existent keys — that's fine, the blob
+				// was already removed. Only re-throw real failures (network, permissions).
+				if (err?.message?.includes("NoSuchKey")) return;
+				throw err;
+			}),
+		),
 	);
 
 	// 2. Delete the accounts row — FK cascade drops everything account-scoped.

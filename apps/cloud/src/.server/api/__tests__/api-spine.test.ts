@@ -1,6 +1,6 @@
-import type { Hono } from "hono";
+import type { Context, Hono } from "hono";
 import { describe, expect, it } from "vitest";
-import { type ApiEnv, createApiApp } from "..";
+import { type ApiEnv, createApi } from "..";
 import { ApiError, EntitlementError, NotFoundError } from "../errors";
 import { json, jsonError } from "../json";
 
@@ -47,11 +47,11 @@ async function fetchApi(
 
 /** Builds an API app with one extra probe route for envelope/error tests. */
 function appWithProbe() {
-	const app = createApiApp();
+	const app = createApi();
 	// Reach into the Hono instance and add a probe route at /v1/__probe/* to
-	// exercise json/jsonError/throw without touching health. (createApiApp
+	// exercise json/jsonError/throw without touching health. (createApi
 	// already wired notFound + onError, so throws here hit the real handler.)
-	app.get("/v1/__probe/ok", (c) => json(c, { hello: "world" }));
+	app.get("/v1/__probe/ok", (c: Context) => json(c, { hello: "world" }));
 	app.get("/v1/__probe/throw-api", () => {
 		throw new NotFoundError("probe-missing");
 	});
@@ -67,7 +67,7 @@ function appWithProbe() {
 	app.get("/v1/__probe/throw-unexpected", () => {
 		throw new Error("boom-from-handler");
 	});
-	app.get("/v1/__probe/json-error", (c) =>
+	app.get("/v1/__probe/json-error", (c: Context) =>
 		jsonError(c, 418, "teapot", "I'm a teapot"),
 	);
 	return app;
@@ -183,7 +183,7 @@ describe("requestId middleware", () => {
 
 describe("health endpoints (through the envelope)", () => {
 	it("GET /v1/health returns the { data, meta } envelope with ok:true", async () => {
-		const res = await fetchApi(createApiApp(), "/v1/health");
+		const res = await fetchApi(createApi(), "/v1/health");
 		expect(res.status).toBe(200);
 		const body = await jsonBody(res);
 		expect(body.data).toMatchObject({
@@ -205,7 +205,7 @@ describe("health endpoints (through the envelope)", () => {
 				},
 			},
 		} as unknown as Env;
-		const res = await createApiApp().fetch(
+		const res = await createApi().fetch(
 			new Request("http://memofs.test/v1/readiness"),
 			throwingEnv,
 		);

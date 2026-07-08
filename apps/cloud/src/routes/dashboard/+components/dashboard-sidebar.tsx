@@ -135,6 +135,15 @@ export function DashboardSidebar({
 	);
 }
 
+/**
+ * Dropdown that lists the user's projects and lets them switch the active
+ * project context. Shows "No project" when nothing is selected and
+ * "No projects yet" when the list is empty.
+ *
+ * @param projects - List of projects the user has access to.
+ * @param project - Currently selected project, or `null` if none.
+ * @param onSelect - Callback when a project is selected from the dropdown.
+ */
 function ProjectSwitcher({
 	projects,
 	selected,
@@ -189,6 +198,14 @@ function ProjectSwitcher({
 	);
 }
 
+/**
+ * User account dropdown at the bottom of the sidebar — shows avatar, name,
+ * and links to settings + log out.
+ *
+ * @param user - The signed-in user's display name and email.
+ * @param initials - Two-letter avatar fallback derived from the user's name.
+ * @param onLogout - Callback to sign the user out.
+ */
 function AccountMenu({
 	user,
 	initials,

@@ -56,46 +56,46 @@ export async function provisionAccount(
 	// `UNLIMITED_CONNECTORS_SENTINEL` so the integer column never receives
 	// `Infinity` (free is finite today, but the write path stays uniform).
 	const freeCaps = capsForStorage("free");
-	const [account] = await db
-		.insert(accounts)
-		.values({
-			userId,
-			plan: "free",
-			maxHostedStorageBytes: freeCaps.maxHostedStorageBytes,
-			maxConnectors: freeCaps.maxConnectors,
-		})
-		.returning({ id: accounts.id });
-	const accountId = account.id;
 
-	// Every account owns exactly one personal team (ADR 0011 Phase 2): the
-	// team-scoped project path is universal, so a solo user is a one-member
-	// team they own. The default project is created under this team.
-	const [team] = await db
-		.insert(teams)
-		.values({
+	// Wrap all inserts in a transaction so a partial failure doesn't leave the
+	// DB in an inconsistent state (e.g. account exists but no team/project).
+	const result = await db.transaction(async (tx) => {
+		const [account] = await tx
+			.insert(accounts)
+			.values({
+				userId,
+				plan: "free",
+				maxHostedStorageBytes: freeCaps.maxHostedStorageBytes,
+				maxConnectors: freeCaps.maxConnectors,
+			})
+			.returning({ id: accounts.id });
+		const accountId = account.id;
+
+		const [team] = await tx
+			.insert(teams)
+			.values({
+				name: "My Workspace",
+				ownerAccountId: accountId,
+			})
+			.returning({ id: teams.id });
+		const teamId = team.id;
+
+		await tx.insert(teamMembers).values({
+			teamId,
+			accountId,
+			role: "owner",
+			acceptedAt: new Date().toISOString(),
+		});
+
+		await tx.insert(projects).values({
+			accountId,
+			teamId,
 			name: "My Workspace",
-			ownerAccountId: accountId,
-		})
-		.returning({ id: teams.id });
-	const teamId = team.id;
+			isDefault: true,
+		});
 
-	await db.insert(teamMembers).values({
-		teamId,
-		accountId,
-		role: "owner",
-		// The owner didn't get an invite — mark accepted at creation.
-		acceptedAt: new Date().toISOString(),
+		return { id: accountId, plan: "free" as const };
 	});
 
-	// One default project so the dashboard has a workspace on first visit. It
-	// belongs to the personal team (the access boundary); accountId records the
-	// creator. `isDefault` is true here and only here.
-	await db.insert(projects).values({
-		accountId,
-		teamId,
-		name: "My Workspace",
-		isDefault: true,
-	});
-
-	return { id: accountId, plan: "free" };
+	return result;
 }

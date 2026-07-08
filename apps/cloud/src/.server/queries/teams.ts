@@ -277,7 +277,6 @@ export async function listTeamsForAccount(
 			id: teams.id,
 			name: teams.name,
 			role: teamMembers.role,
-			isOwner: isNotNull(teams.ownerAccountId),
 		})
 		.from(teamMembers)
 		.innerJoin(teams, eq(teams.id, teamMembers.teamId))
@@ -288,7 +287,6 @@ export async function listTeamsForAccount(
 			),
 		)
 		.orderBy(desc(teams.createdAt));
-	// `isOwner` is true when this account owns the team (ownerAccountId matches).
 	const owned = await db
 		.select({ id: teams.id })
 		.from(teams)
@@ -367,6 +365,7 @@ export async function listPendingInvitations(
 			and(
 				eq(teamInvitations.teamId, teamId),
 				isNull(teamInvitations.acceptedAt),
+				sql`${teamInvitations.expiresAt} > datetime('now')`,
 			),
 		)
 		.orderBy(desc(teamInvitations.createdAt));
@@ -621,8 +620,33 @@ export async function acceptInvitation({
 	const invitation = await getInvitationByToken(rawToken, salt);
 	if (!invitation) throw new TeamMutationError("not_found");
 	if (invitation.acceptedAt !== null) {
-		// Already accepted — idempotent: return the conferred team/role without
-		// re-inserting the membership. A replay of the link just re-confirms.
+		// Already accepted — idempotent: verify the membership exists (a partial
+		// failure could have stamped acceptedAt but crashed before the insert).
+		// If the membership row is missing, re-upsert it to recover.
+		const existing = await db
+			.select({ id: teamMembers.id })
+			.from(teamMembers)
+			.where(
+				and(
+					eq(teamMembers.teamId, invitation.teamId),
+					eq(teamMembers.accountId, accepterId),
+				),
+			)
+			.limit(1);
+		if (existing.length === 0) {
+			await db
+				.insert(teamMembers)
+				.values({
+					teamId: invitation.teamId,
+					accountId: accepterId,
+					role: invitation.role,
+					acceptedAt: invitation.acceptedAt,
+				})
+				.onConflictDoUpdate({
+					target: [teamMembers.teamId, teamMembers.accountId],
+					set: { role: invitation.role, acceptedAt: invitation.acceptedAt },
+				});
+		}
 		return { teamId: invitation.teamId, role: invitation.role };
 	}
 	if (new Date(invitation.expiresAt).getTime() < Date.now()) {

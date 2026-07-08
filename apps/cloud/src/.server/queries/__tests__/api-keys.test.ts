@@ -45,7 +45,7 @@ afterEach(async () => {
 
 describe("listApiKeysForAccount", () => {
 	it("returns keys for the account, newest first", async () => {
-		const older = await createApiKey(db, {
+		const older = await createApiKey({
 			accountId: ACCT_A,
 			label: "ci",
 			salt: SALT,
@@ -53,47 +53,47 @@ describe("listApiKeysForAccount", () => {
 		// libSQL `created_at` defaults to `current_timestamp` at second resolution;
 		// bump the wall clock for the second key so ordering is deterministic.
 		await new Promise((r) => setTimeout(r, 1100));
-		const newer = await createApiKey(db, {
+		const newer = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
 		});
 
-		const rows = await listApiKeysForAccount(db, ACCT_A);
+		const rows = await listApiKeysForAccount(ACCT_A);
 		expect(rows).toHaveLength(2);
 		expect(rows[0].id).toBe(newer.row.id);
 		expect(rows[1].id).toBe(older.row.id);
 	});
 
 	it("includes revoked keys (dashboard shows history)", async () => {
-		const { row } = await createApiKey(db, {
+		const { row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "to-revoke",
 			salt: SALT,
 		});
-		await revokeApiKey(db, ACCT_A, row.id);
+		await revokeApiKey(ACCT_A, row.id);
 
-		const rows = await listApiKeysForAccount(db, ACCT_A);
+		const rows = await listApiKeysForAccount(ACCT_A);
 		expect(rows).toHaveLength(1);
 		expect(rows[0].revokedAt).not.toBeNull();
 	});
 
 	it("isolates keys by account — one account never sees another's", async () => {
-		await createApiKey(db, { accountId: ACCT_A, label: "a", salt: SALT });
-		await createApiKey(db, { accountId: ACCT_B, label: "b", salt: SALT });
+		await createApiKey({ accountId: ACCT_A, label: "a", salt: SALT });
+		await createApiKey({ accountId: ACCT_B, label: "b", salt: SALT });
 
-		expect(await listApiKeysForAccount(db, ACCT_A)).toHaveLength(1);
-		expect(await listApiKeysForAccount(db, ACCT_B)).toHaveLength(1);
+		expect(await listApiKeysForAccount(ACCT_A)).toHaveLength(1);
+		expect(await listApiKeysForAccount(ACCT_B)).toHaveLength(1);
 	});
 
 	it("returns an empty array for an account with no keys", async () => {
-		expect(await listApiKeysForAccount(db, ACCT_A)).toEqual([]);
+		expect(await listApiKeysForAccount(ACCT_A)).toEqual([]);
 	});
 });
 
 describe("createApiKey", () => {
 	it("generates a tm_-prefixed raw key", async () => {
-		const { rawKey } = await createApiKey(db, {
+		const { rawKey } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
@@ -102,7 +102,7 @@ describe("createApiKey", () => {
 	});
 
 	it("stores only the salted hash — the raw key is never persisted", async () => {
-		const { rawKey, row } = await createApiKey(db, {
+		const { rawKey, row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
@@ -119,7 +119,7 @@ describe("createApiKey", () => {
 	});
 
 	it("returns a lastFour that matches the last 4 chars of the raw key", async () => {
-		const { rawKey, row } = await createApiKey(db, {
+		const { rawKey, row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
@@ -128,7 +128,7 @@ describe("createApiKey", () => {
 	});
 
 	it("the raw key authenticates against the stored hash (round-trip)", async () => {
-		const { rawKey } = await createApiKey(db, {
+		const { rawKey } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
@@ -143,12 +143,12 @@ describe("createApiKey", () => {
 	});
 
 	it("persists the label and nulls out a whitespace-only label", async () => {
-		const labeled = await createApiKey(db, {
+		const labeled = await createApiKey({
 			accountId: ACCT_A,
 			label: "ci",
 			salt: SALT,
 		});
-		const blank = await createApiKey(db, {
+		const blank = await createApiKey({
 			accountId: ACCT_A,
 			label: "   ",
 			salt: SALT,
@@ -160,12 +160,12 @@ describe("createApiKey", () => {
 
 describe("revokeApiKey", () => {
 	it("soft-revokes an owned key and returns rowsAffected = 1", async () => {
-		const { row } = await createApiKey(db, {
+		const { row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
 		});
-		const affected = await revokeApiKey(db, ACCT_A, row.id);
+		const affected = await revokeApiKey(ACCT_A, row.id);
 		expect(affected).toBe(1);
 		const stored = await db
 			.select({ revokedAt: apiKeys.revokedAt })
@@ -176,13 +176,13 @@ describe("revokeApiKey", () => {
 	});
 
 	it("is a no-op for a key owned by another account (returns 0)", async () => {
-		const { row } = await createApiKey(db, {
+		const { row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
 		});
 		// ACCT_B tries to revoke ACCT_A's key — must not touch it.
-		const affected = await revokeApiKey(db, ACCT_B, row.id);
+		const affected = await revokeApiKey(ACCT_B, row.id);
 		expect(affected).toBe(0);
 		const stored = await db
 			.select({ revokedAt: apiKeys.revokedAt })
@@ -193,13 +193,13 @@ describe("revokeApiKey", () => {
 	});
 
 	it("is idempotent — revoking an already-revoked key returns 0", async () => {
-		const { row } = await createApiKey(db, {
+		const { row } = await createApiKey({
 			accountId: ACCT_A,
 			label: "laptop",
 			salt: SALT,
 		});
-		expect(await revokeApiKey(db, ACCT_A, row.id)).toBe(1);
-		expect(await revokeApiKey(db, ACCT_A, row.id)).toBe(0);
+		expect(await revokeApiKey(ACCT_A, row.id)).toBe(1);
+		expect(await revokeApiKey(ACCT_A, row.id)).toBe(0);
 	});
 });
 

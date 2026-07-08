@@ -73,7 +73,6 @@ export function createFakeR2Bucket(): {
 	return { bucket, blobs };
 }
 
-
 /**
  * Coerces a `BodyInit` (the union R2 `put` accepts) into an `ArrayBuffer`.
  * Handles the three shapes the hosted runtime writes — `ArrayBuffer`,
@@ -116,9 +115,7 @@ export type TestEnvOverrides = Partial<Env>;
  * @param overrides optional per-test binding/cred overrides.
  * @returns a `Env` ready to hand to `app.fetch(request, env)`.
  */
-export function createTestEnv(
-	overrides: TestEnvOverrides = {},
-): Env {
+export function createTestEnv(overrides: TestEnvOverrides = {}): Env {
 	const { bucket } = createFakeR2Bucket();
 	const base = {
 		BLOBS: bucket,

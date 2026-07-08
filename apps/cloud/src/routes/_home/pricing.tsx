@@ -11,7 +11,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { buildMeta } from "~/lib/seo";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/pricing";
@@ -42,7 +41,7 @@ const FAQS = [
 	},
 	{
 		q: "Is there an annual discount?",
-		a: "Not yet, but we're planning to introduce one. Join the mailing list (above) and we'll notify you.",
+		a: "Not yet, but we're planning to introduce one. Join the waitlist and we'll notify you.",
 	},
 ];
 
@@ -64,7 +63,6 @@ export default function Pricing(_props: Route.ComponentProps) {
 					<PlanCard key={plan.name} plan={plan} />
 				))}
 			</div>
-			<TeamsNotify />
 			<PricingFaq />
 		</Section>
 	);
@@ -172,37 +170,6 @@ function PlanCardCta({ plan }: { plan: Plan }) {
 				<ArrowRight className="size-4" />
 			</Link>
 		</Button>
-	);
-}
-
-function TeamsNotify() {
-	// Derive the Teams price/period from the SSOT so this card can't drift.
-	const teams = PLANS.find((p) => p.name === "Teams");
-	return (
-		<div id="teams-notify" className="relative mt-20 max-w-lg mx-auto">
-			<Card className="bg-muted/20">
-				<CardHeader className="text-center">
-					<CardTitle className="text-lg">
-						Get notified when Teams launches
-					</CardTitle>
-					<CardDescription className="text-sm">
-						Teams is coming. Join the waitlist and we'll notify you when it goes
-						live — list price locked at{" "}
-						{teams ? `${teams.price}${teams.period}` : "$24/seat/mo"}.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex gap-2">
-					<Input
-						type="email"
-						placeholder="you@example.com"
-						className="bg-background"
-					/>
-					<Button className="shrink-0 bg-primary text-primary-foreground hover:bg-primary/95">
-						Notify me
-					</Button>
-				</CardContent>
-			</Card>
-		</div>
 	);
 }
 

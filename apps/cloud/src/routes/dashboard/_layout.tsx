@@ -1,7 +1,6 @@
 import { Menu, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Outlet } from "react-router";
-import { getDB } from "~/.server/db";
 import type { AccountView, ProjectSummary } from "~/.server/queries";
 import { getAccountUsage, listProjectsForAccount } from "~/.server/queries";
 import { requireUserWithAccount } from "~/.server/session";

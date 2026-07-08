@@ -29,8 +29,8 @@ describe("buildMeta", () => {
 			path: "/pricing",
 		});
 
-		const names = meta.map((m) => ("name" in m ? m.name : null));
-		const props = meta.map((m) => ("property" in m ? m.property : null));
+		const names = meta.map((m: any) => ("name" in m ? m.name : null));
+		const props = meta.map((m: any) => ("property" in m ? m.property : null));
 
 		expect(meta).toContainEqual({ title: "Pricing" });
 		expect(names).toContain("description");
@@ -56,10 +56,12 @@ describe("buildMeta", () => {
 			path: "/",
 		});
 		const ogImage = meta.find(
-			(m): m is { property: string; content: string } =>
+			(m: any): m is { property: string; content: string } =>
 				"property" in m && m.property === "og:image",
 		);
-		expect(ogImage?.content).toBe(`${SITE_META.origin}${SITE_META.defaultImage}`);
+		expect(ogImage?.content).toBe(
+			`${SITE_META.origin}${SITE_META.defaultImage}`,
+		);
 	});
 
 	it("accepts a custom image override (absolute path → absolute URL)", () => {
@@ -70,7 +72,7 @@ describe("buildMeta", () => {
 			image: "/og-custom.png",
 		});
 		const ogImage = meta.find(
-			(m): m is { property: string; content: string } =>
+			(m: any): m is { property: string; content: string } =>
 				"property" in m && m.property === "og:image",
 		);
 		expect(ogImage?.content).toBe(`${SITE_META.origin}/og-custom.png`);
@@ -84,7 +86,7 @@ describe("buildMeta", () => {
 			image: full,
 		});
 		const ogImage = meta.find(
-			(m): m is { property: string; content: string } =>
+			(m: any): m is { property: string; content: string } =>
 				"property" in m && m.property === "og:image",
 		);
 		expect(ogImage?.content).toBe(full);
@@ -96,27 +98,25 @@ describe("buildMeta", () => {
 
 		const hasOgUrl = (m: ReturnType<typeof buildMeta>) =>
 			m.some(
-				(e): e is { property: string; content: string } =>
+				(e: any): e is { property: string; content: string } =>
 					"property" in e && e.property === "og:url",
 			);
 
 		expect(hasOgUrl(withPath)).toBe(true);
 		expect(
-			(withPath.find(
-				(e): e is { property: string; content: string } =>
+			withPath.find(
+				(e: any): e is { property: string; content: string } =>
 					"property" in e && e.property === "og:url",
-			)?.content),
+			)?.content,
 		).toBe(`${SITE_META.origin}/x`);
 		expect(hasOgUrl(withoutPath)).toBe(false);
 	});
 
 	it("does not emit a robots directive for an indexable route", () => {
 		const meta = buildMeta({ title: "t", description: "d" });
-		expect(
-			meta.some(
-				(m) => "name" in m && m.name === "robots",
-			),
-		).toBe(false);
+		expect(meta.some((m: any) => "name" in m && m.name === "robots")).toBe(
+			false,
+		);
 	});
 });
 
@@ -134,7 +134,7 @@ describe("buildNoindexMeta", () => {
 
 	it("never emits OG/Twitter tags (wasteful on noindex pages)", () => {
 		const meta = buildNoindexMeta("Settings");
-		const keys = meta.flatMap((m) =>
+		const keys = meta.flatMap((m: any) =>
 			"property" in m
 				? [m.property]
 				: "name" in m && m.name.startsWith("twitter")

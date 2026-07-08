@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useFetcher, useNavigate } from "react-router";
-import { getDB } from "~/.server/db";
 import type {
 	CursorHistoryView,
 	ProjectFileView,
@@ -23,13 +22,12 @@ import {
 	CardDescription,
 	CardHeader,
 } from "~/components/ui/card";
+import { buildNoindexMeta } from "~/lib/seo";
 import { cn } from "~/lib/utils";
-import { invariantResponse } from "~/utils/misc";
-import { formatBytes, formatRelative } from "~/utils/misc";
+import { formatBytes, formatRelative, invariantResponse } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { ProjectManifest } from "./+components/project-manifest";
 import type { Route } from "./+types/projects.$projectId";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Project detail (SC3.2). One loader resolves the project (ownership-gated — a
@@ -67,7 +65,9 @@ export async function loader({
 	const project = account
 		? await getProjectForAccount(account.id, projectId)
 		: null;
-	invariantResponse(project, "Project not found", { status: StatusCodes.NOT_FOUND });
+	invariantResponse(project, "Project not found", {
+		status: StatusCodes.NOT_FOUND,
+	});
 
 	const [files, cursors] = await Promise.all([
 		listProjectFiles(projectId),
@@ -87,9 +87,12 @@ export async function action({
 }: Route.ActionArgs): Promise<{ ok: true }> {
 	const { account } = await requireUserWithAccount(request);
 	const projectId = params.projectId ?? "";
-	if (account) {
-		await deleteProject(account.id, projectId);
+	if (!account) {
+		invariantResponse(false, "Account not found", {
+			status: StatusCodes.NOT_FOUND,
+		});
 	}
+	await deleteProject(account.id, projectId);
 	return { ok: true };
 }
 

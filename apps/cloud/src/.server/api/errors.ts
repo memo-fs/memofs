@@ -60,7 +60,13 @@ export class ApiError extends Error {
 		super(options.message);
 		this.name = new.target.name;
 		this.code = options.code;
-		this.status = (options.status ?? 500) as ContentfulStatusCode;
+		this.status = (
+			Number.isInteger(options.status) &&
+			(options.status ?? 500) >= 100 &&
+			(options.status ?? 500) <= 599
+				? options.status
+				: 500
+		) as ContentfulStatusCode;
 		this.details = options.details;
 		this.hideMessage = options.hideMessage ?? Number(this.status) >= 500;
 		this.headers = options.headers;
@@ -71,28 +77,48 @@ export class ApiError extends Error {
 /** 400 — malformed request body / params. */
 export class ValidationError extends ApiError {
 	constructor(message: string, details?: JsonValue) {
-		super({ code: "validation_error", message, status: StatusCodes.BAD_REQUEST, details });
+		super({
+			code: "validation_error",
+			message,
+			status: StatusCodes.BAD_REQUEST,
+			details,
+		});
 	}
 }
 
 /** 401 — missing/invalid bearer token (§12.4). */
 export class AuthError extends ApiError {
 	constructor(message = "Authentication required.", details?: JsonValue) {
-		super({ code: "unauthorized", message, status: StatusCodes.UNAUTHORIZED, details });
+		super({
+			code: "unauthorized",
+			message,
+			status: StatusCodes.UNAUTHORIZED,
+			details,
+		});
 	}
 }
 
 /** 403 — authenticated but not allowed to touch this project. */
 export class PermissionError extends ApiError {
 	constructor(message = "Forbidden.", details?: JsonValue) {
-		super({ code: "forbidden", message, status: StatusCodes.FORBIDDEN, details });
+		super({
+			code: "forbidden",
+			message,
+			status: StatusCodes.FORBIDDEN,
+			details,
+		});
 	}
 }
 
 /** 404 — project/file/route not found. */
 export class NotFoundError extends ApiError {
 	constructor(message = "Not found.", details?: JsonValue) {
-		super({ code: "not_found", message, status: StatusCodes.NOT_FOUND, details });
+		super({
+			code: "not_found",
+			message,
+			status: StatusCodes.NOT_FOUND,
+			details,
+		});
 	}
 }
 

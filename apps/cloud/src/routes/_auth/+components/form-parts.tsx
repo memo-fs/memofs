@@ -1,6 +1,4 @@
 import { Link } from "react-router";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 
 /**
  * Shared fragments for the passwordless auth forms (SC4.1). Extracted to keep
@@ -23,36 +21,8 @@ export function FormError({ errors }: { errors: string | string[] }) {
 			className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive"
 		>
 			{messages.map((msg) => (
-				<p key={msg}>{msg}</p>
+				<p key={message}>{msg}</p>
 			))}
-		</div>
-	);
-}
-
-/**
- * Email label + input, identical on login and signup. Uncontrolled: uses
- * `name` + `defaultValue` so the value serialises through `<Form>`/`fetcher.Form`
- * `FormData` (RR's mutation model) without a controlled-state round-trip.
- */
-export function EmailField({
-	name = "email",
-	defaultValue = "",
-}: {
-	name?: string;
-	defaultValue?: string;
-}) {
-	return (
-		<div className="space-y-1.5">
-			<Label htmlFor={name}>Email</Label>
-			<Input
-				id={name}
-				name={name}
-				type="email"
-				placeholder="you@example.com"
-				defaultValue={defaultValue}
-				autoComplete="email"
-				inputMode="email"
-			/>
 		</div>
 	);
 }

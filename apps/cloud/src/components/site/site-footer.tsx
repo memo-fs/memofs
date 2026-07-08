@@ -90,7 +90,7 @@ export function SiteFooter() {
 
 			<div className="border-t border-border/60">
 				<div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8">
-					<p>© {new Date().getFullYear()} Tekbreed. All rights reserved.</p>
+					<p>© {new Date().getFullYear()} Memo FS. All rights reserved.</p>
 					<a href="/v1/health" className="hover:text-foreground">
 						API status
 					</a>

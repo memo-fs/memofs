@@ -49,7 +49,7 @@ export function OAuthButtons({
 			</div>
 			<div className="flex items-center gap-3 my-4">
 				<Separator className="flex-1" />
-				<span className="text-xs text-muted-foreground">or</span>
+				<span className="text-xs text-muted-foreground">OR</span>
 				<Separator className="flex-1" />
 			</div>
 		</>

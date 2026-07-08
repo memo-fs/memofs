@@ -2,8 +2,8 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import { getCtx } from "~/.server/context";
 import { consumeMagicLinkToken, rateLimitMessage } from "~/.server/rate-limit";
 import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
-import type { Route } from "../+types/login";
 import { emailIssueMessage, validateEmail } from "../+utils/email-validation";
+import type { Route } from "./+types/index";
 import { LoginSchema } from "./+utils";
 
 /**
@@ -47,10 +47,16 @@ export async function action({ request, context }: Route.ActionArgs) {
 
 	const auth = createAuthFromEnv(getCtx(context).waitUntil);
 
-	await auth.api.signInMagicLink({
-		body: { email, callbackURL },
-		headers: request.headers,
-	});
+	try {
+		await auth.api.signInMagicLink({
+			body: { email, callbackURL },
+			headers: request.headers,
+		});
+	} catch {
+		return submission.reply({
+			formErrors: ["Something went wrong. Please try again."],
+		});
+	}
 
 	return { status: "success", email };
 }

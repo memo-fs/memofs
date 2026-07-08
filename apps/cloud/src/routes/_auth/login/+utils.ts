@@ -8,11 +8,7 @@ import { z } from "zod/v4";
  * so a transient DoH failure can't lock a returning user out.
  */
 export const LoginSchema = z.object({
-	email: z
-		.string()
-		.trim()
-		.min(1, "Email is required.")
-		.email("Enter a valid email address."),
+	email: z.string("Email is required").trim().email("Invalid email address."),
 });
 
 export type LoginFormValues = z.infer<typeof LoginSchema>;

@@ -14,14 +14,13 @@ import { z } from "zod/v4";
  */
 export const SignupSchema = z.object({
 	name: z
-		.string()
+		.string("Name is required")
 		.trim()
-		.min(1, "Please enter your name.")
+		.min(3, "Name must be atleast 3 characters.")
 		.max(50, "Name must be 50 characters or fewer."),
 	email: z
-		.string()
+		.string("Email address is required.")
 		.trim()
-		.min(1, "Email is required.")
 		.email("Enter a valid email address."),
 });
 

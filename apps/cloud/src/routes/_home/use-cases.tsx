@@ -89,7 +89,8 @@ export default function UseCases(_props: Route.ComponentProps) {
 					</span>
 				</div>
 				<h1 className="font-heading font-bold tracking-[-0.03em] leading-[1.02] max-w-2xl text-balance text-4xl text-foreground sm:text-5xl">
-					What Memo FS Cloud is <span className="text-primary">for</span>.
+					What <span className="text-accent-ai font-semibold"> Memo FS </span>{" "}
+					Cloud is <span className="text-primary">for</span>.
 				</h1>
 				<p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
 					Memo FS Cloud mirrors your{" "}

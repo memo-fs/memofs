@@ -26,7 +26,7 @@ export async function action({ request }: Route.ActionArgs) {
 	if (domain && !(await hasMxRecord(domain))) {
 		return submission.reply({
 			fieldErrors: {
-				email: ["That email domain doesn't appear to be reachable. Please use a different address."],
+				email: ["Invalid email address."],
 			},
 		});
 	}

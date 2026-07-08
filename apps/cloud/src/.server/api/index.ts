@@ -3,8 +3,8 @@
  *
  * Mounted at the `/v1` prefix. Today this wires the public health endpoints +
  * the request-wide middleware spine (requestId + envelope + error handling);
- * authenticated sync routes (`/v1/projects/:projectId/sync/*`) land in P2 and
- * compose in here as their own sub-apps.
+ * authenticated sync routes (`/v1/projects/:projectId/sync/*`) compose in
+ * here as their own sub-apps.
  *
  * Consumed by one entrypoint: `workers/app.ts` — the single Cloud Worker
  * (`/v1` → this API app, `/api/auth/*` → Better Auth, else React Router SSR).
@@ -16,12 +16,14 @@
  *   3. `notFound`       — 404 for unmatched `/v1/*` paths, envelope-shaped.
  *   4. `onError`        — catch every throw, serialize into `{ error, meta }`.
  *
+ * DB access: Handlers call `getDB()` directly — no middleware needed since
+ * `getDB()` is memoized per isolate. Tests mock the module to inject a
+ * test DB.
+ *
  * The `Variables` type declares what middleware makes available on `c.var` so
  * handlers + helpers stay type-safe instead of reaching into `any`.
  */
 import { type Context, Hono } from "hono";
-import { routePath } from "hono/route";
-import type { Database } from "../db";
 import { connectorsApp } from "./connectors";
 import { isApiError } from "./errors";
 import { healthApp } from "./health";
@@ -35,13 +37,6 @@ export interface ApiVariables {
 	requestId: string;
 	/** Authenticated account — set by `createAuthMiddleware` on protected routes. */
 	account?: AuthAccount;
-	/**
-	 * Per-request drizzle client bound to `c.env`'s Turso config. Set by the
-	 * sync router's `dbMiddleware` before any sync handler runs, so handlers
-	 * read `c.get("db")` instead of constructing their own client. Health/
-	 * readiness never touch the DB and don't pay the construction cost.
-	 */
-	db?: Database;
 }
 
 export type ApiEnv = { Bindings: Env; Variables: ApiVariables };
@@ -61,14 +56,13 @@ export function createApi() {
 		new Hono<ApiEnv>()
 			.use("*", requestIdMiddleware)
 			.route("/", healthApp)
-			// Sync routes carry their own auth + db middleware (both need `c.env`),
+			// Sync routes carry their own auth middleware (needs `c.env` for salt),
 			// mounted under the project-scoped path the frozen client contract uses.
 			.route("/projects/:projectId/sync", syncApp)
 			// Connectors routes: credentials resolution.
 			.route("/projects/:projectId/connectors", connectorsApp)
 			// Billing routes (ADR 0006 / ADR 0011 Phase 2): Polar webhook
-			// (signature-authenticated), checkout, and customer portal. Carry their
-			// own db middleware; the webhook is NOT bearer-authenticated (Polar signs).
+			// (signature-authenticated), checkout, and customer portal.
 			//
 			// LAZY-MOUNTED: the `@polar-sh/sdk` + `@polar-sh/hono` deps hang under
 			// workerd's synchronous module-eval (a hard stall, not a throw), so
@@ -97,7 +91,6 @@ export function createApi() {
 						cause.headers,
 					);
 				}
-				console.error(`[api] unhandled error on route ${routePath(c)}`, cause);
 				return jsonError(c, 500, "internal_error", "Internal server error.");
 			})
 	);

@@ -1,11 +1,10 @@
+import { env } from "cloudflare:workers";
 import { parseWithZod } from "@conform-to/zod/v4";
 import { eq } from "drizzle-orm";
 import { StatusCodes } from "http-status-codes";
 import { Plug } from "lucide-react";
 import { useState } from "react";
 import { useOutletContext } from "react-router";
-import { env } from "cloudflare:workers";
-import { encryptToken } from "~/.server/utils";
 import { getDB } from "~/.server/db";
 import { connectors as connectorsTable } from "~/.server/db/schema";
 import {
@@ -18,8 +17,11 @@ import {
 	verifyProjectOwnership,
 } from "~/.server/queries/connectors";
 import { requireUserWithAccount } from "~/.server/session";
+import { encryptToken } from "~/.server/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { secret } from "~/lib/env";
+import { buildNoindexMeta } from "~/lib/seo";
 import type { DashboardOutletContext } from "./_layout";
 import { AddConnectorDialog } from "./+components/add-connector-dialog";
 import { ConnectorCard } from "./+components/connector-card";
@@ -27,7 +29,6 @@ import { ConnectorCatalog } from "./+components/connector-catalog";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/connectors";
 import { ConnectorActionSchema } from "./+utils/connectors";
-import { buildNoindexMeta } from "~/lib/seo";
 
 export function meta() {
 	return buildNoindexMeta("Connectors — Memo FS Cloud");
@@ -35,7 +36,7 @@ export function meta() {
 
 export async function loader({
 	request,
-}: Route.LoaderArgs): Promise<{ connectors: ConnectorView[] } | Response> {
+}: Route.LoaderArgs): Promise<{ connectors: ConnectorView[] }> {
 	const { account } = await requireUserWithAccount(request);
 	if (!account) return { connectors: [] };
 
@@ -110,7 +111,7 @@ async function handleCreate(
 			{ status: StatusCodes.FORBIDDEN },
 		);
 	}
-	const encrypted = await encryptToken(data.token, env.ENCRYPTION_KEY);
+	const encrypted = await encryptToken(data.token, secret("ENCRYPTION_KEY"));
 	await createConnector({
 		projectId: data.projectId,
 		type: data.type,
@@ -160,10 +161,7 @@ async function handleUpdate(
 	return { ok: true };
 }
 
-async function handleDelete(
-	accountId: string,
-	data: { id: string },
-) {
+async function handleDelete(accountId: string, data: { id: string }) {
 	const db = getDB();
 	const rows = await db
 		.select()

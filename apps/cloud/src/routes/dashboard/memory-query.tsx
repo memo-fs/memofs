@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { getDB } from "~/.server/db";
 import { getAccountUsage, listProjectsForAccount } from "~/.server/queries";
 import { createRuntimeClient } from "~/.server/runtime-client";
 import { requireUserWithAccount } from "~/.server/session";
@@ -12,9 +11,7 @@ import type { Route } from "./+types/memory-query";
  * Handles GET requests to retrieve memories (recent or recalled via semantic query)
  * and POST requests to run consolidation on the selected project.
  */
-export async function loader({
-	request,
-}: Route.LoaderArgs): Promise<Response> {
+export async function loader({ request }: Route.LoaderArgs): Promise<Response> {
 	const { account } = await requireUserWithAccount(request);
 
 	const url = new URL(request.url);
@@ -51,9 +48,7 @@ export async function loader({
 	}
 }
 
-export async function action({
-	request,
-}: Route.ActionArgs): Promise<Response> {
+export async function action({ request }: Route.ActionArgs): Promise<Response> {
 	const { account } = await requireUserWithAccount(request);
 
 	const form = await request.formData();
@@ -83,17 +78,16 @@ export async function action({
 	// bypass the cap. `account.plan` is the plan enum; `canRunConsolidation` is
 	// numeric (ADR 0006 §12.3) — `Infinity` (Teams) always satisfies.
 	const plan = account.plan ?? "free";
-	if (account) {
-		const usage = await getAccountUsage(account.id);
-		if (!canRunConsolidation(plan, usage.consolidationUsedToday)) {
-			return Response.json(
-				{
-					ok: false,
-					error: "Daily consolidation limit reached. Your budget resets at 00:00 UTC.",
-				},
-				{ status: StatusCodes.TOO_MANY_REQUESTS },
-			);
-		}
+	const usage = await getAccountUsage(account.id);
+	if (!canRunConsolidation(plan, usage.consolidationUsedToday)) {
+		return Response.json(
+			{
+				ok: false,
+				error:
+					"Daily consolidation limit reached. Your budget resets at 00:00 UTC.",
+			},
+			{ status: StatusCodes.TOO_MANY_REQUESTS },
+		);
 	}
 
 	try {

@@ -27,9 +27,12 @@
  *      mutating push path (P2.4); rate limiting is a separate cross-cutting
  *      layer (Upstash Redis, deferred). Neither is an auth concern.
  *
- * The middleware is factory-built (`createAuthMiddleware(db, salt)`) so tests
- * can inject an in-memory DB + literal salt without Worker bindings; the route
- * layer constructs it once per request from `createDb(env)` + `env` salt.
+ * The middleware is factory-built (`createAuthMiddleware(salt)`) so tests
+ * can inject a literal salt without Worker bindings; the route layer
+ * constructs it once per request from `env.API_KEY_SALT`.
+ *
+ * DB access is handled via `getDB()` calls — no middleware needed since
+ * `getDB()` is memoized per isolate.
  *
  * @see docs/architecture/cloud-sync-and-refactor.md §12.4 — auth contract.
  * @see apps/cloud/src/server/sha256.ts — `hashApiKey` (salted sha256, Web Crypto).
@@ -38,7 +41,8 @@ import { and, eq, isNull } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
 import { getDB } from "~/.server/db/index";
 import { normalizeCaps } from "../../../lib/entitlements";
-import { accounts, apiKeys, type PlanTier } from "../../db/schema";
+import { accounts, apiKeys } from "../../db/schema";
+import type { EntitlementSnapshot } from "../../queries/types";
 import { hashApiKey } from "../../utils";
 import { AuthError } from "../errors";
 import type { ApiEnv } from "../index";
@@ -46,15 +50,10 @@ import type { ApiEnv } from "../index";
 /**
  * The authenticated account context stamped onto `c.var.account`. Handlers read
  * entitlements straight off this (`account.maxHostedStorageBytes`) for the 402
- * gate without a second DB round-trip. Mirrors the `accounts` row the key rolled
- * back to at auth time.
+ * gate without a second DB round-trip. Derived from the shared
+ * `EntitlementSnapshot` type.
  */
-export interface AuthAccount {
-	id: string;
-	plan: PlanTier;
-	maxHostedStorageBytes: number;
-	maxConnectors: number;
-}
+export type AuthAccount = EntitlementSnapshot;
 
 /**
  * Builds the bearer-auth middleware bound to a DB client + salt.

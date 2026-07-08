@@ -1,6 +1,5 @@
 import { StatusCodes } from "http-status-codes";
 import { redirect } from "react-router";
-import { getDB } from "~/.server/db";
 import {
 	enabledOAuthProviders,
 	OAUTH_PROVIDER_IDS,
@@ -56,7 +55,7 @@ export async function loader({
 		headers: request.headers,
 	});
 
-	if (result.url) {
+	if (result.url !== undefined) {
 		throw redirect(result.url);
 	}
 	// No URL means something unexpected (the idToken branch, which we never

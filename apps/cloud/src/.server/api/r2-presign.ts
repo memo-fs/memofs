@@ -52,15 +52,17 @@ export interface R2PresignConfig {
 	ttlSeconds?: number;
 }
 
-/** Pulls the presign config out of the Worker bindings. */
-export function presignConfigFromEnv(): R2PresignConfig {
+/** Pulls the presign config out of the Worker bindings.
+ *  @param envOverride — optional env for testability; defaults to `cloudflare:workers` env. */
+export function presignConfigFromEnv(envOverride?: Env): R2PresignConfig {
+	const e = envOverride ?? env;
 	return {
-		accessKeyId: env.R2_S3_ACCESS_KEY_ID,
-		secretAccessKey: env.R2_S3_SECRET_ACCESS_KEY,
-		endpoint: env.R2_S3_ENDPOINT,
-		bucket: env.R2_BUCKET_NAME,
-		publicBaseUrl: env.CLOUD_PUBLIC_BASE_URL,
-		ttlSeconds: parseTtl(env.PRESIGN_TTL_SECONDS),
+		accessKeyId: e.R2_S3_ACCESS_KEY_ID!,
+		secretAccessKey: e.R2_S3_SECRET_ACCESS_KEY!,
+		endpoint: e.R2_S3_ENDPOINT!,
+		bucket: e.R2_BUCKET_NAME!,
+		publicBaseUrl: e.CLOUD_PUBLIC_BASE_URL,
+		ttlSeconds: parseTtl(e.PRESIGN_TTL_SECONDS),
 	};
 }
 

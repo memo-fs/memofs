@@ -14,7 +14,12 @@
 import { and, count, eq } from "drizzle-orm";
 import { invariant } from "../../utils/misc";
 import { getDB } from "../db";
-import { type ConnectorType, connectors, projects } from "../db/schema";
+import {
+	type Connector,
+	type ConnectorType,
+	connectors,
+	projects,
+} from "../db/schema";
 
 /** The dashboard-facing connector shape — no `encryptedSecret` (never exposed). */
 export interface ConnectorView {
@@ -27,7 +32,7 @@ export interface ConnectorView {
 	sourceMapping: string;
 	secretRef: string;
 	lastRunAt: string | null;
-	lastRunStatus: "success" | "fail" | null;
+	lastRunStatus: Connector["lastRunStatus"];
 	createdAt: string;
 }
 
@@ -117,24 +122,22 @@ export async function createConnector(
 ): Promise<ConnectorView> {
 	const db = getDB();
 	const id = generateConnectorId();
-	await db.insert(connectors).values({
-		id,
-		projectId: input.projectId,
-		type: input.type,
-		name: input.name,
-		enabled: input.enabled ?? true,
-		schedule: input.schedule ?? "Every 1h",
-		sourceMapping: input.sourceMapping ?? "",
-		secretRef: input.secretRef,
-		encryptedSecret: input.encryptedSecret,
-	});
-	const row = await db
-		.select()
-		.from(connectors)
-		.where(eq(connectors.id, id))
-		.limit(1);
-	invariant(row[0], "Connector insert failed");
-	return toView(row[0]);
+	const rows = await db
+		.insert(connectors)
+		.values({
+			id,
+			projectId: input.projectId,
+			type: input.type,
+			name: input.name,
+			enabled: input.enabled ?? true,
+			schedule: input.schedule ?? "Every 1h",
+			sourceMapping: input.sourceMapping ?? "",
+			secretRef: input.secretRef,
+			encryptedSecret: input.encryptedSecret,
+		})
+		.returning();
+	invariant(rows[0], "Connector insert failed");
+	return toView(rows[0]);
 }
 
 /** Input for updating a connector (all fields optional). */
@@ -184,7 +187,7 @@ export async function verifyProjectOwnership(
 	return rows.length > 0;
 }
 
-/** Generates a `tmc_<32 random hex>` connector id (memofs-connector prefix). */
+/** Generates a `mfc_<32 random hex>` connector id (memofs-connector prefix). */
 function generateConnectorId(): string {
 	const bytes = new Uint8Array(16);
 	crypto.getRandomValues(bytes);

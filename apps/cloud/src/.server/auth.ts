@@ -27,6 +27,7 @@ import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { magicLink } from "better-auth/plugins/magic-link";
+import { secret } from "../lib/env";
 import { getDB } from "./db";
 import * as schema from "./db/schema";
 import { sendMagicLinkMail } from "./email/resend";
@@ -64,13 +65,13 @@ function providerCredentials(
 	switch (provider) {
 		case "github":
 			return {
-				clientId: env.GITHUB_CLIENT_ID,
-				clientSecret: env.GITHUB_CLIENT_SECRET,
+				clientId: secret("GITHUB_CLIENT_ID"),
+				clientSecret: secret("GITHUB_CLIENT_SECRET"),
 			};
 		case "google":
 			return {
-				clientId: env.GOOGLE_CLIENT_ID,
-				clientSecret: env.GOOGLE_CLIENT_SECRET,
+				clientId: secret("GOOGLE_CLIENT_ID"),
+				clientSecret: secret("GOOGLE_CLIENT_SECRET"),
 			};
 	}
 }
@@ -89,14 +90,14 @@ export function createAuth(waitUntil?: (promise: Promise<unknown>) => void) {
 	const db = getDB();
 	return betterAuth({
 		baseURL: env.BETTER_AUTH_URL,
-		secret: env.BETTER_AUTH_SECRET,
+		secret: secret("BETTER_AUTH_SECRET"),
 		basePath: "/api/auth",
 		database: drizzleAdapter(db, { provider: "sqlite", schema }),
 		emailAndPassword: { enabled: false },
 		socialProviders: resolveSocialProviders(),
 		plugins: [
 			magicLink({
-				sendMagicLink: async ({ email, url, _token }) => {
+				sendMagicLink: async ({ email, url }) => {
 					await sendMagicLinkMail({ email, url });
 				},
 			}),

@@ -61,7 +61,7 @@ afterEach(async () => {
 
 describe("getAccountForUser", () => {
 	it("returns the entitlement snapshot for the user", async () => {
-		const result = await getAccountForUser(db, USER);
+		const result = await getAccountForUser(USER);
 		expect(result).toEqual({
 			id: ACCT,
 			plan: "pro",
@@ -71,7 +71,7 @@ describe("getAccountForUser", () => {
 	});
 
 	it("returns null for a user with no account", async () => {
-		const result = await getAccountForUser(db, "user_nobody");
+		const result = await getAccountForUser("user_nobody");
 		expect(result).toBeNull();
 	});
 
@@ -80,7 +80,7 @@ describe("getAccountForUser", () => {
 		const bareUser = "user_bare";
 		await seedUserWithAccount(bareUser, bareAcct);
 
-		const result = await getAccountForUser(db, bareUser);
+		const result = await getAccountForUser(bareUser);
 		expect(result?.plan).toBe("free");
 		expect(result?.maxHostedStorageBytes).toBe(1e9);
 		expect(result?.maxConnectors).toBe(1);
@@ -95,13 +95,13 @@ describe("getAccountUsage", () => {
 			{ id: "p3", accountId: ACCT, name: "three", totalStorageBytes: 0 },
 		]);
 
-		const usage = await getAccountUsage(db, ACCT);
+		const usage = await getAccountUsage(ACCT);
 		expect(usage.storageBytes).toBe(5120);
 		expect(usage.connectorsUsed).toBe(0);
 	});
 
 	it("returns 0 storage for an account with no projects", async () => {
-		const usage = await getAccountUsage(db, ACCT);
+		const usage = await getAccountUsage(ACCT);
 		expect(usage.storageBytes).toBe(0);
 	});
 
@@ -118,7 +118,7 @@ describe("getAccountUsage", () => {
 			},
 		]);
 
-		const usage = await getAccountUsage(db, ACCT);
+		const usage = await getAccountUsage(ACCT);
 		expect(usage.storageBytes).toBe(1024);
 	});
 });

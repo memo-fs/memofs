@@ -18,7 +18,12 @@ export function ComparisonSection() {
 		<Section className="py-20">
 			<SectionHeading
 				eyebrow="Comparison"
-				title={<>Memo FS Cloud vs DIY</>}
+				title={
+					<>
+						<span className="text-accent-ai font-semibold"> Memo FS </span>{" "}
+						Cloud vs DIY
+					</>
+				}
 				lede="We'll be honest. Here's when you'd use us vs. when you'd roll your own."
 			/>
 			<div className="mt-10 border-y border-border bg-card/10">

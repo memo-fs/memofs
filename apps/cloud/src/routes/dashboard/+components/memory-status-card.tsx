@@ -1,3 +1,9 @@
+/**
+ * Memory runtime status card — displays the active plan tier, operational
+ * state, and which hosted-runtime providers (embedder, extractor, reranker)
+ * are bound (S3-Q8: honest about what runs where).
+ */
+
 import { Brain } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import {
@@ -10,12 +16,18 @@ import {
 import { cn } from "~/lib/utils";
 import type { RuntimeProviders } from "../memory";
 
+/** Props for {@link MemoryStatusCard}. */
 interface MemoryStatusCardProps {
+	/** Current account plan tier (`"free"`, `"pro"`, or `"teams"`). */
 	plan: string;
-	/** Hosted-runtime provider bundle (S3-Q8 open-core honesty line). */
+	/** Hosted-runtime provider bundle — only bound providers are shown. */
 	providers: RuntimeProviders;
 }
 
+/**
+ * Renders a card showing the memory runtime's plan tier, operational status,
+ * and active providers. Absent providers are omitted (not shown as "off").
+ */
 export function MemoryStatusCard({ plan, providers }: MemoryStatusCardProps) {
 	const info =
 		plan === "teams"

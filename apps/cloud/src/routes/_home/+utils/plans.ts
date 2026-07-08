@@ -14,11 +14,8 @@
  * Reference: docs/architecture/decisions.md (pricing tiers).
  */
 
-import {
-	type EntitlementCaps,
-	PLAN_ENTITLEMENTS,
-} from "~/lib/entitlements";
 import type { PlanTier } from "~/.server/db/schema";
+import { type EntitlementCaps, PLAN_ENTITLEMENTS } from "~/lib/entitlements";
 
 export type PlanFeature = { text: string; included: boolean };
 

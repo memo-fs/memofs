@@ -1,7 +1,6 @@
 import { FolderOpen, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Link, useFetcher } from "react-router";
-import { getDB } from "~/.server/db";
 import type { ProjectSummary } from "~/.server/queries";
 import { deleteProject, listProjectsForAccount } from "~/.server/queries";
 import { requireUserWithAccount } from "~/.server/session";
@@ -15,12 +14,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
+import { buildNoindexMeta } from "~/lib/seo";
 import { formatBytes, formatRelative } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { NewProjectDialog } from "./+components/new-project-dialog";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/projects";
-import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Projects list (SC3.2). Reads the account's projects from the real DB; each
@@ -118,8 +117,8 @@ export default function ProjectsPage({ loaderData }: Route.ComponentProps) {
 							</p>
 							<p className="max-w-sm text-xs text-muted-foreground">
 								Projects appear here after your first{" "}
-								<code className="font-mono text-[10px]">memofs push</code>.
-								Push from the CLI to provision one.
+								<code className="font-mono text-[10px]">memofs push</code>. Push
+								from the CLI to provision one.
 							</p>
 						</div>
 					) : (
