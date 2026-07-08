@@ -12,7 +12,7 @@
  * keeps the local `pnpm dev` flow dependency-free.
  */
 
-import { env as cfEnv } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 
 /**
  * Resolve the client IP from Worker request headers.
@@ -25,13 +25,11 @@ export function getClientIp(request: Request): string {
 	const headers = request.headers;
 	const cfIp = headers.get("CF-Connecting-IP");
 	if (cfIp) return cfIp;
-
 	const forwarded = headers.get("X-Forwarded-For");
 	if (forwarded) return forwarded.split(",")[0].trim();
 
 	return "anonymous";
 }
-
 /** Outcome of {@link consumeMagicLinkToken}. */
 export type RateLimitResult = { ok: true } | { ok: false; reset: number };
 
@@ -61,20 +59,18 @@ export async function consumeMagicLinkToken(
 	request: Request,
 	_ctx: ExecutionContext,
 ): Promise<RateLimitResult> {
-	if (cfEnv.ENV === "development") {
+	if (env.ENV === "development") {
 		return { ok: true };
 	}
 
 	const ip = getClientIp(request);
 
 	try {
-		// Cloudflare Rate Limiting binding call.
-		if (!cfEnv.SESSION_RATE_LIMIT) {
+		if (!env.SESSION_RATE_LIMIT) {
 			return { ok: true };
 		}
-		const limitResult = await cfEnv.SESSION_RATE_LIMIT.limit({ key: ip });
+		const limitResult = await env.SESSION_RATE_LIMIT.limit({ key: ip });
 		if (!limitResult.success) {
-			// Native rate limit hit, back off for 60 seconds.
 			return { ok: false, reset: Date.now() + 60000 };
 		}
 	} catch (error) {

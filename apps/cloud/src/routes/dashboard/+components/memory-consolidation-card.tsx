@@ -9,12 +9,15 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import { PLAN_ENTITLEMENTS, type PlanTier } from "~/lib/entitlements";
 import { cn } from "~/lib/utils";
 
 import type { ConsolidationResult } from "./consolidation-run-log";
 
 interface MemoryConsolidationCardProps {
-	plan: string;
+	plan: PlanTier;
+	/** Real count of consolidation runs today (UTC) — from `getAccountUsage`. */
+	runsToday: number;
 	isConsolidating: boolean;
 	onConsolidate: () => void;
 	consolidationResult?: ConsolidationResult;
@@ -22,32 +25,30 @@ interface MemoryConsolidationCardProps {
 
 export function MemoryConsolidationCard({
 	plan,
+	runsToday,
 	isConsolidating,
 	onConsolidate,
 	consolidationResult,
 }: MemoryConsolidationCardProps) {
 	const info = useMemo(() => {
-		switch (plan) {
-			case "teams":
-				return {
-					limit: "Unlimited",
-					runsToday: consolidationResult ? 19 : 18,
-					progress: 35,
-				};
-			case "pro":
-				return {
-					limit: "24 / day",
-					runsToday: consolidationResult ? 5 : 4,
-					progress: 16.6,
-				};
-			default:
-				return {
-					limit: "1 / day",
-					runsToday: 1,
-					progress: 100,
-				};
-		}
-	}, [plan, consolidationResult]);
+		const cap = PLAN_ENTITLEMENTS[plan].maxConsolidationRuns;
+		const unlimited = !Number.isFinite(cap);
+		// Progress against the daily budget. Unlimited (Teams) renders a flat
+		// "well within" bar so the metric stays meaningful without a finite cap.
+		const progress = unlimited
+			? Math.min(((runsToday || 1) / Math.max(runsToday, 1)) * 100, 100)
+			: cap === 0
+				? 0
+				: Math.min((runsToday / cap) * 100, 100);
+		return {
+			limitLabel: unlimited ? "∞" : `${cap} / day`,
+			progress,
+		};
+	}, [plan, runsToday]);
+
+	// Disable the button when consolidating, or when the daily budget is
+	// exhausted. `consolidationResult` only gates the optimistic label flip.
+	const budgetExhausted = runsToday >= PLAN_ENTITLEMENTS[plan].maxConsolidationRuns;
 
 	return (
 		<Card className="flex flex-col justify-between">
@@ -58,7 +59,7 @@ export function MemoryConsolidationCard({
 						variant="outline"
 						size="sm"
 						className="h-7 px-2 text-xs rounded-none"
-						disabled={isConsolidating || plan === "free"}
+						disabled={isConsolidating || budgetExhausted}
 						onClick={onConsolidate}
 					>
 						<RefreshCw
@@ -78,16 +79,16 @@ export function MemoryConsolidationCard({
 					<div className="flex items-center justify-between text-xs mb-1">
 						<span className="text-muted-foreground">Runs Today</span>
 						<span className="font-mono text-white font-medium">
-							{info.runsToday} / {info.limit}
+							{consolidationResult ? runsToday + 1 : runsToday} / {info.limitLabel}
 						</span>
 					</div>
 					<Progress value={info.progress} className="h-1.5 rounded-none" />
 				</div>
 				<div className="text-[10px] font-mono text-muted-foreground pt-1">
-					{plan === "free" ? (
-						<span>Nightly run locked at 02:00 UTC</span>
+					{budgetExhausted ? (
+						<span>Daily limit reached — resets at 00:00 UTC</span>
 					) : (
-						<span>Next run scheduled in 42 minutes</span>
+						<span>Manual runs decrement your daily budget</span>
 					)}
 				</div>
 			</CardContent>

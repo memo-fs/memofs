@@ -4,6 +4,7 @@ import { GithubMark } from "~/components/site/brand-icons";
 import { Section } from "~/components/site/visuals";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { buildMeta } from "~/lib/seo";
 import type { Route } from "./+types/use-cases";
 
 /**
@@ -66,14 +67,12 @@ const USE_CASES = [
 ] as const;
 
 export function meta(_: Route.MetaArgs) {
-	return [
-		{ title: "Use cases — Memo FS Cloud" },
-		{
-			name: "description",
-			content:
-				"Multi-device sync, hosted serverless query runtime, connector ingestion, and team collaboration. Discover the core capabilities of Memo FS Cloud.",
-		},
-	];
+	return buildMeta({
+		title: "Use cases — Memo FS Cloud",
+		description:
+			"Multi-device sync, hosted serverless query runtime, connector ingestion, and team collaboration. Discover the core capabilities of Memo FS Cloud.",
+		path: "/use-cases",
+	});
 }
 
 export default function UseCases(_props: Route.ComponentProps) {

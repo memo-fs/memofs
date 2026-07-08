@@ -11,6 +11,5 @@ import type { Route } from "./+types/verify";
  * login. It renders nothing of its own.
  */
 export async function loader({ request }: Route.LoaderArgs) {
-	const user = await getSessionUser(request);
-	throw safeRedirect(user ? "/dashboard" : "/login");
+	throw safeRedirect((await getSessionUser(request)) ? "/dashboard" : "/login");
 }

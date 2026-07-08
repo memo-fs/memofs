@@ -1,5 +1,6 @@
 import { Section } from "~/components/site/visuals";
 import { Card, CardContent } from "~/components/ui/card";
+import { buildMeta } from "~/lib/seo";
 import { SITE_LINKS } from "~/lib/site";
 import type { Route } from "./+types/terms";
 
@@ -160,14 +161,12 @@ const SECTIONS = [
 ] as const;
 
 export function meta(_: Route.MetaArgs) {
-	return [
-		{ title: "Terms of Service — Memo FS Cloud" },
-		{
-			name: "description",
-			content:
-				"Memo FS Cloud terms of service. A file-replica sync service; the local-first runtime is MIT-licensed open source.",
-		},
-	];
+	return buildMeta({
+		title: "Terms of Service — Memo FS Cloud",
+		description:
+			"Memo FS Cloud terms of service. A file-replica sync service; the local-first runtime is MIT-licensed open source.",
+		path: "/terms",
+	});
 }
 
 export default function Terms(_props: Route.ComponentProps) {

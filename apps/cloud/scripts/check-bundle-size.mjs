@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * Bundle-size guard for the two-Worker split (ADR 0013).
+ * Bundle-size guard (ADR 0013).
  *
  * @remarks
  * The free-plan 3 MB (compressed) Worker cap is the load-bearing constraint
- * that forced the split. This script runs `wrangler deploy --dry-run` against
- * each Worker config and parses the reported gzip size, failing if either
- * exceeds the cap. Run before deploy / in CI.
+ * that will force the two-Worker split in v1.1. This script runs
+ * `wrangler deploy --dry-run` against the commercial Worker config
+ * (`wrangler.toml`) and parses the reported gzip size, failing if it exceeds
+ * the cap. Run before deploy / in CI.
  *
- * The runtime Worker (`wrangler.runtime.jsonc`) is the critical proof — it
- * carries the `MemoFS` engine + the R2/Voyage/Workers AI adapters, the bundle
- * that previously pushed the single Worker past 3 MB. The commercial Worker
- * (`wrangler.jsonc`) needs its built assets (`build/client`) present, so it is
- * checked after `pnpm build`; when assets are absent the script skips it with
- * a clear note rather than failing falsely.
+ * The commercial Worker (`wrangler.toml`) needs its built assets
+ * (`build/client`) present, so it is checked after `pnpm build`; when assets
+ * are absent the script skips it with a clear note rather than failing falsely.
+ * The runtime Worker config (`wrangler.runtime.jsonc`) does not exist until the
+ * v1.1 two-Worker split; until then it is skipped.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -27,7 +27,7 @@ const ASSETS_DIR = "build/client";
 /**
  * Runs `wrangler deploy --dry-run` against a config + parses the gzip size.
  *
- * @param config - The wrangler config path (e.g. `wrangler.runtime.jsonc`).
+ * @param config - The wrangler config path (e.g. `wrangler.toml`).
  * @returns the gzipped Worker size in bytes, or `undefined` if wrangler failed
  *   for a known reason (missing assets).
  */
@@ -69,16 +69,22 @@ function main() {
 		{
 			name: "runtime (memofs-cloud-runtime)",
 			config: "wrangler.runtime.jsonc",
-			requiresAssets: false,
+			// The runtime Worker config is created during the v1.1 two-Worker
+			// split (ADR 0013). Until it exists, skip rather than crash.
+			skipIfMissing: true,
 		},
 		{
 			name: "commercial (memofs-cloud)",
-			config: "wrangler.jsonc",
+			config: "wrangler.toml",
 			requiresAssets: true,
 		},
 	];
 	let failed = false;
-	for (const { name, config, requiresAssets } of checks) {
+	for (const { name, config, requiresAssets, skipIfMissing } of checks) {
+		if (skipIfMissing && !existsSync(config)) {
+			console.log(`  - ${name}: skipped (${config} not present — v1.1)`);
+			continue;
+		}
 		if (requiresAssets && !existsSync(ASSETS_DIR)) {
 			console.log(
 				`  - ${name}: skipped (run \`pnpm build\` first — ${ASSETS_DIR} absent)`,

@@ -14,7 +14,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			<head>
 				<meta charSet="utf-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1" />
-				<title>Memo FS Cloud</title>
+				{/*
+				 * Title is owned by route `meta()` exports (rendered via `<Meta />`).
+				 * A static `<title>` here would shadow or duplicate them; the last
+				 * `title` entry wins, so leaving route titles as the sole source.
+				 */}
+				<meta name="theme-color" content="#0a0a0a" />
 				<Meta />
 				<Links />
 			</head>

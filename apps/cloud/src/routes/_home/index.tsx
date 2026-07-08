@@ -1,4 +1,5 @@
 import { SectionDivider } from "~/components/site/visuals";
+import { buildMeta } from "~/lib/seo";
 import { BottomCta } from "./+components/bottom-cta";
 import { ComparisonSection } from "./+components/comparison-section";
 import { ConnectorsSection } from "./+components/connectors-section";
@@ -26,14 +27,12 @@ import { UseCasesSection } from "./+components/use-cases-section";
  */
 
 export function meta() {
-	return [
-		{ title: "Memo FS Cloud — Local-first sync & hosted runtime" },
-		{
-			name: "description",
-			content:
-				"Local-first memory for AI apps. Memo FS Cloud mirrors your .memofs/ files across devices and hosts a secure serverless query runtime for fast remote semantic recall.",
-		},
-	];
+	return buildMeta({
+		title: "Memo FS Cloud — Local-first sync & hosted runtime",
+		description:
+			"Local-first memory for AI apps. Memo FS Cloud mirrors your .memofs/ files across devices and hosts a secure serverless query runtime for fast remote semantic recall.",
+		path: "/",
+	});
 }
 
 export default function Home() {

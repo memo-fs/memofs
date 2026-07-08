@@ -3,7 +3,7 @@
  * Starts a local libSQL (`sqld`) server for `pnpm preview` (wrangler dev).
  *
  * PROBLEM: the prod-faithful preview loop (`pnpm preview` → `wrangler dev` →
- * `workers/app.ts`) reads bindings from `wrangler.jsonc` + `.dev.vars`, NEVER from
+ * `workers/app.ts`) reads bindings from `wrangler.toml` + `.dev.vars.local`, NEVER from
  * `process.env` (P0.5). With no local metadata DB, every dashboard/sync request
  * that touches Turso fails — so devs fall back to `react-router dev` (which reads
  * `.env` via Vite), losing the Worker-runtime parity preview exists to provide.

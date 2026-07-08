@@ -3,7 +3,11 @@
  * Free-tier default fix (500 MB, not the old 1 GB schema default).
  */
 import { describe, expect, it } from "vitest";
-import { PLAN_ENTITLEMENTS, resolveCaps } from "../../lib/entitlements";
+import {
+	canRunConsolidation,
+	PLAN_ENTITLEMENTS,
+	resolveCaps,
+} from "../../lib/entitlements";
 import type { PlanTier } from "../db/schema";
 
 describe("PLAN_ENTITLEMENTS (SSOT)", () => {
@@ -50,5 +54,31 @@ describe("resolveCaps", () => {
 		expect(resolveCaps("free")).toEqual(PLAN_ENTITLEMENTS.free);
 		expect(resolveCaps("pro")).toEqual(PLAN_ENTITLEMENTS.pro);
 		expect(resolveCaps("teams")).toEqual(PLAN_ENTITLEMENTS.teams);
+	});
+});
+
+describe("canRunConsolidation", () => {
+	it("allows a run when usedToday is below the plan cap", () => {
+		// free cap = 1
+		expect(canRunConsolidation("free", 0)).toBe(true);
+		// pro cap = 24
+		expect(canRunConsolidation("pro", 0)).toBe(true);
+		expect(canRunConsolidation("pro", 23)).toBe(true);
+	});
+
+	it("refuses a run when usedToday equals the cap (boundary)", () => {
+		expect(canRunConsolidation("free", 1)).toBe(false);
+		expect(canRunConsolidation("pro", 24)).toBe(false);
+	});
+
+	it("refuses a run when usedToday exceeds the cap", () => {
+		expect(canRunConsolidation("free", 5)).toBe(false);
+		expect(canRunConsolidation("pro", 100)).toBe(false);
+	});
+
+	it("always allows Teams (Infinity cap — never exhausts)", () => {
+		// `Infinity` is the Teams sentinel; any finite count is below it.
+		expect(canRunConsolidation("teams", 0)).toBe(true);
+		expect(canRunConsolidation("teams", 1_000_000)).toBe(true);
 	});
 });

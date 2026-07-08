@@ -27,7 +27,7 @@ test.describe("cloud e2e: health + readiness", () => {
 	}) => {
 		const res = await request.get("/v1/readiness");
 		// readiness is 200 only if `env.BLOBS.head(...)` does not throw — i.e. the
-		// R2 binding declared in `wrangler.jsonc` is actually wired by wrangler dev.
+		// R2 binding declared in `wrangler.toml` is actually wired by wrangler dev.
 		expect(res.status()).toBe(200);
 		const body = await res.json();
 		expect(body.data.ok).toBe(true);

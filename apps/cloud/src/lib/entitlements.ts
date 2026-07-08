@@ -120,6 +120,28 @@ export function resolveCaps(plan: PlanTier): EntitlementCaps {
 }
 
 /**
+ * Whether the daily consolidation budget is exhausted for `plan`.
+ *
+ * The single enforcement predicate the memory resource route calls before
+ * invoking `runtime.consolidate()` (Q19). Numeric, plan-agnostic — never a
+ * `plan === 'pro'` check (ADR 0006 §12.3): `Infinity` (Teams) always satisfies,
+ * the free floor (`maxConsolidationRuns: 1`) lets a free user run ONE
+ * consolidation so they can evaluate the feature, and Pro's `24/day` cap is the
+ * real guard. `usedToday` comes from {@link getAccountUsage}, which counts
+ * `memory_events` rows of `kind = 'consolidation'` since UTC midnight.
+ *
+ * @param plan     the account's plan tier.
+ * @param usedToday count of consolidation runs logged today (UTC).
+ * @returns `true` when the run is allowed, `false` when over cap.
+ */
+export function canRunConsolidation(
+	plan: PlanTier,
+	usedToday: number,
+): boolean {
+	return usedToday < PLAN_ENTITLEMENTS[plan].maxConsolidationRuns;
+}
+
+/**
  * The integer sentinel stored in a `NOT NULL integer` entitlement column to mean
  * "unlimited" (Teams tier). The column can't hold `Infinity`, and SQLite doesn't
  * support cheap column-nullability changes. This sentinel is finite (so libSQL

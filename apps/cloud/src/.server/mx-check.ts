@@ -4,7 +4,7 @@
  * A domain with no MX records can't receive the magic link, so sending to it is
  * pointless (and a vector for list bombing — an attacker points a signup at
  * thousands of unreachable domains). This rejects such domains at request time
- * rather than after Plunk bounces them.
+ * rather than after Resend bounces them.
  *
  * Uses Cloudflare's public DoH endpoint (`cloudflare-dns.com`), which is
  * reachable from the Worker and needs no API key. The query is scoped to MX so

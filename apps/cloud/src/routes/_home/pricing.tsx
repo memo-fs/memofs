@@ -12,6 +12,7 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { buildMeta } from "~/lib/seo";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/pricing";
 import type { Plan } from "./+utils/plans";
@@ -46,14 +47,12 @@ const FAQS = [
 ];
 
 export function meta(_: Route.MetaArgs) {
-	return [
-		{ title: "Pricing — Memo FS Cloud" },
-		{
-			name: "description",
-			content:
-				"Simple, transparent pricing. Pay for storage and the features you use. Billed through Polar.",
-		},
-	];
+	return buildMeta({
+		title: "Pricing — Memo FS Cloud",
+		description:
+			"Simple, transparent pricing. Pay for storage and the features you use. Billed through Polar.",
+		path: "/pricing",
+	});
 }
 
 export default function Pricing(_props: Route.ComponentProps) {
@@ -187,8 +186,8 @@ function TeamsNotify() {
 						Get notified when Teams launches
 					</CardTitle>
 					<CardDescription className="text-sm">
-						Teams is coming. Join the waitlist and we'll notify you when it
-						goes live — list price locked at{" "}
+						Teams is coming. Join the waitlist and we'll notify you when it goes
+						live — list price locked at{" "}
 						{teams ? `${teams.price}${teams.period}` : "$24/seat/mo"}.
 					</CardDescription>
 				</CardHeader>

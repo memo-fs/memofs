@@ -1,9 +1,10 @@
 import { redirect } from "react-router";
 import { getSessionUser } from "~/.server/session";
 import type { Route } from "./+types/callback";
+import { buildNoindexMeta } from "~/lib/seo";
 
 export function meta() {
-	return [{ title: "Completing Sign-in — Memo FS Cloud" }];
+	return buildNoindexMeta("Completing Sign-in — Memo FS Cloud");
 }
 
 /**

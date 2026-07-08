@@ -1,5 +1,6 @@
 import { Section } from "~/components/site/visuals";
 import { Card, CardContent } from "~/components/ui/card";
+import { buildMeta } from "~/lib/seo";
 import { SITE_LINKS } from "~/lib/site";
 import type { Route } from "./+types/privacy";
 
@@ -154,14 +155,12 @@ const SECTIONS = [
 ] as const;
 
 export function meta(_: Route.MetaArgs) {
-	return [
-		{ title: "Privacy Policy — Memo FS Cloud" },
-		{
-			name: "description",
-			content:
-				"Memo FS Cloud privacy policy. The cloud stores file bytes and metadata only — it never parses or indexes your memory.",
-		},
-	];
+	return buildMeta({
+		title: "Privacy Policy — Memo FS Cloud",
+		description:
+			"Memo FS Cloud privacy policy. The cloud stores file bytes and metadata only — it never parses or indexes your memory.",
+		path: "/privacy",
+	});
 }
 
 export default function Privacy(_props: Route.ComponentProps) {

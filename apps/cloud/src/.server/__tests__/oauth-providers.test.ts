@@ -12,10 +12,13 @@ function setOAuthEnv(oauth: {
 	googleId?: string;
 	googleSecret?: string;
 }) {
-	env.GITHUB_CLIENT_ID = oauth.githubId;
-	env.GITHUB_CLIENT_SECRET = oauth.githubSecret;
-	env.GOOGLE_CLIENT_ID = oauth.googleId;
-	env.GOOGLE_CLIENT_SECRET = oauth.googleSecret;
+	// OAuth creds are env-gated: absent in test by default. Coerce to "" so the
+	// assignment satisfies the `Env.GITHUB_*: string` contract without widening
+	// the ambient type (the production code path treats "" the same as unset).
+	env.GITHUB_CLIENT_ID = oauth.githubId ?? "";
+	env.GITHUB_CLIENT_SECRET = oauth.githubSecret ?? "";
+	env.GOOGLE_CLIENT_ID = oauth.googleId ?? "";
+	env.GOOGLE_CLIENT_SECRET = oauth.googleSecret ?? "";
 }
 
 describe("enabledOAuthProviders", () => {

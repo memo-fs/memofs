@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { safeRelativeRedirect } from "../redirect";
+import { safeRelativeRedirect } from "../../lib/redirect";
 
 /**
  * Regression tests for the open-redirect guard (VULN-001).

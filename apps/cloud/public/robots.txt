@@ -1,0 +1,10 @@
+# Memo FS Cloud — https://memofs.dev
+#
+# Public marketing pages are crawled; auth-gated dashboard routes emit
+# `robots: noindex, nofollow` via route `meta()` (see `src/lib/seo.ts`).
+
+User-agent: *
+Allow: /
+
+# Sitemap (canonical production origin)
+Sitemap: https://memofs.dev/sitemap.xml
