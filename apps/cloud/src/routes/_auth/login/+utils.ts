@@ -1,14 +1,28 @@
 import type { SubmissionResult } from "@conform-to/dom";
 import { z } from "zod/v4";
+import { isDisposableDomain } from "../+utils/email-validation";
 
 /**
- * Shared validation schema for the login form.
+ * Validation schema for the login form (SC4.1).
  *
- * Only email is validated; the MX check is intentionally skipped (unlike signup)
- * so a transient DoH failure can't lock a returning user out.
+ * Format check via Zod's `.email()`, plus disposable-domain rejection via
+ * `superRefine`. The MX check is intentionally skipped so a transient DoH
+ * failure can't lock a returning user out.
  */
 export const LoginSchema = z.object({
-	email: z.string("Email is required").trim().email("Invalid email address."),
+	email: z
+		.string("Email is required")
+		.trim()
+		.email("Invalid email address.")
+		.superRefine((email, ctx) => {
+			const domain = email.split("@")[1];
+			if (domain && isDisposableDomain(domain)) {
+				ctx.addIssue({
+					code: "custom",
+					message: "Invalid email address.",
+				});
+			}
+		}),
 });
 
 export type LoginFormValues = z.infer<typeof LoginSchema>;

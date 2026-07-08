@@ -2,7 +2,6 @@ import { parseWithZod } from "@conform-to/zod/v4";
 import { getCtx } from "~/.server/context";
 import { consumeMagicLinkToken, rateLimitMessage } from "~/.server/rate-limit";
 import { createAuthFromEnv, safeRelativeRedirect } from "~/.server/session";
-import { emailIssueMessage, validateEmail } from "../+utils/email-validation";
 import type { Route } from "./+types/index";
 import { LoginSchema } from "./+utils";
 
@@ -12,6 +11,9 @@ import { LoginSchema } from "./+utils";
  * Runs server-side so Better Auth's `signInMagicLink` is called directly — no
  * extra HTTP hop through the client. Login omits the MX check (unlike signup)
  * so a transient DoH failure can't lock a returning user out.
+ *
+ * Email validation (format + disposable) is handled by the Zod schema's
+ * `superRefine`; no manual validation step needed.
  *
  * Returns a Conform `SubmissionResult` on errors (drives field/form-level
  * error display via `useForm`) or `{ status: 'success', email }` on success
@@ -34,14 +36,6 @@ export async function action({ request, context }: Route.ActionArgs) {
 	if (limitedMessage) {
 		return submission.reply({
 			formErrors: [limitedMessage.error],
-		});
-	}
-
-	// Reject invalid/disposable addresses (business rule, not a format check).
-	const validation = validateEmail(email);
-	if (!validation.ok) {
-		return submission.reply({
-			fieldErrors: { email: [emailIssueMessage(validation.issue)] },
 		});
 	}
 

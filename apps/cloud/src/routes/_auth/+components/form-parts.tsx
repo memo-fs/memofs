@@ -21,7 +21,7 @@ export function FormError({ errors }: { errors: string | string[] }) {
 			className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive"
 		>
 			{messages.map((msg) => (
-				<p key={message}>{msg}</p>
+				<p key={msg}>{msg}</p>
 			))}
 		</div>
 	);
