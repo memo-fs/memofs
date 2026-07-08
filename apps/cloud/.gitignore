@@ -23,3 +23,13 @@ node_modules/
 
 # TypeScript composite output
 /.typecheck/
+*.tsbuildinfo
+
+# Vite
+vite.config.d.ts
+
+# Dev
+.dev.vars.local
+
+# VS Code
+.vscode/
