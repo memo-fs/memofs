@@ -44,11 +44,11 @@
 import {
 	type Extractor,
 	type LlmClient,
+	MemoFS,
 	type MemoryEmbedder,
 	type MemoryStore,
 	type RecallStore,
 	type Reranker,
-	MemoFS,
 } from "@memofs/core";
 
 /**

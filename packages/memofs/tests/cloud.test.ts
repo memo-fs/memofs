@@ -1,4 +1,4 @@
-import { type MemoryPath, MEMOFS_PATHS } from "@memofs/core";
+import { MEMOFS_PATHS, type MemoryPath } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
 	createTempMemoFsDir,

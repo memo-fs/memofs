@@ -17,9 +17,9 @@ import {
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import {
+	MEMOFS_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	MEMOFS_PATHS,
 } from "../protocol/constants";
 import { createDefaultManifest } from "../protocol/manifest";
 

@@ -28,6 +28,7 @@
 
 import type {
 	FileManifest,
+	MemoFsCloudClient,
 	SyncPullInput,
 	SyncPullResult,
 	SyncPushCompleteInput,
@@ -37,7 +38,6 @@ import type {
 	SyncStatusInput,
 	SyncStatusResult,
 	SyncUploadTarget,
-	MemoFsCloudClient,
 } from "../../cloud-client/types";
 import {
 	CANONICAL_MEMOFS_FILES,

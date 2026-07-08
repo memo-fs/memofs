@@ -32,9 +32,7 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 
 		await store.write(".memofs/memory/core.md", "hello");
 
-		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(
-			true,
-		);
+		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(true);
 	});
 
 	test("reads do NOT acquire the lock and do NOT block", async () => {
@@ -150,9 +148,7 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 
 		await store.write(".memofs/memory/core.md", "x");
 
-		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(
-			true,
-		);
+		expect(await pathExists(path.join(rootDir, ".memofs", ".lock"))).toBe(true);
 		// And NOT at the rootDir level.
 		expect(await pathExists(path.join(rootDir, ".lock"))).toBe(false);
 	});

@@ -2,9 +2,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+	type MemoFsConfigFile,
 	type RecallEngineConfig,
 	resolveMemoFsConfig,
-	type MemoFsConfigFile,
 } from "../../src/index";
 import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 

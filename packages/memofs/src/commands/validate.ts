@@ -11,9 +11,9 @@ import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
+	MEMOFS_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
-	MEMOFS_PATHS,
 } from "../protocol/constants";
 import { parseManifest } from "../protocol/manifest";
 import {

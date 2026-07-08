@@ -58,8 +58,6 @@ export class GraphParseError extends MemoFsGraphError {
 	}
 }
 
-export function isMemoFsGraphError(
-	error: unknown,
-): error is MemoFsGraphError {
+export function isMemoFsGraphError(error: unknown): error is MemoFsGraphError {
 	return error instanceof MemoFsGraphError;
 }

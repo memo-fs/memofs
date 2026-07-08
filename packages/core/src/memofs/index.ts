@@ -6,19 +6,19 @@
 
 export {
 	extractConfigFile,
+	type MemoFsCloudOptions,
+	type MemoFsConfig,
+	type MemoFsConfigFile,
 	type RecallEngineConfig,
 	type ResolvedMemoFsConfig,
 	resolveMemoFsConfig,
-	type MemoFsConfigFile,
-	type MemoFsCloudOptions,
-	type MemoFsConfig,
 } from "./config";
 export {
 	createLazyLocalEmbedder,
 	type LazyLocalEmbedderOptions,
 } from "./local-embedder";
-export { sha256Hex } from "./sync/sha256";
 export { MemoFS } from "./MemoFS";
+export { sha256Hex } from "./sync/sha256";
 export type {
 	AgentSessionCompleteInput,
 	AgentSessionExtractResult,
@@ -36,6 +36,8 @@ export type {
 	JsonPrimitive,
 	JsonValue,
 	ListGraphInput,
+	MemoFSHealthResult,
+	MemoFSRuntimeMode,
 	MemoryContextExpandableSection,
 	MemoryContextExpansion,
 	MemoryContextInput,
@@ -62,8 +64,6 @@ export type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	MemoFSHealthResult,
-	MemoFSRuntimeMode,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,

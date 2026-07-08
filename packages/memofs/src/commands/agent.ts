@@ -212,9 +212,7 @@ export async function runAgentCompleteCommand(
 		return 0;
 	}
 
-	options.output.success(
-		`Completed MemoFS agent session ${pointer.sessionId}`,
-	);
+	options.output.success(`Completed MemoFS agent session ${pointer.sessionId}`);
 	if (result.durableMemoryWritten) {
 		options.output.success("Persisted extracted durable memory to notes.");
 	}

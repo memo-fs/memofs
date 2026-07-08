@@ -113,8 +113,7 @@ export async function runContextCommand(
 				? parsePositiveInteger(options.maxChars, "max chars")
 				: 12000;
 	const core =
-		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.coreMemory)) ??
-		"";
+		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.coreMemory)) ?? "";
 	const notes =
 		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.notesMemory)) ??
 		"";

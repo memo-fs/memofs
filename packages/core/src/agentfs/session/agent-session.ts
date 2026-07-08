@@ -20,8 +20,8 @@ import type {
 	CompleteMemoFSAgentSessionResult,
 	CreateMemoFSAgentSessionOptions,
 	ExtractedSessionMemory,
-	PrepareMemoFSAgentSessionResult,
 	MemoFSAgentSession,
+	PrepareMemoFSAgentSessionResult,
 } from "./types";
 
 export {
@@ -34,9 +34,9 @@ export type {
 	CompleteMemoFSAgentSessionResult,
 	CreateMemoFSAgentSessionOptions,
 	ExtractedSessionMemory,
-	PrepareMemoFSAgentSessionResult,
 	MemoFSAgentSession,
 	MemoFSAgentSessionPaths,
+	PrepareMemoFSAgentSessionResult,
 } from "./types";
 
 /**

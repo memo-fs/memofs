@@ -212,11 +212,7 @@ async function dispatchSingle(
 			);
 			return success(id, result);
 		} catch (error) {
-			return failure(
-				id,
-				errorCodeFor(error),
-				messageFor(error),
-			);
+			return failure(id, errorCodeFor(error), messageFor(error));
 		}
 	}
 

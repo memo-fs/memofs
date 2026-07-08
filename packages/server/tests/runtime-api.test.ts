@@ -18,8 +18,8 @@ import {
 	type ExtractionResult,
 	type Extractor,
 	InMemoryMemoryStore,
-	type MemoryEmbedder,
 	type MemoFS,
+	type MemoryEmbedder,
 } from "@memofs/core";
 import { JSON_RPC_ERRORS } from "@memofs/json-rpc";
 import { beforeEach, describe, expect, it } from "vitest";

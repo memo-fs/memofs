@@ -15,9 +15,9 @@
 
 import type {
 	FileManifest,
+	MemoFsCloudClient,
 	SyncCursor,
 	SyncPushCompleteResult,
-	MemoFsCloudClient,
 } from "@memofs/core";
 import { CANONICAL_MEMOFS_FILES, sha256Hex } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";

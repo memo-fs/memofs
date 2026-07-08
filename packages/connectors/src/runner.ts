@@ -16,7 +16,7 @@
  * @public
  */
 
-import type { JsonObject, SourceRef, MemoFS } from "@memofs/core";
+import type { JsonObject, MemoFS, SourceRef } from "@memofs/core";
 import { readMemoryEvents } from "@memofs/core";
 import { readConnectorsFile, selectConnectors } from "./config";
 import { connectorNoteId } from "./id";

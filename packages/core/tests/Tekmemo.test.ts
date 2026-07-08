@@ -4,8 +4,8 @@ import {
 	CORE_MEMORY_PATH,
 	createInMemoryRecallStore,
 	InMemoryMemoryStore,
-	NOTES_MEMORY_PATH,
 	MemoFS,
+	NOTES_MEMORY_PATH,
 } from "../src/index";
 
 describe("MemoFS Client", () => {

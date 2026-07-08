@@ -13,9 +13,9 @@ import {
 	runStdioServer,
 } from "../index";
 import type {
+	MemoFSRuntimeMode,
 	RuntimeReadPolicy,
 	RuntimeWritePolicy,
-	MemoFSRuntimeMode,
 } from "../types";
 
 main().catch((error) => {

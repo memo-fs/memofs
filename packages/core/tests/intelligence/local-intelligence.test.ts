@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	createInMemoryRecallStore,
-	type MemoryEmbedder,
 	MemoFS,
+	type MemoryEmbedder,
 } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempMemoFsDir } from "../../src/testing/temp-dir";

@@ -9,7 +9,7 @@ import type { MemoFS } from "@memofs/core";
 import { appendText, readTextIfExists, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { REQUIRED_FILES, MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_PATHS, REQUIRED_FILES } from "../protocol/constants";
 import { stringifyJsonl } from "../protocol/jsonl";
 import { createSafeIdFromLabel, validateSnapshotLabel } from "../utils/labels";
 

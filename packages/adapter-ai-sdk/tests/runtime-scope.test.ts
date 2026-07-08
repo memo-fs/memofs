@@ -5,11 +5,11 @@ import {
 	canReadMemoryMetadata,
 	createRecallFilters,
 	createScopeMetadata,
+	type MemoFSMemoryRuntime,
 	type MemoryRuntimeNote,
 	type MemoryRuntimeRecallInput,
 	type MemoryRuntimeRecallResult,
 	normalizeAccessContext,
-	type MemoFSMemoryRuntime,
 } from "../src";
 
 function createFakeRuntime(): MemoFSMemoryRuntime & {

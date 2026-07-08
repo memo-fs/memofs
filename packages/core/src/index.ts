@@ -63,6 +63,8 @@ export * from "./fs";
 export * from "./graph";
 // Explicit re-export resolves TS2308 ambiguity: cloneAndValidateMetadata appears in multiple export * sources.
 export { cloneAndValidateMetadata } from "./graph";
+export type { RecallResult } from "./memofs";
+export * from "./memofs";
 export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";
@@ -71,8 +73,6 @@ export * from "./rerank";
 // durability tier classifier.
 export * from "./security/durability-tier";
 export * from "./security/secret-blocklist";
-export type { RecallResult } from "./memofs";
-export * from "./memofs";
 // NOTE: `./testing` (createTempMemoFsDir) is NOT re-exported here — it imports
 // `node:fs`/`node:os`/`node:path`, which would pull `node:fs` into this barrel
 // and break the runtime Worker. It lives behind the Node-only

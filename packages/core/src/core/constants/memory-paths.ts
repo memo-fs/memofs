@@ -176,8 +176,7 @@ export function createSnapshotPath(snapshotId: string): SnapshotFilePath {
 		});
 	}
 
-	const path =
-		`${MEMOFS_DIR}/snapshots/${normalized}.json` as SnapshotFilePath;
+	const path = `${MEMOFS_DIR}/snapshots/${normalized}.json` as SnapshotFilePath;
 	assertMemoryPath(path);
 	return path;
 }

@@ -5,10 +5,10 @@ import {
 	CORE_MEMORY_PATH,
 	createSnapshotPath,
 	MANIFEST_PATH,
-	MEMORY_EVENTS_PATH,
-	MemoryPathError,
 	MEMOFS_DIR,
 	MEMOFS_PATHS,
+	MEMORY_EVENTS_PATH,
+	MemoryPathError,
 } from "../src/index";
 
 describe(".memofs protocol paths", () => {

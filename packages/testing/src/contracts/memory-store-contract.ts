@@ -45,9 +45,7 @@ export function defineMemoryStoreContractTests(
 		it("handles missing reads according to configured behavior", async () => {
 			const store = await options.createStore();
 			try {
-				const result = Promise.resolve(
-					store.read(".memofs/memory/missing.md"),
-				);
+				const result = Promise.resolve(store.read(".memofs/memory/missing.md"));
 
 				if (options.missingReadBehavior === "empty") {
 					await expect(result).resolves.toBe("");

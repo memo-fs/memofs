@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@memofs/json-rpc"><img src="https://img.shields.io/npm/v/%40memofs%2Fjson-rpc?label=%40memofs%2Fjson-rpc&style=for-the-badge" alt="npm version" /></a> &nbsp;
-  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-alpha-orange?style=for-the-badge" alt="Status: Alpha" /></a> &nbsp;
+  <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-beta-blue?style=for-the-badge" alt="Status: Beta" /></a> &nbsp;
   <a href="https://www.npmjs.com/package/@memofs/json-rpc"><img src="https://img.shields.io/npm/dm/%40memofs%2Fjson-rpc?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
   <a href="https://docs.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;

@@ -3,13 +3,13 @@ import {
 	assertMemoryPath,
 	CORE_MEMORY_PATH,
 	createDefaultMemoFsManifest,
-	isMemoryPath,
 	isMemoFsError,
+	isMemoryPath,
+	MemoFsError,
 	MemoryPathError,
 	MemoryValidationError,
 	memoryTypeFromPath,
 	normalizeTimestampedNote,
-	MemoFsError,
 	validateMemoFsManifest,
 } from "../src/index";
 

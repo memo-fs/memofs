@@ -158,8 +158,7 @@ export async function handleMemoFSMcpRequest(
 	const server = createMemoFSMcpProtocolServer({
 		...options,
 		runtime: options.runtime ?? createRuntimeFromHttpOptions(options),
-		readOnly:
-			options.readOnly ?? options.env?.MEMOFS_MCP_READ_ONLY !== "false",
+		readOnly: options.readOnly ?? options.env?.MEMOFS_MCP_READ_ONLY !== "false",
 	});
 	const result = await server.handleJsonRpcMessage(payload);
 	if (result === undefined) return emptyResponse(202, request, options);

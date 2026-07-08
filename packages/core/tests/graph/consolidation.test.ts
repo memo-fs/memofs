@@ -174,9 +174,7 @@ describe("applyConsolidation (store-backed)", () => {
 		expect(applied.mergesApplied).toBe(1);
 		// The absorbed node is gone; the survivor remains.
 		expect(await store.getNode("project:memofs-dup")).toBeUndefined();
-		expect((await store.getNode("project:memofs"))?.id).toBe(
-			"project:memofs",
-		);
+		expect((await store.getNode("project:memofs"))?.id).toBe("project:memofs");
 	});
 
 	it("marks superseded edges and nodes deprecated without deleting them", async () => {

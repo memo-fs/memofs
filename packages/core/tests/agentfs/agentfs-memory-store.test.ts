@@ -2,9 +2,9 @@ import {
 	bootstrapMemoryStore,
 	CORE_MEMORY_PATH,
 	MANIFEST_PATH,
+	MEMOFS_PATHS,
 	MemoryNotFoundError,
 	MemoryPathError,
-	MEMOFS_PATHS,
 } from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {

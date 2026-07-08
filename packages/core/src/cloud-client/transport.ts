@@ -1,33 +1,30 @@
 import {
 	createHttpError,
-	redactSecrets,
-	MemoFsCloudAuthError,
 	MemoFSCloudNetworkError,
 	MemoFSCloudResponseParseError,
 	MemoFSCloudTimeoutError,
+	MemoFsCloudAuthError,
+	redactSecrets,
 } from "./errors";
 import type {
-	MemoFsCloudClientOptions,
 	MemoFSCloudErrorEnvelope,
-	MemoFsCloudFetch,
 	MemoFSCloudRequestOptions,
 	MemoFSCloudRetryOptions,
+	MemoFsCloudClientOptions,
+	MemoFsCloudFetch,
 	MemoFsCloudSuccessEnvelope,
 } from "./types";
 import { normalizeApiKey, normalizeBaseUrl } from "./validation";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_RETRY_OPTIONS: Required<MemoFSCloudRetryOptions> = Object.freeze(
-	{
-		retries: 2,
-		baseDelayMs: 250,
-		maxDelayMs: 2_500,
-		statuses: [408, 409, 425, 429, 500, 502, 503, 504],
-	},
-);
+const DEFAULT_RETRY_OPTIONS: Required<MemoFSCloudRetryOptions> = Object.freeze({
+	retries: 2,
+	baseDelayMs: 250,
+	maxDelayMs: 2_500,
+	statuses: [408, 409, 425, 429, 500, 502, 503, 504],
+});
 
-export interface MemoFsCloudTransportOptions
-	extends MemoFsCloudClientOptions {}
+export interface MemoFsCloudTransportOptions extends MemoFsCloudClientOptions {}
 
 export class MemoFsCloudTransport {
 	readonly baseUrl: string;
@@ -81,9 +78,7 @@ export class MemoFsCloudTransport {
 		throw lastError;
 	}
 
-	private async requestOnce<T>(
-		options: MemoFSCloudRequestOptions,
-	): Promise<T> {
+	private async requestOnce<T>(options: MemoFSCloudRequestOptions): Promise<T> {
 		const timeoutController = new AbortController();
 		const timeout = setTimeout(() => timeoutController.abort(), this.timeoutMs);
 		const signal = mergeAbortSignals(options.signal, timeoutController.signal);

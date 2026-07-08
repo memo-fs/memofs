@@ -2,6 +2,9 @@ declare const process: { env?: Record<string, string | undefined> } | undefined;
 
 import { MemoFsCloudTransport } from "./transport";
 import type {
+	MemoFSCloudHealthResult,
+	MemoFsCloudClient,
+	MemoFsCloudClientOptions,
 	ProjectScopedInput,
 	SyncPullInput,
 	SyncPullResult,
@@ -11,9 +14,6 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	MemoFsCloudClient,
-	MemoFsCloudClientOptions,
-	MemoFSCloudHealthResult,
 } from "./types";
 import {
 	assertProjectId,

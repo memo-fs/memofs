@@ -7,8 +7,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	createDefaultMemoFsManifest,
-	parseManifest as parseCoreManifest,
 	type MemoFsManifest,
+	parseManifest as parseCoreManifest,
 	validateMemoFsManifest,
 } from "@memofs/core";
 import { CliProtocolError } from "../errors/cli-errors";

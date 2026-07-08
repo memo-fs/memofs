@@ -15,6 +15,8 @@
 
 import type {
 	JsonObject,
+	MemoFS,
+	MemoFSMemoryRuntime,
 	MemoryRuntimeCoreMemoryDocument,
 	MemoryRuntimeCreateNoteInput,
 	MemoryRuntimeListNotesInput,
@@ -26,8 +28,6 @@ import type {
 	RecallFilter,
 	RecallItem,
 	RecentMemoryResult,
-	MemoFSMemoryRuntime,
-	MemoFS,
 } from "@memofs/core";
 
 /**

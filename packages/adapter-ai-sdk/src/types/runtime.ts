@@ -21,6 +21,7 @@ export type {
 	JsonObject,
 	JsonPrimitive,
 	JsonValue,
+	MemoFSMemoryRuntime,
 	MemoryRuntimeCoreMemoryDocument,
 	MemoryRuntimeCreateNoteInput,
 	MemoryRuntimeIndexInput,
@@ -33,7 +34,6 @@ export type {
 	MemoryRuntimeRecallInput,
 	MemoryRuntimeRecallResult,
 	MemoryRuntimeRecallStrategy,
-	MemoFSMemoryRuntime,
 } from "@memofs/core";
 
 // Imported locally (not just re-exported) so the L2 interfaces below can

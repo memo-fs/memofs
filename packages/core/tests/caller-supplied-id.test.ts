@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { NOTES_MEMORY_PATH, MemoFS } from "../src/index";
+import { MemoFS, NOTES_MEMORY_PATH } from "../src/index";
 import {
 	NodeFsMemoryStore,
 	type NodeFsMemoryStoreOptions,

@@ -88,8 +88,6 @@ export function redactSecrets(
 	return output;
 }
 
-export function isMemoFSCloudError(
-	value: unknown,
-): value is MemoFSCloudError {
+export function isMemoFSCloudError(value: unknown): value is MemoFSCloudError {
 	return value instanceof MemoFSCloudError;
 }

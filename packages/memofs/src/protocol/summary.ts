@@ -10,7 +10,7 @@ import type { MemoryStore } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import { MEMOFS_PATHS } from "./constants";
 import { parseJsonl } from "./jsonl";
-import { parseManifest, type MemoFsCliManifest } from "./manifest";
+import { type MemoFsCliManifest, parseManifest } from "./manifest";
 
 /**
  * Detailed diagnosis/inspection report of a MemoFS workspace repository.

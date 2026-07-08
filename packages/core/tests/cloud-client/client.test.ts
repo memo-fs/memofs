@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { MemoFsCloudFetch } from "../../src/cloud-client";
 import {
-	createProjectScopedClient,
 	createMemoFsCloudClient,
 	createMemoFsCloudClientFromEnv,
+	createProjectScopedClient,
 	MemoFsCloudAuthError,
 	MemoFsCloudValidationError,
 } from "../../src/cloud-client";

@@ -46,8 +46,7 @@ export function createPromptDefinitions(): McpPromptDefinition[] {
 		{
 			name: "memofs-memory-review",
 			title: "Review Memory Candidate",
-			description:
-				"Review whether a text should become durable MemoFS memory.",
+			description: "Review whether a text should become durable MemoFS memory.",
 			arguments: [
 				{
 					name: "content",

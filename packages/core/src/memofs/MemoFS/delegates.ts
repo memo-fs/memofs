@@ -12,8 +12,8 @@ import type {
 import {
 	appendConversationEntry,
 	bootstrapMemoryStore,
-	createSnapshotPath,
 	createMemoFsAgentSession,
+	createSnapshotPath,
 	MEMORY_EVENTS_PATH,
 	MemoryNotFoundError,
 	NOTES_MEMORY_PATH,
@@ -23,9 +23,9 @@ import {
 } from "../../index";
 import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
+import type { MemoFS } from "../MemoFS";
 import { createMemoryStrategy } from "../memory-strategy";
 import { createFileSyncLayer } from "../sync/file-replication";
-import type { MemoFS } from "../MemoFS";
 import type {
 	SnapshotMemoryInput,
 	WriteMemoryInput,

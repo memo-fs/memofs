@@ -9,10 +9,10 @@
 
 import {
 	createLazyLocalEmbedder,
-	type RuntimeReadPolicy,
-	type RuntimeWritePolicy,
 	MemoFS,
 	type MemoFsConfig,
+	type RuntimeReadPolicy,
+	type RuntimeWritePolicy,
 } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,

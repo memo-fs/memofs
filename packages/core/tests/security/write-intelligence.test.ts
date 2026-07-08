@@ -5,8 +5,8 @@ import {
 	BLOCKLIST_RULES,
 	containsBlockedContent,
 	detectBlockedContent,
-	MemoryWriteBlockedError,
 	MemoFS,
+	MemoryWriteBlockedError,
 } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import {
@@ -163,10 +163,7 @@ describe("write intelligence — secret blocklist (layer 1)", () => {
 
 		it("surfaces the path in details when provided", () => {
 			try {
-				assertWriteAllowed(
-					["AKIAIOSFODNN7EXAMPLE"],
-					".memofs/memory/notes.md",
-				);
+				assertWriteAllowed(["AKIAIOSFODNN7EXAMPLE"], ".memofs/memory/notes.md");
 				throw new Error("should have thrown");
 			} catch (error) {
 				const e = error as MemoryWriteBlockedError;

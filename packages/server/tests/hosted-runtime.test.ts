@@ -6,11 +6,11 @@ import {
 	type LlmClient,
 	type LlmCompletionInput,
 	type LlmCompletionResult,
+	MemoFS,
 	type MemoryEmbedder,
 	type Reranker,
 	type RerankInput,
 	type RerankResult,
-	MemoFS,
 } from "@memofs/core";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createHostedRuntime } from "../src";

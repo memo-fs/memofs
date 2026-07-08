@@ -66,8 +66,7 @@ export function createLazyLocalEmbedder(
 	options: LazyLocalEmbedderOptions = {},
 ): MemoryEmbedder {
 	const model = options.model ?? "Xenova/all-MiniLM-L6-v2";
-	const adapterModule =
-		options.adapterModule ?? "@memofs/adapter-transformers";
+	const adapterModule = options.adapterModule ?? "@memofs/adapter-transformers";
 
 	let embedderPromise: Promise<MemoryEmbedder> | undefined;
 

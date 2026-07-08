@@ -29,10 +29,10 @@ export {
 	printJsonError,
 } from "./output/output";
 export {
-	REQUIRED_DIRS,
-	REQUIRED_FILES,
 	MEMOFS_DIR,
 	MEMOFS_PATHS,
+	REQUIRED_DIRS,
+	REQUIRED_FILES,
 } from "./protocol/constants";
 export type { JsonlParseOptions, JsonlRecord } from "./protocol/jsonl";
 export { parseJsonl, stringifyJsonl } from "./protocol/jsonl";

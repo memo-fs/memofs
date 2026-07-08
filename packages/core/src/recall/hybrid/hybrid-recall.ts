@@ -22,8 +22,8 @@
  * @public
  */
 
-import type { Reranker } from "../../rerank/types";
 import type { RecallItem } from "../../memofs/types";
+import type { Reranker } from "../../rerank/types";
 
 /** A candidate surfaced by one of the retrieval paths. */
 export interface HybridCandidate {

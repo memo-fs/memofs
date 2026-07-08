@@ -5,7 +5,7 @@
  */
 
 import { createHash } from "node:crypto";
-import type { MemoryStore, MemoFS } from "@memofs/core";
+import type { MemoFS, MemoryStore } from "@memofs/core";
 import { readText, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
