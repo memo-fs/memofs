@@ -52,9 +52,8 @@ import type {
 } from "@memofs/core/cloud-client";
 import type { MiddlewareHandler } from "hono";
 import { Hono } from "hono";
-import type { Database } from "../../db";
-import { getDB } from "../../db";
 import { invariant } from "../../../utils/misc";
+import { getDB } from "../../db";
 import { ConflictError, EntitlementError, ValidationError } from "../errors";
 import type { ApiEnv, ApiVariables } from "../index";
 import { json } from "../json";
@@ -148,8 +147,8 @@ const authMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
 	// normal operation. Failing loudly surfaces a wiring bug rather than
 	// letting an unauthenticated request slip past.
 	invariant(db, "db middleware must run before auth middleware");
-	const salt = c.env.API_KEY_SALT ?? "";
-	const account = await resolveAccount(db, salt, c.req.header("authorization"));
+	const salt = c.env.API_KEY_SALT;
+	const account = await resolveAccount(salt, c.req.header("authorization"));
 	c.set("account", account);
 	await next();
 };
@@ -164,7 +163,6 @@ export const syncApp = new Hono<ApiEnv>()
 
 	// --- POST /push ----------------------------------------------------------
 	.post("/push", async (c) => {
-		const db = requireDb(c);
 		const account = requireAccount(c);
 		const projectId = requireProjectId(c);
 
@@ -178,10 +176,10 @@ export const syncApp = new Hono<ApiEnv>()
 		void parseCursor(baseCursor);
 
 		// First push auto-provisions the project owned by this account (Q13).
-		const project = await ensureProject(db, account.id, projectId);
-		await assertOwns(db, project, account.id);
+		const project = await ensureProject(account.id, projectId);
+		await assertOwns(project, account.id);
 
-		const cloud = await loadCloudManifest(db, projectId);
+		const cloud = await loadCloudManifest(projectId);
 		const targets = diffPushTargets(manifest, cloudManifestToLocal(cloud));
 
 		// Issue one presigned PUT per changed/missing path. Keys are content-
@@ -193,7 +191,7 @@ export const syncApp = new Hono<ApiEnv>()
 			"PUT",
 		);
 
-		const cursor = await currentCursor(db, projectId);
+		const cursor = await currentCursor(projectId);
 		const expiresAt = presignExpiry(c.env);
 
 		return json(c, {
@@ -215,7 +213,6 @@ export const syncApp = new Hono<ApiEnv>()
 
 	// --- POST /push/complete -------------------------------------------------
 	.post("/push/complete", async (c) => {
-		const db = requireDb(c);
 		const account = requireAccount(c);
 		const projectId = requireProjectId(c);
 
@@ -232,14 +229,14 @@ export const syncApp = new Hono<ApiEnv>()
 		// A `complete` with no prior `push` means the project doesn't exist yet;
 		// there is nothing to complete. The client should have called push first.
 		// Surface as 409 (conflict) so the client re-pushes cleanly.
-		const project = await loadProject(db, projectId);
+		const project = await loadProject(projectId);
 		if (!project) {
 			throw new ConflictError(
 				"Project has no prior push; call /sync/push first.",
 				{ projectId },
 			);
 		}
-		await assertOwns(db, project, account.id);
+		await assertOwns(project, account.id);
 
 		// Verify each uploaded object against R2 (existence + sha256 match) and
 		// capture its size. This is the content-addressing gate: the bytes the
@@ -270,7 +267,7 @@ export const syncApp = new Hono<ApiEnv>()
 		// reject with 402 (+ upgrade payload) if it would exceed the account's
 		// cap. AFTER verifying uploads (so sizes are authoritative) and BEFORE
 		// committing (so a rejection leaves the manifest untouched).
-		const cloud = await loadCloudManifest(db, projectId);
+		const cloud = await loadCloudManifest(projectId);
 		const projected = projectedStorageBytes(cloud, verified);
 		if (projected > account.maxHostedStorageBytes) {
 			throw new EntitlementError("Storage limit exceeded for this plan.", {
@@ -287,7 +284,6 @@ export const syncApp = new Hono<ApiEnv>()
 		// then commit. Two concurrent multi-agent pushes to one project cannot
 		// interleave; a contended lock surfaces as 503 concurrency_locked.
 		const { cursor, manifest } = await acquireWriteLock(
-			db,
 			projectId,
 			async (tx) => {
 				// Optimistic gate: if the client supplied a baseCursor that is now
@@ -310,7 +306,6 @@ export const syncApp = new Hono<ApiEnv>()
 
 	// --- POST /pull ----------------------------------------------------------
 	.post("/pull", async (c) => {
-		const db = requireDb(c);
 		const account = requireAccount(c);
 		const projectId = requireProjectId(c);
 
@@ -323,11 +318,11 @@ export const syncApp = new Hono<ApiEnv>()
 
 		// A missing project is reported as empty (Q13) — a brand-new client's
 		// first pull is a clean no-op, not a 404.
-		const project = await loadProject(db, projectId);
+		const project = await loadProject(projectId);
 		if (!project) return json(c, emptyPull());
-		await assertOwns(db, project, account.id);
+		await assertOwns(project, account.id);
 
-		const cloud = await loadCloudManifest(db, projectId);
+		const cloud = await loadCloudManifest(projectId);
 		// No client manifest ⇒ the client wants everything it doesn't already
 		// have, i.e. diff against `{}`.
 		const client: FileManifest = clientManifest ?? {};
@@ -341,7 +336,7 @@ export const syncApp = new Hono<ApiEnv>()
 			"GET",
 		);
 		const expiresAt = presignExpiry(c.env);
-		const cursor = await currentCursor(db, projectId);
+		const cursor = await currentCursor(projectId);
 
 		return json(c, {
 			files: targets.map((t) => {
@@ -362,11 +357,10 @@ export const syncApp = new Hono<ApiEnv>()
 
 	// --- GET /status ---------------------------------------------------------
 	.get("/status", async (c) => {
-		const db = requireDb(c);
 		const account = requireAccount(c);
 		const projectId = requireProjectId(c);
 
-		const project = await loadProject(db, projectId);
+		const project = await loadProject(projectId);
 		if (!project) {
 			// Empty result for a not-yet-pushed project (Q13).
 			return json(c, {
@@ -375,12 +369,12 @@ export const syncApp = new Hono<ApiEnv>()
 				storageBytes: 0,
 			});
 		}
-		await assertOwns(db, project, account.id);
+		await assertOwns(project, account.id);
 
 		const [manifest, cursor, lastAt] = await Promise.all([
-			loadCloudManifest(db, projectId),
-			currentCursor(db, projectId),
-			lastSyncAt(db, projectId),
+			loadCloudManifest(projectId),
+			currentCursor(projectId),
+			lastSyncAt(projectId),
 		]);
 		return json(c, {
 			manifest,
@@ -478,13 +472,6 @@ function parseUploaded(
 	return out;
 }
 
-/** `c.get("db")` narrowed to non-undefined; throws loudly if middleware mis-ran. */
-function requireDb(c: HonoContext): Database {
-	const db = c.get("db");
-	invariant(db, "db not set on context");
-	return db;
-}
-
 /**
  * The `:projectId` route param, narrowed to a non-empty string.
  *
@@ -528,7 +515,7 @@ function emptyPull() {
  * is the `X-Amz-Expires` the signature carries.
  */
 function presignExpiry(env: Env): string | undefined {
-	const raw = env.PRESIGN_TTL_SECONDS as string | undefined;
+	const raw = env.PRESIGN_TTL_SECONDS;
 	const ttl = raw && raw !== "" && Number(raw) > 0 ? Number(raw) : 900;
 	return new Date(Date.now() + ttl * 1000).toISOString();
 }

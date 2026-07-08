@@ -36,7 +36,6 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<Response> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 
 	const url = new URL(request.url);
 	const projectId = url.searchParams.get("projectId");
@@ -49,14 +48,14 @@ export async function loader({
 	// feed (no cross-account leak).
 	if (!account) return Response.json({ activity: [] });
 
-	const owned = await listProjectsForAccount(db, account.id);
+	const owned = await listProjectsForAccount(account.id);
 	if (!owned.some((p) => p.id === projectId)) {
 		return Response.json({ activity: [] });
 	}
 
 	const [syncActivity, memoryActivity] = await Promise.all([
-		recentSyncActivity(db, projectId, 3),
-		recentMemoryActivity(db, projectId, 3),
+		recentSyncActivity(projectId, 3),
+		recentMemoryActivity(projectId, 3),
 	]);
 	return Response.json({ activity: { syncActivity, memoryActivity } });
 }

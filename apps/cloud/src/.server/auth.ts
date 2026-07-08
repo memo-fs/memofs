@@ -85,9 +85,7 @@ function providerCredentials(
  * @returns the Better Auth {@link Auth} — `.handler` for Worker dispatch,
  *          `.api` for server-side calls (`getSession`, `signInMagicLink`, …).
  */
-export function createAuth(
-	waitUntil?: (promise: Promise<unknown>) => void,
-) {
+export function createAuth(waitUntil?: (promise: Promise<unknown>) => void) {
 	const db = getDB();
 	return betterAuth({
 		baseURL: env.BETTER_AUTH_URL,
@@ -98,8 +96,8 @@ export function createAuth(
 		socialProviders: resolveSocialProviders(),
 		plugins: [
 			magicLink({
-				sendMagicLink: async ({ email, url, token }) => {
-					await sendMagicLinkMail().sendMagicLink({ email, url });
+				sendMagicLink: async ({ email, url, _token }) => {
+					await sendMagicLinkMail({ email, url });
 				},
 			}),
 		],

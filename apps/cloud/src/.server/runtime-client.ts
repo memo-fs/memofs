@@ -7,7 +7,6 @@
  */
 
 import { env } from "cloudflare:workers";
-import { getDB } from "./db";
 import { createClient } from "@libsql/client";
 import { createR2BlobClient } from "@memofs/adapter-r2";
 import { createTursoMetadataStore } from "@memofs/adapter-turso";
@@ -18,11 +17,12 @@ import {
 import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
 import {
 	createFsRecallStore,
-	RemoteBlobMemoryStore,
 	type MemoFS,
+	RemoteBlobMemoryStore,
 } from "@memofs/core";
 import { createHostedRuntime } from "@memofs/server";
 import { CLOUD_NAME, cloudVersion } from "./api/health";
+import { getDB } from "./db";
 import { logMemoryEvent } from "./queries";
 
 /** The read-method surface this client exposes today (slice 2). */
@@ -53,9 +53,7 @@ export interface RuntimeClient {
 }
 
 /** Factory used by tests to supply a fake runtime without cloud providers. */
-export type RuntimeFactory = (
-	projectId: string,
-) => MemoFS | Promise<MemoFS>;
+export type RuntimeFactory = (projectId: string) => MemoFS | Promise<MemoFS>;
 
 /** Optional seams for {@link createRuntimeClient}. */
 export interface RuntimeClientOptions {
@@ -84,21 +82,19 @@ function createCloudRuntime(projectId: string): MemoFS {
 		store,
 		projectId,
 		recallStore: createFsRecallStore({ store }),
-		...(env.VOYAGE_API_KEY === undefined || env.VOYAGE_API_KEY.length === 0
-			? {}
-			: {
-					embedder: createVoyageEmbedder({
-						apiKey: env.VOYAGE_API_KEY,
-						model: VOYAGE_EMBED_MODEL,
-					}),
-					reranker: createVoyageReranker({
-						apiKey: env.VOYAGE_API_KEY,
-						model: VOYAGE_RERANK_MODEL,
-					}),
-				}),
-		...(env.AI === undefined
-			? {}
-			: { extractor: createWorkersAiExtractor({ ai: env.AI }) }),
+		...((env.VOYAGE_API_KEY !== undefined || env.VOYAGE_API_KEY.length > 0) && {
+			embedder: createVoyageEmbedder({
+				apiKey: env.VOYAGE_API_KEY,
+				model: VOYAGE_EMBED_MODEL,
+			}),
+			reranker: createVoyageReranker({
+				apiKey: env.VOYAGE_API_KEY,
+				model: VOYAGE_RERANK_MODEL,
+			}),
+		}),
+		...(env.AI !== undefined && {
+			extractor: createWorkersAiExtractor({ ai: env.AI }),
+		}),
 		name: CLOUD_NAME,
 		version: cloudVersion(),
 	});
@@ -129,14 +125,14 @@ export function createRuntimeClient(
 		async recall(projectId, query, options) {
 			const memofs = await runtime(projectId);
 			return memofs.recall(query, {
-				...(options?.limit === undefined ? {} : { limit: options.limit }),
+				...(options?.limit !== undefined && { limit: options.limit }),
 			});
 		},
 		async context(projectId, task, options) {
 			const memofs = await runtime(projectId);
 			return memofs.context({
 				query: task,
-				...(options?.detail === undefined ? {} : { detail: options.detail }),
+				...(options?.detail !== undefined && { detail: options.detail }),
 			});
 		},
 		async readCore(projectId) {
@@ -150,21 +146,20 @@ export function createRuntimeClient(
 		async listRecent(projectId, options) {
 			const memofs = await runtime(projectId);
 			return memofs.listRecentMemories({
-				...(options?.limit === undefined ? {} : { limit: options.limit }),
+				...(options?.limit !== undefined && { limit: options.limit }),
 			});
 		},
 		async consolidate(projectId, options) {
 			const memofs = await runtime(projectId);
 			const result = await memofs.consolidate({
-				...(options?.apply === undefined ? {} : { apply: options.apply }),
+				...(options?.apply !== undefined && { apply: options.apply }),
 			});
 
 			if (result.applied && env.DATABASE_URL) {
-				const db = getDB();
 				const merges = result.mergesApplied;
 				const retirements = result.retirementsApplied;
 				const summary = `Consolidation merged ${merges} node${merges === 1 ? "" : "s"} and retired ${retirements} relation${retirements === 1 ? "" : "s"}.`;
-				await logMemoryEvent(db, {
+				await logMemoryEvent(getDB(), {
 					projectId,
 					kind: "consolidation",
 					summary,

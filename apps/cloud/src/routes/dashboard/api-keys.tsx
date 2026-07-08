@@ -27,6 +27,7 @@ import { PageHeader } from "./+components/page-header";
 import { RevealKeyDialog } from "./+components/reveal-key-dialog";
 import { RevokeKeyDialog } from "./+components/revoke-key-dialog";
 import type { Route } from "./+types/api-keys";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * API keys (SC3.x). Real DB-backed provisioning + revocation. The cloud stores
@@ -40,8 +41,8 @@ import type { Route } from "./+types/api-keys";
  * only. The list refreshes via loader revalidation after each action.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "API Keys — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("API Keys — Memo FS Cloud");
 }
 
 /** Server data: the account's API keys, newest first. */
@@ -59,8 +60,7 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<ApiKeysLoaderData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
-	const keys = account ? await listApiKeysForAccount(db, account.id) : [];
+	const keys = account ? await listApiKeysForAccount(account.id) : [];
 	return { keys };
 }
 
@@ -74,7 +74,6 @@ export async function action({
 	request,
 }: Route.ActionArgs): Promise<ApiKeyActionData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const form = await request.formData();
 	const intent = String(form.get("intent") ?? "");
 
@@ -84,7 +83,7 @@ export async function action({
 
 	if (intent === "create") {
 		const label = String(form.get("label") ?? "");
-		const { rawKey, row } = await createApiKey(db, {
+		const { rawKey, row } = await createApiKey({
 			accountId: account.id,
 			label,
 			salt: env.API_KEY_SALT ?? "",
@@ -95,7 +94,7 @@ export async function action({
 	if (intent === "revoke") {
 		const keyId = String(form.get("keyId") ?? "");
 		if (keyId) {
-			await revokeApiKey(db, account.id, keyId);
+			await revokeApiKey(account.id, keyId);
 		}
 		return { intent: "revoke", ok: true };
 	}

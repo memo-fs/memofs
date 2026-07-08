@@ -42,20 +42,12 @@ import {
 } from "../../queries/billing";
 import type { ApiEnv } from "../index";
 import { json, jsonError } from "../json";
-import { invariant } from "../../../utils/misc";
 
 /** Per-request drizzle client, mirroring the sync router's `dbMiddleware`. */
 const dbMiddleware: MiddlewareHandler<ApiEnv> = async (c, next) => {
 	if (!c.get("db")) c.set("db", getDB());
 	await next();
 };
-
-/** Read `c.var.db`, throwing if a wiring bug left it unset. */
-function requireDb(c: Context<ApiEnv>) {
-	const db = c.get("db");
-	invariant(db, "db middleware must run before the billing handler");
-	return db;
-}
 
 /** Read the plan tier from subscription metadata (`memofs_plan`), or null. */
 function planFromMetadata(
@@ -74,7 +66,6 @@ function planFromMetadata(
  * event is ignored (no silent downgrade on a malformed event).
  */
 async function handleSubscriptionEvent(
-	db: ReturnType<typeof requireDb>,
 	event: {
 		data: { customerId: string; metadata?: Record<string, unknown> | null };
 	},
@@ -85,11 +76,11 @@ async function handleSubscriptionEvent(
 			? event.data.metadata.memofs_account_id
 			: undefined;
 	const account =
-		(metaAccountId ? await getAccountById(db, metaAccountId) : null) ??
-		(await getAccountByPolarCustomerId(db, event.data.customerId));
+		(metaAccountId ? await getAccountById(metaAccountId) : null) ??
+		(await getAccountByPolarCustomerId(event.data.customerId));
 	if (!account || !plan) return;
-	await setPolarCustomerId(db, account.id, event.data.customerId);
-	await applyPlanToAccount(db, account.id, plan);
+	await setPolarCustomerId(account.id, event.data.customerId);
+	await applyPlanToAccount(account.id, plan);
 }
 
 export const billingApp = new Hono<ApiEnv>()
@@ -131,7 +122,6 @@ export const billingApp = new Hono<ApiEnv>()
 			}
 			throw err;
 		}
-		const db = requireDb(c);
 		const data = event.data as {
 			customerId?: string;
 			id?: string;

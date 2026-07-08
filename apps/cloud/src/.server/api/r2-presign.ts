@@ -22,6 +22,8 @@
  *      cloud-sync-and-refactor.md §4.5 (pull: presigned GETs)
  * @see docs/adr/0005-cloud-tech-stack.md — R2 + aws4fetch (S3 API, free egress).
  */
+
+import { env } from "cloudflare:workers";
 import { AwsV4Signer } from "aws4fetch";
 
 export const DEFAULT_PRESIGN_TTL_SECONDS = 900;
@@ -51,7 +53,7 @@ export interface R2PresignConfig {
 }
 
 /** Pulls the presign config out of the Worker bindings. */
-export function presignConfigFromEnv(env: Env): R2PresignConfig {
+export function presignConfigFromEnv(): R2PresignConfig {
 	return {
 		accessKeyId: env.R2_S3_ACCESS_KEY_ID,
 		secretAccessKey: env.R2_S3_SECRET_ACCESS_KEY,
@@ -117,7 +119,7 @@ export async function presign(
 	// publicly-reachable address (e.g. when the S3 endpoint is internal or a
 	// custom domain fronts R2). The signature binds the original host, so this
 	// is only valid when publicBaseUrl is a CNAME/alias that routes to the same
-	// R2 endpoint — see wrangler.jsonc `CLOUD_PUBLIC_BASE_URL`.
+	// R2 endpoint — see wrangler.toml `CLOUD_PUBLIC_BASE_URL`.
 	if (config.publicBaseUrl) {
 		signedUrl = signedUrl.replace(`https://${host}`, config.publicBaseUrl);
 	}

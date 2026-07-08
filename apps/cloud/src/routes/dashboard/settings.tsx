@@ -20,6 +20,7 @@ import { ProfileForm } from "./+components/profile-form";
 import type { Route as DashboardRoute } from "./+types/_layout";
 import type { Route } from "./+types/settings";
 import { ProfileSchema } from "./+utils/settings";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Settings (SC3.6). Account-wide. The profile is editable (name via Conform +
@@ -32,8 +33,8 @@ import { ProfileSchema } from "./+utils/settings";
  * gated by typed confirmation ("DELETE") re-validated server-side.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Settings — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Settings — Memo FS Cloud");
 }
 
 /**
@@ -65,7 +66,6 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<SettingsLoaderData> {
 	const user = await requireUser(request);
-	const db = getDB();
 	const auth = createAuthFromEnv();
 
 	// The active session's token (from the cookie) identifies the current row.
@@ -153,7 +153,7 @@ export async function action({
 		if (!env.BLOBS) {
 			throw new Error("R2 BLOBS bucket is not bound to the worker.");
 		}
-		await purgeAccount(db, env.BLOBS, accountId);
+		await purgeAccount(env.BLOBS, accountId);
 		await db.delete(user).where(eq(user.id, sessionUser.id));
 		throw redirect("/login");
 	}

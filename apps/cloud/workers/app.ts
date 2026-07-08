@@ -15,14 +15,16 @@
 import { createRequestHandler } from "@react-router/cloudflare";
 import { Hono } from "hono";
 import { RouterContextProvider } from "react-router";
-import { createApiApp } from "../src/.server/api";
+import { createApi } from "~/.server/api/index";
+import { getDB } from "~/.server/db/index";
+import { invariant } from "~/utils/misc";
 import { createAuth } from "../src/.server/auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
 // 1. Mount the Hono API sub-app
-const api = createApiApp();
-app.route("/", api);
+const api = createApi();
+app.route("/v1", api);
 
 // 2. Mount the Better Auth sub-app
 app.all("/api/auth/*", (c) => {
@@ -43,6 +45,7 @@ const requestHandler = createRequestHandler({
 });
 
 app.all("*", (c) => {
+	invariant(getDB, "DB is required for app startup.");
 	return requestHandler({
 		request: c.req.raw,
 		env: c.env,

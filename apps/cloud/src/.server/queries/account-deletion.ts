@@ -25,14 +25,12 @@
  */
 
 import { eq, inArray, ne } from "drizzle-orm";
-import type { Database } from "../db";
+import { getDB } from "../db";
 import { accounts, projectFiles, projects } from "../db/schema";
 
 /** R2 keys that are safe to delete = referenced only by `accountId`'s projects. */
-async function collectOrphanedR2Keys(
-	db: Database,
-	accountId: string,
-): Promise<string[]> {
+async function collectOrphanedR2Keys(accountId: string): Promise<string[]> {
+	const db = getDB();
 	const accountProjectIds = db
 		.select({ id: projects.id })
 		.from(projects)
@@ -69,13 +67,13 @@ async function collectOrphanedR2Keys(
  * @param accountId the billing account to purge.
  */
 export async function purgeAccount(
-	db: Database,
 	blobs: R2Bucket,
 	accountId: string,
 ): Promise<{ r2KeysDeleted: number }> {
+	const db = getDB();
 	// 1. Collect + delete orphaned R2 blobs BEFORE the DB cascade (the
 	//    project_files rows are the index that tells us which keys are shared).
-	const orphanedKeys = await collectOrphanedR2Keys(db, accountId);
+	const orphanedKeys = await collectOrphanedR2Keys(accountId);
 	await Promise.all(
 		orphanedKeys.map((key) => blobs.delete(key).catch(() => {})),
 	);

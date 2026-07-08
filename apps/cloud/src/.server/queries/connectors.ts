@@ -12,8 +12,8 @@
  */
 
 import { and, count, eq } from "drizzle-orm";
-import type { Database } from "../db";
 import { invariant } from "../../utils/misc";
+import { getDB } from "../db";
 import { type ConnectorType, connectors, projects } from "../db/schema";
 
 /** The dashboard-facing connector shape — no `encryptedSecret` (never exposed). */
@@ -50,9 +50,9 @@ function toView(row: typeof connectors.$inferSelect): ConnectorView {
 
 /** Lists all connectors for a project, ordered by creation time. */
 export async function listConnectorsForProject(
-	db: Database,
 	projectId: string,
 ): Promise<ConnectorView[]> {
+	const db = getDB();
 	const rows = await db
 		.select()
 		.from(connectors)
@@ -62,9 +62,9 @@ export async function listConnectorsForProject(
 
 /** Counts active connectors for a project — used for cap enforcement. */
 export async function countConnectorsForProject(
-	db: Database,
 	projectId: string,
 ): Promise<number> {
+	const db = getDB();
 	const rows = await db
 		.select({ n: count() })
 		.from(connectors)
@@ -73,10 +73,8 @@ export async function countConnectorsForProject(
 }
 
 /** Fetches a single connector by id (returns the safe view). */
-export async function getConnector(
-	db: Database,
-	id: string,
-): Promise<ConnectorView | null> {
+export async function getConnector(id: string): Promise<ConnectorView | null> {
+	const db = getDB();
 	const rows = await db
 		.select()
 		.from(connectors)
@@ -87,9 +85,9 @@ export async function getConnector(
 
 /** Fetches the encrypted secret for a connector (used by the secret-fetch API). */
 export async function getConnectorSecret(
-	db: Database,
 	id: string,
 ): Promise<{ encryptedSecret: string; projectId: string } | null> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			encryptedSecret: connectors.encryptedSecret,
@@ -115,9 +113,9 @@ export interface CreateConnectorInput {
 
 /** Creates a connector. Callers must enforce the cap BEFORE calling this. */
 export async function createConnector(
-	db: Database,
 	input: CreateConnectorInput,
 ): Promise<ConnectorView> {
+	const db = getDB();
 	const id = generateConnectorId();
 	await db.insert(connectors).values({
 		id,
@@ -150,10 +148,10 @@ export interface UpdateConnectorInput {
 
 /** Updates a connector. Only the provided fields are touched. */
 export async function updateConnector(
-	db: Database,
 	id: string,
 	input: UpdateConnectorInput,
 ): Promise<void> {
+	const db = getDB();
 	const updates: Record<string, unknown> = {};
 	if (input.name !== undefined) updates.name = input.name;
 	if (input.enabled !== undefined) updates.enabled = input.enabled;
@@ -167,16 +165,17 @@ export async function updateConnector(
 }
 
 /** Deletes a connector. */
-export async function deleteConnector(db: Database, id: string): Promise<void> {
+export async function deleteConnector(id: string): Promise<void> {
+	const db = getDB();
 	await db.delete(connectors).where(eq(connectors.id, id));
 }
 
 /** Verifies a project belongs to `accountId` (access control for API routes). */
 export async function verifyProjectOwnership(
-	db: Database,
 	projectId: string,
 	accountId: string,
 ): Promise<boolean> {
+	const db = getDB();
 	const rows = await db
 		.select({ id: projects.id })
 		.from(projects)
@@ -192,5 +191,5 @@ function generateConnectorId(): string {
 	const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join(
 		"",
 	);
-	return `tmc_${hex}`;
+	return `mfc_${hex}`;
 }

@@ -2,7 +2,7 @@
  * Bearer-token authentication middleware.
  *
  * Authenticates `/v1/projects/:projectId/sync/*` requests (§12.4) against the
- * `api_keys` table: the raw `tm_…` key is salted-hashed to
+ * `api_keys` table: the raw `mf_…` key is salted-hashed to
  * `sha256(salt + ":" + rawKey)` and looked up. The cloud NEVER stores raw keys —
  * only the hash (`api_keys.key_hash`, ADR 0006). On a hit, the middleware loads
  * the owning account and stamps it on `c.var.account` so downstream handlers
@@ -36,8 +36,8 @@
  */
 import { and, eq, isNull } from "drizzle-orm";
 import type { MiddlewareHandler } from "hono";
+import { getDB } from "~/.server/db/index";
 import { normalizeCaps } from "../../../lib/entitlements";
-import type { Database } from "../../db";
 import { accounts, apiKeys, type PlanTier } from "../../db/schema";
 import { hashApiKey } from "../../utils";
 import { AuthError } from "../errors";
@@ -68,16 +68,9 @@ export interface AuthAccount {
  * The handler throws `AuthError` (→ 401 envelope) on every failure path, so the
  * global `onError` serializes it uniformly. It never throws a generic Error.
  */
-export function createAuthMiddleware(
-	db: Database,
-	salt: string,
-): MiddlewareHandler<ApiEnv> {
+export function createAuthMiddleware(salt: string): MiddlewareHandler<ApiEnv> {
 	return async (c, next) => {
-		const account = await resolveAccount(
-			db,
-			salt,
-			c.req.header("authorization"),
-		);
+		const account = await resolveAccount(salt, c.req.header("authorization"));
 		c.set("account", account);
 		await next();
 	};
@@ -95,10 +88,10 @@ export function createAuthMiddleware(
  * revoked) so a caller cannot tell which check failed — reducing probing surface.
  */
 export async function resolveAccount(
-	db: Database,
 	salt: string,
 	authorization: string | undefined,
 ): Promise<AuthAccount> {
+	const db = getDB();
 	const rawKey = extractBearer(authorization);
 	if (!rawKey) {
 		throw new AuthError("Missing or malformed Authorization header.");

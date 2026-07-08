@@ -1,6 +1,5 @@
 import { env } from "cloudflare:workers";
 import { ArrowUpRight, Check, ExternalLink } from "lucide-react";
-import { useState } from "react";
 import { getDB } from "~/.server/db";
 import type { AccountView } from "~/.server/queries";
 import { getAccountUsage } from "~/.server/queries";
@@ -23,6 +22,7 @@ import { formatBytes } from "~/utils/misc";
 import { PLANS } from "../_home/+utils/plans";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/billing";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Billing (SC3.5 / SC9). Account-wide: plan + the 4-dimension entitlement
@@ -39,8 +39,8 @@ import type { Route } from "./+types/billing";
  * (AGENTS.md DRY/SSOT; ADR 0006 §12.3).
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Billing — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Billing — Memo FS Cloud");
 }
 
 /** Server data: the entitlement snapshot + account-wide usage + Polar config. */
@@ -61,9 +61,8 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<BillingLoaderData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const usage = account
-		? await getAccountUsage(db, account.id)
+		? await getAccountUsage(account.id)
 		: {
 				storageBytes: 0,
 				connectorsUsed: 0,
@@ -80,8 +79,6 @@ export async function loader({
 
 export default function BillingPage({ loaderData }: Route.ComponentProps) {
 	const { account, usage, proProductId, teamsProductId } = loaderData;
-	const [notifyEmail, setNotifyEmail] = useState("");
-	const [notified, setNotified] = useState(false);
 
 	const plan = account?.plan ?? "free";
 	const accountId = account?.id;
@@ -99,9 +96,8 @@ export default function BillingPage({ loaderData }: Route.ComponentProps) {
 		maxStorage > 0 ? (usage.storageBytes / maxStorage) * 100 : 0;
 	const connectorsPercent =
 		maxConnectors > 0 ? (usage.connectorsUsed / maxConnectors) * 100 : 0;
-	// Intelligence dimensions are metered per UTC day (Q19). Until the
-	// usage-tracking query lands, "used" reads as 0 — the cap still renders so
-	// users see their budget; the over-cap gate enforces the real count.
+	// Intelligence dimensions are metered per UTC day (Q19). Both counts come
+	// from `getAccountUsage`, which aggregates `memory_events` since UTC midnight.
 	const consolidationUsed = usage.consolidationUsedToday;
 	const preWarmUsed = usage.preWarmUsedToday;
 	const consolidationPercent = capPercent(consolidationUsed, maxConsolidation);
@@ -261,38 +257,13 @@ export default function BillingPage({ loaderData }: Route.ComponentProps) {
 										Current plan
 									</Button>
 								) : planOption.soon ? (
-									<div className="w-full space-y-2">
-										<Button
-											variant="outline"
-											className="h-9 w-full text-xs"
-											disabled
-										>
-											Coming soon
-										</Button>
-										{!notified ? (
-											<div className="flex gap-1.5">
-												<input
-													type="email"
-													placeholder="you@example.com"
-													value={notifyEmail}
-													onChange={(e) => setNotifyEmail(e.target.value)}
-													className="h-8 flex-1 rounded-md border border-border/40 bg-background px-2.5 text-[10px] focus:outline-none focus:ring-1 focus:ring-primary"
-												/>
-												<Button
-													size="sm"
-													className="h-8 shrink-0 text-[10px]"
-													onClick={() => setNotified(true)}
-													disabled={!notifyEmail}
-												>
-													Notify me
-												</Button>
-											</div>
-										) : (
-											<p className="text-center text-[10px] font-medium text-primary">
-												✓ We'll let you know!
-											</p>
-										)}
-									</div>
+									<Button
+										variant="outline"
+										className="h-9 w-full text-xs"
+										disabled
+									>
+										Coming soon
+									</Button>
 								) : (
 									<Button
 										className="h-9 w-full gap-1 text-xs"

@@ -26,7 +26,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { and, count, desc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
-import type { Database } from "../db";
+import { getDB } from "../db";
 import {
 	accounts,
 	type InvitationRole,
@@ -131,10 +131,10 @@ export class TeamMutationError extends Error {
  * pending members as NOT able to write (they haven't joined).
  */
 export async function getMembership(
-	db: Database,
 	teamId: string,
 	accountId: string,
 ): Promise<TeamMembership | null> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			teamId: teamMembers.teamId,
@@ -157,9 +157,9 @@ export async function getMembership(
  * backfilled (the `0002_*` migration covers the deploy case).
  */
 export async function getPersonalTeam(
-	db: Database,
 	accountId: string,
 ): Promise<{ id: string; name: string } | null> {
+	const db = getDB();
 	const rows = await db
 		.select({ id: teams.id, name: teams.name })
 		.from(teams)
@@ -174,9 +174,9 @@ export async function getPersonalTeam(
  * stamp `memofs_account_id` in metadata.
  */
 export async function getAccountIdByPolarCustomerId(
-	db: Database,
 	polarCustomerId: string,
 ): Promise<string | null> {
+	const db = getDB();
 	const rows = await db
 		.select({ id: accounts.id })
 		.from(accounts)
@@ -199,7 +199,6 @@ export async function getAccountIdByPolarCustomerId(
  * @param accountId   the account requesting access.
  */
 export async function canWriteProject(
-	db: Database,
 	teamId: string | null,
 	creatorId: string,
 	accountId: string,
@@ -209,7 +208,7 @@ export async function canWriteProject(
 	// No team means no shared path: only the creator may write. This covers
 	// pre-migration rows pending the `0002_*` backfill (teamId null).
 	if (!teamId) return false;
-	const membership = await getMembership(db, teamId, accountId);
+	const membership = await getMembership(teamId, accountId);
 	// A pending invite (acceptedAt null) has not joined yet — no write access.
 	return membership !== null && membership.acceptedAt !== null;
 }
@@ -220,11 +219,10 @@ export async function canWriteProject(
  * lighter than {@link canWriteProject} since it doesn't take a creator.
  */
 export async function isAcceptedMember(
-	db: Database,
 	teamId: string,
 	accountId: string,
 ): Promise<boolean> {
-	const membership = await getMembership(db, teamId, accountId);
+	const membership = await getMembership(teamId, accountId);
 	return membership !== null && membership.acceptedAt !== null;
 }
 
@@ -232,10 +230,8 @@ export async function isAcceptedMember(
  * The team ids an account can access (personal team + every team it has joined).
  * Used by the dashboard project list to union personal + shared projects.
  */
-export async function accessibleTeamIds(
-	db: Database,
-	accountId: string,
-): Promise<string[]> {
+export async function accessibleTeamIds(accountId: string): Promise<string[]> {
+	const db = getDB();
 	// Accepted memberships (joined teams — acceptedAt set).
 	const joined = await db
 		.select({ teamId: teamMembers.teamId })
@@ -247,7 +243,7 @@ export async function accessibleTeamIds(
 			),
 		);
 	// The personal team (owned).
-	const personal = await getPersonalTeam(db, accountId);
+	const personal = await getPersonalTeam(accountId);
 	const ids = new Set<string>(joined.map((r) => r.teamId));
 	if (personal) ids.add(personal.id);
 	return [...ids];
@@ -273,9 +269,9 @@ export async function accessibleTeamIds(
  * (every account owns exactly one). `role` is the account's role on each team.
  */
 export async function listTeamsForAccount(
-	db: Database,
 	accountId: string,
 ): Promise<TeamSummary[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: teams.id,
@@ -315,9 +311,9 @@ export async function listTeamsForAccount(
  * before calling.
  */
 export async function listTeamMembers(
-	db: Database,
 	teamId: string,
 ): Promise<TeamMemberView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			accountId: teamMembers.accountId,
@@ -355,9 +351,9 @@ export async function listTeamMembers(
  * here (they're dead); accept-route lookups still reject them explicitly.
  */
 export async function listPendingInvitations(
-	db: Database,
 	teamId: string,
 ): Promise<PendingInvitationView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: teamInvitations.id,
@@ -389,10 +385,8 @@ export async function listPendingInvitations(
  * joined and may never), so the gate is honest: it blocks only when the team is
  * actually full of joined members.
  */
-export async function resolveSeatsUsed(
-	db: Database,
-	teamId: string,
-): Promise<number> {
+export async function resolveSeatsUsed(teamId: string): Promise<number> {
+	const db = getDB();
 	const rows = await db
 		.select({ n: count() })
 		.from(teamMembers)
@@ -416,7 +410,6 @@ export async function resolveSeatsUsed(
  * @param salt       `MEMOFS_API_KEY_SALT` (injected, not read from env).
  */
 export async function getInvitationByToken(
-	db: Database,
 	rawToken: string,
 	salt: string,
 ): Promise<{
@@ -427,6 +420,7 @@ export async function getInvitationByToken(
 	expiresAt: string;
 	acceptedAt: string | null;
 } | null> {
+	const db = getDB();
 	const tokenHash = await hashToken(rawToken, salt);
 	const rows = await db
 		.select({
@@ -464,11 +458,10 @@ export async function hashToken(
  * is refused identically, so the error doesn't leak role membership.
  */
 export async function assertCanAdmin(
-	db: Database,
 	teamId: string,
 	actorId: string,
 ): Promise<void> {
-	const membership = await getMembership(db, teamId, actorId);
+	const membership = await getMembership(teamId, actorId);
 	if (!membership || membership.acceptedAt === null) {
 		throw new TeamMutationError("not_authorized");
 	}
@@ -504,29 +497,27 @@ export async function assertCanAdmin(
  * @param tokenHash     sha256 of the raw token (persisted, never the raw token).
  * @param expiresAt     ISO timestamp the link stops being valid.
  */
-export async function createInvitation(
-	db: Database,
-	{
-		teamId,
-		email,
-		role,
-		actorId,
-		maxSeats,
-		rawToken,
-		tokenHash,
-		expiresAt,
-	}: {
-		teamId: string;
-		email: string;
-		role: InvitationRole;
-		actorId: string;
-		maxSeats: number;
-		rawToken: string;
-		tokenHash: string;
-		expiresAt: string;
-	},
-): Promise<CreatedInvitation> {
-	await assertCanAdmin(db, teamId, actorId);
+export async function createInvitation({
+	teamId,
+	email,
+	role,
+	actorId,
+	maxSeats,
+	rawToken,
+	tokenHash,
+	expiresAt,
+}: {
+	teamId: string;
+	email: string;
+	role: InvitationRole;
+	actorId: string;
+	maxSeats: number;
+	rawToken: string;
+	tokenHash: string;
+	expiresAt: string;
+}): Promise<CreatedInvitation> {
+	const db = getDB();
+	await assertCanAdmin(teamId, actorId);
 
 	// An accepted member can't be re-invited — they're already in.
 	const existingMember = await db
@@ -548,7 +539,7 @@ export async function createInvitation(
 
 	// Seat gate: count accepted members; pending invitees don't count (they may
 	// never accept), so the gate only fires when the team is genuinely full.
-	const seatsUsed = await resolveSeatsUsed(db, teamId);
+	const seatsUsed = await resolveSeatsUsed(teamId);
 	if (seatsUsed >= maxSeats) {
 		throw new TeamMutationError("seat_limit_reached");
 	}
@@ -615,21 +606,19 @@ export async function createInvitation(
  * @param accepterEmail  the accepter's `user.email`, checked against the invite.
  * @param salt        `MEMOFS_API_KEY_SALT`.
  */
-export async function acceptInvitation(
-	db: Database,
-	{
-		rawToken,
-		accepterId,
-		accepterEmail,
-		salt,
-	}: {
-		rawToken: string;
-		accepterId: string;
-		accepterEmail: string;
-		salt: string;
-	},
-): Promise<{ teamId: string; role: InvitationRole }> {
-	const invitation = await getInvitationByToken(db, rawToken, salt);
+export async function acceptInvitation({
+	rawToken,
+	accepterId,
+	accepterEmail,
+	salt,
+}: {
+	rawToken: string;
+	accepterId: string;
+	accepterEmail: string;
+	salt: string;
+}): Promise<{ teamId: string; role: InvitationRole }> {
+	const db = getDB();
+	const invitation = await getInvitationByToken(rawToken, salt);
 	if (!invitation) throw new TeamMutationError("not_found");
 	if (invitation.acceptedAt !== null) {
 		// Already accepted — idempotent: return the conferred team/role without
@@ -656,7 +645,6 @@ export async function acceptInvitation(
 	await db
 		.insert(teamMembers)
 		.values({
-			id: createId(),
 			teamId: invitation.teamId,
 			accountId: accepterId,
 			role: invitation.role,
@@ -676,12 +664,12 @@ export async function acceptInvitation(
  * by row deletion, so any cached/pasted link stops resolving.
  */
 export async function revokeInvitation(
-	db: Database,
 	teamId: string,
 	invitationId: string,
 	actorId: string,
 ): Promise<void> {
-	await assertCanAdmin(db, teamId, actorId);
+	const db = getDB();
+	await assertCanAdmin(teamId, actorId);
 	await db
 		.delete(teamInvitations)
 		.where(
@@ -701,13 +689,13 @@ export async function revokeInvitation(
  * refuse to act on the only owner regardless of direction.
  */
 export async function updateMemberRole(
-	db: Database,
 	teamId: string,
 	memberAccountId: string,
 	newRole: "admin" | "member",
 	actorId: string,
 ): Promise<void> {
-	await assertCanAdmin(db, teamId, actorId);
+	const db = getDB();
+	await assertCanAdmin(teamId, actorId);
 
 	// Refuse if the target is the only owner (can't strip the last owner).
 	const owners = await db
@@ -744,14 +732,14 @@ export async function updateMemberRole(
  * @param actorId  the account performing the removal (owner/admin, or self-leave).
  */
 export async function removeTeamMember(
-	db: Database,
 	teamId: string,
 	memberAccountId: string,
 	actorId: string,
 ): Promise<void> {
+	const db = getDB();
 	// Self-leave is always allowed; removing another requires owner/admin.
 	if (actorId !== memberAccountId) {
-		await assertCanAdmin(db, teamId, actorId);
+		await assertCanAdmin(teamId, actorId);
 	}
 
 	// Last-owner protection: removing the only owner is refused.

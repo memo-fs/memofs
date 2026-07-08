@@ -17,16 +17,15 @@
  * @see {@link ../sha256} — `hashApiKey` (salted sha256, Web Crypto).
  * @see docs/adr/0006-pricing-and-entitlements.md — hashed-key entitlement model.
  */
-import { createId } from "@paralleldrive/cuid2";
 import { and, desc, eq, isNull } from "drizzle-orm";
 
-import type { Database } from "../db";
+import { getDB } from "../db";
 import { apiKeys } from "../db/schema";
 import { hashApiKey } from "../utils";
 import type { ApiKeyView } from "./types";
 
 /** The live token prefix, matching the published format (see `middleware/auth`). */
-const KEY_PREFIX = "tm_";
+const KEY_PREFIX = "mf_";
 
 /** The number of random bytes (base64url-encoded) after the prefix. */
 const KEY_RANDOM_BYTES = 32;
@@ -36,9 +35,9 @@ const KEY_RANDOM_BYTES = 32;
  * revoked keys so the dashboard shows history; the UI greys out revoked rows.
  */
 export async function listApiKeysForAccount(
-	db: Database,
 	accountId: string,
 ): Promise<ApiKeyView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: apiKeys.id,
@@ -71,32 +70,35 @@ export interface CreatedApiKey {
  *
  * @param salt  `MEMOFS_API_KEY_SALT` (injected, not read from env, for testing).
  */
-export async function createApiKey(
-	db: Database,
-	{
-		accountId,
-		label,
-		salt,
-	}: { accountId: string; label: string; salt: string },
-): Promise<CreatedApiKey> {
+export async function createApiKey({
+	accountId,
+	label,
+	salt,
+}: {
+	accountId: string;
+	label: string;
+	salt: string;
+}): Promise<CreatedApiKey> {
+	const db = getDB();
 	const rawKey = generateRawKey();
 	const keyHash = await hashApiKey(rawKey, salt);
-	const id = createId();
 	const lastFour = rawKey.slice(-4);
 
-	await db.insert(apiKeys).values({
-		id,
-		accountId,
-		keyHash,
-		label: label.trim() || null,
-		lastFour,
-		revokedAt: null,
-	});
+	const [row] = await db
+		.insert(apiKeys)
+		.values({
+			accountId,
+			keyHash,
+			label: label.trim() || null,
+			lastFour,
+			revokedAt: null,
+		})
+		.returning({ id: apiKeys.id });
 
 	return {
 		rawKey,
 		row: {
-			id,
+			id: row.id,
 			label: label.trim() || null,
 			lastFour,
 			createdAt: new Date().toISOString(),
@@ -114,10 +116,10 @@ export async function createApiKey(
  * @returns the number of rows updated (0 = nothing matched/changed).
  */
 export async function revokeApiKey(
-	db: Database,
 	accountId: string,
 	keyId: string,
 ): Promise<number> {
+	const db = getDB();
 	const now = new Date().toISOString();
 	const result = await db
 		.update(apiKeys)

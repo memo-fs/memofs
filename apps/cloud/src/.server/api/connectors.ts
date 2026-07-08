@@ -11,10 +11,10 @@
 
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { decryptToken } from "../utils";
 import { invariant } from "../../utils/misc";
 import { getDB } from "../db";
 import { connectors } from "../db/schema";
+import { decryptToken } from "../utils";
 import { NotFoundError, ValidationError } from "./errors";
 import type { ApiEnv } from "./index";
 import { json } from "./json";
@@ -25,16 +25,14 @@ export const connectorsApp = new Hono<ApiEnv>();
 
 // Middleware spine: bind request-wide db and auth.
 connectorsApp.use("*", async (c, next) => {
-	const db = c.get("db") ?? getDB();
-	c.set("db", db);
-
-	const salt = c.env.API_KEY_SALT || "";
-	const auth = createAuthMiddleware(db, salt);
+	c.set("db", c.get("db") ?? getDB());
+	const salt = c.env.API_KEY_SALT;
+	const auth = createAuthMiddleware(salt);
 	return auth(c, next);
 });
 
 connectorsApp.get("/secret", async (c) => {
-	const db = c.get("db")!;
+	const db = c.get("db");
 	const account = c.get("account")!;
 	const projectId = c.req.param("projectId");
 	const ref = c.req.query("ref");
@@ -51,7 +49,7 @@ connectorsApp.get("/secret", async (c) => {
 		throw new NotFoundError(`Project not found: ${projectId}`);
 	}
 
-	await assertOwns(db, project, account.id);
+	await assertOwns(project, account.id);
 
 	const rows = await db
 		.select({
@@ -70,7 +68,6 @@ connectorsApp.get("/secret", async (c) => {
 
 	const encryptionKey = c.env.ENCRYPTION_KEY;
 	invariant(encryptionKey, "ENCRYPTION_KEY secret is not set on the server.");
-
 	const secret = await decryptToken(row.encryptedSecret, encryptionKey);
 
 	return json(c, { secret });

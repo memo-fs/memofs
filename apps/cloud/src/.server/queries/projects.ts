@@ -15,7 +15,7 @@
  */
 import { and, count, desc, eq, inArray, or } from "drizzle-orm";
 import { currentCursor, lastSyncAt } from "../api/sync/shared";
-import type { Database } from "../db";
+import { getDB } from "../db";
 import {
 	memoryEvents,
 	projectFiles,
@@ -46,14 +46,14 @@ import type {
  * `lastSyncAt` is `null` when the project has never been pushed (no cursor rows).
  */
 export async function listProjectsForAccount(
-	db: Database,
 	accountId: string,
 ): Promise<ProjectSummary[]> {
+	const db = getDB();
 	// Team-scoped access (ADR 0011 Phase 2): an account sees projects it created
 	// (accountId) OR that belong to a team it has joined. accessibleTeamIds
 	// returns the personal team + every joined team; projects on any of those,
 	// plus projects the account authored directly, are visible.
-	const teamIds = await accessibleTeamIds(db, accountId);
+	const teamIds = await accessibleTeamIds(accountId);
 	const teamClause =
 		teamIds.length > 0 ? inArray(projects.teamId, teamIds) : undefined;
 	const where = teamClause
@@ -91,8 +91,8 @@ export async function listProjectsForAccount(
 
 	const summaries: ProjectSummary[] = [];
 	for (const row of projectRows) {
-		const cursor = await currentCursor(db, row.id);
-		const lastAt = await lastSyncAt(db, row.id);
+		const cursor = await currentCursor(row.id);
+		const lastAt = await lastSyncAt(row.id);
 		summaries.push({
 			id: row.id,
 			name: row.name,
@@ -117,11 +117,11 @@ export async function listProjectsForAccount(
  * does, just for one project.
  */
 export async function getProjectForAccount(
-	db: Database,
 	accountId: string,
 	projectId: string,
 ): Promise<ProjectSummary | null> {
-	const teamIds = await accessibleTeamIds(db, accountId);
+	const db = getDB();
+	const teamIds = await accessibleTeamIds(accountId);
 	const teamClause =
 		teamIds.length > 0 ? inArray(projects.teamId, teamIds) : undefined;
 	const access = teamClause
@@ -165,10 +165,10 @@ export async function getProjectForAccount(
  * @param limit  how many recent commits to return (default 3 — overview size).
  */
 export async function recentSyncActivity(
-	db: Database,
 	projectId: string,
 	limit = 3,
 ): Promise<SyncActivity[]> {
+	const db = getDB();
 	const cursorRows = await db
 		.select({
 			id: syncCursors.id,
@@ -207,10 +207,10 @@ export async function recentSyncActivity(
  * @param limit  how many recent events to return (default 3 — overview size).
  */
 export async function recentMemoryActivity(
-	db: Database,
 	projectId: string,
 	limit = 3,
 ): Promise<MemoryActivityView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: memoryEvents.id,
@@ -229,15 +229,13 @@ export async function recentMemoryActivity(
 /**
  * Log a semantic runtime memory event to the audit trail (SC10).
  */
-export async function logMemoryEvent(
-	db: Database,
-	input: {
-		projectId: string;
-		kind: "consolidation" | "write" | "core_update";
-		summary: string;
-		actor: string;
-	},
-): Promise<void> {
+export async function logMemoryEvent(input: {
+	projectId: string;
+	kind: "consolidation" | "write" | "core_update";
+	summary: string;
+	actor: string;
+}): Promise<void> {
+	const db = getDB();
 	await db.insert(memoryEvents).values({
 		projectId: input.projectId,
 		kind: input.kind,
@@ -260,9 +258,9 @@ export async function logMemoryEvent(
  * the now-known-owned project id.
  */
 export async function listProjectFiles(
-	db: Database,
 	projectId: string,
 ): Promise<ProjectFileView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: projectFiles.id,
@@ -285,9 +283,9 @@ export async function listProjectFiles(
  * been pushed.
  */
 export async function listProjectCursorHistory(
-	db: Database,
 	projectId: string,
 ): Promise<CursorHistoryView[]> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: syncCursors.id,
@@ -328,10 +326,10 @@ export async function listProjectCursorHistory(
  * owner removes projects via team-admin actions, not this call.
  */
 export async function deleteProject(
-	db: Database,
 	accountId: string,
 	projectId: string,
 ): Promise<boolean> {
+	const db = getDB();
 	const deleted = await db
 		.delete(projects)
 		.where(and(eq(projects.id, projectId), eq(projects.accountId, accountId)))

@@ -34,6 +34,7 @@ import {
 	resolveRequestedTeamId,
 	teamErrorMessage,
 } from "./+utils/team";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Team management (SC7). The `/dashboard/team` route: a team switcher (owned +
@@ -55,8 +56,8 @@ import {
  * @see docs/adr/0011-managed-runtime-sequencing.md — Phase 2 collaboration model.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Team — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Team — Memo FS Cloud");
 }
 
 /** Server data: the switcher teams, the selected team's roster + invites + seats. */
@@ -85,7 +86,6 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<TeamLoaderData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const plan = account?.plan ?? "free";
 
 	// No account means no teams (provisioning raced). Degrade to an empty state
@@ -104,7 +104,7 @@ export async function loader({
 		};
 	}
 
-	const teams = await listTeamsForAccount(db, account.id);
+	const teams = await listTeamsForAccount(account.id);
 	const ownedIds = teams.filter((t) => t.isOwner).map((t) => t.id);
 	const selectedTeamId = resolveRequestedTeamId(
 		new URL(request.url).searchParams,
@@ -129,10 +129,10 @@ export async function loader({
 	}
 
 	const [members, invitations, seatsUsed, myMembership] = await Promise.all([
-		listTeamMembers(db, selected.id),
-		listPendingInvitations(db, selected.id),
-		listTeamMembers(db, selected.id).then((m) => m.length),
-		getMembership(db, selected.id, account.id),
+		listTeamMembers(selected.id),
+		listPendingInvitations(selected.id),
+		listTeamMembers(selected.id).then((m) => m.length),
+		getMembership(selected.id, account.id),
 	]);
 
 	return {
@@ -160,7 +160,6 @@ export async function action({
 	request,
 }: Route.ActionArgs): Promise<TeamActionData> {
 	const { user, account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const form = await request.formData();
 	const intent = String(form.get("intent") ?? "");
 	const teamId = String(form.get("teamId") ?? "");
@@ -191,7 +190,7 @@ export async function action({
 				Date.now() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000,
 			).toISOString();
 
-			const { invitation } = await createInvitation(db, {
+			const { invitation } = await createInvitation({
 				teamId,
 				email,
 				role,
@@ -229,7 +228,7 @@ export async function action({
 
 		if (intent === "revoke") {
 			const invitationId = String(form.get("invitationId") ?? "");
-			await revokeInvitation(db, teamId, invitationId, account.id);
+			await revokeInvitation(teamId, invitationId, account.id);
 			return { intent: "revoke", ok: true };
 		}
 
@@ -238,13 +237,13 @@ export async function action({
 			const role = (
 				String(form.get("role") ?? "member") === "admin" ? "admin" : "member"
 			) as "admin" | "member";
-			await updateMemberRole(db, teamId, memberAccountId, role, account.id);
+			await updateMemberRole(teamId, memberAccountId, role, account.id);
 			return { intent: "role", ok: true };
 		}
 
 		if (intent === "remove") {
 			const memberAccountId = String(form.get("memberAccountId") ?? "");
-			await removeTeamMember(db, teamId, memberAccountId, account.id);
+			await removeTeamMember(teamId, memberAccountId, account.id);
 			return { intent: "remove", ok: true };
 		}
 

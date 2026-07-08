@@ -52,7 +52,6 @@
  * client rather than a local re-declaration.
  */
 import type { Transaction } from "@libsql/client";
-import type { Database } from "../../db";
 import { type ApiErrorHeaders, ConcurrencyError } from "../errors";
 
 /**
@@ -85,7 +84,6 @@ const LOCK_TIMEOUT_PATTERNS = [
  * @throws re-throws anything `fn` throws (after rolling back).
  */
 export async function acquireWriteLock<T>(
-	db: Database,
 	projectId: string,
 	fn: (tx: Transaction) => Promise<T>,
 ): Promise<T> {

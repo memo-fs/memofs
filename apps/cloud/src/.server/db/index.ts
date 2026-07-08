@@ -47,10 +47,26 @@ export type Database = ReturnType<typeof getDB>;
  * @returns a drizzle `Database` whose `.$client` is the raw libSQL `Client`
  *          (used by the concurrency layer's `transaction("write")`).
  */
+// export function getDB() {
+// 	const client = createClient({
+// 		url: env.DATABASE_URL,
+// 		authToken: env.DATABASE_AUTH_TOKEN,
+// 	});
+// 	return drizzle({ schema, client });
+// }
+
+let db: ReturnType<typeof drizzle> | undefined;
+
 export function getDB() {
-	const client = createClient({
-		url: env.DATABASE_URL,
-		authToken: env.DATABASE_AUTH_TOKEN,
-	});
-	return drizzle({ schema, client });
+	if (!db) {
+		db = drizzle({
+			client: createClient({
+				url: env.DATABASE_URL,
+				authToken: env.DATABASE_AUTH_TOKEN,
+			}),
+			schema,
+		});
+	}
+	return db;
 }
+

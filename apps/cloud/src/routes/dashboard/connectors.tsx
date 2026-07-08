@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useOutletContext } from "react-router";
 import { env } from "cloudflare:workers";
 import { encryptToken } from "~/.server/utils";
-import type { Database } from "~/.server/db";
 import { getDB } from "~/.server/db";
 import { connectors as connectorsTable } from "~/.server/db/schema";
 import {
@@ -28,9 +27,10 @@ import { ConnectorCatalog } from "./+components/connector-catalog";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/connectors";
 import { ConnectorActionSchema } from "./+utils/connectors";
+import { buildNoindexMeta } from "~/lib/seo";
 
 export function meta() {
-	return [{ title: "Connectors — Memo FS Cloud" }];
+	return buildNoindexMeta("Connectors — Memo FS Cloud");
 }
 
 export async function loader({
@@ -43,11 +43,10 @@ export async function loader({
 	const projectId = url.searchParams.get("projectId");
 	if (!projectId) return { connectors: [] };
 
-	const db = getDB();
-	if (!(await verifyProjectOwnership(db, projectId, account.id))) {
+	if (!(await verifyProjectOwnership(projectId, account.id))) {
 		return { connectors: [] };
 	}
-	return { connectors: await listConnectorsForProject(db, projectId) };
+	return { connectors: await listConnectorsForProject(projectId) };
 }
 
 export async function action({
@@ -71,15 +70,14 @@ export async function action({
 	}
 	const data = submission.value;
 
-	const db = getDB();
 	if (data.intent === "create") {
-		return handleCreate(db, account.id, account.maxConnectors, data);
+		return handleCreate(account.id, account.maxConnectors, data);
 	}
 	if (data.intent === "update") {
-		return handleUpdate(db, account.id, data);
+		return handleUpdate(account.id, data);
 	}
 	if (data.intent === "delete") {
-		return handleDelete(db, account.id, data);
+		return handleDelete(account.id, data);
 	}
 	return Response.json(
 		{ ok: false, error: "Unknown intent." },
@@ -88,7 +86,6 @@ export async function action({
 }
 
 async function handleCreate(
-	db: Database,
 	accountId: string,
 	maxConnectors: number,
 	data: {
@@ -100,13 +97,13 @@ async function handleCreate(
 		token: string;
 	},
 ) {
-	if (!(await verifyProjectOwnership(db, data.projectId, accountId))) {
+	if (!(await verifyProjectOwnership(data.projectId, accountId))) {
 		return Response.json(
 			{ ok: false, error: "Project not found." },
 			{ status: StatusCodes.NOT_FOUND },
 		);
 	}
-	const count = await countConnectorsForProject(db, data.projectId);
+	const count = await countConnectorsForProject(data.projectId);
 	if (count >= maxConnectors) {
 		return Response.json(
 			{ ok: false, error: "Connector cap reached. Upgrade your plan." },
@@ -114,7 +111,7 @@ async function handleCreate(
 		);
 	}
 	const encrypted = await encryptToken(data.token, env.ENCRYPTION_KEY);
-	await createConnector(db, {
+	await createConnector({
 		projectId: data.projectId,
 		type: data.type,
 		name: data.name,
@@ -127,7 +124,6 @@ async function handleCreate(
 }
 
 async function handleUpdate(
-	db: Database,
 	accountId: string,
 	data: {
 		id: string;
@@ -137,6 +133,7 @@ async function handleUpdate(
 		sourceMapping?: string;
 	},
 ) {
+	const db = getDB();
 	const rows = await db
 		.select()
 		.from(connectorsTable)
@@ -148,13 +145,13 @@ async function handleUpdate(
 			{ status: StatusCodes.NOT_FOUND },
 		);
 	}
-	if (!(await verifyProjectOwnership(db, rows[0].projectId, accountId))) {
+	if (!(await verifyProjectOwnership(rows[0].projectId, accountId))) {
 		return Response.json(
 			{ ok: false, error: "Not authorized." },
 			{ status: StatusCodes.FORBIDDEN },
 		);
 	}
-	await updateConnector(db, data.id, {
+	await updateConnector(data.id, {
 		name: data.name,
 		enabled: data.enabled === "true",
 		schedule: data.schedule,
@@ -164,10 +161,10 @@ async function handleUpdate(
 }
 
 async function handleDelete(
-	db: Database,
 	accountId: string,
 	data: { id: string },
 ) {
+	const db = getDB();
 	const rows = await db
 		.select()
 		.from(connectorsTable)
@@ -179,13 +176,13 @@ async function handleDelete(
 			{ status: StatusCodes.NOT_FOUND },
 		);
 	}
-	if (!(await verifyProjectOwnership(db, rows[0].projectId, accountId))) {
+	if (!(await verifyProjectOwnership(rows[0].projectId, accountId))) {
 		return Response.json(
 			{ ok: false, error: "Not authorized." },
 			{ status: StatusCodes.FORBIDDEN },
 		);
 	}
-	await deleteConnector(db, data.id);
+	await deleteConnector(data.id);
 	return { ok: true };
 }
 

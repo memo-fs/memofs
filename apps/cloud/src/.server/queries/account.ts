@@ -17,7 +17,7 @@
  */
 import { and, eq, inArray, sql, sum } from "drizzle-orm";
 import { normalizeCaps } from "../../lib/entitlements";
-import type { Database } from "../db";
+import { getDB } from "../db";
 import {
 	accounts,
 	connectors,
@@ -49,10 +49,10 @@ export interface AccountView {
  * blocking the user out of their dashboard.
  */
 export async function getAccountForUser(
-	db: Database,
 	userId: string,
 ): Promise<AccountView | null> {
-	const rows = await db
+	const db = getDB();
+	const rows = db
 		.select({
 			id: accounts.id,
 			plan: accounts.plan,
@@ -87,7 +87,6 @@ export async function getAccountForUser(
  * account-wide count checked against `maxConnectors` (ADR 0006).
  */
 export async function getAccountUsage(
-	db: Database,
 	accountId: string,
 ): Promise<{
 	storageBytes: number;
@@ -95,6 +94,7 @@ export async function getAccountUsage(
 	consolidationUsedToday: number;
 	preWarmUsedToday: number;
 }> {
+	const db = getDB();
 	const accountProjectIds = db
 		.select({ id: projects.id })
 		.from(projects)

@@ -47,7 +47,6 @@ export async function loader({
 	const url = new URL(request.url);
 	const callbackURL = safeRelativeRedirect(url.searchParams.get("callbackURL"));
 
-	const db = getDB();
 	const auth = createAuthFromEnv();
 
 	const result = await auth.api.signInSocial({

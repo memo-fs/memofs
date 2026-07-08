@@ -16,12 +16,13 @@ import type { DashboardOutletContext } from "./_layout";
 import { OverviewCards } from "./+components/overview-cards";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/index";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /** Shape returned by the `recent-activity` resource route. */
 type RecentActivityResponse = { activity: SyncActivity[] };
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Dashboard — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Dashboard — Memo FS Cloud");
 }
 
 export default function OverviewPage() {

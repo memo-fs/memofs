@@ -12,7 +12,7 @@
  * path creates a *project* under an *existing* account (key-authenticated);
  * this path creates the *account* for a brand-new *user*. They are deliberately
  * separate because the key-auth and magic-link-auth trust paths are disjoint —
- * but both reuse the `createId`/`projects`/`accounts` tables identically.
+ * but both reuse the `projects`/`accounts` tables identically.
  *
  * Idempotent: if an account already exists for `userId` (e.g. a retried hook),
  * it returns the existing one and skips project creation, so a transient retry
@@ -21,7 +21,6 @@
  * @see docs/architecture/decisions.md Q13 — auto-provision (sync path).
  * @see docs/adr/0006-pricing-and-entitlements.md — free-tier default caps.
  */
-import { createId } from "@paralleldrive/cuid2";
 import { capsForStorage } from "../lib/entitlements";
 import { getDB } from "./db";
 import {
@@ -47,7 +46,7 @@ export async function provisionAccount(
 	// Idempotency guard: a retried hook (or an OAuth-link to an existing user
 	// that already provisioned) must not create a second account. Delegates to
 	// the SSOT `getAccountForUser` so the `accounts.userId` lookup lives once.
-	const existing = await getAccountForUser(db, userId);
+	const existing = await getAccountForUser(userId);
 	if (existing) return existing;
 
 	// Free-tier caps come from the SSOT resolver, NOT the schema default (which
@@ -57,24 +56,29 @@ export async function provisionAccount(
 	// `UNLIMITED_CONNECTORS_SENTINEL` so the integer column never receives
 	// `Infinity` (free is finite today, but the write path stays uniform).
 	const freeCaps = capsForStorage("free");
-	const accountId = createId();
-	await db.insert(accounts).values({
-		id: accountId,
-		userId,
-		plan: "free",
-		maxHostedStorageBytes: freeCaps.maxHostedStorageBytes,
-		maxConnectors: freeCaps.maxConnectors,
-	});
+	const [account] = await db
+		.insert(accounts)
+		.values({
+			userId,
+			plan: "free",
+			maxHostedStorageBytes: freeCaps.maxHostedStorageBytes,
+			maxConnectors: freeCaps.maxConnectors,
+		})
+		.returning({ id: accounts.id });
+	const accountId = account.id;
 
 	// Every account owns exactly one personal team (ADR 0011 Phase 2): the
 	// team-scoped project path is universal, so a solo user is a one-member
 	// team they own. The default project is created under this team.
-	const teamId = createId();
-	await db.insert(teams).values({
-		id: teamId,
-		name: "My Workspace",
-		ownerAccountId: accountId,
-	});
+	const [team] = await db
+		.insert(teams)
+		.values({
+			name: "My Workspace",
+			ownerAccountId: accountId,
+		})
+		.returning({ id: teams.id });
+	const teamId = team.id;
+
 	await db.insert(teamMembers).values({
 		teamId,
 		accountId,
@@ -87,7 +91,6 @@ export async function provisionAccount(
 	// belongs to the personal team (the access boundary); accountId records the
 	// creator. `isDefault` is true here and only here.
 	await db.insert(projects).values({
-		id: createId(),
 		accountId,
 		teamId,
 		name: "My Workspace",

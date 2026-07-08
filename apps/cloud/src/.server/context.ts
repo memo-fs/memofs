@@ -19,7 +19,7 @@ import type { env as cfEnv } from "cloudflare:workers";
 /** The adapter-shaped context available in every loader/action at runtime. */
 export interface CloudflareLoadContext {
 	cloudflare: {
-		/** Worker bindings declared in `wrangler.jsonc`. */
+		/** Worker bindings declared in `wrangler.toml`. */
 		env: typeof cfEnv;
 		/** Cloudflare request properties (geo, colo, etc.). */
 		cf: Request["cf"];

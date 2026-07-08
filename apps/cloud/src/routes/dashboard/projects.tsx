@@ -20,6 +20,7 @@ import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { NewProjectDialog } from "./+components/new-project-dialog";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/projects";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Projects list (SC3.2). Reads the account's projects from the real DB; each
@@ -31,8 +32,8 @@ import type { Route } from "./+types/projects";
  * lands, so a brand-new account sees an honest empty state, not seeded mocks.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Projects — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Projects — Memo FS Cloud");
 }
 
 /** Server data: the account's projects, newest-updated first. */
@@ -44,8 +45,7 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<ProjectsLoaderData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
-	const projects = account ? await listProjectsForAccount(db, account.id) : [];
+	const projects = account ? await listProjectsForAccount(account.id) : [];
 	return { projects };
 }
 
@@ -59,14 +59,13 @@ export async function action({
 	request,
 }: Route.ActionArgs): Promise<{ ok: boolean }> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const form = await request.formData();
 	const projectId = String(form.get("projectId") ?? "");
 	if (!projectId) return { ok: false };
 
 	if (!account) return { ok: false };
 
-	await deleteProject(db, account.id, projectId);
+	await deleteProject(account.id, projectId);
 	return { ok: true };
 }
 

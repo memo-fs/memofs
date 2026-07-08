@@ -17,6 +17,7 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import type { Route } from "./+types/accept";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Team-invitation accept route — `/team/accept?token=…` (SC7).
@@ -42,8 +43,8 @@ import type { Route } from "./+types/accept";
  * @see {@link ../../server/queries/teams} `acceptInvitation` — the join logic.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Accept invitation — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Accept invitation — Memo FS Cloud");
 }
 
 /** The terminal outcome the component renders (success redirects in the loader). */
@@ -65,7 +66,6 @@ export async function loader({
 	const url = new URL(request.url);
 	const rawToken = url.searchParams.get("token") ?? "";
 	const salt = env.API_KEY_SALT ?? "";
-	const db = getDB();
 
 	// A missing/blank token renders not_found (no leak of whether an email is
 	// invited). Resolve the invite before requiring auth so a bad/expired token
@@ -74,7 +74,7 @@ export async function loader({
 		return { outcome: { kind: "not_found" } };
 	}
 
-	const invitation = await getInvitationByToken(db, rawToken, salt);
+	const invitation = await getInvitationByToken(rawToken, salt);
 	if (!invitation || invitation.acceptedAt !== null) {
 		// Unknown token OR already-used invite → identical not_found state so a
 		// forwarded-link viewer can't tell a once-valid token from a never-valid one.
@@ -102,7 +102,7 @@ export async function loader({
 	}
 
 	try {
-		await acceptInvitation(db, {
+		await acceptInvitation({
 			rawToken,
 			accepterId: user.accountId,
 			accepterEmail: user.email,

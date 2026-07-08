@@ -21,7 +21,7 @@
 
 import { and, eq, isNull } from "drizzle-orm";
 import { capsForStorage, resolveCaps } from "../../lib/entitlements";
-import type { Database } from "../db";
+import { getDB } from "../db";
 import { accounts, type PlanTier } from "../db/schema";
 
 /**
@@ -50,9 +50,9 @@ export function isPlanMetadataValue(
  * {@link getAccountById} for the direct lookup.
  */
 export async function getAccountByPolarCustomerId(
-	db: Database,
 	polarCustomerId: string,
 ): Promise<{ id: string; plan: PlanTier } | null> {
+	const db = getDB();
 	const rows = await db
 		.select({ id: accounts.id, plan: accounts.plan })
 		.from(accounts)
@@ -63,9 +63,9 @@ export async function getAccountByPolarCustomerId(
 
 /** Looks up a Memo FS account by its own id (the `memofs_account_id` metadata). */
 export async function getAccountById(
-	db: Database,
 	accountId: string,
 ): Promise<{ id: string; plan: PlanTier } | null> {
+	const db = getDB();
 	const rows = await db
 		.select({ id: accounts.id, plan: accounts.plan })
 		.from(accounts)
@@ -80,10 +80,10 @@ export async function getAccountById(
  * `subscription.created` never clobbers a recorded id.
  */
 export async function setPolarCustomerId(
-	db: Database,
 	accountId: string,
 	polarCustomerId: string,
 ): Promise<void> {
+	const db = getDB();
 	await db
 		.update(accounts)
 		.set({ polarCustomerId, updatedAt: new Date().toISOString() })
@@ -102,10 +102,10 @@ export async function setPolarCustomerId(
  *          directly rather than via a second DB read.
  */
 export async function applyPlanToAccount(
-	db: Database,
 	accountId: string,
 	plan: PlanTier,
 ): Promise<AppliedAccount | null> {
+	const db = getDB();
 	const caps = resolveCaps(plan);
 	const stored = capsForStorage(plan);
 	const result = await db

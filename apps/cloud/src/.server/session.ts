@@ -15,23 +15,20 @@
  * @see {@link ./email} — the mailer injected into the factory.
  */
 
-import { env } from "cloudflare:workers";
 import { redirect } from "react-router";
 import { createAuth } from "./auth";
-import type { Database } from "./db";
-import { getDB } from "./db";
 import type { PlanTier } from "./db/schema";
 import { type AccountView, getAccountForUser } from "./queries/account";
 
 // Re-export the open-redirect guard for legacy `~/server/session.server` imports.
-// The SSOT now lives in `./redirect` so client code (which cannot import a
-// `.server` module) can use it too. New code should import from `./redirect`
-// directly.
+// The SSOT lives in `~/lib/redirect` (outside `.server/`) so client code (which
+// cannot import a `.server` module) can use it too. New code should import from
+// `~/lib/redirect` directly.
 export {
 	SAFE_REDIRECT_DEFAULT,
 	safeRedirect,
 	safeRelativeRedirect,
-} from "./redirect";
+} from "~/lib/redirect";
 
 /** Dashboard-facing user identity: the Better Auth user + their billing account. */
 export interface SessionUser {
@@ -100,6 +97,18 @@ export async function getSessionUser(
 		plan: account?.plan ?? null,
 	};
 }
+/**
+ * Constructs and returns aa redirect URL params
+ * @param request
+ * @returns {string}
+ */
+export function getRedirectParams(request) {
+	const { pathname, search } = new URL(request.url);
+	const params = new URLSearchParams({
+		redirect: `${pathname}${search}`,
+	});
+	return params.toString();
+}
 
 /**
  * Resolves the signed-in user or throws a redirect to `/login`. Use in loaders
@@ -116,11 +125,7 @@ export async function requireUser(request: Request): Promise<SessionUser> {
 	if (user) {
 		return user;
 	}
-	const { pathname, search } = new URL(request.url);
-	const params = new URLSearchParams({
-		redirect: `${pathname}${search}`,
-	});
-	throw redirect(`/login?${params.toString()}`);
+	throw redirect(`/login?${getRedirectParams(request)}`);
 }
 
 /**
@@ -144,17 +149,12 @@ export async function requireUserWithAccount(request: Request): Promise<{
 }> {
 	const auth = createAuthFromEnv();
 	const result = await auth.api.getSession({ headers: request.headers });
+
 	if (!result) {
-		const { pathname, search } = new URL(request.url);
-
-		const params = new URLSearchParams({
-			redirect: `${pathname}${search}`,
-		});
-		throw redirect(`/login?${params.toString()}`);
+		throw redirect(`/login?${getRedirectParams(request)}`);
 	}
-
 	const { user } = result;
-	const account = await getAccountForUser(getDB(), user.id);
+	const account = await getAccountForUser(user.id);
 
 	return {
 		user: {
@@ -180,7 +180,7 @@ export async function requireUserWithAccount(request: Request): Promise<{
 async function resolveAccount(
 	userId: string,
 ): Promise<{ id: string; plan: PlanTier } | null> {
-	const account = await getAccountForUser(getDB(), userId);
+	const account = await getAccountForUser(userId);
 	if (!account) return null;
 	return { id: account.id, plan: account.plan };
 }

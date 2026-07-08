@@ -11,6 +11,7 @@ import { MemoryPreWarmingCard } from "./+components/memory-pre-warming-card";
 import { MemoryStatusCard } from "./+components/memory-status-card";
 import { PageHeader } from "./+components/page-header";
 import type { Route } from "./+types/memory";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Which hosted-runtime providers are actually bound in this deployment.
@@ -46,8 +47,8 @@ export async function loader({ context }: Route.LoaderArgs) {
 	return { providers };
 }
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Memory Runtime — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Memory Runtime — Memo FS Cloud");
 }
 
 export default function MemoryPage({ loaderData }: Route.ComponentProps) {
@@ -111,6 +112,7 @@ export default function MemoryPage({ loaderData }: Route.ComponentProps) {
 				<MemoryStatusCard plan={plan} providers={providers} />
 				<MemoryConsolidationCard
 					plan={plan}
+					runsToday={usage.consolidationUsedToday}
 					isConsolidating={isConsolidating}
 					onConsolidate={handleConsolidate}
 					consolidationResult={consolidationFetcher.data?.result}

@@ -29,6 +29,7 @@ import { formatBytes, formatRelative } from "~/utils/misc";
 import { DeleteProjectDialog } from "./+components/delete-project-dialog";
 import { ProjectManifest } from "./+components/project-manifest";
 import type { Route } from "./+types/projects.$projectId";
+import { buildNoindexMeta } from "~/lib/seo";
 
 /**
  * Project detail (SC3.2). One loader resolves the project (ownership-gated — a
@@ -41,8 +42,8 @@ import type { Route } from "./+types/projects.$projectId";
  * committed push state.
  */
 
-export function meta(_: Route.MetaArgs) {
-	return [{ title: "Project Details — Memo FS Cloud" }];
+export function meta() {
+	return buildNoindexMeta("Project Details — Memo FS Cloud");
 }
 
 /** Server data for the project detail page. */
@@ -57,7 +58,6 @@ export async function loader({
 	params,
 }: Route.LoaderArgs): Promise<ProjectDetailLoaderData> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const projectId = params.projectId ?? "";
 
 	// Ownership gate: a project id from the URL that isn't owned by the signed-in
@@ -65,13 +65,13 @@ export async function loader({
 	// queries layer applies; we surface it as a clean not-found rather than a
 	// cross-account data leak.
 	const project = account
-		? await getProjectForAccount(db, account.id, projectId)
+		? await getProjectForAccount(account.id, projectId)
 		: null;
 	invariantResponse(project, "Project not found", { status: StatusCodes.NOT_FOUND });
 
 	const [files, cursors] = await Promise.all([
-		listProjectFiles(db, projectId),
-		listProjectCursorHistory(db, projectId),
+		listProjectFiles(projectId),
+		listProjectCursorHistory(projectId),
 	]);
 	return { project, files, cursors };
 }
@@ -86,10 +86,9 @@ export async function action({
 	params,
 }: Route.ActionArgs): Promise<{ ok: true }> {
 	const { account } = await requireUserWithAccount(request);
-	const db = getDB();
 	const projectId = params.projectId ?? "";
 	if (account) {
-		await deleteProject(db, account.id, projectId);
+		await deleteProject(account.id, projectId);
 	}
 	return { ok: true };
 }

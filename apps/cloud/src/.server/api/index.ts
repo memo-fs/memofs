@@ -47,43 +47,25 @@ export interface ApiVariables {
 export type ApiEnv = { Bindings: Env; Variables: ApiVariables };
 
 /**
- * Memoized billing sub-app (ADR 0006 / ADR 0011 Phase 2).
- *
- * `@polar-sh/sdk` + `@polar-sh/hono` hang under workerd's synchronous module-eval
- * (a hard stall, not a throw), so they cannot be imported eagerly at
- * `createApiApp()` eval time — doing so hangs the Worker on cold start. This
- * lazy loader `import()`s the billing sub-app on the first `/v1/billing/*`
- * request and memoizes it for the isolate's lifetime, so non-billing requests
- * (health, readiness, sync) never pay the Polar import cost. The first billing
- * request absorbs it once.
- */
-let billingAppPromise: Promise<typeof import("./billing")> | undefined;
-
-/** Lazily resolves the billing sub-app, importing it once per isolate. */
-function loadBillingApp() {
-	return (billingAppPromise ??= import("./billing"));
-}
-
-/**
  * Catch-all handler that mounts the lazily-imported billing sub-app on
  * `/v1/billing/*`. Forwards the request verbatim once the sub-app is resolved,
  * so the routing tree is identical to an eager `.route("/v1/billing", ...)`.
  */
 const lazyBillingHandler = async (c: Context<ApiEnv>) => {
-	const { billingApp } = await loadBillingApp();
+	const { billingApp } = await import("./billing");
 	return billingApp.fetch(c.req.raw, c.env, c.executionCtx);
 };
 
-export function createApiApp() {
+export function createApi() {
 	return (
 		new Hono<ApiEnv>()
 			.use("*", requestIdMiddleware)
-			.route("/v1", healthApp)
+			.route("/", healthApp)
 			// Sync routes carry their own auth + db middleware (both need `c.env`),
 			// mounted under the project-scoped path the frozen client contract uses.
-			.route("/v1/projects/:projectId/sync", syncApp)
+			.route("/projects/:projectId/sync", syncApp)
 			// Connectors routes: credentials resolution.
-			.route("/v1/projects/:projectId/connectors", connectorsApp)
+			.route("/projects/:projectId/connectors", connectorsApp)
 			// Billing routes (ADR 0006 / ADR 0011 Phase 2): Polar webhook
 			// (signature-authenticated), checkout, and customer portal. Carry their
 			// own db middleware; the webhook is NOT bearer-authenticated (Polar signs).
@@ -95,7 +77,7 @@ export function createApiApp() {
 			// first `/v1/billing/*` request and memoized — non-billing requests
 			// (health, readiness, sync) never pay the Polar import cost, and the
 			// routing tree is otherwise identical to an eager `.route()`.
-			.all("/v1/billing/*", lazyBillingHandler)
+			.all("/billing/*", lazyBillingHandler)
 			.notFound((c) => jsonError(c, 404, "not_found", "Unknown API route."))
 			.onError((cause, c) => {
 				// Our own `ApiError` carries a stable `code`, status, and optional

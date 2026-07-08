@@ -16,13 +16,13 @@
  */
 
 import type { Transaction } from "@libsql/client";
-import { createId } from "@paralleldrive/cuid2";
 import type {
 	CloudFileManifest,
 	FileManifest,
 } from "@memofs/core/cloud-client";
+import { createId } from "@paralleldrive/cuid2";
 import { desc, eq, sql } from "drizzle-orm";
-import type { Database } from "../../db";
+import { getDB } from "../../db";
 import { projectFiles, projects, syncCursors } from "../../db/schema";
 import { canWriteProject, getPersonalTeam } from "../../queries/teams";
 import { ConflictError, PermissionError } from "../errors";
@@ -50,9 +50,9 @@ export const INITIAL_CURSOR = "0";
  * Push uses `ensureProject` instead, which creates the row if absent.
  */
 export async function loadProject(
-	db: Database,
 	projectId: string,
 ): Promise<SyncProject | null> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			id: projects.id,
@@ -79,17 +79,17 @@ export async function loadProject(
  * "does this key own it?" is vacuously answered by "this key is creating it."
  */
 export async function ensureProject(
-	db: Database,
 	accountId: string,
 	projectId: string,
 ): Promise<SyncProject> {
-	const existing = await loadProject(db, projectId);
+	const db = getDB();
+	const existing = await loadProject(projectId);
 	if (existing) return existing;
 	// Assign the new project to the creator's personal team (ADR 0011 Phase 2):
 	// the team is the access boundary. If the account has no personal team yet
 	// (a pre-backfill account), the project is created teamless and the backfill
 	// migration will link it later; only the creator may write until then.
-	const personalTeam = await getPersonalTeam(db, accountId);
+	const personalTeam = await getPersonalTeam(accountId);
 	await db.insert(projects).values({
 		id: projectId,
 		accountId,
@@ -108,10 +108,8 @@ export async function ensureProject(
  * Returns the current cursor for a project, or `INITIAL_CURSOR` if it has no
  * `sync_cursors` rows yet. The cursor is `String(max seq)` (Q14).
  */
-export async function currentCursor(
-	db: Database,
-	projectId: string,
-): Promise<string> {
+export async function currentCursor(projectId: string): Promise<string> {
+	const db = getDB();
 	const rows = await db
 		.select({ seq: syncCursors.seq })
 		.from(syncCursors)
@@ -129,7 +127,7 @@ export async function currentCursor(
  * that isn't a non-negative integer is treated as "no cursor" rather than
  * rejected — the worst case is a slightly larger diff, never a hard failure.
  */
-export function parseCursor(cursor: string | undefined | null): number | null {
+export function parseCursor(cursor?: string | null): number | null {
 	if (cursor == null || cursor === "") return null;
 	const n = Number(cursor);
 	if (!Number.isInteger(n) || n < 0) return null;
@@ -143,9 +141,9 @@ export function parseCursor(cursor: string | undefined | null): number | null {
  * This is what `pull`/`status` return and what `push` diffs against.
  */
 export async function loadCloudManifest(
-	db: Database,
 	projectId: string,
 ): Promise<CloudFileManifest> {
+	const db = getDB();
 	const rows = await db
 		.select({
 			path: projectFiles.path,
@@ -455,7 +453,6 @@ export async function loadCloudManifestTx(
  * @returns `{ cursor, manifest }` — see `commitPushTx`.
  */
 export async function commitPush(
-	db: Database,
 	projectId: string,
 	uploaded: Array<{
 		path: string;
@@ -464,10 +461,11 @@ export async function commitPush(
 		sizeBytes: number;
 	}>,
 ): Promise<{ cursor: string; manifest: CloudFileManifest }> {
+	const db = getDB();
 	// Mirror `commitPushTx`'s logic against the drizzle builder (the deferred-
 	// mode transaction it runs in is the only difference). Keeping both paths
 	// avoids a hard dependency on raw-SQL correctness for the legacy caller.
-	const nextSeq = await bumpCursor(db, projectId, "push");
+	const nextSeq = await bumpCursor(projectId, "push");
 
 	for (const entry of uploaded) {
 		await db
@@ -501,7 +499,7 @@ export async function commitPush(
 		.set({ totalStorageBytes: totalBytes, updatedAt: sql`(current_timestamp)` })
 		.where(eq(projects.id, projectId));
 
-	const manifest = await loadCloudManifest(db, projectId);
+	const manifest = await loadCloudManifest(projectId);
 	return { cursor: String(nextSeq), manifest };
 }
 
@@ -514,10 +512,10 @@ export async function commitPush(
  * `init`) for observability; it isn't read back by sync logic.
  */
 export async function bumpCursor(
-	db: Database,
 	projectId: string,
 	kind: "push" | "pull" | "init",
 ): Promise<number> {
+	const db = getDB();
 	const rows = await db
 		.select({ max: sql<number>`coalesce(max(${syncCursors.seq}), 0)` })
 		.from(syncCursors)
@@ -544,12 +542,10 @@ export async function bumpCursor(
  * concurrency layer (ADR 0010) serializes their concurrent writes safely.
  */
 export async function assertOwns(
-	db: Database,
 	project: SyncProject,
 	accountId: string,
 ): Promise<void> {
 	const allowed = await canWriteProject(
-		db,
 		project.teamId,
 		project.accountId,
 		accountId,
@@ -597,9 +593,9 @@ export function projectedStorageBytes(
  * separate write-tracking column.
  */
 export async function lastSyncAt(
-	db: Database,
 	projectId: string,
 ): Promise<string | undefined> {
+	const db = getDB();
 	const rows = await db
 		.select({ createdAt: syncCursors.createdAt })
 		.from(syncCursors)

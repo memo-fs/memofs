@@ -60,17 +60,16 @@ export async function loader({
 	request,
 }: Route.LoaderArgs): Promise<DashboardLoaderData> {
 	const { user, account } = await requireUserWithAccount(request);
-	const db = getDB();
 
 	// Provisioning is best-effort: an account may be missing only if signup
 	// provisioning raced. Degrade gracefully (null account → zeroed usage) rather
 	// than blocking the user out of their dashboard.
 	const [projects, usage] = await Promise.all([
 		account
-			? listProjectsForAccount(db, account.id)
+			? listProjectsForAccount(account.id)
 			: Promise.resolve([] as ProjectSummary[]),
 		account
-			? getAccountUsage(db, account.id)
+			? getAccountUsage(account.id)
 			: Promise.resolve({
 					storageBytes: 0,
 					connectorsUsed: 0,
