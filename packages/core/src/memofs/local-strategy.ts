@@ -59,6 +59,30 @@ import type {
 import { updateCoreMemory, writeMemory } from "./local-strategy/write";
 import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
+import type {
+	AgentSessionCompleteInput,
+	AgentSessionExtractResult,
+	AgentSessionFileInput,
+	AgentSessionResult,
+	AgentSessionStartInput,
+	ConsolidateMemoryInput,
+	ConsolidateMemoryResult,
+	GraphEdgeInput,
+	GraphNeighborsInput,
+	GraphNodeInput,
+	GraphPathInput,
+	GraphPathResult,
+	ListGraphInput,
+	MemoFSHealthResult,
+	MemoryContextInput,
+	MemoryContextResult,
+	MemoryDocumentResult,
+	RecallInput,
+	RecallResult,
+	SnapshotMemoryInput,
+	WriteMemoryInput,
+	WriteMemoryResult,
+} from "./types";
 
 export type { LocalGraphStore, LocalStrategyOptions };
 
@@ -96,7 +120,8 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		return out;
 	}
 
-	const graphNodes = new Map<string, any>();
+	const graphNodes = new Map<string, GraphNodeInput>();
+	// biome-ignore lint/suspicious/noExplicitAny: graphEdges stored as any for compatibility with LocalStrategyContext which expects GraphEdgeInput but receives ResolveGraphEdge
 	const graphEdges = new Map<string, any>();
 	const contextCache = new ContextCache();
 	let bootstrapped = false;
@@ -134,9 +159,13 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	}
 
 	async function createSnapshotImpl(
-		input?: any,
+		input?: {
+			label?: string;
+			type?: string;
+			metadata?: Record<string, unknown>;
+		},
 		signal?: AbortSignal,
-	): Promise<any> {
+	): Promise<{ id: string; path: string; created: boolean }> {
 		if (signal?.aborted) throw new Error("Operation aborted.");
 		await ensureReady();
 		const id = snapshotId(input?.label);
@@ -157,7 +186,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			store,
 			createSnapshotRecord({
 				id,
-				type: input?.type ?? "manual",
+				type: (input?.type ?? "manual") as
+					| "manual"
+					| "automatic"
+					| "pre-sync"
+					| "pre-restore",
 				createdAt: now,
 				metadata: {
 					label: input?.label ?? null,
@@ -172,7 +205,16 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	async function listRecentMemories(
 		limit?: number,
 		signal?: AbortSignal,
-	): Promise<any> {
+	): Promise<{
+		items: Array<{
+			id: string;
+			type: string;
+			timestamp: string;
+			summary: string;
+			metadata: Record<string, unknown>;
+		}>;
+		warnings?: string[];
+	}> {
 		if (signal?.aborted) throw new Error("Operation aborted.");
 		await ensureReady();
 		const result = await readMemoryEventsWithIssues(store, {
@@ -186,8 +228,8 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				id: entry.id,
 				type: entry.type,
 				timestamp: entry.timestamp,
-				summary: entry.summary,
-				metadata: entry.metadata as any,
+				summary: entry.summary ?? "",
+				metadata: entry.metadata as Record<string, unknown>,
 			}));
 		return {
 			items,
@@ -234,7 +276,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	};
 
 	return {
-		async health(signal?: AbortSignal): Promise<any> {
+		async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			return {
 				ok: true,
@@ -257,7 +299,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			};
 		},
 
-		async context(input: any, signal?: AbortSignal): Promise<any> {
+		async context(
+			input: MemoryContextInput,
+			signal?: AbortSignal,
+		): Promise<MemoryContextResult> {
 			await ensureReady();
 			return buildContext(
 				{
@@ -283,21 +328,27 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			);
 		},
 
-		async recall(input: any, signal?: AbortSignal): Promise<any> {
+		async recall(
+			input: RecallInput,
+			signal?: AbortSignal,
+		): Promise<RecallResult> {
 			return localRecall(ctx, input, signal);
 		},
 
-		async writeMemory(input: any, signal?: AbortSignal): Promise<any> {
+		async writeMemory(
+			input: WriteMemoryInput,
+			signal?: AbortSignal,
+		): Promise<WriteMemoryResult> {
 			return writeMemory(ctx, input, signal);
 		},
 
-		async readCoreMemory(signal?: AbortSignal): Promise<any> {
+		async readCoreMemory(signal?: AbortSignal): Promise<MemoryDocumentResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			await ensureReady();
 			return { content: await readCoreMemory(store) };
 		},
 
-		async readNotesMemory(signal?: AbortSignal): Promise<any> {
+		async readNotesMemory(signal?: AbortSignal): Promise<MemoryDocumentResult> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			await ensureReady();
 			return { content: await readNotesMemory(store) };
@@ -306,16 +357,31 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		async updateCoreMemory(
 			content: string,
 			signal?: AbortSignal,
-		): Promise<any> {
+		): Promise<MemoryDocumentResult> {
 			return updateCoreMemory(ctx, content, signal);
 		},
 
-		async listRecentMemories(input?: any, signal?: AbortSignal): Promise<any> {
+		async listRecentMemories(
+			input?: { limit?: number },
+			signal?: AbortSignal,
+		): Promise<{
+			items: Array<{
+				id: string;
+				type: string;
+				timestamp: string;
+				summary: string;
+				metadata: Record<string, unknown>;
+			}>;
+			warnings?: string[];
+		}> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			return listRecentMemories(input?.limit, signal);
 		},
 
-		async validate(input?: any, signal?: AbortSignal): Promise<any> {
+		async validate(
+			input?: { strict?: boolean },
+			signal?: AbortSignal,
+		): Promise<{ ok: boolean; warnings: string[]; errors: string[] }> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			await ensureReady();
 			const warnings: string[] = [];
@@ -367,84 +433,127 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			};
 		},
 
-		async createSnapshot(input?: any, signal?: AbortSignal): Promise<any> {
+		async createSnapshot(
+			input?: SnapshotMemoryInput,
+			signal?: AbortSignal,
+		): Promise<{ id: string; path: string; created: boolean }> {
 			return createSnapshotImpl(input, signal);
 		},
 
-		async startAgentSession(input: any, signal?: AbortSignal): Promise<any> {
+		async startAgentSession(
+			input: AgentSessionStartInput,
+			signal?: AbortSignal,
+		): Promise<AgentSessionResult> {
 			return startAgentSession(ctx, input, signal);
 		},
 
-		async readAgentSessionFile(input: any, signal?: AbortSignal): Promise<any> {
+		async readAgentSessionFile(
+			input: AgentSessionFileInput,
+			signal?: AbortSignal,
+		): Promise<{ content: string }> {
 			return readAgentSessionFile(ctx, input, signal);
 		},
 
 		async writeAgentSessionFile(
-			input: any,
+			input: AgentSessionFileInput,
 			signal?: AbortSignal,
-		): Promise<any> {
+		): Promise<{ written: true; path: string }> {
 			return writeAgentSessionFile(ctx, input, signal);
 		},
 
 		async appendAgentSessionFile(
-			input: any,
+			input: AgentSessionFileInput,
 			signal?: AbortSignal,
-		): Promise<any> {
+		): Promise<{ appended: true; path: string }> {
 			return appendAgentSessionFile(ctx, input, signal);
 		},
 
-		async extractAgentSession(input: any, signal?: AbortSignal): Promise<any> {
+		async extractAgentSession(
+			input: { sessionId: string; workspaceId?: string; projectId?: string },
+			signal?: AbortSignal,
+		): Promise<AgentSessionExtractResult> {
 			return extractAgentSession(ctx, input, signal);
 		},
 
-		async completeAgentSession(input: any, signal?: AbortSignal): Promise<any> {
+		async completeAgentSession(
+			input: AgentSessionCompleteInput,
+			signal?: AbortSignal,
+		): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
 			return completeAgentSession(ctx, input, signal);
 		},
 
-		async upsertGraphNodes(input: any, signal?: AbortSignal): Promise<any> {
+		async upsertGraphNodes(
+			input: { nodes: GraphNodeInput[] },
+			signal?: AbortSignal,
+		): Promise<{ nodes: GraphNodeInput[] }> {
 			return upsertGraphNodes(ctx, input, signal);
 		},
 
-		async upsertGraphEdges(input: any, signal?: AbortSignal): Promise<any> {
+		async upsertGraphEdges(
+			input: { edges: GraphEdgeInput[] },
+			signal?: AbortSignal,
+		): Promise<{ edges: GraphEdgeInput[] }> {
 			return upsertGraphEdges(ctx, input, signal);
 		},
 
-		async graphNeighbors(input: any, signal?: AbortSignal): Promise<any> {
+		async graphNeighbors(
+			input: GraphNeighborsInput,
+			signal?: AbortSignal,
+		): Promise<{
+			items: Array<{
+				node: GraphNodeInput;
+				edge: GraphEdgeInput;
+				direction: "in" | "out";
+			}>;
+			nextCursor?: string;
+		}> {
 			return graphNeighbors(ctx, input, signal);
 		},
 
-		async graphPath(input: any, signal?: AbortSignal): Promise<any> {
+		async graphPath(
+			input: GraphPathInput,
+			signal?: AbortSignal,
+		): Promise<GraphPathResult> {
 			return graphPath(ctx, input, signal);
 		},
 
-		async listGraphNodes(input: any, signal?: AbortSignal): Promise<any> {
+		async listGraphNodes(
+			input: ListGraphInput,
+			signal?: AbortSignal,
+		): Promise<{ items: GraphNodeInput[]; nextCursor?: string }> {
 			return listGraphNodes(ctx, input, signal);
 		},
 
-		async listGraphEdges(input: any, signal?: AbortSignal): Promise<any> {
+		async listGraphEdges(
+			input: ListGraphInput,
+			signal?: AbortSignal,
+		): Promise<{ items: GraphEdgeInput[]; nextCursor?: string }> {
 			return listGraphEdges(ctx, input, signal);
 		},
 
-		async consolidateMemory(input: any, signal?: AbortSignal): Promise<any> {
+		async consolidateMemory(
+			input: ConsolidateMemoryInput,
+			signal?: AbortSignal,
+		): Promise<ConsolidateMemoryResult> {
 			return consolidateMemory(ctx, input, signal);
 		},
 
-		async syncPush(_input: any, signal?: AbortSignal): Promise<any> {
+		async syncPush(_input: unknown, signal?: AbortSignal): Promise<never> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			throw new Error("sync.push is not available in local mode.");
 		},
 
-		async syncComplete(_input: any, signal?: AbortSignal): Promise<any> {
+		async syncComplete(_input: unknown, signal?: AbortSignal): Promise<never> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			throw new Error("sync.complete is not available in local mode.");
 		},
 
-		async syncPull(_input: any, signal?: AbortSignal): Promise<any> {
+		async syncPull(_input: unknown, signal?: AbortSignal): Promise<never> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			throw new Error("sync.pull is not available in local mode.");
 		},
 
-		async syncStatus(_input?: any, signal?: AbortSignal): Promise<any> {
+		async syncStatus(_input?: unknown, signal?: AbortSignal): Promise<never> {
 			if (signal?.aborted) throw new Error("Operation aborted.");
 			throw new Error("sync.status is not available in local mode.");
 		},

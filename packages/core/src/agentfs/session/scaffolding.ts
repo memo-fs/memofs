@@ -1,4 +1,3 @@
-import type { MemoryStore } from "../../index";
 import {
 	CORE_MEMORY_PATH,
 	MANIFEST_PATH,

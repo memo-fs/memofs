@@ -50,7 +50,7 @@ import { RUNTIME_HANDLERS } from "./handlers";
 export interface ConcurrencyLayer {
 	/** The project lock primitive (slice 3). Implemented then. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	readonly acquire: (projectId: string, fn: () => Promise<any>) => Promise<any>;
+	readonly acquire: <T>(projectId: string, fn: () => Promise<T>) => Promise<T>;
 }
 
 /** Options for {@link dispatch} and {@link handleRuntimeMessage}. */
@@ -161,7 +161,7 @@ async function dispatchSingle(
 	message: unknown,
 	options: DispatchOptions,
 ): Promise<JsonRpcResponse | undefined> {
-	let request;
+	let request: ReturnType<typeof validateJsonRpcRequest>;
 	try {
 		request = validateJsonRpcRequest(message);
 	} catch (error) {

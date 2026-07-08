@@ -3,6 +3,7 @@
 skills-lock.json
 social
 .opencode
+apps/cloud
 # Dependencies
 node_modules
 .pnp

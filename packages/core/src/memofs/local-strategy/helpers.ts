@@ -90,9 +90,11 @@ let nodeFsPromise: Promise<NodeFs> | undefined;
 let nodePathPromise: Promise<NodePath> | undefined;
 
 export function loadNodeFs(): Promise<NodeFs> {
-	return (nodeFsPromise ??= import("node:fs/promises"));
+	if (!nodeFsPromise) nodeFsPromise = import("node:fs/promises");
+	return nodeFsPromise;
 }
 
 export function loadNodePath(): Promise<NodePath> {
-	return (nodePathPromise ??= import("node:path"));
+	if (!nodePathPromise) nodePathPromise = import("node:path");
+	return nodePathPromise;
 }

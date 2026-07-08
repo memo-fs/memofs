@@ -23,10 +23,10 @@ import {
 	buildRuntimeMemoryToolDefinition,
 	createAiSdkRuntimeFromTekmemo,
 } from "@memofs/adapter-ai-sdk";
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { generateText, stepCountIs } from "ai";
 
-const memo = new Tekmemo({ rootDir: "./.memofs", projectId: "demo" });
+const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
 const runtime = createAiSdkRuntimeFromTekmemo(memo);
 const access = { projectId: "demo", userId: "user_demo" };
 

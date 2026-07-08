@@ -22,11 +22,11 @@ import { parseNonNegativeInteger, parsePositiveInteger } from "./utils/numbers";
  * Commander's `option()` generic overload matches `(value: string, previous: T) => T`.
  * These wrappers satisfy that signature while delegating to the core parsers.
  */
-function parsePositiveOption(value: string, previous: number): number {
+function parsePositiveOption(value: string, _previous: number): number {
 	return parsePositiveInteger(value);
 }
 
-function parseNonNegativeOption(value: string, previous: number): number {
+function parseNonNegativeOption(value: string, _previous: number): number {
 	return parseNonNegativeInteger(value);
 }
 

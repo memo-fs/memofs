@@ -23,11 +23,11 @@
  * openai-agents-js. It is distinct from the Cloudflare Agents SDK.
  */
 
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { Agent, run, tool } from "@openai/agents";
 import { z } from "zod";
 
-const memo = new Tekmemo({ rootDir: "./.memofs", projectId: "demo" });
+const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
 
 // --- Tools: give the agent safe, scoped access to MemoFS memory -------------
 

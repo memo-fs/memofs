@@ -17,7 +17,6 @@ import type {
 	GraphNode,
 	GraphNodeQuery,
 	GraphPath,
-	GraphPathStep,
 	GraphShortestPathQuery,
 	GraphSnapshot,
 	GraphStats,
@@ -35,7 +34,6 @@ import {
 	normalizeEdge,
 	normalizeEdgeIdentityMode,
 	normalizeNode,
-	validateDepth,
 	validateLimit,
 	validateUnitNumber,
 } from "../utils/validation";
@@ -44,14 +42,6 @@ export interface InMemoryGraphStoreOptions {
 	allowSelfEdges?: boolean;
 	requireExistingNodes?: boolean;
 	edgeIdentityMode?: GraphEdgeIdentityMode;
-}
-
-interface PathQueueItem {
-	nodeId: string;
-	steps: GraphPathStep[];
-	totalWeight: number;
-	totalCost: number;
-	depth: number;
 }
 
 export class InMemoryGraphStore implements GraphStore {
@@ -492,13 +482,6 @@ export class InMemoryGraphStore implements GraphStore {
 		for (const edge of normalizedEdges) this.setEdge(edge);
 	}
 
-	private requireNode(id: string, label: "Start" | "Target"): StoredGraphNode {
-		const node = this.nodes.get(id);
-		if (!node)
-			throw new GraphNotFoundError(`${label} node "${id}" does not exist.`);
-		return node;
-	}
-
 	private resolveEdgeId(edge: GraphEdge): string {
 		if (edge.id) return edge.id;
 		const preview = normalizeEdge(edge, {
@@ -620,7 +603,7 @@ function neighborCandidates(
 	return out;
 }
 
-function edgeCost(edge: StoredGraphEdge): number {
+function _edgeCost(edge: StoredGraphEdge): number {
 	return 1 - edge.weight;
 }
 

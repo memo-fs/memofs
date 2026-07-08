@@ -36,6 +36,7 @@ export async function coreRead(
 	self: MemoFS,
 	signal?: AbortSignal,
 ): Promise<string> {
+	// biome-ignore lint/suspicious/noExplicitAny: strategy is private on MemoFS, delegates need access
 	const result = await (self as any).strategy.readCoreMemory(signal);
 	return result.content;
 }
@@ -46,6 +47,7 @@ export async function coreUpdate(
 	signal?: AbortSignal,
 ): Promise<void> {
 	assertString(content, "content");
+	// biome-ignore lint/suspicious/noExplicitAny: strategy is private on MemoFS, delegates need access
 	await (self as any).strategy.updateCoreMemory(content, signal);
 }
 
@@ -53,6 +55,7 @@ export async function notesRead(
 	self: MemoFS,
 	signal?: AbortSignal,
 ): Promise<string> {
+	// biome-ignore lint/suspicious/noExplicitAny: strategy is private on MemoFS, delegates need access
 	const result = await (self as any).strategy.readNotesMemory(signal);
 	return result.content;
 }
@@ -65,6 +68,7 @@ export async function notesRecord(
 	},
 	signal?: AbortSignal,
 ): Promise<WriteMemoryResult> {
+	// biome-ignore lint/suspicious/noExplicitAny: strategy is private on MemoFS, delegates need access
 	return (self as any).strategy.writeMemory(
 		{
 			content: note.content,
@@ -150,7 +154,11 @@ export function agentfsCreateSession(
 	} as CreateMemoFSAgentSessionOptions);
 }
 
-export function createStrategy(self: MemoFS, resolved: any): any {
+export function createStrategy(
+	self: MemoFS,
+	resolved: { mode: string; autoBootstrap?: boolean },
+	// biome-ignore lint/suspicious/noExplicitAny: return type is a union of strategy implementations
+): any {
 	if (resolved.mode === "memory") {
 		return createMemoryStrategy({
 			name: self.name,
@@ -182,7 +190,7 @@ export function createStrategy(self: MemoFS, resolved: any): any {
 			recallStore: self.recallStore,
 			projectId: self.projectId,
 			tenantId: self.tenantId,
-			autoBootstrap: resolved.autoBootstrap,
+			autoBootstrap: resolved.autoBootstrap ?? false,
 			name: self.name,
 			version: self.version,
 			syncLayer: sync,
@@ -204,7 +212,7 @@ export function createStrategy(self: MemoFS, resolved: any): any {
 		recallStore: self.recallStore,
 		projectId: self.projectId,
 		tenantId: self.tenantId,
-		autoBootstrap: resolved.autoBootstrap,
+		autoBootstrap: resolved.autoBootstrap ?? false,
 		name: self.name,
 		version: self.version,
 	});

@@ -76,7 +76,7 @@ describe("createLazyLocalEmbedder", () => {
 			const embedder = createLazyLocalEmbedder({ adapterFactory: factory });
 
 			expect(typeof embedder.prewarm).toBe("function");
-			await expect(embedder.prewarm!()).resolves.toBeUndefined();
+			await expect(embedder.prewarm?.()).resolves.toBeUndefined();
 			expect(factory).toHaveBeenCalledTimes(1);
 		});
 	});

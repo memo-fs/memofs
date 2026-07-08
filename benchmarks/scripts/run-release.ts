@@ -12,11 +12,11 @@ import {
 	chunkText,
 	createDeterministicFallbackReranker,
 	createInMemoryRecallStore,
-	createNodeFsMemoryStore,
 	NOTES_MEMORY_PATH,
 	readCoreMemory,
 	writeCoreMemory,
 } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import {
 	createMemoryText,
 	createRecallDocuments,

@@ -3,7 +3,6 @@ import {
 	consolidateGraph,
 	type GraphEdge,
 	type GraphNode,
-	type JsonObject,
 } from "../../index";
 import { paginateArray } from "../helpers";
 import type {
@@ -16,7 +15,7 @@ import type {
 	GraphPathResult,
 	ListGraphInput,
 } from "../types";
-import { stableEdgeKey, toGraphEdgeInput, toGraphNodeInput } from "./helpers";
+import { stableEdgeKey } from "./helpers";
 import type { LocalStrategyContext } from "./types";
 
 export function edgeId(edge: GraphEdgeInput): string {

@@ -17,13 +17,13 @@ import {
 	buildRuntimeMemoryToolDefinition,
 	createAiSdkRuntimeFromTekmemo,
 } from "@memofs/adapter-ai-sdk";
-import { Tekmemo } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { streamText } from "ai";
 
 // In production, persist these per conversation (a Map keyed by conversationId,
-// a DB row, etc.). One Tekmemo instance = one .memofs/ project dir.
-function getMemo(_conversationId: string): Tekmemo {
-	return new Tekmemo({ rootDir: "./.memofs", projectId: "next-app" });
+// a DB row, etc.). One MemoFS instance = one .memofs/ project dir.
+function getMemo(_conversationId: string): MemoFS {
+	return new MemoFS({ rootDir: "./.memofs", projectId: "next-app" });
 }
 
 interface ChatRequestBody {

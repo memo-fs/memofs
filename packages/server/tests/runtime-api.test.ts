@@ -151,10 +151,14 @@ describe("runtime-API dispatch — slice 1", () => {
 				ranHandler: boolean;
 			}> = [];
 			const layer = {
-				acquire: async (projectId: string, fn: () => Promise<unknown>) => {
+				acquire: async <T>(
+					projectId: string,
+					fn: () => Promise<T>,
+				): Promise<T> => {
 					const ranHandler = true; // `fn` IS the handler; reaching here means the gate dropped.
-					await fn();
+					const result = await fn();
 					acquireCalls.push({ projectId, ranHandler });
+					return result;
 				},
 			};
 
@@ -178,7 +182,10 @@ describe("runtime-API dispatch — slice 1", () => {
 		it("acquire is scoped to params.projectId when the request carries one", async () => {
 			const seen: string[] = [];
 			const layer = {
-				acquire: async (projectId: string, fn: () => Promise<unknown>) => {
+				acquire: async <T>(
+					projectId: string,
+					fn: () => Promise<T>,
+				): Promise<T> => {
 					seen.push(projectId);
 					return fn();
 				},

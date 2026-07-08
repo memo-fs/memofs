@@ -61,7 +61,7 @@ function createFakeMetadataStore(): MetadataStore & {
 			try {
 				return await fn(this);
 			} finally {
-				resolveTx!();
+				resolveTx?.();
 			}
 		},
 	};

@@ -106,12 +106,12 @@ export function defineMetadataStoreContractTests(
 			}
 			try {
 				const order: string[] = [];
-				const tx1 = store.withTransaction(async (tx) => {
+				const tx1 = store.withTransaction(async (_tx) => {
 					order.push("start1");
 					await new Promise((resolve) => setTimeout(resolve, 50));
 					order.push("end1");
 				});
-				const tx2 = store.withTransaction(async (tx) => {
+				const tx2 = store.withTransaction(async (_tx) => {
 					order.push("start2");
 					order.push("end2");
 				});

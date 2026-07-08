@@ -1,5 +1,7 @@
 import { GraphNotFoundError } from "../errors/graph-errors";
 import type {
+	GraphNeighbor,
+	GraphNeighborQuery,
 	GraphPath,
 	GraphPathStep,
 	GraphShortestPathQuery,
@@ -19,7 +21,7 @@ interface PathQueueItem {
 
 export interface PathfindingStore {
 	getNode(id: string): Promise<StoredGraphNode | undefined>;
-	neighbors(query: any): Promise<any[]>;
+	neighbors(query: GraphNeighborQuery): Promise<GraphNeighbor[]>;
 }
 
 function edgeCost(edge: StoredGraphEdge): number {
@@ -51,7 +53,8 @@ export async function fewestHopsPath(
 	const visited = new Set<string>([from.id]);
 
 	while (queue.length > 0) {
-		const current = queue.shift()!;
+		const current = queue.shift();
+		if (!current) continue;
 		if (current.nodeId === to.id) {
 			return {
 				steps: current.steps,
@@ -120,7 +123,8 @@ export async function weightedShortestPath(
 				b.totalWeight - a.totalWeight ||
 				a.depth - b.depth,
 		);
-		const current = queue.shift()!;
+		const current = queue.shift();
+		if (!current) continue;
 		const knownCost = bestCostByNode.get(current.nodeId);
 		if (knownCost !== undefined && current.totalCost > knownCost) continue;
 		if (current.nodeId === to.id) {

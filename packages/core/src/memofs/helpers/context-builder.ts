@@ -26,7 +26,6 @@ import type {
 	MemoryContextResult,
 	RecallItem,
 } from "../types";
-import { decodeCursor } from "./utils";
 
 export const AGENT_CONTEXT_DIRECTIVE = `MemoFS is your long-term memory — treat it as the single source of truth for project identity, architecture, constraints, and decisions.
 

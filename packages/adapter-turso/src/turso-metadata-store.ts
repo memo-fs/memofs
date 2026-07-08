@@ -111,7 +111,7 @@ export function createTursoMetadataStore(
 
 		async withTransaction(fn) {
 			const current = pendingTx;
-			let resolveTx: () => void;
+			let resolveTx: (() => void) | undefined;
 			pendingTx = new Promise<void>((resolve) => {
 				resolveTx = resolve;
 			});
@@ -171,7 +171,7 @@ export function createTursoMetadataStore(
 					tx.close();
 				}
 			} finally {
-				resolveTx!();
+				resolveTx?.();
 			}
 		},
 	};
