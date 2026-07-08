@@ -86,15 +86,6 @@ export class OpenAIEmbedder implements MemoryEmbedder {
 	 * @param text - The text to generate an embedding for.
 	 * @param options - Optional embedding options (excluding texts).
 	 * @returns A promise that resolves to the embedding record.
-	 * @throws {OpenAIValidationError} If the text is invalid or model/dimensions are invalid.
-	 * @throws {OpenAIAPIError} If the API returns an error.
-	 */
-	/**
-	 * Generates an embedding for a single text string.
-	 *
-	 * @param text - The text to generate an embedding for.
-	 * @param options - Optional embedding options (excluding texts).
-	 * @returns A promise that resolves to the embedding record.
 	 * @throws {@link OpenAIValidationError} If the text is invalid or model/dimensions are invalid.
 	 * @throws {@link OpenAIAPIError} If the API returns an error.
 	 */
@@ -112,16 +103,6 @@ export class OpenAIEmbedder implements MemoryEmbedder {
 		return first;
 	}
 
-	/**
-	 * Generates embeddings for multiple text strings.
-	 *
-	 * @param input - The input containing texts and embedding options.
-	 * @returns A promise that resolves to the embeddings result with usage information.
-	 * @throws {OpenAIValidationError} If texts are invalid, model is invalid, or dimensions are invalid.
-	 * @throws {OpenAIValidationError} If base64 encoding format is requested (not supported).
-	 * @throws {OpenAIAPIError} If the API returns an error.
-	 * @throws {OpenAIResponseError} If the API response is invalid.
-	 */
 	/**
 	 * Generates embeddings for multiple text strings.
 	 *

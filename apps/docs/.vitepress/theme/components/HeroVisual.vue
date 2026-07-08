@@ -186,18 +186,19 @@ const handleMouseLeave = () => {
         <circle cx="250" cy="250" r="50" fill="none" stroke="url(#grad-core-mem)" stroke-width="2.5" class="core-center-disc" />
 
         <!-- Brand Logo Embedded inside the Core Node -->
-        <!-- Translating the 100x100 logo so its center (50, 50) sits at (250, 250) -->
+        <!-- Memory Stack logo: 3 isometric diamond layers + AI node accents -->
         <g transform="translate(212.5, 212.5) scale(0.75)">
-          <!-- Brackets (TekBreed lineage) -->
-          <polyline points="25,25 5,50 25,75" stroke="#4fb2f3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-left" />
-          <polyline points="75,25 95,50 75,75" stroke="#5bd473" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" class="bracket-right" />
-
-          <!-- Isometric layered stack (the MemoFS mark) -->
-          <g stroke="url(#grad-mem-layers)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
-            <polygon points="50,28 66,37 50,46 34,37" class="mem-layer ml1" />
-            <polyline points="34,45 50,54 66,45" class="mem-layer ml2" />
-            <polyline points="34,53 50,62 66,53" class="mem-layer ml3" />
-          </g>
+          <!-- Bottom layer (green) -->
+          <polygon points="50,82 12,62 50,45 88,62" fill="#5bd473" class="mem-layer ml3" />
+          <!-- Middle layer (teal) -->
+          <polygon points="50,63 12,43 50,26 88,43" fill="#3ec4d8" class="mem-layer ml2" />
+          <!-- Top layer (blue) -->
+          <polygon points="50,45 12,25 50,8 88,25" fill="#4fb2f3" class="mem-layer ml1" />
+          <!-- AI node accent cluster -->
+          <circle cx="50" cy="23" r="3.5" fill="#ffffff" />
+          <circle cx="35" cy="30" r="1.5" fill="#ffffff" opacity="0.6" />
+          <circle cx="65" cy="30" r="1.5" fill="#ffffff" opacity="0.6" />
+          <circle cx="50" cy="37" r="1.5" fill="#ffffff" opacity="0.6" />
         </g>
       </g>
 
@@ -417,31 +418,13 @@ const handleMouseLeave = () => {
 	to { transform: rotate(360deg); }
 }
 
-/* Embedded logo details */
-.bracket-left {
-	transition: transform 0.3s ease;
-	transform-origin: 15px 50px;
-}
-.bracket-right {
-	transition: transform 0.3s ease;
-	transform-origin: 85px 50px;
-}
-
-.core-node:hover .bracket-left {
-	transform: translateX(-3px);
-}
-.core-node:hover .bracket-right {
-	transform: translateX(3px);
-}
-
+/* Embedded logo details — memory stack layers */
 .mem-layer {
-	opacity: 0.9;
-	transition: stroke-width 0.3s, opacity 0.3s;
+	transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 .core-node:hover .mem-layer {
-	stroke-width: 8.5px;
-	opacity: 1;
+	filter: brightness(1.15);
 }
 
 /* Layered-stack pulse — each layer breathes in sequence */

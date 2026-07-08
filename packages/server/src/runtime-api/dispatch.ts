@@ -35,7 +35,7 @@ import {
 	success,
 	validateJsonRpcRequest,
 } from "@memofs/json-rpc";
-import { GATED_METHODS, RUNTIME_METHOD } from "../protocol/methods";
+import { GATED_METHODS } from "../protocol/methods";
 import { RUNTIME_HANDLERS } from "./handlers";
 
 /**
@@ -216,7 +216,6 @@ async function dispatchSingle(
 				id,
 				errorCodeFor(error),
 				messageFor(error),
-				cleanErrorData(error),
 			);
 		}
 	}
@@ -249,14 +248,3 @@ function errorCodeFor(error: unknown): number {
 function messageFor(error: unknown): string {
 	return error instanceof TypeError ? error.message : "Internal runtime error.";
 }
-
-/**
- * Optional structured `data` for a failure envelope. Currently unused (the
- * gate carries its own `data`), but kept for the slice-3 lock-timeout path
- * which will surface `retryAfterMs` here.
- */
-function cleanErrorData(_error: unknown): JsonValue | undefined {
-	return undefined;
-}
-
-export { RUNTIME_METHOD };

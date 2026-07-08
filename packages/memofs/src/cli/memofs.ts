@@ -44,9 +44,6 @@ export function createMemoFSFromCli(options: CliMemoFSOptions = {}): MemoFS {
 		...(options.runtime !== undefined
 			? { mode: options.runtime as MemoFsConfig["mode"] }
 			: {}),
-		...(options.runtime !== undefined
-			? { mode: options.runtime as MemoFsConfig["mode"] }
-			: {}),
 		...(options.projectId !== undefined
 			? { projectId: options.projectId }
 			: {}),

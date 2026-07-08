@@ -642,3 +642,67 @@
 .blog-index-page .VPDoc:not(.has-sidebar) .content {
   max-width: 1152px;
 }
+
+/* ===================================================================
+   Announcement bar — mobile responsive
+   =================================================================== */
+@media (max-width: 640px) {
+  .alpha-announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    min-height: 0;
+    padding: 5px 12px;
+    gap: 6px;
+    font-size: 12px;
+    z-index: 100;
+  }
+
+  .alpha-announcement-bar .alpha-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+
+  .alpha-announcement-bar .alpha-description {
+    display: none;
+  }
+
+  .alpha-announcement-bar .alpha-text {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .alpha-announcement-bar .alpha-link {
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  :root {
+    --vp-announcement-height: 30px;
+    --vp-layout-top-height: 30px;
+  }
+
+  .VPNav {
+    top: 30px !important;
+  }
+
+  .VPSidebar {
+    top: 30px !important;
+  }
+
+  .VPLocalNav {
+    top: 30px !important;
+  }
+
+  .VPContent {
+    margin-top: 30px !important;
+  }
+
+  .has-scrolled {
+    --vp-layout-top-height: 0px;
+  }
+}

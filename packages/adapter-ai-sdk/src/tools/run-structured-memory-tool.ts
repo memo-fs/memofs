@@ -19,13 +19,6 @@ import type { MemoryToolExecutionContext } from "../types/ai-sdk-memory";
  * @param input - The validated tool input.
  * @returns The result of executing the memory command.
  */
-/**
- * Runs a structured memory tool command.
- *
- * @param context - The execution context containing the memory store.
- * @param input - The validated tool input.
- * @returns The result of executing the memory command.
- */
 export async function runStructuredMemoryTool(
 	context: MemoryToolExecutionContext,
 	input: MemoryToolInput,
@@ -34,12 +27,6 @@ export async function runStructuredMemoryTool(
 	return runMemoryCommand(context.store, command);
 }
 
-/**
- * Maps a MemoryToolInput to a MemoryCommand for execution.
- *
- * @param input - The tool input to map.
- * @returns The corresponding MemoryCommand.
- */
 /**
  * Maps a MemoryToolInput to a MemoryCommand for execution.
  *

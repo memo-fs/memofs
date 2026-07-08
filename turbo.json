@@ -24,19 +24,12 @@
 			"dependsOn": ["^build"],
 			"outputs": []
 		},
-		"//#format-and-lint": {
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
-		},
+		"//#format-and-lint": {},
 		"//#format-and-lint:fix": {
-			"cache": false,
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
+			"cache": false
 		},
 		"//#format-and-lint:fix:unsafe": {
-			"cache": false,
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
+			"cache": false
 		},
 		"test:run": {
 			"dependsOn": ["^build"],

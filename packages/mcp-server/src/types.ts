@@ -4,7 +4,7 @@
  * Memory/recall/graph/sync types are imported from @memofs/core to avoid duplication.
  * Only MCP-protocol-specific types (tool results, definitions, options) are defined here.
  *
- * The runtime surface mirrors the v1.0.0-alpha.0 contract: every operation runs in the
+ * The runtime surface mirrors the v1.0.0-beta.1 contract: every operation runs in the
  * local engine against the canonical `.memofs/` files, and the cloud is a dumb file
  * replica exposed only through `sync.{push,pull,status}` (+ `health`/`readiness`). The
  * cloud-engine surface (context compose, extraction, evals, benchmarks, exports, hosted
@@ -13,6 +13,7 @@
  *
  * @module types
  */
+import type { Page } from "@memofs/core";
 
 export type {
 	AgentSessionCompleteInput,
@@ -31,6 +32,8 @@ export type {
 	JsonPrimitive,
 	JsonValue,
 	ListGraphInput,
+	MemoFSHealthResult,
+	MemoFSRuntimeMode,
 	MemoryContextInput,
 	MemoryContextResult,
 	MemoryDocumentResult,
@@ -53,8 +56,6 @@ export type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	MemoFSHealthResult,
-	MemoFSRuntimeMode,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -76,6 +77,7 @@ import type {
 	GraphPathResult,
 	JsonObject,
 	ListGraphInput,
+	MemoFSHealthResult,
 	MemoryContextInput,
 	MemoryContextResult,
 	MemoryDocumentResult,
@@ -92,7 +94,6 @@ import type {
 	SyncPushResult,
 	SyncStatusInput,
 	SyncStatusResult,
-	MemoFSHealthResult,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,
@@ -302,5 +303,3 @@ export interface MemoFSMcpRuntime {
 		signal?: AbortSignal,
 	): Promise<ConsolidateMemoryResult>;
 }
-
-import type { Page } from "@memofs/core";

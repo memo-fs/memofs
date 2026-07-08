@@ -66,8 +66,8 @@ const modes = [
       <div class="alpha-announcement-bar">
         <span class="alpha-badge">Cloud</span>
         <span class="alpha-text">
-          The core runtime is open source and free. MemoFS Cloud (hosted sync, managed MCP, team features) is in early access.
-          <a href="https://memo.tekbreed.com" class="alpha-link" target="_blank" rel="noopener noreferrer">Join the waitlist →</a>
+          <span class="alpha-description">The core runtime is open source and free. MemoFS Cloud (hosted sync, managed MCP, team features) is in early access.</span>
+          <a href="https://memofs.dev" class="alpha-link" target="_blank" rel="noopener noreferrer">Join the waitlist →</a>
         </span>
       </div>
     </template>
@@ -446,11 +446,11 @@ const modes = [
             </div>
             <div class="cta-buttons">
               <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
-              <a href="https://memo.tekbreed.com" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
+              <a href="https://memofs.dev" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
                 Explore MemoFS Cloud →
               </a>
             </div>
-            <a href="https://github.com/tekbreed/memofs" class="bottom-cta-link">
+            <a href="https://github.com/christophersesugh/memofs" class="bottom-cta-link">
               View on GitHub
             </a>
           </div>

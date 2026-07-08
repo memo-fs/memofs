@@ -18,20 +18,17 @@ import { registerAllCommands } from "./runner/register";
 import { parseNonNegativeInteger, parsePositiveInteger } from "./utils/numbers";
 
 /**
- * Helper constant mapping positive integer parser.
+ * Commander-compatible option parser for positive integers.
+ * Commander's `option()` generic overload matches `(value: string, previous: T) => T`.
+ * These wrappers satisfy that signature while delegating to the core parsers.
  */
-const parsePositiveOption = parsePositiveInteger as unknown as (
-	value: string,
-	previous: string | undefined,
-) => string;
+function parsePositiveOption(value: string, previous: number): number {
+	return parsePositiveInteger(value);
+}
 
-/**
- * Helper constant mapping non-negative integer parser.
- */
-const parseNonNegativeOption = parseNonNegativeInteger as unknown as (
-	value: string,
-	previous: string | undefined,
-) => string;
+function parseNonNegativeOption(value: string, previous: number): number {
+	return parseNonNegativeInteger(value);
+}
 
 /**
  * Input configuration variables for invoking the CLI runner programmatically.

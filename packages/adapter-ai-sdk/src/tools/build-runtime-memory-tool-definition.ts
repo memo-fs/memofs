@@ -175,7 +175,6 @@ function assertSafeContent(
 function toJsonObject(value: unknown): JsonObject | undefined {
 	if (value === undefined) return undefined;
 	if (value && typeof value === "object" && !Array.isArray(value)) {
-		JSON.stringify(value);
 		return value as JsonObject;
 	}
 	throw new Error("metadata must be a JSON object when provided.");

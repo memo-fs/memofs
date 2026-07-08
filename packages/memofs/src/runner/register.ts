@@ -39,14 +39,20 @@ function collect(value: string, previous: string[]): string[] {
 }
 
 export interface CLIContext {
-	globals: () => Promise<any>;
+	globals: () => Promise<{
+		root: string;
+		json: boolean;
+		verbose: boolean;
+		quiet: boolean;
+		memo: import("@memofs/core").MemoFS;
+	}>;
 	setExitCode: (code: number) => void;
 	setCurrentCommand: (cmd: string) => void;
-	output: any;
+	output: import("../output/output").CliOutput;
 	stdinContent?: string;
 	cwd?: string;
-	parsePositiveOption: any;
-	parseNonNegativeOption: any;
+	parsePositiveOption: (value: string, previous: number) => number;
+	parseNonNegativeOption: (value: string, previous: number) => number;
 }
 
 export function registerAllCommands(program: Command, ctx: CLIContext) {
@@ -105,7 +111,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 			"--max-chars <n>",
 			"maximum output characters",
 			parsePositiveOption,
-			12000 as unknown as string,
+			12000,
 		)
 		.option("--include-events", "include recent memory events", false)
 		.option("--include-chunks", "include recent chunk records", false)
@@ -195,7 +201,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 			"-l, --limit <n>",
 			"limit number of events",
 			parseNonNegativeOption,
-			0 as unknown as string,
+			0,
 		)
 		.option("-s, --strict", "strict protocol validation", false)
 		.action(async (options) => {
@@ -219,7 +225,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 			"-l, --limit <n>",
 			"limit number of chunks",
 			parseNonNegativeOption,
-			0 as unknown as string,
+			0,
 		)
 		.option("-s, --strict", "strict protocol validation", false)
 		.action(async (options) => {

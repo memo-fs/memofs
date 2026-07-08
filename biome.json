@@ -14,10 +14,9 @@
 			"!**/worker-configuration.d.ts",
 			"!skills-lock.json",
 			"!**/components/ui/**",
-			"!**/Initial design/**",
 			"!**/drizzle/meta/**",
 			"!**/./agents/**",
-			"!**/./tekmemo/**"
+			"!**/./memofs/**"
 		]
 	},
 	"formatter": {
