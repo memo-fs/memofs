@@ -30,6 +30,8 @@ const DISPOSABLE_DOMAINS = new Set([
 	"yopmail.com",
 	"getnada.com",
 	"dispostable.com",
+	"dropoffs.org",
+	"dropon.com",
 	"sharklasers.com",
 	"maildrop.cc",
 ]);
@@ -77,10 +79,8 @@ export function emailDomain(email: string): string | null {
 export function emailIssueMessage(issue: EmailIssue): string {
 	switch (issue.kind) {
 		case "invalid":
-			return "Enter a valid email address.";
 		case "disposable":
-			return `${issue.domain} is a disposable email provider. Use a real address — magic links can't reach temporary inboxes.`;
 		case "no-mx":
-			return `${issue.domain} can't receive email (no mail server found). Check the address.`;
+			return "Invalid email address";
 	}
 }

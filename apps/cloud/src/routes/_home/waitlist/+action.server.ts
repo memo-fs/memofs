@@ -1,8 +1,8 @@
-import { StatusCodes } from "http-status-codes";
-import { data } from "react-router";
+import { parseWithZod } from "@conform-to/zod/v4";
 import { sendWaitlistEmail, subscribeUser } from "~/.server/email/resend";
 import { hasMxRecord } from "~/.server/mx-check";
 import type { Route } from "./+types/index";
+import { WaitlistSchema } from "./+utils";
 
 /**
  * Waitlist sign-up action.
@@ -13,27 +13,22 @@ import type { Route } from "./+types/index";
  */
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData();
-	const email = String(formData.get("email") ?? "")
-		.trim()
-		.toLowerCase();
+	const submission = parseWithZod(formData, { schema: WaitlistSchema });
 
-	if (!email?.includes("@")) {
-		return data(
-			{ ok: false as const, error: "Please enter a valid email address." },
-			{ status: StatusCodes.BAD_REQUEST },
-		);
+	if (submission.status !== "success") {
+		return submission.reply();
 	}
 
+	const { email } = submission.value;
+
+	// MX check — reject domains that can't receive mail.
 	const domain = email.split("@")[1];
 	if (domain && !(await hasMxRecord(domain))) {
-		return data(
-			{
-				ok: false as const,
-				error:
-					"That email domain doesn't appear to be reachable. Please use a different address.",
+		return submission.reply({
+			fieldErrors: {
+				email: ["That email domain doesn't appear to be reachable. Please use a different address."],
 			},
-			{ status: StatusCodes.BAD_REQUEST },
-		);
+		});
 	}
 
 	try {
@@ -46,5 +41,5 @@ export async function action({ request }: Route.ActionArgs) {
 
 	await sendWaitlistEmail(email);
 
-	return { ok: true as const, email };
+	return { status: "success", email };
 }

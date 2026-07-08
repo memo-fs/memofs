@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router";
-import { safeRelativeRedirect } from "~/.server/redirect";
+import { safeRelativeRedirect } from "~/lib/redirect";
 
 /**
  * Get the `redirect` or `next` query param as a validated same-origin path.

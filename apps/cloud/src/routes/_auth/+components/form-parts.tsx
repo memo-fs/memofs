@@ -8,16 +8,23 @@ import { Label } from "~/components/ui/label";
  * carry state — they're pure presentational pieces fed by the parent form.
  */
 
-/** Inline error banner. Renders nothing when `message` is empty. */
-export function FormError({ message }: { message?: string }) {
-	if (!message) return null;
+/**
+ * Inline error banner. Accepts a single string or an array of strings
+ * (Conform field errors are `string[]`). Renders nothing when the array is
+ * empty.
+ */
+export function FormError({ errors }: { errors: string | string[] }) {
+	const messages = Array.isArray(errors) ? errors : [errors];
+	if (messages.length === 0) return null;
 	return (
 		<div
 			role="alert"
 			aria-live="assertive"
 			className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive"
 		>
-			{message}
+			{messages.map((msg) => (
+				<p key={msg}>{msg}</p>
+			))}
 		</div>
 	);
 }
