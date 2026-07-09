@@ -11,8 +11,10 @@ import fs from "node:fs/promises";
  * @public
  */
 
-import type { MemoryPath, MemoryStore } from "@memofs/core";
-import { MEMOFS_DIR, MemoryNotFoundError } from "@memofs/core";
+import type { MemoryPath } from "../core/constants/memory-paths";
+import type { MemoryStore } from "../core/types/memory-store";
+import { MEMOFS_DIR } from "../core/constants/memory-paths";
+import { MemoryNotFoundError } from "../core/errors/errors";
 import { PathLock } from "@repo/utils";
 import { assertString } from "../core/validation/assertions";
 import { isNotFoundError, wrapFsError } from "./errors/fs-memory-store-error";
@@ -83,7 +85,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 	 * Acquires the cross-process advisory lock (idempotent) before a mutating op.
 	 *
 	 * @remarks
-	 * Enforces the local single-process contract (Q28). Reads never acquire;
+	 * Enforces the local single-process contract. Reads never acquire;
 	 * only write/append/delete do. Throws {@link LockHeldError} if another live
 	 * process holds the lock. No-op when the store was created with `lock: false`.
 	 *

@@ -5,8 +5,7 @@
  * file-manifest sync payloads (`push`, `push/complete`, `pull`, `status`).
  * Every engine validator (recall, memory, graph, extraction, providers,
  * candidates, conflicts, agent sessions) has been removed — those operations
- * run locally and never hit the cloud. See
- * `docs/architecture/cloud-sync-and-refactor.md` §6.5–6.6.
+ * run locally and never hit the cloud.
  *
  * @public
  */
@@ -16,7 +15,6 @@ import {
 } from "./errors";
 import type {
 	FileManifest,
-	JsonObject,
 	SyncCursor,
 	SyncPullInput,
 	SyncPushCompleteInput,
@@ -35,41 +33,6 @@ export function assertNonEmptyString(
 		throw new MemoFsCloudValidationError({
 			code: "invalid_input",
 			message: `${fieldName} must be a non-empty string.`,
-		});
-	}
-}
-
-export function assertOptionalPositiveInteger(
-	value: unknown,
-	fieldName: string,
-): void {
-	if (value === undefined || value === null) return;
-	if (!Number.isInteger(value) || (value as number) <= 0) {
-		throw new MemoFsCloudValidationError({
-			code: "invalid_input",
-			message: `${fieldName} must be a positive integer.`,
-		});
-	}
-}
-
-export function assertOptionalJsonObject(
-	value: unknown,
-	fieldName: string,
-): asserts value is JsonObject | undefined {
-	if (value === undefined) return;
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		throw new MemoFsCloudValidationError({
-			code: "invalid_input",
-			message: `${fieldName} must be a JSON object.`,
-		});
-	}
-	try {
-		JSON.stringify(value);
-	} catch (cause) {
-		throw new MemoFsCloudValidationError({
-			code: "invalid_input",
-			message: `${fieldName} must be JSON serializable.`,
-			cause,
 		});
 	}
 }
@@ -193,13 +156,6 @@ export function validateSyncPushCompleteInput(
 export function validateSyncPullInput(input: SyncPullInput): SyncPullInput {
 	assertOptionalCursor(input.since, "since");
 	assertOptionalFileManifest(input.manifest, "manifest");
-	return input;
-}
-
-/** Validates a `status` request. The body carries only the project scope. */
-export function validateSyncStatusInput(
-	input: SyncStatusInput,
-): SyncStatusInput {
 	return input;
 }
 

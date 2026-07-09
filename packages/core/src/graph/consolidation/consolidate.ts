@@ -1,11 +1,11 @@
 /**
- * Memory consolidation — the differentiator of v1 intelligence ( / Q5).
+ * Memory consolidation — the differentiator of v1 intelligence.
  *
  * @remarks
  * Consolidation is a local, deterministic pass over the graph that makes the
  * memory system *feel* smart: it quietly merges duplicate entities and retires
  * facts that have been superseded, **without ever deleting** (the audit trail
- * is preserved — facts are marked `deprecated`, never removed, exactly as Q3
+ * is preserved — facts are marked `deprecated`, never removed, exactly as
  * resolved for connector re-ingestion conflicts).
  *
  * The pass is built entirely on primitives that already exist:
@@ -28,7 +28,7 @@
  * a contradiction `{ from: A, to: B }`), B is the *retired* entity. Every
  * active edge that *references* B (on either side, except the superseding
  * `supersedes` edge itself) is marked `deprecated` with a `validUntil` — so the
- * "we used JWT → we switched to OAuth" story from Q3/Q5 retires the JWT fact
+ * "we used JWT → we switched to OAuth" story retires the JWT fact
  * while keeping it auditable. This is node-level retirement, which is what real
  * extractor output demands: the existing {@link invalidateSupersededEdges}
  * matches `edge.id` against `edge.to`, but extractor `to` values are *node*
@@ -41,7 +41,6 @@
  * which rewrites edges onto the surviving node and records the absorbed label
  * as an alias (see `in-memory-graph-store.ts`).
  *
- * @see — v1 intelligence = LLM-based extraction + memory consolidation.
  * @see {@link invalidateSupersededEdges} — the invalidation building block.
  * @see {@link GraphStore.mergeNodes} — the merge building block.
  *
@@ -348,7 +347,7 @@ function findRetirements(
 	supersededNodeIds: string[];
 } {
 	// First, the legacy primitive: edges whose `id` matches a `supersedes.to`.
-	// Kept for parity with the documented seam ( references it by name).
+	// Kept for parity with the documented seam (references it by name).
 	const invalidated = invalidateSupersededEdges({
 		edges,
 		supersedingEdgeType: supersedingType,

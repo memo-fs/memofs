@@ -8,6 +8,8 @@
  * @internal
  */
 
+import { cloneJson as cloneJsonInternal } from "../../core/internal/clone";
+import { isForbiddenKey } from "../../core/internal/forbidden-keys";
 import { RecallValidationError } from "../errors/errors";
 import type { JsonValue } from "../types";
 
@@ -109,8 +111,7 @@ export function assertJsonValue(
  * @public
  */
 export function cloneJsonValue<T extends JsonValue | undefined>(value: T): T {
-	if (value === undefined) return value;
-	return JSON.parse(JSON.stringify(value)) as T;
+	return cloneJsonInternal(value);
 }
 
 /**
@@ -126,7 +127,7 @@ export function cloneJsonValue<T extends JsonValue | undefined>(value: T): T {
  * @internal
  */
 export function assertSafeObjectKey(key: string, name = "key"): void {
-	if (key === "__proto__" || key === "constructor" || key === "prototype") {
+	if (isForbiddenKey(key)) {
 		throw new RecallValidationError(`${name} is not allowed.`, { key });
 	}
 }
@@ -145,6 +146,5 @@ export function assertSafeObjectKey(key: string, name = "key"): void {
 export function cloneRecord<T extends Record<string, unknown> | undefined>(
 	value: T,
 ): T {
-	if (value === undefined) return value;
-	return JSON.parse(JSON.stringify(value)) as T;
+	return cloneJsonInternal(value);
 }

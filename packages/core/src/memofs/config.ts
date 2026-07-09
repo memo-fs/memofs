@@ -60,9 +60,9 @@ export interface MemoFsConfig {
 	reranker?: Reranker;
 	/**
 	 * Optional LLM transport (the 4th contract member) powering the
-	 * LLM-enhanced intelligence tier — the retrieval strategist (Q23),
-	 * writer-critic consolidation (Q25a), staleness re-verification (Q24 v1.x),
-	 * and semantic consolidation (Q25a). When omitted, every feature runs its
+	 * LLM-enhanced intelligence tier — the retrieval strategist,
+	 * writer-critic consolidation, staleness re-verification, and semantic
+	 * consolidation. When omitted, every feature runs its
 	 * deterministic default (regex rewrite, the deterministic `consolidateGraph`,
 	 * etc.) — the absence of an `LlmClient` *is* the deterministic default, not a
 	 * parallel built-in impl. Inject a provider client (OpenAI today,
@@ -190,9 +190,9 @@ export function resolveMemoFsConfig(input: {
 			? rawRootDir
 			: `${cwd.replace(/\/$/, "")}/${rawRootDir}`;
 
-	// Config-file resolution is the caller's concern (Node-only) — see
-	// {@link readMemoFsConfigFile}. Core never touches the filesystem.
-	const fileConfig = config.fileConfig ?? readMemoFsConfigFile(rootDir);
+	// Config-file resolution is the caller's concern (Node-only).
+	// Callers pre-parse the file and pass it as `config.fileConfig`.
+	const fileConfig = config.fileConfig ?? {};
 
 	const mode = resolveMode(config.mode, env, fileConfig);
 	const projectId =
@@ -362,29 +362,6 @@ function resolveCloudOptions(
 			: {}),
 		...(configCloud?.retry !== undefined ? { retry: configCloud.retry } : {}),
 	};
-}
-
-/**
- * Reads `.memofs/config.json` if present (best-effort).
- *
- * @remarks
- * This used to read the file synchronously here via `node:fs`, but that eager
- * import pulled `node:fs` into the Worker bundle ( — the runtime
- * Worker cannot evaluate it). Config-file resolution is now the **caller's**
- * responsibility: a Node consumer (the CLI / MCP factory) reads the file and
- * passes its values as constructor args; the Worker path injects a store and
- * never reads the filesystem. This keeps `resolveMemoFsConfig` — and the
- * whole root barrel — free of any `node:fs` import edge.
- *
- * The hook is `config.fileConfig`: callers pre-parse the file and pass it
- * through, so the resolution priority chain (constructor > env > file >
- * defaults) is preserved without core touching the filesystem.
- */
-function readMemoFsConfigFile(rootDir: string): MemoFsConfigFile {
-	// No-op: the file read moved to Node-only entry points (CLI / MCP). The
-	// `rootDir` is accepted for signature stability but never read here.
-	void rootDir;
-	return {};
 }
 
 export function extractConfigFile(

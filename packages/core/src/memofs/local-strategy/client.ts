@@ -1,9 +1,9 @@
 import type { MemoryStore } from "../../core/types/memory-store";
+import type { AgentfsLikeClient } from "../../agentfs/client/agentfs-like";
 import type {
-	AgentfsLikeClient,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
-} from "../../index";
+} from "../types";
 import type { FileSyncLayer } from "../sync/file-replication";
 import { loadNodeFs, loadNodePath, type NodePath } from "./helpers";
 

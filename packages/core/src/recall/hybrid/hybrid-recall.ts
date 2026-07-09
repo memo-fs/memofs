@@ -22,6 +22,7 @@
  * @public
  */
 
+import type { JsonObject } from "../../core/types/json";
 import type { RecallItem } from "../../memofs/types";
 import type { Reranker } from "../../rerank/types";
 
@@ -36,7 +37,7 @@ export interface HybridCandidate {
 	/** Normalized BM25 score, or 0 when absent. */
 	lexicalScore: number;
 	/** Optional metadata (may carry createdAt, confidence, etc.). */
-	metadata?: Record<string, unknown>;
+	metadata?: JsonObject;
 }
 
 export interface HybridMergeOptions {
@@ -168,7 +169,7 @@ export async function mergeHybridCandidates(
  * @internal
  */
 export function recencyBoost(
-	metadata: Record<string, unknown> | undefined,
+	metadata: JsonObject | undefined,
 	now: Date,
 	halfLifeDays: number,
 ): number {
@@ -194,7 +195,7 @@ export function recencyBoost(
  * @internal
  */
 export function readConfidence(
-	metadata: Record<string, unknown> | undefined,
+	metadata: JsonObject | undefined,
 ): number {
 	const raw = metadata?.confidence;
 	if (typeof raw === "number" && Number.isFinite(raw)) {

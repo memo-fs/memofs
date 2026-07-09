@@ -248,15 +248,3 @@ export interface InMemoryRecallStoreOptions {
 	/** Optional function to generate ISO 8601 timestamps (defaults to new Date().toISOString()) */
 	now?: () => string;
 }
-
-/**
- * Options for running recall store contract tests.
- *
- * @internal
- */
-export interface RecallStoreContractOptions {
-	/** Namespace to use for contract tests */
-	namespace?: string;
-	/** Expected embedding dimension for contract tests */
-	dimension?: number;
-}

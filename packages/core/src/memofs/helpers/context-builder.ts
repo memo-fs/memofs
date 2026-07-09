@@ -4,8 +4,6 @@ import {
 	COMPACT_BUDGET,
 	type ContextCache,
 	type ContextCacheEntry,
-	decodeExpansionCursor,
-	expandAffordanceLine,
 } from "../progressive";
 import {
 	allocateBudget,
@@ -20,19 +18,20 @@ import {
 	SECTION_WEIGHTS,
 } from "../strategist";
 import type {
-	MemoryContextExpandableSection,
-	MemoryContextExpansion,
 	MemoryContextInput,
 	MemoryContextResult,
 	RecallItem,
 } from "../types";
+import {
+	addAffordances,
+	AGENT_CONTEXT_DIRECTIVE,
+	renderEntities,
+	renderRecall,
+	renderRecent,
+} from "./renderers";
+import { expandContext } from "./expand-context";
 
-export const AGENT_CONTEXT_DIRECTIVE = `MemoFS is your long-term memory — treat it as the single source of truth for project identity, architecture, constraints, and decisions.
-
-- Adhere to memory: follow the constraints, decisions, and preferences below. Stored facts override assumptions and guesses.
-- Recall before answering: when a fact, convention, or prior decision might exist, call memofs.recall instead of re-deriving it.
-- Persist discoveries: when you learn a durable decision, constraint, preference, or architectural fact, call memofs.remember (classify with kind, set confidence) without waiting to be asked.
-- Never store secrets, credentials, or environment values. Respect read-only intent where indicated.`;
+export { AGENT_CONTEXT_DIRECTIVE };
 
 export async function buildContext(
 	operations: {
@@ -91,7 +90,7 @@ interface AssembleMode {
 	cache?: ContextCache;
 }
 
-async function assembleContext(
+export async function assembleContext(
 	operations: BuildContextOperations,
 	input: MemoryContextInput,
 	warnings: string[],
@@ -319,191 +318,4 @@ async function assembleContext(
 	};
 }
 
-async function expandContext(
-	operations: BuildContextOperations,
-	input: MemoryContextInput,
-	warnings: string[],
-	signal: AbortSignal | undefined,
-): Promise<MemoryContextResult> {
-	const decoded =
-		input.expand !== undefined
-			? decodeExpansionCursor(input.expand)
-			: undefined;
-	const cache = operations.cache;
-	const section = input.section as MemoryContextExpandableSection | undefined;
-
-	if (decoded === undefined || cache === undefined || section === undefined) {
-		warnings.push(
-			"Expansion cursor was invalid or expired; returning a fresh briefing.",
-		);
-		return assembleContext(operations, input, warnings, signal, {
-			mode: "compact",
-			cache: operations.cache,
-		});
-	}
-
-	const entry = cache.get(decoded.key);
-	if (entry === undefined) {
-		warnings.push(
-			"Expansion cursor was invalid or expired; returning a fresh briefing.",
-		);
-		return assembleContext(operations, input, warnings, signal, {
-			mode: "compact",
-			cache: operations.cache,
-		});
-	}
-
-	const nonNegotiable: BudgetSection[] = [
-		{
-			type: "directive",
-			title: "How to use MemoFS context",
-			content: AGENT_CONTEXT_DIRECTIVE,
-			nonNegotiable: true,
-		},
-	];
-	const negotiable: BudgetSection[] = [];
-	let expandedRecallItems: RecallItem[] = [];
-
-	if (section === "recall") {
-		expandedRecallItems = entry.recallItems;
-		if (expandedRecallItems.length > 0) {
-			negotiable.push({
-				type: "recall",
-				title: "Relevant Recall (expanded)",
-				content: renderRecall(expandedRecallItems),
-				weight: SECTION_WEIGHTS.recall,
-			});
-		}
-	} else if (section === "recent") {
-		const recent = entry.recentItems;
-		if (recent.length > 0) {
-			negotiable.push({
-				type: "recent",
-				title: "Recent Memory Events (expanded)",
-				content: renderRecent(recent),
-				weight: SECTION_WEIGHTS.recent,
-			});
-		}
-	} else if (section === "notes") {
-		if (operations.readNotesMemory) {
-			try {
-				const notes = await operations.readNotesMemory(signal);
-				if (notes.content.trim()) {
-					negotiable.push({
-						type: "notes",
-						title: "Notes Memory (expanded)",
-						content: notes.content.trim(),
-						weight: SECTION_WEIGHTS.notes,
-					});
-				}
-				if (notes.warnings?.length) warnings.push(...notes.warnings);
-			} catch (error) {
-				warnings.push(
-					`Could not read notes memory: ${error instanceof Error ? error.message : String(error)}`,
-				);
-			}
-		}
-	} else if (section === "entities") {
-		if (operations.listGraphNodes && entry.hasEntities) {
-			try {
-				const nodes = await operations.listGraphNodes(signal);
-				const resolved = resolveEntities(nodes, entry.expandedTerms);
-				if (resolved.length > 0) {
-					let enriched: EntityState[] = resolved.map((entity) => ({
-						nodeId: entity.nodeId,
-						label: entity.label,
-						type: entity.type,
-						currentState: "",
-						summary: entity.summary,
-						activeEdgeCount: 0,
-					}));
-					if (operations.listGraphEdges) {
-						const edges = await operations.listGraphEdges(signal);
-						const nodeById = new Map<string, ResolveGraphNode>(
-							nodes.map((node) => [node.id, node]),
-						);
-						enriched = resolveEntityState(resolved, edges, nodeById);
-					}
-					negotiable.push({
-						type: "entities",
-						title: "Entities (expanded)",
-						content: renderEntities(enriched),
-						weight: SECTION_WEIGHTS.entities,
-					});
-				}
-			} catch (error) {
-				warnings.push(
-					`Could not resolve entities: ${error instanceof Error ? error.message : String(error)}`,
-				);
-			}
-		}
-	}
-
-	const budget = allocateBudget({
-		sections: [...nonNegotiable, ...negotiable],
-		maxBytes: input.maxBytes ?? 64_000,
-	});
-
-	return {
-		text: budget.text,
-		sections: budget.sections,
-		...(expandedRecallItems.length > 0 ? { items: expandedRecallItems } : {}),
-		...(warnings.length === 0 ? {} : { warnings }),
-	};
-}
-
-function renderEntities(enriched: EntityState[]): string {
-	return enriched
-		.map((entity, index) => {
-			const head = `${index + 1}. ${entity.label} (${entity.type})`;
-			const body = entity.currentState
-				? `currently: ${entity.currentState}`
-				: entity.summary;
-			const tail = body ? ` — ${body}` : "";
-			const provenance = entity.provenance
-				? `\n ↳ source: ${entity.provenance}`
-				: "";
-			return `${head}${tail}${provenance}`;
-		})
-		.join("\n");
-}
-
-function renderRecall(items: RecallItem[]): string {
-	return items
-		.map(
-			(item, index) =>
-				`${index + 1}. ${item.text}${item.score === undefined ? "" : `\n score: ${item.score}`}`,
-		)
-		.join("\n\n");
-}
-
-function renderRecent(
-	items: Array<{
-		id: string;
-		type?: string;
-		timestamp?: string;
-		summary?: string;
-	}>,
-): string {
-	return items
-		.map(
-			(item) =>
-				`- ${item.timestamp ?? "unknown"} ${item.type ?? "memory"}: ${item.summary ?? item.id}`,
-		)
-		.join("\n");
-}
-
-function addAffordances(
-	result: MemoryContextResult,
-	affordances: MemoryContextExpansion[],
-): MemoryContextResult {
-	if (affordances.length === 0) return result;
-	const lines = affordances.map(expandAffordanceLine).join("\n");
-	return {
-		...result,
-		text: `${result.text}\n\n${lines}`,
-		expandable: affordances,
-	};
-}
-
-type BuildContextOperations = Parameters<typeof buildContext>[0];
+export type BuildContextOperations = Parameters<typeof buildContext>[0];

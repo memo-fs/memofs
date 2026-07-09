@@ -42,7 +42,7 @@ export const MEMOFS_PATHS = Object.freeze({
 	snapshots: Object.freeze({
 		index: `${MEMOFS_DIR}/snapshots/snapshots.jsonl`,
 	}),
-	/** Connector config — the 11th canonical file ( / decision Q2). No secrets. */
+	/** Connector config — the 11th canonical file. No secrets. */
 	connectors: `${MEMOFS_DIR}/connectors.json`,
 	tmpDir: `${MEMOFS_DIR}/tmp`,
 } as const);

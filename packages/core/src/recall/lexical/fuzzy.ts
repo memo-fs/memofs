@@ -3,19 +3,22 @@
  *
  * @remarks
  * Lightweight prefix/substring matching used to catch typos and partials
- * that exact BM25 term matching would miss. Mirrors the scoring philosophy
- * already in {@link DeterministicFallbackReranker} (exact + partial) but
- * operates on token sets without a dependency on a reranker invocation.
+ * that exact BM25 term matching would miss. The scoring algorithm is shared
+ * with the deterministic fallback reranker via `core/internal/lexical`.
  *
  * @public
  */
 
+import { tokenOverlapScore } from "../../core/internal/lexical";
 import { tokenize } from "./tokenize";
 
 /**
  * Score query terms against document terms using exact + partial overlap.
  *
  * @remarks
+ * Delegates to the shared `tokenOverlapScore` primitive so recall and the
+ * deterministic fallback reranker share one scoring implementation.
+ *
  * - An exact token match contributes `1`.
  * - A partial match (one token contains the other, e.g. "auth" inside
  * "authentication") contributes `0.25`.
@@ -32,28 +35,7 @@ export function fuzzyOverlapScore(
 	queryTerms: string[],
 	documentTerms: string[],
 ): number {
-	if (queryTerms.length === 0 || documentTerms.length === 0) return 0;
-
-	const docSet = new Set(documentTerms);
-	let exact = 0;
-	let partial = 0;
-
-	for (const term of queryTerms) {
-		if (docSet.has(term)) {
-			exact += 1;
-			continue;
-		}
-		// O(n*m) but terms are short and few — fine for local-scale recall.
-		if (
-			documentTerms.some(
-				(docTerm) => docTerm.includes(term) || term.includes(docTerm),
-			)
-		) {
-			partial += 0.25;
-		}
-	}
-
-	return (exact + partial) / queryTerms.length;
+	return tokenOverlapScore(queryTerms, documentTerms);
 }
 
 /**

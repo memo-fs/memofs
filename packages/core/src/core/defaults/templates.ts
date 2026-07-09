@@ -35,7 +35,7 @@ Use this file for lower-confidence notes, observations, and working memory.
 export const DEFAULT_JSONL = "";
 
 /**
- * Empty connector-config payload — the 11th canonical file ( / decision Q2).
+ * Empty connector-config payload — the 11th canonical file.
  *
  * Connector config is a sync unit. It holds one entry per connector with its
  * type, schedule, source mapping, enabled flag, and an opaque `secretRef` —
@@ -90,5 +90,3 @@ export const DEFAULT_MEMORY_TEMPLATES: MemoryTemplates = Object.freeze(
 
 /** @deprecated Use DEFAULT_JSONL. */
 export const DEFAULT_CONVERSATIONS_MEMORY = DEFAULT_JSONL;
-/** @deprecated Use DEFAULT_CORE_MEMORY. */
-export { DEFAULT_CORE_MEMORY as DEFAULT_MEMORY_CORE };

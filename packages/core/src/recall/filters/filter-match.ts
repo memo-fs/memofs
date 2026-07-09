@@ -8,7 +8,11 @@
  * @public
  */
 
-import type { JsonPrimitive, JsonValue, RecallFilter } from "../types";
+import {
+	getByPath,
+	stableDeepEqual,
+} from "../../core/internal/deep-equal";
+import type { JsonPrimitive, RecallFilter } from "../types";
 import { validateRecallFilter } from "../validation/assertions";
 
 /**
@@ -72,18 +76,18 @@ function matchesFilterValue(actual: unknown, expected: unknown): boolean {
 		];
 		switch (operator) {
 			case "$eq":
-				return deepEqual(actual, operand);
+				return stableDeepEqual(actual, operand);
 			case "$ne":
-				return !deepEqual(actual, operand);
+				return !stableDeepEqual(actual, operand);
 			case "$in":
 				return (
 					Array.isArray(operand) &&
-					operand.some((item) => deepEqual(actual, item))
+					operand.some((item) => stableDeepEqual(actual, item))
 				);
 			case "$nin":
 				return (
 					Array.isArray(operand) &&
-					!operand.some((item) => deepEqual(actual, item))
+					!operand.some((item) => stableDeepEqual(actual, item))
 				);
 			case "$gt":
 				return (
@@ -118,7 +122,7 @@ function matchesFilterValue(actual: unknown, expected: unknown): boolean {
 		}
 	}
 
-	return deepEqual(actual, expected);
+	return stableDeepEqual(actual, expected);
 }
 
 /**
@@ -155,64 +159,6 @@ function contains(actual: unknown, expected: JsonPrimitive): boolean {
 	if (typeof actual === "string")
 		return typeof expected === "string" && actual.includes(expected);
 	if (Array.isArray(actual))
-		return actual.some((item) => deepEqual(item, expected));
+		return actual.some((item) => stableDeepEqual(item, expected));
 	return false;
-}
-
-/**
- * Gets a value from an object using dot notation path.
- *
- * @param value - The object to access
- * @param key - The dot-separated path (e.g., "metadata.sourceType")
- * @returns The value at the path, or undefined if not found
- *
- * @internal
- */
-function getByPath(value: Record<string, unknown>, key: string): unknown {
-	if (!key.includes(".")) return value[key];
-	return key.split(".").reduce<unknown>((current, part) => {
-		if (
-			typeof current !== "object" ||
-			current === null ||
-			Array.isArray(current)
-		)
-			return undefined;
-		return (current as Record<string, unknown>)[part];
-	}, value);
-}
-
-/**
- * Performs a deep equality check between two values.
- *
- * @remarks
- * Uses JSON serialization with stable key ordering for comparison.
- *
- * @param a - First value
- * @param b - Second value
- * @returns true if values are deeply equal
- *
- * @internal
- */
-function deepEqual(a: unknown, b: unknown): boolean {
-	return JSON.stringify(stable(a)) === JSON.stringify(stable(b));
-}
-
-/**
- * Creates a stable representation of a value by sorting object keys.
- *
- * @param value - The value to stabilize
- * @returns A new value with object keys sorted
- *
- * @internal
- */
-function stable(value: unknown): unknown {
-	if (Array.isArray(value)) return value.map(stable);
-	if (typeof value === "object" && value !== null) {
-		const output: Record<string, unknown> = {};
-		for (const key of Object.keys(value).sort()) {
-			output[key] = stable((value as Record<string, unknown>)[key]);
-		}
-		return output;
-	}
-	return value as JsonValue;
 }

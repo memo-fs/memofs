@@ -1,9 +1,8 @@
 import {
 	applyConsolidation,
 	consolidateGraph,
-	type GraphEdge,
-	type GraphNode,
-} from "../../index";
+} from "../../graph/consolidation/consolidate";
+import type { GraphEdge, GraphNode } from "../../graph/types";
 import { paginateArray } from "../helpers";
 import type {
 	ConsolidateMemoryInput,

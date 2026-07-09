@@ -7,8 +7,6 @@
  * traversal, extracts memory, or hosts agent sessions — every one of those
  * operations runs in the local runtime against the same files the cloud mirrors.
  *
- * See `docs/architecture/cloud-sync-and-refactor.md` for the full contract.
- *
  * The client is project-scoped:
  * /api/v1/projects/:projectId/sync/{push,pull,status}
  *
@@ -73,8 +71,6 @@ export interface MemoFsCloudClientOptions {
 	apiKey?: string;
 	/** Default project used by project-scoped API calls. */
 	defaultProjectId?: string;
-	/** Optional workspace value kept for caller metadata/config. API calls are project-scoped. */
-	defaultWorkspaceId?: string;
 	fetch?: MemoFsCloudFetch;
 	timeoutMs?: number;
 	retry?: MemoFSCloudRetryOptions | false;

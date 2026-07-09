@@ -1,10 +1,15 @@
+import { cloneJson } from "../../core/internal/clone";
+import { isForbiddenKey } from "../../core/internal/forbidden-keys";
 import { RerankValidationError } from "../errors/rerank-errors";
 
-/** Keys that are forbidden in metadata to prevent prototype pollution. */
-const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
-
 /**
- * Validates metadata and returns a deep clone, or undefined if input is undefined.
+ * Validates rerank metadata and returns a deep clone, or undefined if input is undefined.
+ *
+ * @remarks
+ * Distinct from the graph-zone `cloneAndValidateMetadata`: rerank metadata is
+ * a pass-through clone with circular-reference and prototype-pollution guards
+ * but no depth/key-count/string-length limits, and it throws
+ * {@link RerankValidationError}. Renamed to reflect the different contract.
  *
  * @param value - The metadata value to validate and clone. May be undefined.
  * @returns A deep clone of the metadata, or undefined if input was undefined.
@@ -12,14 +17,14 @@ const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
  *
  * @public
  */
-export function cloneAndValidateMetadata(
+export function cloneAndValidateRerankMetadata(
 	value: Record<string, unknown> | undefined,
 ): Record<string, unknown> | undefined {
 	if (value === undefined) return undefined;
 
 	const seen = new WeakSet<object>();
 	validateMetadataValue(value, "$", seen);
-	return structuredCloneSafe(value) as Record<string, unknown>;
+	return cloneJson(value) as Record<string, unknown>;
 }
 
 /**
@@ -72,7 +77,7 @@ function validateMetadataValue(
 		}
 		seen.add(object);
 		for (const [key, nested] of Object.entries(object)) {
-			if (FORBIDDEN_KEYS.has(key)) {
+			if (isForbiddenKey(key)) {
 				throw new RerankValidationError(
 					`metadata key "${key}" is not allowed.`,
 				);
@@ -83,19 +88,8 @@ function validateMetadataValue(
 		return;
 	}
 
-	throw new RerankValidationError(
-		`metadata at ${path} contains unsupported value type ${type}.`,
-	);
+		throw new RerankValidationError(
+			`metadata at ${path} contains unsupported value type ${type}.`,
+		);
 }
 
-/**
- * Creates a deep clone of a value using JSON serialization.
- *
- * @param value - The value to clone.
- * @returns A deep clone of the value.
- *
- * @internal
- */
-function structuredCloneSafe(value: unknown): unknown {
-	return JSON.parse(JSON.stringify(value)) as unknown;
-}

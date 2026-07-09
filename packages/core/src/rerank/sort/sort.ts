@@ -1,3 +1,4 @@
+import { cloneJson } from "../../core/internal/clone";
 import type { RerankResult } from "../types";
 
 /**
@@ -28,8 +29,8 @@ export function stableSortRerankResults(
 		.map((item, index) => ({
 			...item.result,
 			metadata: item.result.metadata
-				? structuredCloneSafe(item.result.metadata)
-				: undefined,
+					? cloneJson(item.result.metadata)
+					: undefined,
 			rank: index + 1,
 		}));
 }
@@ -56,14 +57,3 @@ export function applyTopK(
 		}));
 }
 
-/**
- * Creates a deep clone of a value using JSON serialization.
- *
- * @param value - The value to clone.
- * @returns A deep clone of the value.
- *
- * @internal
- */
-function structuredCloneSafe<T>(value: T): T {
-	return JSON.parse(JSON.stringify(value)) as T;
-}

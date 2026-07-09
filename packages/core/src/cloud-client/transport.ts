@@ -1,28 +1,31 @@
 import {
 	createHttpError,
 	MemoFSCloudNetworkError,
-	MemoFSCloudResponseParseError,
 	MemoFSCloudTimeoutError,
 	MemoFsCloudAuthError,
 	redactSecrets,
 } from "./errors";
 import type {
-	MemoFSCloudErrorEnvelope,
 	MemoFSCloudRequestOptions,
 	MemoFSCloudRetryOptions,
 	MemoFsCloudClientOptions,
 	MemoFsCloudFetch,
-	MemoFsCloudSuccessEnvelope,
 } from "./types";
 import { normalizeApiKey, normalizeBaseUrl } from "./validation";
+import {
+	parseJsonPayload,
+	unwrapErrorBody,
+	unwrapSuccessPayload,
+} from "./envelope";
+import {
+	getRetryDelayMs,
+	normalizeRetryOptions,
+	parseRetryAfter,
+	shouldRetry,
+	sleep,
+} from "./retry";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const DEFAULT_RETRY_OPTIONS: Required<MemoFSCloudRetryOptions> = Object.freeze({
-	retries: 2,
-	baseDelayMs: 250,
-	maxDelayMs: 2_500,
-	statuses: [408, 409, 425, 429, 500, 502, 503, 504],
-});
 
 export interface MemoFsCloudTransportOptions extends MemoFsCloudClientOptions {}
 
@@ -95,7 +98,9 @@ export class MemoFsCloudTransport {
 
 			const headerRequestId =
 				getHeader(response.headers, "x-request-id") ?? undefined;
-			const retryAfterMs = parseRetryAfter(response.headers);
+			const retryAfterMs = parseRetryAfter(
+				getHeader(response.headers, "retry-after"),
+			);
 			const payload = await parseJsonPayload(response);
 
 			if (!response.ok) {
@@ -166,18 +171,6 @@ function normalizeHeaders(
 	return output;
 }
 
-function normalizeRetryOptions(
-	retry: MemoFSCloudRetryOptions | false | undefined,
-): Required<MemoFSCloudRetryOptions> | false {
-	if (retry === false) return false;
-	return {
-		retries: retry?.retries ?? DEFAULT_RETRY_OPTIONS.retries,
-		baseDelayMs: retry?.baseDelayMs ?? DEFAULT_RETRY_OPTIONS.baseDelayMs,
-		maxDelayMs: retry?.maxDelayMs ?? DEFAULT_RETRY_OPTIONS.maxDelayMs,
-		statuses: retry?.statuses ?? DEFAULT_RETRY_OPTIONS.statuses,
-	};
-}
-
 function buildUrl(
 	baseUrl: string,
 	path: string,
@@ -199,142 +192,8 @@ function buildUrl(
 	return url;
 }
 
-async function parseJsonPayload(response: {
-	text(): Promise<string>;
-	status: number;
-}): Promise<unknown> {
-	const text = await response.text();
-	if (!text.trim()) return null;
-	try {
-		return JSON.parse(text) as unknown;
-	} catch (cause) {
-		throw new MemoFSCloudResponseParseError({
-			code: "invalid_json_response",
-			message: "MemoFS Cloud response was not valid JSON.",
-			status: response.status,
-			cause,
-		});
-	}
-}
-
-function unwrapSuccessPayload<T>(
-	payload: unknown,
-	headerRequestId: string | undefined,
-): T {
-	if (isSuccessEnvelope<T>(payload)) return payload.data;
-	if (isErrorEnvelope(payload)) {
-		throw createHttpError({
-			code: payload.error.code,
-			message: payload.error.message,
-			requestId: payload.meta?.requestId ?? headerRequestId,
-			details: payload.error.details,
-		});
-	}
-
-	throw new MemoFSCloudResponseParseError({
-		code: "invalid_response_envelope",
-		message:
-			"MemoFS Cloud response must use { data, meta } or { error, meta } envelope.",
-		requestId: headerRequestId,
-	});
-}
-
-function unwrapErrorBody(
-	payload: unknown,
-	headerRequestId: string | undefined,
-): { code?: string; message?: string; details?: unknown; requestId?: string } {
-	if (isErrorEnvelope(payload)) {
-		return {
-			code: payload.error.code,
-			message: payload.error.message,
-			details: payload.error.details,
-			requestId: payload.meta?.requestId ?? headerRequestId,
-		};
-	}
-
-	if (typeof payload === "object" && payload !== null && "message" in payload) {
-		return {
-			message: String((payload as { message: unknown }).message),
-			requestId: headerRequestId,
-		};
-	}
-	return { requestId: headerRequestId };
-}
-
-function isSuccessEnvelope<T>(
-	payload: unknown,
-): payload is MemoFsCloudSuccessEnvelope<T> {
-	return (
-		typeof payload === "object" &&
-		payload !== null &&
-		"data" in payload &&
-		!("error" in payload)
-	);
-}
-
-function isErrorEnvelope(
-	payload: unknown,
-): payload is MemoFSCloudErrorEnvelope {
-	return (
-		typeof payload === "object" &&
-		payload !== null &&
-		"error" in payload &&
-		typeof (payload as { error?: unknown }).error === "object" &&
-		(payload as { error?: unknown }).error !== null
-	);
-}
-
 function getHeader(headers: Headers, name: string): string | null {
 	return headers.get(name) ?? headers.get(name.toLowerCase());
-}
-
-function parseRetryAfter(headers: Headers): number | undefined {
-	const value = getHeader(headers, "retry-after");
-	if (!value) return undefined;
-	const seconds = Number(value);
-	if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
-	const dateMs = Date.parse(value);
-	if (Number.isFinite(dateMs)) return Math.max(0, dateMs - Date.now());
-	return undefined;
-}
-
-function shouldRetry(
-	error: unknown,
-	attempt: number,
-	attempts: number,
-	retry: Required<MemoFSCloudRetryOptions> | false,
-): boolean {
-	if (retry === false || attempt >= attempts - 1) return false;
-	const status =
-		typeof error === "object" && error !== null && "status" in error
-			? (error as { status?: unknown }).status
-			: undefined;
-	if (typeof status === "number") return retry.statuses.includes(status);
-	return (
-		error instanceof MemoFSCloudNetworkError ||
-		error instanceof MemoFSCloudTimeoutError
-	);
-}
-
-function getRetryDelayMs(
-	error: unknown,
-	attempt: number,
-	retry: Required<MemoFSCloudRetryOptions> | false,
-): number {
-	if (retry === false) return 0;
-	const retryAfterMs =
-		typeof error === "object" && error !== null && "retryAfterMs" in error
-			? (error as { retryAfterMs?: unknown }).retryAfterMs
-			: undefined;
-	if (typeof retryAfterMs === "number")
-		return Math.min(retryAfterMs, retry.maxDelayMs);
-	const exponential = retry.baseDelayMs * 2 ** attempt;
-	const jitter = Math.floor(Math.random() * Math.min(100, retry.baseDelayMs));
-	return Math.min(exponential + jitter, retry.maxDelayMs);
-}
-
-function sleep(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function httpStatusCode(status: number): string {

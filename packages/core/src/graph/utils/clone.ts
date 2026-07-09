@@ -1,10 +1,28 @@
+import { cloneJson as cloneJsonValue } from "../../core/internal/clone";
 import { GraphValidationError } from "../errors/graph-errors";
 
+/**
+ * Deep-clones a JSON-serializable graph value.
+ *
+ * @remarks
+ * Delegates to the shared `core/internal` clone primitive and wraps any
+ * serialization failure in a {@link GraphValidationError} so callers keep
+ * their domain-specific error type. This is the graph-zone public wrapper;
+ * the implementation lives once in `core/internal/clone.ts`.
+ *
+ * @typeParam T - The value type.
+ * @param value - The value to clone.
+ * @returns A deep clone of the value.
+ * @throws {@link GraphValidationError} If the value is not JSON-serializable.
+ *
+ * @public
+ */
 export function cloneJson<T>(value: T): T {
 	if (value === undefined) return value;
 	try {
-		return JSON.parse(JSON.stringify(value)) as T;
+		return cloneJsonValue(value);
 	} catch (error) {
+		if (error instanceof GraphValidationError) throw error;
 		throw new GraphValidationError("value must be JSON-serializable.", {
 			cause: error,
 		});

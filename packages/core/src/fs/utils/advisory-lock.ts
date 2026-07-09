@@ -2,8 +2,8 @@
  * Cross-process advisory file lock for the local single-process contract.
  *
  * @remarks
- * Implements the Q28 decision (decisions.md): the local runtime is
- * single-process by contract, but two Claude Code windows on one repo is a
+ * Implements the decision: the local runtime is single-process by
+ * contract, but two Claude Code windows on one repo is a
  * day-one v1 scenario. A replace-whole-file race on `core.md` silently loses
  * a write. This lock — `.memofs/.lock`, the git-index model — is acquired on
  * the first mutating write and held process-lifetime; a second process
@@ -23,6 +23,7 @@
  * @internal
  */
 
+import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
@@ -338,20 +339,13 @@ export function parseLockContents(raw: string): LockFileContents | null {
 	}
 }
 
-// Errno classifiers (kept local to avoid an import cycle through the errors
-// module, which itself imports this module for LockHeldError).
+// Errno classifier kept local to avoid an import cycle through the errors
+// module (which imports this module for LockHeldError). `isNotFoundError` is
+// imported from the cycle-free `core/internal` leaf.
 function isAlreadyExistsError(error: unknown): boolean {
 	return (
 		typeof error === "object" &&
 		error !== null &&
 		(error as NodeJS.ErrnoException).code === "EEXIST"
-	);
-}
-
-function isNotFoundError(error: unknown): boolean {
-	return (
-		typeof error === "object" &&
-		error !== null &&
-		(error as NodeJS.ErrnoException).code === "ENOENT"
 	);
 }

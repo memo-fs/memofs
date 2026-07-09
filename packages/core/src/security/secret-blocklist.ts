@@ -1,4 +1,5 @@
 import { MemoryWriteBlockedError } from "../core/errors/errors";
+import { KNOWN_SECRET_PREFIX_PATTERNS } from "../core/internal/secret-prefixes";
 
 /**
  * @file Write blocklist — hard-rejects secrets/PII before they reach syncable
@@ -77,13 +78,20 @@ export interface BlocklistViolation {
 /**
  * The write blocklist rule set.
  *
+ * Provider-prefixed secrets (`AKIA…`, `ghp_…`, `sk-…`, `AIza…`, `xox…`,
+ * `sk_live_…`) are sourced from the shared {@link KNOWN_SECRET_PREFIX_PATTERNS}
+ * SSOT so output redaction (`cloud-client/errors.ts`) and write-gating stay in
+ * sync. Blocklist-specific rules (AWS secret in assignment context, PEM blocks,
+ * JWTs, connection strings, secret assignments) are defined inline below.
+ *
  * Order is informational only; {@link detectBlockedContent} reports the first
- * violation per rule. Add rules here, not in the detector.
+ * violation per rule. Add provider prefixes to
+ * {@link KNOWN_SECRET_PREFIX_PATTERNS}; add blocklist-specific rules here.
  *
  * @remarks
  * Precision notes:
- * - Provider-prefixed keys (`AKIA…`, `ghp_…`, `sk-…`, `AIza…`, `xox…`,
- * `sk_live_…`) are near-zero false-positive — the prefixes are unambiguous.
+ * - Provider-prefixed keys are near-zero false-positive — the prefixes are
+ * unambiguous.
  * - PEM `PRIVATE KEY` blocks and JWTs (`eyJ…`) are structurally unambiguous.
  * - The `secret_assignment` rule requires the value to be 12+ chars *and*
  * contain a digit, so documentation prose ("password: must be rotated",
@@ -93,41 +101,12 @@ export interface BlocklistViolation {
  * embedded credentials.
  */
 export const BLOCKLIST_RULES: readonly BlocklistRule[] = [
-	{
-		id: "aws_access_key_id",
-		description: "AWS access key ID",
-		pattern: /\bAKIA[0-9A-Z]{16}\b/g,
-	},
+	...KNOWN_SECRET_PREFIX_PATTERNS,
 	{
 		id: "aws_secret_access_key",
 		description: "AWS secret access key in assignment context",
 		pattern:
 			/\baws_secret_access_key["']?\s*[:=]\s*["']?[A-Za-z0-9/+=]{40}["']?/gi,
-	},
-	{
-		id: "github_token",
-		description: "GitHub personal access / OAuth / app token",
-		pattern: /\bgh[pousr]_[A-Za-z0-9]{36,}\b/g,
-	},
-	{
-		id: "openai_api_key",
-		description: "OpenAI-style API key",
-		pattern: /\bsk-[A-Za-z0-9]{20,}\b/g,
-	},
-	{
-		id: "google_api_key",
-		description: "Google API key",
-		pattern: /\bAIza[0-9A-Za-z_-]{35}\b/g,
-	},
-	{
-		id: "slack_token",
-		description: "Slack token",
-		pattern: /\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g,
-	},
-	{
-		id: "stripe_key",
-		description: "Stripe secret/restricted key",
-		pattern: /\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{24,}\b/g,
 	},
 	{
 		id: "private_key_block",
@@ -162,8 +141,9 @@ export const BLOCKLIST_RULES: readonly BlocklistRule[] = [
  * matches multiple times). Returns an empty array when the text is clean.
  *
  * Pure, synchronous, side-effect free. The caller decides what to do with
- * violations (hard-reject on the write path, warn, redact — the ADR mandates
- * hard-reject on `writeMemory` and the agent-session durable-memory append).
+* violations (hard-reject on the write path, warn, redact — the spec
+	 * mandates hard-reject on `writeMemory` and the agent-session durable-memory
+	 * append).
  *
  * @param text - The text to scan (note content, title, durable memory, etc.).
  * @returns Violations found, or `[]` when clean. Never throws.

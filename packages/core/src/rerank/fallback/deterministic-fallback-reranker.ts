@@ -1,3 +1,8 @@
+import { cloneJson } from "../../core/internal/clone";
+import {
+	tokenOverlapScore,
+	tokenizeSimple,
+} from "../../core/internal/lexical";
 import { applyTopK } from "../sort/sort";
 import type { Reranker, RerankInput, RerankResult } from "../types";
 import { normalizeRerankInput } from "../validation/validation";
@@ -31,10 +36,10 @@ export class DeterministicFallbackReranker implements Reranker {
 			return [];
 		}
 
-		const queryTerms = tokenize(normalized.query);
+		const queryTerms = tokenizeSimple(normalized.query);
 		const results = normalized.documents.map((document): RerankResult => {
-			const documentTerms = tokenize(document.text);
-			const score = lexicalScore(queryTerms, documentTerms);
+			const documentTerms = tokenizeSimple(document.text);
+			const score = tokenOverlapScore(queryTerms, documentTerms);
 
 			return {
 				id: document.id,
@@ -42,7 +47,7 @@ export class DeterministicFallbackReranker implements Reranker {
 				score,
 				rank: 0,
 				metadata: document.metadata
-					? structuredCloneSafe(document.metadata)
+					? cloneJson(document.metadata)
 					: undefined,
 			};
 		});
@@ -60,68 +65,4 @@ export class DeterministicFallbackReranker implements Reranker {
  */
 export function createDeterministicFallbackReranker(): DeterministicFallbackReranker {
 	return new DeterministicFallbackReranker();
-}
-
-/**
- * Splits a string into individual terms by non-alphanumeric characters.
- *
- * @param value - The string to tokenize.
- * @returns An array of lowercase terms with whitespace trimmed.
- *
- * @internal
- */
-function tokenize(value: string): string[] {
-	return value
-		.toLowerCase()
-		.split(/[^a-z0-9]+/i)
-		.map((term) => term.trim())
-		.filter(Boolean);
-}
-
-/**
- * Computes a lexical similarity score between query terms and document terms.
- *
- * @param queryTerms - The tokenized query terms.
- * @param documentTerms - The tokenized document terms.
- * @returns A score between 0 and 1, where 1 means all query terms exactly match.
- *
- * @internal
- */
-function lexicalScore(queryTerms: string[], documentTerms: string[]): number {
-	if (queryTerms.length === 0 || documentTerms.length === 0) {
-		return 0;
-	}
-
-	const docSet = new Set(documentTerms);
-	let exact = 0;
-	let partial = 0;
-
-	for (const term of queryTerms) {
-		if (docSet.has(term)) {
-			exact += 1;
-			continue;
-		}
-
-		if (
-			documentTerms.some(
-				(docTerm) => docTerm.includes(term) || term.includes(docTerm),
-			)
-		) {
-			partial += 0.25;
-		}
-	}
-
-	return (exact + partial) / queryTerms.length;
-}
-
-/**
- * Creates a deep clone of a value using JSON serialization.
- *
- * @param value - The value to clone.
- * @returns A deep clone of the value.
- *
- * @internal
- */
-function structuredCloneSafe<T>(value: T): T {
-	return JSON.parse(JSON.stringify(value)) as T;
 }

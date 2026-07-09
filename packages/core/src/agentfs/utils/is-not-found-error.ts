@@ -2,39 +2,14 @@
  * Determines if an error represents a "not found" condition.
  *
  * @remarks
- * Checks various error properties (`code`, `status`, `statusCode`, `name`, `message`)
- * for common not-found indicators like `ENOENT`, `404`, or `"NOT FOUND"`.
+ * Re-exported from `core/internal/is-not-found-error` — the single source of
+ * truth shared by the agentfs (remote) and fs (Node) zones. The canonical
+ * classifier checks `code`, `status`, `statusCode`, `name`, and `message`
+ * for not-found indicators (`ENOENT`, `404`, `NOT_FOUND`).
  *
  * @param error - The error to check.
- * @returns `true` if the error indicates a not-found condition, `false` otherwise.
+ * @returns `true` if the error indicates a not-found condition.
  *
  * @public
  */
-export function isNotFoundError(error: unknown): boolean {
-	if (!error || typeof error !== "object") {
-		return false;
-	}
-
-	const candidate = error as {
-		code?: unknown;
-		status?: unknown;
-		statusCode?: unknown;
-		name?: unknown;
-		message?: unknown;
-	};
-
-	const code = String(candidate.code ?? "").toUpperCase();
-	const name = String(candidate.name ?? "").toUpperCase();
-	const message = String(candidate.message ?? "").toUpperCase();
-	const status = Number(candidate.status ?? candidate.statusCode ?? 0);
-
-	return (
-		status === 404 ||
-		code === "ENOENT" ||
-		code === "NOT_FOUND" ||
-		code === "404" ||
-		name.includes("NOTFOUND") ||
-		message.includes("NOT FOUND") ||
-		message.includes("ENOENT")
-	);
-}
+export { isNotFoundError } from "../../core/internal/is-not-found-error";

@@ -77,71 +77,10 @@ export class RecallValidationError extends RecallError {
 }
 
 /**
- * Error thrown when a provider operation fails.
- *
- * @remarks
- * Used for external service errors (e.g., vector database, embedding API).
- *
- * @public
- */
-export class RecallProviderError extends RecallError {
-	override readonly name: string = "RecallProviderError";
-
-	/**
-	 * Creates a new RecallProviderError instance.
-	 *
-	 * @param message - Human-readable error message
-	 * @param options - Provider error options including provider name and operation
-	 *
-	 * @public
-	 */
-	constructor(
-		message: string,
-		options: {
-			provider?: string;
-			operation?: string;
-			details?: RecallErrorDetails;
-			cause?: unknown;
-		} = {},
-	) {
-		super(message, {
-			code: "recall_provider_error",
-			details: {
-				provider: options.provider,
-				operation: options.operation,
-				...options.details,
-			},
-			cause: options.cause,
-		});
-	}
-}
-
-/**
  * Error thrown when embedding dimensions don't match expected values.
  *
  * @public
  */
 export class RecallDimensionError extends RecallValidationError {
 	override readonly name: string = "RecallDimensionError";
-}
-
-/**
- * Error thrown for operations that are not yet implemented.
- *
- * @public
- */
-export class RecallNotImplementedError extends RecallError {
-	override readonly name: string = "RecallNotImplementedError";
-
-	/**
-	 * Creates a new RecallNotImplementedError instance.
-	 *
-	 * @param message - Human-readable error message
-	 * @param details - Optional additional error details
-	 *
-	 * @public
-	 */
-	constructor(message: string, details?: RecallErrorDetails) {
-		super(message, { code: "recall_not_implemented", details });
-	}
 }

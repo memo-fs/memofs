@@ -1,16 +1,15 @@
 /**
- * Progressive recall — per-section expansion cursors ( /
- * Q27).
+ * Progressive recall — per-section expansion cursors.
  *
  * @remarks
- * This is the headline delivery of the Q16 cold-start token-reduction north
+ * This is the headline delivery of the cold-start token-reduction north
  * star. A compact first `memofs.context` call returns a small briefing
  * (~6kb) with expandable sections; the agent calls back with `section` +
  * `expand` to pull only the section it needs and stops. Compact ≈ 6kb; full ≈
- * 80kb; the agent pulls the 2kb it needs — vs ~64kb truncated before Q27.
+ * 80kb; the agent pulls the 2kb it needs — vs ~64kb truncated previously.
  *
  * The strategist intelligence (Rewrite → Resolve → Filter → Budget
- * Component 2) already exists. Q27 is a *delivery* change plus one genuinely
+ * Component 2) already exists. This is a *delivery* change plus one genuinely
  * new piece of machinery: the strategist must be **stateful across two calls**
  * so the second call re-resolves fast. Today's `buildContext()` is stateless.
  *
@@ -45,7 +44,7 @@ import type {
  * Per-section caps for compact mode. These are what make the first call ~6kb
  * instead of ~64kb: each negotiable section is capped, and the surplus is
  * advertised as an expansion affordance (the agent pulls it only if it needs
- * it). Entities are already compact one-liners ( / Q26),
+ * it). Entities are already compact one-liners,
  * so they're never capped in compact mode — capping them would lose the
  * high-trust artifact, which defeats the trust-order purpose.
  *
@@ -181,8 +180,8 @@ const CACHE_TTL_MS = 10 * 60 * 1000;
 const CACHE_MAX_ENTRIES = 8;
 
 /**
- * A session-scoped cache of resolved context pointers ( /
- * Q27). Held as a closure variable by each runtime strategy (one per
+ * A session-scoped cache of resolved context pointers. Held as a closure
+ * variable by each runtime strategy (one per
  * `MemoFS` instance), so the cache is never global and never crosses
  * instances. LRU + TTL bounded: the cache is a performance optimization for
  * the second call, not durable state.
@@ -324,7 +323,7 @@ export function buildExpansionAffordances(
 /**
  * A one-line expand affordance appended to a compact section's rendered
  * content, telling the model exactly how to pull more. This is the
- * load-bearing copy the ADR flags as a quality risk — keep it imperative,
+ * load-bearing copy the spec flags as a quality risk — keep it imperative,
  * short, and copy-pasteable.
  *
  * @internal

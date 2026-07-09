@@ -67,8 +67,8 @@ export interface DurabilityInput {
 	/**
 	 * Optional explicit tier override. When set, the classifier returns it
 	 * verbatim — the caller knows better than the heuristic. This is the escape
-	 * hatch the ADR names ("the tier is assigned by a deterministic classifier
-	 * ... re-scored by a configured LLM adapter when present").
+	 * hatch the spec names ("the tier is assigned by a deterministic
+	 * classifier ... re-scored by a configured LLM adapter when present").
 	 */
 	tier?: DurabilityTier;
 }

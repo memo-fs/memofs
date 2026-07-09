@@ -6,7 +6,7 @@ import type {
 	RerankInput,
 	RerankResult,
 } from "../types";
-import { cloneAndValidateMetadata } from "./metadata";
+import { cloneAndValidateRerankMetadata } from "./metadata";
 
 /** Regular expression for validating safe document IDs. Allows alphanumeric, dots, underscores, colons, and hyphens. */
 const SAFE_ID = /^[A-Za-z0-9._:-]{1,256}$/;
@@ -119,7 +119,7 @@ export function normalizeRerankInput(
 		return {
 			id: document.id,
 			text: document.text,
-			metadata: cloneAndValidateMetadata(document.metadata),
+			metadata: cloneAndValidateRerankMetadata(document.metadata),
 		};
 	});
 
@@ -158,5 +158,5 @@ export function validateRerankResult(
 		);
 	}
 
-	cloneAndValidateMetadata(result.metadata);
+	cloneAndValidateRerankMetadata(result.metadata);
 }

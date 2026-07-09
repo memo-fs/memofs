@@ -1,12 +1,14 @@
 import { describe, expect, test } from "vitest";
 import {
 	createInMemoryRecallStore,
-	createRecallDocument,
-	createRecallDocuments,
 	InMemoryRecallStore,
 	RecallDimensionError,
 	RecallValidationError,
 } from "../../src/index";
+import {
+	createRecallDocument,
+	createRecallDocuments,
+} from "../../src/recall/testing/fixtures";
 
 describe("InMemoryRecallStore", () => {
 	test("upsert with empty documents is a no-op", async () => {

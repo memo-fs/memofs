@@ -43,8 +43,8 @@ export interface NodeFsMemoryStoreOptions {
 	 * on the first mutating write. Defaults to `true`.
 	 *
 	 * @remarks
-	 * Implements the local single-process contract (Q28 / decisions.md): a
-	 * second process mutating the same `.memofs/` root gets a
+	 * Implements the local single-process contract: a second process
+	 * mutating the same `.memofs/` root gets a
 	 * {@link LockHeldError}. Set to `false` to opt out — e.g. when an external
 	 * coordinator already serializes access, or in tests that deliberately
 	 * share a root across stores.

@@ -266,7 +266,7 @@ export class BM25Store {
 	private getOrCreate<K, V>(map: Map<K, V>, key: K): V {
 		let value = map.get(key);
 		if (!value) {
-			value = (typeof key === "string" ? new Map() : new Map()) as V;
+			value = new Map() as V;
 			map.set(key, value);
 		}
 		return value;

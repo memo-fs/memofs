@@ -1,10 +1,9 @@
 /**
  * File-replication sync layer.
  *
- * The cloud is a file replica, never an engine (see
- * `docs/architecture/cloud-sync-and-refactor.md` §0, §4, §8). This module is
+ * The cloud is a file replica, never an engine. This module is
  * the local half of that contract. Its four sync methods (`push`, `complete`,
- * `pull`, `status`) mirror the frozen cloud-client surface 1:1 (§7), so the
+ * `pull`, `status`) mirror the frozen cloud-client surface 1:1, so the
  * runtime stays honest with the wire protocol:
  *
  * - `push` — phase 1: send the local manifest, receive presigned upload

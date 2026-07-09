@@ -1,10 +1,7 @@
 import { createHash } from "node:crypto";
-import type {
-	GraphEdge,
-	GraphEdgeInput,
-	GraphNode,
-	GraphNodeInput,
-} from "../../index";
+import type { JsonObject } from "../../core/types/json";
+import type { GraphEdge, GraphNode } from "../../graph/types";
+import type { GraphEdgeInput, GraphNodeInput } from "../types";
 
 export function hash(value: string): string {
 	return createHash("sha256").update(value).digest("hex");
@@ -13,10 +10,10 @@ export function hash(value: string): string {
 export function candidateShape(
 	id: string,
 	vector:
-		| { text: string; score: number; metadata?: Record<string, unknown> }
+		| { text: string; score: number; metadata?: JsonObject }
 		| undefined,
 	lexical:
-		| { text: string; score: number; metadata?: Record<string, unknown> }
+		| { text: string; score: number; metadata?: JsonObject }
 		| undefined,
 ) {
 	return {
@@ -24,13 +21,10 @@ export function candidateShape(
 		text: vector?.text ?? lexical?.text ?? "",
 		vectorScore: vector?.score ?? 0,
 		lexicalScore: lexical?.score ?? 0,
-		...((vector?.metadata ?? lexical?.metadata === undefined)
+		...((vector?.metadata ?? lexical?.metadata) === undefined
 			? {}
 			: {
-					metadata: (vector?.metadata ?? lexical?.metadata) as Record<
-						string,
-						unknown
-					>,
+					metadata: vector?.metadata ?? lexical?.metadata,
 				}),
 	};
 }

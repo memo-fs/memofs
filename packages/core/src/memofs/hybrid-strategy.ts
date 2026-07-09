@@ -1,11 +1,9 @@
 /**
  * Hybrid runtime strategy for MemoFS.
  *
- * After the cloud-sync refactor (see `docs/architecture/cloud-sync-and-refactor.md`),
  * `hybrid` means: a local engine (recall, memory CRUD, graph, extraction,
  * agent sessions — all local) **plus** file replication to/from the cloud via
- * a {@link FileSyncLayer}. The cloud is a file replica, never an engine
- * (§0/§5).
+ * a {@link FileSyncLayer}. The cloud is a file replica, never an engine.
  *
  * Reads and writes always go to the local engine. The only cloud-facing
  * surface is the four sync methods (`push`, `complete`, `pull`, `status`),

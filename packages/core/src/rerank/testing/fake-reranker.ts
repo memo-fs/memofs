@@ -1,3 +1,4 @@
+import { cloneJson } from "../../core/internal/clone";
 import { applyTopK } from "../sort/sort";
 import type { Reranker, RerankInput, RerankResult } from "../types";
 import { normalizeRerankInput } from "../validation/validation";
@@ -51,7 +52,7 @@ export class FakeReranker implements Reranker {
 	 * @throws {@link RerankValidationError} If the input fails validation.
 	 */
 	async rerank(input: RerankInput): Promise<RerankResult[]> {
-		this.calls.push(structuredCloneSafe(input));
+		this.calls.push(cloneJson(input));
 
 		if (this.failWith) {
 			throw this.failWith;
@@ -64,7 +65,7 @@ export class FakeReranker implements Reranker {
 			score: this.scores[document.id] ?? 1 / (index + 1),
 			rank: 0,
 			metadata: document.metadata
-				? structuredCloneSafe(document.metadata)
+				? cloneJson(document.metadata)
 				: undefined,
 		}));
 
@@ -84,16 +85,4 @@ export function createFakeReranker(
 	options?: FakeRerankerOptions,
 ): FakeReranker {
 	return new FakeReranker(options);
-}
-
-/**
- * Creates a deep clone of a value using JSON serialization.
- *
- * @param value - The value to clone.
- * @returns A deep clone of the value.
- *
- * @internal
- */
-function structuredCloneSafe<T>(value: T): T {
-	return JSON.parse(JSON.stringify(value)) as T;
 }

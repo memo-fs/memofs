@@ -1,15 +1,16 @@
+import type { JsonObject } from "../../core/types/json";
 import type { MemoryEmbedder } from "../../core/types/embeddings";
 import type { MemoryStore } from "../../core/types/memory-store";
 import type { Extractor } from "../../graph/extraction/extractor";
+import type { AgentfsLikeClient } from "../../agentfs/client/agentfs-like";
 import type {
-	AgentfsLikeClient,
 	GraphEdgeInput,
 	GraphNodeInput,
-	InMemoryGraphStore,
-	LlmClient,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
-} from "../../index";
+} from "../types";
+import type { InMemoryGraphStore } from "../../graph/stores/in-memory-graph-store";
+import type { LlmClient } from "../../ai-runtime/llm-client";
 import type { BM25Store } from "../../recall/lexical/bm25";
 import type { RecallStore } from "../../recall/types";
 import type { Reranker } from "../../rerank";
@@ -87,7 +88,7 @@ export interface LocalStrategyContext {
 			type: string;
 			timestamp: string;
 			summary: string;
-			metadata: Record<string, unknown>;
+			metadata?: JsonObject;
 		}>;
 		warnings?: string[];
 	}>;

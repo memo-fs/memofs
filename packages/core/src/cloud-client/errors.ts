@@ -1,4 +1,5 @@
 import type { JsonValue, MemoFSCloudRequestMeta } from "./types";
+import { KNOWN_SECRET_PREFIX_PATTERNS } from "../core/internal/secret-prefixes";
 
 export interface MemoFSCloudErrorOptions extends MemoFSCloudRequestMeta {
 	code: string;
@@ -64,14 +65,19 @@ export function createHttpError(
 }
 
 const SECRET_PATTERNS = [
-	// Current prefix: `tm_`. Legacy prefixes (`tk_live_`, `tm_live_`) are kept so
-	// error redaction stays safe for keys issued before the rename — redaction is
-	// additive and must never miss a real token shape in the wild.
+	// MemoFS-specific key prefixes. Legacy prefixes (`tk_live_`, `tm_live_`)
+	// are kept so error redaction stays safe for keys issued before the rename
+	// — redaction is additive and must never miss a real token shape in the
+	// wild. These do NOT belong in the shared provider-prefix constant (they
+	// are MemoFS-internal, not third-party provider keys).
 	/tm_[A-Za-z0-9._-]+/g,
 	/tk_live_[A-Za-z0-9._-]+/g,
 	/tm_live_[A-Za-z0-9._-]+/g,
 	/Bearer\s+[A-Za-z0-9._-]+/gi,
-	/sk-[A-Za-z0-9._-]+/g,
+	// Third-party provider prefixes — sourced from the SSOT
+	// (`KNOWN_SECRET_PREFIX_PATTERNS`) so adding a new provider there
+	// automatically redacts it from error messages too.
+	...KNOWN_SECRET_PREFIX_PATTERNS.map((rule) => rule.pattern),
 	/pa-[A-Za-z0-9._-]+/g,
 ];
 

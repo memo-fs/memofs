@@ -7,22 +7,16 @@
  * @internal
  */
 
+import { bootstrapMemoryStore } from "../core/bootstrap/bootstrap-memory-store";
+import { createBM25Store } from "../recall/lexical/bm25";
+import { createFsGraphStore } from "../graph/stores/fs-graph-store";
 import {
-	appendSnapshotRecord,
-	bootstrapMemoryStore,
-	createBM25Store,
-	createFsGraphStore,
 	createRuleBasedExtractor,
-	createSnapshotPath,
-	createSnapshotRecord,
-	DeterministicFallbackReranker,
 	type Extractor,
-	readCoreMemory,
-	readManifest,
-	readMemoryEventsWithIssues,
-	readNotesMemory,
-	readSnapshotRecordsWithIssues,
-} from "../index";
+} from "../graph/extraction/extractor";
+import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
+import { readCoreMemory } from "../core/documents/core-memory";
+import { readNotesMemory } from "../core/documents/notes-memory";
 import type { BM25Store } from "../recall/lexical/bm25";
 import { buildContext } from "./helpers";
 import { createLocalAgentfsClient } from "./local-strategy/client";
@@ -36,13 +30,12 @@ import {
 	upsertGraphNodes,
 } from "./local-strategy/graph";
 import {
-	message,
-	snapshotId,
 	stableEdgeKey,
 	toGraphEdgeInput,
 	toGraphNodeInput,
 } from "./local-strategy/helpers";
 import { localRecall } from "./local-strategy/recall";
+import { listRecentMemories as listRecentMemoriesFn } from "./local-strategy/recent";
 import {
 	appendAgentSessionFile,
 	completeAgentSession,
@@ -51,6 +44,8 @@ import {
 	startAgentSession,
 	writeAgentSessionFile,
 } from "./local-strategy/session";
+import { createSnapshot as createSnapshotFn } from "./local-strategy/snapshot";
+import { validateStore } from "./local-strategy/validate";
 import type {
 	LocalGraphStore,
 	LocalStrategyContext,
@@ -83,6 +78,7 @@ import type {
 	WriteMemoryInput,
 	WriteMemoryResult,
 } from "./types";
+import type { JsonObject } from "../core/types/json";
 
 export type { LocalGraphStore, LocalStrategyOptions };
 
@@ -158,91 +154,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		bootstrapped = true;
 	}
 
-	async function createSnapshotImpl(
-		input?: {
-			label?: string;
-			type?: string;
-			metadata?: Record<string, unknown>;
-		},
-		signal?: AbortSignal,
-	): Promise<{ id: string; path: string; created: boolean }> {
-		if (signal?.aborted) throw new Error("Operation aborted.");
-		await ensureReady();
-		const id = snapshotId(input?.label);
-		const snapshotPath = createSnapshotPath(id);
-		const now = new Date().toISOString();
-		const files = {
-			core: await readCoreMemory(store),
-			notes: await readNotesMemory(store),
-			events: (
-				await readMemoryEventsWithIssues(store, { malformedLineMode: "skip" })
-			).entries,
-		};
-		await store.write(
-			snapshotPath,
-			`${JSON.stringify({ version: 1, id, createdAt: now, files }, null, 2)}\n`,
-		);
-		await appendSnapshotRecord(
-			store,
-			createSnapshotRecord({
-				id,
-				type: (input?.type ?? "manual") as
-					| "manual"
-					| "automatic"
-					| "pre-sync"
-					| "pre-restore",
-				createdAt: now,
-				metadata: {
-					label: input?.label ?? null,
-					createdBy: "memofs",
-					...(input?.metadata ?? {}),
-				},
-			}),
-		);
-		return { id, path: snapshotPath, created: true };
-	}
+	const createSnapshotImpl = (input?: SnapshotMemoryInput, signal?: AbortSignal) =>
+		createSnapshotFn(store, ensureReady, input, signal);
 
-	async function listRecentMemories(
-		limit?: number,
-		signal?: AbortSignal,
-	): Promise<{
-		items: Array<{
-			id: string;
-			type: string;
-			timestamp: string;
-			summary: string;
-			metadata: Record<string, unknown>;
-		}>;
-		warnings?: string[];
-	}> {
-		if (signal?.aborted) throw new Error("Operation aborted.");
-		await ensureReady();
-		const result = await readMemoryEventsWithIssues(store, {
-			malformedLineMode: "skip",
-		});
-		const max = limit ?? 20;
-		const items = result.entries
-			.slice(-max)
-			.reverse()
-			.map((entry) => ({
-				id: entry.id,
-				type: entry.type,
-				timestamp: entry.timestamp,
-				summary: entry.summary ?? "",
-				metadata: entry.metadata as Record<string, unknown>,
-			}));
-		return {
-			items,
-			...(result.issues.length === 0
-				? {}
-				: {
-						warnings: result.issues.map(
-							(issue) =>
-								`Invalid memory event line ${issue.lineNumber}: ${issue.message}`,
-						),
-					}),
-		};
-	}
+	const listRecentMemories = (limit?: number, signal?: AbortSignal) =>
+		listRecentMemoriesFn(store, ensureReady, limit, signal);
 
 	const agentfsClient = (
 		options.createAgentfsClient ?? createLocalAgentfsClient
@@ -370,7 +286,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				type: string;
 				timestamp: string;
 				summary: string;
-				metadata: Record<string, unknown>;
+				metadata?: JsonObject;
 			}>;
 			warnings?: string[];
 		}> {
@@ -378,59 +294,8 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			return listRecentMemories(input?.limit, signal);
 		},
 
-		async validate(
-			input?: { strict?: boolean },
-			signal?: AbortSignal,
-		): Promise<{ ok: boolean; warnings: string[]; errors: string[] }> {
-			if (signal?.aborted) throw new Error("Operation aborted.");
-			await ensureReady();
-			const warnings: string[] = [];
-			const errors: string[] = [];
-			try {
-				await readManifest(store);
-			} catch (error) {
-				errors.push(`manifest: ${message(error)}`);
-			}
-			try {
-				await readCoreMemory(store);
-			} catch (error) {
-				errors.push(`core memory: ${message(error)}`);
-			}
-			try {
-				await readNotesMemory(store);
-			} catch (error) {
-				errors.push(`notes memory: ${message(error)}`);
-			}
-			try {
-				const events = await readMemoryEventsWithIssues(store, {
-					malformedLineMode: "skip",
-				});
-				warnings.push(
-					...events.issues.map(
-						(issue) =>
-							`memory-events line ${issue.lineNumber}: ${issue.message}`,
-					),
-				);
-			} catch (error) {
-				errors.push(`memory events: ${message(error)}`);
-			}
-			try {
-				const snapshots = await readSnapshotRecordsWithIssues(store, {
-					malformedLineMode: "skip",
-				});
-				warnings.push(
-					...snapshots.issues.map(
-						(issue) => `snapshots line ${issue.lineNumber}: ${issue.message}`,
-					),
-				);
-			} catch (error) {
-				warnings.push(`snapshot index: ${message(error)}`);
-			}
-			return {
-				ok: errors.length === 0 && (!input?.strict || warnings.length === 0),
-				warnings,
-				errors,
-			};
+		async validate(input?: { strict?: boolean }, signal?: AbortSignal): Promise<{ ok: boolean; warnings: string[]; errors: string[] }> {
+			return validateStore(store, ensureReady, signal, input);
 		},
 
 		async createSnapshot(

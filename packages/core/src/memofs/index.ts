@@ -17,7 +17,7 @@ export {
 	createLazyLocalEmbedder,
 	type LazyLocalEmbedderOptions,
 } from "./local-embedder";
-export { MemoFS } from "./MemoFS";
+export { MemoFS } from "./memo-fs";
 export { sha256Hex } from "./sync/sha256";
 export type {
 	AgentSessionCompleteInput,
@@ -56,14 +56,8 @@ export type {
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 	SourceRef,
-	SyncPullInput,
-	SyncPullResult,
 	SyncPushCompleteInput,
 	SyncPushCompleteResult,
-	SyncPushInput,
-	SyncPushResult,
-	SyncStatusInput,
-	SyncStatusResult,
 	ValidateMemoryInput,
 	ValidateMemoryResult,
 	WriteMemoryInput,

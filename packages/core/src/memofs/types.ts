@@ -11,6 +11,19 @@ import type {
 	DurabilityReason,
 	DurabilityTier,
 } from "../security/durability-tier";
+import type {
+	JsonArray,
+	JsonObject,
+	JsonPrimitive,
+	JsonValue,
+} from "../core/types/json";
+
+export type {
+	JsonArray,
+	JsonObject,
+	JsonPrimitive,
+	JsonValue,
+} from "../core/types/json";
 
 export type MemoFSRuntimeMode = "local" | "hybrid" | "memory";
 
@@ -41,10 +54,6 @@ export interface SourceRef {
 	metadata?: JsonObject;
 }
 
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue = JsonPrimitive | JsonValue[] | JsonObject;
-export type JsonObject = Record<string, unknown>;
-
 export interface RecallInput {
 	query: string;
 	workspaceId?: string;
@@ -74,12 +83,12 @@ export interface MemoryContextInput extends RecallInput {
 	includeNotes?: boolean;
 	includeRecent?: boolean;
 	/**
-	 * Progressive disclosure level ( / Q27).
+	 * Progressive disclosure level.
 	 *
 	 * - `"compact"` (default): a small briefing with expandable sections. The
 	 * agent calls back with `section` + `expand` to pull only the section it
-	 * needs. Compact ≈ 6kb vs ~64kb truncated today — the Q16 cold-start
-	 * token-reduction north star.
+	 * needs. Compact ≈ 6kb vs ~64kb truncated today — the
+	 * cold-start token-reduction north star.
 	 * - `"full"`: today's whole-budget behavior — all sections packed into
 	 * `maxBytes`, no expansion affordances, no cache. Use this when you want
 	 * the entire dump in one call (the benchmark kit measuring recall
@@ -87,8 +96,8 @@ export interface MemoryContextInput extends RecallInput {
 	 */
 	detail?: "compact" | "full";
 	/**
-	 * Expand a single section (progressive disclosure /
-	 * Q27). Set together with {@link expand} to the opaque cursor the compact
+	 * Expand a single section (progressive disclosure).
+	 * Set together with {@link expand} to the opaque cursor the compact
 	 * call returned in `MemoryContextResult.expandable`. The result then
 	 * contains only that one section, expanded beyond the compact cap, and
 	 * reuses the first call's resolved pointers (no re-rewrite). Ignored unless
@@ -106,8 +115,8 @@ export interface MemoryContextInput extends RecallInput {
 }
 
 /**
- * The sections a compact `memofs.context` briefing marks expandable (
- * Component 4 / Q27). Each can be pulled individually on a second call via
+* The sections a compact `memofs.context` briefing marks expandable.
+	 * Each can be pulled individually on a second call via
  * `section` + `expand`.
  *
  * @public
@@ -141,11 +150,11 @@ export interface MemoryContextResult {
 	}>;
 	items?: RecallItem[];
 	/**
-	 * Expandable sections for progressive disclosure ( /
-	 * Q27). Populated on compact calls; absent on `detail: "full"` and on
+	 * Expandable sections for progressive disclosure. Populated on compact
+	 * calls; absent on `detail: "full"` and on
 	 * expand calls. Each entry tells the agent what it can pull and the opaque
 	 * cursor to pass back via `memofs.context(section, expand)`. The agent
-	 * expands only what it needs and stops — the headline delivery of the Q16
+	 * expands only what it needs and stops — the headline delivery of the
 	 * cold-start token-reduction north star.
 	 */
 	expandable?: MemoryContextExpansion[];
@@ -153,8 +162,7 @@ export interface MemoryContextResult {
 }
 
 /**
- * One expandable section in a compact `memofs.context` briefing (
- * Component 4 / Q27).
+* One expandable section in a compact `memofs.context` briefing.
  *
  * @public
  */
@@ -190,7 +198,7 @@ export interface WriteMemoryInput {
 	/**
 	 * Optional caller-supplied stable memory id. When set, the strategy uses it
 	 * verbatim instead of computing the default `mem_<wall-clock:content>` hash.
-	 * This is the Q3 connector-write-discipline hook: connectors pass
+	 * This is the connector-write-discipline hook: connectors pass
 	 * a content-derived id with no wall-clock in the hashed bytes, so re-ingesting
 	 * unchanged external content reproduces identical bytes → the sync manifest
 	 * reports "no change". When omitted, the strategy's default id is computed.
@@ -303,8 +311,7 @@ export interface AgentSessionExtractResult {
  * File-based sync types — single source of truth.
  *
  * These are re-exported from the cloud-client, which freezes the four-method
- * file-replica contract (`push`, `complete`, `pull`, `status`) into
- * `v1.0.0-alpha.0` (see `docs/architecture/cloud-sync-and-refactor.md` §7).
+ * file-replica contract (`push`, `complete`, `pull`, `status`).
  * The cloud is a file replica, never an engine: there are no event-level
  * types, no conflict-resolution types, and no `serverVersion`/`openConflicts`
  * fields. All engine operations (recall, memory CRUD, graph, extraction,

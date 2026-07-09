@@ -1,8 +1,28 @@
+import {
+	getByPath,
+	stableDeepEqual,
+} from "../../core/internal/deep-equal";
+import { isForbiddenKey } from "../../core/internal/forbidden-keys";
 import type { GraphMetadata } from "../types";
 
 const MAX_FILTER_KEYS = 100;
-const MAX_FILTER_DEPTH = 12;
+const MAX_PATH_LENGTH = 512;
 
+/**
+ * Tests graph metadata against a filter object.
+ *
+ * @remarks
+ * Path access and deep equality delegate to the shared `core/internal`
+ * primitives. The local `valuesEqual` keeps this filter's array-semantics
+ * (a filter value matches if ANY element of an array-valued metadata field
+ * equals it), wrapping the shared {@link stableDeepEqual} leaf check.
+ *
+ * @param metadata - The metadata to test.
+ * @param filter - The filter to apply (dot-path keys).
+ * @returns `true` if the metadata matches the filter.
+ *
+ * @public
+ */
 export function matchesMetadataFilter(
 	metadata: GraphMetadata | undefined,
 	filter: Record<string, unknown> | undefined,
@@ -26,65 +46,18 @@ export function matchesMetadataFilter(
 	return true;
 }
 
-function getByPath(input: Record<string, unknown>, path: string): unknown {
-	if (!path.includes(".")) return input[path];
-
-	let current: unknown = input;
-	for (const part of path.split(".")) {
-		if (!isSafeFilterPath(part)) return undefined;
-		if (
-			current === null ||
-			typeof current !== "object" ||
-			Array.isArray(current)
-		)
-			return undefined;
-		current = (current as Record<string, unknown>)[part];
-	}
-	return current;
-}
-
+/**
+ * Deep equality with array-any semantics.
+ *
+ * @remarks
+ * If the actual value is an array, the filter matches when ANY element
+ * equals the expected value. Leaf comparison uses the shared
+ * {@link stableDeepEqual}.
+ */
 function valuesEqual(actual: unknown, expected: unknown): boolean {
 	if (Array.isArray(actual))
 		return actual.some((value) => valuesEqual(value, expected));
-
-	try {
-		return stableStringify(actual) === stableStringify(expected);
-	} catch {
-		return false;
-	}
-}
-
-function stableStringify(value: unknown): string {
-	return JSON.stringify(
-		normalizeForComparison(value, 0, new WeakSet<object>()),
-	);
-}
-
-function normalizeForComparison(
-	value: unknown,
-	depth: number,
-	seen: WeakSet<object>,
-): unknown {
-	if (depth > MAX_FILTER_DEPTH) throw new TypeError("filter too deep");
-	if (value === null || typeof value !== "object") return value;
-	if (seen.has(value)) throw new TypeError("circular filter");
-	seen.add(value);
-	try {
-		if (Array.isArray(value)) {
-			return value.map((item) => normalizeForComparison(item, depth + 1, seen));
-		}
-		const entries = Object.entries(value as Record<string, unknown>).sort(
-			([a], [b]) => a.localeCompare(b),
-		);
-		return Object.fromEntries(
-			entries.map(([key, nested]) => [
-				key,
-				normalizeForComparison(nested, depth + 1, seen),
-			]),
-		);
-	} finally {
-		seen.delete(value);
-	}
+	return stableDeepEqual(actual, expected);
 }
 
 function isSafeFilter(input: Record<string, unknown>): boolean {
@@ -94,14 +67,8 @@ function isSafeFilter(input: Record<string, unknown>): boolean {
 }
 
 function isSafeFilterPath(path: string): boolean {
-	if (!path || path.length > 512) return false;
+	if (!path || path.length > MAX_PATH_LENGTH) return false;
 	return !path
 		.split(".")
-		.some(
-			(part) =>
-				part === "__proto__" ||
-				part === "prototype" ||
-				part === "constructor" ||
-				part.length === 0,
-		);
+		.some((part) => isForbiddenKey(part) || part.length === 0);
 }

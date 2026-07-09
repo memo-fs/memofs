@@ -1,18 +1,18 @@
-import type { GraphEdge } from "../../index";
+import type { GraphEdge } from "../../graph/types";
+import { appendMemoryEvent, createMemoryEvent } from "../../core/events/memory-events";
+import { appendTimestampedNote } from "../../core/documents/notes-memory";
+import { assertWriteAllowed } from "../../security/secret-blocklist";
 import {
-	appendMemoryEvent,
-	appendTimestampedNote,
-	assertWriteAllowed,
 	CORE_MEMORY_PATH,
-	chunkText,
-	classifyDurability,
-	createMemoryEvent,
-	type MemorySourceType,
-	type MemoryType,
 	NOTES_MEMORY_PATH,
-	readCoreMemory,
-	writeCoreMemory,
-} from "../../index";
+} from "../../core/constants/memory-paths";
+import { chunkText } from "../../core/chunking/chunk-text";
+import { classifyDurability } from "../../security/durability-tier";
+import type {
+	MemorySourceType,
+	MemoryType,
+} from "../../core/types/memory-documents";
+import { readCoreMemory, writeCoreMemory } from "../../core/documents/core-memory";
 import type {
 	MemoryDocumentResult,
 	WriteMemoryInput,

@@ -1,9 +1,8 @@
-import {
-	mergeHybridCandidates,
-	readCoreMemory,
-	readNotesMemory,
-	searchMemoryText,
-} from "../../index";
+import type { JsonObject } from "../../core/types/json";
+import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
+import { readCoreMemory } from "../../core/documents/core-memory";
+import { readNotesMemory } from "../../core/documents/notes-memory";
+import { searchMemoryText } from "../../core/search/search-memory";
 import type { RecallInput, RecallResult } from "../types";
 import { candidateShape, hash } from "./helpers";
 import type { LocalStrategyContext } from "./types";
@@ -22,7 +21,7 @@ export async function localRecall(
 
 	const vectorCandidates = new Map<
 		string,
-		{ text: string; score: number; metadata?: Record<string, unknown> }
+		{ text: string; score: number; metadata?: JsonObject }
 	>();
 	if (ctx.options.embedder && ctx.options.recallStore) {
 		try {
@@ -37,7 +36,7 @@ export async function localRecall(
 					score: r.score ?? 0,
 					...(r.metadata === undefined
 						? {}
-						: { metadata: r.metadata as Record<string, unknown> }),
+						: { metadata: r.metadata as JsonObject }),
 				});
 			}
 		} catch {
@@ -79,12 +78,12 @@ async function runLexicalRecall(
 ): Promise<
 	Map<
 		string,
-		{ text: string; score: number; metadata?: Record<string, unknown> }
+		{ text: string; score: number; metadata?: JsonObject }
 	>
 > {
 	const out = new Map<
 		string,
-		{ text: string; score: number; metadata?: Record<string, unknown> }
+		{ text: string; score: number; metadata?: JsonObject }
 	>();
 
 	try {

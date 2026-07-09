@@ -9,7 +9,7 @@
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { MemoryPathError } from "@memofs/core";
+import { MemoryPathError } from "../../core/errors/errors";
 
 /**
  * Normalizes a root directory path (string or URL).

@@ -204,6 +204,27 @@ export function edgeIdentitySalt(
 	return buildEdgeIdentitySalt(input, mode);
 }
 
+export function resolveEdgeId(
+	edge: GraphEdge,
+	options: {
+		allowSelfEdges: boolean;
+		edgeIdentityMode: GraphEdgeIdentityMode;
+	},
+): string {
+	if (edge.id) return edge.id;
+	const preview = normalizeEdge(edge, options);
+	return (
+		preview.id ??
+		stableEdgeId({
+			from: preview.from,
+			type: preview.type,
+			to: preview.to,
+			directed: preview.directed,
+			dedupeKey: edgeIdentitySalt(preview, options.edgeIdentityMode),
+		})
+	);
+}
+
 export function normalizeEdgeIdentityMode(
 	value: unknown,
 ): GraphEdgeIdentityMode {

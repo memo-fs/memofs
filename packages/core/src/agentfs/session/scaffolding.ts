@@ -2,7 +2,7 @@ import {
 	CORE_MEMORY_PATH,
 	MANIFEST_PATH,
 	NOTES_MEMORY_PATH,
-} from "../../index";
+} from "../../core/constants/memory-paths";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import { normalizeRootPrefix } from "../utils/normalize-root-prefix";
 import { validateSafeSegment } from "../utils/validate-safe-segment";

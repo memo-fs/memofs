@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { HybridCandidate } from "../../src/index";
+import type { HybridCandidate, JsonObject } from "../../src/index";
 import {
 	createDeterministicFallbackReranker,
 	mergeHybridCandidates,
@@ -11,7 +11,7 @@ function candidate(
 	id: string,
 	vectorScore: number,
 	lexicalScore: number,
-	metadata?: Record<string, unknown>,
+	metadata?: JsonObject,
 ): HybridCandidate {
 	return {
 		id,

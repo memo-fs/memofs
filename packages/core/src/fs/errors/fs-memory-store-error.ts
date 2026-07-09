@@ -1,4 +1,4 @@
-import { MemoryStoreError } from "@memofs/core";
+import { MemoryStoreError } from "../../core/errors/errors";
 
 /**
  * Error class for filesystem memory store errors.
@@ -43,8 +43,8 @@ export interface LockHeldDetails {
  * that is already locked.
  *
  * @remarks
- * Implements the local single-process contract (Q28 / decisions.md). A second
- * Claude Code window on one repo is the canonical day-one scenario this
+ * Implements the local single-process contract. A second Claude Code
+ * window on one repo is the canonical day-one scenario this
  * guards. `details` carries the holder PID + startedAt so the caller can show
  * "locked by pid 1234 since 2026-06-22T10:00Z." Releasing is via the holder
  * exiting gracefully; a crashed holder leaves a stale lock the next process
@@ -89,14 +89,21 @@ export function isNodeErrnoException(
 }
 
 /**
- * Checks if an error is a "not found" (ENOENT) error.
+ * Determines if an error represents a "not found" condition.
+ *
+ * @remarks
+ * Re-exported from `core/internal/is-not-found-error` — the single source of
+ * truth shared by the fs (Node) and agentfs (remote) zones. The canonical
+ * classifier is a superset of the previous ENOENT-only check: it still
+ * matches `code === "ENOENT"` but also recognizes HTTP 404s and
+ * protocol-level NOT_FOUND indicators.
  *
  * @param error - The error to check.
- * @returns `true` if the error is an ENOENT error, `false` otherwise.
+ * @returns `true` if the error indicates a not-found condition.
+ *
+ * @public
  */
-export function isNotFoundError(error: unknown): boolean {
-	return isNodeErrnoException(error) && error.code === "ENOENT";
-}
+export { isNotFoundError } from "../../core/internal/is-not-found-error";
 
 /**
  * Checks if an error is an "already exists" (EEXIST) error.

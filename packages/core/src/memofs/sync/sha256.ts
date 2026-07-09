@@ -1,8 +1,7 @@
 /**
  * sha256 hex helper for file-replication sync.
  *
- * Sync identity is the sha256 of a canonical file's content (see
- * `docs/architecture/cloud-sync-and-refactor.md` §4.1). The cloud-client
+ * Sync identity is the sha256 of a canonical file's content. The cloud-client
  * contract treats this as a 64-character lowercase hex digest.
  *
  * @public

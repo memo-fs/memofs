@@ -17,11 +17,9 @@ import type {
 } from "./types";
 import {
 	assertProjectId,
-	compactQuery,
 	validateSyncPullInput,
 	validateSyncPushCompleteInput,
 	validateSyncPushInput,
-	validateSyncStatusInput,
 } from "./validation";
 
 /**
@@ -33,8 +31,6 @@ import {
  *
  * The client is project-scoped:
  * /v1/projects/:projectId/sync/{push,push/complete,pull,status}
- *
- * See `docs/architecture/cloud-sync-and-refactor.md` §7 for the contract.
  *
  * @public
  */
@@ -144,11 +140,10 @@ export function createMemoFsCloudClient(
 			},
 			/** Reads the cloud manifest, cursor, and storage usage. */
 			async status(input: SyncStatusInput = {}, signal?: AbortSignal) {
-				const normalized = validateSyncStatusInput(input);
 				return transport.request<SyncStatusResult>({
 					method: "GET",
-					path: projectPath(resolveProjectId(normalized), "/sync/status"),
-					query: compactQuery({}),
+					path: projectPath(resolveProjectId(input), "/sync/status"),
+					query: {},
 					signal,
 				});
 			},
@@ -169,7 +164,6 @@ export function createMemoFsCloudClientFromEnv(
 		baseUrl,
 		apiKey: env.MEMOFS_API_KEY,
 		defaultProjectId: options.defaultProjectId ?? env.MEMOFS_PROJECT_ID,
-		defaultWorkspaceId: options.defaultWorkspaceId ?? env.MEMOFS_WORKSPACE_ID,
 	});
 }
 

@@ -5,7 +5,6 @@ export * from "./lexical";
 export * from "./scoring/cosine";
 export * from "./stores/fs-recall-store";
 export * from "./stores/in-memory-recall-store";
-export * from "./testing/fixtures";
 export * from "./types";
 export * from "./utils/json";
 export * from "./utils/namespace";

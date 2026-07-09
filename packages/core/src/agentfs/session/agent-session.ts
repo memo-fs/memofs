@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { NOTES_MEMORY_PATH } from "../../index";
+import { NOTES_MEMORY_PATH } from "../../core/constants/memory-paths";
 import { assertWriteAllowed } from "../../security/secret-blocklist";
 import { syncAfterSession } from "../sync/sync-after-session";
 import { syncBeforeSession } from "../sync/sync-before-session";

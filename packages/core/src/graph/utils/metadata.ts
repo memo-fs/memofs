@@ -1,3 +1,4 @@
+import { isForbiddenKey } from "../../core/internal/forbidden-keys";
 import { GraphValidationError } from "../errors/graph-errors";
 import type { GraphMetadata, GraphMetadataValue } from "../types";
 import { cloneJson, isPlainObject } from "./clone";
@@ -5,7 +6,6 @@ import { cloneJson, isPlainObject } from "./clone";
 const MAX_METADATA_DEPTH = 6;
 const MAX_METADATA_KEYS = 100;
 const MAX_STRING_LENGTH = 16_384;
-const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 
 export function cloneAndValidateMetadata(
 	input: unknown,
@@ -86,7 +86,7 @@ function validateMetadataValue(
 			throw new GraphValidationError(`${path} has too many keys.`);
 		}
 		for (const [key, nested] of entries) {
-			if (!key || key.length > 128 || FORBIDDEN_KEYS.has(key)) {
+			if (!key || key.length > 128 || isForbiddenKey(key)) {
 				throw new GraphValidationError(`${path} contains an invalid key.`);
 			}
 			validateMetadataValue(nested, `${path}.${key}`, depth + 1, seen);
