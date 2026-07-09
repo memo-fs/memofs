@@ -105,7 +105,7 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 
 ## General Rules
 
-- **⚠️ Always use** the `code-reviewer` skill to review your plan implementation after completing the plan (all checkboxes are checked).
+- **⚠️ Always use** the `code-review` skill to review your plan implementation after completing the plan (all checkboxes are checked).
 - **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
 - **⚠️ Always use** the `cloudflare` skill when working with Cloudflare or building on the server for best practices.
 - **⚠️ Avoid** adding adding adr and wf related nameings to code documentation and avoid pointing to ADRs and WF in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation. Do not track ADRs and WFs in git history.
