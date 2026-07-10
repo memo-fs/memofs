@@ -12,8 +12,7 @@ describe("memofs.context directive block", () => {
 			"# Core Memory\n\nAlways use Biome for formatting.\n",
 		);
 		await memo.writeMemory({
-			content:
-				"The CLI entry point is `memofs` and ships from packages/memofs-cli.",
+			content: "The CLI entry point is `memofs` and ships from packages/cli.",
 			kind: "reference",
 		});
 

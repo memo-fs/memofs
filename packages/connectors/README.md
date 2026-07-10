@@ -180,7 +180,7 @@ This package owns the connector framework + the built-in connectors. It does **n
 
 ## What's not here yet (v1 deferrals)
 
-- **CLI `memofs connectors {add|remove|list|run}`** — lives in `packages/memofs` (the CLI package); wires to this package.
+- **CLI `memofs connectors {add|remove|list|run}`** — lives in `packages/cli` (the CLI package); wires to this package.
 - **Cloud `GET .../connectors/:id/secret` resolver** — ships when the cloud app does.
 - **Schedule enforcement** — `schedule` is stored but not acted on; execution happens only while the local runtime is alive (CLI / MCP session / daemon).
 

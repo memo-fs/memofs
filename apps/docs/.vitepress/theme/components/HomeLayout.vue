@@ -211,14 +211,14 @@ const integrationLogos = [
                       <span class="terminal-dot red"></span>
                       <span class="terminal-dot yellow"></span>
                       <span class="terminal-dot green"></span>
-                      <CopyButton text="npm install -D memofs" class="terminal-copy" />
+                      <CopyButton text="npm install -D @memofs/cli" class="terminal-copy" />
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npm install -D memofs<br />
+                      <span class="terminal-prompt">$</span> npm install -D @memofs/cli<br />
                       <br />
-                      <span class="terminal-comment"># or: pnpm add -D memofs</span><br />
-                      <span class="terminal-comment"># or: yarn add -D memofs</span><br />
-                      <span class="terminal-comment"># or: bun add -D memofs</span>
+                      <span class="terminal-comment"># or: pnpm add -D @memofs/cli</span><br />
+                      <span class="terminal-comment"># or: yarn add -D @memofs/cli</span><br />
+                      <span class="terminal-comment"># or: bun add -d @memofs/cli</span>
                     </div>
                   </div>
                   <p class="step-requirement">

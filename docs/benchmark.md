@@ -12,7 +12,7 @@ A package should not be published if smoke benchmarks fail. Full benchmark regre
 
 MemoFS keeps benchmark infrastructure in two places:
 
-- `packages/memofs/src/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
+- `packages/benchmark-kit` provides the reusable runner, reporters, threshold checks, and workload helpers.
 - `benchmarks` is the private workspace package that owns MemoFS-specific suites, thresholds, reports, and release scripts.
 
 Generated output is written to `benchmark-results/` and ignored by Git.

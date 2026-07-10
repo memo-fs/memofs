@@ -126,7 +126,7 @@ MemoFS is structured as a monorepo containing 15 published public packages under
 | Package | Purpose |
 | --- | --- |
 | [`@memofs/core`](packages/core) | Core runtime, virtual AgentFS, graph engine, and hybrid recall router. |
-| [`memofs`](packages/memofs) | CLI tool for local and cloud memory workflows (`npx memofs`). |
+| [`@memofs/cli`](packages/cli) | CLI tool for local and cloud memory workflows (`npx memofs`). |
 | [`@memofs/server`](packages/server) | Self-hostable, OSS-deployable memory server for Node and Workers. |
 | [`@memofs/mcp-server`](packages/mcp-server) | Model Context Protocol server exposing memory tools to AI agents. |
 | [`@memofs/connectors`](packages/connectors) | Local ingestion framework plugins (Notion, GitHub). |

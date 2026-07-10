@@ -21,7 +21,7 @@ in your repo, not in a vendor's database.
 ## 1. Install the MemoFS CLI
 
 ```bash
-npm install -g memofs
+npm install -g @memofs/cli
 # or use without installing:
 npx memofs
 ```

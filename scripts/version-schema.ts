@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 async function main() {
-	const pkgPath = path.resolve(process.cwd(), "packages/memofs/package.json");
+	const pkgPath = path.resolve(process.cwd(), "packages/cli/package.json");
 	const pkgData = await fs.readFile(pkgPath, "utf-8");
 	const pkg = JSON.parse(pkgData);
 	const version = pkg.version;

@@ -7,7 +7,7 @@ Welcome to the `@memofs/core` workspace runbook. This document provides an opera
 ## Workspace Overview
 
 The MemoFS repository is structured as a **pnpm monorepo** containing:
-1. **Public Package**: `@memofs/core` (located in [packages/memofs](file:///Users/codingsimba/Desktop/projects/oss/packages/memofs)) — the unified file-first memory runtime.
+1. **Public Package**: `@memofs/core` (located in `packages/core`) — the unified file-first memory runtime.
 2. **Docs App**: `apps/docs` — the VitePress-based documentation site.
 3. **Tooling**: `@repo/*` packages in [tooling](file:///Users/codingsimba/Desktop/projects/oss/tooling) — private workspace support for builds, tests, and configuration.
 

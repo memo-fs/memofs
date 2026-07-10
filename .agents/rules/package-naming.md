@@ -5,14 +5,14 @@ separate naming lanes.
 
 ### Public OSS Packages
 
-Public packages use the `@memofs/*` npm scope, except the CLI distribution. The
-CLI stays unscoped as `memofs` so `npm install -g memofs` and `npx memofs`
-remain the primary install surfaces.
+Public packages use the `@memofs/*` npm scope. The CLI is published as
+`@memofs/cli`; the binary name remains `memofs` so `npx memofs` and
+`npm install -g @memofs/cli` are the primary install surfaces.
 
 | Package directory | Published name | Scope | Description |
 |---|---|---|---|
 | `packages/core` | `@memofs/core` | `@memofs` | Core memory runtime, primitives, stores, recall, graph, AgentFS, and cloud-client contracts |
-| `packages/memofs` | `memofs` | unscoped | CLI tool for local and cloud memory workflows |
+| `packages/cli` | `@memofs/cli` | `@memofs` | CLI tool for local and cloud memory workflows |
 | `packages/adapter-ai-sdk` | `@memofs/adapter-ai-sdk` | `@memofs` | Vercel AI SDK adapter, memory tool, runtime bridge |
 | `packages/adapter-openai` | `@memofs/adapter-openai` | `@memofs` | OpenAI embedder adapter |
 | `packages/adapter-r2` | `@memofs/adapter-r2` | `@memofs` | Cloudflare R2 blob adapter |

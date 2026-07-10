@@ -1,9 +1,9 @@
 {
-  "$schema": "https://opencode.ai/config.json",
-  "references": {
-    "memofs-cloud": {
-      "path": "../memofs-cloud/apps/cloud",
-      "description": "Use for MemoFS Cloud app reference and implementation details"
-    }
-  },
+	"$schema": "https://opencode.ai/config.json",
+	"references": {
+		"memofs-cloud": {
+			"path": "../memofs-cloud/apps/cloud",
+			"description": "Use for MemoFS Cloud app reference and implementation details"
+		}
+	}
 }

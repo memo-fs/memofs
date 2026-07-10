@@ -1,6 +1,6 @@
 # Command Line Interface (CLI)
 
-The `memofs` package provides the primary command-line tool for managing local and hybrid memory workflows.
+The `@memofs/cli` package provides the primary command-line tool for managing local and hybrid memory workflows.
 
 ---
 
@@ -11,19 +11,19 @@ Install the CLI as a development dependency in your project:
 ::: code-group
 
 ```sh [npm]
-npm install -D memofs
+npm install -D @memofs/cli
 ```
 
 ```sh [pnpm]
-pnpm add -D memofs
+pnpm add -D @memofs/cli
 ```
 
 ```sh [yarn]
-yarn add -D memofs
+yarn add -D @memofs/cli
 ```
 
 ```sh [bun]
-bun add -d memofs
+bun add -d @memofs/cli
 ```
 
 :::
@@ -36,19 +36,19 @@ Or install globally:
 ::: code-group
 
 ```sh [npm]
-npm install -g memofs
+npm install -g @memofs/cli
 ```
 
 ```sh [pnpm]
-pnpm add -g memofs
+pnpm add -g @memofs/cli
 ```
 
 ```sh [yarn]
-yarn global add memofs
+yarn global add @memofs/cli
 ```
 
 ```sh [bun]
-bun add -g memofs
+bun add -g @memofs/cli
 ```
 
 :::

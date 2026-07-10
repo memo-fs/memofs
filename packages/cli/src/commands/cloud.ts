@@ -178,7 +178,7 @@ export async function runCloudSyncStatusCommand(
  *
  * NOTE: the actual byte download + verify + write + reindex is delegated to the
  * local file-sync layer (see
- * `packages/memofs/src/memofs/sync/file-replication.ts`). When this command is
+ * `packages/core/src/sync/file-replication.ts`). When this command is
  * invoked through the CLI runner, the runtime wires `pull` end-to-end; when
  * invoked directly with a raw cloud client, it reports the planned download set.
  *

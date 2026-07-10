@@ -13,7 +13,7 @@
 "@memofs/adapter-turso": major
 "@memofs/adapter-voyage": major
 "@memofs/adapter-workers-ai": major
-"memofs": major
+"@memofs/cli": major
 ---
 
 # MemoFS 1.0.0-beta.1 — Initial OSS publication
@@ -23,7 +23,7 @@ First public release of the MemoFS workspace to npm. 15 packages, published toge
 ## Highlights
 
 - **`@memofs/core`** — the file-first memory runtime, with a local filesystem store, graph memory, recall engine (lexical, vector, hybrid, auto), cloud client contracts, and a single `MemoFS` client class.
-- **`memofs`** — the CLI for local + cloud memory workflows.
+- **`@memofs/cli`** — the CLI for local + cloud memory workflows.
 - **`@memofs/server`** — self-hostable runtime over `node:http` and a Cloudflare Worker entry point.
 - **`@memofs/mcp-server`** — a Model Context Protocol server exposing the core engine as tools.
 - **`@memofs/connectors`** — the local connector framework with first-party GitHub and Notion connectors and three secret resolver strategies.
@@ -47,7 +47,7 @@ This release uses the `MemoFS` brand across LICENSE files, READMEs, URLs, packag
 
 ```bash
 npm install @memofs/core
-npm install memofs
+npm install @memofs/cli
 npm install @memofs/mcp-server
 npm install @memofs/adapter-openai
 # ...etc

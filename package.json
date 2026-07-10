@@ -53,7 +53,7 @@
 		"@changesets/cli": "^2.31.0",
 		"@changesets/types": "^6.1.0",
 		"@memofs/mcp-server": "workspace:^",
-		"memofs": "workspace:^",
+		"@memofs/cli": "workspace:^",
 		"@types/node": "^25.9.2",
 		"@vitest/coverage-v8": "^4.1.8",
 		"dotenv": "^17.4.2",

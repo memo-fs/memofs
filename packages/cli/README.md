@@ -1,9 +1,9 @@
-# `memofs`
+# `@memofs/cli`
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/memofs"><img src="https://img.shields.io/npm/v/memofs?label=memofs&style=for-the-badge" alt="npm version" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/cli"><img src="https://img.shields.io/npm/v/@memofs/cli?label=@memofs/cli&style=for-the-badge" alt="npm version" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs"><img src="https://img.shields.io/badge/status-beta-blue?style=for-the-badge" alt="Status: Beta" /></a> &nbsp;
-  <a href="https://www.npmjs.com/package/memofs"><img src="https://img.shields.io/npm/dm/memofs?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
+  <a href="https://www.npmjs.com/package/@memofs/cli"><img src="https://img.shields.io/npm/dm/@memofs/cli?style=for-the-badge" alt="npm downloads" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/christophersesugh/memofs/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a> &nbsp;
   <a href="https://docs.memofs.dev/"><img src="https://img.shields.io/badge/docs-online-blue?style=for-the-badge" alt="Docs" /></a> &nbsp;
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
@@ -13,16 +13,16 @@ MemoFS command-line interface for local and hybrid memory workflows.
 
 ## What is this?
 
-The `memofs` package gives you a command-line tool for managing local and hybrid memory. You can use it to initialize a memory workspace, store durable decisions, search past memory, sync with MemoFS Cloud, and manage agent sessions and connectors.
+The `@memofs/cli` package gives you a command-line tool (`memofs`) for managing local and hybrid memory. You can use it to initialize a memory workspace, store durable decisions, search past memory, sync with MemoFS Cloud, and manage agent sessions and connectors.
 
 ## Installation
 
 ```bash
-npm install -D memofs
+npm install -D @memofs/cli
 
-# or: pnpm add -D memofs
-# or: yarn add -D memofs
-# or: bun add -d memofs
+# or: pnpm add -D @memofs/cli
+# or: yarn add -D @memofs/cli
+# or: bun add -d @memofs/cli
 ```
 
 > Requires **Node.js >= 22**.

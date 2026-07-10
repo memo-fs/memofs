@@ -84,7 +84,7 @@ This project follows [semantic versioning](https://semver.org/).
 ## v1.0.0-alpha.0 — 2026-01-15
 **Initial alpha release**
 
-### Core (`packages/memofs`)
+### Core (`packages/core`)
 
 #### Added
 - Core memory management (core, notes, recent, graph)

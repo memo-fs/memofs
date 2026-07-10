@@ -239,9 +239,9 @@ Packages in this OSS repo must not contain private MemoFS Cloud logic such as:
 ---
 
 ## Adding a new package or feature
+- **MemoFS features**: Add all new MemoFS capabilities as internal modules under `packages/core/src/<feature>/` and re-export them from the package root [index.ts](./packages/core/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
 
-- **MemoFS features**: Add all new MemoFS capabilities as internal modules under `packages/memofs/src/<feature>/` and re-export them from the package root [index.ts](./packages/memofs/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
-- **New workspace packages**: Future workspace packages (such as MemoFS components) should live beside `packages/memofs/` under `packages/<package-name>/` and conform to the following directory structure:
+- **New workspace packages**: Future workspace packages (such as MemoFS components) should live beside `packages/core/` under `packages/<package-name>/` and conform to the following directory structure:
 
 ```txt
 packages/package-name/

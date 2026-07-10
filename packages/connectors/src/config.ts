@@ -125,7 +125,7 @@ export async function readConnectorsFile(
  *
  * Structural (zod-free) checks: top-level shape, required per-row fields, non-empty
  * `id`/`type`/`secretRef`, and rejection of any token-shaped field leak (the
- * `packages/memofs-cli/src/utils/secrets.ts` guardrail intent — tokens never
+ * `packages/cli/src/utils/secrets.ts` guardrail intent — tokens never
  * ride in the file replica).
  *
  * @public
