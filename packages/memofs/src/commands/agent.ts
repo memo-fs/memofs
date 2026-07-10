@@ -13,9 +13,9 @@ import {
 import { appendText, exists, readText, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 
-const LATEST_AGENT_SESSION_PATH = `${MEMOFS_PATHS.tmpDir}/agent-sessions/latest.json`;
+const LATEST_AGENT_SESSION_PATH = `${MEMOFS_CLI_PATHS.tmpDir}/agent-sessions/latest.json`;
 
 /**
  * Shared options for local AgentFS session commands.

@@ -14,7 +14,7 @@ import {
 import { CliUsageError } from "../errors/cli-errors";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 import { stringifyJsonl } from "../protocol/jsonl";
 import { resolveCommandContent } from "../utils/content";
 import { parseMetadataJson } from "../utils/metadata";
@@ -233,13 +233,13 @@ export async function runRememberCommand(
 
 	const currentNotes = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.notesMemory,
+		MEMOFS_CLI_PATHS.notesMemory,
 	);
 	const nextNotes =
 		`${(currentNotes ?? "# Notes\n").trimEnd()}\n\n${note}`.trimStart();
 	await writeText(
 		options.memo.store,
-		MEMOFS_PATHS.notesMemory,
+		MEMOFS_CLI_PATHS.notesMemory,
 		`${nextNotes.trimEnd()}\n`,
 	);
 
@@ -248,7 +248,7 @@ export async function runRememberCommand(
 		id: eventId,
 		type: "memory.created",
 		timestamp,
-		sourcePath: MEMOFS_PATHS.notesMemory,
+		sourcePath: MEMOFS_CLI_PATHS.notesMemory,
 		actor,
 		summary:
 			options.title ??
@@ -265,14 +265,14 @@ export async function runRememberCommand(
 	};
 	await appendText(
 		options.memo.store,
-		MEMOFS_PATHS.memoryEvents,
+		MEMOFS_CLI_PATHS.memoryEvents,
 		stringifyJsonl([event]),
 	);
 
 	const data = {
 		stored: true,
 		eventId,
-		path: MEMOFS_PATHS.notesMemory,
+		path: MEMOFS_CLI_PATHS.notesMemory,
 		kind,
 		tags,
 		confidence,
@@ -281,7 +281,7 @@ export async function runRememberCommand(
 	if (options.json) printJsonEnvelope(options.output, "remember", data);
 	else
 		options.output.success(
-			`Stored ${kind} memory in ${MEMOFS_PATHS.notesMemory}`,
+			`Stored ${kind} memory in ${MEMOFS_CLI_PATHS.notesMemory}`,
 		);
 	return 0;
 }

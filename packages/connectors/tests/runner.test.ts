@@ -98,7 +98,7 @@ describe("runConnectors", () => {
 	beforeEach(async () => {
 		rootDir = await mkdtemp(join(tmpdir(), "memofs-runner-"));
 		store = new InMemoryMemoryStore();
-		memo = new MemoFS({ mode: "memory", store });
+		memo = new MemoFS({ mode: "local", store });
 	});
 
 	afterEach(async () => {

@@ -1,18 +1,17 @@
 /**
- * JSON-RPC method names + the live/gated partition for the `memofs-server`
+ * JSON-RPC method names + the live/gated partition for the `@memofs/server`
  * runtime API.
  *
  * @remarks
- * This is the single source of truth for the **Hard ordering rule**
- * (s3-execution-plan.md §"Hard ordering rule"). Every mutating method is a
- * member of {@link GATED_METHODS}; until slice 3's concurrency layer
- * merges, the dispatcher refuses those methods with `503`. No
+ * This is the single source of truth for the **Hard ordering rule**. Every
+ * mutating method is a member of {@link GATED_METHODS}; until a concurrency
+ * layer is injected, the dispatcher refuses those methods with `503`. No
  * concurrent-write surface is reachable before its serialization — the gate
  * is "method rejects," never "method present unsafely."
  *
- * Slice 3 flips the gate: it injects a `concurrencyLayer`, and the mutating
- * methods run live through it. The method names themselves never change, so
- * the OSS Node deploy and the cloud Worker deploy stay identical.
+ * Injecting a `concurrencyLayer` flips the gate: the mutating methods then
+ * run live through it. The method names themselves never change, so the OSS
+ * Node deploy and the cloud Worker deploy stay identical.
  *
  * The method surface mirrors the {@link MemoFS} client's frozen public API
  * (`recall`, `context`, `writeMemory`, `core`, `notes`, `graph`, `snapshots`,
@@ -77,7 +76,7 @@ export const RUNTIME_METHOD = {
 	restoreSnapshot: "snapshots.restore",
 } as const;
 
-/** The set of method names that are live (read-only) at slice 1. */
+/** The set of method names that are live (read-only) today. */
 export const LIVE_METHODS: ReadonlySet<string> = new Set<string>([
 	RUNTIME_METHOD.health,
 	RUNTIME_METHOD.recall,
@@ -95,12 +94,12 @@ export const LIVE_METHODS: ReadonlySet<string> = new Set<string>([
 ]);
 
 /**
- * The set of method names gated on slice 3's concurrency layer.
+ * The set of method names gated on the concurrency layer.
  *
- * Every mutating operation lives here. Until a `concurrencyLayer` is injected
- * (slice 3), the dispatcher refuses these with `503`. This is the Hard
- * ordering rule made machine-checkable: no concurrent-write surface is
- * reachable before its serialization.
+ * Every mutating operation lives here. Until a `concurrencyLayer` is injected,
+ * the dispatcher refuses these with `503`. This is the Hard ordering rule made
+ * machine-checkable: no concurrent-write surface is reachable before its
+ * serialization.
  */
 export const GATED_METHODS: ReadonlySet<string> = new Set<string>([
 	RUNTIME_METHOD.write,

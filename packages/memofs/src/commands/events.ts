@@ -7,7 +7,7 @@
 import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
 /**
@@ -47,7 +47,7 @@ export async function runEventsCommand(
 ): Promise<number> {
 	const content = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.memoryEvents,
+		MEMOFS_CLI_PATHS.memoryEvents,
 	);
 	const records = content
 		? parseJsonl(content, { strict: options.strict ?? false })

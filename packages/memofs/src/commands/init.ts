@@ -17,7 +17,7 @@ import {
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import {
-	MEMOFS_PATHS,
+	MEMOFS_CLI_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
 } from "../protocol/constants";
@@ -90,7 +90,7 @@ export async function runInitCommand(
 
 	const existingManifest = await readTextIfExistsSafe(
 		options.memo.store,
-		MEMOFS_PATHS.manifest,
+		MEMOFS_CLI_PATHS.manifest,
 	);
 	if (existingManifest && !options.force) {
 		const data = {
@@ -105,15 +105,15 @@ export async function runInitCommand(
 
 	const manifest = createDefaultManifest(projectId ? { projectId } : undefined);
 	const seedFiles: Record<string, string> = {
-		[MEMOFS_PATHS.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
-		[MEMOFS_PATHS.coreMemory]: "# Core Memory\n\n",
-		[MEMOFS_PATHS.notesMemory]: "# Notes\n\n",
-		[MEMOFS_PATHS.memoryEvents]: "",
-		[MEMOFS_PATHS.conversations]: "",
-		[MEMOFS_PATHS.chunks]: "",
-		[MEMOFS_PATHS.graphNodes]: "",
-		[MEMOFS_PATHS.graphEdges]: "",
-		[MEMOFS_PATHS.snapshots]: "",
+		[MEMOFS_CLI_PATHS.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
+		[MEMOFS_CLI_PATHS.coreMemory]: "# Core Memory\n\n",
+		[MEMOFS_CLI_PATHS.notesMemory]: "# Notes\n\n",
+		[MEMOFS_CLI_PATHS.memoryEvents]: "",
+		[MEMOFS_CLI_PATHS.conversations]: "",
+		[MEMOFS_CLI_PATHS.chunks]: "",
+		[MEMOFS_CLI_PATHS.graphNodes]: "",
+		[MEMOFS_CLI_PATHS.graphEdges]: "",
+		[MEMOFS_CLI_PATHS.snapshots]: "",
 	};
 
 	const created: string[] = [];

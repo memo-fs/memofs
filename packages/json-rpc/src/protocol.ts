@@ -2,13 +2,11 @@
  * JSON-RPC 2.0 protocol structures, validation, and response helpers.
  *
  * @remarks
- * A dependency-free, product-neutral implementation of the JSON-RPC 2.0 spec
+ * A dependency-free, neutral implementation of the JSON-RPC 2.0 spec
  * ({@link https://www.jsonrpc.org/specification}). Extracted as a shared SSOT
- * so every JSON-RPC-speaking package in the workspace (`memofs-server`'s
- * runtime API, `memofs-mcp-server`'s MCP transport) shares one set of types
- * + helpers instead of each vendoring a copy (AGENTS.md: DRY & SSOT
- * everywhere; `.agents/rules/package-boundaries.md`: no transport in core, no
- * distribution→distribution import).
+ * so every JSON-RPC-speaking package in the workspace (`@memofs/server`'s
+ * runtime API, `@memofs/mcp-server`'s MCP transport) shares one set of types
+ * + helpers instead of each vendoring a copy.
  *
  * The two throw sites (`parseJsonRpcPayload`, `validateJsonRpcRequest`) throw
  * {@link JsonRpcProtocolError} — the neutral error type. A consumer that owns

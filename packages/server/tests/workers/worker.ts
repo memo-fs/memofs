@@ -4,7 +4,7 @@ import { createRuntimeFetchHandler } from "../../src/http/fetch-handler";
 const runtime = new MemoFS({
 	store: new InMemoryMemoryStore(),
 	projectId: "worker-test",
-	mode: "memory",
+	mode: "local",
 });
 
 const handler = createRuntimeFetchHandler({

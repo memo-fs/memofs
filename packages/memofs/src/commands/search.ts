@@ -7,7 +7,7 @@
 import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 
 /**
  * Options configuration for the search command.
@@ -56,9 +56,9 @@ export async function runSearchCommand(
 	const matches: SearchMatch[] = [];
 
 	const filesToSearch = [
-		MEMOFS_PATHS.coreMemory,
-		MEMOFS_PATHS.notesMemory,
-		MEMOFS_PATHS.conversations,
+		MEMOFS_CLI_PATHS.coreMemory,
+		MEMOFS_CLI_PATHS.notesMemory,
+		MEMOFS_CLI_PATHS.conversations,
 	];
 
 	let matcher: (line: string) => boolean;

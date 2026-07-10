@@ -2,7 +2,7 @@
 	"name": "@memofs/server",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Self-hostable Memo FS runtime server for Node and Cloudflare Workers deployments.",
+	"description": "Self-hostable MemoFS runtime server for Node and Cloudflare Workers deployments.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",

@@ -2,7 +2,7 @@
 	"name": "@memofs/testing",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Shared contract tests, fixtures, and fakes for Memo FS packages.",
+	"description": "Shared contract tests, fixtures, and fakes for MemoFS packages.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",

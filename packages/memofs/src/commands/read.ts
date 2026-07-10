@@ -8,7 +8,7 @@ import type { MemoFS } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 
 /**
  * Options configuration for the read command.
@@ -36,9 +36,9 @@ export interface ReadCommandOptions {
  * Internal mapping of targets to their respective workspace file paths.
  */
 const TARGET_PATHS = {
-	core: MEMOFS_PATHS.coreMemory,
-	notes: MEMOFS_PATHS.notesMemory,
-	manifest: MEMOFS_PATHS.manifest,
+	core: MEMOFS_CLI_PATHS.coreMemory,
+	notes: MEMOFS_CLI_PATHS.notesMemory,
+	manifest: MEMOFS_CLI_PATHS.manifest,
 } as const;
 
 /**

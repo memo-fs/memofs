@@ -3,7 +3,7 @@
  *
  * Ingests Notion pages from a database (`POST /v1/databases/:id/query`) or a
  * workspace search (`POST /v1/search`) into `.memofs/` as connector notes.
- * The runner handles the Q3 write discipline; this connector only fetches +
+ * The runner handles the write discipline; this connector only fetches +
  * normalizes.
  *
  * @public

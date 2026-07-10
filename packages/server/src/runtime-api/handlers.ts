@@ -8,10 +8,10 @@
  * two-Worker boundary: the runtime API the commercial Worker reaches
  * over a Service Binding is the same surface an OSS self-hoster gets over HTTP.
  *
- * Read handlers run live at slice 1. Write handlers (the gated set) only run
- * once slice 3's concurrency layer is injected; the dispatcher refuses them
- * with `503` until then (see {@link dispatch}). They are defined here so the
- * slice-3 flip is "inject the lock + drop the gate," not "add new routes."
+ * Read handlers run live. Write handlers (the gated set) only run once
+ * a concurrency layer is injected; the dispatcher refuses them with `503`
+ * until then (see {@link dispatch}). They are defined here so enabling writes
+ * is "inject the lock + drop the gate," not "add new routes."
  *
  * Param extraction is defensive: every field is narrowed from `unknown`
  * before it reaches the typed {@link MemoFS} call, so a malformed payload
@@ -75,8 +75,8 @@ function optionalObject(
 
 /**
  * The complete method → handler map. Read methods run live; the gated
- * mutating methods run only once the dispatcher injects a concurrency layer
- * (slice 3). Grouped read-first, then mutating.
+ * mutating methods run only once the dispatcher injects a concurrency layer.
+ * Grouped read-first, then mutating.
  */
 export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 	// ── Reads (live) ──────────────────────────────────────────────────────
@@ -163,8 +163,8 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 		return { items: await tek.snapshots.list() } as unknown as JsonValue;
 	},
 
-	// ── Writes (gated on slice 3 — refused with 503 until the concurrency
-	// layer merges; handlers exist so the slice-3 flip drops the gate) ──
+	// ── Writes (gated — refused with 503 until the concurrency layer is
+	// injected; handlers exist so enabling writes drops the gate) ──
 	async [RUNTIME_METHOD.write](tek, params) {
 		return (await tek.writeMemory(params as never)) as unknown as JsonValue;
 	},

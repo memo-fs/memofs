@@ -9,55 +9,59 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Self-hostable Memo FS runtime server for Node and Cloudflare Workers deployments.
+Self-hostable MemoFS runtime server for Node and Cloudflare Workers deployments.
 
 ## What is this?
 
-**The OSS-deployable hosted-memory server for Memo FS.** Runs the *same* memory
-engine Memo FS Cloud runs, over a memory store you bring, with **no provider
-hardcoding**. Memo FS Cloud runs this package as its runtime worker; you can run
+**The OSS-deployable hosted-memory server for MemoFS.** Runs the *same* memory
+engine MemoFS Cloud runs, over a memory store you bring, with **no provider
+hardcoding**. MemoFS Cloud runs this package as its runtime worker; you can run
 the identical code on your own infra as a single Node process — the only
-difference is which adapters you inject ( /).
+difference is which adapters you inject.
 
 Bring your own blob store, metadata store, embedder, reranker, extractor, and LLM
-client. No vendor lock-in. No Memo FS Cloud dependency.
+client. No vendor lock-in. No MemoFS Cloud dependency.
 
 ## Installation
 
 ```bash
 npm install @memofs/server
+
+# or: pnpm add @memofs/server
+# or: yarn add @memofs/server
+# or: bun add @memofs/server
 ```
+
+> Requires **Node.js >= 22**.
 
 ## Quick Start
 
 ```ts
 import { createHostedRuntime } from "@memofs/server";
-import {
- InMemoryMemoryStore,
-} from "@memofs";
+import { InMemoryMemoryStore } from "@memofs/core";
 
-const tek = createHostedRuntime({
- // The only required slot: the memory store (your file replica).
- store: new InMemoryMemoryStore(),
- projectId: "my-project",
+const runtime = createHostedRuntime({
+  // The only required slot: the memory store (your file replica).
+  store: new InMemoryMemoryStore(),
+  projectId: "my-project",
 
- // Optional intelligence slots — each runs its deterministic default
- // when omitted (lexical recall, rule-based extraction, no LLM tier).
- // Inject a provider adapter to upgrade a slot.
- embedder: yourEmbedder,
- reranker: yourReranker,
- extractor: yourExtractor,
- llmClient: yourLlmClient,
+  // Optional intelligence slots — each runs its deterministic default
+  // when omitted (lexical recall, rule-based extraction, no LLM tier).
+  // Inject a provider adapter to upgrade a slot.
+  embedder: yourEmbedder,
+  reranker: yourReranker,
+  extractor: yourExtractor,
+  llmClient: yourLlmClient,
 });
 
-await tek.writeMemory({ content: "self-hosted runtime runs the engine" });
-const hits = await tek.recall("self-hosted");
+await runtime.writeMemory({ content: "self-hosted runtime runs the engine" });
+const hits = await runtime.recall("self-hosted");
 ```
 
 ## The one required slot: `store`
 
 A memory runtime needs files to read and write. That is the `store` — your
-memory store (the file replica). Memo FS Cloud builds it from Cloudflare R2 +
+memory store (the file replica). MemoFS Cloud builds it from Cloudflare R2 +
 Turso; you build it from whatever you run (S3 + Postgres, GCS + D1, or anything
 else that implements `MemoryStore`). There is no default to fall back on.
 
@@ -77,7 +81,7 @@ The same runtime works zero-config or fully enhanced. Inject only what you need.
 
 ## Boundary
 
-This package assembles a `Memofs` instance from adapters you provide. It never
+This package assembles a `MemoFS` instance from adapters you provide. It never
 reads environment variables, never imports an adapter package, and never hardcodes
 a provider. The store and provider choices belong to you (or to the cloud, when
 it consumes this same factory).
@@ -85,7 +89,7 @@ it consumes this same factory).
 ## The HTTP runtime API (JSON-RPC over HTTP)
 
 The same engine is reachable over HTTP — the two-Worker boundary. An
-OSS self-hoster deploys it as a **Node single process**; Memo FS Cloud deploys it
+OSS self-hoster deploys it as a **Node single process**; MemoFS Cloud deploys it
 as the **runtime Worker** behind a Service Binding. Both run identical code.
 
 ### Deploy targets
@@ -131,28 +135,26 @@ gated** (see below).
 
 ### The write-gate (important)
 
-Every mutating method returns **`503`** until the concurrency layer ships
-(slice 3 / [](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0010-cloud-concurrency-control-for-b3.md)).
+Every mutating method returns **`503`** until the concurrency layer ships.
 This is deliberate: concurrent writes to the same project would silently lose
 data under last-writer-wins, so **no write surface is reachable before the
 serialization layer that makes writes safe exists**. The gate is "method
 rejects," never "method present unsafely."
 
 Reads work fully today. To write memory programmatically before the gate lifts,
-use the `Memofs` client directly in-process.
+use the `MemoFS` client directly in-process.
 
 ## Status
 
-- **Slice 0** — the provider-neutral factory + the `LlmClient` core contract.
-- **Slice 1 (this release)** — the JSON-RPC-over-HTTP runtime API, the Worker
- entry, and the Node bin. Reads are live; writes are gated on slice 3.
-- **Slice 2** — the cloud wires this package as its runtime Worker (Service
- Binding) and deletes its hardcoded `hosted-runtime.ts`.
-- **Slice 3** — the concurrency layer lands; the write-gate flips to live routes.
+- **Reads are live** — `recall`, `context`, `memory.readCore`, `memory.readNotes`,
+  `memory.readConversations`, `memory.listRecent`, `memory.validate`, `graph.*`
+  reads, and `snapshots.list` all work today.
+- **Writes are gated** — every mutating method returns `503` until the
+  concurrency layer lands. This prevents silent data loss from concurrent
+  last-writer-wins writes. To write memory programmatically, use the `MemoFS`
+  client directly in-process.
 
-See the
-[execution plan](https://github.com/christophersesugh/memofs/blob/main/docs/architecture/s3-execution-plan.md)
-for the full roadmap.
+For a complete list of all available methods, refer to the [Full Documentation](https://docs.memofs.dev/packages/server/).
 
 ## License
 

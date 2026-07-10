@@ -1,25 +1,24 @@
 /**
- * Framework-free HTTP core for the `memofs-server` runtime API.
+ * Framework-free HTTP core for the `@memofs/server` runtime API.
  *
  * @remarks
  * Takes a Web `Request` + an assembled {@link MemoFS} runtime + options, and
  * returns a Web `Response`. This is the one place the runtime API touches
  * HTTP; both the Worker entry (`worker.ts`) and the Node bin
- * (`bin/memofs-server.ts`) are thin adapters over it's "the cloud
- * and the OSS self-hoster run identical `memofs-server` code" made literal.
+ * (`bin/memofs-server.ts`) are thin adapters over it — "the cloud and the
+ * OSS self-hoster run identical `@memofs/server` code" made literal.
  *
- * The shape mirrors `memofs-mcp-server`'s `handleMemoFSMcpRequest`:
+ * The shape mirrors `@memofs/mcp-server`'s `handleMemoFSMcpRequest`:
  * `GET /health` → liveness JSON; `POST /` → JSON-RPC dispatch; `OPTIONS` →
  * CORS preflight; everything else → `405`. Bearer-token auth is optional and
  * defaults off (the cloud reaches the runtime Worker over a private Service
  * Binding that needs no shared secret; an OSS self-hoster exposes it publicly
  * and turns auth on).
  *
- * The concurrency gate's `data.httpStatus` is honored: a gated-write
- * `503` is surfaced as an actual `503` so a client's retry logic engages
- * correctly. Every other JSON-RPC response is `200` (JSON-RPC carries errors
- * in the body, not the status — except the gate, which is an HTTP-level
- * "try again later").
+ * The concurrency gate's `data.httpStatus` is honored: a gated-write `503` is
+ * surfaced as an actual `503` so a client's retry logic engages correctly.
+ * Every other JSON-RPC response is `200` (JSON-RPC carries errors in the body,
+ * not the status — except the gate, which is an HTTP-level "try again later").
  *
  * @module http
  */

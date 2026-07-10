@@ -1,5 +1,5 @@
 /**
- * Secret resolution — the Q2 credential plane.
+ * Secret resolution — the credential plane for connectors.
  *
  * Tokens never ride in the file replica. `.memofs/connectors.json` carries only
  * an opaque `secretRef`; the framework resolves it to a live token through an

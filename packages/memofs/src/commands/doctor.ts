@@ -11,7 +11,7 @@ import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
-	MEMOFS_PATHS,
+	MEMOFS_CLI_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
 } from "../protocol/constants";
@@ -102,7 +102,7 @@ export async function runDoctorCommand(
 
 	const manifestContent = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.manifest,
+		MEMOFS_CLI_PATHS.manifest,
 	);
 	if (manifestContent) {
 		try {
@@ -118,10 +118,10 @@ export async function runDoctorCommand(
 	}
 
 	const validationMap: Record<string, z.ZodSchema> = {
-		[MEMOFS_PATHS.memoryEvents]: MemoryEventSchema,
-		[MEMOFS_PATHS.conversations]: ConversationEntrySchema,
-		[MEMOFS_PATHS.chunks]: MemoryChunkSchema,
-		[MEMOFS_PATHS.snapshots]: SnapshotEntrySchema,
+		[MEMOFS_CLI_PATHS.memoryEvents]: MemoryEventSchema,
+		[MEMOFS_CLI_PATHS.conversations]: ConversationEntrySchema,
+		[MEMOFS_CLI_PATHS.chunks]: MemoryChunkSchema,
+		[MEMOFS_CLI_PATHS.snapshots]: SnapshotEntrySchema,
 	};
 
 	const conversationIds = new Set<string>();
@@ -136,7 +136,7 @@ export async function runDoctorCommand(
 				const validated = schema.parse(record.value) as Record<string, unknown>;
 
 				if (
-					file === MEMOFS_PATHS.conversations &&
+					file === MEMOFS_CLI_PATHS.conversations &&
 					typeof validated.id === "string"
 				) {
 					conversationIds.add(validated.id);
@@ -153,7 +153,7 @@ export async function runDoctorCommand(
 
 	const eventContent = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.memoryEvents,
+		MEMOFS_CLI_PATHS.memoryEvents,
 	);
 	if (eventContent) {
 		const events = parseJsonl(eventContent);
@@ -166,7 +166,7 @@ export async function runDoctorCommand(
 				issues.push({
 					level: "warning",
 					code: "orphaned_event",
-					message: `${MEMOFS_PATHS.memoryEvents}:${event.line}: Event references unknown document/conversation "${docId}"`,
+					message: `${MEMOFS_CLI_PATHS.memoryEvents}:${event.line}: Event references unknown document/conversation "${docId}"`,
 				});
 			}
 		}

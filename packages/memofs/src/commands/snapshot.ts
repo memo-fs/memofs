@@ -9,7 +9,7 @@ import type { MemoFS } from "@memofs/core";
 import { appendText, readTextIfExists, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS, REQUIRED_FILES } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS, REQUIRED_FILES } from "../protocol/constants";
 import { stringifyJsonl } from "../protocol/jsonl";
 import { createSafeIdFromLabel, validateSnapshotLabel } from "../utils/labels";
 
@@ -69,7 +69,7 @@ export async function runSnapshotCommand(
 	const label = validateSnapshotLabel(options.label);
 	const createdAt = new Date().toISOString();
 	const id = createSafeIdFromLabel(label, createdAt);
-	const path = `${MEMOFS_PATHS.snapshotsDir}/${id}.json`;
+	const path = `${MEMOFS_CLI_PATHS.snapshotsDir}/${id}.json`;
 	const files: Record<string, string> = {};
 
 	for (const filePath of REQUIRED_FILES) {
@@ -111,12 +111,12 @@ export async function runSnapshotCommand(
 
 	await appendText(
 		options.memo.store,
-		MEMOFS_PATHS.snapshots,
+		MEMOFS_CLI_PATHS.snapshots,
 		stringifyJsonl([record]),
 	);
 	await appendText(
 		options.memo.store,
-		MEMOFS_PATHS.memoryEvents,
+		MEMOFS_CLI_PATHS.memoryEvents,
 		stringifyJsonl([
 			{
 				id: `evt_${id}`,

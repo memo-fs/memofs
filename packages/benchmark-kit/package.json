@@ -2,7 +2,7 @@
 	"name": "@memofs/benchmark-kit",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Reusable benchmark workloads, runners, and reporters for Memo FS.",
+	"description": "Reusable benchmark workloads, runners, and reporters for MemoFS.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -27,6 +27,26 @@
 			"require": {
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
+			}
+		},
+		"./workloads": {
+			"import": {
+				"types": "./dist/workloads.d.mts",
+				"default": "./dist/workloads.mjs"
+			},
+			"require": {
+				"types": "./dist/workloads.d.cts",
+				"default": "./dist/workloads.cjs"
+			}
+		},
+		"./fakes": {
+			"import": {
+				"types": "./dist/testing/fake-targets.d.mts",
+				"default": "./dist/testing/fake-targets.mjs"
+			},
+			"require": {
+				"types": "./dist/testing/fake-targets.d.cts",
+				"default": "./dist/testing/fake-targets.cjs"
 			}
 		}
 	},

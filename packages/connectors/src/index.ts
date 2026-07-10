@@ -3,8 +3,7 @@
  *
  * Connectors ingest external sources (GitHub, Notion, …) into `.memofs/`
  * through the local engine. Each source is a plugin implementing the
- * provider-neutral {@link Connector} interface. See `README.md` and
- * [](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0002-connectors-run-locally.md).
+ * provider-neutral {@link Connector} interface.
  *
  * @public
  */

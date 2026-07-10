@@ -667,8 +667,6 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 				...(g.memo.workspaceId !== undefined
 					? { workspaceId: g.memo.workspaceId }
 					: {}),
-				readPolicy: g.memo.readPolicy,
-				writePolicy: g.memo.writePolicy,
 				...(g.memo.cloud
 					? { cloud: { configured: true } }
 					: { cloud: { configured: false } }),
@@ -683,14 +681,12 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.option("-f, --force", "overwrite existing config", false)
 		.option(
 			"--runtime <mode>",
-			"runtime mode: local, hybrid, or memory",
+			"runtime mode: local or hybrid",
 			"local",
 		)
 		.option("--cloud-url <url>", "MemoFS Cloud API URL")
 		.option("--workspace-id <id>", "cloud workspace ID")
 		.option("--project-id <id>", "cloud project ID")
-		.option("--read-policy <policy>", "hybrid read policy", "local-first")
-		.option("--write-policy <policy>", "hybrid write policy", "local-first")
 		.action(async (options) => {
 			setCurrentCommand("config.init");
 			const g = await globals();
@@ -708,10 +704,6 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 							? { workspaceId: options.workspaceId }
 							: {}),
 						...(options.projectId ? { projectId: options.projectId } : {}),
-					},
-					hybrid: {
-						readPolicy: options.readPolicy,
-						writePolicy: options.writePolicy,
 					},
 				} satisfies MemoFsConfigFile,
 			});

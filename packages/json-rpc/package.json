@@ -2,7 +2,7 @@
 	"name": "@memofs/json-rpc",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by Memo FS transports.",
+	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by MemoFS transports.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",

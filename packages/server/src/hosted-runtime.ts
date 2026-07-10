@@ -10,19 +10,9 @@
  * core already works: the strategy assembles from injected slots; the cloud
  * supplies one provider bundle (R2 + Turso + Voyage + Workers AI), an OSS
  * self-hoster supplies another (e.g. S3 + Postgres + OpenAI). The factory is
- * the realization of's "self-host the same engine free" thesis
- * ([CONTEXT.md](../../docs/CONTEXT.md) S3-Q1) — the cloud and the OSS
- * self-hoster run **identical** factory code; the only difference is the
- * adapters injected.
- *
- * ## Scope (slice 0)
- *
- * Slice 0 lands this factory + the {@link LlmClient} core contract. The HTTP
- * surface (`recall` / `context` / `graph` / `memory` over JSON-RPC) is slice 1;
- * the cloud's `apps/cloud/src/server/hosted-runtime.ts` (which hardcodes
- * Voyage + Workers AI from env) is **deleted in slice 2** when the cloud
- * delegates to this shared factory. Today both coexist — the slice-2 deletion
- * is the cutover.
+ * the realization of the "self-host the same engine free" thesis — the cloud
+ * and the OSS self-hoster run **identical** factory code; the only difference
+ * is the adapters injected.
  *
  * ## The deterministic-default seam
  *
@@ -77,8 +67,7 @@ export interface HostedRuntimeOptions {
 	extractor?: Extractor;
 	/**
 	 * Optional LLM transport. When omitted, every LLM-enhanced
-	 * intelligence feature runs its deterministic default. Slice 0 threads the
-	 * seam; the strategist (Q23) and consolidation (Q25a) consume it later.
+	 * intelligence feature runs its deterministic default.
 	 */
 	llmClient?: LlmClient;
 	/** Runtime name surfaced in health output. Defaults to `"memofs-server"`. */
@@ -117,8 +106,8 @@ export function createHostedRuntime(options: HostedRuntimeOptions): MemoFS {
 		projectId: options.projectId,
 		// The hosted runtime always runs the local engine over the injected store.
 		// The cloud is a file replica reached via explicit sync verbs, never an
-		// implicit read policy (S3-Q5 / P-Cut) — so `mode: "local"` is correct
-		// whether the store is R2 or S3-resident.
+		// implicit read policy — so `mode: "local"` is correct whether the store
+		// is R2 or S3-resident.
 		mode: "local",
 		...(options.embedder === undefined ? {} : { embedder: options.embedder }),
 		...(options.recallStore === undefined

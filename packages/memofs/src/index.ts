@@ -29,8 +29,8 @@ export {
 	printJsonError,
 } from "./output/output";
 export {
+	MEMOFS_CLI_PATHS,
 	MEMOFS_DIR,
-	MEMOFS_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
 } from "./protocol/constants";

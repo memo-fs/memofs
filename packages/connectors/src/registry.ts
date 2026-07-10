@@ -14,7 +14,7 @@ import type { Connector } from "./types";
  * connector by {@link ConnectorConfig.type} here.
  *
  * Third-party connectors register via {@link ConnectorRegistry.register} —
- * this is the Q10 extensibility point ("write a new adapter, not a refactor").
+ * this is the extensibility point ("write a new adapter, not a refactor").
  *
  * @public
  */

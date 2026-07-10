@@ -3,9 +3,10 @@
  *
  * @remarks
  * Provides contract tests, fake implementations, fixtures, and assertion helpers
- * used across all MemoFS package tests.
+ * used across all MemoFS package tests. This package is **public and stable** —
+ * adapter authors depend on it to run the contract suites shipped from core.
  *
- * @internal
+ * @public
  */
 
 export {

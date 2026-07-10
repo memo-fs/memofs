@@ -3,19 +3,19 @@
  * payload into a JSON-RPC response over a {@link MemoFS} runtime.
  *
  * @remarks
- * This is the heart of the `memofs-server` HTTP surface (s3-execution-plan
- * slice 1). It mirrors the dispatch shape in `memofs-mcp-server`'s protocol
- * server (parse → validate → batch/single → route → envelope) but routes over
- * the frozen `MemoFS` client API instead of MCP tools/resources.
+ * This is the heart of the `@memofs/server` HTTP surface. It mirrors the
+ * dispatch shape in `@memofs/mcp-server`'s protocol server (parse → validate
+ * → batch/single → route → envelope) but routes over the frozen `MemoFS`
+ * client API instead of MCP tools/resources.
  *
  * ## The write-gate (Hard ordering rule)
  *
  * The dispatcher refuses every mutating method (the {@link GATED_METHODS} set)
- * with a `503` JSON-RPC error **until a `concurrencyLayer` is injected**
- * (slice 3). This is the load-bearing safety invariant: no concurrent-write
- * surface is reachable before its serialization. The gate is
- * "method rejects," never "method present unsafely." Slice 3 flips it by
- * injecting the lock + delegating the mutating handlers to run inside it.
+ * with a `503` JSON-RPC error **until a `concurrencyLayer` is injected**.
+ * This is the load-bearing safety invariant: no concurrent-write surface is
+ * reachable before its serialization. The gate is "method rejects," never
+ * "method present unsafely." Inject the concurrency layer to flip it —
+ * mutating handlers then run inside `acquire`.
  *
  * The `503` carries a `data.httpStatus` field so the HTTP layer maps it to the
  * right status code without sniffing message text.
@@ -39,16 +39,15 @@ import { GATED_METHODS } from "../protocol/methods";
 import { RUNTIME_HANDLERS } from "./handlers";
 
 /**
- * The concurrency-layer seam. Slice 1 leaves this `undefined`; slice 3
- * injects the lock + manifest validation so mutating handlers can
+ * The concurrency-layer seam. When absent, mutating methods are refused with
+ * `503`. When injected, the lock + manifest validation lets mutating handlers
  * run safely under concurrent writers.
  *
  * Kept as an option type (not implemented today) so the dispatcher's signature
- * is stable across the slice boundary — slice 3 only adds the impl, not a new
- * surface.
+ * is stable — injecting the impl is all that's needed to enable writes.
  */
 export interface ConcurrencyLayer {
-	/** The project lock primitive (slice 3). Implemented then. */
+	/** The project lock primitive. Implemented when the concurrency layer is injected. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	readonly acquire: <T>(projectId: string, fn: () => Promise<T>) => Promise<T>;
 }
@@ -56,9 +55,9 @@ export interface ConcurrencyLayer {
 /** Options for {@link dispatch} and {@link handleRuntimeMessage}. */
 export interface DispatchOptions {
 	/**
-	 * The concurrency layer. When absent (slice 1), mutating methods are
-	 * refused with `503`. When present (slice 3+), mutating handlers run inside
-	 * `acquire` so concurrent writers serialize.
+	 * The concurrency layer. When absent, mutating methods are refused with
+	 * `503`. When present, mutating handlers run inside `acquire` so
+	 * concurrent writers to the same project serialize through the lock.
 	 */
 	concurrencyLayer?: ConcurrencyLayer;
 }
@@ -71,7 +70,7 @@ export const CONCURRENCY_GATE_ERROR_CODE = -32000;
 
 /** The canonical gated-write failure message. */
 export const CONCURRENCY_GATE_MESSAGE =
-	"Concurrent writes require the concurrency layer (slice 3). This method is read-only until it merges.";
+	"Concurrent writes require the concurrency layer. This method is read-only until it is injected.";
 
 /**
  * Builds the `503` concurrency-gate failure response for a request id.
@@ -195,11 +194,9 @@ async function dispatchSingle(
 	}
 
 	// The write-gate (Hard ordering rule). Gated mutating methods:
-	// - return 503 when no concurrency layer is injected (slice 1), AND
-	// - run inside `concurrencyLayer.acquire` when one is (slice 3+), so
+	// - return 503 when no concurrency layer is injected, AND
+	// - run inside `concurrencyLayer.acquire` when one is, so
 	// concurrent writers to the same project serialize through the lock.
-	// The acquire wiring is real: slice 3 implements the lock + injects it
-	// here; the test that exercises this path proves the acquire callback runs.
 	if (GATED_METHODS.has(request.method)) {
 		if (!options.concurrencyLayer) {
 			return concurrencyGateFailure(id);

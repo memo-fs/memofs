@@ -9,17 +9,23 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Memo FS command-line interface for local and cloud memory workflows.
+MemoFS command-line interface for local and hybrid memory workflows.
 
 ## What is this?
 
-The `memofs` package gives you a command-line tool for managing local, cloud, and hybrid memory. You can use it to initialize a memory workspace, store durable decisions, search past memory, and interact with the Memo FS Cloud API.
+The `memofs` package gives you a command-line tool for managing local and hybrid memory. You can use it to initialize a memory workspace, store durable decisions, search past memory, sync with MemoFS Cloud, and manage agent sessions and connectors.
 
 ## Installation
 
 ```bash
 npm install -D memofs
+
+# or: pnpm add -D memofs
+# or: yarn add -D memofs
+# or: bun add -d memofs
 ```
+
+> Requires **Node.js >= 22**.
 
 Or use directly without installing:
 
@@ -47,9 +53,9 @@ npx memofs inspect
 
 ## Configuration and Usage
 
-The CLI supports Local (default), Cloud, and Hybrid runtime modes.
+The CLI supports Local (default) and Hybrid runtime modes.
 
-You can configure defaults using a ``.memofs/`config.json` file. For a complete list of commands, global flags, and cloud integration features, please refer to the [Full Documentation](https://docs.memofs.dev/cli/).
+You can configure defaults using a `.memofs/config.json` file. For a complete list of commands, global flags, and cloud integration features, refer to the [Full Documentation](https://docs.memofs.dev/packages/cli/).
 
 ## Contributing
 

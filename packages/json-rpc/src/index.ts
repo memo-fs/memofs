@@ -1,13 +1,13 @@
 /**
- * `@memofs/json-rpc` — a dependency-free, product-neutral JSON-RPC 2.0
- * protocol SSOT for the MemoFS workspace.
+ * `@memofs/json-rpc` — a dependency-free, neutral JSON-RPC 2.0 protocol SSOT
+ * for the MemoFS workspace.
  *
  * @remarks
  * Spec types + helpers (parse, validate, success/failure envelopes, the five
- * spec error codes). Extracted from `memofs-mcp-server`'s protocol layer so
+ * spec error codes). Extracted from `@memofs/mcp-server`'s protocol layer so
  * every JSON-RPC-speaking package shares one implementation instead of
- * vendoring copies — the workspace DRY/SSOT rule applied to the
- * transport layer. See `packages/memofs-json-rpc/README.md` for the design.
+ * vendoring copies — the workspace DRY/SSOT rule applied to the transport
+ * layer.
  *
  * @public
  */

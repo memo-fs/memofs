@@ -61,8 +61,6 @@ function createMemo(
 		workspaceId?: string;
 		projectId?: string;
 		timeoutMs?: number;
-		readPolicy?: string;
-		writePolicy?: string;
 	},
 ): MemoFS {
 	return createMemoFSFromCli({
@@ -94,7 +92,7 @@ export async function runMemoFsCli(
 			"project root containing .memofs/",
 			input.cwd ?? process.cwd(),
 		)
-		.option("--runtime <mode>", "runtime mode: local, hybrid, or memory")
+		.option("--runtime <mode>", "runtime mode: local or hybrid")
 		.option("--cloud-url <url>", "MemoFS Cloud API URL")
 		.option("--api-key <key>", "MemoFS Cloud API key")
 		.option("--workspace-id <id>", "default cloud workspace ID")
@@ -104,8 +102,6 @@ export async function runMemoFsCli(
 			"cloud request timeout in milliseconds",
 			parsePositiveOption,
 		)
-		.option("--read-policy <policy>", "hybrid read policy")
-		.option("--write-policy <policy>", "hybrid write policy")
 		.option("-j, --json", "output machine-readable JSON", false)
 		.option("-v, --verbose", "show detailed output", input.verbose ?? false)
 		.option(
@@ -143,8 +139,6 @@ export async function runMemoFsCli(
 			workspaceId?: string;
 			projectId?: string;
 			timeoutMs?: number;
-			readPolicy?: string;
-			writePolicy?: string;
 		};
 		wantsJson = Boolean(opts.json);
 		const root = opts.root ?? input.cwd ?? process.cwd();
@@ -155,8 +149,6 @@ export async function runMemoFsCli(
 			workspaceId: opts.workspaceId,
 			projectId: opts.projectId,
 			timeoutMs: opts.timeoutMs,
-			readPolicy: opts.readPolicy,
-			writePolicy: opts.writePolicy,
 		});
 		activeMemo = memo;
 		return {

@@ -9,7 +9,7 @@ import type { MemoFS, MemoryStore } from "@memofs/core";
 import { readText, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 
 /**
@@ -108,7 +108,7 @@ export async function runDiffCommand(
 ): Promise<number> {
 	const snapshotContent = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.snapshots,
+		MEMOFS_CLI_PATHS.snapshots,
 	);
 	if (!snapshotContent) {
 		options.output.error("No snapshots found.");

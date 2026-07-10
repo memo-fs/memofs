@@ -9,15 +9,13 @@
  * deploys it as the runtime Worker behind a Service Binding. The two
  * run **identical** factory code — the only difference is the adapters injected.
  *
- * Slice 0 landed the factory + the `LlmClient` core contract.
- * **Slice 1** (this release) adds the JSON-RPC-over-HTTP runtime API
- * (`recall` / `context` / `graph` / `memory` over `dispatchRuntimeMessage`) +
- * the framework-free HTTP core (`handleRuntimeRequest`) + the Worker entry
- * (`src/worker.ts`) + the Node bin (`bin/memofs-server.ts`). See
- * [s3-execution-plan.md](../../docs/architecture/s3-execution-plan.md) slice 1.
+ * Exports the JSON-RPC-over-HTTP runtime API (`recall` / `context` / `graph` /
+ * `memory` over `dispatchRuntimeMessage`), the framework-free HTTP core
+ * (`handleRuntimeRequest`), the Worker entry (`src/worker.ts`), and the Node
+ * bin (`bin/memofs-server.ts`).
  *
- * The write surface is gated on slice 3's concurrency layer (the Hard ordering
- * rule): mutating methods return `503` until it merges.
+ * The write surface is gated until the concurrency layer lands: mutating
+ * methods return `503` until it merges.
  *
  * @public
  */

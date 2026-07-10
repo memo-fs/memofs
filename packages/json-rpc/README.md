@@ -9,11 +9,11 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Dependency-free JSON-RPC 2.0 protocol primitives shared by Memo FS transports.
+Dependency-free JSON-RPC 2.0 protocol primitives shared by MemoFS transports.
 
 ## Why a separate package?
 
-Two Memo FS packages speak JSON-RPC over the wire. Before this package, both
+Two MemoFS packages speak JSON-RPC over the wire. Before this package, both
 shipped near-identical copies of the same ~200 lines of spec types and helpers,
 and one was coupled to the other's error classes. That violates the workspace
 DRY/SSOT rule and the package-boundaries rule (no transport in core, no
@@ -39,7 +39,13 @@ dependency-free package fixes both:
 
 ```sh
 npm install @memofs/json-rpc
+
+# or: pnpm add @memofs/json-rpc
+# or: yarn add @memofs/json-rpc
+# or: bun add @memofs/json-rpc
 ```
+
+> Requires **Node.js >= 22**.
 
 ## Usage
 
@@ -57,7 +63,7 @@ import {
 const payload = parseJsonRpcPayload(await request.text());
 
 // 2. Validate the request shape (throws with the right spec code).
-const request = validateJsonRpcPayload(payload);
+const request = validateJsonRpcRequest(payload);
 
 // 3. Dispatch + respond.
 return success(request.id, await handle(request.method, request.params));

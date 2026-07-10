@@ -127,18 +127,17 @@ describe("runtime-API dispatch — slice 1", () => {
 			expect(response.error.data.reason).toBe("concurrency_layer_required");
 		});
 
-		it("the gate message references slice 3", async () => {
+		it("the gate message references the concurrency layer", async () => {
 			const response = (await dispatchRuntimeMessage(tek, {
 				jsonrpc: "2.0",
 				id: 1,
 				method: RUNTIME_METHOD.write,
 				params: { content: "x" },
 			})) as unknown as { error: { message: string } };
-			expect(response.error.message).toMatch(/slice 3/i);
 			expect(response.error.message).toMatch(/concurrency layer/i);
 		});
 
-		it("injecting a concurrencyLayer runs the mutating handler inside acquire (the slice-3 seam)", async () => {
+		it("injecting a concurrencyLayer runs the mutating handler inside acquire (the concurrency seam)", async () => {
 			// The seam contract: once a concurrencyLayer is present, the gate
 			// drops AND the mutating handler runs inside `acquire` (scoped to the
 			// project) — so concurrent writers serialize through the lock. Slice 3

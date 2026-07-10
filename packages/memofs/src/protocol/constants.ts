@@ -25,7 +25,7 @@ export { MEMOFS_DIR };
  * The values intentionally come from `@memofs/core`, so the CLI cannot drift from
  * the canonical protocol owned by the core package.
  */
-export const MEMOFS_PATHS = {
+export const MEMOFS_CLI_PATHS = {
 	manifest: MANIFEST_PATH,
 	coreMemory: CORE_MEMORY_PATH,
 	notesMemory: NOTES_MEMORY_PATH,

@@ -6,9 +6,9 @@
  * JSON-RPC error code it should be mapped to (see {@link JSON_RPC_ERRORS}).
  * Downstream packages that own their *own* error hierarchy (e.g. an MCP
  * server with `McpValidationError`) catch this and re-throw in their own
- * type — the protocol layer stays product-neutral and never imports a
+ * type — the protocol layer stays neutral and never imports a
  * consumer's error classes. This is the decoupling that lets both
- * `memofs-server` and `memofs-mcp-server` share one protocol SSOT.
+ * `@memofs/server` and `@memofs/mcp-server` share one protocol SSOT.
  *
  * @public
  */

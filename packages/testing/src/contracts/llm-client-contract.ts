@@ -38,8 +38,7 @@ export interface LlmClientContractOptions {
  *
  * Load-bearing for the deterministic-default fallback: malformed or empty
  * provider output **never throws** — it returns a text-only result so the
- * feature's deterministic path stays reachable (s3-execution-plan.md universal
- * bar). This suite cannot assert it generically because each provider fails
+ * feature's deterministic path stays reachable. This suite cannot assert it generically because each provider fails
  * differently (a 500, a truncated stream, an unparseable JSON body); each
  * adapter MUST add its own provider-specific malformed-output test (the parity
  * the rule-based fallback depends on). The {@link FakeLlmClient} is the

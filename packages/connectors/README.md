@@ -9,33 +9,41 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Local connector framework for ingesting external sources into Memo FS memory.
+Local connector framework for ingesting external sources into MemoFS memory.
 
 ## What is this?
 
-**The local connector framework for Memo FS.** Connectors ingest external sources (GitHub, Notion, …) into ``.memofs/`` through the **local** engine. The cloud only replicates the resulting files — connectors never run server-side. This is the [`git`/GitHub-Actions model](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0002-connectors-run-locally.md): the *config* is synced, the *credential* is fetched live, the *work* happens on your machine.
+**The local connector framework for MemoFS.** Connectors ingest external sources (GitHub, Notion, …) into `.memofs/` through the **local** engine. The cloud only replicates the resulting files — connectors never run server-side. This is the `git`/GitHub-Actions model: the *config* is synced, the *credential* is fetched live, the *work* happens on your machine.
 
-Each source is a plugin implementing the provider-neutral `Connector` interface — the same adapter pattern Memo FS uses for embedders and extractors. Adding a connector later means writing a new adapter, not refactoring the framework.
+Each source is a plugin implementing the provider-neutral `Connector` interface — the same adapter pattern MemoFS uses for embedders and extractors. Adding a connector later means writing a new adapter, not refactoring the framework.
 
 ## Installation
 
 ```bash
-npm install @memofs/connectors @memofs
+npm install @memofs/connectors @memofs/core
+
+# or: pnpm add @memofs/connectors @memofs/core
+# or: yarn add @memofs/connectors @memofs/core
+# or: bun add @memofs/connectors @memofs/core
 ```
+
+> Requires **Node.js >= 22**.
 
 ## Quick Start
 
 ```ts
-import { Memofs } from "@memofs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { runConnectors, EnvSecretResolver } from "@memofs/connectors";
 
-// The host owns the Memofs instance (single-writer per `.memofs/` root).
-const memo = new Memofs({ rootDir: "./`.memofs`", projectId: "my-app" });
+// The host owns the MemoFS instance (single-writer per `.memofs/` root).
+const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const memo = new MemoFS({ store, projectId: "my-app" });
 
 const result = await runConnectors({
- rootDir: "./`.memofs`",
- memo,
- secretResolver: new EnvSecretResolver({ rootDir: "./`.memofs`" }),
+  rootDir: "./.memofs",
+  memo,
+  secretResolver: new EnvSecretResolver({ rootDir: "./.memofs" }),
 });
 
 console.log(result.written); // ["conn_...", ...] — newly ingested note ids
@@ -45,16 +53,16 @@ console.log(result.skipped); // ["issue:42", ...] — already ingested (dedup)
 ## How it works
 
 ```
-`.memofs/`connectors.json ──► runConnectors() ──► `.memofs/`notes.md (+ derived indexes)
- (config, no tokens) (local engine) (source: "connector")
+.memofs/connectors.json ──► runConnectors() ──► .memofs/notes.md (+ derived indexes)
+ (config, no tokens)         (local engine)      (source: "connector")
 ```
 
-1. **Config** lives in ``.memofs/`connectors.json` — one of Memo FS's 11 canonical sync units. Each connector row carries an opaque `secretRef`, **never** the token.
-2. **Secrets** are resolved at run time through an injected `SecretResolver`. The token lives in memory only and is never written to disk. The v1 dev fallback reads ``.memofs/`secrets.json` (a separate, gitignored, non-synced file); production wires a `CloudSecretResolver` against `GET /v1/projects/:projectId/connectors/:connectorId/secret` when the cloud app ships.
+1. **Config** lives in `.memofs/connectors.json` — one of MemoFS's 11 canonical sync units. Each connector row carries an opaque `secretRef`, **never** the token.
+2. **Secrets** are resolved at run time through an injected `SecretResolver`. The token lives in memory only and is never written to disk. The v1 dev fallback reads `.memofs/secrets.json` (a separate, gitignored, non-synced file); production wires a `CloudSecretResolver` against `GET /v1/projects/:projectId/connectors/:connectorId/secret` when the cloud app ships.
 3. **Ingestion** runs locally: each connector fetches its source, normalizes items into `ConnectorRecord`s, and the runner writes them through the local engine with the connector-write discipline (see below).
 4. **The resulting files** sync back to the cloud like any other memory file.
 
-### The connector-write discipline (Q3 /)
+### The connector-write discipline
 
 Every connector-emitted note is written with three guarantees:
 
@@ -64,7 +72,7 @@ Every connector-emitted note is written with three guarantees:
 | `sourceRefs[0].sourceId` | stable external id (`"issue:42"`) | The dedup key — re-ingest skips already-seen items. |
 | `id` | `conn_<sha256(externalId:content)[:16]>` | Content-derived, **no wall-clock**. Re-ingesting identical content reproduces identical bytes → the sync manifest reports "no change" → no phantom conflict, no needless upload. |
 
-## ``.memofs/`connectors.json`
+## `.memofs/connectors.json`
 
 ```json
 {
@@ -81,16 +89,16 @@ Every connector-emitted note is written with three guarantees:
 }
 ```
 
-The schema (`{ id, type, enabled, schedule, sourceMapping, secretRef }`) is locked by decision Q7. A row carrying a `token`/`secret`/`apiKey` field is rejected — tokens never ride in the file replica.
+The schema (`{ id, type, enabled, schedule, sourceMapping, secretRef }`) is locked. A row carrying a `token`/`secret`/`apiKey` field is rejected — tokens never ride in the file replica.
 
 ## Secret resolution
 
 ```ts
 import { EnvSecretResolver, StaticSecretResolver } from "@memofs/connectors";
 
-// Dev/local fallback: reads `.memofs/`secrets.json (gitignored, NOT synced)
+// Dev/local fallback: reads `.memofs/secrets.json` (gitignored, NOT synced)
 // { "ss_abc123": "ghp_..." }
-const resolver = new EnvSecretResolver({ rootDir: "./`.memofs`" });
+const resolver = new EnvSecretResolver({ rootDir: "./.memofs" });
 
 // Tests / programmatic
 const testResolver = new StaticSecretResolver({ ss_abc123: "test-token" });
@@ -168,11 +176,11 @@ class LinearConnector implements Connector {
 
 ## Boundary
 
-This package owns the connector framework + the built-in connectors. It does **not** own the Memo FS core write path (`@memofs`), the MCP server, or the CLI command group. It depends on core for writes and accepts the host's `Memofs` instance (single-writer contract — see `AGENTS.md`).
+This package owns the connector framework + the built-in connectors. It does **not** own the MemoFS core write path (`@memofs/core`), the MCP server, or the CLI command group. It depends on core for writes and accepts the host's `MemoFS` instance (single-writer contract).
 
 ## What's not here yet (v1 deferrals)
 
-- **CLI `memofs connectors {add|remove|list|run}`** — lives in `packages/memofs-cli`; wires to this package.
+- **CLI `memofs connectors {add|remove|list|run}`** — lives in `packages/memofs` (the CLI package); wires to this package.
 - **Cloud `GET .../connectors/:id/secret` resolver** — ships when the cloud app does.
 - **Schedule enforcement** — `schedule` is stored but not acted on; execution happens only while the local runtime is alive (CLI / MCP session / daemon).
 

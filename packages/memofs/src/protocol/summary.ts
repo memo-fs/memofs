@@ -8,7 +8,7 @@ import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { MemoryStore } from "@memofs/core";
 import { readTextIfExists } from "../cli/store-helpers";
-import { MEMOFS_PATHS } from "./constants";
+import { MEMOFS_CLI_PATHS } from "./constants";
 import { parseJsonl } from "./jsonl";
 import { type MemoFsCliManifest, parseManifest } from "./manifest";
 
@@ -102,20 +102,20 @@ export async function inspectMemoFs(
 	} catch {
 		dirExists = false;
 	}
-	const manifestContent = await readTextIfExists(store, MEMOFS_PATHS.manifest);
+	const manifestContent = await readTextIfExists(store, MEMOFS_CLI_PATHS.manifest);
 	const manifest =
 		manifestContent === undefined ? undefined : parseManifest(manifestContent);
 
 	const tracked = [
-		MEMOFS_PATHS.manifest,
-		MEMOFS_PATHS.coreMemory,
-		MEMOFS_PATHS.notesMemory,
-		MEMOFS_PATHS.memoryEvents,
-		MEMOFS_PATHS.conversations,
-		MEMOFS_PATHS.chunks,
-		MEMOFS_PATHS.graphNodes,
-		MEMOFS_PATHS.graphEdges,
-		MEMOFS_PATHS.snapshots,
+		MEMOFS_CLI_PATHS.manifest,
+		MEMOFS_CLI_PATHS.coreMemory,
+		MEMOFS_CLI_PATHS.notesMemory,
+		MEMOFS_CLI_PATHS.memoryEvents,
+		MEMOFS_CLI_PATHS.conversations,
+		MEMOFS_CLI_PATHS.chunks,
+		MEMOFS_CLI_PATHS.graphNodes,
+		MEMOFS_CLI_PATHS.graphEdges,
+		MEMOFS_CLI_PATHS.snapshots,
 	];
 
 	const files: MemoFsInspection["files"] = [];
@@ -148,12 +148,12 @@ export async function inspectMemoFs(
 		...(manifest ? { manifest } : {}),
 		files,
 		summary: {
-			eventCount: recordCounts[MEMOFS_PATHS.memoryEvents] ?? 0,
-			conversationCount: recordCounts[MEMOFS_PATHS.conversations] ?? 0,
-			chunkCount: recordCounts[MEMOFS_PATHS.chunks] ?? 0,
-			graphNodeCount: recordCounts[MEMOFS_PATHS.graphNodes] ?? 0,
-			graphEdgeCount: recordCounts[MEMOFS_PATHS.graphEdges] ?? 0,
-			snapshotCount: recordCounts[MEMOFS_PATHS.snapshots] ?? 0,
+			eventCount: recordCounts[MEMOFS_CLI_PATHS.memoryEvents] ?? 0,
+			conversationCount: recordCounts[MEMOFS_CLI_PATHS.conversations] ?? 0,
+			chunkCount: recordCounts[MEMOFS_CLI_PATHS.chunks] ?? 0,
+			graphNodeCount: recordCounts[MEMOFS_CLI_PATHS.graphNodes] ?? 0,
+			graphEdgeCount: recordCounts[MEMOFS_CLI_PATHS.graphEdges] ?? 0,
+			snapshotCount: recordCounts[MEMOFS_CLI_PATHS.snapshots] ?? 0,
 		},
 	};
 }

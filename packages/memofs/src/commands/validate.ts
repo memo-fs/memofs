@@ -11,7 +11,7 @@ import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
-	MEMOFS_PATHS,
+	MEMOFS_CLI_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
 } from "../protocol/constants";
@@ -90,7 +90,7 @@ export async function runValidateCommand(
 
 	const manifestContent = await readTextIfExists(
 		options.memo.store,
-		MEMOFS_PATHS.manifest,
+		MEMOFS_CLI_PATHS.manifest,
 	);
 	if (manifestContent === undefined) {
 		issues.push({
@@ -119,10 +119,10 @@ export async function runValidateCommand(
 	}
 
 	const strictSchemas: Record<string, z.ZodSchema> = {
-		[MEMOFS_PATHS.memoryEvents]: MemoryEventSchema,
-		[MEMOFS_PATHS.conversations]: ConversationEntrySchema,
-		[MEMOFS_PATHS.chunks]: MemoryChunkSchema,
-		[MEMOFS_PATHS.snapshots]: SnapshotEntrySchema,
+		[MEMOFS_CLI_PATHS.memoryEvents]: MemoryEventSchema,
+		[MEMOFS_CLI_PATHS.conversations]: ConversationEntrySchema,
+		[MEMOFS_CLI_PATHS.chunks]: MemoryChunkSchema,
+		[MEMOFS_CLI_PATHS.snapshots]: SnapshotEntrySchema,
 	};
 
 	for (const [file, schema] of Object.entries(strictSchemas)) {

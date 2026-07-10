@@ -4,8 +4,7 @@
  * Connectors ingest external sources (GitHub, Notion, …) into `.memofs/`
  * through the local engine. Each source is a plugin implementing {@link Connector}.
  * This mirrors the embedder/extractor adapter pattern used across MemoFS:
- * adding a connector = writing a new adapter, not refactoring the framework
- * (decision Q10 /).
+ * adding a connector = writing a new adapter, not refactoring the framework.
  *
  * @public
  */
@@ -15,10 +14,9 @@ import type { JsonObject, MemoFS } from "@memofs/core";
 /**
  * A single connector row in `.memofs/connectors.json`.
  *
- * Locked schema (decision Q7): `{ id, type, enabled, schedule, sourceMapping,
- * secretRef }`. The `secretRef` is an opaque pointer to a token stored
- * server-side — **never** the token itself (tokens never ride in the file
- * replica;).
+ * Locked schema: `{ id, type, enabled, schedule, sourceMapping, secretRef }`.
+ * The `secretRef` is an opaque pointer to a token stored server-side —
+ * **never** the token itself (tokens never ride in the file replica).
  *
  * @public
  */
@@ -31,7 +29,7 @@ export interface ConnectorConfig {
 	readonly enabled: boolean;
 	/**
 	 * Optional schedule hint (cron-ish). Stored but not enforced in v1 — execution
-	 * happens only while the local runtime is alive (decision Q2).
+	 * happens only while the local runtime is alive.
 	 */
 	readonly schedule?: string;
 	/**
@@ -95,8 +93,8 @@ export interface ConnectorIngestContext {
 	 */
 	readonly token: string;
 	/**
-	 * The host's MemoFS instance. Single-writer contract (AGENTS.md): the
-	 * connector must not construct its own `MemoFS` on this root.
+	 * The host's MemoFS instance. Single-writer contract: the connector must
+	 * not construct its own `MemoFS` on this root.
 	 */
 	readonly memo: MemoFS;
 	/** Optional abort signal propagated from {@link RunConnectorsOptions.signal}. */
@@ -149,8 +147,8 @@ export interface Connector {
 	 * Fetch + normalize external items into {@link ConnectorRecord}s.
 	 *
 	 * The connector does **not** write notes itself — the runner handles the
-	 * connector-write discipline (decision Q3 /): `source: "connector"`,
-	 * stable `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock.
+	 * connector-write discipline: `source: "connector"`, stable
+	 * `sourceRefs[0].sourceId`, content-derived `id` with no wall-clock.
 	 * Returning records (rather than writing) keeps the discipline in one place
 	 * and makes connectors trivial to test.
 	 *

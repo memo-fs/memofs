@@ -1,17 +1,15 @@
 /**
- * Worker fetch-handler factory for the `memofs-server` runtime API.
+ * Worker fetch-handler factory for the `@memofs/server` runtime API.
  *
  * @remarks
  * Returns a `(request, env, ctx) => Response` — the Cloudflare Worker `fetch`
- * signature (: the cloud deploys `memofs-server` as the **runtime
- * Worker** behind a Service Binding). Mirrors `memofs-mcp-server`'s
+ * signature (the cloud deploys `@memofs/server` as the **runtime Worker**
+ * behind a Service Binding). Mirrors `@memofs/mcp-server`'s
  * `createMemoFSMcpFetchHandler`.
  *
  * The runtime is supplied as a factory (`createRuntime`) rather than a single
  * instance so each Worker invocation can assemble it lazily from `env`
- * bindings. At slice 1 the cloud has not wired the Service Binding yet
- * (that's slice 2); the handler is proven against an injected fake runtime in
- * the Miniflare test, and the OSS self-hoster uses the Node bin (no Worker).
+ * bindings.
  */
 
 import type { MemoFS } from "@memofs/core";
@@ -19,7 +17,7 @@ import { handleRuntimeRequest, type RuntimeHttpOptions } from "./index";
 
 /**
  * Minimal Worker environment shape. The runtime Worker's real bindings (R2,
- * AI, vars) arrive in slice 2; slice 1 only needs the optional auth token.
+ * AI, vars) are wired by the deployer; the auth token is optional.
  */
 export interface RuntimeWorkerEnv {
 	/** Optional bearer token for the runtime API (when exposed publicly). */
@@ -35,9 +33,9 @@ export interface RuntimeExecutionContext {
 
 /**
  * Options for {@link createRuntimeFetchHandler}. The `createRuntime` factory
- * receives the request + env so it can read bindings AND route per-project
- * (slice 2's instance-map concern): the cloud's runtime Worker scopes each call
- * to a `MemoFS` instance keyed by a request header.
+ * receives the request + env so it can read bindings AND route per-project:
+ * the cloud's runtime Worker scopes each call to a `MemoFS` instance keyed by
+ * a request header.
  */
 export interface RuntimeFetchHandlerOptions {
 	/**

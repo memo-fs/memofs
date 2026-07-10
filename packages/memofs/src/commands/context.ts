@@ -8,7 +8,7 @@ import type { MemoFS } from "@memofs/core";
 import { getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import { MEMOFS_PATHS } from "../protocol/constants";
+import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 import { parseJsonl } from "../protocol/jsonl";
 import { parsePositiveInteger } from "../utils/numbers";
 
@@ -113,15 +113,15 @@ export async function runContextCommand(
 				? parsePositiveInteger(options.maxChars, "max chars")
 				: 12000;
 	const core =
-		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.coreMemory)) ?? "";
+		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.coreMemory)) ?? "";
 	const notes =
-		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.notesMemory)) ??
+		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.notesMemory)) ??
 		"";
 	const eventContent =
-		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.memoryEvents)) ??
+		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.memoryEvents)) ??
 		"";
 	const chunkContent =
-		(await readTextIfExists(options.memo.store, MEMOFS_PATHS.chunks)) ?? "";
+		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.chunks)) ?? "";
 	const events = eventContent
 		? parseJsonl(eventContent)
 				.slice(-10)
@@ -134,8 +134,8 @@ export async function runContextCommand(
 		: [];
 	const matches = options.query
 		? [
-				...searchText(MEMOFS_PATHS.coreMemory, core, options.query),
-				...searchText(MEMOFS_PATHS.notesMemory, notes, options.query),
+				...searchText(MEMOFS_CLI_PATHS.coreMemory, core, options.query),
+				...searchText(MEMOFS_CLI_PATHS.notesMemory, notes, options.query),
 			]
 		: [];
 

@@ -7,11 +7,8 @@
  * @module memofs-cli
  */
 
-import { MemoFS, type MemoFsConfig } from "@memofs/core";
-import {
-	createNodeFsMemoryStore,
-	readMemoFsConfigFileSync,
-} from "@memofs/core/node-fs";
+import type { MemoFS, MemoFsConfig } from "@memofs/core";
+import { createNodeMemoFs } from "@memofs/core/node-fs";
 
 export interface CliMemoFSOptions {
 	cwd?: string;
@@ -22,8 +19,6 @@ export interface CliMemoFSOptions {
 	workspaceId?: string;
 	projectId?: string;
 	timeoutMs?: string | number;
-	readPolicy?: string;
-	writePolicy?: string;
 }
 
 /**
@@ -34,12 +29,12 @@ export interface CliMemoFSOptions {
  */
 export function createMemoFSFromCli(options: CliMemoFSOptions = {}): MemoFS {
 	const rootDir = options.root ?? options.cwd ?? ".";
-	const config: MemoFsConfig = {
-		// Core no longer reads `.memofs/config.json` (the read moved out of the
-		// Worker-loadable barrel). The CLI is Node-only, so it reads the file
-		// here and passes it as `fileConfig` — preserving constructor > env >
-		// file > defaults.
-		fileConfig: readMemoFsConfigFileSync(rootDir),
+	const timeoutMs =
+		typeof options.timeoutMs === "string"
+			? Number(options.timeoutMs)
+			: options.timeoutMs;
+
+	return createNodeMemoFs({
 		rootDir,
 		...(options.runtime !== undefined
 			? { mode: options.runtime as MemoFsConfig["mode"] }
@@ -50,46 +45,21 @@ export function createMemoFSFromCli(options: CliMemoFSOptions = {}): MemoFS {
 		...(options.workspaceId !== undefined
 			? { workspaceId: options.workspaceId }
 			: {}),
-		...(options.readPolicy !== undefined
-			? { readPolicy: options.readPolicy as MemoFsConfig["readPolicy"] }
-			: {}),
-		...(options.writePolicy !== undefined
-			? { writePolicy: options.writePolicy as MemoFsConfig["writePolicy"] }
-			: {}),
 		...(options.cloudUrl !== undefined ||
 		options.apiKey !== undefined ||
-		options.timeoutMs !== undefined
+		(typeof timeoutMs === "number" && timeoutMs > 0)
 			? {
 					cloud: {
 						...(options.cloudUrl !== undefined
 							? { baseUrl: options.cloudUrl }
 							: {}),
 						...(options.apiKey !== undefined ? { apiKey: options.apiKey } : {}),
-						...(typeof options.timeoutMs === "number" && options.timeoutMs > 0
-							? { timeoutMs: options.timeoutMs }
+						...(typeof timeoutMs === "number" && timeoutMs > 0
+							? { timeoutMs }
 							: {}),
 						userAgent: "memofs/cli",
 					},
 				}
 			: {}),
-	};
-
-	// The CLI is Node-only: inject the filesystem-backed store explicitly. The
-	// root `@memofs/core` barrel is Worker-safe (no `node:fs` default), so
-	// a `local`/`hybrid` runtime requires a `store`. The volatile "memory" mode
-	// defaults to an in-memory store inside the constructor.
-	const resolvedMode = config.mode ?? "local";
-	const withStore: MemoFsConfig =
-		resolvedMode === "memory"
-			? config
-			: {
-					...config,
-					store: createNodeFsMemoryStore({
-						rootDir: config.rootDir ?? ".",
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
-				};
-
-	return new MemoFS(withStore);
+	});
 }

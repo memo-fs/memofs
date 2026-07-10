@@ -10,27 +10,10 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { MemoFsConfigFile } from "@memofs/core";
 import pkg from "../../package.json" with { type: "json" };
 
-export interface MemoFsConfigFile {
-	/** JSON Schema URL for editor validation of `.memofs/config.json`. */
-	$schema?: string;
-	runtime?: "local" | "hybrid" | "memory";
-	root?: string;
-	projectId?: string;
-	workspaceId?: string;
-	cloud?: {
-		baseUrl?: string;
-		apiKey?: string;
-		workspaceId?: string;
-		projectId?: string;
-		timeoutMs?: number;
-	};
-	hybrid?: {
-		readPolicy?: "local-first" | "cloud-first" | "local-only";
-		writePolicy?: "local-first" | "cloud-first" | "local-only";
-	};
-}
+export type { MemoFsConfigFile };
 
 /**
  * Canonical JSON Schema URL for a given MemoFS version.

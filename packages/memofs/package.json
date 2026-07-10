@@ -2,12 +2,12 @@
 	"name": "memofs",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Memo FS command-line interface for local and cloud memory workflows.",
+	"description": "MemoFS command-line interface for local and hybrid memory workflows.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/christophersesugh/memofs.git",
-		"directory": "packages/tekmemo"
+		"directory": "packages/memofs"
 	},
 	"homepage": "https://docs.memofs.dev/packages/cli/",
 	"bugs": {
