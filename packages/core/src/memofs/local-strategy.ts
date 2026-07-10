@@ -8,16 +8,17 @@
  */
 
 import { bootstrapMemoryStore } from "../core/bootstrap/bootstrap-memory-store";
-import { createBM25Store } from "../recall/lexical/bm25";
-import { createFsGraphStore } from "../graph/stores/fs-graph-store";
+import { readCoreMemory } from "../core/documents/core-memory";
+import { readNotesMemory } from "../core/documents/notes-memory";
+import type { JsonObject } from "../core/types/json";
 import {
 	createRuleBasedExtractor,
 	type Extractor,
 } from "../graph/extraction/extractor";
-import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
-import { readCoreMemory } from "../core/documents/core-memory";
-import { readNotesMemory } from "../core/documents/notes-memory";
+import { createFsGraphStore } from "../graph/stores/fs-graph-store";
 import type { BM25Store } from "../recall/lexical/bm25";
+import { createBM25Store } from "../recall/lexical/bm25";
+import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
 import { buildContext } from "./helpers";
 import { createLocalAgentfsClient } from "./local-strategy/client";
 import {
@@ -45,12 +46,12 @@ import {
 	writeAgentSessionFile,
 } from "./local-strategy/session";
 import { createSnapshot as createSnapshotFn } from "./local-strategy/snapshot";
-import { validateStore } from "./local-strategy/validate";
 import type {
 	LocalGraphStore,
 	LocalStrategyContext,
 	LocalStrategyOptions,
 } from "./local-strategy/types";
+import { validateStore } from "./local-strategy/validate";
 import { updateCoreMemory, writeMemory } from "./local-strategy/write";
 import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
@@ -78,7 +79,6 @@ import type {
 	WriteMemoryInput,
 	WriteMemoryResult,
 } from "./types";
-import type { JsonObject } from "../core/types/json";
 
 export type { LocalGraphStore, LocalStrategyOptions };
 
@@ -154,8 +154,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		bootstrapped = true;
 	}
 
-	const createSnapshotImpl = (input?: SnapshotMemoryInput, signal?: AbortSignal) =>
-		createSnapshotFn(store, ensureReady, input, signal);
+	const createSnapshotImpl = (
+		input?: SnapshotMemoryInput,
+		signal?: AbortSignal,
+	) => createSnapshotFn(store, ensureReady, input, signal);
 
 	const listRecentMemories = (limit?: number, signal?: AbortSignal) =>
 		listRecentMemoriesFn(store, ensureReady, limit, signal);
@@ -294,7 +296,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			return listRecentMemories(input?.limit, signal);
 		},
 
-		async validate(input?: { strict?: boolean }, signal?: AbortSignal): Promise<{ ok: boolean; warnings: string[]; errors: string[] }> {
+		async validate(
+			input?: { strict?: boolean },
+			signal?: AbortSignal,
+		): Promise<{ ok: boolean; warnings: string[]; errors: string[] }> {
 			return validateStore(store, ensureReady, signal, input);
 		},
 

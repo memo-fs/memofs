@@ -65,8 +65,10 @@ export function getByPath(
  */
 export function stableDeepEqual(a: unknown, b: unknown): boolean {
 	try {
-		return JSON.stringify(stabilize(a, 0, new WeakSet<object>())) ===
-			JSON.stringify(stabilize(b, 0, new WeakSet<object>()));
+		return (
+			JSON.stringify(stabilize(a, 0, new WeakSet<object>())) ===
+			JSON.stringify(stabilize(b, 0, new WeakSet<object>()))
+		);
 	} catch {
 		return false;
 	}
@@ -95,14 +97,11 @@ function stabilize(
 		if (Array.isArray(value)) {
 			return value.map((item) => stabilize(item, depth + 1, seen));
 		}
-		const entries = Object.entries(
-			value as Record<string, unknown>,
-		).sort(([a], [b]) => a.localeCompare(b));
+		const entries = Object.entries(value as Record<string, unknown>).sort(
+			([a], [b]) => a.localeCompare(b),
+		);
 		return Object.fromEntries(
-			entries.map(([key, nested]) => [
-				key,
-				stabilize(nested, depth + 1, seen),
-			]),
+			entries.map(([key, nested]) => [key, stabilize(nested, depth + 1, seen)]),
 		);
 	} finally {
 		seen.delete(value);

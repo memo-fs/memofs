@@ -9,11 +9,11 @@
  * @internal
  */
 
-import { readSnapshotRecordsWithIssues } from "../../core/snapshots/snapshot-records";
 import { readCoreMemory } from "../../core/documents/core-memory";
-import { readManifest } from "../../core/manifest/manifest";
-import { readMemoryEventsWithIssues } from "../../core/events/memory-events";
 import { readNotesMemory } from "../../core/documents/notes-memory";
+import { readMemoryEventsWithIssues } from "../../core/events/memory-events";
+import { readManifest } from "../../core/manifest/manifest";
+import { readSnapshotRecordsWithIssues } from "../../core/snapshots/snapshot-records";
 import type { MemoryStore } from "../../core/types/memory-store";
 import { message } from "./helpers";
 

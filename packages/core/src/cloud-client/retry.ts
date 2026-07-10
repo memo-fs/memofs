@@ -9,11 +9,8 @@
  * @internal
  */
 
+import { MemoFSCloudNetworkError, MemoFSCloudTimeoutError } from "./errors";
 import type { MemoFSCloudRetryOptions } from "./types";
-import {
-	MemoFSCloudNetworkError,
-	MemoFSCloudTimeoutError,
-} from "./errors";
 
 export const DEFAULT_RETRY_OPTIONS: Required<MemoFSCloudRetryOptions> =
 	Object.freeze({

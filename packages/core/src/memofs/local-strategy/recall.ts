@@ -1,8 +1,8 @@
-import type { JsonObject } from "../../core/types/json";
-import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import { readCoreMemory } from "../../core/documents/core-memory";
 import { readNotesMemory } from "../../core/documents/notes-memory";
 import { searchMemoryText } from "../../core/search/search-memory";
+import type { JsonObject } from "../../core/types/json";
+import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
 import { candidateShape, hash } from "./helpers";
 import type { LocalStrategyContext } from "./types";
@@ -76,10 +76,7 @@ async function runLexicalRecall(
 	query: string,
 	limit: number,
 ): Promise<
-	Map<
-		string,
-		{ text: string; score: number; metadata?: JsonObject }
-	>
+	Map<string, { text: string; score: number; metadata?: JsonObject }>
 > {
 	const out = new Map<
 		string,

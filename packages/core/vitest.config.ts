@@ -4,9 +4,7 @@ import { createVitestConfig } from "@memofs/testing/vitest";
 export default createVitestConfig({
 	resolve: {
 		alias: {
-			"@memofs/core": fileURLToPath(
-				new URL("./src/index.ts", import.meta.url),
-			),
+			"@memofs/core": fileURLToPath(new URL("./src/index.ts", import.meta.url)),
 		},
 	},
 	test: {

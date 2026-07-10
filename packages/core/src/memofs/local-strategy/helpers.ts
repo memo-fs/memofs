@@ -9,12 +9,8 @@ export function hash(value: string): string {
 
 export function candidateShape(
 	id: string,
-	vector:
-		| { text: string; score: number; metadata?: JsonObject }
-		| undefined,
-	lexical:
-		| { text: string; score: number; metadata?: JsonObject }
-		| undefined,
+	vector: { text: string; score: number; metadata?: JsonObject } | undefined,
+	lexical: { text: string; score: number; metadata?: JsonObject } | undefined,
 ) {
 	return {
 		id,

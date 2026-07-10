@@ -12,18 +12,18 @@
 
 export { cloneJson } from "./clone";
 export {
-	FORBIDDEN_KEYS,
-	isForbiddenKey,
-} from "./forbidden-keys";
-export {
 	getByPath,
 	stableDeepEqual,
 } from "./deep-equal";
 export {
-	tokenOverlapScore,
-	tokenizeSimple,
-} from "./lexical";
+	FORBIDDEN_KEYS,
+	isForbiddenKey,
+} from "./forbidden-keys";
 export { isNotFoundError } from "./is-not-found-error";
+export {
+	tokenizeSimple,
+	tokenOverlapScore,
+} from "./lexical";
 export {
 	KNOWN_SECRET_PREFIX_PATTERNS,
 	type SecretPrefixPattern,

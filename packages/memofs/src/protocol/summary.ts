@@ -102,7 +102,10 @@ export async function inspectMemoFs(
 	} catch {
 		dirExists = false;
 	}
-	const manifestContent = await readTextIfExists(store, MEMOFS_CLI_PATHS.manifest);
+	const manifestContent = await readTextIfExists(
+		store,
+		MEMOFS_CLI_PATHS.manifest,
+	);
 	const manifest =
 		manifestContent === undefined ? undefined : parseManifest(manifestContent);
 

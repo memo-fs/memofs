@@ -1,8 +1,5 @@
 import { cloneJson } from "../../core/internal/clone";
-import {
-	tokenOverlapScore,
-	tokenizeSimple,
-} from "../../core/internal/lexical";
+import { tokenizeSimple, tokenOverlapScore } from "../../core/internal/lexical";
 import { applyTopK } from "../sort/sort";
 import type { Reranker, RerankInput, RerankResult } from "../types";
 import { normalizeRerankInput } from "../validation/validation";
@@ -46,9 +43,7 @@ export class DeterministicFallbackReranker implements Reranker {
 				text: document.text,
 				score,
 				rank: 0,
-				metadata: document.metadata
-					? cloneJson(document.metadata)
-					: undefined,
+				metadata: document.metadata ? cloneJson(document.metadata) : undefined,
 			};
 		});
 

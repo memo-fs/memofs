@@ -4,12 +4,19 @@
  * @public
  */
 
+import type { AgentfsLikeClient } from "../agentfs/client/agentfs-like";
 import type {
 	CreateMemoFSAgentSessionOptions,
 	MemoFSAgentSession,
 } from "../agentfs/session/agent-session";
+import { AgentfsMemoryStore } from "../agentfs/stores/agentfs-memory-store";
+import type { AgentfsMemoryStoreConfig } from "../agentfs/types/config";
 import type { LlmClient } from "../ai-runtime/llm-client";
+import { createMemoFsCloudClient } from "../cloud-client/client";
+import type { MemoFsCloudClient } from "../cloud-client/types";
 import type { BootstrapMemoryStoreOptions } from "../core/bootstrap/bootstrap-memory-store";
+import { bootstrapMemoryStore } from "../core/bootstrap/bootstrap-memory-store";
+import { runMemoryCommand } from "../core/commands/run-memory-command";
 import type { ReadConversationHistoryOptions } from "../core/documents/conversations-memory";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryCommand } from "../core/types/memory-commands";
@@ -20,16 +27,9 @@ import type {
 } from "../core/types/memory-documents";
 import type { MemoryStore } from "../core/types/memory-store";
 import type { Extractor } from "../graph/extraction/extractor";
-import type { AgentfsLikeClient } from "../agentfs/client/agentfs-like";
-import type { AgentfsMemoryStoreConfig } from "../agentfs/types/config";
-import { AgentfsMemoryStore } from "../agentfs/stores/agentfs-memory-store";
-import { applyTopK, stableSortRerankResults } from "../rerank/sort/sort";
-import { bootstrapMemoryStore } from "../core/bootstrap/bootstrap-memory-store";
-import { createMemoFsCloudClient } from "../cloud-client/client";
-import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
-import type { MemoFsCloudClient } from "../cloud-client/types";
-import { runMemoryCommand } from "../core/commands/run-memory-command";
 import type { RecallFilter, RecallStore } from "../recall/types";
+import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
+import { applyTopK, stableSortRerankResults } from "../rerank/sort/sort";
 import type { Reranker } from "../rerank/types";
 import {
 	type MemoFsConfig,

@@ -8,10 +8,7 @@
  * @public
  */
 
-import {
-	getByPath,
-	stableDeepEqual,
-} from "../../core/internal/deep-equal";
+import { getByPath, stableDeepEqual } from "../../core/internal/deep-equal";
 import type { JsonPrimitive, RecallFilter } from "../types";
 import { validateRecallFilter } from "../validation/assertions";
 

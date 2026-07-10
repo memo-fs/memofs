@@ -1,10 +1,7 @@
-import type { MemoryStore } from "../../core/types/memory-store";
 import type { AgentfsLikeClient } from "../../agentfs/client/agentfs-like";
-import type {
-	SnapshotMemoryInput,
-	SnapshotMemoryResult,
-} from "../types";
+import type { MemoryStore } from "../../core/types/memory-store";
 import type { FileSyncLayer } from "../sync/file-replication";
+import type { SnapshotMemoryInput, SnapshotMemoryResult } from "../types";
 import { loadNodeFs, loadNodePath, type NodePath } from "./helpers";
 
 export function createLocalAgentfsClient(opts: {

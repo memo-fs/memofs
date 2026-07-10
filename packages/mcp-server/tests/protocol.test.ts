@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { InMemoryMemoryStore } from "@memofs/core";
+import { describe, expect, it } from "vitest";
 import {
 	createMemoFSMcpProtocolServer,
 	createMemoFSMcpRuntimeFromConfig,
@@ -7,7 +7,10 @@ import {
 
 function makeServer() {
 	return createMemoFSMcpProtocolServer({
-		runtime: createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() }),
+		runtime: createMemoFSMcpRuntimeFromConfig({
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+		}),
 		defaultPageSize: 2,
 		maxPageSize: 5,
 	});
@@ -165,7 +168,10 @@ describe("MCP protocol", () => {
 	});
 
 	it("graph neighbors can be read via runtime methods after node and edge upserts", async () => {
-		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
+		const runtime = createMemoFSMcpRuntimeFromConfig({
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+		});
 		const server = createMemoFSMcpProtocolServer({ runtime });
 		// graph_upsert_nodes/edges and graph_neighbors were demoted to runtime
 		// methods. Seed + read the graph directly through

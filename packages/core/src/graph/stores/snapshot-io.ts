@@ -22,10 +22,7 @@ import type {
 } from "../types";
 import { cloneJson } from "../utils/clone";
 import { nowIso } from "../utils/time";
-import {
-	normalizeEdge,
-	normalizeNode,
-} from "../utils/validation";
+import { normalizeEdge, normalizeNode } from "../utils/validation";
 
 /**
  * Exports the current graph state as a serializable snapshot.
@@ -84,14 +81,11 @@ export async function importSnapshot(
 		try {
 			const normalized = normalizeNode(node);
 			if (nodeIds.has(normalized.id))
-				throw new GraphValidationError(
-					`Duplicate node id "${normalized.id}".`,
-				);
+				throw new GraphValidationError(`Duplicate node id "${normalized.id}".`);
 			nodeIds.add(normalized.id);
 			return normalized;
 		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Invalid node.";
+			const message = error instanceof Error ? error.message : "Invalid node.";
 			throw new GraphValidationError(
 				`Invalid snapshot node at index ${index}: ${message}`,
 				{ cause: error },
@@ -115,14 +109,11 @@ export async function importSnapshot(
 				edgeIdentityMode: store.edgeIdentityMode,
 			});
 			if (edgeIds.has(normalized.id))
-				throw new GraphValidationError(
-					`Duplicate edge id "${normalized.id}".`,
-				);
+				throw new GraphValidationError(`Duplicate edge id "${normalized.id}".`);
 			edgeIds.add(normalized.id);
 			return normalized;
 		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : "Invalid edge.";
+			const message = error instanceof Error ? error.message : "Invalid edge.";
 			throw new GraphValidationError(
 				`Invalid snapshot edge at index ${index}: ${message}`,
 				{ cause: error },
@@ -131,7 +122,6 @@ export async function importSnapshot(
 	});
 
 	if (options?.clear ?? true) await store.clear();
-	for (const node of normalizedNodes)
-		store.nodes.set(node.id, cloneJson(node));
+	for (const node of normalizedNodes) store.nodes.set(node.id, cloneJson(node));
 	for (const edge of normalizedEdges) store.setEdge(edge);
 }

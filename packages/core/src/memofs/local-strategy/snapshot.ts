@@ -9,14 +9,14 @@
  * @internal
  */
 
+import { createSnapshotPath } from "../../core/constants/memory-paths";
+import { readCoreMemory } from "../../core/documents/core-memory";
+import { readNotesMemory } from "../../core/documents/notes-memory";
+import { readMemoryEventsWithIssues } from "../../core/events/memory-events";
 import {
 	appendSnapshotRecord,
 	createSnapshotRecord,
 } from "../../core/snapshots/snapshot-records";
-import { createSnapshotPath } from "../../core/constants/memory-paths";
-import { readCoreMemory } from "../../core/documents/core-memory";
-import { readMemoryEventsWithIssues } from "../../core/events/memory-events";
-import { readNotesMemory } from "../../core/documents/notes-memory";
 import type { MemoryStore } from "../../core/types/memory-store";
 import { snapshotId } from "./helpers";
 

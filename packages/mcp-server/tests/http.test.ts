@@ -11,7 +11,10 @@ import {
 	type JsonRpcResponse,
 } from "../src/index";
 
-const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
+const runtime = createMemoFSMcpRuntimeFromConfig({
+	mode: "local",
+	store: new InMemoryMemoryStore(),
+});
 const auth = { requireAuth: true, bearerToken: "test-token" };
 
 /**
@@ -226,10 +229,7 @@ describe("MCP HTTP adapter", () => {
 	});
 
 	it("keeps the HTTP subpath source free of Node runtime imports", () => {
-		const files = [
-			"../src/http/index.ts",
-			"../src/http/cloud-runtime.ts",
-		];
+		const files = ["../src/http/index.ts", "../src/http/cloud-runtime.ts"];
 		for (const file of files) {
 			const source = readFileSync(new URL(file, import.meta.url), "utf8");
 			expect(source).not.toMatch(/node:(process|readline|fs|path)/);

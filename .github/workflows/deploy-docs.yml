@@ -26,7 +26,7 @@ on:
       - ".github/workflows/deploy-docs.yml"
 
 concurrency:
-  group: memofs-docs-${{ github.workflow }}-${{ github.ref }}
+  group: docs-memofs-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:

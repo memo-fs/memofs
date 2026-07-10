@@ -141,9 +141,9 @@ export const BLOCKLIST_RULES: readonly BlocklistRule[] = [
  * matches multiple times). Returns an empty array when the text is clean.
  *
  * Pure, synchronous, side-effect free. The caller decides what to do with
-* violations (hard-reject on the write path, warn, redact — the spec
-	 * mandates hard-reject on `writeMemory` and the agent-session durable-memory
-	 * append).
+ * violations (hard-reject on the write path, warn, redact — the spec
+ * mandates hard-reject on `writeMemory` and the agent-session durable-memory
+ * append).
  *
  * @param text - The text to scan (note content, title, durable memory, etc.).
  * @returns Violations found, or `[]` when clean. Never throws.

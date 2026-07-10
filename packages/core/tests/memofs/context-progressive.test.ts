@@ -280,7 +280,10 @@ describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", (
 
 	describe("in-memory store parity", () => {
 		it("compact works with an in-memory store (verifies cache wiring)", async () => {
-			const memo = new MemoFS({ mode: "local", store: new InMemoryMemoryStore() });
+			const memo = new MemoFS({
+				mode: "local",
+				store: new InMemoryMemoryStore(),
+			});
 			await memo.core.update(CORE);
 			await memo.notes.record({
 				content: "Authentication uses JWT tokens.",

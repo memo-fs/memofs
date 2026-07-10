@@ -12,9 +12,7 @@ import {
 	createMemoFSMcpRuntimeFromConfig,
 	runStdioServer,
 } from "../index";
-import type {
-	MemoFSRuntimeMode,
-} from "../types";
+import type { MemoFSRuntimeMode } from "../types";
 
 main().catch((error) => {
 	console.error(

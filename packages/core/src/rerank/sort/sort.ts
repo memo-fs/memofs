@@ -29,8 +29,8 @@ export function stableSortRerankResults(
 		.map((item, index) => ({
 			...item.result,
 			metadata: item.result.metadata
-					? cloneJson(item.result.metadata)
-					: undefined,
+				? cloneJson(item.result.metadata)
+				: undefined,
 			rank: index + 1,
 		}));
 }
@@ -56,4 +56,3 @@ export function applyTopK(
 			rank: index + 1,
 		}));
 }
-

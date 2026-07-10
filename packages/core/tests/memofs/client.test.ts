@@ -229,7 +229,10 @@ describe("MemoFS Client", () => {
 	});
 
 	it("supports in-memory store for testing", async () => {
-		const memo = new MemoFS({ mode: "local", store: new InMemoryMemoryStore() });
+		const memo = new MemoFS({
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+		});
 
 		const health = await memo.health();
 		expect(health.ok).toBe(true);

@@ -113,13 +113,18 @@ export async function runContextCommand(
 				? parsePositiveInteger(options.maxChars, "max chars")
 				: 12000;
 	const core =
-		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.coreMemory)) ?? "";
+		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.coreMemory)) ??
+		"";
 	const notes =
-		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.notesMemory)) ??
-		"";
+		(await readTextIfExists(
+			options.memo.store,
+			MEMOFS_CLI_PATHS.notesMemory,
+		)) ?? "";
 	const eventContent =
-		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.memoryEvents)) ??
-		"";
+		(await readTextIfExists(
+			options.memo.store,
+			MEMOFS_CLI_PATHS.memoryEvents,
+		)) ?? "";
 	const chunkContent =
 		(await readTextIfExists(options.memo.store, MEMOFS_CLI_PATHS.chunks)) ?? "";
 	const events = eventContent

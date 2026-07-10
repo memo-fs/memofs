@@ -194,9 +194,7 @@ export function recencyBoost(
  *
  * @internal
  */
-export function readConfidence(
-	metadata: JsonObject | undefined,
-): number {
+export function readConfidence(metadata: JsonObject | undefined): number {
 	const raw = metadata?.confidence;
 	if (typeof raw === "number" && Number.isFinite(raw)) {
 		return clamp01(raw);

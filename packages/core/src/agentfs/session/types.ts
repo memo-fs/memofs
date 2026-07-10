@@ -1,7 +1,7 @@
 import type { MemoryStore } from "../../core/types/memory-store";
-import type { SyncOperationResult } from "../sync/types";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import type { SyncAfterSessionResult } from "../sync/sync-after-session";
+import type { SyncOperationResult } from "../sync/types";
 
 export interface MemoFSAgentSessionPaths {
 	readonly root: string;

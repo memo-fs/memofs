@@ -274,4 +274,4 @@ Creates a registry seeded with the built-in connectors (GitHub + Notion), plus a
 
 - [Core Client API](/packages/core/client)
 - [Configuration](/packages/core/configuration)
-- [CLI `memofs connectors`](/packages/cli)
+- [CLI `memofs connectors`](/packages/cli/)

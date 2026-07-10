@@ -679,11 +679,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.command("init")
 		.description("create .memofs/config.json without storing secrets")
 		.option("-f, --force", "overwrite existing config", false)
-		.option(
-			"--runtime <mode>",
-			"runtime mode: local or hybrid",
-			"local",
-		)
+		.option("--runtime <mode>", "runtime mode: local or hybrid", "local")
 		.option("--cloud-url <url>", "MemoFS Cloud API URL")
 		.option("--workspace-id <id>", "cloud workspace ID")
 		.option("--project-id <id>", "cloud project ID")

@@ -11,11 +11,11 @@ import fs from "node:fs/promises";
  * @public
  */
 
+import { PathLock } from "@repo/utils";
 import type { MemoryPath } from "../core/constants/memory-paths";
-import type { MemoryStore } from "../core/types/memory-store";
 import { MEMOFS_DIR } from "../core/constants/memory-paths";
 import { MemoryNotFoundError } from "../core/errors/errors";
-import { PathLock } from "@repo/utils";
+import type { MemoryStore } from "../core/types/memory-store";
 import { assertString } from "../core/validation/assertions";
 import { isNotFoundError, wrapFsError } from "./errors/fs-memory-store-error";
 import type {

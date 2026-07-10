@@ -64,9 +64,7 @@ export class FakeReranker implements Reranker {
 			text: document.text,
 			score: this.scores[document.id] ?? 1 / (index + 1),
 			rank: 0,
-			metadata: document.metadata
-				? cloneJson(document.metadata)
-				: undefined,
+			metadata: document.metadata ? cloneJson(document.metadata) : undefined,
 		}));
 
 		return applyTopK(results, normalized.topK);

@@ -23,10 +23,10 @@
  * @internal
  */
 
-import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
+import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import { LockHeldError } from "../errors/fs-memory-store-error";
 
 /** Shape of the JSON written to the `.lock` file. */

@@ -1,4 +1,7 @@
-import { assertMemoryPath, type MemoryPath } from "../../core/constants/memory-paths";
+import {
+	assertMemoryPath,
+	type MemoryPath,
+} from "../../core/constants/memory-paths";
 import { AgentfsConfigError } from "../errors/agentfs-error";
 
 /**

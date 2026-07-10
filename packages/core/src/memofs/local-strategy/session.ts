@@ -1,8 +1,8 @@
+import { createMemoFsAgentSession } from "../../agentfs/session/agent-session";
 import {
 	createAgentWorkspacePaths,
 	extractSessionMemory,
 } from "../../agentfs/session/scaffolding";
-import { createMemoFsAgentSession } from "../../agentfs/session/agent-session";
 import type { JsonObject } from "../../core/types/json";
 import type {
 	AgentSessionCompleteInput,

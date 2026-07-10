@@ -1,5 +1,5 @@
-import type { JsonValue, MemoFSCloudRequestMeta } from "./types";
 import { KNOWN_SECRET_PREFIX_PATTERNS } from "../core/internal/secret-prefixes";
+import type { JsonValue, MemoFSCloudRequestMeta } from "./types";
 
 export interface MemoFSCloudErrorOptions extends MemoFSCloudRequestMeta {
 	code: string;

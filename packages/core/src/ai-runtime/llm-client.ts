@@ -8,8 +8,8 @@
  * `LlmClient` is the **transport** — "given a system prompt + user content
  * (+ optional JSON schema), return text or structured output." It is the
  * primitive every LLM-enhanced intelligence feature consumes: the retrieval
-* strategist (rewrite/resolve/filter/budget), writer-critic
-	 * consolidation, staleness re-verification, and semantic consolidation.
+ * strategist (rewrite/resolve/filter/budget), writer-critic
+ * consolidation, staleness re-verification, and semantic consolidation.
  *
  * The relationship to {@link Extractor} is the same as `RemoteBlobMemoryStore`
  * to `BlobClient` (domain logic over a transport contract): a provider's

@@ -42,7 +42,5 @@ export function rewireEdgesForMerge(
 			updatedAt: nowIso(),
 		});
 	}
-	return movedEdges.filter(
-		(next) => next.from !== next.to || allowSelfEdges,
-	);
+	return movedEdges.filter((next) => next.from !== next.to || allowSelfEdges);
 }

@@ -19,7 +19,6 @@ import type {
 	SyncPullInput,
 	SyncPushCompleteInput,
 	SyncPushInput,
-	SyncStatusInput,
 } from "./types";
 
 /** sha256 hex digest: 64 lowercase hexadecimal characters. */

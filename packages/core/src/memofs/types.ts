@@ -7,16 +7,11 @@
  * @public
  */
 
+import type { JsonObject } from "../core/types/json";
 import type {
 	DurabilityReason,
 	DurabilityTier,
 } from "../security/durability-tier";
-import type {
-	JsonArray,
-	JsonObject,
-	JsonPrimitive,
-	JsonValue,
-} from "../core/types/json";
 
 export type {
 	JsonArray,
@@ -111,8 +106,8 @@ export interface MemoryContextInput extends RecallInput {
 }
 
 /**
-* The sections a compact `memofs.context` briefing marks expandable.
-	 * Each can be pulled individually on a second call via
+ * The sections a compact `memofs.context` briefing marks expandable.
+ * Each can be pulled individually on a second call via
  * `section` + `expand`.
  *
  * @public
@@ -158,7 +153,7 @@ export interface MemoryContextResult {
 }
 
 /**
-* One expandable section in a compact `memofs.context` briefing.
+ * One expandable section in a compact `memofs.context` briefing.
  *
  * @public
  */

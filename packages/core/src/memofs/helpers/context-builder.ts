@@ -22,14 +22,14 @@ import type {
 	MemoryContextResult,
 	RecallItem,
 } from "../types";
+import { expandContext } from "./expand-context";
 import {
-	addAffordances,
 	AGENT_CONTEXT_DIRECTIVE,
+	addAffordances,
 	renderEntities,
 	renderRecall,
 	renderRecent,
 } from "./renderers";
-import { expandContext } from "./expand-context";
 
 export { AGENT_CONTEXT_DIRECTIVE };
 

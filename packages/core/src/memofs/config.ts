@@ -17,9 +17,7 @@ import type { MemoryStore } from "../core/types/memory-store";
 import type { Extractor } from "../graph/extraction/extractor";
 import type { RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
-import type {
-	MemoFSRuntimeMode,
-} from "./types";
+import type { MemoFSRuntimeMode } from "./types";
 
 export interface MemoFsCloudOptions {
 	baseUrl?: string;
@@ -286,8 +284,7 @@ function resolveMode(
 ): MemoFSRuntimeMode {
 	if (arg !== undefined) return arg;
 	const envValue = env.MEMOFS_RUNTIME;
-	if (envValue === "local" || envValue === "hybrid")
-		return envValue;
+	if (envValue === "local" || envValue === "hybrid") return envValue;
 	return file.runtime ?? "local";
 }
 

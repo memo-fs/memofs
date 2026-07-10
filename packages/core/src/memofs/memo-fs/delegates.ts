@@ -3,26 +3,26 @@ import type {
 	CreateMemoFSAgentSessionOptions,
 	MemoFSAgentSession,
 } from "../../agentfs/session/agent-session";
-import type { ReadConversationHistoryOptions } from "../../core/documents/conversations-memory";
-import type {
-	ConversationEntry,
-	SnapshotRecord,
-	TimestampedNote,
-} from "../../core/types/memory-documents";
-import {
-	appendConversationEntry,
-	readConversationHistory,
-} from "../../core/documents/conversations-memory";
-import { bootstrapMemoryStore } from "../../core/bootstrap/bootstrap-memory-store";
 import { createMemoFsAgentSession } from "../../agentfs/session/agent-session";
+import { bootstrapMemoryStore } from "../../core/bootstrap/bootstrap-memory-store";
 import {
 	createSnapshotPath,
 	MEMORY_EVENTS_PATH,
 	NOTES_MEMORY_PATH,
 } from "../../core/constants/memory-paths";
+import type { ReadConversationHistoryOptions } from "../../core/documents/conversations-memory";
+import {
+	appendConversationEntry,
+	readConversationHistory,
+} from "../../core/documents/conversations-memory";
+import { writeCoreMemory } from "../../core/documents/core-memory";
 import { MemoryNotFoundError } from "../../core/errors/errors";
 import { readSnapshotRecords } from "../../core/snapshots/snapshot-records";
-import { writeCoreMemory } from "../../core/documents/core-memory";
+import type {
+	ConversationEntry,
+	SnapshotRecord,
+	TimestampedNote,
+} from "../../core/types/memory-documents";
 import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
 import type { MemoFS } from "../memo-fs";

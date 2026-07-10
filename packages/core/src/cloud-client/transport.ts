@@ -1,22 +1,15 @@
 import {
+	parseJsonPayload,
+	unwrapErrorBody,
+	unwrapSuccessPayload,
+} from "./envelope";
+import {
 	createHttpError,
 	MemoFSCloudNetworkError,
 	MemoFSCloudTimeoutError,
 	MemoFsCloudAuthError,
 	redactSecrets,
 } from "./errors";
-import type {
-	MemoFSCloudRequestOptions,
-	MemoFSCloudRetryOptions,
-	MemoFsCloudClientOptions,
-	MemoFsCloudFetch,
-} from "./types";
-import { normalizeApiKey, normalizeBaseUrl } from "./validation";
-import {
-	parseJsonPayload,
-	unwrapErrorBody,
-	unwrapSuccessPayload,
-} from "./envelope";
 import {
 	getRetryDelayMs,
 	normalizeRetryOptions,
@@ -24,6 +17,13 @@ import {
 	shouldRetry,
 	sleep,
 } from "./retry";
+import type {
+	MemoFSCloudRequestOptions,
+	MemoFSCloudRetryOptions,
+	MemoFsCloudClientOptions,
+	MemoFsCloudFetch,
+} from "./types";
+import { normalizeApiKey, normalizeBaseUrl } from "./validation";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 

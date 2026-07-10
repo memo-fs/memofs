@@ -88,8 +88,7 @@ function validateMetadataValue(
 		return;
 	}
 
-		throw new RerankValidationError(
-			`metadata at ${path} contains unsupported value type ${type}.`,
-		);
+	throw new RerankValidationError(
+		`metadata at ${path} contains unsupported value type ${type}.`,
+	);
 }
-

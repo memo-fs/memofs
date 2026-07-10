@@ -1,7 +1,4 @@
-import {
-	getByPath,
-	stableDeepEqual,
-} from "../../core/internal/deep-equal";
+import { getByPath, stableDeepEqual } from "../../core/internal/deep-equal";
 import { isForbiddenKey } from "../../core/internal/forbidden-keys";
 import type { GraphMetadata } from "../types";
 

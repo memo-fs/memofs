@@ -10,15 +10,11 @@
  * @internal
  */
 
-import {
-	type ContextCacheEntry,
-	decodeExpansionCursor,
-} from "../progressive";
+import { decodeExpansionCursor } from "../progressive";
 import {
 	allocateBudget,
 	type BudgetSection,
 	type EntityState,
-	type ResolveGraphEdge,
 	type ResolveGraphNode,
 	resolveEntities,
 	resolveEntityState,
@@ -30,8 +26,13 @@ import type {
 	MemoryContextResult,
 	RecallItem,
 } from "../types";
-import { AGENT_CONTEXT_DIRECTIVE, renderEntities, renderRecall, renderRecent } from "./renderers";
 import type { BuildContextOperations } from "./context-builder";
+import {
+	AGENT_CONTEXT_DIRECTIVE,
+	renderEntities,
+	renderRecall,
+	renderRecent,
+} from "./renderers";
 
 /**
  * Expands a single section of the memory context from a cached cursor.

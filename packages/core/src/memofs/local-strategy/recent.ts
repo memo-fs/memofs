@@ -9,8 +9,8 @@
  */
 
 import { readMemoryEventsWithIssues } from "../../core/events/memory-events";
-import type { MemoryStore } from "../../core/types/memory-store";
 import type { JsonObject } from "../../core/types/json";
+import type { MemoryStore } from "../../core/types/memory-store";
 
 /**
  * Lists recent memory events as a summary list.
