@@ -96,7 +96,7 @@ or in `.memofs/config.json`:
 
 ```json
 {
-  "$schema": "https://docs.memofs.dev/1.0.0-beta.1/config.schema.json",
+  "$schema": "https://docs.memofs.dev/1.0.0-beta.2/config.schema.json",
   "runtime": "local",
   "recall": { "engine": "auto", "localEmbeddings": true }
 }

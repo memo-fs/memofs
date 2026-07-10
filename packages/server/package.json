@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/server",
-	"version": "1.0.0-beta.1",
+	"version": "1.0.0-beta.2",
 	"private": false,
 	"description": "Self-hostable MemoFS runtime server for Node and Cloudflare Workers deployments.",
 	"license": "MIT",

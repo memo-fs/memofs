@@ -107,7 +107,7 @@ memofs config init --runtime hybrid --cloud-url https://memofs.dev/api/v1
 
 ```json
 {
-  "$schema": "https://docs.memofs.dev/1.0.0-beta.1/config.schema.json",
+  "$schema": "https://docs.memofs.dev/1.0.0-beta.2/config.schema.json",
   "runtime": "hybrid",
   "root": ".",
   "cloud": {

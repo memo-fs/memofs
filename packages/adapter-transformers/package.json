@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/adapter-transformers",
-	"version": "1.0.0-beta.1",
+	"version": "1.0.0-beta.2",
 	"private": false,
 	"description": "Local Transformers.js ONNX embedder adapter for MemoFS with no API key or cloud dependency.",
 	"license": "MIT",

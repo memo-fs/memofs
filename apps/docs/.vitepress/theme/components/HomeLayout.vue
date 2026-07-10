@@ -600,7 +600,7 @@ const integrationLogos = [
             <a href="/changelog" class="changelog-teaser">
               <span class="changelog-teaser-badge">New</span>
               <span class="changelog-teaser-text">
-                <span class="changelog-teaser-version">v1.0.0-beta.1</span>
+                <span class="changelog-teaser-version">v1.0.0-beta.2</span>
                 <span class="changelog-teaser-divider">—</span>
                 <span class="changelog-teaser-description">First public beta</span>
               </span>
