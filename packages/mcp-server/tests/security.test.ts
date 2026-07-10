@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { InMemoryMemoryStore } from "@memofs/core";
 import {
 	callMemoFSTool,
 	createMemoFSMcpRuntimeFromConfig,
@@ -8,7 +9,7 @@ import {
 describe("Security", () => {
 	it("metadata rejects prototype pollution keys", async () => {
 		const result = await callMemoFSTool(
-			{ runtime: createMemoFSMcpRuntimeFromConfig({ mode: "memory" }) },
+			{ runtime: createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() }) },
 			"memofs.remember",
 			{
 				content: "hello",
@@ -23,7 +24,7 @@ describe("Security", () => {
 
 	it("oversized input is rejected before runtime execution", async () => {
 		let called = false;
-		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 		const wrapped = {
 			...runtime,
 			async writeMemory(input: WriteMemoryInput, signal?: AbortSignal) {
@@ -45,7 +46,7 @@ describe("Security", () => {
 	});
 
 	it("runtime timeouts are converted into tool-level errors", async () => {
-		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 		// memofs.health was demoted to a runtime method,
 		// so exercise the timeout path through memofs.recall — a surviving read
 		// verb. The wrapped recall stalls past the 1ms deadline.

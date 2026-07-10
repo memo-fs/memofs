@@ -1,3 +1,4 @@
+import { InMemoryMemoryStore } from "@memofs/core";
 import type { MemoFsCloudClient } from "@memofs/core/cloud-client";
 import { describe, expect, it } from "vitest";
 import { createMemoFSCloudMcpRuntime } from "../src/http/cloud-runtime";
@@ -95,7 +96,7 @@ describe("MCP tools", () => {
 	it("write tool can be blocked by authorization policy", async () => {
 		const result = await callMemoFSTool(
 			{
-				runtime: createMemoFSMcpRuntimeFromConfig({ mode: "memory" }),
+				runtime: createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() }),
 				authorize: ({ safety }) => safety === "read",
 			},
 			"memofs.remember",
@@ -109,7 +110,7 @@ describe("MCP tools", () => {
 
 	it("source refs reject path traversal and non-http URLs", async () => {
 		const result = await callMemoFSTool(
-			{ runtime: createMemoFSMcpRuntimeFromConfig({ mode: "memory" }) },
+			{ runtime: createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() }) },
 			"memofs.remember",
 			{
 				content: "hello",
@@ -129,7 +130,7 @@ describe("MCP tools", () => {
 	});
 
 	it("output text is truncated safely when max output bytes is small", async () => {
-		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 		const write = await callMemoFSTool({ runtime }, "memofs.remember", {
 			content: "a".repeat(5000),
 		});
@@ -146,7 +147,7 @@ describe("MCP tools", () => {
 	});
 
 	it("resources/read exposes graph nodes as JSON content", async () => {
-		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+		const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 		const server = createMemoFSMcpProtocolServer({ runtime });
 		// Seed via the runtime method (graph_upsert_nodes is no longer a tool,
 		// but the resources surface still reads the graph store it writes).

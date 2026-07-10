@@ -45,8 +45,6 @@ export type {
 	RecallResult,
 	RecentMemoryInput,
 	RecentMemoryResult,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 	SourceRef,

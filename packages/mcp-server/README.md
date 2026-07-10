@@ -9,17 +9,31 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Model Context Protocol server for Memo FS agent integrations.
+Model Context Protocol server for MemoFS agent integrations.
 
 ## What is this?
 
-The `@memofs/mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 40+ standardized tools for memory operations, cloud syncing, graph search, and AgentFS sandboxing.
+The `@memofs/mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 10 model-facing tools (4 memory verbs + 6 AgentFS session tools) and 9 resources for memory, graph, and session access.
 
 ## Installation
 
+Most MCP clients invoke the server on demand via `npx` — no install required:
+
+```bash
+npx -y @memofs/mcp-server --help
+```
+
+If you want to install the server as a dev dependency instead:
+
 ```bash
 npm install -D @memofs/mcp-server
+
+# or: pnpm add -D @memofs/mcp-server
+# or: yarn add -D @memofs/mcp-server
+# or: bun add -d @memofs/mcp-server
 ```
+
+> Requires **Node.js >= 22**.
 
 Or use directly via `npx` in your client's configuration:
 
@@ -36,9 +50,10 @@ You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the 
 ```json
 {
  "mcpServers": {
- "memofs": {
- "command": "npx",
- "args": [
+  "memofs": {
+  "command": 
+    "npx",
+    "args": [
  "-y",
  "@memofs/mcp-server",
  "--runtime", "local",
@@ -51,7 +66,7 @@ You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the 
 
 ## Configuration and Usage
 
-The server supports advanced runtime modes (`local`, `cloud`, `hybrid`, `memory`), customizable read/write policies, and a strict `--read-only` flag to block mutating tools when used with untrusted clients.
+The server supports two runtime modes (`local`, `hybrid`), cloud sync via `--cloud-url` and `--api-key`, and a strict `--read-only` flag to block mutating tools when used with untrusted clients.
 
 For comprehensive setup instructions across all major AI tools, the full list of exposed tools and resources, and runtime mode options, please refer to the [Full Documentation](https://docs.memofs.dev/packages/mcp/).
 

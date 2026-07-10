@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { InMemoryMemoryStore } from "@memofs/core";
 import { describe, expect, it } from "vitest";
 import {
 	createHonoMemoFSMcpHandler,
@@ -10,7 +11,7 @@ import {
 	type JsonRpcResponse,
 } from "../src/index";
 
-const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 const auth = { requireAuth: true, bearerToken: "test-token" };
 
 /**
@@ -228,7 +229,6 @@ describe("MCP HTTP adapter", () => {
 		const files = [
 			"../src/http/index.ts",
 			"../src/http/cloud-runtime.ts",
-			"../src/utils/pagination.ts",
 		];
 		for (const file of files) {
 			const source = readFileSync(new URL(file, import.meta.url), "utf8");

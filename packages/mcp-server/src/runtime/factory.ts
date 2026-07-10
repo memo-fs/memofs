@@ -9,15 +9,11 @@
 
 import {
 	createLazyLocalEmbedder,
-	MemoFS,
+	type MemoFS,
 	type MemoFsConfig,
-	type RuntimeReadPolicy,
-	type RuntimeWritePolicy,
+	type MemoryStore,
 } from "@memofs/core";
-import {
-	createNodeFsMemoryStore,
-	readMemoFsConfigFileSync,
-} from "@memofs/core/node-fs";
+import { createNodeMemoFs } from "@memofs/core/node-fs";
 import type { MemoFSMcpRuntime, MemoFSRuntimeMode } from "../types";
 
 /**
@@ -28,6 +24,8 @@ export interface RuntimeFactoryOptions {
 	rootDir?: string;
 	projectId?: string;
 	workspaceId?: string;
+	/** Inject a custom store (e.g. `InMemoryMemoryStore` for tests). When omitted, a `NodeFsMemoryStore` is created from `rootDir`. */
+	store?: MemoryStore;
 	cloudClient?: MemoFsConfig["cloudClient"];
 	cloud?: {
 		baseUrl?: string;
@@ -39,8 +37,6 @@ export interface RuntimeFactoryOptions {
 		requireApiKey?: boolean;
 		retry?: NonNullable<NonNullable<MemoFsConfig["cloud"]>["retry"]>;
 	};
-	readPolicy?: RuntimeReadPolicy;
-	writePolicy?: RuntimeWritePolicy;
 	/**
 	 * Recall engine configuration. When `recall.localEmbeddings` is true (the
 	 * default for the MCP runtime), a local ONNX embedder is lazy-loaded so
@@ -72,9 +68,8 @@ export function createMemoFSMcpRuntimeFromConfig(
 			: undefined);
 
 	// Local ONNX embedder is lazy: constructing it is synchronous and cheap.
-	// The heavy runtime is imported on first recall. Memory mode is volatile and
-	// never persists vectors, so skip wiring the local embedder there.
-	const useLocalEmbedder = localEmbeddings && options.mode !== "memory";
+	// The heavy runtime is imported on first recall.
+	const useLocalEmbedder = localEmbeddings;
 	const embedder = useLocalEmbedder
 		? createLazyLocalEmbedder({
 				...(embeddingModel === undefined ? {} : { model: embeddingModel }),
@@ -87,25 +82,7 @@ export function createMemoFSMcpRuntimeFromConfig(
 		});
 	}
 
-	const memo = new MemoFS({
-		// The MCP server is Node-only: inject the filesystem-backed store
-		// explicitly. The root `@memofs/core` barrel is Worker-safe (no
-		// `node:fs` default), so a `local`/`hybrid` runtime requires a `store`.
-		// The volatile "memory" mode defaults to an in-memory store inside the
-		// constructor.
-		...(options.mode === "memory"
-			? {}
-			: {
-					store: createNodeFsMemoryStore({
-						rootDir: options.rootDir ?? ".",
-						createRoot: true,
-						missingFileBehavior: "empty",
-					}),
-				}),
-		// Core no longer reads `.memofs/config.json` (the read moved out of the
-		// Worker-loadable barrel). The MCP server is Node-only, so it reads the
-		// file here and passes it as `fileConfig`.
-		fileConfig: readMemoFsConfigFileSync(options.rootDir ?? "."),
+	const memo = createNodeMemoFs({
 		...(options.rootDir !== undefined ? { rootDir: options.rootDir } : {}),
 		...(options.mode !== undefined ? { mode: options.mode } : {}),
 		...(options.projectId !== undefined
@@ -114,47 +91,13 @@ export function createMemoFSMcpRuntimeFromConfig(
 		...(options.workspaceId !== undefined
 			? { workspaceId: options.workspaceId }
 			: {}),
-		...(options.readPolicy !== undefined
-			? { readPolicy: options.readPolicy }
-			: {}),
-		...(options.writePolicy !== undefined
-			? { writePolicy: options.writePolicy }
-			: {}),
+		...(options.store !== undefined ? { store: options.store } : {}),
 		...(options.cloudClient !== undefined
 			? { cloudClient: options.cloudClient }
 			: {}),
 		...(embedder !== undefined ? { embedder } : {}),
 		...(options.recall !== undefined ? { recall: options.recall } : {}),
-		...(options.cloud !== undefined
-			? {
-					cloud: {
-						...(options.cloud.baseUrl !== undefined
-							? { baseUrl: options.cloud.baseUrl }
-							: {}),
-						...(options.cloud.apiKey !== undefined
-							? { apiKey: options.cloud.apiKey }
-							: {}),
-						...(options.cloud.workspaceId !== undefined
-							? { workspaceId: options.cloud.workspaceId }
-							: {}),
-						...(options.cloud.projectId !== undefined
-							? { projectId: options.cloud.projectId }
-							: {}),
-						...(options.cloud.timeoutMs !== undefined
-							? { timeoutMs: options.cloud.timeoutMs }
-							: {}),
-						...(options.cloud.userAgent !== undefined
-							? { userAgent: options.cloud.userAgent }
-							: {}),
-						...(options.cloud.requireApiKey !== undefined
-							? { requireApiKey: options.cloud.requireApiKey }
-							: {}),
-						...(options.cloud.retry !== undefined
-							? { retry: options.cloud.retry }
-							: {}),
-					},
-				}
-			: {}),
+		...(options.cloud !== undefined ? { cloud: options.cloud } : {}),
 	});
 
 	return createMemoFSMcpRuntimeFromMemoFS(memo);

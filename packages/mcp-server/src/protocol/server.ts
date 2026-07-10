@@ -4,6 +4,7 @@
  * @module server
  */
 
+import { MemoryValidationError, paginateArray } from "@memofs/core";
 import {
 	McpNotFoundError,
 	McpValidationError,
@@ -20,7 +21,6 @@ import { createToolDefinitions } from "../tools/definitions";
 import { callMemoFSTool } from "../tools/handlers";
 import type { JsonValue, MemoFSMcpOptions } from "../types";
 import { asObject } from "../utils/json";
-import { paginateArray } from "../utils/pagination";
 import {
 	failure,
 	isNotification,
@@ -387,6 +387,8 @@ function toMcpError(error: unknown): unknown {
  * @returns A JSON-RPC 2.0 compliant error code.
  */
 function errorCodeFrom(error: unknown): number {
+	if (error instanceof MemoryValidationError)
+		return JSON_RPC_ERRORS.invalidParams;
 	if (error instanceof McpValidationError) {
 		const maybe = error.details as { jsonRpcCode?: unknown } | undefined;
 		return typeof maybe?.jsonRpcCode === "number"

@@ -2,6 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { InMemoryMemoryStore } from "@memofs/core";
 import { createMemoFSMcpRuntimeFromConfig } from "../src/index";
 
 /**
@@ -54,7 +55,7 @@ async function tempRoot() {
 describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 	describe("mode-gated wiring", () => {
 		it("memory mode: runtime is healthy and never wires the local embedder", async () => {
-			const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "memory" });
+			const runtime = createMemoFSMcpRuntimeFromConfig({ mode: "local", store: new InMemoryMemoryStore() });
 			const health = await runtime.health();
 			expect(health.ok).toBe(true);
 			// memory mode is volatile; recall returns no items but must not throw.

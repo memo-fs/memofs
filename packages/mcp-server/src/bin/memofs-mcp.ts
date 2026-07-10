@@ -14,8 +14,6 @@ import {
 } from "../index";
 import type {
 	MemoFSRuntimeMode,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 } from "../types";
 
 main().catch((error) => {
@@ -45,8 +43,6 @@ async function main(): Promise<void> {
 			rootDir: args.root as string | undefined,
 			projectId: args.projectId as string | undefined,
 			workspaceId: args.workspaceId as string | undefined,
-			readPolicy: args.readPolicy as RuntimeReadPolicy | undefined,
-			writePolicy: args.writePolicy as RuntimeWritePolicy | undefined,
 			cloud: {
 				baseUrl: args.cloudUrl as string | undefined,
 				apiKey: args.apiKey as string | undefined,
@@ -112,10 +108,6 @@ function parseArgs(
 		else if (arg === "--api-key") out.apiKey = requireValue(argv, ++index, arg);
 		else if (arg === "--cloud-timeout-ms")
 			out.cloudTimeoutMs = requireValue(argv, ++index, arg);
-		else if (arg === "--read-policy")
-			out.readPolicy = requireValue(argv, ++index, arg);
-		else if (arg === "--write-policy")
-			out.writePolicy = requireValue(argv, ++index, arg);
 		else if (arg === "--request-timeout-ms")
 			out.requestTimeoutMs = requireValue(argv, ++index, arg);
 		else if (arg === "--max-input-bytes")
@@ -130,31 +122,9 @@ function parseArgs(
 
 	if (
 		out.runtime !== undefined &&
-		!["local", "memory", "hybrid"].includes(out.runtime as string)
+		!["local", "hybrid"].includes(out.runtime as string)
 	) {
-		console.error(`[memofs-mcp] --runtime must be local, memory, or hybrid.`);
-		process.exit(2);
-	}
-	if (
-		out.readPolicy !== undefined &&
-		!["local-first", "cloud-first", "local-only"].includes(
-			out.readPolicy as string,
-		)
-	) {
-		console.error(
-			`[memofs-mcp] --read-policy must be local-first, cloud-first, or local-only.`,
-		);
-		process.exit(2);
-	}
-	if (
-		out.writePolicy !== undefined &&
-		!["local-first", "cloud-first", "local-only"].includes(
-			out.writePolicy as string,
-		)
-	) {
-		console.error(
-			`[memofs-mcp] --write-policy must be local-first, cloud-first, or local-only.`,
-		);
+		console.error(`[memofs-mcp] --runtime must be local or hybrid.`);
 		process.exit(2);
 	}
 
@@ -201,17 +171,13 @@ function printHelp(): void {
 	console.log(`Usage: memofs-mcp-server [options]
 
 Options:
- --runtime <local|memory|cloud|hybrid> Runtime mode. Defaults to local.
+ --runtime <local|hybrid> Runtime mode. Defaults to local.
  --root <path> Local workspace root. Defaults to cwd.
  --project-id <id> Optional project id / default cloud project id.
  --workspace-id <id> Optional default cloud workspace id.
  --cloud-url <url> MemoFS Cloud API root, e.g. https://memofs.dev/api/v1.
  --api-key <key> MemoFS Cloud API key. Prefer MEMOFS_API_KEY.
  --cloud-timeout-ms <number> Cloud request timeout. Defaults to cloud-client default.
- --read-policy <local-first|cloud-first>
- Hybrid read policy. Defaults to local-first.
- --write-policy <local-first|cloud-first|local-only|cloud-only>
- Hybrid write policy. Defaults to local-first.
  --read-only Block all write tools.
  --allow-writes Allow write tools when host authorizes them.
  --request-timeout-ms <number> Per-tool timeout. Defaults to 30000.
@@ -220,7 +186,7 @@ Options:
  --help Show this help.
 
 Environment:
- MEMOFS_RUNTIME local, memory, cloud, or hybrid.
+ MEMOFS_RUNTIME local or hybrid.
  MEMOFS_ROOT Local workspace root.
  MEMOFS_CLOUD_URL / MEMOFS_API_URL MemoFS Cloud API root.
  MEMOFS_API_KEY MemoFS Cloud API key.
@@ -228,5 +194,5 @@ Environment:
  MEMOFS_PROJECT_ID Default project id.
  MEMOFS_CLOUD_TIMEOUT_MS Cloud request timeout.
  MEMOFS_MCP_READ_ONLY true to block write tools.
-`);
+ `);
 }

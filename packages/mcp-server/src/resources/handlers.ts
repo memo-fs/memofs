@@ -4,10 +4,10 @@
  * @module handlers
  */
 
+import { normalizeLimit } from "@memofs/core";
 import { McpNotFoundError, McpValidationError, toSafeError } from "../errors";
 import type { McpResourceDefinition, MemoFSMcpOptions } from "../types";
 import { safeJsonStringify } from "../utils/json";
-import { normalizeLimit } from "../utils/pagination";
 
 /**
  * Creates and returns all available MCP Resource definitions.

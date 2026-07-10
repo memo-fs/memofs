@@ -4,24 +4,13 @@
  * @module json
  */
 
+import { isPlainObject } from "@memofs/json-rpc";
 import { McpValidationError } from "../errors";
 import type { JsonObject, JsonValue } from "../types";
 
-const BLOCKED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+export { isPlainObject };
 
-/**
- * Checks if a value is a plain JavaScript object (i.e. created with `{}` or `new Object()`).
- *
- * @param value - The value to inspect.
- * @returns `true` if the value is a plain object, `false` otherwise.
- */
-export function isPlainObject(
-	value: unknown,
-): value is Record<string, unknown> {
-	if (value === null || typeof value !== "object") return false;
-	const proto = Object.getPrototypeOf(value);
-	return proto === Object.prototype || proto === null;
-}
+const BLOCKED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 
 /**
  * Asserts that a value is a valid JSON value.
