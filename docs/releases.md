@@ -1,6 +1,6 @@
 # Release Process
 
-Memo FS uses Changesets for package versioning and publishing. Memo FS is published as one public package, `@memofs/core`, with all public APIs exported from the single root entrypoint.
+MemoFS uses Changesets for package versioning and publishing. MemoFS is published as one public package, `@memofs/core`, with all public APIs exported from the single root entrypoint.
 
 ## Validation
 
@@ -70,7 +70,7 @@ pnpm release
 
 ## Package inspection
 
-Before a major or first public release, inspect the Memo FS package contents:
+Before a major or first public release, inspect the MemoFS package contents:
 
 ```bash
 pnpm --filter @memofs/core pack:dry-run

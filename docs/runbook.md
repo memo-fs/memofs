@@ -1,4 +1,4 @@
-# Memo FS Workspace Runbook
+# MemoFS Workspace Runbook
 
 Welcome to the `@memofs/core` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
 
@@ -6,7 +6,7 @@ Welcome to the `@memofs/core` workspace runbook. This document provides an opera
 
 ## Workspace Overview
 
-The Memo FS repository is structured as a **pnpm monorepo** containing:
+The MemoFS repository is structured as a **pnpm monorepo** containing:
 1. **Public Package**: `@memofs/core` (located in [packages/memofs](file:///Users/codingsimba/Desktop/projects/oss/packages/memofs)) — the unified file-first memory runtime.
 2. **Docs App**: `apps/docs` — the VitePress-based documentation site.
 3. **Tooling**: `@repo/*` packages in [tooling](file:///Users/codingsimba/Desktop/projects/oss/tooling) — private workspace support for builds, tests, and configuration.
@@ -18,7 +18,7 @@ memofs/
 ├── apps/
 │   └── docs/                  # VitePress docs site
 ├── packages/
-│   ├── memofs/               # Memo FS source package
+│   ├── memofs/               # MemoFS source package
 │   │   ├── src/               # Main source tree (all modules)
 │   │   └── tests/             # Workspace tests (unit, integration, contracts)
 │   ├── tekcode-cli/           # Future TekCode placeholder
@@ -36,7 +36,7 @@ memofs/
 
 ## Module Map (`packages/core/src/`)
 
-All Memo FS capabilities live as **internal modules** under `packages/core/src/` and are re-exported from the package root: [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). There are **no public subpath imports** or separate adapter packages.
+All MemoFS capabilities live as **internal modules** under `packages/core/src/` and are re-exported from the package root: [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). There are **no public subpath imports** or separate adapter packages.
 
 | Module | Description |
 | :--- | :--- |
@@ -52,7 +52,7 @@ All Memo FS capabilities live as **internal modules** under `packages/core/src/`
 | **`ai-sdk`** | Vercel AI SDK utility integrations (tools, system prompts, structures). |
 | **`cli`** | Local memory CLI commands (`init`, `search`, `inspect`, `edit`, `agent`). |
 | **`mcp-server`** | Model Context Protocol (MCP) server boundary for exposing memory tools to agents. |
-| **`cloud-client`** | Connection client for Memo FS Cloud API (without SaaS business logic). |
+| **`cloud-client`** | Connection client for MemoFS Cloud API (without SaaS business logic). |
 | **`benchmark-kit`** | Performance benchmarking kit and test runners. |
 | **`testing`** | Shared test-only fixtures and mock implementations. |
 
@@ -60,7 +60,7 @@ All Memo FS capabilities live as **internal modules** under `packages/core/src/`
 
 ## Canonical Local Protocol
 
-By default, Memo FS writes its file-first structure under a ``.memofs`` directory at the project root:
+By default, MemoFS writes its file-first structure under a ``.memofs`` directory at the project root:
 
 ```txt
 `.memofs/`
