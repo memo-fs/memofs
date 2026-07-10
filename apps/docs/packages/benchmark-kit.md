@@ -1,14 +1,33 @@
 # Benchmark Kit (`@memofs/benchmark-kit`)
 
-`@memofs/benchmark-kit` is a reusable testing framework that provides benchmarks, runners, statistical analysis, and markdown reporters to measure the throughput, latency, and quality of Memo FS adapters.
+`@memofs/benchmark-kit` is a reusable testing framework that provides benchmarks, runners, statistical analysis, and markdown reporters to measure the throughput, latency, and quality of MemoFS adapters.
 
 ---
 
 ## Installation
 
-```bash
-npm install @memofs/benchmark-kit
+::: code-group
+
+```sh [npm]
+npm install -D @memofs/benchmark-kit
 ```
+
+```sh [pnpm]
+pnpm add -D @memofs/benchmark-kit
+```
+
+```sh [yarn]
+yarn add -D @memofs/benchmark-kit
+```
+
+```sh [bun]
+bun add -d @memofs/benchmark-kit
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 
@@ -38,7 +57,7 @@ const results = await runner.runSuite(suite);
 ```
 
 ### 3. Built-In Workloads
-Provides preset workloads for common Memo FS interfaces:
+Provides preset workloads for common MemoFS interfaces:
 - `createEmbedderWorkloads(embedder)`: Measures vector computing performance.
 - `createRerankWorkloads(reranker)`: Measures reranking performance.
 - `createRecallWorkloads(recallStore)`: Measures upsert and query latency.

@@ -1,6 +1,6 @@
 # Testing Framework (`@memofs/testing`)
 
-`@memofs/testing` provides a shared framework containing contract tests, fakes, fixtures, and assertion helpers to ensure all custom or provider-specific adapters (embedders, rerankers, stores) satisfy Memo FS's runtime specifications.
+`@memofs/testing` provides a shared framework containing contract tests, fakes, fixtures, and assertion helpers to ensure all custom or provider-specific adapters (embedders, rerankers, stores) satisfy MemoFS's runtime specifications.
 
 ---
 
@@ -8,9 +8,28 @@
 
 Install the testing utilities as a development dependency:
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install -D @memofs/testing
 ```
+
+```sh [pnpm]
+pnpm add -D @memofs/testing
+```
+
+```sh [yarn]
+yarn add -D @memofs/testing
+```
+
+```sh [bun]
+bun add -d @memofs/testing
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 

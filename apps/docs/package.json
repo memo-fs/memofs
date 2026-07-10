@@ -21,6 +21,6 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "apps/docs"
 	},
-	"description": "Memo FS documentation site.",
+	"description": "MemoFS documentation site.",
 	"homepage": "https://docs.memofs.dev/"
 }

@@ -7,6 +7,7 @@ import BlogPostFooter from "./BlogPostFooter.vue";
 import BlogPostHeader from "./BlogPostHeader.vue";
 import HeroVisual from "./HeroVisual.vue";
 import SidebarBrand from "./SidebarBrand.vue";
+import StatsStrip from "./StatsStrip.vue";
 
 const { Layout } = DefaultTheme;
 
@@ -51,11 +52,44 @@ const modes = [
 	},
 	{
 		label: "Hybrid + sync",
-		kicker: "Local first, cloud as a replica.",
+		kicker: "Local by default, cloud as a replica.",
 	},
 	{
 		label: "Managed (later)",
 		kicker: "MemoFS Cloud runs the engine.",
+	},
+];
+
+/**
+ * Integration logos rendered in the credibility bar.
+ * Each link points at the closest matching docs page; SVG marks are
+ * simplified monogram glyphs to avoid bundling third-party brand assets.
+ */
+const integrationLogos = [
+	{
+		name: "Claude Code",
+		href: "/packages/mcp/",
+		svg: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2c.4 0 .78.16 1.06.44l8.5 8.5a1.5 1.5 0 0 1 0 2.12l-8.5 8.5a1.5 1.5 0 0 1-2.12 0l-8.5-8.5a1.5 1.5 0 0 1 0-2.12l8.5-8.5A1.5 1.5 0 0 1 12 2Zm-1.06 6.06-4.94 4.94 4.94 4.94 1.06-1.06L7.06 12l4.94-4.94-1.06-1.06Z"/></svg>',
+	},
+	{
+		name: "Cursor",
+		href: "/packages/mcp/",
+		svg: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M5 3l13 9-13 9V3z"/></svg>',
+	},
+	{
+		name: "Codex",
+		href: "/packages/mcp/",
+		svg: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>',
+	},
+	{
+		name: "OpenCode",
+		href: "/packages/mcp/",
+		svg: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M9 8l-5 4 5 4M15 8l5 4-5 4M14 6l-4 12"/></svg>',
+	},
+	{
+		name: "Any MCP client",
+		href: "/packages/connectors/",
+		svg: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 6h6v6H4zM14 6h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>',
 	},
 ];
 </script>
@@ -96,18 +130,51 @@ const modes = [
         <!-- Credibility: works with the agents devs already use -->
         <section class="credibility-section">
           <div class="credibility-container">
+            <p class="credibility-kicker">Works with the agents you already use</p>
             <div class="credibility-row">
-              <p class="compat-line">
-                Works with <span class="compat-tool">Claude Code</span>
-                <span class="compat-sep">·</span>
-                <span class="compat-tool">Cursor</span>
-                <span class="compat-sep">·</span>
-                <span class="compat-tool">Codex</span>
-                <span class="compat-sep">·</span>
-                <span class="compat-tool">OpenCode</span>
-                <span class="compat-sep">·</span>
-                <span class="compat-tool">any MCP client</span>
-              </p>
+              <a
+                v-for="logo in integrationLogos"
+                :key="logo.name"
+                :href="logo.href"
+                :title="logo.name"
+                :aria-label="logo.name"
+                class="credibility-logo-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span class="credibility-logo" v-html="logo.svg" />
+                <span class="credibility-logo-name">{{ logo.name }}</span>
+              </a>
+            </div>
+            <div class="credibility-badges">
+              <a
+                href="https://github.com/christophersesugh/memofs"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="credibility-badge-link"
+                aria-label="GitHub stars"
+              >
+                <img
+                  src="https://img.shields.io/github/stars/christophersesugh/memofs?style=flat&logo=github&label=stars&color=4f46e5"
+                  alt="GitHub stars"
+                  class="credibility-badge"
+                  loading="lazy"
+                />
+              </a>
+              <a
+                href="https://www.npmjs.com/package/memofs"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="credibility-badge-link"
+                aria-label="npm weekly downloads"
+              >
+                <img
+                  src="https://img.shields.io/npm/dw/memofs?style=flat&logo=npm&label=downloads%2Fweek&color=4f46e5"
+                  alt="npm weekly downloads"
+                  class="credibility-badge"
+                  loading="lazy"
+                />
+              </a>
             </div>
           </div>
         </section>
@@ -117,7 +184,7 @@ const modes = [
     <template #home-features-after>
       <div class="home-custom-sections">
         <!-- Problem: name the pain before pitching -->
-        <section class="problem-section tek-reveal">
+        <section id="problem" class="problem-section tek-reveal">
           <div class="container">
             <span class="section-kicker">The problem</span>
             <h2>Every new session starts from zero.</h2>
@@ -130,7 +197,7 @@ const modes = [
         </section>
 
         <!-- How it works: reduce perceived complexity to three commands -->
-        <section class="how-it-works-section tek-reveal">
+        <section id="how-it-works" class="how-it-works-section tek-reveal">
           <div class="container">
             <span class="section-kicker">How it works</span>
             <h2>Three commands. Your agent remembers.</h2>
@@ -144,11 +211,19 @@ const modes = [
                       <span class="terminal-dot red"></span>
                       <span class="terminal-dot yellow"></span>
                       <span class="terminal-dot green"></span>
+                      <CopyButton text="npm install -D memofs" class="terminal-copy" />
                     </div>
                     <div class="terminal-content">
-                      <span class="terminal-prompt">$</span> npm install -D memofs
+                      <span class="terminal-prompt">$</span> npm install -D memofs<br />
+                      <br />
+                      <span class="terminal-comment"># or: pnpm add -D memofs</span><br />
+                      <span class="terminal-comment"># or: yarn add -D memofs</span><br />
+                      <span class="terminal-comment"># or: bun add -D memofs</span>
                     </div>
                   </div>
+                  <p class="step-requirement">
+                    Requires <strong>Node.js &gt;= 22</strong>
+                  </p>
                 </div>
               </div>
               <div class="step">
@@ -160,6 +235,7 @@ const modes = [
                       <span class="terminal-dot red"></span>
                       <span class="terminal-dot yellow"></span>
                       <span class="terminal-dot green"></span>
+                      <CopyButton text="npx memofs init" class="terminal-copy" />
                     </div>
                     <div class="terminal-content">
                       <span class="terminal-prompt">$</span> npx memofs init<br />
@@ -177,10 +253,11 @@ const modes = [
                       <span class="terminal-dot red"></span>
                       <span class="terminal-dot yellow"></span>
                       <span class="terminal-dot green"></span>
+                      <CopyButton text='npx memofs remember "Auth uses JWT with refresh rotation" --kind decision' class="terminal-copy" />
                     </div>
                     <div class="terminal-content">
                       <span class="terminal-prompt">$</span> npx memofs remember "Auth uses JWT with refresh rotation" --kind decision<br />
-                      <span class="terminal-success">✓ Saved to core memory.</span>
+                      <span class="terminal-success">✓ Stored decision memory in .memofs/memory/notes.md</span>
                     </div>
                   </div>
                 </div>
@@ -193,9 +270,12 @@ const modes = [
           </div>
         </section>
 
+        <!-- Benchmark stats: real numbers from benchmark-results/release/ -->
+        <StatsStrip />
+
         <!-- Feature showcase: three pillars, each with a live visual -->
-        <section class="feature-showcase tek-reveal">
-          <div class="showcase-container">
+        <section id="features" class="feature-showcase tek-reveal">
+          <div class="container-wide">
             <div class="feature-showcase-item">
               <div class="feature-showcase-content">
                 <span class="section-kicker">File-first</span>
@@ -222,9 +302,11 @@ const modes = [
                     <div class="file-tree-item indent-2">conversations.jsonl</div>
                     <div class="file-tree-item indent-1 folder">indexes/</div>
                     <div class="file-tree-item indent-2">chunks.jsonl</div>
+                    <div class="file-tree-item indent-2">embeddings.jsonl</div>
                     <div class="file-tree-item indent-1 folder">graph/</div>
                     <div class="file-tree-item indent-2">nodes.jsonl</div>
                     <div class="file-tree-item indent-2">edges.jsonl</div>
+                    <div class="file-tree-item indent-1">connectors.json</div>
                     <div class="file-tree-item indent-1 folder">snapshots/</div>
                     <div class="file-tree-item indent-2">snapshots.jsonl</div>
                   </div>
@@ -247,6 +329,7 @@ const modes = [
               </div>
               <div class="feature-showcase-visual">
                 <div class="recall-mockup">
+                  <div class="recall-header">Recall</div>
                   <div class="recall-query">
                     <span class="recall-query-label">Query</span>
                     <span class="recall-query-text">"How does auth work?"</span>
@@ -287,11 +370,11 @@ const modes = [
             <div class="feature-showcase-item">
               <div class="feature-showcase-content">
                 <span class="section-kicker">Runtimes</span>
-                <h3>One engine, three ways to run it</h3>
+                <h3>One engine, two ways to run it</h3>
                 <p>
                   Local mode works offline. Hybrid adds a cloud replica so your memory follows you
-                  across machines. Managed runtime is on the roadmap. The engine and the API stay
-                  the same — you only change how memory is stored and synced.
+                  across machines. A managed runtime (cloud-hosted engine) is on the roadmap. The
+                  engine and the API stay the same — you only change how memory is stored and synced.
                 </p>
                 <a href="/configure/storage" class="showcase-link">
                   Explore the storage options →
@@ -327,7 +410,7 @@ const modes = [
 <span class="token keyword">import</span> { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>;
 
 <span class="token comment">// Same engine, same files — plus a cloud replica for other machines.</span>
-<span class="token comment">// Reads/writes hit local first; sync.push / sync.pull mirror .memofs/.</span>
+<span class="token comment">// sync.push / sync.pull mirror .memofs/. Reads/writes always hit local.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsMemoryStore</span>({ rootDir: <span class="token string">"./.memofs"</span> }),
   projectId: <span class="token string">"my-app"</span>,
@@ -336,18 +419,39 @@ const modes = [
     baseUrl: process.env.MEMOFS_CLOUD_URL!,
     apiKey: process.env.MEMOFS_API_KEY!,
   },
-  readPolicy: <span class="token string">"local-first"</span>,
-  writePolicy: <span class="token string">"local-first"</span>,
 });</code></pre>
 
-                    <pre v-show="activeMode === 2"><code><span class="token comment">// MemoFS Cloud can host the runtime so thin clients (CI, dashboards)</span>
-<span class="token comment">// read memory over HTTPS without a local checkout.</span>
-<span class="token comment">//</span>
-<span class="token comment">//   • Cloud client: a file-sync transport today</span>
-<span class="token comment">//     (push / complete / pull / status).</span>
-<span class="token comment">//   • Managed runtime: coming after early access.</span>
-<span class="token comment">//</span>
-<span class="token comment">// Same data model either way — .memofs/ is always the source of truth.</span></code></pre>
+                    <div v-show="activeMode === 2" class="mode-coming-soon">
+                      <div class="mode-coming-soon-header">
+                        <span class="mode-coming-soon-badge">Coming soon</span>
+                      </div>
+                      <p class="mode-coming-soon-text">
+                        MemoFS Cloud will host the runtime so thin clients (CI, dashboards) can
+                        read memory over HTTPS without a local checkout.
+                      </p>
+                      <div class="mode-coming-soon-features">
+                        <div class="mode-coming-soon-feature">
+                          <span class="mode-coming-soon-dot" aria-hidden="true">●</span>
+                          <span>Cloud-hosted engine, no local checkout required</span>
+                        </div>
+                        <div class="mode-coming-soon-feature">
+                          <span class="mode-coming-soon-dot" aria-hidden="true">●</span>
+                          <span>Read memory over HTTPS from any environment</span>
+                        </div>
+                        <div class="mode-coming-soon-feature">
+                          <span class="mode-coming-soon-dot" aria-hidden="true">●</span>
+                          <span>Same <code>@memofs/core</code> API you use today</span>
+                        </div>
+                      </div>
+                      <a
+                        href="https://memofs.dev"
+                        class="mode-coming-soon-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Join the early-access waitlist →
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -356,13 +460,18 @@ const modes = [
         </section>
 
         <!-- Audience: two doors for two intents -->
-        <section class="audience-section tek-reveal">
+        <section id="audience" class="audience-section tek-reveal">
           <div class="container">
             <span class="section-kicker">Built for how you work</span>
             <h2>Two ways in</h2>
             <div class="audience-grid">
               <div class="audience-card">
-                <span class="audience-emoji">🧩</span>
+                <span class="audience-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                </span>
                 <h3>Building AI apps</h3>
                 <p>
                   Give your app durable memory. Import <code>@memofs/core</code> — the same API
@@ -372,7 +481,15 @@ const modes = [
                 <a href="/api/core" class="audience-link">See the API reference →</a>
               </div>
               <div class="audience-card">
-                <span class="audience-emoji">🤖</span>
+                <span class="audience-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="6" width="18" height="13" rx="2" />
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <circle cx="9" cy="13" r="1" fill="currentColor" />
+                    <circle cx="15" cy="13" r="1" fill="currentColor" />
+                    <path d="M9 17h6" />
+                  </svg>
+                </span>
                 <h3>Using a coding agent</h3>
                 <p>
                   Your coding agent finally remembers your project. Install the MCP server, drop one
@@ -386,7 +503,7 @@ const modes = [
         </section>
 
         <!-- Comparison: the honest "why file-first" -->
-        <section class="comparison-section tek-reveal">
+        <section id="comparison" class="comparison-section tek-reveal">
           <div class="container">
             <span class="section-kicker">Why file-first</span>
             <h2>MemoFS vs. hosted memory tools</h2>
@@ -433,16 +550,38 @@ const modes = [
                 </tbody>
               </table>
             </div>
+            <div class="star-history-embed">
+              <a
+                href="https://star-history.com/#christophersesugh/memofs&Date"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="star-history-link"
+              >
+                <img
+                  src="https://api.star-history.com/svg?repos=christophersesugh/memofs&type=Date&theme=light"
+                  alt="MemoFS star history"
+                  class="star-history-img"
+                  loading="lazy"
+                />
+                <img
+                  src="https://api.star-history.com/svg?repos=christophersesugh/memofs&type=Date&theme=dark"
+                  alt="MemoFS star history"
+                  class="star-history-img star-history-img-dark"
+                  loading="lazy"
+                />
+              </a>
+            </div>
           </div>
         </section>
 
         <!-- Bottom CTA -->
-        <section class="bottom-cta-section tek-reveal">
+        <section id="get-started" class="bottom-cta-section tek-reveal">
           <div class="container">
             <p class="oss-badge">MIT Licensed · 100% open source</p>
             <h2>One command. Your agent never forgets.</h2>
-            <div class="code-snippet large">
+            <div class="code-snippet large code-snippet-with-copy">
               <code>npx memofs init</code>
+              <CopyButton text="npx memofs init" class="code-snippet-copy" />
             </div>
             <div class="cta-buttons">
               <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
@@ -450,8 +589,22 @@ const modes = [
                 Explore MemoFS Cloud →
               </a>
             </div>
-            <a href="https://github.com/christophersesugh/memofs" class="bottom-cta-link">
+            <a
+              href="https://github.com/christophersesugh/memofs"
+              class="bottom-cta-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View on GitHub
+            </a>
+            <a href="/changelog" class="changelog-teaser">
+              <span class="changelog-teaser-badge">New</span>
+              <span class="changelog-teaser-text">
+                <span class="changelog-teaser-version">v1.0.0-beta.1</span>
+                <span class="changelog-teaser-divider">—</span>
+                <span class="changelog-teaser-description">First public beta</span>
+              </span>
+              <span class="changelog-teaser-cta">Read the changelog →</span>
             </a>
           </div>
         </section>
@@ -461,8 +614,18 @@ const modes = [
 </template>
 
 <style scoped>
+/* Container scale — three widths for predictable visual rhythm.
+   Use .container for text-heavy sections, .container-wide for sections
+   that pair content with visuals side-by-side, .credibility-container
+   for the narrow island between hero and feature showcase. */
 .container {
   max-width: 768px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container-wide {
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -513,47 +676,99 @@ const modes = [
 .credibility-container {
   max-width: 720px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.credibility-kicker {
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+  margin: 0;
 }
 
 .credibility-row {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 8px 20px;
 }
 
-.compat-line {
+.credibility-logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vp-c-text-2);
+  text-decoration: none;
   font-family: var(--vp-font-family-mono);
   font-size: 13px;
-  font-weight: 500;
-  color: var(--vp-c-text-2);
-  margin: 0;
-  white-space: nowrap;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.2s, background 0.2s;
 }
 
-.compat-tool {
+.credibility-logo-link:hover {
   color: var(--vp-c-text-1);
-  font-weight: 600;
+  background: var(--vp-c-bg-soft);
+}
+
+.credibility-logo {
+  display: inline-flex;
+  align-items: center;
+  color: var(--vp-c-text-2);
   transition: color 0.2s;
 }
 
-.compat-tool:hover {
+.credibility-logo-link:hover .credibility-logo {
   color: var(--vp-c-brand-1);
 }
 
-.compat-sep {
-  color: var(--vp-c-text-3);
-  margin: 0 4px;
+.credibility-logo-name {
+  line-height: 1;
+}
+
+.credibility-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.credibility-badge-link {
+  display: inline-block;
+  line-height: 0;
+  text-decoration: none;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.credibility-badge-link:hover {
+  opacity: 1;
+}
+
+.credibility-badge {
+  display: block;
+  height: 22px;
+  width: auto;
 }
 
 @media (max-width: 640px) {
   .credibility-row {
-    gap: 12px;
+    gap: 6px 14px;
   }
 
-  .compat-line {
-    white-space: normal;
-    text-align: center;
+  .credibility-logo-link {
+    font-size: 12px;
+    padding: 4px 8px;
   }
 }
 
@@ -561,7 +776,7 @@ const modes = [
    Problem Section
    =================================================================== */
 .problem-section {
-  padding: 72px 0 96px 0;
+  padding: 96px 0;
 }
 
 .problem-section h2 {
@@ -582,7 +797,7 @@ const modes = [
    How It Works
    =================================================================== */
 .how-it-works-section {
-  padding: 96px 0;
+  padding: 0 0 64px 0;
 }
 
 .how-it-works-section h2 {
@@ -647,6 +862,24 @@ const modes = [
   font-size: 13px;
 }
 
+.terminal-mockup {
+  position: relative;
+}
+
+.terminal-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-right: 40px;
+}
+
+.terminal-copy {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
 .code-snippet {
   background: var(--vp-code-block-bg);
   border: 1px solid var(--vp-c-border);
@@ -663,6 +896,24 @@ const modes = [
   font-size: 15px;
 }
 
+.bottom-cta-section .code-snippet.code-snippet-with-copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-right: 44px;
+}
+
+.code-snippet-with-copy code {
+  line-height: 1.4;
+}
+
+.code-snippet-copy {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+}
+
 .result-text {
   margin-top: 40px;
   font-size: 17px;
@@ -673,10 +924,8 @@ const modes = [
 /* ===================================================================
    Feature Showcase
    =================================================================== */
-.showcase-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 64px 24px;
+.feature-showcase {
+  padding: 64px 0;
 }
 
 .feature-showcase-item {
@@ -744,16 +993,17 @@ const modes = [
 }
 
 .file-tree-header {
-  padding: 12px 16px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--vp-c-border);
   font-family: var(--vp-font-family-mono);
   font-size: 14px;
   font-weight: 600;
   color: var(--vp-c-brand-1);
+  letter-spacing: 0.01em;
 }
 
 .file-tree-body {
-  padding: 12px 0;
+  padding: 14px 0;
 }
 
 .file-tree-item {
@@ -779,15 +1029,25 @@ const modes = [
 
 /* Recall Mockup */
 .recall-mockup {
-  background: var(--vp-c-bg-soft);
+  background: var(--vp-code-block-bg);
   border: 1px solid var(--vp-c-border);
   border-radius: var(--tek-radius);
   overflow: hidden;
   box-shadow: var(--tek-shadow-lg);
 }
 
+.recall-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--vp-c-border);
+  font-family: var(--vp-font-family-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  letter-spacing: 0.01em;
+}
+
 .recall-query {
-  padding: 14px 16px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--vp-c-border);
   display: flex;
   align-items: center;
@@ -811,14 +1071,14 @@ const modes = [
 }
 
 .recall-results {
-  padding: 8px 0;
+  padding: 10px 0;
 }
 
 .recall-result {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--vp-c-border);
   transition: background-color 0.2s;
 }
@@ -870,12 +1130,12 @@ const modes = [
 .mode-toggle-buttons {
   display: flex;
   gap: 4px;
-  padding: 8px;
+  padding: 10px;
   border-bottom: 1px solid var(--vp-c-border);
 }
 
 .mode-toggle-btn {
-  padding: 6px 16px;
+  padding: 7px 18px;
   border: none;
   border-radius: 6px;
   font-family: var(--vp-font-family-display);
@@ -897,11 +1157,12 @@ const modes = [
 }
 
 .mode-toggle-kicker {
-  padding: 10px 16px 0;
+  padding: 12px 20px 0;
   font-family: var(--vp-font-family-mono);
   font-size: 12px;
   color: var(--vp-c-brand-1);
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .mode-toggle-code {
@@ -918,6 +1179,94 @@ const modes = [
   font-size: 13px;
   line-height: 1.7;
   color: var(--vp-c-text-1);
+}
+
+.mode-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 6px 0;
+}
+
+.mode-coming-soon-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode-coming-soon-badge {
+  display: inline-block;
+  font-family: var(--vp-font-family-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vp-c-bg);
+  background: var(--vp-c-brand-1);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.mode-coming-soon-text {
+  font-family: var(--vp-font-family-display);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+  margin: 0;
+}
+
+.mode-coming-soon-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.mode-coming-soon-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vp-c-text-2);
+}
+
+.mode-coming-soon-feature code {
+  font-family: var(--vp-font-family-mono);
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: var(--vp-c-text-1);
+}
+
+.mode-coming-soon-dot {
+  color: var(--vp-c-brand-1);
+  font-size: 8px;
+  line-height: 1.5;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.mode-coming-soon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--vp-font-family-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  transition: gap 0.2s;
+  margin-top: 4px;
+}
+
+.mode-coming-soon-link:hover {
+  text-decoration: none;
+  gap: 8px;
 }
 
 /* ===================================================================
@@ -956,11 +1305,20 @@ const modes = [
   box-shadow: var(--tek-shadow-glow);
 }
 
-.audience-emoji {
-  font-size: 28px;
-  line-height: 1;
+.audience-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  margin-bottom: 18px;
+}
+
+.audience-icon svg {
   display: block;
-  margin-bottom: 16px;
 }
 
 .audience-card h3 {
@@ -1030,11 +1388,47 @@ const modes = [
   font-size: 13px;
 }
 
+.star-history-embed {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.star-history-link {
+  display: inline-block;
+  line-height: 0;
+  text-decoration: none;
+  opacity: 0.95;
+  transition: opacity 0.2s;
+}
+
+.star-history-link:hover {
+  opacity: 1;
+}
+
+.star-history-img {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--tek-radius);
+}
+
+.star-history-img-dark {
+  display: none;
+}
+
+:root.dark .star-history-img {
+  display: none;
+}
+
+:root.dark .star-history-img-dark {
+  display: inline-block;
+}
+
 /* ===================================================================
    Bottom CTA
    =================================================================== */
 .bottom-cta-section {
-  padding: 80px 0 96px 0;
+  padding: 96px 0;
   text-align: center;
   border-top: 1px solid var(--vp-c-border);
 }
@@ -1112,6 +1506,68 @@ const modes = [
 
 .bottom-cta-link:hover {
   color: var(--vp-c-brand-1);
+}
+
+.changelog-teaser {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  padding: 10px 16px;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.changelog-teaser:hover {
+  border-color: var(--vp-c-brand-1);
+  transform: translateY(-1px);
+}
+
+.changelog-teaser-badge {
+  display: inline-block;
+  font-family: var(--vp-font-family-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vp-c-bg);
+  background: var(--vp-c-brand-1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+.changelog-teaser-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--vp-c-text-1);
+}
+
+.changelog-teaser-version {
+  font-family: var(--vp-font-family-mono);
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.changelog-teaser-divider {
+  color: var(--vp-c-text-3);
+}
+
+.changelog-teaser-description {
+  color: var(--vp-c-text-2);
+}
+
+.changelog-teaser-cta {
+  font-family: var(--vp-font-family-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+  margin-left: 4px;
 }
 
 /* ===================================================================

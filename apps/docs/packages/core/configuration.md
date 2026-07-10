@@ -1,6 +1,6 @@
 # Configuration
 
-Memo FS uses a clear priority chain to resolve configuration settings:
+MemoFS uses a clear priority chain to resolve configuration settings:
 1. **Constructor Options** (Highest priority)
 2. **Environment Variables**
 3. **Workspace Configuration File** (`.memofs/config.json`)
@@ -10,37 +10,37 @@ Memo FS uses a clear priority chain to resolve configuration settings:
 
 ## Runtime Modes
 
-When initializing `MemoFS`, you can select one of three runtime modes:
+When initializing `MemoFS`, you can select one of two runtime modes:
 
 | Mode | Target | Description |
 |---|---|---|
 | `local` | Off-grid / Zero Config | All reads and writes occur directly on the local filesystem. Zero cloud dependencies. |
-| `hybrid` | Cloud Sync Enabled | Reads and writes are mirrored to a remote replica (e.g. Memo FS Cloud) using sync policies. |
-| `memory` | In-Memory Only | No disk access. Primitives are read and written to memory. Great for transient tests. |
+| `hybrid` | Cloud Sync Enabled | Same local engine, plus a cloud replica. Sync via explicit `sync.push` / `sync.pull` verbs — no implicit read/write policies. |
 
 ```ts
 const memo = new MemoFS({
-  mode: "local", // or "hybrid", "memory"
+  mode: "local", // or "hybrid"
 });
 ```
 
 ---
 
-## Sync Policies (Hybrid Mode)
+## Sync Verbs (Hybrid Mode)
 
-In `hybrid` mode, read and write operations are guided by policies:
+In `hybrid` mode, the cloud is reached via two explicit verbs only — there are no read/write policies:
 
-| Policy | Behavior |
-|---|---|
-| `local-first` | Serve/Write locally first, and synchronize changes in the background (default). |
-| `cloud-first` | Query the remote replica first for the latest state; fall back to local disk if offline. |
-| `local-only` | Prevent all remote network calls for this execution, keeping operations strictly local. |
+- **`sync.push`** — compute manifest, upload changed blobs, advance the sync cursor.
+- **`sync.pull`** — download changed files, remove deleted ones, re-derive indexes.
+
+Reads and writes always hit the local engine. The cloud is a file replica, not a runtime mode.
 
 ```ts
 const memo = new MemoFS({
   mode: "hybrid",
-  readPolicy: "local-first",
-  writePolicy: "local-first",
+  cloud: {
+    baseUrl: process.env.MEMOFS_CLOUD_URL!,
+    apiKey: process.env.MEMOFS_CLOUD_API_KEY!,
+  },
 });
 ```
 
@@ -72,8 +72,10 @@ The following environment variables are recognized:
 
 | Variable | Description |
 |---|---|
-| `MEMOFS_MODE` | Overrides the runtime mode (`local`, `hybrid`, `memory`). |
-| `MEMOFS_READ_POLICY` | Overrides the read policy (`local-first`, `cloud-first`, `local-only`). |
-| `MEMOFS_WRITE_POLICY` | Overrides the write policy (`local-first`, `cloud-first`, `local-only`). |
-| `MEMOFS_CLOUD_API_KEY`| The API key used to authenticate with Memo FS Cloud. |
+| `MEMOFS_RUNTIME` | Overrides the runtime mode (`local`, `hybrid`). |
+| `MEMOFS_CLOUD_URL` | Base URL of the MemoFS Cloud replica (for hybrid mode). |
+| `MEMOFS_API_KEY` | The API key used to authenticate with MemoFS Cloud. |
 | `MEMOFS_PROJECT_ID` | The unique ID of the target project workspace. |
+| `MEMOFS_RECALL_ENGINE` | Recall strategy: `lexical`, `vector`, `hybrid`, or `auto`. |
+| `MEMOFS_LOCAL_EMBEDDINGS` | Enable local ONNX embeddings (`"1"` or `"true"`). |
+| `MEMOFS_EMBEDDING_MODEL` | Local embedding model id (Transformers.js compatible). |

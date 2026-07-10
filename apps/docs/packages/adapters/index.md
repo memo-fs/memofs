@@ -1,6 +1,6 @@
 # Adapters Overview
 
-Memo FS is designed to be completely provider-neutral. The core memory runtime does not bundle or lock you into any specific LLM provider, vector database, or cloud host. Instead, you inject **adapters** to upgrade storage and intelligence capabilities.
+MemoFS is designed to be completely provider-neutral. The core memory runtime does not bundle or lock you into any specific LLM provider, vector database, or cloud host. Instead, you inject **adapters** to upgrade storage and intelligence capabilities.
 
 ---
 

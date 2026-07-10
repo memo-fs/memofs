@@ -1,6 +1,6 @@
 # `@memofs/core`
 
-`@memofs/core` is the core memory runtime and provider-neutral contract engine for Memo FS. It provides the architectural foundation for local-first, versioned, and semantic memory for AI agents.
+`@memofs/core` is the core memory runtime and provider-neutral contract engine for MemoFS. It provides the architectural foundation for file-first, versioned, and semantic memory for AI agents.
 
 ## Features
 
@@ -14,9 +14,28 @@
 
 Install the core package using your preferred package manager:
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/core
 ```
+
+```sh [pnpm]
+pnpm add @memofs/core
+```
+
+```sh [yarn]
+yarn add @memofs/core
+```
+
+```sh [bun]
+bun add @memofs/core
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 > [!NOTE]
 > Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.
@@ -29,7 +48,7 @@ Initialize memory in your project and read the core memory:
 import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-// Initialize a Node.js filesystem-backed memory store
+// Create a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
   rootDir: "./.memofs",
 });
@@ -41,12 +60,9 @@ const memo = new MemoFS({
   mode: "local",
 });
 
-// Retrieve core memory
-const context = await memo.read({
-  kind: "core",
-});
-
-console.log(context.content);
+// Retrieve core memory (returns raw markdown string)
+const core = await memo.core.read();
+console.log(core);
 ```
 
 ## Package Architecture

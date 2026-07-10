@@ -1,8 +1,8 @@
 # API Reference Overview
 
-Welcome to the Memo FS API Reference documentation.
+Welcome to the MemoFS API Reference documentation.
 
-Memo FS's application programming interfaces are structured around modular, scoped npm packages.
+MemoFS's application programming interfaces are structured around modular, scoped npm packages.
 
 ## Core Packages
 

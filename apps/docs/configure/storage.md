@@ -1,6 +1,6 @@
 # Configure Storage
 
-Memo FS uses a **2-axis storage architecture** that decouples file-based content storage from query-based index and metadata tracking. This split ensures high durability and performance across local and cloud environments.
+MemoFS uses a **2-axis storage architecture** that decouples file-based content storage from query-based index and metadata tracking. This split ensures high durability and performance across local and cloud environments.
 
 ---
 
@@ -10,7 +10,7 @@ Storage is separated into two independent systems:
 
 ```mermaid
 graph TD
-    A[Memo FS Engine] --> B[Blob Storage Axis]
+    A[MemoFS Engine] --> B[Blob Storage Axis]
     A --> C[Metadata Storage Axis]
     
     B --> D[Filesystem / R2 / S3]
@@ -37,7 +37,7 @@ Tracks indexes, relational graphs, transactional status, and search schemas. It 
 
 ## Local Development vs. Cloud Deployments
 
-- **Local Development:** When executing locally with `mode: "local"`, you do not need to configure anything. Memo FS automatically uses standard filesystem storage.
+- **Local Development:** When executing locally with `mode: "local"`, you do not need to configure anything. MemoFS automatically uses standard filesystem storage.
 - **Cloud Deployments:** For production services or distributed teams, you configure the axes independently in your initialization script.
 
 ### Configuration Example

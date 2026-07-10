@@ -3,6 +3,7 @@ import { inBrowser } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { watch } from "vue";
 import BlogIndex from "./components/BlogIndex.vue";
+import CopyButton from "./components/CopyButton.vue";
 import HomeLayout from "./components/HomeLayout.vue";
 import NewsletterSignup from "./components/NewsletterSignup.vue";
 import "./custom.css";
@@ -16,6 +17,8 @@ export default {
 		app.component("BlogIndex", BlogIndex);
 		// Newsletter signup (Plunk) — embedded in blog + changelog markdown.
 		app.component("NewsletterSignup", NewsletterSignup);
+		// Inline copy-to-clipboard for install commands + code snippets.
+		app.component("CopyButton", CopyButton);
 
 		if (!inBrowser) return;
 

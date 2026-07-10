@@ -1,14 +1,33 @@
 # Turso / libSQL Adapter (`@memofs/adapter-turso`)
 
-The `@memofs/adapter-turso` adapter integrates Turso and libSQL databases into Memo FS, providing a query-optimized metadata axis for index matching, graph relationships, and semantic search tracking.
+The `@memofs/adapter-turso` adapter integrates Turso and libSQL databases into MemoFS, providing a query-optimized metadata axis for index matching, graph relationships, and semantic search tracking.
 
 ---
 
 ## Installation
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/adapter-turso
 ```
+
+```sh [pnpm]
+pnpm add @memofs/adapter-turso
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-turso
+```
+
+```sh [bun]
+bun add @memofs/adapter-turso
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 

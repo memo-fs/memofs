@@ -1,22 +1,22 @@
-# TekMemo
+# MemoFS
 
-> TekMemo is a file-first memory runtime for AI agents and coding assistants. It gives LLMs durable, project-scoped context so they stay accurate and consistent across sessions. Memory lives as plain text and JSON in a `.tekmemo/` folder (local) or in TekMemo Cloud (hosted).
+> MemoFS is a file-first memory runtime for AI agents and coding assistants. It gives LLMs durable, project-scoped context so they stay accurate and consistent across sessions. Memory lives as plain text and JSON in a `.memofs/` folder (local) or in MemoFS Cloud (hosted).
 
-TekMemo is published as focused packages:
-- `@tekmemo/core` — the core memory runtime (the `Tekmemo` client, filesystem store, graph memory, recall, and cloud client contracts).
-- `tekmemo` — the CLI for terminal and CI workflows.
-- `@tekmemo/mcp-server` — a self-hostable MCP server (stdio) for agent integration.
+MemoFS is published as focused packages:
+- `@memofs/core` — the core memory runtime (the `MemoFS` client, filesystem store, graph memory, recall, and cloud client contracts).
+- `memofs` — the CLI for terminal and CI workflows.
+- `@memofs/mcp-server` — a self-hostable MCP server (stdio) for agent integration.
 
 Official adapters live alongside it:
-- `@tekmemo/adapter-openai` — OpenAI embeddings.
-- `@tekmemo/adapter-voyage` — Voyage AI embedder + reranker.
-- `@tekmemo/adapter-transformers` — zero-config local ONNX embedder (Transformers.js) for hybrid recall with no API key, no cloud.
+- `@memofs/adapter-openai` — OpenAI embeddings.
+- `@memofs/adapter-voyage` — Voyage AI embedder + reranker.
+- `@memofs/adapter-transformers` — zero-config local ONNX embedder (Transformers.js) for hybrid recall with no API key, no cloud.
 
 ## Recall (local intelligence)
 
 Local and hybrid modes retrieve memory through a configurable recall engine. In local mode, recall works with zero configuration: the default is lexical-only retrieval (BM25 + fuzzy matching), so memory is searchable with no embedder and no API keys. Strategies (`recall.engine`): `lexical`, `vector`, `hybrid`, or `auto` (default — `hybrid` when an embedder is available, else `lexical`). When `recall.localEmbeddings` is on, the runtime lazy-loads the local ONNX adapter so `auto` upgrades to hybrid recall with zero API keys. The vector path is an enhancement: if the embedder fails or the adapter is missing, writes and recall keep working on the lexical path.
 
-Environment variables (same priority chain: constructor args > env > `.tekmemo/config.json` > defaults):
+Environment variables (same priority chain: constructor args > env > `.memofs/config.json` > defaults):
 - `TEKMEMO_RECALL_ENGINE` — `lexical` | `vector` | `hybrid` | `auto` (default `auto`).
 - `TEKMEMO_LOCAL_EMBEDDINGS` — `1`/`true` to lazy-load the local ONNX embedder.
 - `TEKMEMO_EMBEDDING_MODEL` — Transformers.js-compatible model id (default `Xenova/all-MiniLM-L6-v2`).
@@ -26,15 +26,15 @@ Environment variables (same priority chain: constructor args > env > `.tekmemo/c
 Install the core runtime and start recording memory in code:
 
 ```bash
-npm install @tekmemo/core
+npm install @memofs/core
 ```
 
 ```ts
-import { Tekmemo } from "@tekmemo/core";
-import { createNodeFsMemoryStore } from "@tekmemo/core/node-fs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-const memo = new Tekmemo({
-  store: createNodeFsMemoryStore({ rootDir: "./.tekmemo" }),
+const memo = new MemoFS({
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
   projectId: "my-app",
   mode: "local",
 });
@@ -45,42 +45,42 @@ const hits = await memo.recall({ query: "database decisions" });
 
 ## Docs
 
-- Overview & quick start: https://docs.memo.tekbreed.com/packages/core/
-- Installation: https://docs.memo.tekbreed.com/packages/cli/
-- The `Tekmemo` client (modes, strategies, API surface): https://docs.memo.tekbreed.com/packages/core/client
-- Configuration (resolution chain, env vars, config.json): https://docs.memo.tekbreed.com/packages/core/configuration
-- Core concepts: https://docs.memo.tekbreed.com/packages/core/concepts
-- Filesystem layout: https://docs.memo.tekbreed.com/packages/core/agentfs
-- Cloud client / storage: https://docs.memo.tekbreed.com/configure/storage
-- Architecture: https://docs.memo.tekbreed.com/packages/core/concepts
+- Overview & quick start: https://docs.memofs.dev/packages/core/
+- Installation: https://docs.memofs.dev/packages/cli/
+- The `MemoFS` client (modes, strategies, API surface): https://docs.memofs.dev/packages/core/client
+- Configuration (resolution chain, env vars, config.json): https://docs.memofs.dev/packages/core/configuration
+- Core concepts: https://docs.memofs.dev/packages/core/concepts
+- Filesystem layout: https://docs.memofs.dev/packages/core/agentfs
+- Cloud client / storage: https://docs.memofs.dev/configure/storage
+- Architecture: https://docs.memofs.dev/packages/core/concepts
 
 ## Runtime modes
 
-`Tekmemo` supports three runtime modes, selected in config: `local` (filesystem), `hybrid` (local + cloud with read/write policies), and `memory` (volatile, for tests).
+`MemoFS` supports three runtime modes, selected in config: `local` (filesystem), `hybrid` (local + cloud with read/write policies), and `memory` (volatile, for tests).
 
-- Local vs hybrid: https://docs.memo.tekbreed.com/packages/core/client
-- Configuration resolution: https://docs.memo.tekbreed.com/packages/core/configuration
+- Local vs hybrid: https://docs.memofs.dev/packages/core/client
+- Configuration resolution: https://docs.memofs.dev/packages/core/configuration
 
 ## MCP (Model Context Protocol)
 
-Two ways to expose TekMemo to coding agents:
+Two ways to expose MemoFS to coding agents:
 
-- **Hosted server** (cloud-only): `https://mcp.memo.tekbreed.com/` over Streamable HTTP, bearer-token auth, read-only by default. Docs: https://docs.memo.tekbreed.com/packages/mcp/
-- **Self-hosted stdio server** (`@tekmemo/mcp-server`): supports `local`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memo.tekbreed.com/packages/mcp/
+- **Hosted server** (cloud-only): `https://mcp.memofs.dev/` over Streamable HTTP, bearer-token auth, read-only by default. Docs: https://docs.memofs.dev/packages/mcp/
+- **Self-hosted stdio server** (`@memofs/mcp-server`): supports `local`, `hybrid`, and `memory` modes for file-first memory. Docs: https://docs.memofs.dev/packages/mcp/
 
-Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.memo.tekbreed.com/packages/mcp/
+Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.memofs.dev/packages/mcp/
 
 ## CLI
 
-- CLI guide: https://docs.memo.tekbreed.com/packages/cli/
-- Commands: https://docs.memo.tekbreed.com/packages/cli/
+- CLI guide: https://docs.memofs.dev/packages/cli/
+- Commands: https://docs.memofs.dev/packages/cli/
 
 ## API reference
 
-- Modules overview: https://docs.memo.tekbreed.com/api/
-- Core client API: https://docs.memo.tekbreed.com/api/core
-- AI SDK helpers: https://docs.memo.tekbreed.com/packages/adapters/ai-sdk
+- Modules overview: https://docs.memofs.dev/api/
+- Core client API: https://docs.memofs.dev/api/core
+- AI SDK helpers: https://docs.memofs.dev/packages/adapters/ai-sdk
 
 ## Cloud
 
-TekMemo Cloud base URL: `https://api.tekbreed.com/memo/v1`. Authenticate with a TekMemo API key (`tk_live_...`), kept server-side. Cloud is optional — local file-first memory works with zero cloud setup.
+MemoFS Cloud base URL: `https://memofs.dev/api/v1/memo/v1`. Authenticate with a MemoFS API key (`mfs_live_...`), kept server-side. Cloud is optional — local file-first memory works with zero cloud setup.

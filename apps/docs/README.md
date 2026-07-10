@@ -1,10 +1,10 @@
-# Memo FS Docs App
+# MemoFS Docs App
 
-Developer documentation for the Memo FS OSS workspace.
+Developer documentation for the MemoFS OSS workspace.
 
 ## Scope
 
-This VitePress app documents the Memo FS OSS workspace:
+This VitePress app documents the MemoFS OSS workspace:
 
 - `@memofs/core` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
 - `memofs` (CLI distribution)
@@ -14,10 +14,10 @@ This VitePress app documents the Memo FS OSS workspace:
 It also hosts the engineering blog (`/blog/`), changelog (`/changelog/`), and
 FAQs (`/faqs/`) — engineering content lives where developers already read it
 (per the ADR 0008 docs-IA decision, 2026-06-20). **Commercial pages — pricing,
-billing, legal, roadmap, competitor content — belong in the Memo FS Cloud app,
+billing, legal, roadmap, competitor content — belong in the MemoFS Cloud app,
 not here**, and are blocked from the OSS docs by `scripts/check-doc-links.mjs`.
 
-**Memo FS Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
+**MemoFS Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
 and sync content is documented here too — not deferred to a separate CMS. Per
 [ADR 0008][adr8], every doc claim must be derivable from code/tests/ADRs; when
 code and docs disagree, code wins and the doc is the bug. The drift worklist

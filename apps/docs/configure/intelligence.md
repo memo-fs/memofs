@@ -1,6 +1,6 @@
 # Configure Intelligence
 
-Memo FS utilizes a **4-role intelligence model** to power semantic search, knowledge graph construction, and automated memory consolidation. 
+MemoFS utilizes a **4-role intelligence model** to power semantic search, knowledge graph construction, and automated memory consolidation. 
 
 To maintain portability and zero-config defaults, every role features a **deterministic local fallback** that runs without requiring third-party API keys or external models.
 
@@ -21,7 +21,7 @@ The system isolates intelligence tasks into four separate, composable interfaces
 
 ## The Deterministic Seam
 
-If you do not inject an intelligence adapter, Memo FS does not fail; it falls back to the deterministic local engines:
+If you do not inject an intelligence adapter, MemoFS does not fail; it falls back to the deterministic local engines:
 
 - **No Embedder:** Recall runs BM25 lexical token matching and fuzzy edit-distance search.
 - **No Extractor:** Graph building extracts entities based on keyword tags and markdown heading structures.

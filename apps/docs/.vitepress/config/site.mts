@@ -1,5 +1,5 @@
 export const site = {
-	title: "Memo FS",
+	title: "MemoFS",
 	description:
 		"File-first memory for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
 	repo: "https://github.com/christophersesugh/memofs",

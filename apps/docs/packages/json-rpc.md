@@ -8,9 +8,28 @@ This package is utilized internally by both the Model Context Protocol (MCP) ser
 
 ## Installation
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/json-rpc
 ```
+
+```sh [pnpm]
+pnpm add @memofs/json-rpc
+```
+
+```sh [yarn]
+yarn add @memofs/json-rpc
+```
+
+```sh [bun]
+bun add @memofs/json-rpc
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
-title: "Introducing Memo FS: File-first Memory for AI Agents"
-description: The launch of Memo FS — a memory layer built for AI agents that need durable, queryable context across sessions.
+title: "Introducing MemoFS: File-first Memory for AI Agents"
+description: The launch of MemoFS — a memory layer built for AI agents that need durable, queryable context across sessions.
 date: 2026-01-15
 author: Christopher S. Aondona
 tags: [product, launch, memory, ai-agents]
@@ -9,7 +9,7 @@ sidebar: false
 outline: deep
 ---
 
-Today we're launching **Memo FS** — a memory layer designed specifically for AI agents that need durable, queryable context across sessions.
+Today we're launching **MemoFS** — a memory layer designed specifically for AI agents that need durable, queryable context across sessions.
 
 ## The Problem
 
@@ -22,7 +22,7 @@ AI agents today suffer from amnesia. Every conversation starts from zero. Contex
 
 ## The Solution
 
-Memo FS gives agents a **persistent memory layer** with:
+MemoFS gives agents a **persistent memory layer** with:
 
 | Capability | What It Means |
 |------------|---------------|
@@ -36,11 +36,30 @@ Memo FS gives agents a **persistent memory layer** with:
 
 ## Quick Start
 
-Install Memo FS:
+Install MemoFS:
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/core
 ```
+
+```sh [pnpm]
+pnpm add @memofs/core
+```
+
+```sh [yarn]
+yarn add @memofs/core
+```
+
+```sh [bun]
+bun add @memofs/core
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ```ts
 import { MemoFS } from "@memofs/core";

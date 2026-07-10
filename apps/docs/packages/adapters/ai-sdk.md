@@ -1,14 +1,33 @@
 # Vercel AI SDK Adapter (`@memofs/adapter-ai-sdk`)
 
-The `@memofs/adapter-ai-sdk` adapter provides a runtime bridge and tool definitions to seamlessly integrate Memo FS memory into Vercel AI SDK applications.
+The `@memofs/adapter-ai-sdk` adapter provides a runtime bridge and tool definitions to seamlessly integrate MemoFS memory into Vercel AI SDK applications.
 
 ---
 
 ## Installation
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/adapter-ai-sdk
 ```
+
+```sh [pnpm]
+pnpm add @memofs/adapter-ai-sdk
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-ai-sdk
+```
+
+```sh [bun]
+bun add @memofs/adapter-ai-sdk
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 

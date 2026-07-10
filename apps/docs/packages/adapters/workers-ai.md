@@ -6,9 +6,28 @@ The `@memofs/adapter-workers-ai` adapter utilizes Cloudflare's serverless GPUs t
 
 ## Installation
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/adapter-workers-ai
 ```
+
+```sh [pnpm]
+pnpm add @memofs/adapter-workers-ai
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-workers-ai
+```
+
+```sh [bun]
+bun add @memofs/adapter-workers-ai
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 

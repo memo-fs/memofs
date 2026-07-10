@@ -1,6 +1,6 @@
 ### Hybrid Recall Architecture
 
-Memo FS retrieves context from three parallel retrieval channels:
+MemoFS retrieves context from three parallel retrieval channels:
 
 1. **Vector Channel:** Semantic search utilizing the configured `MemoryEmbedder` (e.g. Voyage, OpenAI, or local ONNX). This handles conceptual similarity where keyword matching fails.
 2. **Lexical Channel (BM25):** Full-text search over exact terms, ensuring highly specific keywords, error messages, and filenames are precisely matched.

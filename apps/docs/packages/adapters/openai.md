@@ -8,9 +8,28 @@ The OpenAI adapter provides vector embedding capabilities utilizing OpenAI's emb
 
 Install the adapter package in your workspace:
 
-```bash
+::: code-group
+
+```sh [npm]
 npm install @memofs/adapter-openai
 ```
+
+```sh [pnpm]
+pnpm add @memofs/adapter-openai
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-openai
+```
+
+```sh [bun]
+bun add @memofs/adapter-openai
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
 
 ---
 
