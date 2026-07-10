@@ -1,12 +1,12 @@
-# Self-host the `tekmemo-server` runtime
+# Self-host the `memofs-server` runtime
 
 Run the **same** memory engine MemoFS Cloud runs, on your own infra. No vendor
 lock-in, no MemoFS Cloud dependency — you bring the storage and the providers,
-`tekmemo-server` runs the engine.
+`memofs-server` runs the engine.
 
-This example covers the two deploy targets (ADR 0013): a **single Node process**
+This example covers the two deploy targets: a **single Node process**
 for self-hosters (Fly / Railway / Render / a VPS), and a **Cloudflare Worker**
-for the cloud's two-Worker topology. Both run identical `tekmemo-server` code.
+for the cloud's two-Worker topology. Both run identical `memofs-server` code.
 
 ## What you need
 
@@ -24,23 +24,23 @@ extraction). Inject a provider adapter only to upgrade a slot.
 
 ## Deploy as a Node single process
 
-The `tekmemo-server` bin boots a `node:http` server that serves the JSON-RPC
+The `memofs-server` bin boots a `node:http` server that serves the JSON-RPC
 runtime API. Build once, run anywhere Node 22+ runs:
 
 ```bash
-# From the repo root (builds every package, including tekmemo-server)
+# From the repo root (builds every package, including @memofs/server)
 pnpm install
 pnpm packages:build
 
 # Boot the server. Defaults to port 8787, in-memory store, auth off.
-PORT=8787 node packages/tekmemo-server/dist/bin/tekmemo-server.mjs
+PORT=8787 node packages/server/dist/bin/memofs-server.mjs
 ```
 
 Health check:
 
 ```bash
 curl http://127.0.0.1:8787/health
-# {"ok":true,"name":"tekmemo-server","version":"0.1.0"}
+# {"ok":true,"name":"memofs-server","version":"0.1.0"}
 ```
 
 ### Configure the bundle (storage + providers)
@@ -75,7 +75,7 @@ createServer(async (req, res) => {
 If the port is public, require a bearer token:
 
 ```bash
-MEMOFS_SERVER_TOKEN="your-secret" node dist/bin/tekmemo-server.mjs
+MEMOFS_SERVER_TOKEN="your-secret" node dist/bin/memofs-server.mjs
 ```
 
 Setting `MEMOFS_SERVER_TOKEN` auto-enables auth. Clients send
@@ -84,9 +84,9 @@ network or a Service Binding.
 
 ## Deploy as a Cloudflare Worker
 
-The cloud runs `tekmemo-server` as the **runtime Worker** behind a Service
-Binding (the two-Worker split — ADR 0013). The Worker entry is
-`packages/tekmemo-server/src/worker.ts`:
+The cloud runs `@memofs/server` as the **runtime Worker** behind a Service
+Binding (the two-Worker split). The Worker entry is
+`packages/server/src/worker.ts`:
 
 ```ts
 import { createRuntimeFetchHandler } from "@memofs/server/worker";
@@ -99,10 +99,9 @@ export default {
 };
 ```
 
-`wrangler.jsonc` points `main` at the entry. Slice 2 wires the commercial
-Worker to call it over the binding; this example shows the runtime-Worker
-shape so a self-hoster can deploy the same Worker topology if they prefer
-Cloudflare to Node.
+`wrangler.jsonc` points `main` at the entry. This example shows the
+runtime-Worker shape so a self-hoster can deploy the same Worker topology if
+they prefer Cloudflare to Node.
 
 ## The runtime API (JSON-RPC over HTTP)
 
@@ -123,19 +122,17 @@ Both deploys serve the same surface — `POST /` with a JSON-RPC 2.0 body:
 
 ### The write-gate (important)
 
-Every mutating method returns **`503`** until the concurrency layer ships (slice
-3 / ADR 0010). This is deliberate: concurrent writes to the same project would
-silently lose data under last-writer-wins, so no write surface is reachable
-before the serialization layer that makes writes safe exists. The gate is
-"method rejects," never "method present unsafely."
+Every mutating method returns **`503`** until the concurrency layer ships.
+This is deliberate: concurrent writes to the same project would silently lose
+data under last-writer-wins, so no write surface is reachable before the
+serialization layer that makes writes safe exists. The gate is "method
+rejects," never "method present unsafely."
 
 Reads work fully today. To write memory programmatically before the gate lifts,
-use the `Tekmemo` client directly in-process (the engine supports writes; only
+use the `MemoFS` client directly in-process (the engine supports writes; only
 the *concurrent-over-HTTP* path is gated).
 
 ## See also
 
 - [`@memofs/server` README](../../packages/server/README.md)
-- [The execution plan](https://github.com/christophersesugh/memofs/blob/main/docs/architecture/s3-execution-plan.md)
-- [ADR 0013 — two-Worker split](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0013-two-worker-split.md)
-- [ADR 0003 — the self-host thesis](https://github.com/christophersesugh/memofs/blob/main/docs/adr/0003-managed-runtime-tier.md)
+- [Full Documentation](https://docs.memofs.dev/packages/server/)

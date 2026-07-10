@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg"
      style="width:100%;max-width:1040px;height:auto" role="img">
-<title>TekMemo Cloud — Architecture</title>
+<title>MemoFS Cloud — Architecture</title>
 <desc>Six memory layers stream data via animated bezier paths into a central MemArch data-center node.</desc>
 <style><![CDATA[
 svg {
@@ -402,12 +402,12 @@ svg {
 <!-- ════════════════════════════════════════════════════════════ -->
 <!-- LABELS (file tree paths, below each node card)              -->
 
-<text x="148" y="155" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/memory/</text>
-<text x="752" y="155" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/events/</text>
-<text x="95"  y="315" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/indexes/</text>
-<text x="805" y="315" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/graph/</text>
-<text x="148" y="482" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/snapshots/</text>
-<text x="752" y="482" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.tekmemo/manifest.json</text>
+<text x="148" y="155" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/memory/</text>
+<text x="752" y="155" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/events/</text>
+<text x="95"  y="315" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/indexes/</text>
+<text x="805" y="315" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/graph/</text>
+<text x="148" y="482" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/snapshots/</text>
+<text x="752" y="482" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#3a3d48" letter-spacing="0.05em">.memofs/manifest.json</text>
 
 <!-- DC label below rack -->
 <text x="450" y="378" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#464555" letter-spacing="0.1em">AGENT MEMORY CLOUD</text>

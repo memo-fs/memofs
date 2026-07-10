@@ -16,8 +16,8 @@
  *    note into the agent's system context BEFORE generation (the "context-first"
  *    pattern).
  *  - Every recall flows through the MemoFS hybrid engine (BM25 + fuzzy +
- *    embeddings + recency + reranker) via `createAiSdkRuntimeFromTekmemo`'s
- *    underlying Tekmemo instance — not a naive search.
+ *    embeddings + recency + reranker) via `createAiSdkRuntimeFromMemoFS`'s
+ *    underlying MemoFS instance — not a naive search.
  *
  * The OpenAI Agents SDK is the `Agent` + `tool()` + `run()` framework from
  * openai-agents-js. It is distinct from the Cloudflare Agents SDK.

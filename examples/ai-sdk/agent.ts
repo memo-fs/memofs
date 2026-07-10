@@ -12,7 +12,7 @@
  *    memory before generation.
  *  - Tool-augmented: `buildRuntimeMemoryToolDefinition` lets the model recall
  *    and remember during multi-step reasoning.
- *  - The runtime is built with `createAiSdkRuntimeFromTekmemo`, so every
+ *  - The runtime is built with `createAiSdkRuntimeFromMemoFS`, so every
  *    recall goes through the MemoFS hybrid engine (BM25 + fuzzy + embeddings +
  *    recency + reranker) — not a naive search.
  */
@@ -21,13 +21,13 @@ import { openai } from "@ai-sdk/openai";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
-	createAiSdkRuntimeFromTekmemo,
+	createAiSdkRuntimeFromMemoFS,
 } from "@memofs/adapter-ai-sdk";
 import { MemoFS } from "@memofs/core";
 import { generateText, stepCountIs } from "ai";
 
 const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
-const runtime = createAiSdkRuntimeFromTekmemo(memo);
+const runtime = createAiSdkRuntimeFromMemoFS(memo);
 const access = { projectId: "demo", userId: "user_demo" };
 
 async function agentTurn(userPrompt: string): Promise<string> {

@@ -27,5 +27,5 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "examples"
 	},
-	"description": "Runnable Memo FS integration examples for AI agents and apps."
+	"description": "Runnable MemoFS integration examples for AI agents and apps."
 }

@@ -1,10 +1,10 @@
-# Memo FS + your coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
+# MemoFS + your coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
 
-Give your daily coding agent **persistent, inspectable memory** with Memo FS.
+Give your daily coding agent **persistent, inspectable memory** with MemoFS.
 Your agent remembers decisions, constraints, and project facts across sessions —
 stored as plain files under `.memofs/` you can `cat`, `git diff`, and roll back.
 
-This is Memo FS's differentiator for **local daily builders**: memory that lives
+This is MemoFS's differentiator for **local daily builders**: memory that lives
 in your repo, not in a vendor's database.
 
 ## What you get
@@ -18,7 +18,7 @@ in your repo, not in a vendor's database.
 - **File-first storage** — everything is plain Markdown + JSONL under
   `.memofs/`. Commit it for team-shared memory, or gitignore it for personal.
 
-## 1. Install the Memo FS CLI
+## 1. Install the MemoFS CLI
 
 ```bash
 npm install -g memofs
@@ -36,7 +36,7 @@ This creates `.memofs/` (memory, events, graph, snapshots) and a project ID.
 
 ## 2. Generate your agent's rules file
 
-Each coding agent reads instructions from a different path. Memo FS emits the
+Each coding agent reads instructions from a different path. MemoFS emits the
 right file for each:
 
 ```bash
@@ -52,12 +52,12 @@ memofs generate agent-rules --list
 ```
 
 The generated file contains only behavioral rules + pointers — no project facts.
-The real project knowledge lives in Memo FS memory, injected at runtime via
+The real project knowledge lives in MemoFS memory, injected at runtime via
 `context`.
 
 ## 3. Wire the MCP server into your agent
 
-Add the Memo FS MCP server to your agent's MCP config. The server runs locally
+Add the MemoFS MCP server to your agent's MCP config. The server runs locally
 over stdio — no API key, no cloud.
 
 ### Cursor (`.cursor/mcp.json`)
@@ -157,7 +157,7 @@ git commit -m "chore: record auth-session decision"
 
 - **Agent doesn't call the memory tools** → you skipped step 2. The
   `generate agent-rules` file is what makes agents proactively use memory.
-- **`tekmemo` command not found** → run via `npx memofs ...`.
+- **`memofs` command not found** → run via `npx memofs ...`.
 - **Want semantic recall without an API key?** → the MCP server defaults to
   lexical (BM25 + fuzzy) recall. For zero-config hybrid recall, see
   [`@memofs/adapter-transformers`](../../packages/adapter-transformers).
@@ -166,4 +166,4 @@ git commit -m "chore: record auth-session decision"
 
 - [MCP server docs](https://docs.memofs.dev/packages/mcp/)
 - [CLI docs](https://docs.memofs.dev/packages/cli/)
-- [File-first memory](https://docs.memofs.dev/packages/tekmemo/file-first-memory)
+- [File-first memory](https://docs.memofs.dev/packages/file-first-memory)

@@ -15,7 +15,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
-	createAiSdkRuntimeFromTekmemo,
+	createAiSdkRuntimeFromMemoFS,
 } from "@memofs/adapter-ai-sdk";
 import { MemoFS } from "@memofs/core";
 import { streamText } from "ai";
@@ -44,7 +44,7 @@ export async function POST(request: Request): Promise<Response> {
 	}
 
 	const memo = getMemo(conversationId);
-	const runtime = createAiSdkRuntimeFromTekmemo(memo);
+	const runtime = createAiSdkRuntimeFromMemoFS(memo);
 	const access = { projectId: "next-app", userId, conversationId };
 
 	// 1. Context-first — ground the model in memory before generation.

@@ -1,6 +1,6 @@
 # MemoFS + Next.js (App Router)
 
-A memory-augmented chat API built with Memo FS and the [Vercel AI SDK](https://sdk.vercel.ai),
+A memory-augmented chat API built with MemoFS and the [Vercel AI SDK](https://sdk.vercel.ai),
 exposed as a Next.js App Router **route handler**. Demonstrates the recommended
 "context-first + tool-augmented" pattern in a real HTTP server context.
 
@@ -62,6 +62,6 @@ to both helpers — MemoFS enforces the scope on every read and write.
 
 ## See also
 
-- [The `Tekmemo` client](https://docs.memofs.dev/packages/tekmemo/client)
-- [AI SDK tools guide](https://docs.memofs.dev/packages/tekmemo/ai-sdk/tools)
-- [AI SDK agent patterns](https://docs.memofs.dev/packages/tekmemo/ai-sdk/agent-patterns)
+- [The `MemoFS` client](https://docs.memofs.dev/packages/client)
+- [AI SDK tools guide](https://docs.memofs.dev/packages/ai-sdk/tools)
+- [AI SDK agent patterns](https://docs.memofs.dev/packages/ai-sdk/agent-patterns)

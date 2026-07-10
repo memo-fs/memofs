@@ -1,6 +1,6 @@
 # MemoFS Examples
 
-Runnable, end-to-end examples for building memory-augmented agents with Memo FS.
+Runnable, end-to-end examples for building memory-augmented agents with MemoFS.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Demonstrates the recommended "intelligent memory" pattern end to end:
   more, read core memory, and record durable facts *during* multi-step
   reasoning.
 - **Single intelligent engine** — the runtime is built with
-  `createAiSdkRuntimeFromTekmemo`, so every recall flows through the MemoFS
+  `createAiSdkRuntimeFromMemoFS`, so every recall flows through the MemoFS
   hybrid engine (BM25 + fuzzy + embeddings + recency boost + reranker), not a
   naive text search.
 
@@ -68,11 +68,11 @@ a Next.js app — see [`nextjs/README.md`](./nextjs/README.md) for setup.
 
 Give your daily coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
 persistent MemoFS memory over MCP. Covers `memofs init`, `memofs generate
-agent-rules` for each agent, and the per-platform MCP config. This is Memo FS's
+agent-rules` for each agent, and the per-platform MCP config. This is MemoFS's
 differentiator for **local daily builders** — memory that lives in your repo,
 not a vendor database. See [`mcp-coding-agent/README.md`](./mcp-coding-agent/README.md).
 
-### Self-host the `tekmemo-server` runtime — [`server/`](./server/)
+### Self-host the `memofs-server` runtime — [`server/`](./server/)
 
 Run the **same** memory engine MemoFS Cloud runs, on your own infra — a single
 Node process (Fly / Railway / VPS) or a Cloudflare Worker. Bring your own blob
@@ -82,6 +82,6 @@ self-host bundle. See [`server/README.md`](./server/README.md).
 
 ## See also
 
-- [AI SDK Tools guide](https://docs.memofs.dev/packages/tekmemo/ai-sdk/tools)
-- [AI SDK Agent patterns](https://docs.memofs.dev/packages/tekmemo/ai-sdk/agent-patterns)
-- [The `Tekmemo` client](https://docs.memofs.dev/packages/tekmemo/client)
+- [AI SDK Tools guide](https://docs.memofs.dev/packages/ai-sdk/tools)
+- [AI SDK Agent patterns](https://docs.memofs.dev/packages/ai-sdk/agent-patterns)
+- [The `MemoFS` client](https://docs.memofs.dev/packages/client)

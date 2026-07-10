@@ -31,7 +31,7 @@ const recallStore = createInMemoryRecallStore({
 });
 await recallStore.upsert(recallDocuments);
 
-const rootDir = await mkdtemp(path.join(tmpdir(), "tekmemo-release-bench-"));
+const rootDir = await mkdtemp(path.join(tmpdir(), "memofs-release-bench-"));
 const fsStore = createNodeFsMemoryStore({
 	rootDir,
 	missingFileBehavior: "throw",

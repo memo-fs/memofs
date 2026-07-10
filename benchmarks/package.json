@@ -28,5 +28,5 @@
 		"url": "git+https://github.com/christophersesugh/memofs.git",
 		"directory": "benchmarks"
 	},
-	"description": "Private workspace runner for Memo FS benchmark suites."
+	"description": "Private workspace runner for MemoFS benchmark suites."
 }
