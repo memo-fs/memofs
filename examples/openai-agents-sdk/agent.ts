@@ -3,38 +3,38 @@
  * for TypeScript (`@openai/agents`).
  *
  * Run it:
- *   pnpm --filter @tekbreed/examples openai-agents:agent
+ *   pnpm --filter @memofs/examples openai-agents:agent
  *
  * Requires:
  *   OPENAI_API_KEY — for the model
  *
  * What it shows:
- *  - TekMemo memory surfaced as OpenAI Agents SDK `tool()`s — `recall_memory`
+ *  - MemoFS memory surfaced as OpenAI Agents SDK `tool()`s — `recall_memory`
  *    and `remember` — so the model can read durable context and record new
  *    facts during a run.
  *  - An `instructions` prompt that bakes project-wide core memory + a recent
  *    note into the agent's system context BEFORE generation (the "context-first"
  *    pattern).
- *  - Every recall flows through the TekMemo hybrid engine (BM25 + fuzzy +
- *    embeddings + recency + reranker) via `createAiSdkRuntimeFromTekmemo`'s
- *    underlying Tekmemo instance — not a naive search.
+ *  - Every recall flows through the MemoFS hybrid engine (BM25 + fuzzy +
+ *    embeddings + recency + reranker) via `createAiSdkRuntimeFromMemoFS`'s
+ *    underlying MemoFS instance — not a naive search.
  *
  * The OpenAI Agents SDK is the `Agent` + `tool()` + `run()` framework from
  * openai-agents-js. It is distinct from the Cloudflare Agents SDK.
  */
 
+import { MemoFS } from "@memofs/core";
 import { Agent, run, tool } from "@openai/agents";
-import { Tekmemo } from "@tekbreed/tekmemo";
 import { z } from "zod";
 
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
+const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
 
-// --- Tools: give the agent safe, scoped access to TekMemo memory -------------
+// --- Tools: give the agent safe, scoped access to MemoFS memory -------------
 
 const recallMemory = tool({
 	name: "recall_memory",
 	description:
-		"Search TekMemo memory for durable facts relevant to the query. " +
+		"Search MemoFS memory for durable facts relevant to the query. " +
 		"Call this before answering if the question references prior context, " +
 		"decisions, or preferences. Returns ranked memory hits.",
 	parameters: z.object({
@@ -50,7 +50,7 @@ const recallMemory = tool({
 const remember = tool({
 	name: "remember",
 	description:
-		"Persist a durable, non-secret fact to TekMemo memory. Only call this " +
+		"Persist a durable, non-secret fact to MemoFS memory. Only call this " +
 		"when a genuine decision, constraint, or preference was established. " +
 		"Let ephemeral state die — do not record it.",
 	parameters: z.object({
@@ -72,7 +72,7 @@ async function buildInstructions(): Promise<string> {
 		.join("\n");
 
 	return [
-		"You are a senior engineer with persistent TekMemo memory.",
+		"You are a senior engineer with persistent MemoFS memory.",
 		"Use the `recall_memory` tool before answering when prior context matters.",
 		"Only persist durable, non-secret facts via `remember`; let ephemeral state die.",
 		"",
@@ -87,7 +87,7 @@ async function buildInstructions(): Promise<string> {
 // --- Agent + run -------------------------------------------------------------
 
 const memoryAgent = new Agent({
-	name: "TekMemo agent",
+	name: "MemoFS agent",
 	instructions: await buildInstructions(),
 	tools: [recallMemory, remember],
 });

@@ -1,0 +1,12 @@
+{
+	"extends": "@repo/typescript/base.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"rootDir": ".",
+		"paths": {
+			"@memofs/benchmark-kit": ["./src/index.ts"]
+		}
+	},
+	"include": ["src/**/*.ts"],
+	"exclude": ["node_modules", "dist"]
+}

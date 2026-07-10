@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for TekMemo
+about: Suggest an idea for MemoFS
 title: ''
 labels: 'enhancement'
 assignees: ''

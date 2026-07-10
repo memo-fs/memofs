@@ -2,10 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 async function main() {
-	const pkgPath = path.resolve(
-		process.cwd(),
-		"packages/tekmemo-cli/package.json",
-	);
+	const pkgPath = path.resolve(process.cwd(), "packages/memofs/package.json");
 	const pkgData = await fs.readFile(pkgPath, "utf-8");
 	const pkg = JSON.parse(pkgData);
 	const version = pkg.version;
@@ -19,7 +16,7 @@ async function main() {
 
 	const schemaData = await fs.readFile(schemaSrc, "utf-8");
 	const schema = JSON.parse(schemaData);
-	schema.$id = `https://docs.memo.tekbreed.com/${version}/config.schema.json`;
+	schema.$id = `https://docs.memofs.dev/${version}/config.schema.json`;
 
 	await fs.mkdir(targetDir, { recursive: true });
 	await fs.writeFile(

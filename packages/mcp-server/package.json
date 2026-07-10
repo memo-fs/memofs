@@ -1,0 +1,109 @@
+{
+	"name": "@memofs/mcp-server",
+	"version": "1.0.0-beta.1",
+	"private": false,
+	"description": "Model Context Protocol server for MemoFS agent integrations.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
+		"directory": "packages/mcp-server"
+	},
+	"homepage": "https://docs.memofs.dev/packages/mcp/",
+	"bugs": {
+		"url": "https://github.com/christophersesugh/memofs/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./http": {
+			"import": {
+				"types": "./dist/http.d.mts",
+				"default": "./dist/http.mjs"
+			},
+			"require": {
+				"types": "./dist/http.d.cts",
+				"default": "./dist/http.cjs"
+			}
+		}
+	},
+	"bin": {
+		"memofs-mcp": "./dist/bin/memofs-mcp.mjs"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"mcp",
+		"model-context-protocol",
+		"ai",
+		"agents",
+		"memory",
+		"memofs",
+		"typescript"
+	],
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": ">=1.29.0",
+		"@memofs/core": "workspace:^",
+		"@memofs/json-rpc": "workspace:^"
+	},
+	"peerDependencies": {
+		"@huggingface/transformers": "^3.7.6",
+		"@memofs/adapter-transformers": "workspace:^"
+	},
+	"peerDependenciesMeta": {
+		"@huggingface/transformers": {
+			"optional": true
+		},
+		"@memofs/adapter-transformers": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@memofs/testing": "workspace:^",
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"@types/node": "^25.9.2"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

@@ -1,5 +1,5 @@
 /* ===================================================================
-   TekMemo — "Engineered memory" design system
+   MemoFS — "Engineered memory" design system
    A refined, technical-but-warm aesthetic. Distinctive display type,
    layered atmosphere, hairline depth. Not generic AI slop.
    =================================================================== */
@@ -18,7 +18,7 @@
   --vp-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --vp-font-family-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
 
-  /* TekBreed Brand Colors — vibrant blue/green dual identity */
+  /* MemoFS Brand Colors — vibrant blue/green dual identity */
   --vp-c-brand-1: #258acb;
   --vp-c-brand-2: #2a9be4;
   --vp-c-brand-3: #1b6595;
@@ -171,7 +171,7 @@
 /* ===================================================================
    Sidebar brand styling
    =================================================================== */
-.TekMemoSidebarBrand {
+.MemoFSSidebarBrand {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -182,31 +182,31 @@
   transition: background-color 0.2s ease;
 }
 
-.TekMemoSidebarBrand:hover {
+.MemoFSSidebarBrand:hover {
   background: var(--vp-c-bg-soft);
 }
 
-.TekMemoSidebarBrandIcon {
+.MemoFSSidebarBrandIcon {
   width: 32px;
   height: 32px;
   flex: 0 0 auto;
 }
 
-.TekMemoSidebarBrandContent {
+.MemoFSSidebarBrandContent {
   display: flex;
   min-width: 0;
   flex-direction: column;
   line-height: 1.3;
 }
 
-.TekMemoSidebarBrandName {
+.MemoFSSidebarBrandName {
   font-family: var(--vp-font-family-display);
   color: var(--vp-c-text-1);
   font-size: 14px;
   font-weight: 600;
 }
 
-.TekMemoSidebarBrandLabel {
+.MemoFSSidebarBrandLabel {
   color: var(--vp-c-text-2);
   font-size: 12px;
   font-weight: 400;
@@ -293,6 +293,22 @@
 
 .terminal-success {
   color: #6a9955;
+}
+
+.terminal-comment {
+  color: #71717a;
+  font-style: italic;
+}
+
+.step-requirement {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+}
+
+.step-requirement strong {
+  color: var(--vp-c-text-1);
+  font-weight: 600;
 }
 
 /* ===================================================================
@@ -641,4 +657,68 @@
 .blog-index-page .VPDoc .container,
 .blog-index-page .VPDoc:not(.has-sidebar) .content {
   max-width: 1152px;
+}
+
+/* ===================================================================
+   Announcement bar — mobile responsive
+   =================================================================== */
+@media (max-width: 640px) {
+  .alpha-announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    min-height: 0;
+    padding: 5px 12px;
+    gap: 6px;
+    font-size: 12px;
+    z-index: 100;
+  }
+
+  .alpha-announcement-bar .alpha-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+
+  .alpha-announcement-bar .alpha-description {
+    display: none;
+  }
+
+  .alpha-announcement-bar .alpha-text {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .alpha-announcement-bar .alpha-link {
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  :root {
+    --vp-announcement-height: 30px;
+    --vp-layout-top-height: 30px;
+  }
+
+  .VPNav {
+    top: 30px !important;
+  }
+
+  .VPSidebar {
+    top: 30px !important;
+  }
+
+  .VPLocalNav {
+    top: 30px !important;
+  }
+
+  .VPContent {
+    margin-top: 30px !important;
+  }
+
+  .has-scrolled {
+    --vp-layout-top-height: 0px;
+  }
 }

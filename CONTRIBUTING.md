@@ -1,8 +1,8 @@
-# Contributing to TekMemo
+# Contributing to MemoFS
 
-Thank you for your interest in contributing to TekMemo.
+Thank you for your interest in contributing to MemoFS.
 
-This repository hosts TekMemo open-source work. TekMemo is the first product family: an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only TekMemo Cloud.
+This repository hosts MemoFS open-source work. MemoFS is the first product family: an open-source memory runtime for AI apps and agents. The project is designed to be useful to external developers, not only MemoFS Cloud.
 
 This guide explains how to contribute code, docs, tests, and package improvements.
 
@@ -10,7 +10,7 @@ This guide explains how to contribute code, docs, tests, and package improvement
 
 ## Project goals
 
-TekMemo aims to provide:
+MemoFS aims to provide:
 
 - file-first memory infrastructure
 - provider-neutral memory contracts
@@ -72,8 +72,8 @@ corepack prepare pnpm@9 --activate
 Clone the repo:
 
 ```bash
-git clone https://github.com/tekbreed/tekmemo.git
-cd tekmemo
+git clone https://github.com/christophersesugh/memofs.git
+cd memofs
 ```
 
 Install dependencies:
@@ -137,7 +137,7 @@ git commit -m "fix: short description"
 
 # or
 
-git commit -m "fix(tekmemo-cli): short description"
+git commit -m "fix(memofs-cli): short description"
 ```
 
 Push:
@@ -221,11 +221,11 @@ Before opening a pull request, verify:
 
 ## Package boundary rules
 
-Each product package should own one concern. TekMemo is one unified package where all public APIs are exported from `@tekbreed/tekmemo`.
+Each product package should own one concern. MemoFS is one unified package where all public APIs are exported from `memofs`.
 
-Internally, code is organized by feature area (such as `fs`, `recall`, `agentfs`, `ai-sdk`, etc.), but these are not exposed as separate package entrypoints. All public features are imported directly from `@tekbreed/tekmemo`.
+Internally, code is organized by feature area (such as `fs`, `recall`, `agentfs`, `ai-sdk`, etc.), but these are not exposed as separate package entrypoints. All public features are imported directly from `memofs`.
 
-Packages in this OSS repo must not contain private TekMemo Cloud logic such as:
+Packages in this OSS repo must not contain private MemoFS Cloud logic such as:
 
 * tenant routing
 * subscription enforcement
@@ -240,8 +240,8 @@ Packages in this OSS repo must not contain private TekMemo Cloud logic such as:
 
 ## Adding a new package or feature
 
-- **TekMemo features**: Add all new TekMemo capabilities as internal modules under `packages/tekmemo/src/<feature>/` and re-export them from the package root [index.ts](./packages/tekmemo/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
-- **New workspace packages**: Future workspace packages (such as TekCode components) should live beside `packages/tekmemo/` under `packages/<package-name>/` and conform to the following directory structure:
+- **MemoFS features**: Add all new MemoFS capabilities as internal modules under `packages/memofs/src/<feature>/` and re-export them from the package root [index.ts](./packages/memofs/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
+- **New workspace packages**: Future workspace packages (such as MemoFS components) should live beside `packages/memofs/` under `packages/<package-name>/` and conform to the following directory structure:
 
 ```txt
 packages/package-name/
@@ -281,7 +281,7 @@ The public API should be exported from:
 src/index.ts
 ```
 
-Avoid deep imports. Since everything is exported from the root entrypoint `@tekbreed/tekmemo`, import directly from `@tekbreed/tekmemo`.
+Avoid deep imports. Since everything is exported from the root entrypoint `memofs`, import directly from `memofs`.
 
 If something is public, export it intentionally.
 
@@ -361,7 +361,7 @@ pnpm test
 Run tests for a product package:
 
 ```bash
-pnpm --filter @tekbreed/tekmemo test
+pnpm --filter memofs test
 ```
 
 ---
@@ -487,7 +487,7 @@ Never commit:
 * private certificates
 * session secrets
 * customer data
-* private TekMemo Cloud internals
+* private MemoFS Cloud internals
 
 Use `.env.example` for documented configuration.
 
@@ -525,7 +525,7 @@ When opening an issue, include:
 Good title:
 
 ```txt
-@tekbreed/tekmemo: fs JSONL parser skips valid line after malformed object
+memofs: fs JSONL parser skips valid line after malformed object
 ```
 
 Bad title:
@@ -570,7 +570,7 @@ A smaller focused PR is easier to review than a large mixed PR.
 
 ## Release philosophy
 
-TekMemo should release stable, well-tested packages.
+MemoFS should release stable, well-tested packages.
 
 Do not rush a package into public release if:
 
@@ -600,4 +600,4 @@ For security issues, follow [SECURITY.md](./SECURITY.md).
 
 ## Thank you
 
-Every useful issue, test, doc fix, example, and bug report helps make TekMemo better.
+Every useful issue, test, doc fix, example, and bug report helps make MemoFS better.

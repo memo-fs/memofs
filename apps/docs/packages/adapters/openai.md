@@ -1,0 +1,65 @@
+# OpenAI Adapter (`@memofs/adapter-openai`)
+
+The OpenAI adapter provides vector embedding capabilities utilizing OpenAI's embeddings API endpoint.
+
+---
+
+## Installation
+
+Install the adapter package in your workspace:
+
+::: code-group
+
+```sh [npm]
+npm install @memofs/adapter-openai
+```
+
+```sh [pnpm]
+pnpm add @memofs/adapter-openai
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-openai
+```
+
+```sh [bun]
+bun add @memofs/adapter-openai
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22**.
+
+---
+
+## Usage
+
+Use `createOpenAIEmbedder` to instantiate an embedder for the `MemoFS` client:
+
+```ts
+import { MemoFS } from "@memofs/core";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+
+const memo = new MemoFS({
+  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  projectId: "openai-project",
+  embedder: createOpenAIEmbedder({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: "text-embedding-3-small", // or text-embedding-3-large, text-embedding-ada-002
+    dimensions: 1536, // Optional dimension configuration
+  }),
+});
+```
+
+---
+
+## Configuration API (`OpenAIEmbedderConfig`)
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | OpenAI API Key. Defaults to `process.env.OPENAI_API_KEY`. |
+| `model` | `string` | No | Model name (default: `"text-embedding-3-small"`). |
+| `dimensions` | `number` | No | Target output vector dimensions. |
+| `baseUrl` | `string` | No | Optional API base URL override for proxy servers. |

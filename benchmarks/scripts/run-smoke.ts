@@ -1,4 +1,3 @@
-import { CORE_MEMORY_PATH, chunkText } from "@tekbreed/tekmemo";
 import {
 	createBenchmarkSuite,
 	createFakeMemoryStore,
@@ -9,7 +8,8 @@ import {
 	createRecallQueryBenchmarkCase,
 	createRecallUpsertBenchmarkCase,
 	createRerankBenchmarkCase,
-} from "@tekbreed/tekmemo-benchmark-kit";
+} from "@memofs/benchmark-kit";
+import { CORE_MEMORY_PATH, chunkText } from "@memofs/core";
 import {
 	createMemoryText,
 	createRecallDocuments,
@@ -75,7 +75,7 @@ await runBenchmarks({
 					query: {
 						embedding: createVector(8, 5),
 						topK: 5,
-						filter: { projectId: "tekbreed-tekmemo" },
+						filter: { projectId: "memofs" },
 					},
 					iterations: 100,
 					warmupIterations: 5,

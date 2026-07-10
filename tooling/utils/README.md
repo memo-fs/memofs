@@ -1,8 +1,8 @@
 # @repo/utils
 
-Shared utility helpers for TekMemo packages.
+Shared utility helpers for MemoFS packages.
 
-This internal package provides common utility functions used across TekMemo packages. It keeps the codebase DRY and ensures consistent behavior.
+This internal package provides common utility functions used across MemoFS packages. It keeps the codebase DRY and ensures consistent behavior.
 
 ## Exports;
 

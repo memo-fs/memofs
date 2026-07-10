@@ -1,3 +1,3 @@
-{"id":"core-1","text":"TekMemo stores canonical project memory in core.md.","memoryType":"core"}
+{"id":"core-1","text":"MemoFS stores canonical project memory in core.md.","memoryType":"core"}
 {"id":"notes-1","text":"Durable archival notes live in notes.md.","memoryType":"notes"}
 {"id":"conversation-1","text":"Conversation fragments can be indexed for semantic recall.","memoryType":"conversation"}

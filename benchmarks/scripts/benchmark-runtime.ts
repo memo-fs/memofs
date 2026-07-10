@@ -1,7 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { RecallDocument } from "@tekbreed/tekmemo";
 import {
 	BenchmarkRunner,
 	type BenchmarkSuite,
@@ -12,7 +11,8 @@ import {
 	evaluateBenchmarkThresholds,
 	jsonBenchmarkReport,
 	markdownBenchmarkReport,
-} from "@tekbreed/tekmemo-benchmark-kit";
+} from "@memofs/benchmark-kit";
+import type { RecallDocument } from "@memofs/core";
 
 const BENCHMARK_ROOT = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
@@ -71,10 +71,10 @@ export function createRecallDocuments(
 ): RecallDocument[] {
 	return Array.from({ length: count }, (_value, index) => ({
 		id: `memory-${index}`,
-		text: `TekMemo memory record ${index} about layered agent memory.`,
+		text: `MemoFS memory record ${index} about layered agent memory.`,
 		embedding: createVector(dimensions, index + 1),
 		metadata: {
-			projectId: "tekbreed-tekmemo",
+			projectId: "memofs",
 			sourceType: "benchmark",
 			sourceId: `source-${index % 5}`,
 			memoryType: index % 2 === 0 ? "core" : "notes",
@@ -89,7 +89,7 @@ export function createMemoryText(records: number): string {
 	return Array.from(
 		{ length: records },
 		(_value, index) =>
-			`Record ${index}. TekMemo keeps core memory compact, archival notes durable, and recall fragments searchable for agent context.`,
+			`Record ${index}. MemoFS keeps core memory compact, archival notes durable, and recall fragments searchable for agent context.`,
 	).join("\n\n");
 }
 
@@ -144,7 +144,7 @@ async function writeReports({
 	);
 
 	const markdown = [
-		`# TekMemo ${mode} benchmarks`,
+		`# MemoFS ${mode} benchmarks`,
 		"",
 		`Status: ${summary.ok ? "pass" : "fail"}`,
 		"",

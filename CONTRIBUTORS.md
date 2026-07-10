@@ -1,18 +1,18 @@
 # Contributors
 
-Thank you to everyone helping build TekMemo.
+Thank you to everyone helping build MemoFS.
 
 ## Maintainers
 
 | Name | GitHub | Role | Focus |
 |---|---|---|---|
-| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder / Maintainer | TekMemo architecture, TekMemo packages, docs, releases |
+| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder / Maintainer | MemoFS architecture, MemoFS packages, docs, releases |
 
 ## Contributors
 
 | Name | GitHub | Contribution area |
 |---|---|---|
-| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder, architecture, TekMemo packages, docs |
+| Christopher S. Aondona | [@christophersesugh](https://github.com/christophersesugh) | Founder, architecture, MemoFS packages, docs |
 
 ## How to be added
 

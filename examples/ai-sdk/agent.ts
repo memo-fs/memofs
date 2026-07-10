@@ -2,7 +2,7 @@
  * Runnable example: a memory-augmented agent built with the Vercel AI SDK.
  *
  * Run it:
- *   pnpm --filter @tekbreed/examples ai-sdk:agent
+ *   pnpm --filter @memofs/examples ai-sdk:agent
  *
  * Requires:
  *   OPENAI_API_KEY  — for the model
@@ -12,22 +12,22 @@
  *    memory before generation.
  *  - Tool-augmented: `buildRuntimeMemoryToolDefinition` lets the model recall
  *    and remember during multi-step reasoning.
- *  - The runtime is built with `createAiSdkRuntimeFromTekmemo`, so every
- *    recall goes through the TekMemo hybrid engine (BM25 + fuzzy + embeddings +
+ *  - The runtime is built with `createAiSdkRuntimeFromMemoFS`, so every
+ *    recall goes through the MemoFS hybrid engine (BM25 + fuzzy + embeddings +
  *    recency + reranker) — not a naive search.
  */
 
 import { openai } from "@ai-sdk/openai";
-import { Tekmemo } from "@tekbreed/tekmemo";
 import {
 	buildRuntimeMemoryContext,
 	buildRuntimeMemoryToolDefinition,
-	createAiSdkRuntimeFromTekmemo,
-} from "@tekbreed/tekmemo-adapter-ai-sdk";
+	createAiSdkRuntimeFromMemoFS,
+} from "@memofs/adapter-ai-sdk";
+import { MemoFS } from "@memofs/core";
 import { generateText, stepCountIs } from "ai";
 
-const memo = new Tekmemo({ rootDir: "./.tekmemo", projectId: "demo" });
-const runtime = createAiSdkRuntimeFromTekmemo(memo);
+const memo = new MemoFS({ rootDir: "./.memofs", projectId: "demo" });
+const runtime = createAiSdkRuntimeFromMemoFS(memo);
 const access = { projectId: "demo", userId: "user_demo" };
 
 async function agentTurn(userPrompt: string): Promise<string> {

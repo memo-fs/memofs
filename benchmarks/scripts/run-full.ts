@@ -1,8 +1,8 @@
-import { chunkText, createInMemoryRecallStore } from "@tekbreed/tekmemo";
 import {
 	createBenchmarkSuite,
 	createRecallQueryBenchmarkCase,
-} from "@tekbreed/tekmemo-benchmark-kit";
+} from "@memofs/benchmark-kit";
+import { chunkText, createInMemoryRecallStore } from "@memofs/core";
 import {
 	createMemoryText,
 	createRecallDocuments,
@@ -55,7 +55,7 @@ await runBenchmarks({
 					query: {
 						embedding: createVector(dimensions, 42),
 						topK: 20,
-						filter: { projectId: "tekbreed-tekmemo" },
+						filter: { projectId: "memofs" },
 					},
 					iterations: 50,
 					warmupIterations: 5,

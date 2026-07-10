@@ -2,21 +2,21 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import * as path from "node:path";
 import {
-	CORE_MEMORY_PATH,
-	chunkText,
-	createDeterministicFallbackReranker,
-	createInMemoryRecallStore,
-	createNodeFsMemoryStore,
-	NOTES_MEMORY_PATH,
-	readCoreMemory,
-	writeCoreMemory,
-} from "@tekbreed/tekmemo";
-import {
 	createBenchmarkSuite,
 	createMemoryReadBenchmarkCase,
 	createMemoryWriteBenchmarkCase,
 	createRecallQueryBenchmarkCase,
-} from "@tekbreed/tekmemo-benchmark-kit";
+} from "@memofs/benchmark-kit";
+import {
+	CORE_MEMORY_PATH,
+	chunkText,
+	createDeterministicFallbackReranker,
+	createInMemoryRecallStore,
+	NOTES_MEMORY_PATH,
+	readCoreMemory,
+	writeCoreMemory,
+} from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import {
 	createMemoryText,
 	createRecallDocuments,
@@ -31,7 +31,7 @@ const recallStore = createInMemoryRecallStore({
 });
 await recallStore.upsert(recallDocuments);
 
-const rootDir = await mkdtemp(path.join(tmpdir(), "tekmemo-release-bench-"));
+const rootDir = await mkdtemp(path.join(tmpdir(), "memofs-release-bench-"));
 const fsStore = createNodeFsMemoryStore({
 	rootDir,
 	missingFileBehavior: "throw",
@@ -53,7 +53,7 @@ try {
 						iterations: 10,
 						warmupIterations: 1,
 						async run() {
-							await import("@tekbreed/tekmemo");
+							await import("@memofs/core");
 						},
 					},
 					createMemoryWriteBenchmarkCase({
@@ -111,7 +111,7 @@ try {
 						query: {
 							embedding: createVector(12, 10),
 							topK: 10,
-							filter: { projectId: "tekbreed-tekmemo" },
+							filter: { projectId: "memofs" },
 						},
 						iterations: 75,
 						warmupIterations: 5,

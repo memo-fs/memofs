@@ -1,0 +1,47 @@
+import { createTempMemoFsDir } from "@memofs/core/node-fs";
+import { describe, expect, it } from "vitest";
+import { runMemoFsCli } from "../src";
+
+describe("snapshot", () => {
+	it("creates a snapshot", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			await runMemoFsCli({
+				argv: ["init", "--root", temp.rootDir, "--no-input"],
+			});
+			const result = await runMemoFsCli({
+				argv: [
+					"snapshot",
+					"--root",
+					temp.rootDir,
+					"--label",
+					"before-change",
+					"--json",
+				],
+			});
+
+			expect(result.exitCode).toBe(0);
+			const parsed = JSON.parse(result.stdout.join("\n"));
+			expect(parsed.ok).toBe(true);
+			expect(parsed.data.label).toBe("before-change");
+		} finally {
+			await temp.cleanup();
+		}
+	});
+
+	it("rejects unsafe snapshot labels", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			await runMemoFsCli({
+				argv: ["init", "--root", temp.rootDir, "--no-input"],
+			});
+			const result = await runMemoFsCli({
+				argv: ["snapshot", "--root", temp.rootDir, "--label", "../bad"],
+			});
+
+			expect(result.exitCode).toBe(1);
+		} finally {
+			await temp.cleanup();
+		}
+	});
+});

@@ -1,6 +1,6 @@
 # Release Process
 
-TekMemo uses Changesets for package versioning and publishing. TekMemo is published as one public package, `@tekbreed/tekmemo`, with all public APIs exported from the single root entrypoint.
+MemoFS uses Changesets for package versioning and publishing. MemoFS is published as one public package, `@memofs/core`, with all public APIs exported from the single root entrypoint.
 
 ## Validation
 
@@ -57,7 +57,7 @@ Use `prepare` when changesets need to update versions and changelogs. Use `publi
 Publish from GitHub Actions when possible. The publish workflow expects:
 
 - `NPM_TOKEN` configured in repository secrets.
-- npm publishing permission for `@tekbreed/tekmemo`.
+- npm publishing permission for `@memofs/core`.
 - release branch contents already reviewed and merged.
 
 For local emergency publishing, verify npm auth first:
@@ -70,10 +70,10 @@ pnpm release
 
 ## Package inspection
 
-Before a major or first public release, inspect the TekMemo package contents:
+Before a major or first public release, inspect the MemoFS package contents:
 
 ```bash
-pnpm --filter @tekbreed/tekmemo pack:dry-run
+pnpm --filter @memofs/core pack:dry-run
 ```
 
 The tarball should contain `dist`, `README.md`, and `LICENSE`, and should not contain source-only tests, local docs, credentials, or generated benchmark results.

@@ -7,7 +7,7 @@
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["build/**", "dist/**", ".vitepress/dist/**"]
 		},
-		"@tekbreed/tekmemo#build": {
+		"@memofs/core#build": {
 			"dependsOn": [],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["build/**", "dist/**"]
@@ -24,22 +24,19 @@
 			"dependsOn": ["^build"],
 			"outputs": []
 		},
-		"//#format-and-lint": {
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
-		},
+		"//#format-and-lint": {},
 		"//#format-and-lint:fix": {
-			"cache": false,
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
+			"cache": false
 		},
 		"//#format-and-lint:fix:unsafe": {
-			"cache": false,
-			"inputs": ["$TURBO_DEFAULT$"],
-			"outputs": []
+			"cache": false
 		},
 		"test:run": {
 			"dependsOn": ["^build"],
+			"outputs": []
+		},
+		"@memofs/server#test:run": {
+			"dependsOn": ["^build", "build"],
 			"outputs": []
 		},
 		"test:watch": {

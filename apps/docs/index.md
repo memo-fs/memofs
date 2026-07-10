@@ -2,41 +2,16 @@
 layout: home
 
 hero:
-  name: "TekMemo"
-  text: "Your AI agents forget. TekMemo doesn’t."
+  name: "MemoFS"
+  text: "Your AI agents forget. MemoFS doesn’t."
   image: /logo.svg
-  tagline: "Local-first memory for AI agents — versioned, portable, and always there when the next session starts."
+  tagline: "The file-first memory runtime for AI agents — versioned, portable, and always there when the next session starts."
   actions:
     - theme: brand
       text: "Get Started"
-      link: /packages/tekmemo/
+      link: /packages/core/
     - theme: alt
       text: "Star on GitHub"
-      link: https://github.com/tekbreed/tekmemo
-
-features:
-  - title: Memory you can read
-    icon: 📁
-    link: /packages/tekmemo/file-first-memory
-    details: Every memory is a markdown file in `.tekmemo/`. Read it in your editor, review it in PRs, track it in Git — alongside your source code.
-  - title: Local by default
-    icon: 🔒
-    link: /packages/tekmemo/configuration
-    details: Works offline with zero cloud setup. Your memory never leaves your repo unless you say so.
-  - title: Sync when you need it
-    icon: ☁️
-    link: /packages/tekmemo/cloud-client
-    details: Add a cloud replica so memory follows you across machines. Same engine, same files, same code — the cloud is a sync transport, not a separate system.
-  - title: Works with your coding agent
-    icon: 🧠
-    link: /packages/mcp/
-    details: One config block and Claude Code, Cursor, Codex, or any MCP-compatible agent remembers your project — every session, automatically.
-  - title: Ask, don't search
-    icon: 💬
-    link: /packages/tekmemo/architecture/indexing-recall
-    details: Semantic recall finds the right memory for each task. No keyword guessing. No re-reading old transcripts.
-  - title: Roll back any decision
-    icon: 🕸️
-    link: /packages/tekmemo/architecture/graph-memory
-    details: Versioned snapshots and a knowledge graph let you restore any state. One bad edit never erases a good decision.
+      link: https://github.com/christophersesugh/memofs
 ---
+

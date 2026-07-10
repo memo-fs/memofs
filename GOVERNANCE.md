@@ -1,6 +1,6 @@
 # Governance
 
-TekMemo is an independent open-source project. This document describes how
+MemoFS is an independent open-source project. This document describes how
 decisions are made and how the project can grow maintainers over time. It is
 deliberately short — it reflects the project's current reality, not an aspirational
 structure it hasn't earned yet.
@@ -29,7 +29,7 @@ lists approachable issues for new contributors.
 
 ## Becoming a maintainer
 
-TekMemo starts with one maintainer and intends to grow. The path is:
+MemoFS starts with one maintainer and intends to grow. The path is:
 
 1. **Sustained, high-quality contributions** — multiple merged PRs that show
    judgment about the codebase and the project's constraints (package
@@ -43,11 +43,11 @@ project can trust, not titles.
 
 ## Code of Conduct
 
-Everyone participating in TekMemo agrees to abide by the
+Everyone participating in MemoFS agrees to abide by the
 [Code of Conduct](./CODE_OF_CONDUCT.md). Reports of conduct violations go to
-**christopher@tekbreed.com** and are handled confidentially by the maintainer.
+**christopher@memofs.dev** and are handled confidentially by the maintainer.
 
 ## License
 
-TekMemo is [MIT licensed](./LICENSE). Contributions are accepted under the same
+MemoFS is [MIT licensed](./LICENSE). Contributions are accepted under the same
 license.

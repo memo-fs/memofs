@@ -1,6 +1,6 @@
-# TekMemo Benchmarks
+# MemoFS Benchmarks
 
-Private benchmark workspace for TekMemo release validation.
+Private benchmark workspace for MemoFS release validation.
 
 ## Commands
 

@@ -1,6 +1,6 @@
 # @repo/tsdown
 
-Shared tsdown configuration for TekMemo packages.
+Shared tsdown configuration for MemoFS packages.
 
 This internal package provides the base tsdown configuration that all public packages use. It ensures consistent build output across the monorepo.
 

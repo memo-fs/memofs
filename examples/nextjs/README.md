@@ -1,19 +1,19 @@
-# TekMemo + Next.js (App Router)
+# MemoFS + Next.js (App Router)
 
-A memory-augmented chat API built with TekMemo and the [Vercel AI SDK](https://sdk.vercel.ai),
+A memory-augmented chat API built with MemoFS and the [Vercel AI SDK](https://sdk.vercel.ai),
 exposed as a Next.js App Router **route handler**. Demonstrates the recommended
 "context-first + tool-augmented" pattern in a real HTTP server context.
 
 ## What it shows
 
-- **Per-conversation memory** — each conversation gets its own scoped TekMemo
+- **Per-conversation memory** — each conversation gets its own scoped MemoFS
   instance, so memory is isolated by `conversationId`.
 - **Context-first** — `buildRuntimeMemoryContext` reads core memory + recent
   notes + a hybrid recall of the user's message *before* generation, and folds
   it into the system prompt.
 - **Tool-augmented** — `buildRuntimeMemoryToolDefinition` lets the model recall
   more and record durable facts during multi-step reasoning.
-- **One intelligent engine** — recall always flows through the TekMemo hybrid
+- **One intelligent engine** — recall always flows through the MemoFS hybrid
   engine (BM25 + fuzzy + embeddings + recency + reranker), never a naive search.
 
 ## Files
@@ -33,7 +33,7 @@ This example is meant to be copied into a Next.js app. From a fresh
 [Next.js](https://nextjs.org) project (App Router):
 
 ```bash
-npm install @tekbreed/tekmemo ai @ai-sdk/openai
+npm install @memofs/core ai @ai-sdk/openai
 ```
 
 Add `app/api/chat/route.ts` from this folder, then:
@@ -58,10 +58,10 @@ const access = { projectId: "my-next-app", userId, conversationId };
 
 The `AiMemoryAccessContext` (`projectId`, `userId`, `conversationId`,
 `workspaceId`, `tenantId`) controls read/write visibility. Pass it as `access`
-to both helpers — TekMemo enforces the scope on every read and write.
+to both helpers — MemoFS enforces the scope on every read and write.
 
 ## See also
 
-- [The `Tekmemo` client](https://docs.memo.tekbreed.com/packages/tekmemo/client)
-- [AI SDK tools guide](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/tools)
-- [AI SDK agent patterns](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/agent-patterns)
+- [The `MemoFS` client](https://docs.memofs.dev/packages/client)
+- [AI SDK tools guide](https://docs.memofs.dev/packages/ai-sdk/tools)
+- [AI SDK agent patterns](https://docs.memofs.dev/packages/ai-sdk/agent-patterns)

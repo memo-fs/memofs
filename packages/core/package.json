@@ -1,0 +1,111 @@
+{
+	"name": "@memofs/core",
+	"version": "1.0.0-beta.1",
+	"private": false,
+	"description": "MemoFS core memory runtime and provider-neutral contracts for AI apps and agents.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/christophersesugh/memofs.git",
+		"directory": "packages/core"
+	},
+	"homepage": "https://docs.memofs.dev/packages/core/",
+	"bugs": {
+		"url": "https://github.com/christophersesugh/memofs/issues"
+	},
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./cloud-client": {
+			"import": {
+				"types": "./dist/cloud-client.d.mts",
+				"default": "./dist/cloud-client.mjs"
+			},
+			"require": {
+				"types": "./dist/cloud-client.d.cts",
+				"default": "./dist/cloud-client.cjs"
+			}
+		},
+		"./node-fs": {
+			"import": {
+				"types": "./dist/node-fs.d.mts",
+				"default": "./dist/node-fs.mjs"
+			},
+			"require": {
+				"types": "./dist/node-fs.d.cts",
+				"default": "./dist/node-fs.cjs"
+			}
+		}
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/",
+		"provenance": true
+	},
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"clean": "rm -rf dist coverage .turbo",
+		"lint:package": "publint",
+		"prepack": "pnpm build",
+		"pack:dry-run": "pnpm build && npm pack --dry-run",
+		"release:check": "pnpm build && pnpm typecheck && pnpm test:run && pnpm lint:package && npm pack --dry-run"
+	},
+	"keywords": [
+		"ai",
+		"agents",
+		"memory",
+		"recall",
+		"graph",
+		"agentfs",
+		"memofs",
+		"typescript"
+	],
+	"devDependencies": {
+		"@memofs/testing": "workspace:^",
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
+		"@types/node": "^25.9.2"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/christophersesugh"
+	},
+	"dependencies": {
+		"zod": "^4.4.2"
+	},
+	"peerDependencies": {
+		"@modelcontextprotocol/sdk": ">=1.29.0"
+	},
+	"peerDependenciesMeta": {
+		"@modelcontextprotocol/sdk": {
+			"optional": true
+		}
+	}
+}

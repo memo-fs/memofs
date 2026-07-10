@@ -3,23 +3,13 @@ import type { DefaultTheme } from "vitepress";
 export const nav: DefaultTheme.NavItem[] = [
 	{
 		text: "Get Started",
-		link: "/packages/tekmemo",
-		activeMatch: "/packages/tekmemo/",
-	},
-	{
-		text: "CLI",
-		link: "/packages/cli",
-		activeMatch: "/packages/cli/",
-	},
-	{
-		text: "MCP Server",
-		link: "/packages/mcp",
-		activeMatch: "/packages/mcp/",
+		link: "/packages/core/",
+		activeMatch: "/packages/core/",
 	},
 	{
 		text: "API",
-		link: "/api/tekmemo",
-		activeMatch: "/api/tekmemo/",
+		link: "/api/",
+		activeMatch: "/api/",
 	},
 	{
 		text: "Blog",
@@ -33,6 +23,6 @@ export const nav: DefaultTheme.NavItem[] = [
 	},
 	{
 		text: "Cloud",
-		link: "https://memo.tekbreed.com",
+		link: "https://memofs.dev",
 	},
 ];

@@ -1,17 +1,17 @@
 # Security Policy
 
-TekMemo takes security seriously.
+MemoFS takes security seriously.
 
-This document explains how to report vulnerabilities and what security practices apply to the public TekMemo repository, starting with the TekMemo package family.
+This document explains how to report vulnerabilities and what security practices apply to the public MemoFS repository, starting with the MemoFS package family.
 
 ---
 
 ## Scope
 
-This policy applies to the public TekMemo repository and the published TekMemo package surfaces, including:
+This policy applies to the public MemoFS repository and the published MemoFS package surfaces, including:
 
 ```txt
-@tekbreed/tekmemo
+memofs
 ```
 
 This policy also covers:
@@ -27,9 +27,9 @@ This policy also covers:
 
 ## Out of scope
 
-The public OSS repository does not include private TekMemo Cloud backend implementation.
+The public OSS repository does not include private MemoFS Cloud backend implementation.
 
-Private TekMemo Cloud systems include:
+Private MemoFS Cloud systems include:
 
 * tenant routing
 * billing
@@ -39,7 +39,7 @@ Private TekMemo Cloud systems include:
 * hosted database infrastructure
 * internal admin tooling
 
-If you believe you found a vulnerability in TekMemo Cloud itself, report it using the contact method below and clearly state that it affects TekMemo Cloud.
+If you believe you found a vulnerability in MemoFS Cloud itself, report it using the contact method below and clearly state that it affects MemoFS Cloud.
 
 ---
 
@@ -68,7 +68,7 @@ Use GitHub private vulnerability reporting or GitHub Security Advisories when av
 You may also report security concerns by emailing:
 
 ```txt
-security@tekbreed.com
+security@memofs.dev
 ```
 
 If the email is not active, use GitHub private vulnerability reporting or contact a maintainer privately through GitHub.
@@ -105,7 +105,7 @@ Response times may vary, especially before the project has dedicated security st
 
 ## Security-sensitive areas
 
-TekMemo has several areas where security matters deeply.
+MemoFS has several areas where security matters deeply.
 
 ### Filesystem access
 
@@ -191,7 +191,7 @@ Never commit:
 * OAuth client secrets
 * production `.env` files
 * customer data
-* private TekMemo Cloud credentials
+* private MemoFS Cloud credentials
 
 Use `.env.example` files for documented examples.
 
@@ -270,7 +270,7 @@ If you are unsure whether your testing is acceptable, contact maintainers first.
 
 ## Public advisories
 
-When appropriate, TekMemo may publish:
+When appropriate, MemoFS may publish:
 
 * GitHub Security Advisories
 * patched npm releases
@@ -282,6 +282,6 @@ When appropriate, TekMemo may publish:
 
 ## Contact
 
-Security reports: [security@tekbreed.com](mailto:security@tekbreed.com)
+Security reports: [security@memofs.dev](mailto:security@memofs.dev)
 
-General issues: [TekMemo](https://github.com/tekbreed/tekmemo/issues)
+General issues: [MemoFS](https://github.com/christophersesugh/memofs/issues)

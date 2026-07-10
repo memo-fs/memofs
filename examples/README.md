@@ -1,6 +1,6 @@
-# TekMemo Examples
+# MemoFS Examples
 
-Runnable, end-to-end examples for building memory-augmented agents with TekMemo.
+Runnable, end-to-end examples for building memory-augmented agents with MemoFS.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ Demonstrates the recommended "intelligent memory" pattern end to end:
   more, read core memory, and record durable facts *during* multi-step
   reasoning.
 - **Single intelligent engine** — the runtime is built with
-  `createAiSdkRuntimeFromTekmemo`, so every recall flows through the TekMemo
+  `createAiSdkRuntimeFromMemoFS`, so every recall flows through the MemoFS
   hybrid engine (BM25 + fuzzy + embeddings + recency boost + reranker), not a
   naive text search.
 
@@ -35,31 +35,31 @@ Demonstrates the recommended "intelligent memory" pattern end to end:
 export OPENAI_API_KEY="sk-..."
 
 # uses a default prompt
-pnpm --filter @tekbreed/examples ai-sdk:agent
+pnpm --filter @memofs/examples ai-sdk:agent
 
 # or pass your own
-pnpm --filter @tekbreed/examples ai-sdk:agent "How should we handle session auth?"
+pnpm --filter @memofs/examples ai-sdk:agent "How should we handle session auth?"
 ```
 
-Memory is written to `examples/.tekmemo/`. Re-run the example and it will
+Memory is written to `examples/.memofs/`. Re-run the example and it will
 recall what it learned on the previous run — that's durable, compounding
 memory.
 
 ### OpenAI Agents SDK agent — [`openai-agents-sdk/agent.ts`](./openai-agents-sdk/agent.ts)
 
 The same memory-augmented pattern built with the [OpenAI Agents SDK](https://github.com/openai/openai-agents-js)
-for TypeScript (`@openai/agents`). TekMemo memory is surfaced as SDK `tool()`
+for TypeScript (`@openai/agents`). MemoFS memory is surfaced as SDK `tool()`
 calls — `recall_memory` and `remember` — so the agent reads durable context and
 records new facts during a run.
 
 ```bash
 export OPENAI_API_KEY="sk-..."
-pnpm --filter @tekbreed/examples openai-agents:agent
+pnpm --filter @memofs/examples openai-agents:agent
 ```
 
 ### Next.js (App Router) chat API — [`nextjs/`](./nextjs/)
 
-A memory-augmented **HTTP chat endpoint** (`POST /api/chat`) using TekMemo + the
+A memory-augmented **HTTP chat endpoint** (`POST /api/chat`) using MemoFS + the
 Vercel AI SDK in a Next.js route handler. Demonstrates per-`conversationId`
 scoped memory in a real server context. This example is meant to be copied into
 a Next.js app — see [`nextjs/README.md`](./nextjs/README.md) for setup.
@@ -67,13 +67,21 @@ a Next.js app — see [`nextjs/README.md`](./nextjs/README.md) for setup.
 ### MCP coding-agent setup — [`mcp-coding-agent/`](./mcp-coding-agent/)
 
 Give your daily coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
-persistent TekMemo memory over MCP. Covers `tekmemo init`, `tekmemo generate
-agent-rules` for each agent, and the per-platform MCP config. This is TekMemo's
+persistent MemoFS memory over MCP. Covers `memofs init`, `memofs generate
+agent-rules` for each agent, and the per-platform MCP config. This is MemoFS's
 differentiator for **local daily builders** — memory that lives in your repo,
 not a vendor database. See [`mcp-coding-agent/README.md`](./mcp-coding-agent/README.md).
 
+### Self-host the `memofs-server` runtime — [`server/`](./server/)
+
+Run the **same** memory engine MemoFS Cloud runs, on your own infra — a single
+Node process (Fly / Railway / VPS) or a Cloudflare Worker. Bring your own blob
+store (R2-compatible), metadata store (Turso/libSQL), and providers; the engine
+is identical. Covers the JSON-RPC runtime API, the write-gate, and the canonical
+self-host bundle. See [`server/README.md`](./server/README.md).
+
 ## See also
 
-- [AI SDK Tools guide](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/tools)
-- [AI SDK Agent patterns](https://docs.memo.tekbreed.com/packages/tekmemo/ai-sdk/agent-patterns)
-- [The `Tekmemo` client](https://docs.memo.tekbreed.com/packages/tekmemo/client)
+- [AI SDK Tools guide](https://docs.memofs.dev/packages/ai-sdk/tools)
+- [AI SDK Agent patterns](https://docs.memofs.dev/packages/ai-sdk/agent-patterns)
+- [The `MemoFS` client](https://docs.memofs.dev/packages/client)

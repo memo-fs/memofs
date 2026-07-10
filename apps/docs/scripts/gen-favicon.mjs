@@ -1,4 +1,4 @@
-// Generates favicon.ico for both apps from the TekMemo brand mark, with no
+// Generates favicon.ico for both apps from the MemoFS brand mark, with no
 // external dependencies. The mark is pure stroked geometry (brackets + memory
 // layers), so we rasterize each segment as an anti-aliased capsule (round caps)
 // via per-pixel distance coverage, encode PNG frames with Node's zlib, and pack

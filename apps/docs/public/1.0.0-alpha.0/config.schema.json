@@ -1,7 +1,7 @@
 {
-	"$id": "https://docs.memo.tekbreed.com/1.0.0-alpha.0/config.schema.json",
+	"$id": "https://docs.memofs.dev/1.0.0-alpha.0/config.schema.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "TekMemo CLI Configuration",
+	"title": "MemoFS CLI Configuration",
 	"type": "object",
 	"properties": {
 		"$schema": {
@@ -19,7 +19,7 @@
 		},
 		"cloud": {
 			"type": "object",
-			"description": "Configuration for the TekMemo Cloud API.",
+			"description": "Configuration for the MemoFS Cloud API.",
 			"properties": {
 				"baseUrl": {
 					"type": "string",
@@ -69,7 +69,7 @@
 				},
 				"localEmbeddings": {
 					"type": "boolean",
-					"description": "When true, lazy-load a local ONNX embedder (via @tekbreed/tekmemo-adapter-transformers) so hybrid recall works with no API keys. The model is only loaded on the first recall. Disable to keep the runtime import-light. Defaults to false in the core runtime; the MCP server may default this on."
+					"description": "When true, lazy-load a local ONNX embedder (via @memofs/adapter-transformers) so hybrid recall works with no API keys. The model is only loaded on the first recall. Disable to keep the runtime import-light. Defaults to false in the core runtime; the MCP server may default this on."
 				},
 				"embeddingModel": {
 					"type": "string",

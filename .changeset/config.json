@@ -1,16 +1,13 @@
 {
-	"$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
-	"changelog": ["@changesets/changelog-github", { "repo": "tekbreed/tekmemo" }],
+	"$schema": "https://unpkg.com/@changesets/config@2.3.1/schema.json",
+	"changelog": [
+		"@changesets/changelog-github",
+		{ "repo": "christophersesugh/memofs" }
+	],
 	"commit": false,
-	"fixed": [],
-	"linked": [],
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": [],
-	"privatePackages": {
-		"version": false,
-		"tag": false
-	},
-	"changedFilePatterns": ["src/**", "package.json", "README.md"]
+	"privatePackages": { "version": true, "tag": false },
+	"ignore": ["@memofs/benchmarks", "@memofs/examples", "@memofs/docs"]
 }

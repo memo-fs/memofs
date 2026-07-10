@@ -1,4 +1,6 @@
-# AGENTS.md - TekMemo
+# AGENTS.md - MemoFS
+
+This is an open-source software (OSS) project.
 
 ## Behavioral Rules
 
@@ -9,15 +11,37 @@
 - **Do not** add `prettier` — it has been removed; all formatting goes through Biome
 - **Do not** use `@repo/` for public OSS packages — that scope is for internal tooling only
 - **Do not** copy-paste tsdown options into new packages — import `pkgConfig` from `@repo/tsdown` instead
-- **Do not** create a second `Tekmemo`/`NodeFsMemoryStore` instance on the same `.tekmemo/` root — the local contract is single-process (Q28); a second writer gets a `LockHeldError`. Call `dispose()` to release before handing the root to another process, or pass `lock: false` only when an external coordinator serializes access
-- **Connector discipline (ADR 0002)**: connectors run locally; connector ingest writes notes with `source: "connector"`, a stable `sourceRefs[0].sourceId` (the external id), and a content-derived `id` with **no wall-clock** in the hashed bytes (`connectorNoteId` in `@tekbreed/tekmemo-connectors`). Tokens never touch disk or the file replica — only the opaque `secretRef` lives in `.tekmemo/connectors.json`; resolve tokens at run time via the injected `SecretResolver` and keep them in memory only. `.tekmemo/secrets.json` is a dev-only fallback, gitignored, never synced
-- **DRY & SSOT everywhere**: Enforce Single Source of Truth and Don't-Repeat-Yourself across the **entire workspace**, including the cloud app. Do not duplicate knowledge, logic, constants, or copy that already lives elsewhere — extract to a shared module, type, or constant and import it. Do not duplicate knowledge in this file that already exists in TekMemo memory
+- **DRY & SSOT everywhere**: Enforce Single Source of Truth and Don't-Repeat-Yourself across the **entire workspace**. Do not duplicate knowledge, logic, constants, or copy that already lives elsewhere — extract to a shared module, type, or constant and import it.
+- **Always use** the `technical-writer` skill when writing package READMEs and user facing documentation.
+- **Never commit gitignored files.** Before any `git add` or `git commit`, run `git status` and verify every staged file is tracked. If a file is gitignored (check `.gitignore`), it must never be committed — not even with `git add -f`. When in doubt, `git check-ignore <path>` tells you if a path is ignored.
+
+## General Rules
+
+- **⚠️ Always use** the `code-review` skill to review your plan implementation after completing the plan (all checkboxes are checked).
+- **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
+- **⚠️ Avoid** adding ADR and WF related namings to code documentation, and avoid pointing to ADRs and WFs in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation.
+- **⚠️ Never track internal docs or the cloud app in git.** The following paths are gitignored (`.gitignore`) and must never be `git add`-ed (including `git add -f`):
+  - `docs/adr/` — ADRs (internal architecture decisions)
+  - `docs/architecture/` — decisions log, locked specs, execution plan, archive
+  - `docs/CONTEXT.md` — the working glossary
+  - `apps/cloud/` — the cloud app (the SaaS; does not exist in this OSS repo — lives in the private `memofs-cloud` repo)
+  
+  These are local-only working artifacts. If a file in one of these paths is already tracked, untrack it with `git rm --cached <path>` (keeps the file on disk). Never link to these paths from public/tracked files (READMEs, CONTRIBUTING, GOVERNANCE, package READMEs, `examples/`, `apps/docs/`) — a public reader will hit a 404.
 
 ## Pointers
 
-**Always** reference [./.agents/rules/tekmemo-cloud.md](./.agents/rules/tekmemo-cloud.md) for cloud app conventions, style, and architecture rules.
-
 - Workspace rules: [.agents/rules](./.agents/rules)
+  - [monorepo-structure.md](./.agents/rules/monorepo-structure.md): The official directory structure of the MemoFS monorepo.
+  - [package-naming.md](./.agents/rules/package-naming.md): Scope conventions (`@memofs` vs `@repo`) and package naming requirements.
+  - [package-boundaries.md](./.agents/rules/package-boundaries.md): Rules governing imports and dependencies between different packages and zones (core vs optional).
+  - [package-build-rules.md](./.agents/rules/package-build-rules.md): Guidelines for building packages with `tsdown` and standard export maps.
+  - [adding-new-package.md](./.agents/rules/adding-new-package.md): Checklist/steps for adding a new package to the monorepo.
+  - [code-style.md](./.agents/rules/code-style.md): Biome formatting guidelines, tab indentation, double quotes, and JSDoc requirements.
+  - [typescript-rules.md](./.agents/rules/typescript-rules.md): Coding rules for strict TS, ESM, and type exports.
+  - [technology-stack.md](./.agents/rules/technology-stack.md): Tooling checklist (pnpm, Vitest, Node requirements, etc.).
+  - [development-commands.md](./.agents/rules/development-commands.md): Crucial scripts to install, lint, test, and build.
+  - [git-conventions.md](./.agents/rules/git-conventions.md): Conventions for branching and conventional commit formats.
+  - [testing.md](./.agents/rules/testing.md) / [testing-requirements.md](./.agents/rules/testing-requirements.md): Unit testing instructions using Vitest.
+  - [core-concepts.md](./.agents/rules/core-concepts.md): High-level architectural overview of MemoFS memory layers.
 - Global skills: `~/.agents/skills/`
-- MCP config: `opencode.json`
 
