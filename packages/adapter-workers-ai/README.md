@@ -9,11 +9,11 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Cloudflare Workers AI extractor adapter for Memo FS.
+Cloudflare Workers AI extractor adapter for MemoFS.
 
 ## What is this?
 
-**Cloudflare Workers AI frontier extractor adapter for Memo FS.** Implements
+**Cloudflare Workers AI frontier extractor adapter for MemoFS.** Implements
 core's provider-neutral `Extractor` contract against a Cloudflare Workers AI
 binding (`env.AI`), extracting subject–predicate–object facts into the memory
 graph.
@@ -22,7 +22,13 @@ graph.
 
 ```bash
 npm install @memofs/adapter-workers-ai
+
+# or: pnpm add @memofs/adapter-workers-ai
+# or: yarn add @memofs/adapter-workers-ai
+# or: bun add @memofs/adapter-workers-ai
 ```
+
+> Requires **Node.js >= 22**.
 
 Peer dependency: `@cloudflare/workers-types` (for the `Ai` binding type).
 
@@ -33,8 +39,8 @@ import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
 
 const extractor = createWorkersAiExtractor({ ai: env.AI });
 
-// Pass it to the Memofs runtime:
-// new Memofs({ store, projectId, mode: "local", extractor, ... })
+// Pass it to the MemoFS runtime:
+// new MemoFS({ store, projectId, mode: "local", extractor, ... })
 ```
 
 ## Resilience
@@ -48,7 +54,7 @@ no `Ai` binding is configured.
 ## Boundary
 
 This package owns the Workers AI extractor adapter implementation. It does not
-own the Memo FS core `Extractor` contract, other adapters, or the Workers AI
+own the MemoFS core `Extractor` contract, other adapters, or the Workers AI
 service itself.
 
 ## Contributing

@@ -9,25 +9,31 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Vercel AI SDK adapter for Memo FS memory tools, runtime bridging, and context builders.
+Vercel AI SDK adapter for MemoFS memory tools, runtime bridging, and context builders.
 
 ## What is this?
 
-**Vercel AI SDK adapter for Memo FS.** Bridges a Memo FS memory engine into the
-framework-neutral [`MemofsMemoryRuntime`](https://www.npmjs.com/package/@memofs)
-contract and exposes a ready-to-use Vercel AI SDK **memory tool**, prompt
-context builders, and agent-session instructions.
+**Vercel AI SDK adapter for MemoFS.** Bridges a MemoFS memory engine into the
+framework-neutral `MemofsMemoryRuntime` contract and exposes a ready-to-use
+Vercel AI SDK **memory tool**, prompt context builders, and agent-session
+instructions.
 
-This package is the provider implementation of Memo FS's AI-framework runtime
+This package is the provider implementation of MemoFS's AI-framework runtime
 contract — the runtime equivalent of the embedder interface/impl split
-(`Embedder` in core; `memofs-adapter-openai`, `-voyage`, `-transformers` as
-provider packages). See [ADR 0007](../../docs/adr/0007-ai-sdk-extraction.md).
+(`Embedder` in core; `@memofs/adapter-openai`, `-voyage`, `-transformers` as
+provider packages).
 
 ## Installation
 
 ```bash
 npm install @memofs/adapter-ai-sdk
+
+# or: pnpm add @memofs/adapter-ai-sdk
+# or: yarn add @memofs/adapter-ai-sdk
+# or: bun add @memofs/adapter-ai-sdk
 ```
+
+> Requires **Node.js >= 22**.
 
 This package has a required peer dependency on the
 [Vercel AI SDK](https://sdk.vercel.ai/docs):
@@ -41,14 +47,16 @@ npm install ai
 ### 1. Build the runtime
 
 ```ts
-import { Memofs } from "@memofs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createAiSdkRuntimeFromMemofs } from "@memofs/adapter-ai-sdk";
 
-const memo = new Memofs({ rootDir: "./`.memofs`", projectId: "demo" });
+const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const memo = new MemoFS({ store, projectId: "demo" });
 const runtime = createAiSdkRuntimeFromMemofs(memo);
 ```
 
-Every `recall` goes through `Memofs.recall` (the single hybrid engine:
+Every `recall` goes through `MemoFS.recall` (the single hybrid engine:
 BM25 + fuzzy + embeddings + recency boost + optional reranker), so recall
 quality never changes between local, cloud, and hybrid modes.
 
@@ -97,7 +105,7 @@ const { text } = await buildRuntimeMemoryContext({
 
 | Export | Description |
 |--------|-------------|
-| `createAiSdkRuntimeFromMemofs(memo)` | Bridges a `Memofs` client into a `MemofsMemoryRuntime`. |
+| `createAiSdkRuntimeFromMemofs(memo)` | Bridges a `MemoFS` client into a `MemofsMemoryRuntime`. |
 | `buildRuntimeMemoryToolDefinition(options)` | A `{ description, inputSchema, execute }` tool for the Vercel AI SDK. |
 | `runRuntimeMemoryTool(options, input)` | Runs a single validated tool command (used by the tool definition; also callable directly). |
 | `buildRuntimeMemoryContext(input)` | Builds a prompt-ready memory text (core memory + notes + recall). |
@@ -121,7 +129,7 @@ the zod memory tool, the prompt/context builders, the agent-session
 instructions, and the scope policy. It does **not** own:
 
 - The framework-neutral `MemofsMemoryRuntime` contract (that lives in
-  `@memofs` core).
+  `@memofs/core`).
 - The memory engine, stores, recall, or `agentfs/` (also core).
 - Other framework adapters (LangChain / OpenAI Agents SDK / Mastra are future
   sibling packages that will implement the same contract).

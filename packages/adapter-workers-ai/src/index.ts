@@ -4,7 +4,7 @@
  *
  * Implements core's provider-neutral {@link Extractor} contract against a
  * Cloudflare Workers AI binding. The Workers AI coupling lives here, never in
- * core (AGENTS.md: provider-neutral contracts).
+ * core.
  *
  * @packageDocumentation
  */

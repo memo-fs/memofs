@@ -1,5 +1,5 @@
 /**
- * Cloudflare Workers AI frontier extractor (Q18).
+ * Cloudflare Workers AI frontier extractor.
  *
  * Implements core's provider-neutral {@link Extractor} contract against a
  * Cloudflare Workers AI binding (`env.AI`). The model emits a structured
@@ -9,15 +9,10 @@
  * (`uses`/`depends_on`/`prefers`/`blocks`/`supersedes`/`owns`/`related_to`), so
  * the graph stays consistent regardless of which extractor produced it.
  *
- * Q33 margin guardrail: on the Free tier the deterministic rule-based extractor
- * runs (zero LLM spend); Pro+ gets this frontier extractor (the Q18
- * monetization lever). Either way the write fan-out calls the same
- * {@link Extractor} shape.
- *
- * The `Ai` coupling lives in this adapter, never in core (AGENTS.md:
- * provider-neutral contracts). Defensive parsing: malformed LLM output never
- * throws — it returns an empty `{ nodes, edges }` so the write path stays
- * resilient, and the rule-based extractor remains available as the fallback.
+ * The `Ai` coupling lives in this adapter, never in core. Defensive parsing:
+ * malformed LLM output never throws — it returns an empty `{ nodes, edges }`
+ * so the write path stays resilient, and the rule-based extractor remains
+ * available as the fallback.
  *
  * @public
  */

@@ -3,13 +3,11 @@
  *
  * @remarks
  * The framework-neutral runtime contract (`MemoFSMemoryRuntime` and its
- * `MemoryRuntime*` value types) lives in `@memofs/core` core and is
- * re-exported here for adapter consumers. This file owns only the **L2
- * tool-layer** types — memory scopes, access contexts, and the options that
- * shape the AI SDK memory tool / context builders. These are Vercel-AI-SDK-
- * facing concerns and do not belong in core.
- *
- * See docs/adr/0007-ai-sdk-extraction.md (L1/L2 split).
+ * `MemoryRuntime*` value types) lives in `@memofs/core` and is re-exported
+ * here for adapter consumers. This file owns only the **L2 tool-layer** types
+ * — memory scopes, access contexts, and the options that shape the AI SDK
+ * memory tool / context builders. These are Vercel-AI-SDK-facing concerns
+ * and do not belong in core.
  *
  * @public
  */

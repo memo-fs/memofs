@@ -9,20 +9,20 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Cloudflare R2 blob adapter for Memo FS remote blob memory stores.
+Cloudflare R2 blob adapter for MemoFS remote blob memory stores.
 
 ## What is this?
 
-**Cloudflare R2 blob adapter for Memo FS's remote-blob memory store.** It
+**Cloudflare R2 blob adapter for MemoFS's remote-blob memory store.** It
 implements core's provider-neutral `BlobClient` contract over a Cloudflare R2
-bucket binding so the Memo FS runtime can read/write its canonical ``.memofs/``
+bucket binding so the MemoFS runtime can read/write its canonical `.memofs/`
 files against R2 blobs — running the *same* runtime on hosted infra as on a
-local filesystem ( /).
+local filesystem.
 
 This package owns **blob storage only**. The matching metadata adapter
 (`createTursoMetadataStore`) lives in [`@memofs/adapter-turso`](../adapter-turso).
-The two are intentionally decoupled —'s adapter shape, not a bundled
-N×M adapter — so a Node self-hoster can pair this blob client with any
+The two are intentionally decoupled — a provider-neutral adapter shape, not a
+bundled N×M adapter — so a Node self-hoster can pair this blob client with any
 `MetadataStore`, or pair a future `@memofs/adapter-s3` blob client with the
 Turso metadata store, without touching the runtime.
 
@@ -30,7 +30,13 @@ Turso metadata store, without touching the runtime.
 
 ```bash
 npm install @memofs/adapter-r2
+
+# or: pnpm add @memofs/adapter-r2
+# or: yarn add @memofs/adapter-r2
+# or: bun add @memofs/adapter-r2
 ```
+
+> Requires **Node.js >= 22**.
 
 Peer dependency: `@cloudflare/workers-types` (for the `R2Bucket` type). It is an
 optional peer — you only need it where you author against the binding.
@@ -70,13 +76,13 @@ core's `RemoteBlobMemoryStore` calls.
 Blobs are written keyed by their sha256 — the key core's
 `RemoteBlobMemoryStore` computes. This matches the cloud file replica's
 `r2_key === sha256` layout exactly, so the runtime and the sync handler share
-the *same* R2 objects rather than a parallel store ( reuse
-sub-decision). Identical content across paths or projects shares one blob.
+the *same* R2 objects rather than a parallel store. Identical content across
+paths or projects shares one blob.
 
 ## Boundary
 
 This package owns the Cloudflare R2 blob client implementation. It does not own
-the Memo FS core contracts (`BlobClient` / `MetadataStore` /
+the MemoFS core contracts (`BlobClient` / `MetadataStore` /
 `RemoteBlobMemoryStore`), the metadata adapter, other adapters, or the R2
 service itself.
 

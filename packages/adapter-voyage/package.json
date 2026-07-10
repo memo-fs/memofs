@@ -2,7 +2,7 @@
 	"name": "@memofs/adapter-voyage",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Voyage AI embedder and reranker adapter for Memo FS.",
+	"description": "Voyage AI embedder and reranker adapter for MemoFS.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
@@ -27,6 +27,16 @@
 			"require": {
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
+			}
+		},
+		"./testing": {
+			"import": {
+				"types": "./dist/testing/index.d.mts",
+				"default": "./dist/testing/index.mjs"
+			},
+			"require": {
+				"types": "./dist/testing/index.d.cts",
+				"default": "./dist/testing/index.cjs"
 			}
 		}
 	},

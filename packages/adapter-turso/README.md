@@ -9,19 +9,19 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Turso/libSQL metadata adapter for Memo FS remote blob memory stores.
+Turso/libSQL metadata adapter for MemoFS remote blob memory stores.
 
 ## What is this?
 
-**Turso/libSQL metadata adapter for Memo FS's remote-blob memory store.** It
+**Turso/libSQL metadata adapter for MemoFS's remote-blob memory store.** It
 implements core's provider-neutral `MetadataStore` contract over the cloud's
-existing `project_files` table so the Memo FS runtime can track which canonical
-``.memofs/`` files exist and where their bytes live — running the *same* runtime
-on hosted infra as on a local filesystem ( /).
+existing `project_files` table so the MemoFS runtime can track which canonical
+`.memofs/` files exist and where their bytes live — running the *same* runtime
+on hosted infra as on a local filesystem.
 
 This package owns **metadata storage only**. The matching blob adapter
 (`createR2BlobClient`) lives in [`@memofs/adapter-r2`](../adapter-r2). The two
-are intentionally decoupled —'s adapter shape, not a bundled N×M
+are intentionally decoupled — a clean adapter shape, not a bundled N×M
 adapter — so a Node self-hoster can pair this metadata store with any
 `BlobClient` (S3, GCS, MinIO) without touching the runtime.
 
@@ -29,7 +29,13 @@ adapter — so a Node self-hoster can pair this metadata store with any
 
 ```bash
 npm install @memofs/adapter-turso
+
+# or: pnpm add @memofs/adapter-turso
+# or: yarn add @memofs/adapter-turso
+# or: bun add @memofs/adapter-turso
 ```
+
+> Requires **Node.js >= 22**.
 
 Peer dependency: `@libsql/client` (for the metadata client type). It is an
 optional peer — you only need it where you author against the libSQL client.
@@ -72,7 +78,7 @@ The metadata store reads/writes the **existing** `project_files` table
 (`project_id`, `path`, `sha256`, `r2_key`, `size_bytes`, `updated_at` with a
 unique `(project_id, path)` index) — the exact layout the cloud file-replica
 sync handler manages. One set of files; the runtime is a new reader/writer over
-them, not a parallel store ( reuse sub-decision).
+them, not a parallel store.
 
 The adapter issues **raw SQL** (not drizzle) against the libSQL client, so it
 stays free of the cloud's drizzle schema and stays portable to Node
@@ -82,7 +88,7 @@ the cloud's drizzle layer.
 ## Boundary
 
 This package owns the Turso/libSQL metadata store implementation. It does not
-own the Memo FS core contracts (`BlobClient` / `MetadataStore` /
+own the MemoFS core contracts (`BlobClient` / `MetadataStore` /
 `RemoteBlobMemoryStore`), the blob adapter, the `project_files` schema/migrations,
 other adapters, or the Turso service itself.
 

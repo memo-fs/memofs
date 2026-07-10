@@ -9,17 +9,23 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-OpenAI embeddings adapter for Memo FS.
+OpenAI embeddings adapter for MemoFS.
 
 ## What is this?
 
-**OpenAI Embedder adapter for Memo FS.** Provides first-class integration with OpenAI's embedding models (text-embedding-3-small, text-embedding-3-large, text-embedding-ada-002) through Memo FS's provider-neutral embedder contract.
+**OpenAI Embedder adapter for MemoFS.** Provides first-class integration with OpenAI's embedding models (text-embedding-3-small, text-embedding-3-large, text-embedding-ada-002) through MemoFS's provider-neutral embedder contract.
 
 ## Installation
 
 ```bash
 npm install @memofs/adapter-openai
+
+# or: pnpm add @memofs/adapter-openai
+# or: yarn add @memofs/adapter-openai
+# or: bun add @memofs/adapter-openai
 ```
+
+> Requires **Node.js >= 22**.
 
 You also need an OpenAI API key from [platform.openai.com](https://platform.openai.com/).
 
@@ -35,7 +41,7 @@ const embedder = createOpenAIEmbedder({
 
 // Embed a batch of texts
 const result = await embedder.embed([
- "Memo FS provides unified memory runtime for AI agents",
+ "MemoFS provides unified memory runtime for AI agents",
  "OpenAI offers state-of-the-art embedding models",
 ]);
 
@@ -66,24 +72,27 @@ console.log(result.usage); // { promptTokens, totalTokens }
 | `text-embedding-3-small` | 1536 (configurable) | 8191 | Balanced quality/speed |
 | `text-embedding-ada-002` | 1536 | 8191 | Legacy, cost-effective |
 
-## Integration with Memo FS Core
+## Integration with MemoFS Core
 
 ```ts
-import { bootstrapMemoryStore, createFsRecallStore } from "@memofs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
-const store = await bootstrapMemoryStore({ rootDir: "./`.memofs`" });
+const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
 
-const embedder = createOpenAIEmbedder({
- apiKey: process.env.OPENAI_API_KEY!,
- model: "text-embedding-3-large",
- dimensions: 1536, // Optional: reduce dimensions for speed
+const memo = new MemoFS({
+  store,
+  projectId: "my-app",
+  embedder: createOpenAIEmbedder({
+    apiKey: process.env.OPENAI_API_KEY!,
+    model: "text-embedding-3-large",
+    dimensions: 1536, // Optional: reduce dimensions for speed
+  }),
 });
 
-// Local-first persistent recall store backed by `.memofs/`indexes/embeddings.jsonl
-const recallStore = createFsRecallStore({ store });
-
-// Now use with Memo FS's memory operations
+// The embedder powers hybrid recall; embeddings persist to
+// `.memofs/indexes/embeddings.jsonl` via the file-backed recall store.
 ```
 
 ## Advanced: Custom Client
@@ -119,7 +128,7 @@ const fakeClient = createFakeOpenAIClient({
 
 ## Boundary
 
-This package owns the OpenAI embedder adapter implementation. It does not own the Memo FS core contracts, other provider adapters, or the OpenAI service itself.
+This package owns the OpenAI embedder adapter implementation. It does not own the MemoFS core contracts, other provider adapters, or the OpenAI service itself.
 
 ## Contributing
 

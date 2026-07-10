@@ -9,17 +9,25 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Voyage AI embedder and reranker adapter for Memo FS.
+Voyage AI embedder and reranker adapter for MemoFS.
 
 ## What is this?
 
-**Voyage AI Embedder and Reranker adapter for Memo FS.** Provides first-class integration with Voyage AI's embedding models (voyage-3, voyage-3-large, voyage-3-lite, voyage-code-3) and reranking models (rerank-2, rerank-2-lite) through Memo FS's provider-neutral embedder and reranker contracts.
+**Voyage AI Embedder and Reranker adapter for MemoFS.** Provides first-class integration with Voyage AI's embedding models (voyage-3, voyage-3-large, voyage-3-lite, voyage-code-3) and reranking models (rerank-2, rerank-2-lite) through MemoFS's provider-neutral embedder and reranker contracts.
+
+The adapter talks to Voyage's REST API directly using the built-in `fetch`, so there is no separate `voyageai` SDK dependency.
 
 ## Installation
 
 ```bash
 npm install @memofs/adapter-voyage
+
+# or: pnpm add @memofs/adapter-voyage
+# or: yarn add @memofs/adapter-voyage
+# or: bun add @memofs/adapter-voyage
 ```
+
+> Requires **Node.js >= 22**.
 
 You also need a Voyage AI API key from [voyageai.com](https://www.voyageai.com/).
 
@@ -37,7 +45,7 @@ const embedder = createVoyageEmbedder({
 
 // Embed a batch of texts
 const result = await embedder.embed([
- "Memo FS provides unified memory runtime for AI agents",
+ "MemoFS provides unified memory runtime for AI agents",
  "Voyage AI offers state-of-the-art embedding models",
 ]);
 
@@ -58,7 +66,7 @@ const reranker = createVoyageReranker({
 const result = await reranker.rerank({
  query: "memory runtime for AI agents",
  documents: [
- "Memo FS is a memory layer for AI agents",
+ "MemoFS is a memory layer for AI agents",
  "Voyage AI provides embedding models",
  "Upstash Vector is a serverless vector database",
  ],
@@ -105,23 +113,26 @@ console.log(result.results); // RerankResult[] with relevance scores
 - `rerank-2` — High-quality reranking
 - `rerank-2-lite` — Faster, cost-effective reranking
 
-## Integration with Memo FS Core
+## Integration with MemoFS Core
 
 ```ts
-import { bootstrapMemoryStore, createFsRecallStore } from "@memofs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
-const store = await bootstrapMemoryStore({ rootDir: "./`.memofs`" });
+const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
 
-const embedder = createVoyageEmbedder({
- apiKey: process.env.VOYAGE_API_KEY!,
- model: "voyage-3-large",
+const memo = new MemoFS({
+  store,
+  projectId: "my-app",
+  embedder: createVoyageEmbedder({
+    apiKey: process.env.VOYAGE_API_KEY!,
+    model: "voyage-3-large",
+  }),
 });
 
-// Local-first persistent recall store backed by `.memofs/`indexes/embeddings.jsonl
-const recallStore = createFsRecallStore({ store });
-
-// Now use with Memo FS's memory operations
+// The embedder powers hybrid recall; embeddings persist to
+// `.memofs/indexes/embeddings.jsonl` via the file-backed recall store.
 ```
 
 ## Testing
@@ -139,7 +150,7 @@ const fakeClient = createFakeVoyageClient({
 
 ## Boundary
 
-This package owns the Voyage AI embedder and reranker adapter implementations. It does not own the Memo FS core contracts, other provider adapters, or the Voyage AI service itself.
+This package owns the Voyage AI embedder and reranker adapter implementations. It does not own the MemoFS core contracts, other provider adapters, or the Voyage AI service itself.
 
 ## Contributing
 

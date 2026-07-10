@@ -9,27 +9,33 @@
   <a href="https://github.com/christophersesugh/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-Local Transformers.js ONNX embedder adapter for Memo FS with no API key or cloud dependency.
+Local Transformers.js ONNX embedder adapter for MemoFS with no API key or cloud dependency.
 
 ## What is this?
 
-**Zero-config local embedder adapter for Memo FS.** Runs a small
+**Zero-config local embedder adapter for MemoFS.** Runs a small
 sentence-embedding model **in process** via [Transformers.js](https://huggingface.co/docs/transformers.js)
 (ONNX runtime) — **no API key, no cloud, and no network after the first model
 download.**
 
-This is what powers Memo FS's *zero-API-key hybrid recall*: install it (or let
+This is what powers MemoFS's *zero-API-key hybrid recall*: install it (or let
 the runtime lazy-load it) and `recall()` gains a semantic vector path on top of
 the default lexical (BM25 + fuzzy) path, with nothing leaving your machine.
 
 ## Installation
 
 ```bash
-npm install @memofs/adapter-transformers @memofs
+npm install @memofs/adapter-transformers @memofs/core
+
+# or: pnpm add @memofs/adapter-transformers @memofs/core
+# or: yarn add @memofs/adapter-transformers @memofs/core
+# or: bun add @memofs/adapter-transformers @memofs/core
 ```
 
+> Requires **Node.js >= 22**.
+
 This pulls in `@huggingface/transformers` and ships an ONNX-compatible embedder
-that implements Memo FS's provider-neutral `MemoryEmbedder` contract.
+that implements MemoFS's provider-neutral `MemoryEmbedder` contract.
 
 ## Quick Start
 
@@ -44,7 +50,7 @@ const embedder = createTransformersEmbedder({
 
 // Embed a batch of texts (mean-pooled + L2-normalized vectors)
 const { embeddings } = await embedder.embedTexts({
-  texts: ["Memo FS gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
+  texts: ["MemoFS gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
 });
 
 console.log(embeddings[0].embedding.length); // 384
@@ -54,16 +60,19 @@ console.log(embeddings[0].model);            // "Xenova/all-MiniLM-L6-v2"
 The first call downloads the ONNX weights once and caches them; subsequent calls
 are fully offline.
 
-### With Memo FS core
+### With MemoFS core
 
-Plug the adapter straight into `Memofs` for hybrid recall with your own embedder:
+Plug the adapter straight into `MemoFS` for hybrid recall with your own embedder:
 
 ```ts
-import { Memofs } from "@memofs";
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
-const memo = new Memofs({
-  rootDir: "./`.memofs`",
+const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+
+const memo = new MemoFS({
+  store,
   projectId: "my-app",
   embedder: createTransformersEmbedder(),
   recall: { engine: "auto" }, // upgrades to hybrid since an embedder is present
@@ -75,7 +84,7 @@ const hits = await memo.recall("coding language preference"); // semantic match
 
 ### Zero-config (no code)
 
-You usually do **not** need to touch this package directly. The Memo FS runtime
+You usually do **not** need to touch this package directly. The MemoFS runtime
 can lazy-load it for you — just enable local embeddings:
 
 ```bash
@@ -83,11 +92,11 @@ export MEMOFS_LOCAL_EMBEDDINGS=true
 export MEMOFS_RECALL_ENGINE=auto
 ```
 
-or in ``.memofs/`config.json`:
+or in `.memofs/config.json`:
 
 ```json
 {
-  "$schema": "https://docs.memofs.dev/1.0.0-alpha.0/config.schema.json",
+  "$schema": "https://docs.memofs.dev/1.0.0-beta.1/config.schema.json",
   "runtime": "local",
   "recall": { "engine": "auto", "localEmbeddings": true }
 }
@@ -95,7 +104,7 @@ or in ``.memofs/`config.json`:
 
 The runtime imports `@memofs/adapter-transformers` only when the first
 embedding is actually requested, so boot stays fast. If the adapter is missing or
-fails to load, Memo FS falls back to lexical (BM25 + fuzzy) recall — memory stays
+fails to load, MemoFS falls back to lexical (BM25 + fuzzy) recall — memory stays
 discoverable and writes are never broken.
 
 ## Configuration
@@ -126,22 +135,22 @@ createTransformersEmbedder({ model: "Xenova/all-MiniLM-L12-v2" });
 | Need | Use |
 |------|-----|
 | Offline / private / zero-cost semantic recall | **This package** (local ONNX) |
-| Highest-quality embeddings, can call an API | [`@memofs/adapter-openai`](../memofs-adapter-openai) or [`-voyage`](../memofs-adapter-voyage) |
-| Persistent local vector recall | pair any embedder with `createFsRecallStore` from `@memofs` |
+| Highest-quality embeddings, can call an API | [`@memofs/adapter-openai`](../adapter-openai) or [`@memofs/adapter-voyage`](../adapter-voyage) |
+| Persistent local vector recall | pair any embedder with `createFsRecallStore` from `@memofs/core` |
 
-The local embedder pairs with Memo FS's built-in filesystem recall store
-(`createFsRecallStore`, backed by ``.memofs/`indexes/embeddings.jsonl`) for a
+The local embedder pairs with MemoFS's built-in filesystem recall store
+(`createFsRecallStore`, backed by `.memofs/indexes/embeddings.jsonl`) for a
 fully local vector memory. For large shared indices, prefer a provider embedder
 plus a managed vector store.
 
 ## Testing
 
 The embedder accepts an injectable `pipelineFactory` (an internal type), so tests
-never need to download weights or run real inference. Within the monorepo, use
-the bundled fake factory from `src/testing`:
+never need to download weights or run real inference. Use the bundled fake
+factory from the public `./testing` subpath:
 
 ```ts
-import { createFakePipelineFactory } from "./src/testing";
+import { createFakePipelineFactory } from "@memofs/adapter-transformers/testing";
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
 const embedder = createTransformersEmbedder({
@@ -159,7 +168,7 @@ exercise recall merging without the real model.
 ## Boundary
 
 This package owns the Transformers.js local embedder adapter. It does **not** own
-the Memo FS core `MemoryEmbedder` contract, other provider adapters, or the
+the MemoFS core `MemoryEmbedder` contract, other provider adapters, or the
 Transformers.js runtime itself.
 
 ## Contributing

@@ -2,7 +2,7 @@
 	"name": "@memofs/adapter-workers-ai",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Cloudflare Workers AI extractor adapter for Memo FS.",
+	"description": "Cloudflare Workers AI extractor adapter for MemoFS.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",

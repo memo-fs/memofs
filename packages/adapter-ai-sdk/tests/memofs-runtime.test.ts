@@ -1,4 +1,4 @@
-import { MemoFS } from "@memofs/core";
+import { InMemoryMemoryStore, MemoFS } from "@memofs/core";
 import {
 	createNodeFsMemoryStore,
 	createTempMemoFsDir,
@@ -180,13 +180,13 @@ describe("createAiSdkRuntimeFromMemoFS", () => {
 	});
 
 	it("does not expose an index() method (MemoFS has no public re-index API)", () => {
-		const memo = new MemoFS({ projectId: "demo", mode: "memory" });
+		const memo = new MemoFS({ projectId: "demo", mode: "local", store: new InMemoryMemoryStore() });
 		const runtime = createAiSdkRuntimeFromMemoFS(memo);
 		expect(runtime.index).toBeUndefined();
 	});
 
 	it("the AI SDK tool's index command throws a clear 'not supported' error", async () => {
-		const memo = new MemoFS({ projectId: "demo", mode: "memory" });
+		const memo = new MemoFS({ projectId: "demo", mode: "local", store: new InMemoryMemoryStore() });
 		const runtime = createAiSdkRuntimeFromMemoFS(memo);
 		const tool = buildRuntimeMemoryToolDefinition({
 			runtime,
