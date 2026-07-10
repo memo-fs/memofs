@@ -108,12 +108,19 @@ All forms that cause page redirects, reloads, validate user input, or submit mut
 - **⚠️ Always use** the `code-review` skill to review your plan implementation after completing the plan (all checkboxes are checked).
 - **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
 - **⚠️ Always use** the `cloudflare` skill when working with Cloudflare or building on the server for best practices.
-- **⚠️ Avoid** adding adding adr and wf related nameings to code documentation and avoid pointing to ADRs and WF in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation. Do not track ADRs and WFs in git history.
+- **⚠️ Avoid** adding ADR and WF related namings to code documentation, and avoid pointing to ADRs and WFs in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation.
+- **⚠️ Never track internal docs or the cloud app in git.** The following paths are gitignored (`.gitignore`) and must never be `git add`-ed (including `git add -f`):
+  - `docs/adr/` — ADRs (internal architecture decisions)
+  - `docs/architecture/` — decisions log, locked specs, execution plan, archive
+  - `docs/CONTEXT.md` — the working glossary
+  - `apps/cloud/` — the cloud app (the SaaS; only the OSS packages are public)
+  
+  These are local-only working artifacts. If a file in one of these paths is already tracked, untrack it with `git rm --cached <path>` (keeps the file on disk). Never link to these paths from public/tracked files (READMEs, CONTRIBUTING, GOVERNANCE, package READMEs, `examples/`, `apps/docs/`) — a public reader will hit a 404.
 
 ## Pointers
 
 - Workspace rules: [.agents/rules](./.agents/rules)
-  - [monorepo-structure.md](./.agents/rules/monorepo-structure.md): The official directory structure of the Memo FS monorepo.
+  - [monorepo-structure.md](./.agents/rules/monorepo-structure.md): The official directory structure of the MemoFS monorepo.
   - [package-naming.md](./.agents/rules/package-naming.md): Scope conventions (`@memofs` vs `@repo`) and package naming requirements.
   - [package-boundaries.md](./.agents/rules/package-boundaries.md): Rules governing imports and dependencies between different packages and zones (core vs optional).
   - [package-build-rules.md](./.agents/rules/package-build-rules.md): Guidelines for building packages with `tsdown` and standard export maps.

@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="./assets/images/logo.svg" alt="Memo FS Logo" width="120" />
+<img src="./assets/images/logo.svg" alt="MemoFS Logo" width="120" />
 
-# Memo FS
+# MemoFS
 
 Open-source, file-first memory for AI applications and agents.
 
@@ -18,11 +18,11 @@ Open-source, file-first memory for AI applications and agents.
 
 ---
 
-## What is Memo FS?
+## What is MemoFS?
 
 **File-first memory for AI applications and agents.** Store, recall, and synchronize memory using plain files on disk — local-first by default, with optional cloud sync.
 
-Most AI memory systems are database-first, vendor-locked, hard to inspect, and hard to version. Memo FS inverts that: your agent's memory lives as Markdown and JSONL under a `.memofs/` directory you can `cat`, `git diff`, and roll back.
+Most AI memory systems are database-first, vendor-locked, hard to inspect, and hard to version. MemoFS inverts that: your agent's memory lives as Markdown and JSONL under a `.memofs/` directory you can `cat`, `git diff`, and roll back.
 
 ```text
 .memofs/
@@ -51,7 +51,7 @@ npm install @memofs/core
 ```
 
 ```ts
-import { Memofs } from "@memofs/core";
+import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Initialize a Node.js filesystem-backed memory store
@@ -60,7 +60,7 @@ const store = createNodeFsMemoryStore({
 });
 
 // Create the unified client
-const memo = new Memofs({
+const memo = new MemoFS({
   store,
   projectId: "my-app",
   mode: "local",
@@ -94,7 +94,7 @@ To connect your coding agent (Cursor, Claude Code, etc.), use the stdio-compatib
 Your App / Agent / MCP client
         │
         ▼
-    Memofs   (local-first runtime)
+    MemoFS   (local-first runtime)
       ├─ .read() / .write() / .recall()
       ├─ .snapshot.create() / .restore()
       ├─ AgentFS  (lease-locking & virtual paths)
@@ -109,7 +109,7 @@ Your App / Agent / MCP client
      └─ snapshots/  manifest.json
         │   git-friendly, inspectable, versionable
         ▼   (optional)
-   Memo FS Cloud
+   MemoFS Cloud
 ```
 
 The runtime resolves configuration from constructor options → env vars → `.memofs/config.json`.
@@ -119,14 +119,14 @@ Three runtime modes are supported: **`local`** (filesystem-only, default), **`hy
 
 ## Packages
 
-Memo FS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope (with the unscoped `memofs` CLI).
+MemoFS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope (with the unscoped `memofs` CLI).
 
 ### Core Engine & Servers
 
 | Package | Purpose |
 | --- | --- |
 | [`@memofs/core`](packages/core) | Core runtime, virtual AgentFS, graph engine, and hybrid recall router. |
-| [`memofs`](packages/tekmemo) | CLI tool for local and cloud memory workflows (`npx memofs`). |
+| [`memofs`](packages/memofs) | CLI tool for local and cloud memory workflows (`npx memofs`). |
 | [`@memofs/server`](packages/server) | Self-hostable, OSS-deployable memory server for Node and Workers. |
 | [`@memofs/mcp-server`](packages/mcp-server) | Model Context Protocol server exposing memory tools to AI agents. |
 | [`@memofs/connectors`](packages/connectors) | Local ingestion framework plugins (Notion, GitHub). |
@@ -153,13 +153,13 @@ Memo FS is structured as a monorepo containing 15 published public packages unde
 
 ---
 
-## Open Source vs. Memo FS Cloud
+## Open Source vs. MemoFS Cloud
 
-The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run Memo FS.
+The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run MemoFS.
 
-**Memo FS Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
+**MemoFS Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
 
-| Feature | Open source (this repo) | Memo FS Cloud |
+| Feature | Open source (this repo) | MemoFS Cloud |
 | --- | --- | --- |
 | Local file-first memory | ✅ | ✅ |
 | CLI + stdio MCP server | ✅ | ✅ |
@@ -179,7 +179,7 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 memofs/
 ├── apps/
 │   ├── docs/         # VitePress documentation (docs.memofs.dev)
-│   └── cloud/        # Memo FS Cloud dashboard (Cloudflare Worker app)
+│   └── cloud/        # MemoFS Cloud dashboard (Cloudflare Worker app)
 ├── packages/         # 15 published @memofs/* packages
 ├── tooling/          # Private @repo/* workspace build packages
 ├── benchmarks/       # Workspace benchmarking suite

@@ -1,5 +1,5 @@
 {
-	"name": "tekmemo-workspace",
+	"name": "memofs/dev",
 	"version": "0.0.1",
 	"private": true,
 	"repository": {
@@ -67,7 +67,7 @@
 		"node": ">=22",
 		"pnpm": ">=9.0.0"
 	},
-	"description": "Memo FS — open-source file-first memory runtime for AI applications and agents.",
+	"description": "MemoFS — open-source file-first memory runtime for AI applications and agents.",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/christophersesugh/memofs/issues"

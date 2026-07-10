@@ -9,9 +9,14 @@
 │   ├── workflows/                # CI/CD workflows
 │   └── PULL_REQUEST_TEMPLATE.md  # Pull request template
 ├── apps/
-│   ├── cloud/                    # @memofs/cloud - Cloudflare web app
+│   ├── cloud/                    # @memofs/cloud - Cloudflare web app (GITIGNORED — never tracked)
 │   └── docs/                     # @memofs/docs - VitePress documentation site
 ├── benchmarks/                   # @memofs/benchmarks - workspace benchmark runner
+├── docs/                         # Internal decision layer (GITIGNORED — never tracked)
+│   ├── CONTEXT.md                #   working glossary (canonical nouns + code contracts)
+│   ├── open-issues.md            #   execution signpost → GitHub Issues
+│   ├── adr/                      #   ADRs 0002..0017 (signed, self-current decisions)
+│   └── architecture/             #   decisions log, locked specs, execution plan, archive/
 ├── examples/                     # @memofs/examples - integration examples
 ├── packages/
 │   ├── adapter-ai-sdk/           # @memofs/adapter-ai-sdk - Vercel AI SDK adapter
@@ -37,3 +42,10 @@
 ├── turbo.json                    # Turborepo task pipeline
 └── pnpm-workspace.yaml           # pnpm workspace definition
 ```
+
+### Never tracked (gitignored)
+
+The `docs/` internal decision layer (`docs/adr/`, `docs/architecture/`,
+`docs/CONTEXT.md`) and `apps/cloud/` are **gitignored and never tracked** —
+they are local-only working artifacts, not public. See AGENTS.md → General
+Rules → "Never track internal docs or the cloud app in git."

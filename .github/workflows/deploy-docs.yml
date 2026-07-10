@@ -26,7 +26,7 @@ on:
       - ".github/workflows/deploy-docs.yml"
 
 concurrency:
-  group: tekmemo-docs-${{ github.workflow }}-${{ github.ref }}
+  group: memofs-docs-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -36,7 +36,7 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  DOCS_PACKAGE: "@tekbreed/docs"
+  DOCS_PACKAGE: "@memofs/docs"
   DOCS_DIST_DIR: "apps/docs/.vitepress/dist"
 
 jobs:
