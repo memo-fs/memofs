@@ -69,6 +69,5 @@ docs/architecture/
 docs/CONTEXT.md
 # Internal tooling - not tracked
 research/
-opencode.json
 skills-lock.json
 .agents/skills/
