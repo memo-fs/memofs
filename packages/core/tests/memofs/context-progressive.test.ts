@@ -4,11 +4,11 @@
  * The unit tests in `progressive.test.ts` cover the machinery in isolation.
  * This file covers the integration through the public `memo.context()` API:
  * the compact default, the expand round-trip, the `detail: "full"` escape
- * hatch, graceful cache-miss fallback, and memory-mode parity.
+ * hatch, graceful cache-miss fallback, and in-memory-store parity.
  */
 
 import { describe, expect, it } from "vitest";
-import { MemoFS } from "../../src/index";
+import { InMemoryMemoryStore, MemoFS } from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
@@ -278,9 +278,9 @@ describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", (
 		});
 	});
 
-	describe("memory mode parity", () => {
-		it("compact works in memory mode (verifies memory-strategy cache wiring)", async () => {
-			const memo = new MemoFS({ mode: "memory" });
+	describe("in-memory store parity", () => {
+		it("compact works with an in-memory store (verifies cache wiring)", async () => {
+			const memo = new MemoFS({ mode: "local", store: new InMemoryMemoryStore() });
 			await memo.core.update(CORE);
 			await memo.notes.record({
 				content: "Authentication uses JWT tokens.",
@@ -293,7 +293,7 @@ describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", (
 
 			const result = await memo.context({ query: "auth" });
 			expect(result.sections[0]?.type).toBe("directive");
-			// Memory mode has a notes reader, so notes is expandable.
+			// In-memory store has a notes reader, so notes is expandable.
 			expect(result.expandable?.some((a) => a.section === "notes")).toBe(true);
 		});
 	});

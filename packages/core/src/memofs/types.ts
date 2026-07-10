@@ -25,11 +25,7 @@ export type {
 	JsonValue,
 } from "../core/types/json";
 
-export type MemoFSRuntimeMode = "local" | "hybrid" | "memory";
-
-export type RuntimeReadPolicy = "local-first" | "cloud-first" | "local-only";
-
-export type RuntimeWritePolicy = "local-first" | "cloud-first" | "local-only";
+export type MemoFSRuntimeMode = "local" | "hybrid";
 
 export type MemoryKind =
 	| "decision"

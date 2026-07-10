@@ -14,6 +14,13 @@ export {
 	resolveMemoFsConfig,
 } from "./config";
 export {
+	decodeCursor,
+	encodeCursor,
+	normalizeLimit,
+	type PaginationOptions,
+	paginateArray,
+} from "./helpers/utils";
+export {
 	createLazyLocalEmbedder,
 	type LazyLocalEmbedderOptions,
 } from "./local-embedder";
@@ -51,8 +58,6 @@ export type {
 	RecallResult,
 	RecentMemoryInput,
 	RecentMemoryResult,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 	SourceRef,

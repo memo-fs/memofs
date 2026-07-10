@@ -69,8 +69,6 @@ import type {
 	RecallResult,
 	RecentMemoryInput,
 	RecentMemoryResult,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 	SyncPullInput,
@@ -106,8 +104,6 @@ export class MemoFS {
 	readonly llmClient?: LlmClient;
 	readonly recallStore?: RecallStore;
 	readonly cloud?: MemoFsCloudClient;
-	readonly readPolicy: RuntimeReadPolicy;
-	readonly writePolicy: RuntimeWritePolicy;
 	readonly name: string;
 	readonly version: string;
 	readonly recallConfig: ResolvedMemoFsConfig["recall"];
@@ -325,8 +321,6 @@ export class MemoFS {
 		this.projectId = this.resolved.projectId;
 		this.tenantId = this.resolved.tenantId;
 		this.workspaceId = this.resolved.workspaceId;
-		this.readPolicy = this.resolved.readPolicy;
-		this.writePolicy = this.resolved.writePolicy;
 		this.name = this.resolved.name;
 		this.version = this.resolved.version;
 		this.recallConfig = this.resolved.recall;

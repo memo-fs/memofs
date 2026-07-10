@@ -19,8 +19,6 @@ import type { RecallStore } from "../recall/types";
 import type { Reranker } from "../rerank/types";
 import type {
 	MemoFSRuntimeMode,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 } from "./types";
 
 export interface MemoFsCloudOptions {
@@ -73,8 +71,6 @@ export interface MemoFsConfig {
 	tenantId?: string;
 	workspaceId?: string;
 	mode?: MemoFSRuntimeMode;
-	readPolicy?: RuntimeReadPolicy;
-	writePolicy?: RuntimeWritePolicy;
 	cloud?: MemoFsCloudOptions;
 	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap?: boolean;
@@ -127,8 +123,6 @@ export interface ResolvedMemoFsConfig {
 	tenantId?: string;
 	workspaceId?: string;
 	mode: MemoFSRuntimeMode;
-	readPolicy: RuntimeReadPolicy;
-	writePolicy: RuntimeWritePolicy;
 	cloud?: MemoFsCloudClientOptions;
 	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap: boolean;
@@ -138,22 +132,18 @@ export interface ResolvedMemoFsConfig {
 }
 
 export interface MemoFsConfigFile {
+	/** JSON Schema URL for editor validation of `.memofs/config.json`. */
+	$schema?: string;
 	runtime?: MemoFSRuntimeMode;
 	root?: string;
 	projectId?: string;
 	workspaceId?: string;
-	readPolicy?: RuntimeReadPolicy;
-	writePolicy?: RuntimeWritePolicy;
 	cloud?: {
 		baseUrl?: string;
 		apiKey?: string;
 		workspaceId?: string;
 		projectId?: string;
 		timeoutMs?: number;
-	};
-	hybrid?: {
-		readPolicy?: RuntimeReadPolicy;
-		writePolicy?: RuntimeWritePolicy;
 	};
 	recall?: {
 		engine?: "lexical" | "vector" | "hybrid" | "auto";
@@ -203,22 +193,6 @@ export function resolveMemoFsConfig(input: {
 	const workspaceId =
 		config.workspaceId ?? env.MEMOFS_WORKSPACE_ID ?? fileConfig.workspaceId;
 	const tenantId = config.tenantId;
-	const readPolicy =
-		config.readPolicy ??
-		(isReadPolicy(env.MEMOFS_READ_POLICY)
-			? env.MEMOFS_READ_POLICY
-			: undefined) ??
-		fileConfig.readPolicy ??
-		fileConfig.hybrid?.readPolicy ??
-		"local-first";
-	const writePolicy =
-		config.writePolicy ??
-		(isWritePolicy(env.MEMOFS_WRITE_POLICY)
-			? env.MEMOFS_WRITE_POLICY
-			: undefined) ??
-		fileConfig.writePolicy ??
-		fileConfig.hybrid?.writePolicy ??
-		"local-first";
 
 	const cloud = resolveCloudOptions(config, env, fileConfig, {
 		workspaceId,
@@ -241,8 +215,6 @@ export function resolveMemoFsConfig(input: {
 		...(tenantId !== undefined ? { tenantId } : {}),
 		...(workspaceId !== undefined ? { workspaceId } : {}),
 		mode,
-		readPolicy,
-		writePolicy,
 		...(cloud !== undefined ? { cloud } : {}),
 		...(config.cloudClient !== undefined
 			? { cloudClient: config.cloudClient }
@@ -314,7 +286,7 @@ function resolveMode(
 ): MemoFSRuntimeMode {
 	if (arg !== undefined) return arg;
 	const envValue = env.MEMOFS_RUNTIME;
-	if (envValue === "local" || envValue === "hybrid" || envValue === "memory")
+	if (envValue === "local" || envValue === "hybrid")
 		return envValue;
 	return file.runtime ?? "local";
 }
@@ -368,7 +340,6 @@ export function extractConfigFile(
 	parsed: Record<string, unknown>,
 ): MemoFsConfigFile {
 	const cloud = objectValue(parsed.cloud);
-	const hybrid = objectValue(parsed.hybrid);
 	const mcp = objectValue(parsed.mcp);
 	const recall = objectValue(parsed.recall);
 	const mode = isRuntimeMode(parsed.runtime)
@@ -379,23 +350,11 @@ export function extractConfigFile(
 	const projectId =
 		stringValue(parsed.projectId) ?? stringValue(cloud.projectId);
 	const workspaceId = stringValue(cloud.workspaceId);
-	const readPolicy = isReadPolicy(hybrid.readPolicy)
-		? hybrid.readPolicy
-		: isReadPolicy(mcp.readPolicy)
-			? mcp.readPolicy
-			: undefined;
-	const writePolicy = isWritePolicy(hybrid.writePolicy)
-		? hybrid.writePolicy
-		: isWritePolicy(mcp.writePolicy)
-			? mcp.writePolicy
-			: undefined;
 
 	const result: MemoFsConfigFile = {};
 	if (mode !== undefined) result.runtime = mode;
 	if (projectId !== undefined) result.projectId = projectId;
 	if (workspaceId !== undefined) result.workspaceId = workspaceId;
-	if (readPolicy !== undefined) result.readPolicy = readPolicy;
-	if (writePolicy !== undefined) result.writePolicy = writePolicy;
 
 	result.cloud = {};
 	const baseUrl = stringValue(cloud.baseUrl);
@@ -406,10 +365,6 @@ export function extractConfigFile(
 	if (projectId !== undefined) result.cloud.projectId = projectId;
 	if (typeof cloud.timeoutMs === "number" && cloud.timeoutMs > 0)
 		result.cloud.timeoutMs = cloud.timeoutMs;
-
-	result.hybrid = {};
-	if (readPolicy !== undefined) result.hybrid.readPolicy = readPolicy;
-	if (writePolicy !== undefined) result.hybrid.writePolicy = writePolicy;
 
 	const recallEngineRaw = recall.engine;
 	const recallEngine = isRecallEngine(recallEngineRaw)
@@ -433,17 +388,7 @@ export function extractConfigFile(
 }
 
 function isRuntimeMode(value: unknown): value is MemoFSRuntimeMode {
-	return value === "local" || value === "hybrid" || value === "memory";
-}
-
-function isReadPolicy(value: unknown): value is RuntimeReadPolicy {
-	return (
-		value === "local-first" || value === "cloud-first" || value === "local-only"
-	);
-}
-
-function isWritePolicy(value: unknown): value is RuntimeWritePolicy {
-	return isReadPolicy(value);
+	return value === "local" || value === "hybrid";
 }
 
 function objectValue(value: unknown): Record<string, unknown> {

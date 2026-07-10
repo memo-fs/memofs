@@ -65,13 +65,13 @@ export function createHttpError(
 }
 
 const SECRET_PATTERNS = [
-	// MemoFS-specific key prefixes. Legacy prefixes (`tk_live_`, `tm_live_`)
+	// MemoFS-specific key prefixes. Legacy prefixes (`mfs_live_`, `tm_live_`)
 	// are kept so error redaction stays safe for keys issued before the rename
 	// — redaction is additive and must never miss a real token shape in the
 	// wild. These do NOT belong in the shared provider-prefix constant (they
 	// are MemoFS-internal, not third-party provider keys).
 	/tm_[A-Za-z0-9._-]+/g,
-	/tk_live_[A-Za-z0-9._-]+/g,
+	/mfs_live_[A-Za-z0-9._-]+/g,
 	/tm_live_[A-Za-z0-9._-]+/g,
 	/Bearer\s+[A-Za-z0-9._-]+/gi,
 	// Third-party provider prefixes — sourced from the SSOT

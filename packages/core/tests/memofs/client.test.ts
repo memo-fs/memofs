@@ -228,12 +228,12 @@ describe("MemoFS Client", () => {
 		expect(memo.cloud?.health).toBeTypeOf("function");
 	});
 
-	it("supports memory mode for testing", async () => {
-		const memo = new MemoFS({ mode: "memory" });
+	it("supports in-memory store for testing", async () => {
+		const memo = new MemoFS({ mode: "local", store: new InMemoryMemoryStore() });
 
 		const health = await memo.health();
 		expect(health.ok).toBe(true);
-		expect(health.mode).toBe("memory");
+		expect(health.mode).toBe("local");
 
 		const result = await memo.writeMemory({ content: "test memory content" });
 		expect(result.created).toBe(true);

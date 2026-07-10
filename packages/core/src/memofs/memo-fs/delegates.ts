@@ -26,7 +26,6 @@ import { writeCoreMemory } from "../../core/documents/core-memory";
 import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
 import type { MemoFS } from "../memo-fs";
-import { createMemoryStrategy } from "../memory-strategy";
 import { createFileSyncLayer } from "../sync/file-replication";
 import type {
 	SnapshotMemoryInput,
@@ -161,13 +160,6 @@ export function createStrategy(
 	resolved: { mode: string; autoBootstrap?: boolean },
 	// biome-ignore lint/suspicious/noExplicitAny: return type is a union of strategy implementations
 ): any {
-	if (resolved.mode === "memory") {
-		return createMemoryStrategy({
-			name: self.name,
-			version: self.version,
-		});
-	}
-
 	if (resolved.mode === "hybrid") {
 		if (!self.cloud) {
 			throw new Error(
@@ -200,8 +192,6 @@ export function createStrategy(
 		return createHybridStrategy({
 			local,
 			sync,
-			readPolicy: self.readPolicy,
-			writePolicy: self.writePolicy,
 		});
 	}
 

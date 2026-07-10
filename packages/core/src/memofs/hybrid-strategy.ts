@@ -35,8 +35,6 @@ import type {
 	RecallResult,
 	RecentMemoryInput,
 	RecentMemoryResult,
-	RuntimeReadPolicy,
-	RuntimeWritePolicy,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 	SyncPullInput,
@@ -57,8 +55,6 @@ export interface HybridStrategyOptions {
 	local: ReturnType<typeof import("./local-strategy").createLocalStrategy>;
 	/** File-replication sync layer (the only cloud-facing surface). */
 	sync: FileSyncLayer;
-	readPolicy: RuntimeReadPolicy;
-	writePolicy: RuntimeWritePolicy;
 }
 
 export function createHybridStrategy(options: HybridStrategyOptions) {

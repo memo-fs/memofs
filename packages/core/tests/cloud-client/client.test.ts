@@ -89,7 +89,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://memofs.dev/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
@@ -107,7 +107,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			});
 			expect(
 				(calls[0]?.init?.headers as Record<string, string>).Authorization,
-			).toBe("Bearer tk_live_test");
+			).toBe("Bearer mfs_live_test");
 			expect(result.upload[0]?.presignedPutUrl).toBe("https://r2/put");
 			expect(result.cursor).toBe("cursor-1");
 		});
@@ -120,7 +120,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "p",
 				fetch,
 			});
@@ -135,7 +135,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "p",
 				fetch,
 			});
@@ -149,7 +149,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				fetch,
 			});
 			await expect(client.sync.push({ manifest: {} })).rejects.toBeInstanceOf(
@@ -181,7 +181,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://memofs.dev/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
@@ -206,7 +206,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "p",
 				fetch,
 			});
@@ -243,7 +243,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://memofs.dev/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
@@ -270,7 +270,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "p",
 				fetch,
 			});
@@ -295,7 +295,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://memofs.dev/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "proj_123",
 				fetch,
 			});
@@ -315,7 +315,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 					{
 						error: {
 							code: "unauthorized",
-							message: "bad tk_live_secret",
+							message: "bad mfs_live_secret",
 						},
 						meta: { requestId: "req_bad" },
 					},
@@ -323,7 +323,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 				);
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_secret",
+				apiKey: "mfs_live_secret",
 				defaultProjectId: "p",
 				fetch,
 			});
@@ -368,7 +368,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				defaultProjectId: "p",
 				fetch,
 				retry: { retries: 1, baseDelayMs: 1, maxDelayMs: 1 },
@@ -407,7 +407,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			};
 			const base = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
-				apiKey: "tk_live_test",
+				apiKey: "mfs_live_test",
 				fetch,
 			});
 			const scoped = createProjectScopedClient(base, "bound_proj");
@@ -430,7 +430,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 		it("builds a client from MEMOFS_CLOUD_URL and the API key env var", async () => {
 			const client = createMemoFsCloudClientFromEnv({
 				MEMOFS_CLOUD_URL: "https://memofs.dev/api/v1",
-				MEMOFS_API_KEY: "tk_live_env",
+				MEMOFS_API_KEY: "mfs_live_env",
 				MEMOFS_PROJECT_ID: "env_proj",
 			});
 			const calls: string[] = [];
@@ -445,7 +445,7 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			// take one; verify the resolved defaults by using the same env.
 			const clientWithFetch = createMemoFsCloudClient({
 				baseUrl: "https://memofs.dev/api/v1",
-				apiKey: "tk_live_env",
+				apiKey: "mfs_live_env",
 				defaultProjectId: "env_proj",
 				fetch,
 			});

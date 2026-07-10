@@ -15,49 +15,6 @@ import {
  * preserves the historical wall-clock-seeded behavior.
  */
 describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
-	describe("memory strategy", () => {
-		it("uses the caller-supplied id verbatim", async () => {
-			const memo = new MemoFS({ mode: "memory" });
-
-			const result = await memo.writeMemory({
-				content: "connector-sourced fact",
-				id: "conn_abcdef0123456789",
-				source: "connector",
-			});
-
-			expect(result.id).toBe("conn_abcdef0123456789");
-			expect(result.created).toBe(true);
-		});
-
-		it("falls back to the default id when `id` is omitted", async () => {
-			const memo = new MemoFS({ mode: "memory" });
-
-			const result = await memo.writeMemory({ content: "agent note" });
-
-			// Default in-memory id shape: `note_<n>`.
-			expect(result.id).toMatch(/^note_\d+$/);
-		});
-
-		it("is deterministic across calls with the same caller id", async () => {
-			const memo = new MemoFS({ mode: "memory" });
-
-			const first = await memo.writeMemory({
-				content: "first",
-				id: "conn_stable",
-			});
-			const second = await memo.writeMemory({
-				content: "second",
-				id: "conn_stable",
-			});
-
-			// Same id is accepted; the strategy does not dedupe (that's the
-			// connector's job via externalId). The contract here is only that
-			// the id round-trips.
-			expect(first.id).toBe("conn_stable");
-			expect(second.id).toBe("conn_stable");
-		});
-	});
-
 	describe("local (filesystem) strategy", () => {
 		let rootDir: string;
 		let memo: MemoFS;

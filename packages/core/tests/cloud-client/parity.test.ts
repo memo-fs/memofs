@@ -18,7 +18,7 @@ describe("Cloud Client Parity", () => {
 	it("exposes only the file-replica surface: health, readiness, and sync", () => {
 		const client = createMemoFsCloudClient({
 			baseUrl: "http://localhost",
-			apiKey: "tk_live_test",
+			apiKey: "mfs_live_test",
 		});
 
 		// Survivors of the §7 trim.
@@ -33,7 +33,7 @@ describe("Cloud Client Parity", () => {
 	it("does not expose any deleted engine namespace", () => {
 		const client = createMemoFsCloudClient({
 			baseUrl: "http://localhost",
-			apiKey: "tk_live_test",
+			apiKey: "mfs_live_test",
 		}) as unknown as Record<string, unknown>;
 
 		// Every namespace listed in §3.4 of the refactor doc must be gone.

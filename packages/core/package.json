@@ -2,7 +2,7 @@
 	"name": "@memofs/core",
 	"version": "1.0.0-beta.1",
 	"private": false,
-	"description": "Memo FS core memory runtime and provider-neutral contracts for AI apps and agents.",
+	"description": "MemoFS core memory runtime and provider-neutral contracts for AI apps and agents.",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
