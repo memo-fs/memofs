@@ -4,12 +4,36 @@
 
 ---
 
-## Installation & Integration
+## Installation
 
-AI clients spawn the MCP server as a background process communicating via standard input/output (stdio). Most agents invoke it on demand via `npx` — no separate install required.
+Install the MCP server package:
+
+::: code-group
+
+```sh [npm]
+npm install @memofs/mcp-server
+```
+
+```sh [pnpm]
+pnpm add @memofs/mcp-server
+```
+
+```sh [yarn]
+yarn add @memofs/mcp-server
+```
+
+```sh [bun]
+bun add @memofs/mcp-server
+```
+
+:::
 
 > [!NOTE]
 > The MCP server runs on **Node.js >= 22**. When configuring it for an AI agent, ensure Node 22+ is available on the machine that hosts the agent (e.g. your dev laptop, a CI runner, or the agent's sandboxed runtime).
+
+## Integration
+
+AI clients spawn the MCP server as a background process communicating via standard input/output (stdio). Most agents invoke it on demand via `npx` — no separate install required.
 
 ### 1. Claude Desktop Setup
 
