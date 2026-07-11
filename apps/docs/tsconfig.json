@@ -1,10 +1,14 @@
 {
 	"extends": "@repo/typescript/base.json",
 	"compilerOptions": {
+		"baseUrl": ".",
 		"types": ["node", "vitepress/client"],
 		"skipLibCheck": true,
 		"noEmit": true,
-		"allowImportingTsExtensions": true
+		"allowImportingTsExtensions": true,
+		"paths": {
+      "@/*": ["./*"]
+    },
 	},
 	"include": [
 		".vitepress/**/*.ts",

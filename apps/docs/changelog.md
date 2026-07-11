@@ -13,11 +13,6 @@ This project follows [semantic versioning](https://semver.org/).
 <NewsletterSignup event="changelog" title="Get release notes by email" description="Be the first to know when a new version ships." />
 
 ## v1.0.0-beta.2 — 2026-07-10
-**Fix: workspace protocol in published dependencies**
-
-All 15 packages republished to resolve `workspace:^` protocol references in dependency declarations. The beta.1 tarballs shipped with unresolved `workspace:^` specifiers instead of concrete version ranges, causing `ERR_PNPM_WORKSPACE_PKG_NOT_FOUND` when installing into a non-workspace project. Beta.2 ships correct semver ranges (e.g. `@memofs/core: ^1.0.0-beta.2`).
-
-## v1.0.0-beta.1 — 2026-07-10
 **First public beta**
 
 ### Core (`@memofs/core`)
@@ -85,17 +80,3 @@ All 15 packages republished to resolve `workspace:^` protocol references in depe
 - `@memofs/json-rpc` — dependency-free JSON-RPC 2.0 protocol primitives (types, parsers, validation, response helpers)
 - `@memofs/testing` — contract tests, fakes, and fixtures for adapter authors
 - `@memofs/benchmark-kit` — benchmarks, runners, statistical analysis, and markdown reporters
-
-## v1.0.0-alpha.0 — 2026-01-15
-**Initial alpha release**
-
-### Core (`packages/core`)
-
-#### Added
-- Core memory management (core, notes, recent, graph)
-- Cloud sync with MemoFS Cloud
-- AI SDK integration (tools, runtime, agent sessions)
-- Vector adapters (VoyageAI, OpenAI)
-- Reranking support with fallback
-- AgentFS for agent session persistence
-- Benchmark kit for memory evaluation
