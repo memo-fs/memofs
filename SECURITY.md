@@ -284,4 +284,4 @@ When appropriate, MemoFS may publish:
 
 Security reports: [security@memofs.dev](mailto:security@memofs.dev)
 
-General issues: [MemoFS](https://github.com/christophersesugh/memofs/issues)
+General issues: [MemoFS](https://github.com/memo-fs/memofs/issues)

@@ -15,4 +15,4 @@ Updates, insights, and deep dives from the team building MemoFS — file-first m
 
 ---
 
-**Stay in the loop** — follow [@memofs](https://x.com/memofss) on X or watch the [GitHub repo](https://github.com/christophersesugh/memofs).
+**Stay in the loop** — follow [@memofs](https://x.com/memofss) on X or watch the [GitHub repo](https://github.com/memo-fs/memofs).

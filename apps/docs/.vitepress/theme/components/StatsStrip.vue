@@ -39,7 +39,12 @@ const displayed = ref(stats.map(() => 0));
 const sectionRef = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
-function animateTo(targetIdx: number, target: number, decimals: number, duration = 900) {
+function animateTo(
+	targetIdx: number,
+	target: number,
+	decimals: number,
+	duration = 900,
+) {
 	const start = performance.now();
 	const step = (now: number) => {
 		const elapsed = now - start;
@@ -55,7 +60,9 @@ function animateTo(targetIdx: number, target: number, decimals: number, duration
 onMounted(() => {
 	if (!sectionRef.value) return;
 
-	const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	const reducedMotion = window.matchMedia(
+		"(prefers-reduced-motion: reduce)",
+	).matches;
 	if (reducedMotion) {
 		stats.forEach((s, i) => {
 			displayed.value[i] = s.rawValue;

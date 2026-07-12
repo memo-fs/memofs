@@ -1,7 +1,7 @@
 # Open Issues — Build Tracker
 
 > **Tracker:** GitHub Issues on
-> [`christophersesugh/memofs`](https://github.com/christophersesugh/memofs/issues)
+> [`memo-fs/memofs`](https://github.com/memo-fs/memofs/issues)
 > (locked K5, 2026-07-02). This file is a lightweight signpost to the open work
 > items from the wayfinder map, reconciled to the keystone decisions (K1–K5).
 > Each line frames the work in current terms; the full ticket body lives on

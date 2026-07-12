@@ -6,12 +6,12 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/christophersesugh/memofs.git",
+		"url": "git+https://github.com/memo-fs/memofs.git",
 		"directory": "packages/testing"
 	},
 	"homepage": "https://docs.memofs.dev/packages/testing/",
 	"bugs": {
-		"url": "https://github.com/christophersesugh/memofs/issues"
+		"url": "https://github.com/memo-fs/memofs/issues"
 	},
 	"type": "module",
 	"sideEffects": false,

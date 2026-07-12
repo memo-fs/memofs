@@ -7,10 +7,18 @@
 		}
 	},
 	"mcp": {
-    "memofs": {
+		"memofs": {
 			"type": "local",
-      "command": ["npx", "-y", "@memofs/mcp-server", "--runtime", "local", "--root", "."],
+			"command": [
+				"npx",
+				"-y",
+				"@memofs/mcp-server",
+				"--runtime",
+				"local",
+				"--root",
+				"."
+			],
 			"enabled": true
-  	}
+		}
 	}
 }

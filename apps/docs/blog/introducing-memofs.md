@@ -99,4 +99,4 @@ const hits = await memo.recall({ query: "What does the user prefer for UI?" });
 
 ---
 
-*Have questions? [Open a discussion](https://github.com/christophersesugh/memofs/discussions) or [file an issue](https://github.com/christophersesugh/memofs/issues).*
+*Have questions? [Open a discussion](https://github.com/memo-fs/memofs/discussions) or [file an issue](https://github.com/memo-fs/memofs/issues).*

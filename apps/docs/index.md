@@ -12,6 +12,6 @@ hero:
       link: /packages/core/
     - theme: alt
       text: "Star on GitHub"
-      link: https://github.com/christophersesugh/memofs
+      link: https://github.com/memo-fs/memofs
 ---
 

@@ -1,0 +1,43 @@
+# .github/CODEOWNERS
+#
+# CODEOWNERS automatically requests reviews from the listed owners when
+# matching files are changed in a pull request.
+#
+# GitHub evaluates rules from top to bottom, and the LAST matching rule
+# takes precedence over earlier ones.
+#
+# The "maintainers" team currently contains a single member (the project
+# owner), but using a team from the beginning avoids changing this file
+# as the project grows.
+
+# Default owner for the entire repository
+* @memo-fs/maintainers
+
+# CI/CD and repository governance
+/.github/workflows/ @memo-fs/maintainers
+/.github/CODEOWNERS @memo-fs/maintainers
+
+# Release management
+/.changeset/ @memo-fs/maintainers
+
+# Workspace configuration
+/pnpm-workspace.yaml @memo-fs/maintainers
+/turbo.json @memo-fs/maintainers
+/biome.json @memo-fs/maintainers
+/package.json @memo-fs/maintainers
+/tooling/ @memo-fs/maintainers
+
+# Packages
+/packages/ @memo-fs/maintainers
+
+# Documentation site
+/apps/docs/ @memo-fs/maintainers
+
+# Future ownership overrides
+#
+# Example:
+#
+# /packages/mcp-server/ @alice @memo-fs/maintainers
+# /packages/core/       @bob @memo-fs/maintainers
+#
+# The last matching rule always wins.

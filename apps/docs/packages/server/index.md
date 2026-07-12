@@ -305,6 +305,6 @@ Cloudflare Worker fetch handler factory.
 
 ## See Also
 
-- [Self-host deploy guide](https://github.com/christophersesugh/memofs/tree/main/examples/server)
+- [Self-host deploy guide](https://github.com/memo-fs/memofs/tree/main/examples/server)
 - [Core Client API](/packages/core/client)
 - [Configuration](/packages/core/configuration)

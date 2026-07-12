@@ -9,10 +9,7 @@ export const head: HeadConfig[] = [
 	["meta", { name: "theme-color", content: "#258acb" }],
 	// Type system — Sora (display + body) and JetBrains Mono (code / kickers),
 	// matching the cloud design system. Loaded via <link> to avoid a build dep.
-	[
-		"link",
-		{ rel: "preconnect", href: "https://fonts.googleapis.com" },
-	],
+	["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
 	[
 		"link",
 		{ rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },

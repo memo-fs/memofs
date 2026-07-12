@@ -27,12 +27,18 @@ const script: TLine[] = [
 	{ type: "out", text: "✓ Created .memofs/ with core memory, notes &" },
 	{ type: "out", text: "  recall indexes." },
 	{ type: "blank", text: "" },
-	{ type: "cmd", text: 'memofs remember "Auth uses JWT + refresh rotation" --kind decision' },
+	{
+		type: "cmd",
+		text: 'memofs remember "Auth uses JWT + refresh rotation" --kind decision',
+	},
 	{ type: "out", text: "✓ Stored in .memofs/memory/notes.md" },
 	{ type: "blank", text: "" },
 	{ type: "cmd", text: 'memofs recall "How does auth work?"' },
 	{ type: "out", text: "→ [0.94] core.md · Auth decisions" },
-	{ type: "out", text: '   "JWT with refresh rotation. Access tokens expire…"' },
+	{
+		type: "out",
+		text: '   "JWT with refresh rotation. Access tokens expire…"',
+	},
 	{ type: "out", text: "→ [0.87] notes.md · Auth flow notes" },
 	{ type: "out", text: '   "Token validation middleware checks expiry…"' },
 	{ type: "blank", text: "" },
@@ -165,7 +171,7 @@ const handleMouseLeave = () => {
         class="ht-line ht-cmd"
       >
         <span class="ht-prompt">❯&nbsp;</span>{{ currentTyping
-        }}<span class="ht-cursor" aria-hidden="true">█</span>
+        }}<span class="ht-cursor" aria-hidden="true">|</span>
       </div>
 
       <!-- Idle cursor when between lines -->
@@ -174,7 +180,7 @@ const handleMouseLeave = () => {
         class="ht-line ht-cmd"
       >
         <span class="ht-prompt">❯&nbsp;</span
-        ><span class="ht-cursor" aria-hidden="true">█</span>
+        ><span class="ht-cursor" aria-hidden="true">|</span>
       </div>
     </div>
 
@@ -287,13 +293,14 @@ const handleMouseLeave = () => {
 .ht-cursor {
   display: inline-block;
   color: var(--tek-c-cyan, #38bdf8);
+  opacity: 0.6;
   animation: htCaret 0.9s step-end infinite;
-  font-size: 12px;
+  font-size: 13px;
   vertical-align: baseline;
 }
 
 @keyframes htCaret {
-  0%, 49% { opacity: 1; }
+  0%, 49% { opacity: 0.6; }
   50%, 100% { opacity: 0; }
 }
 

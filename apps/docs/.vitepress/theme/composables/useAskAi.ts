@@ -37,7 +37,7 @@ function useClickOutside(elRef: Ref<HTMLElement | null>, callback: () => void) {
 }
 
 function getRawMarkdownUrl(path: string): string | null {
-	const repo = "https://github.com/christophersesugh/memofs";
+	const repo = "https://github.com/memo-fs/memofs";
 	const branch = "main";
 	const docsPath = "apps/docs";
 

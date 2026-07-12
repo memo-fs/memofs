@@ -22,6 +22,21 @@ export const nav: DefaultTheme.NavItem[] = [
 		activeMatch: "/changelog",
 	},
 	{
+		text: "Community",
+		items: [
+			{ text: "Contributing", link: "/contributing" },
+			{ text: "Roadmap", link: "/roadmap" },
+			{
+				text: "GitHub Discussions",
+				link: "https://github.com/memo-fs/memofs/discussions",
+			},
+			{
+				text: "Good First Issues",
+				link: "https://github.com/memo-fs/memofs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
+			},
+		],
+	},
+	{
 		text: "Cloud",
 		link: "https://memofs.dev",
 	},

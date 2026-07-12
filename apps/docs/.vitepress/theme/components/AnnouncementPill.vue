@@ -14,7 +14,7 @@ withDefaults(
 		text?: string;
 	}>(),
 	{
-		href: "https://memofs.dev",
+		href: "/changelog",
 		badge: "Cloud",
 		text: "Introducing MemoFS Cloud",
 	},

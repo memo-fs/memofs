@@ -23,8 +23,8 @@ and sync content is documented here too — not deferred to a separate CMS. Per
 code and docs disagree, code wins and the doc is the bug. The drift worklist
 lives in [`docs/architecture/docs-drift-triage.md`][triage].
 
-[adr8]: https://github.com/christophersesugh/memofs/blob/main/docs/adr/0008-docs-information-architecture.md
-[triage]: https://github.com/christophersesugh/memofs/blob/main/docs/architecture/docs-drift-triage.md
+[adr8]: https://github.com/memo-fs/memofs/blob/main/docs/adr/0008-docs-information-architecture.md
+[triage]: https://github.com/memo-fs/memofs/blob/main/docs/architecture/docs-drift-triage.md
 
 > **Note on repeated content:** shared prose (install snippets, the OSS-vs-Cloud
 > framing, canonical-files tables) lives under `apps/docs/includes/` and is pulled

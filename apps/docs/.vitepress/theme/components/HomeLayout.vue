@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useData } from "vitepress";
+import { useData, useRoute } from "vitepress";
 import DefaultTheme from "vitepress/theme";
-import { computed, onMounted, onUpdated, ref } from "vue";
+import { computed, nextTick, onMounted, watch } from "vue";
 import AnnouncementPill from "./AnnouncementPill.vue";
 import AskAiBar from "./AskAiBar.vue";
 import BlogPostFooter from "./BlogPostFooter.vue";
@@ -17,18 +17,29 @@ const { frontmatter } = useData();
 /** Blog posts opt in with `blog: post` frontmatter to get editorial chrome. */
 const isBlogPost = computed(() => frontmatter.value.blog === "post");
 
+const route = useRoute();
 
 const splitTitle = () => {
 	const nameEl = document.querySelector<HTMLElement>(".VPHero .name");
 	if (nameEl && nameEl.textContent === "MemoFS") {
 		nameEl.classList.remove("clip");
-		nameEl.innerHTML = '<span class="name-memo">Memo</span><span class="name-fs">FS</span>';
+		nameEl.innerHTML =
+			'<span class="name-memo">Memo</span><span class="name-fs">FS</span>';
 	}
 };
 
-onMounted(splitTitle);
-onUpdated(splitTitle);
+onMounted(() => {
+	splitTitle();
+});
 
+watch(
+	() => route.path,
+	(to) => {
+		if (to === "/") {
+			nextTick(() => splitTitle());
+		}
+	},
+);
 
 /**
  * Integration logos rendered in the credibility bar.
@@ -82,7 +93,7 @@ const integrationLogos = [
       <AnnouncementPill
         badge="Cloud"
         text="Introducing MemoFS Cloud"
-        href="https://memofs.dev"
+        href="/changelog"
       />
     </template>
 
@@ -117,7 +128,7 @@ const integrationLogos = [
             <div class="credibility-badges">
               <StatBadge
                 type="github"
-                href="https://github.com/christophersesugh/memofs"
+                href="https://github.com/memo-fs/memofs"
                 label="GitHub stars"
               />
               <StatBadge
@@ -568,20 +579,48 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
                 </tbody>
               </table>
             </div>
-            <div class="github-star-cta">
-              <svg class="github-star-icon" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
-              </svg>
-              <span class="github-star-text">If MemoFS saves you time, a star helps others find it.</span>
-              <a
-                href="https://github.com/christophersesugh/memofs"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="github-star-btn"
-              >
-                ★ Star on GitHub
-              </a>
-            </div>
+
+            <!-- Support: star + sponsor + community -->
+            <section class="support-section">
+              <div class="support-card">
+                <p class="support-kicker">Support MemoFS</p>
+                <p class="support-body">
+                  If MemoFS saves you time, a star helps others find it. If it helps your work, consider sponsoring.
+                </p>
+                <div class="support-actions">
+                  <a
+                    href="https://github.com/memo-fs/memofs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="support-btn"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+                    </svg>
+                    ★ Star on GitHub
+                  </a>
+                  <a
+                    href="https://github.com/sponsors/christophersesugh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="support-btn sponsor-btn"
+                  >
+                    <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+                    </svg>
+                    Sponsor on GitHub
+                  </a>
+                </div>
+                <a
+                  href="https://github.com/memo-fs/memofs/discussions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="support-link"
+                >
+                  Join Discussions
+                </a>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -602,7 +641,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
                 </a>
               </div>
                 <a
-                  href="https://github.com/christophersesugh/memofs"
+                  href="https://github.com/memo-fs/memofs"
                   class="bottom-cta-link"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1620,52 +1659,97 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 .comparison-table-check { color: var(--tek-c-cyan); font-weight: 700; font-size: 16px; }
 .comparison-table-cross { color: var(--vp-c-text-3); font-size: 14px; }
 
-.github-star-cta {
+/* ===================================================================
+   Support Section (star + sponsor + community)
+   =================================================================== */
+.support-section {
   margin-top: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 20px 28px;
-  border: 1px solid var(--vp-c-divider);
+}
+
+.support-card {
+  padding: 32px;
+  text-align: center;
   background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: var(--tek-radius);
+  box-shadow: var(--tek-shadow-sm);
+}
+
+.support-kicker {
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tek-c-cyan);
+  margin: 0 0 8px;
+}
+
+.support-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+  margin: 0 0 20px;
+}
+
+.support-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
-.github-star-icon {
-  color: var(--vp-c-text-3);
-  flex-shrink: 0;
-}
-
-.github-star-text {
-  font-family: var(--vp-font-family-display);
-  font-size: 14px;
-  color: var(--vp-c-text-2);
-  flex: 1;
-  min-width: 200px;
-}
-
-.github-star-btn {
+.support-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 20px;
+  gap: 8px;
+  padding: 10px 20px;
   border: 1px solid var(--vp-c-divider);
   font-family: var(--vp-font-family-display);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--vp-c-text-1);
   text-decoration: none;
   background: var(--vp-c-bg);
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  border-radius: var(--tek-radius);
+  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s;
   white-space: nowrap;
 }
 
-.github-star-btn:hover {
+.support-btn:hover {
   border-color: var(--tek-c-gold);
   color: var(--tek-c-gold);
   background: color-mix(in srgb, var(--tek-c-gold) 6%, var(--vp-c-bg));
+  transform: translateY(-1px);
+}
+
+.support-btn.sponsor-btn {
+  background: var(--tek-c-cyan);
+  color: #fff;
+  border-color: var(--tek-c-cyan);
+}
+
+.support-btn.sponsor-btn:hover {
+  background: var(--vp-c-brand-2);
+  border-color: var(--vp-c-brand-2);
+  color: #fff;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--tek-c-cyan) 30%, transparent);
+}
+
+.support-link {
+  display: block;
+  margin-top: 16px;
+  font-family: var(--vp-font-family-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
   text-decoration: none;
+  transition: color 0.2s;
+}
+
+.support-link:hover {
+  color: var(--tek-c-cyan);
 }
 
 /* ===================================================================
@@ -1956,16 +2040,9 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
     min-width: 90px;
   }
 
-  .github-star-cta {
+  .support-actions {
     flex-direction: column;
-    text-align: center;
-    gap: 12px;
-    padding: 20px;
-  }
-
-  .github-star-text {
-    text-align: center;
-    min-width: 100%;
+    gap: 10px;
   }
 
   .cta-buttons {

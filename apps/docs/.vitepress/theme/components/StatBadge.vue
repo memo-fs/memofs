@@ -19,7 +19,7 @@ function formatNumber(n: number): string {
 
 async function fetchGitHubStars(): Promise<number | null> {
 	try {
-		const res = await fetch("https://api.github.com/repos/christophersesugh/memofs");
+		const res = await fetch("https://api.github.com/repos/memo-fs/memofs");
 		if (!res.ok) return null;
 		const data = await res.json();
 		return data.stargazers_count ?? null;
@@ -30,7 +30,9 @@ async function fetchGitHubStars(): Promise<number | null> {
 
 async function fetchNpmDownloads(): Promise<number | null> {
 	try {
-		const res = await fetch("https://api.npmjs.org/downloads/point/last-week/@memofs/cli");
+		const res = await fetch(
+			"https://api.npmjs.org/downloads/point/last-week/@memofs/cli",
+		);
 		if (!res.ok) return null;
 		const data = await res.json();
 		return data.downloads ?? null;
@@ -40,7 +42,10 @@ async function fetchNpmDownloads(): Promise<number | null> {
 }
 
 onMounted(async () => {
-	const count = props.type === "github" ? await fetchGitHubStars() : await fetchNpmDownloads();
+	const count =
+		props.type === "github"
+			? await fetchGitHubStars()
+			: await fetchNpmDownloads();
 	if (count !== null) value.value = formatNumber(count);
 });
 </script>
@@ -76,7 +81,7 @@ onMounted(async () => {
   align-items: center;
   gap: 8px;
   padding: 8px 14px 8px 10px;
-  border-radius: 8px;
+  border-radius: 0;
   text-decoration: none;
   font-family: var(--vp-font-family-mono);
   font-size: 13px;

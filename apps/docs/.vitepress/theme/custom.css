@@ -482,6 +482,7 @@
 .tek-pill-wrap {
 	display: flex;
 	justify-content: center;
+	margin-top: 28px;
 	margin-bottom: 28px;
 }
 
