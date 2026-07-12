@@ -155,7 +155,7 @@ async function handleAction(provider: string | null = null) {
 	color: var(--vp-c-text-2);
 	background: var(--vp-c-bg-soft);
 	border: 1px solid var(--vp-c-divider);
-	border-radius: 6px;
+	border-radius: 0;
 	cursor: pointer;
 	transition: color 0.2s, background-color 0.2s, border-color 0.2s;
 }
@@ -185,7 +185,7 @@ async function handleAction(provider: string | null = null) {
 	padding: 6px;
 	background: var(--vp-c-bg-elv);
 	border: 1px solid var(--vp-c-divider);
-	border-radius: 8px;
+	border-radius: 0;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -205,7 +205,7 @@ async function handleAction(provider: string | null = null) {
 	color: var(--vp-c-text-1);
 	background: transparent;
 	border: none;
-	border-radius: 6px;
+	border-radius: 0;
 	cursor: pointer;
 	text-align: left;
 	transition: background-color 0.15s;
@@ -233,7 +233,7 @@ async function handleAction(provider: string | null = null) {
 	padding: 8px 12px;
 	font-size: 12px;
 	font-weight: 500;
-	border-radius: 6px;
+	border-radius: 0;
 	white-space: nowrap;
 	pointer-events: none;
 }

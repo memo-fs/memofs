@@ -32,13 +32,15 @@ yarn add @memofs/core
 bun add @memofs/core
 ```
 
+```sh [deno]
+deno add npm:@memofs/core
+```
 :::
 
 > [!NOTE]
-> Requires **Node.js >= 22**.
+> Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.<br/> <br/>
+> Requires **Node.js >= 22** to run in Node environments.
 
-> [!NOTE]
-> Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.
 
 ## Quick Start
 

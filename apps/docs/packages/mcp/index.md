@@ -2,8 +2,6 @@
 
 `@memofs/mcp-server` allows AI coding agents (such as Claude Desktop, Cursor, and Zed) to securely interact with MemoFS memory layers using standard Model Context Protocol (MCP) tools.
 
----
-
 ## Installation
 
 Install the MCP server package:
@@ -24,6 +22,10 @@ yarn add @memofs/mcp-server
 
 ```sh [bun]
 bun add @memofs/mcp-server
+```
+
+```sh [deno]
+deno install npm:@memofs/mcp-server
 ```
 
 :::
@@ -64,8 +66,6 @@ Add the server definition to your `claude_desktop_config.json` configuration fil
    - **Type:** `command`
    - **Command:** `npx -y @memofs/mcp-server --runtime local --root /path/to/project`
 
----
-
 ## Command Flags
 
 Customize the server instantiation using standard flags:
@@ -99,8 +99,6 @@ Customize the server instantiation using standard flags:
 | `MEMOFS_LOCAL_EMBEDDINGS` | Enable local ONNX embeddings (`"1"` on, `"0"` off; on by default). |
 | `MEMOFS_MCP_READ_ONLY` | Set to `"true"` to block write tools. |
 
----
-
 ## Exposed MCP Tools
 
 The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS session tools:
@@ -125,8 +123,6 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs_agent_session_extract` | read | Extract summary, durable memory, and follow-ups from a session. |
 | `memofs_agent_session_complete` | write | Extract, checkpoint, sync, and optionally persist durable memory. |
 
----
-
 ## Exposed MCP Resources
 
 | URI | MIME Type | Description |
@@ -140,8 +136,6 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs://graph/edges` | `application/json` | Paginated graph edges (query params: `cursor`, `limit`). |
 | `memofs://agent-sessions/{sessionId}/context/core` | `text/markdown` | Session core context file. |
 | `memofs://agent-sessions/{sessionId}/output/durable-memory` | `text/markdown` | Session durable memory output. |
-
----
 
 ## Hybrid Mode
 
@@ -157,7 +151,7 @@ For cloud-synced memory, use `--runtime hybrid` with cloud credentials:
         "@memofs/mcp-server",
         "--runtime", "hybrid",
         "--root", "/path/to/project",
-        "--cloud-url", "https://memo.memofs.dev",
+        "--cloud-url", "https://memofs.dev/api/v1",
         "--api-key", "your-api-key"
       ]
     }

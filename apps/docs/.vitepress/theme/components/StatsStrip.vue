@@ -1,53 +1,121 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref } from "vue";
+
 /**
- * Benchmark stats strip — surfaces real numbers from benchmark-results/release/
- * to give the landing page immediate proof that the runtime is fast.
- *
- * Numbers are sourced from `benchmark-results/release/summary.md` and are
- * p50 latencies. Update when benchmarks are re-run.
+ * StatsStrip — benchmark performance stats from benchmark-results/release/.
+ * Numbers animate from 0 to their real value on first viewport entry
+ * (Vitest-style "wow" moment). Respects prefers-reduced-motion.
  */
 interface Stat {
-	readonly value: string;
+	readonly rawValue: number;
+	readonly unit: string;
 	readonly label: string;
 	readonly detail: string;
 }
 
 const stats: ReadonlyArray<Stat> = [
 	{
-		value: "0.6ms",
+		rawValue: 0.6,
+		unit: "ms",
 		label: "Recall p50",
 		detail: "Top-10 in-memory recall over a full project memory set.",
 	},
 	{
-		value: "7.4ms",
+		rawValue: 7.4,
+		unit: "ms",
 		label: "Round-trip p50",
 		detail: "Full read + write lifecycle for the core memory store.",
 	},
 	{
-		value: "0.2ms",
+		rawValue: 0.2,
+		unit: "ms",
 		label: "Rerank p50",
 		detail: "Deterministic top-5 rerank after recall.",
 	},
 ];
+
+/** Animated display values — start at 0 */
+const displayed = ref(stats.map(() => 0));
+const sectionRef = ref<HTMLElement | null>(null);
+let observer: IntersectionObserver | null = null;
+
+function animateTo(targetIdx: number, target: number, decimals: number, duration = 900) {
+	const start = performance.now();
+	const step = (now: number) => {
+		const elapsed = now - start;
+		const progress = Math.min(elapsed / duration, 1);
+		// ease-out cubic
+		const eased = 1 - (1 - progress) ** 3;
+		displayed.value[targetIdx] = parseFloat((eased * target).toFixed(decimals));
+		if (progress < 1) requestAnimationFrame(step);
+	};
+	requestAnimationFrame(step);
+}
+
+onMounted(() => {
+	if (!sectionRef.value) return;
+
+	const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	if (reducedMotion) {
+		stats.forEach((s, i) => {
+			displayed.value[i] = s.rawValue;
+		});
+		return;
+	}
+
+	observer = new IntersectionObserver(
+		(entries) => {
+			if (entries[0]?.isIntersecting) {
+				stats.forEach((s, i) => {
+					const decimals = s.rawValue < 1 ? 1 : 0;
+					setTimeout(() => animateTo(i, s.rawValue, decimals, 900), i * 120);
+				});
+				observer?.disconnect();
+			}
+		},
+		{ threshold: 0.3 },
+	);
+	observer.observe(sectionRef.value);
+});
+
+onUnmounted(() => {
+	observer?.disconnect();
+});
 </script>
 
 <template>
-  <section id="performance" class="stats-strip-section tek-reveal">
+  <section
+    id="performance"
+    ref="sectionRef"
+    class="stats-strip-section tek-reveal"
+  >
     <div class="container-wide">
       <div class="stats-header">
         <p class="stats-kicker">Performance</p>
-        <p class="stats-subtitle">Measured locally, on synthetic data — your numbers will vary by embedding provider and dataset size.</p>
+        <p class="stats-subtitle">
+          Measured locally, on synthetic data — your numbers will vary by
+          embedding provider and dataset size.
+        </p>
       </div>
       <ul class="stats-grid">
-        <li v-for="stat in stats" :key="stat.label" class="stat-card">
-          <span class="stat-value">{{ stat.value }}</span>
+        <li
+          v-for="(stat, i) in stats"
+          :key="stat.label"
+          class="stat-card"
+          :data-delay="String(i + 1)"
+        >
+          <span class="stat-value"
+            >{{ displayed[i] }}{{ stat.unit }}</span
+          >
           <span class="stat-label">{{ stat.label }}</span>
           <span class="stat-detail">{{ stat.detail }}</span>
         </li>
       </ul>
       <p class="stats-source">
         Full methodology in
-        <a href="/packages/benchmark-kit" class="stats-source-link">benchmark-kit</a>.
+        <a href="/packages/benchmark-kit" class="stats-source-link"
+          >benchmark-kit</a
+        >.
       </p>
     </div>
   </section>
@@ -121,6 +189,9 @@ const stats: ReadonlyArray<Stat> = [
   color: var(--vp-c-brand-1);
   line-height: 1.1;
   letter-spacing: -0.02em;
+  /* Reserve space to prevent layout shift during count-up */
+  min-width: 4ch;
+  display: inline-block;
 }
 
 .stat-label {

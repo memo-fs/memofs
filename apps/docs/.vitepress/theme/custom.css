@@ -1,78 +1,638 @@
 /* ===================================================================
-   MemoFS — "Engineered memory" design system
-   A refined, technical-but-warm aesthetic. Distinctive display type,
-   layered atmosphere, hairline depth. Not generic AI slop.
+   MemoFS — Design System (SSOT)
+   All tokens + utilities + component overrides live here.
+   Absorbs styles/app.css so there is exactly one CSS file to maintain.
    =================================================================== */
 
-/* --- Typography: a characterful display face (Sora) paired with a
-     refined body face (Inter), and a real mono (JetBrains Mono) so
-     terminal/code mockups read as intentional. Loaded once here. --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
+/* -------------------------------------------------------------------
+   Fonts — Sora (display/body) + JetBrains Mono (code/kickers)
+   Loaded via <link> in config/head.mts.
+   ------------------------------------------------------------------- */
 :root {
-  /* Font families
-     --vp-font-family-display: headlines / the "engineered" voice.
-     --vp-font-family-base:   body, UI.
-     --vp-font-family-mono:   code, terminals, scores. */
-  --vp-font-family-display: "Sora", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --vp-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --vp-font-family-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
-
-  /* MemoFS Brand Colors — vibrant blue/green dual identity */
-  --vp-c-brand-1: #258acb;
-  --vp-c-brand-2: #2a9be4;
-  --vp-c-brand-3: #1b6595;
-  --vp-c-brand-soft: rgba(37, 138, 203, 0.14);
-
-  /* Layer accents (used by HeroVisual + feature showcase) */
-  --tek-c-core: #4fb2f3;       /* core memory */
-  --tek-c-archive: #5bd473;    /* archival / notes */
-  --tek-c-recall: #818cf8;     /* recall / graph */
-  --tek-c-sync: #fb923c;       /* sync state */
-
-  /* Depth tokens for the layered, atmospheric surfaces */
-  --tek-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
-  --tek-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.05);
-  --tek-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10), 0 4px 8px rgba(15, 23, 42, 0.06);
-  --tek-shadow-glow: 0 0 0 1px rgba(37, 138, 203, 0.12), 0 8px 28px rgba(37, 138, 203, 0.14);
-  --tek-radius: 12px;
-  --tek-radius-lg: 16px;
-
-  /* Home hero text gradient — the signature blue→green clip */
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(120deg, #258acb 30%, #4cae61);
-
-  /* Green (success / toast) */
-  --vp-c-green-1: #2e7d32;
-  --vp-c-green-soft: rgba(46, 125, 50, 0.14);
+	--vp-font-family-base: "Sora Variable", "Sora", ui-sans-serif, system-ui,
+		-apple-system, "Segoe UI", sans-serif;
+	--vp-font-family-display: "Sora Variable", "Sora", ui-sans-serif, system-ui,
+		-apple-system, "Segoe UI", sans-serif;
+	--vp-font-family-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular",
+		"SF Mono", Menlo, Consolas, monospace;
 }
 
-.dark {
-  /* Deep rich dark background, not pure black */
-  --vp-c-bg: #1b1b1f;
-  --vp-c-bg-alt: #161618;
-  --vp-c-bg-elv: #202127;
-  --vp-c-bg-soft: #202127;
+/* ===================================================================
+   LIGHT MODE TOKENS
+   =================================================================== */
+:root {
+	color-scheme: light;
 
-  /* Vibrant dark mode accents */
-  --vp-c-brand-1: #4fb2f3;
-  --vp-c-brand-2: #6fc3f7;
-  --vp-c-brand-3: #2a9be4;
-  --vp-c-brand-soft: rgba(79, 178, 243, 0.14);
+	/* Surfaces */
+	--background: #ffffff;
+	--foreground: #0b0c0e;
+	--card: #ffffff;
+	--card-2: #f6f7f9;
+	--muted: #f6f7f9;
+	--muted-foreground: #64748b;
 
-  /* Depth is heavier on dark for the glassy, layered feel */
-  --tek-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --tek-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
-  --tek-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
-  --tek-shadow-glow: 0 0 0 1px rgba(79, 178, 243, 0.18), 0 8px 30px rgba(79, 178, 243, 0.18);
+	/* Lines + fills */
+	--border: #e6e8ec;
+	--divider: #eef0f3;
+	--input: #e6e8ec;
 
-  --vp-home-hero-name-background: linear-gradient(120deg, #4fb2f3 30%, #5bd473);
+	/* Text */
+	--vp-c-text-1: #0b0c0e;
+	--vp-c-text-2: #475569;
+	--vp-c-text-3: #94a3b8;
 
-  --vp-c-green-1: #66bb6a;
-  --vp-c-green-soft: rgba(102, 187, 106, 0.14);
+	/* Brand — primary cyan (AI / neural) */
+	--vp-c-brand-1: #0891b2;
+	--vp-c-brand-2: #0e7490;
+	--vp-c-brand-3: #06b6d4;
+	--vp-c-brand-soft: rgba(8, 145, 178, 0.1);
+	--vp-c-brand-bg: rgba(8, 145, 178, 0.06);
+
+	/* Surfaces */
+	--vp-c-bg: #ffffff;
+	--vp-c-bg-soft: #f6f7f9;
+	--vp-c-bg-mute: #eef0f3;
+	--vp-c-bg-alt: #fafbfc;
+	--vp-c-border: #e6e8ec;
+	--vp-c-divider: #eef0f3;
+
+	/* Code surfaces */
+	--vp-code-block-bg: #f8fafc;
+	--vp-code-color: #0f172a;
+
+	/* Dual accent system */
+	--tek-c-cyan: #0891b2;
+	--tek-c-gold: #b7791f;
+	--tek-c-core: #0891b2;
+	--tek-c-sync: #b7791f;
+	--tek-c-archive: #15803d;
+
+	/* Geometry — sharp broadsheet */
+	--tek-radius: 0px;
+	--tek-radius-pill: 0px;
+
+	/* Elevation */
+	--tek-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+	--tek-shadow-md: 0 12px 28px -12px rgba(15, 23, 42, 0.18);
+	--tek-shadow-lg: 0 32px 64px -24px rgba(15, 23, 42, 0.28);
+	--tek-shadow-glow: 0 0 28px -4px rgba(8, 145, 178, 0.22);
+	--tek-shadow-glow-gold: 0 0 28px -4px rgba(183, 121, 31, 0.22);
+
+	/* Glass surface */
+	--tek-glass-bg: rgba(255, 255, 255, 0.72);
+	--tek-glass-border: rgba(15, 23, 42, 0.08);
+	--tek-glass-blur: 14px;
+
+	/* Ambient glows */
+	--tek-glow-cyan: radial-gradient(60% 60% at 50% 0%, rgba(8, 145, 178, 0.1), transparent 70%);
+	--tek-glow-gold: radial-gradient(60% 60% at 50% 0%, rgba(183, 121, 31, 0.1), transparent 70%);
+
+	/* Section rhythm */
+	--tek-section-pad: 112px;
+	--tek-container: 1100px;
+	--tek-container-narrow: 760px;
+
+	/* Hero name gradient */
+	--vp-home-hero-name-background: linear-gradient(120deg, var(--tek-c-cyan), var(--tek-c-gold));
+	--vp-home-hero-name-color: transparent;
+
+	/* Grid background (Vitest-style) */
+	--tek-grid-line: rgba(15, 23, 42, 0.015);
+	--tek-grid-tick: rgba(15, 23, 42, 0.04);
+	--tek-grid-size: 48px;
 }
 
-/* --- Headlines use the display face everywhere --- */
+/* ===================================================================
+   DARK MODE TOKENS
+   =================================================================== */
+:root.dark {
+	color-scheme: dark;
+
+	--background: #0b0c0e;
+	--foreground: #cbd5e1;
+	--card: #141518;
+	--card-2: #18191d;
+	--muted: #141518;
+	--muted-foreground: #6b7280;
+
+	--border: #27282f;
+	--divider: #1f2024;
+	--input: #27282f;
+
+	--vp-c-text-1: #f1f5f9;
+	--vp-c-text-2: #94a3b8;
+	--vp-c-text-3: #64748b;
+
+	--vp-c-brand-1: #38bdf8;
+	--vp-c-brand-2: #22d3ee;
+	--vp-c-brand-3: #7dd3fc;
+	--vp-c-brand-soft: rgba(56, 189, 248, 0.12);
+	--vp-c-brand-bg: rgba(56, 189, 248, 0.07);
+
+	--vp-c-bg: #0b0c0e;
+	--vp-c-bg-soft: #141518;
+	--vp-c-bg-mute: #18191d;
+	--vp-c-bg-alt: #101115;
+	--vp-c-border: #27282f;
+	--vp-c-divider: #1f2024;
+
+	--vp-code-block-bg: #161719;
+	--vp-code-color: #e2e8f0;
+
+	--tek-c-cyan: #38bdf8;
+	--tek-c-gold: #e0a84e;
+	--tek-c-core: #38bdf8;
+	--tek-c-sync: #e0a84e;
+	--tek-c-archive: #4ade80;
+
+	--tek-radius: 0px;
+	--tek-radius-pill: 0px;
+
+	--tek-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+	--tek-shadow-md: 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+	--tek-shadow-lg: 0 40px 80px -32px rgba(0, 0, 0, 0.7);
+	--tek-shadow-glow: 0 0 32px -2px rgba(56, 189, 248, 0.28);
+	--tek-shadow-glow-gold: 0 0 32px -2px rgba(224, 168, 78, 0.28);
+
+	--tek-glass-bg: rgba(20, 21, 24, 0.55);
+	--tek-glass-border: rgba(255, 255, 255, 0.08);
+	--tek-glass-blur: 12px;
+
+	--tek-glow-cyan: radial-gradient(60% 60% at 50% 0%, rgba(56, 189, 248, 0.12), transparent 70%);
+	--tek-glow-gold: radial-gradient(60% 60% at 50% 0%, rgba(224, 168, 78, 0.1), transparent 70%);
+
+	--tek-section-pad: 112px;
+	--tek-container: 1100px;
+	--tek-container-narrow: 760px;
+
+	--vp-home-hero-name-background: linear-gradient(120deg, var(--tek-c-cyan), var(--tek-c-gold));
+	--vp-home-hero-name-color: transparent;
+
+	/* Grid background (Vitest-style — brighter lines in dark) */
+	--tek-grid-line: rgba(255, 255, 255, 0.012);
+	--tek-grid-tick: rgba(255, 255, 255, 0.03);
+	--tek-grid-size: 48px;
+}
+
+/* ===================================================================
+   BASE
+   =================================================================== */
+.VPHome,
+.VPDoc {
+	font-family: var(--vp-font-family-base);
+}
+
+::selection {
+	background: var(--vp-c-brand-soft);
+	color: var(--vp-c-text-1);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--vp-c-border) transparent;
+}
+
+/* ===================================================================
+   SHARED UTILITIES
+   =================================================================== */
+
+/* Glass / premium card surface */
+.tek-glass {
+	background-color: var(--tek-glass-bg);
+	-webkit-backdrop-filter: blur(var(--tek-glass-blur));
+	backdrop-filter: blur(var(--tek-glass-blur));
+	border: 1px solid var(--tek-glass-border);
+	border-radius: var(--tek-radius);
+}
+
+/* Cyan glow on hover */
+.tek-glow-hover {
+	transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.tek-glow-hover:hover {
+	border-color: color-mix(in srgb, var(--tek-c-cyan) 40%, transparent);
+	box-shadow: var(--tek-shadow-glow);
+}
+
+/* Gold glow on hover */
+.tek-glow-hover-gold {
+	transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.tek-glow-hover-gold:hover {
+	border-color: color-mix(in srgb, var(--tek-c-gold) 40%, transparent);
+	box-shadow: var(--tek-shadow-glow-gold);
+}
+
+/* Small uppercase mono kicker */
+.tek-kicker {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	font-family: var(--vp-font-family-mono);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--tek-c-cyan);
+	margin: 0 0 16px;
+}
+.tek-kicker::before {
+	content: "";
+	width: 22px;
+	height: 1px;
+	background: linear-gradient(to right, var(--tek-c-cyan), transparent);
+}
+.tek-kicker.gold {
+	color: var(--tek-c-gold);
+}
+.tek-kicker.gold::before {
+	background: linear-gradient(to right, var(--tek-c-gold), transparent);
+}
+
+/* Hairline gradient divider */
+.tek-hairline {
+	height: 1px;
+	border: 0;
+	margin: 0 auto;
+	max-width: var(--tek-container);
+	background: linear-gradient(
+		to right,
+		transparent,
+		var(--vp-c-divider) 12%,
+		var(--vp-c-divider) 88%,
+		transparent
+	);
+}
+
+/* Faint dot matrix */
+.tek-dot-grid {
+	background-image: radial-gradient(circle at 1px 1px, var(--vp-c-text-3) 1px, transparent 0);
+	background-size: 28px 28px;
+}
+
+/* Faint engineering grid */
+.tek-grid-pattern {
+	background-image:
+		linear-gradient(to right, var(--vp-c-divider) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--vp-c-divider) 1px, transparent 1px);
+	background-size: 44px 44px;
+	-webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+	mask-image: linear-gradient(to bottom, #000 35%, transparent 100%);
+	opacity: 0.4;
+}
+
+/* Bento grid utility */
+.tek-bento-grid {
+	display: grid;
+	gap: 2px;
+}
+
+/* Section heading scale */
+.tek-h2 {
+	font-family: var(--vp-font-family-display);
+	font-weight: 700;
+	font-size: clamp(28px, 4vw, 42px);
+	line-height: 1.12;
+	letter-spacing: -0.02em;
+	color: var(--vp-c-text-1);
+	margin: 0 0 18px;
+}
+.tek-lede {
+	font-size: 17px;
+	line-height: 1.7;
+	color: var(--vp-c-text-2);
+	max-width: 62ch;
+}
+
+/* ===================================================================
+   KEYFRAMES
+   =================================================================== */
+@keyframes tekReveal {
+	from { opacity: 0; transform: translateY(28px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* (tekFadeInUp removed) */
+
+/* (fadeInUp removed) */
+
+/* Ambient orb — static (animation removed) */
+
+/* Terminal cursor blink */
+@keyframes tekCaretBlink {
+	0%, 49% { opacity: 1; }
+	50%, 100% { opacity: 0; }
+}
+
+/* Marching-dash sync line */
+@keyframes tekSyncDash {
+	to { stroke-dashoffset: -40; }
+}
+
+/* Scroll-triggered reveal — animation removed, sections always visible */
+
+/* ===================================================================
+   VITEST-STYLE GRID BACKGROUND
+   A fine hairline grid with tick-mark corner decorators, giving the
+   page structural depth reminiscent of engineering graph paper.
+   =================================================================== */
+.VPHome {
+	position: relative;
+	/* Hairline grid */
+	background-image:
+		linear-gradient(to right, var(--tek-grid-line) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--tek-grid-line) 1px, transparent 1px);
+	background-size: var(--tek-grid-size) var(--tek-grid-size);
+}
+
+/* Fade the grid out below the fold so it doesn't clash with content */
+.VPHome::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background: linear-gradient(
+		to bottom,
+		transparent 0%,
+		transparent 50%,
+		var(--vp-c-bg) 100%
+	);
+}
+
+/* Large ambient orb — cyan, top-left */
+.VPHome::after {
+	content: "";
+	position: absolute;
+	top: -15%;
+	left: -10%;
+	width: 70%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: radial-gradient(
+		circle,
+		color-mix(in srgb, var(--tek-c-cyan) 18%, transparent) 0%,
+		transparent 70%
+	);
+	pointer-events: none;
+	z-index: 0;
+	filter: blur(80px);
+}
+
+/* Gold orb — bottom-right (via a pseudo on a child) */
+.VPHome .VPHomeContent::after {
+	content: "";
+	position: absolute;
+	bottom: 10%;
+	right: -10%;
+	width: 55%;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: radial-gradient(
+		circle,
+		color-mix(in srgb, var(--tek-c-gold) 14%, transparent) 0%,
+		transparent 70%
+	);
+	pointer-events: none;
+	z-index: 0;
+	filter: blur(80px);
+}
+
+/* Ensure all home sections stack above the grid/orb layers */
+.VPHero,
+.VPFeatures,
+.home-custom-sections {
+	position: relative;
+	z-index: 1;
+}
+
+/* ===================================================================
+   HERO ENHANCEMENTS
+   =================================================================== */
+
+/* Suppress VitePress default blurred gradient behind hero image */
+.VPHero .image-bg {
+	display: none;
+}
+
+/* Scale up the brand name — Vite-style dominant headline */
+.VPHero .name {
+	font-family: var(--vp-font-family-display);
+	font-size: clamp(56px, 9vw, 80px);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+	line-height: 1.0;
+	background: none !important;
+	-webkit-text-fill-color: initial !important;
+	color: var(--vp-c-text-1) !important;
+}
+
+/* Override VitePress scoped .clip — force visible text as CSS fallback.
+   JS later removes .clip and injects .name-memo / .name-fs spans for
+   the cyan→gold split-color gradient. */
+.VPHero .name.clip {
+	color: var(--vp-c-text-1) !important;
+	-webkit-text-fill-color: var(--vp-c-text-1) !important;
+	background: none !important;
+}
+
+.name-memo {
+	color: var(--tek-c-cyan);
+	-webkit-text-fill-color: var(--tek-c-cyan);
+}
+
+.name-fs {
+	color: var(--tek-c-gold);
+	-webkit-text-fill-color: var(--tek-c-gold);
+}
+
+.VPHero .text {
+	font-family: var(--vp-font-family-display);
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	font-size: clamp(22px, 3.5vw, 36px) !important;
+}
+
+.VPHero .tagline {
+	font-size: clamp(16px, 1.8vw, 20px);
+	color: var(--vp-c-text-2);
+	max-width: 46ch;
+	margin: 0 auto;
+	line-height: 1.65;
+}
+
+/* Custom hero visual slot */
+.hero-visual-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+
+@media (max-width: 959px) {
+	.hero-visual-container {
+		display: none !important;
+	}
+}
+
+/* ===================================================================
+   ANNOUNCEMENT PILL
+   =================================================================== */
+.tek-pill-wrap {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 28px;
+}
+
+.tek-announcement-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 14px 6px 8px;
+	border-radius: var(--tek-radius-pill);
+	background: var(--vp-c-bg-soft);
+	border: 1px solid var(--vp-c-border);
+	border-color: color-mix(in srgb, var(--tek-c-cyan) 35%, var(--vp-c-border));
+	text-decoration: none;
+	color: var(--vp-c-text-1);
+	font-family: var(--vp-font-family-mono);
+	font-size: 12.5px;
+	font-weight: 500;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	box-shadow: var(--tek-shadow-sm);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.tek-announcement-pill:hover {
+	transform: translateY(-2px);
+	border-color: var(--tek-c-cyan);
+	box-shadow: var(--tek-shadow-glow);
+	text-decoration: none;
+	color: var(--vp-c-text-1);
+}
+
+.tek-pill-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: var(--tek-radius-pill);
+	background: linear-gradient(90deg, var(--tek-c-cyan), var(--tek-c-gold));
+	color: #fff;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	line-height: 1.5;
+}
+
+.tek-pill-text {
+	color: var(--vp-c-text-1);
+	font-weight: 500;
+}
+
+.tek-pill-arrow {
+	color: var(--tek-c-cyan);
+	font-size: 14px;
+	line-height: 1;
+	transition: transform 0.2s ease;
+}
+
+.tek-announcement-pill:hover .tek-pill-arrow {
+	transform: translateX(3px);
+}
+
+/* ===================================================================
+   BUTTON ENHANCEMENTS
+   =================================================================== */
+.VPButton.brand {
+	background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, var(--vp-c-brand-2) 100%);
+	border: none;
+	padding: 12px 24px;
+	font-family: var(--vp-font-family-display);
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: var(--tek-radius) !important;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 12px rgba(37, 138, 203, 0.3);
+}
+
+.VPButton.brand:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(37, 138, 203, 0.4);
+}
+
+.VPButton.alt {
+	border: 2px solid var(--vp-c-border);
+	background: transparent;
+	padding: 10px 24px;
+	font-family: var(--vp-font-family-display);
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: var(--tek-radius) !important;
+	transition: all 0.3s ease;
+}
+
+.VPButton {
+	border-radius: var(--tek-radius) !important;
+}
+
+.VPButton.alt:hover {
+	border-color: var(--vp-c-brand-1);
+	color: var(--vp-c-brand-1);
+	transform: translateY(-2px);
+}
+
+/* ===================================================================
+   FEATURE CARDS (VitePress default)
+   =================================================================== */
+.VPFeature {
+	background-color: var(--vp-c-bg-soft);
+	border: 1px solid var(--vp-c-divider);
+	border-radius: var(--tek-radius);
+	box-shadow: var(--tek-shadow-sm);
+	transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.VPFeature:hover {
+	border-color: var(--vp-c-brand-1);
+	box-shadow: var(--tek-shadow-glow);
+	transform: translateY(-3px);
+}
+
+.VPFeature .title {
+	font-family: var(--vp-font-family-display);
+	font-weight: 600;
+	color: var(--vp-c-text-1);
+}
+
+.VPFeature .details {
+	color: var(--vp-c-text-2);
+}
+
+.VPFeature .icon {
+	background-color: var(--vp-c-bg-mute);
+	border: 1px solid var(--vp-c-divider);
+	border-radius: var(--tek-radius);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 48px;
+	height: 48px;
+	margin-bottom: 20px;
+	font-size: 24px;
+	transition: background-color 0.25s, border-color 0.25s;
+}
+
+.VPFeature:hover .icon {
+	background-color: var(--vp-c-brand-soft);
+	border-color: var(--vp-c-brand-1);
+}
+
+/* ===================================================================
+   HEADLINES
+   =================================================================== */
 .vp-doc h1,
 .vp-doc h2,
 .vp-doc h3,
@@ -80,199 +640,106 @@
 .VPHome h2,
 .home-custom-sections h2,
 .home-custom-sections h3 {
-  font-family: var(--vp-font-family-display);
-  letter-spacing: -0.02em;
-}
-
-/* The hero visual is a self-contained SVG diagram; suppress VitePress's
-   default blurred gradient backdrop so there's no glow behind it. */
-.VPHero .image-bg {
-  display: none;
+	font-family: var(--vp-font-family-display);
+	letter-spacing: -0.02em;
 }
 
 /* ===================================================================
-   Home page — atmospheric layered background
-   A faint blueprint grid gives the page subtle structural depth
-   without a loud colored glow.
-   =================================================================== */
-.VPHome {
-  position: relative;
-}
-
-.VPHome::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  /* Blueprint dot grid — subtle structural texture */
-  background-image: radial-gradient(circle at 1px 1px, var(--vp-c-text-3) 1px, transparent 0);
-  background-size: 32px 32px;
-  opacity: 0.06;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 70%, transparent);
-}
-
-/* Ensure custom home sections sit above the texture layer */
-.home-custom-sections,
-.VPFeatures {
-  position: relative;
-  z-index: 1;
-}
-
-/* ===================================================================
-   Feature Cards — glassy, layered, with a colored icon well
-   =================================================================== */
-.VPFeature {
-  background-color: var(--vp-c-bg-soft);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: var(--tek-radius);
-  box-shadow: var(--tek-shadow-sm);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.25s ease,
-              border-color 0.25s ease;
-}
-
-.VPFeature:hover {
-  border-color: var(--vp-c-brand-1);
-  box-shadow: var(--tek-shadow-glow);
-  transform: translateY(-3px);
-}
-
-.VPFeature .title {
-  font-family: var(--vp-font-family-display);
-  font-weight: 600;
-  color: var(--vp-c-text-1);
-}
-
-.VPFeature .details {
-  color: var(--vp-c-text-2);
-}
-
-.VPFeature .icon {
-  background-color: var(--vp-c-bg-mute);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: var(--tek-radius);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 20px;
-  font-size: 24px;
-  transition: background-color 0.25s, border-color 0.25s;
-}
-
-.VPFeature:hover .icon {
-  background-color: var(--vp-c-brand-soft);
-  border-color: var(--vp-c-brand-1);
-}
-
-/* ===================================================================
-   Sidebar brand styling
+   SIDEBAR BRAND
    =================================================================== */
 .MemoFSSidebarBrand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 20px;
-  padding: 12px;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 0 0 20px;
+	padding: 12px;
+	text-decoration: none;
+	border-radius: var(--tek-radius);
+	transition: background-color 0.2s ease;
 }
 
 .MemoFSSidebarBrand:hover {
-  background: var(--vp-c-bg-soft);
+	background: var(--vp-c-bg-soft);
 }
 
 .MemoFSSidebarBrandIcon {
-  width: 32px;
-  height: 32px;
-  flex: 0 0 auto;
+	width: 32px;
+	height: 32px;
+	flex: 0 0 auto;
 }
 
 .MemoFSSidebarBrandContent {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  line-height: 1.3;
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	line-height: 1.3;
 }
 
 .MemoFSSidebarBrandName {
-  font-family: var(--vp-font-family-display);
-  color: var(--vp-c-text-1);
-  font-size: 14px;
-  font-weight: 600;
+	font-family: var(--vp-font-family-display);
+	color: var(--vp-c-text-1);
+	font-size: 14px;
+	font-weight: 600;
 }
 
 .MemoFSSidebarBrandLabel {
-  color: var(--vp-c-text-2);
-  font-size: 12px;
-  font-weight: 400;
+	color: var(--vp-c-text-2);
+	font-size: 12px;
+	font-weight: 400;
 }
 
 /* ===================================================================
-   Tables
+   TABLES
    =================================================================== */
 .vp-doc table {
-  display: table;
-  width: 100%;
+	display: table;
+	width: 100%;
 }
 
 .vp-doc th,
 .vp-doc td {
-  vertical-align: top;
+	vertical-align: top;
 }
 
 /* ===================================================================
-   Ask AI Bar positioning - inline with h1
+   ASK AI BAR
    =================================================================== */
 .VPDoc .content-container {
-  position: relative;
+	position: relative;
 }
 
 .VPDoc .content-container > .ask-ai-bar {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 10;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 10;
 }
 
-/* Ensure doc content has padding for the AskAiBar */
 .VPDoc .vp-doc article {
-  position: relative;
+	position: relative;
 }
 
 /* ===================================================================
-   Feature Showcase Item (layout + animation; scoped styles in
-   HomeLayout.vue handle the rest)
-   =================================================================== */
-.feature-showcase-item {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-/* ===================================================================
-   Terminal Mockup — real mono, layered depth
+   TERMINAL MOCKUP (in How It Works steps)
    =================================================================== */
 .terminal-mockup {
-  background: #1e1e1e;
-  border-radius: var(--tek-radius);
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+	background: #1e1e1e;
+	border-radius: var(--tek-radius);
+	overflow: hidden;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .terminal-header {
-  padding: 12px 16px;
-  background: #2d2d2d;
-  display: flex;
-  gap: 8px;
+	padding: 12px 16px;
+	background: #2d2d2d;
+	display: flex;
+	gap: 8px;
 }
 
 .terminal-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
 }
 
 .terminal-dot.red { background: #ff5f56; }
@@ -280,445 +747,226 @@
 .terminal-dot.green { background: #27c93f; }
 
 .terminal-content {
-  padding: 20px;
-  font-family: var(--vp-font-family-mono);
-  font-size: 14px;
-  line-height: 1.8;
-  color: #d4d4d4;
+	padding: 20px;
+	font-family: var(--vp-font-family-mono);
+	font-size: 14px;
+	line-height: 1.8;
+	color: #d4d4d4;
 }
 
-.terminal-prompt {
-  color: #6a9955;
-}
-
-.terminal-success {
-  color: #6a9955;
-}
-
-.terminal-comment {
-  color: #71717a;
-  font-style: italic;
-}
+.terminal-prompt { color: #6a9955; }
+.terminal-success { color: #6a9955; }
+.terminal-comment { color: #71717a; font-style: italic; }
 
 .step-requirement {
-  margin: 10px 0 0;
-  font-size: 12px;
-  color: var(--vp-c-text-2);
+	margin: 10px 0 0;
+	font-size: 12px;
+	color: var(--vp-c-text-2);
 }
 
 .step-requirement strong {
-  color: var(--vp-c-text-1);
-  font-weight: 600;
+	color: var(--vp-c-text-1);
+	font-weight: 600;
+}
+
+/* Feature showcase item — animation removed */
+.feature-showcase-item {
+	/* no animation */
 }
 
 /* ===================================================================
-   Responsive Design
-   =================================================================== */
-@media (max-width: 768px) {
-  .feature-showcase-item {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-}
-
-/* ===================================================================
-   Animations
-   =================================================================== */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Staggered page-load reveal for home sections */
-@keyframes tekReveal {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ===================================================================
-   Hero enhancements
-   =================================================================== */
-.VPHero .name {
-  background: var(--vp-home-hero-name-background);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: var(--vp-home-hero-name-color);
-  font-family: var(--vp-font-family-display);
-  font-size: 56px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.VPHero .text {
-  font-family: var(--vp-font-family-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.VPHero .tagline {
-  font-size: 20px;
-  color: var(--vp-c-text-2);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* Custom hero visual slot styling */
-.hero-visual-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-/* ===================================================================
-   Button enhancements
-   =================================================================== */
-.VPButton.brand {
-  background: linear-gradient(135deg, var(--vp-c-brand-1) 0%, var(--vp-c-brand-2) 100%);
-  border: none;
-  padding: 12px 24px;
-  font-family: var(--vp-font-family-display);
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(37, 138, 203, 0.3);
-}
-
-.VPButton.brand:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(37, 138, 203, 0.4);
-}
-
-.VPButton.alt {
-  border: 2px solid var(--vp-c-border);
-  background: transparent;
-  padding: 10px 24px;
-  font-family: var(--vp-font-family-display);
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.VPButton.alt:hover {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-brand-1);
-  transform: translateY(-2px);
-}
-
-/* ===================================================================
-   Comparison Table
+   COMPARISON TABLE
    =================================================================== */
 .comparison-table-wrapper {
-  overflow-x: auto;
-  margin-top: 28px;
-  border: 1px solid var(--vp-c-border);
-  border-radius: var(--tek-radius);
-  background: var(--vp-c-bg-soft);
-  box-shadow: var(--tek-shadow-sm);
+	overflow-x: auto;
+	margin-top: 28px;
+	border: 1px solid var(--vp-c-border);
+	border-radius: var(--tek-radius);
+	background: var(--vp-c-bg-soft);
+	box-shadow: var(--tek-shadow-sm);
 }
 
 .comparison-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-  line-height: 1.5;
-  text-align: left;
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 15px;
+	line-height: 1.5;
+	text-align: left;
 }
 
 .comparison-table th {
-  padding: 14px 18px;
-  font-family: var(--vp-font-family-display);
-  font-weight: 600;
-  border-bottom: 2px solid var(--vp-c-border);
-  color: var(--vp-c-text-1);
-  background: var(--vp-c-bg-alt);
+	padding: 14px 18px;
+	font-family: var(--vp-font-family-display);
+	font-weight: 600;
+	border-bottom: 2px solid var(--vp-c-border);
+	color: var(--vp-c-text-1);
+	background: var(--vp-c-bg-alt);
 }
 
 .comparison-table td {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--vp-c-border);
-  color: var(--vp-c-text-2);
+	padding: 14px 18px;
+	border-bottom: 1px solid var(--vp-c-border);
+	color: var(--vp-c-text-2);
 }
 
-.comparison-table tr:last-child td {
-  border-bottom: none;
-}
+.comparison-table tr:last-child td { border-bottom: none; }
 
-.comparison-table tr:hover {
-  background-color: var(--vp-c-bg-mute);
-}
+.comparison-table tr:hover { background-color: var(--vp-c-bg-mute); }
 
 .comparison-table td:first-child,
 .comparison-table th:first-child {
-  font-weight: 600;
-  color: var(--vp-c-text-1);
+	font-weight: 600;
+	color: var(--vp-c-text-1);
 }
 
 .comparison-table-check {
-  color: var(--vp-c-brand-1);
-  font-weight: 700;
-  font-size: 16px;
+	color: var(--vp-c-brand-1);
+	font-weight: 700;
+	font-size: 16px;
 }
 
 .comparison-table-cross {
-  color: var(--vp-c-text-3);
-  font-size: 14px;
+	color: var(--vp-c-text-3);
+	font-size: 14px;
 }
 
 /* ===================================================================
-   Alpha Announcement Bar
-   =================================================================== */
-.alpha-announcement-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40px;
-  background: var(--vp-c-brand-soft);
-  border-bottom: 1px solid var(--vp-c-brand-soft);
-  padding: 8px 16px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  z-index: 100;
-}
-
-.alpha-announcement-bar .alpha-badge {
-  padding: 1px 6px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg);
-  border: 1px solid var(--vp-c-brand-1);
-  flex-shrink: 0;
-}
-
-.alpha-announcement-bar .alpha-link {
-  font-weight: 600;
-  color: var(--vp-c-brand-1);
-  text-decoration: none;
-}
-
-.alpha-announcement-bar .alpha-link:hover {
-  text-decoration: underline;
-  color: var(--vp-c-brand-2);
-}
-
-/* Push down VitePress elements to make space for the top announcement bar */
-:root {
-  --vp-announcement-height: 40px;
-  --vp-layout-top-height: 40px;
-}
-
-.alpha-announcement-bar {
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-}
-
-.VPNav {
-  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPSidebar {
-  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPLocalNav {
-  transition: top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.VPContent {
-  transition: margin-top 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Scroll-based hiding behavior */
-.has-scrolled .alpha-announcement-bar {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.has-scrolled {
-  --vp-layout-top-height: 0px;
-}
-
-/* ===================================================================
-   Code blocks — use the real mono face
+   CODE BLOCKS
    =================================================================== */
 .vp-doc :not(pre) > code,
 .mode-toggle-code code,
 .file-tree-item,
 .recall-score,
 .recall-query-text {
-  font-family: var(--vp-font-family-mono);
+	font-family: var(--vp-font-family-mono);
+}
+
+.vp-doc :not(pre) > code {
+	background-color: var(--vp-c-bg-mute) !important;
+	color: var(--vp-c-text-1) !important;
+	border: 1px solid var(--vp-c-divider) !important;
+	padding: 2px 6px !important;
+	border-radius: var(--tek-radius) !important;
+	font-size: 0.9em !important;
+}
+
+/* All inline code elements in custom landing sections */
+.home-custom-sections :not(pre) > code {
+	font-family: var(--vp-font-family-mono) !important;
+	background-color: var(--vp-c-bg-mute) !important;
+	color: var(--vp-c-text-1) !important;
+	border: 1px solid var(--vp-c-divider) !important;
+	padding: 2px 6px !important;
+	border-radius: var(--tek-radius) !important;
+	font-size: 0.9em !important;
+}
+
+/* Force VitePress codeblock wrapping div to stand out from page background */
+div[class*="language-"] {
+	background-color: var(--vp-code-block-bg) !important;
+	border: 1px solid var(--vp-c-divider) !important;
+	border-radius: var(--tek-radius) !important;
+}
+
+div[class*="language-"] pre {
+	background-color: transparent !important;
 }
 
 /* ===================================================================
-   Changelog page — release-note styling
-   Each `## vX — date` becomes a release header with a brand accent;
-   change-type `#### Added/Fixed/Changed/Removed` headings get a colored,
-   uppercase label keyed off their slug id (e.g. id="added").
+   CHANGELOG PAGE
    =================================================================== */
 .changelog-page .vp-doc h2 {
-  position: relative;
-  margin-top: 56px;
-  padding: 6px 0 10px 18px;
-  border-top: none;
-  border-left: 3px solid var(--vp-c-brand-1);
-  font-family: var(--vp-font-family-mono);
-  font-size: 20px;
-  letter-spacing: -0.01em;
+	position: relative;
+	margin-top: 56px;
+	padding: 6px 0 10px 18px;
+	border-top: none;
+	border-left: 3px solid var(--vp-c-brand-1);
+	font-family: var(--vp-font-family-mono);
+	font-size: 20px;
+	letter-spacing: -0.01em;
 }
 
-.changelog-page .vp-doc h2:first-of-type {
-  margin-top: 32px;
-}
+.changelog-page .vp-doc h2:first-of-type { margin-top: 32px; }
 
-/* The "**Initial alpha release**" line that follows a version heading. */
 .changelog-page .vp-doc h2 + p {
-  margin-top: 6px;
-  color: var(--vp-c-text-2);
-  font-size: 15px;
+	margin-top: 6px;
+	color: var(--vp-c-text-2);
+	font-size: 15px;
 }
 
 .changelog-page .vp-doc h3 {
-  font-family: var(--vp-font-family-display);
-  font-size: 16px;
-  color: var(--vp-c-text-1);
-  margin-top: 28px;
+	font-family: var(--vp-font-family-display);
+	font-size: 16px;
+	color: var(--vp-c-text-1);
+	margin-top: 28px;
 }
 
-/* Change-type labels — small, uppercase, color-coded by section slug. */
 .changelog-page .vp-doc h4 {
-  display: inline-block;
-  margin-top: 18px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-family: var(--vp-font-family-mono);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+	display: inline-block;
+	margin-top: 18px;
+	padding: 2px 10px;
+	border-radius: var(--tek-radius);
+	font-family: var(--vp-font-family-mono);
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
 }
 
 .changelog-page .vp-doc h4[id^="added"] {
-  color: var(--tek-c-archive);
-  background: rgba(91, 212, 115, 0.12);
+	color: var(--tek-c-archive);
+	background: rgba(91, 212, 115, 0.12);
 }
 
 .changelog-page .vp-doc h4[id^="changed"] {
-  color: var(--tek-c-core);
-  background: rgba(79, 178, 243, 0.12);
+	color: var(--tek-c-core);
+	background: rgba(79, 178, 243, 0.12);
 }
 
 .changelog-page .vp-doc h4[id^="fixed"] {
-  color: var(--tek-c-sync);
-  background: rgba(251, 146, 60, 0.12);
+	color: var(--tek-c-sync);
+	background: rgba(251, 146, 60, 0.12);
 }
 
 .changelog-page .vp-doc h4[id^="removed"],
 .changelog-page .vp-doc h4[id^="deprecated"] {
-  color: #f87171;
-  background: rgba(248, 113, 113, 0.12);
+	color: #f87171;
+	background: rgba(248, 113, 113, 0.12);
 }
 
-/* Hide the hover anchor "#" on these pill labels — it breaks the shape. */
-.changelog-page .vp-doc h4 .header-anchor {
-  display: none;
-}
+.changelog-page .vp-doc h4 .header-anchor { display: none; }
 
 /* ===================================================================
-   Blog index — widen the doc content so the 3-up card grid has room.
-   VitePress caps a no-sidebar doc at ~688px; the card grid needs more.
+   BLOG INDEX PAGE
    =================================================================== */
 .blog-index-page .VPDoc .container,
 .blog-index-page .VPDoc:not(.has-sidebar) .content {
-  max-width: 1152px;
+	max-width: 1152px;
 }
 
 /* ===================================================================
-   Announcement bar — mobile responsive
+   RESPONSIVE
    =================================================================== */
+@media (max-width: 768px) {
+	.feature-showcase-item {
+		grid-template-columns: 1fr;
+		gap: 40px;
+	}
+}
+
 @media (max-width: 640px) {
-  .alpha-announcement-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: auto;
-    min-height: 0;
-    padding: 5px 12px;
-    gap: 6px;
-    font-size: 12px;
-    z-index: 100;
-  }
+	.tek-pill-wrap {
+		margin-bottom: 16px;
+	}
+}
 
-  .alpha-announcement-bar .alpha-badge {
-    font-size: 9px;
-    padding: 1px 5px;
-  }
-
-  .alpha-announcement-bar .alpha-description {
-    display: none;
-  }
-
-  .alpha-announcement-bar .alpha-text {
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .alpha-announcement-bar .alpha-link {
-    white-space: nowrap;
-    font-size: 12px;
-  }
-
-  :root {
-    --vp-announcement-height: 30px;
-    --vp-layout-top-height: 30px;
-  }
-
-  .VPNav {
-    top: 30px !important;
-  }
-
-  .VPSidebar {
-    top: 30px !important;
-  }
-
-  .VPLocalNav {
-    top: 30px !important;
-  }
-
-  .VPContent {
-    margin-top: 30px !important;
-  }
-
-  .has-scrolled {
-    --vp-layout-top-height: 0px;
-  }
+@media (max-width: 480px) {
+	.tek-announcement-pill {
+		white-space: normal;
+		text-align: center;
+		padding: 8px 12px;
+		display: inline-flex;
+		flex-direction: column;
+		gap: 6px;
+	}
 }

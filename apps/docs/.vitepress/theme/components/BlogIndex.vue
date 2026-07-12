@@ -55,7 +55,7 @@ import { data as posts } from "../../../blog/posts.data";
   overflow: hidden;
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
-  border-radius: var(--tek-radius-lg);
+  border-radius: var(--tek-radius);
   box-shadow: var(--tek-shadow-sm);
   text-decoration: none;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
@@ -152,7 +152,7 @@ import { data as posts } from "../../../blog/posts.data";
   font-family: var(--vp-font-family-mono);
   font-size: 11px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--tek-radius);
   color: var(--vp-c-brand-1);
   background: var(--vp-c-brand-soft);
 }

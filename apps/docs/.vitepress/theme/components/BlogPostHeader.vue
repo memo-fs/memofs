@@ -93,14 +93,14 @@ const post = computed(() =>
   font-family: var(--vp-font-family-mono);
   font-size: 11px;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: var(--tek-radius);
   color: var(--vp-c-brand-1);
   background: var(--vp-c-brand-soft);
 }
 
 .blog-post-cover {
   margin-top: 28px;
-  border-radius: var(--tek-radius-lg);
+  border-radius: var(--tek-radius);
   overflow: hidden;
   border: 1px solid var(--vp-c-divider);
   box-shadow: var(--tek-shadow-md);

@@ -141,7 +141,7 @@ function scheduleReset(): void {
   height: 26px;
   padding: 0;
   border: 1px solid var(--vp-c-border);
-  border-radius: 5px;
+  border-radius: 0;
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
   cursor: pointer;

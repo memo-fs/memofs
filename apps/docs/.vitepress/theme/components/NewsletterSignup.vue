@@ -139,7 +139,7 @@ async function handleSubmit() {
   margin: 40px 0;
   padding: 20px;
   border: 1px solid var(--vp-c-divider);
-  border-radius: var(--tek-radius-lg);
+  border-radius: var(--tek-radius);
   background: var(--vp-c-bg-soft);
   box-shadow: var(--tek-shadow-sm);
 }
@@ -197,7 +197,7 @@ async function handleSubmit() {
   font-size: 14px;
   font-weight: 600;
   color: var(--vp-c-bg);
-  background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+  background: var(--vp-c-brand-1);
   border: none;
   border-radius: var(--tek-radius);
   cursor: pointer;

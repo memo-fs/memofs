@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vitepress";
 import { head } from "./config/head.mts";
 import { nav } from "./config/nav.mts";
@@ -6,6 +7,13 @@ import { site } from "./config/site.mts";
 
 export default defineConfig({
 	lang: "en-US",
+	vite: {
+		resolve: {
+			alias: {
+				"@": fileURLToPath(new URL("..", import.meta.url)),
+			},
+		},
+	},
 	title: site.title,
 	titleTemplate: ":title | MemoFS",
 	description: site.description,
@@ -13,9 +21,9 @@ export default defineConfig({
 	cleanUrls: true,
 	lastUpdated: true,
 	ignoreDeadLinks: false,
+	srcExclude: ["**/includes/**"],
 	head,
 	markdown: {
-		lineNumbers: true,
 		theme: { light: "github-light", dark: "github-dark" },
 		container: {
 			tipLabel: "TIP",

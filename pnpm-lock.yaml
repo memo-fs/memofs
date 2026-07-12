@@ -120,6 +120,9 @@ importers:
       '@repo/typescript':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      tailwindcss:
+        specifier: ^4.3.2
+        version: 4.3.2
       vitepress:
         specifier: 2.0.0-alpha.17
         version: 2.0.0-alpha.17(@types/node@25.9.3)(jiti@2.7.0)(lightningcss@1.32.0)(postcss@8.5.15)(tsx@4.22.4)(typescript@6.0.3)
@@ -3484,6 +3487,9 @@ packages:
 
   tailwind-merge@3.6.0:
     resolution: {integrity: sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==}
+
+  tailwindcss@4.3.2:
+    resolution: {integrity: sha512-WtctNNSH8A9jlMIqxzuYumOHU5uGZyRv0Q5svQl+oEPy5w84YpBxdb7MdqyiSPQge5jTJ6zFQLq0PFygdccSBA==}
 
   tar@7.5.16:
     resolution: {integrity: sha512-56adEpPMouktRlBLXiaYFFzZ/3+JXa8P9n7WbR+ibIjtviN55mEaOkiysCnPnWm+7kkui1Dn8J9l+g6zV8731w==}
@@ -6891,6 +6897,8 @@ snapshots:
     optional: true
 
   tailwind-merge@3.6.0: {}
+
+  tailwindcss@4.3.2: {}
 
   tar@7.5.16:
     dependencies:

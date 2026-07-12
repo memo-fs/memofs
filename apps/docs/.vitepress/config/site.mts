@@ -5,6 +5,6 @@ export const site = {
 	repo: "https://github.com/christophersesugh/memofs",
 	npm: "https://www.npmjs.com/package/@memofs/core",
 	cloud: "https://memofs.dev",
-	x: "https://x.com/memofs",
+	x: "https://x.com/sezugh",
 	license: "MIT",
 } as const;
