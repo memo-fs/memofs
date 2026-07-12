@@ -480,6 +480,8 @@
    ANNOUNCEMENT PILL
    =================================================================== */
 .tek-pill-wrap {
+	position: relative;
+	z-index: 2;
 	display: flex;
 	justify-content: center;
 	margin-top: 28px;
@@ -867,6 +869,7 @@ div[class*="language-"] {
 	background-color: var(--vp-code-block-bg) !important;
 	border: 1px solid var(--vp-c-divider) !important;
 	border-radius: var(--tek-radius) !important;
+	padding: 0 !important;
 }
 
 div[class*="language-"] pre {
