@@ -21,12 +21,6 @@
           </div>
           <div class="runtime-visual">
             <div class="runtime-code-panel">
-              <div class="runtime-code-bar">
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-filename">memofs.ts</span>
-              </div>
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
 import { <span class="token function">createNodeFsStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
@@ -52,12 +46,6 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
           </div>
           <div class="runtime-visual">
             <div class="runtime-code-panel runtime-code-panel--gold">
-              <div class="runtime-code-bar">
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-dot"></span>
-                <span class="runtime-code-filename">memofs.ts</span>
-              </div>
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
 import { <span class="token function">createNodeFsStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
@@ -337,32 +325,6 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 
 .runtime-code-panel--gold {
   border-color: color-mix(in srgb, var(--tek-c-gold) 25%, transparent);
-}
-
-.runtime-code-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.runtime-code-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  display: block;
-  flex-shrink: 0;
-}
-
-.runtime-code-filename {
-  font-family: var(--vp-font-family-mono);
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
-  margin-left: 4px;
-  letter-spacing: 0.02em;
 }
 
 .runtime-pre {
