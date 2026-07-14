@@ -201,6 +201,64 @@ describe("runtime-API dispatch — slice 1", () => {
 			);
 			expect(seen[0]).toBe("other-project");
 		});
+
+		it("concurrent calls to the same projectId serialize through the layer", async () => {
+			const executionLog: string[] = [];
+			const projectLocks = new Map<string, Promise<void>>();
+			const layer = {
+				acquire: async <T>(
+					projectId: string,
+					fn: () => Promise<T>,
+				): Promise<T> => {
+					const current = projectLocks.get(projectId) ?? Promise.resolve();
+					let resolve!: () => void;
+					const next = new Promise<void>((r) => {
+						resolve = r;
+					});
+					projectLocks.set(projectId, next);
+					await current;
+					try {
+						executionLog.push(`${projectId}:start`);
+						return await fn();
+					} finally {
+						executionLog.push(`${projectId}:end`);
+						resolve();
+						if (projectLocks.get(projectId) === next)
+							projectLocks.delete(projectId);
+					}
+				},
+			};
+
+			const p1 = dispatchRuntimeMessage(
+				tek,
+				{
+					jsonrpc: "2.0",
+					id: 1,
+					method: RUNTIME_METHOD.write,
+					params: { content: "first" },
+				},
+				{ concurrencyLayer: layer },
+			);
+			const p2 = dispatchRuntimeMessage(
+				tek,
+				{
+					jsonrpc: "2.0",
+					id: 2,
+					method: RUNTIME_METHOD.write,
+					params: { content: "second" },
+				},
+				{ concurrencyLayer: layer },
+			);
+
+			await Promise.all([p1, p2]);
+
+			expect(executionLog).toEqual([
+				"runtime-api:start",
+				"runtime-api:end",
+				"runtime-api:start",
+				"runtime-api:end",
+			]);
+		});
 	});
 
 	describe("JSON-RPC protocol errors", () => {

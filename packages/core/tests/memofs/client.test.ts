@@ -6,6 +6,7 @@ import {
 	InMemoryMemoryStore,
 	MemoFS,
 	NOTES_MEMORY_PATH,
+	readMemoryEvents,
 } from "../../src/index";
 
 describe("MemoFS Client", () => {
@@ -243,5 +244,42 @@ describe("MemoFS Client", () => {
 
 		const recall = await memo.recall("test");
 		expect(recall.items.length).toBeGreaterThan(0);
+	});
+
+	it("threads writer to note frontmatter and memory event actor", async () => {
+		const store = new InMemoryMemoryStore();
+		const memo = new MemoFS({ store, projectId: "writer-proj" });
+
+		await memo.writeMemory({
+			content: "Decision made by Alice.",
+			writer: "alice@example.com",
+			source: "dashboard",
+		});
+
+		const notes = await memo.notes.read();
+		expect(notes).toMatch(/- writer: alice@example.com/);
+		expect(notes).toMatch(/- source: dashboard/);
+
+		const events = await readMemoryEvents(store);
+		const writeEvent = events.find((e) => e.type === "memory.created");
+		expect(writeEvent).toBeDefined();
+		expect(writeEvent?.actor?.type).toBe("user");
+		expect(writeEvent?.actor?.id).toBe("alice@example.com");
+	});
+
+	it("defaults to agent actor when writer is omitted (no regression)", async () => {
+		const store = new InMemoryMemoryStore();
+		const memo = new MemoFS({ store, projectId: "no-writer-proj" });
+
+		await memo.writeMemory({ content: "Anonymous note." });
+
+		const notes = await memo.notes.read();
+		expect(notes).not.toMatch(/- writer:/);
+
+		const events = await readMemoryEvents(store);
+		const writeEvent = events.find((e) => e.type === "memory.created");
+		expect(writeEvent).toBeDefined();
+		expect(writeEvent?.actor?.type).toBe("agent");
+		expect(writeEvent?.actor?.id).toBe("memofs");
 	});
 });

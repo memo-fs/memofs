@@ -78,6 +78,7 @@ export async function notesRecord(
 			...(note.tags === undefined ? {} : { tags: note.tags }),
 			...(note.confidence === undefined ? {} : { confidence: note.confidence }),
 			...(note.source === undefined ? {} : { source: note.source }),
+			...(note.writer === undefined ? {} : { writer: note.writer }),
 			...(note.tier === undefined ? {} : { tier: note.tier }),
 			...(note.metadata === undefined ? {} : { metadata: note.metadata }),
 		},

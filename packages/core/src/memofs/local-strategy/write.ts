@@ -65,6 +65,7 @@ export async function writeMemory(
 		...(input.source === undefined
 			? { source: "memofs" }
 			: { source: input.source }),
+		...(input.writer === undefined ? {} : { writer: input.writer }),
 		metadata: {
 			id,
 			...(input.workspaceId === undefined
@@ -84,7 +85,9 @@ export async function writeMemory(
 			...((input.projectId ?? ctx.options.projectId)
 				? { projectId: input.projectId ?? ctx.options.projectId }
 				: {}),
-			actor: { type: "agent", id: "memofs" },
+			actor: input.writer
+				? { type: "user", id: input.writer }
+				: { type: "agent", id: "memofs" },
 			summary: input.title ?? input.content.slice(0, 160),
 			metadata: {
 				id,

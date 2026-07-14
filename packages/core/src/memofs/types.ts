@@ -22,6 +22,47 @@ export type {
 
 export type MemoFSRuntimeMode = "local" | "hybrid";
 
+/**
+ * The kind of task an agent is performing, used by the strategist to tailor
+ * the recall query. The strategist augments the expansion lexicon per task
+ * type so the most relevant memories surface first.
+ *
+ * - `"coding"` — surfaces constraints and recent patterns.
+ * - `"debug"` — surfaces recent errors and bug-fix decisions.
+ * - `"refactor"` — surfaces architecture decisions and dependency graph.
+ * - `"docs"` — surfaces terminology and API contracts.
+ * - `"general"` (default) — the current broad briefing with no extra
+ *   task-type augmentation.
+ *
+ * @public
+ */
+export type TaskType = "coding" | "debug" | "refactor" | "docs" | "general";
+
+/**
+ * The canonical list of valid {@link TaskType} values, in enum order.
+ * Imported by the MCP server (JSON schema `enum`) and the CLI (commander
+ * `choices`) so the set of accepted task types has exactly one source.
+ *
+ * @public
+ */
+export const TASK_TYPES: readonly TaskType[] = [
+	"coding",
+	"debug",
+	"refactor",
+	"docs",
+	"general",
+] as const;
+
+/**
+ * Type guard — returns `true` when `value` is one of {@link TASK_TYPES}.
+ *
+ * @param value - The string to test.
+ * @public
+ */
+export function isTaskType(value: string): value is TaskType {
+	return (TASK_TYPES as readonly string[]).includes(value);
+}
+
 export type MemoryKind =
 	| "decision"
 	| "constraint"
@@ -69,6 +110,12 @@ export interface RecallResult {
 }
 
 export interface MemoryContextInput extends RecallInput {
+	/**
+	 * The kind of task the agent is performing. The strategist augments the
+	 * recall query per task type so the most relevant memories surface first.
+	 * Defaults to `"general"` when omitted.
+	 */
+	taskType?: TaskType;
 	maxBytes?: number;
 	includeCore?: boolean;
 	includeNotes?: boolean;
@@ -203,6 +250,13 @@ export interface WriteMemoryInput {
 	 * recall/graph — they don't pollute retrieval.
 	 */
 	tier?: DurabilityTier;
+	/**
+	 * Optional human writer attribution (email or name). When present, the
+	 * write strategy records it in the note frontmatter and the cloud's audit
+	 * trail uses it instead of the generic default. Distinct from `source` —
+	 * both can be set and both are preserved.
+	 */
+	writer?: string;
 }
 
 export interface WriteMemoryResult {
