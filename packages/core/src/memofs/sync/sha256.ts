@@ -7,16 +7,20 @@
  * @public
  */
 
-import { createHash } from "node:crypto";
+import { hashBytesHex } from "../../core/stores/remote-blob-memory-store";
 
 /**
  * Computes the sha256 hex digest of a UTF-8 string.
  *
  * @param value - The string to hash.
- * @returns A 64-character lowercase hexadecimal digest.
+ * @returns A promise for a 64-character lowercase hexadecimal digest.
  *
  * @public
  */
-export function sha256Hex(value: string): string {
-	return createHash("sha256").update(value).digest("hex");
+export function sha256Hex(value: string): Promise<string> {
+	const encoded = new TextEncoder().encode(value);
+	const buffer = new ArrayBuffer(encoded.byteLength);
+	const bytes = new Uint8Array(buffer);
+	bytes.set(encoded);
+	return hashBytesHex(bytes);
 }

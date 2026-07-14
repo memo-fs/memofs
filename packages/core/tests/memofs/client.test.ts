@@ -61,6 +61,28 @@ describe("MemoFS Client", () => {
 		expect(results.items[0]?.text).toContain("Simba is pair programming");
 	});
 
+	it("writes core memory exactly once per update", async () => {
+		class CountingMemoryStore extends InMemoryMemoryStore {
+			coreWrites = 0;
+
+			override async write(
+				path: Parameters<InMemoryMemoryStore["write"]>[0],
+				content: string,
+			): Promise<void> {
+				if (path === CORE_MEMORY_PATH) this.coreWrites += 1;
+				await super.write(path, content);
+			}
+		}
+
+		const store = new CountingMemoryStore();
+		const memo = new MemoFS({ store });
+		await memo.bootstrap();
+		store.coreWrites = 0;
+		await memo.core.update("Core content should not be duplicated.");
+
+		expect(store.coreWrites).toBe(1);
+	});
+
 	it("records timestamped notes and synchronizes chunks/embeddings", async () => {
 		const store = new InMemoryMemoryStore();
 		const embedder = new FakeEmbedder({ dimensions: 4 });
@@ -142,6 +164,7 @@ describe("MemoFS Client", () => {
 		const memo = new MemoFS({ store });
 
 		const testNode = { id: "a", label: "Entity A", type: "custom" };
+		const targetNode = { id: "b", label: "Entity B", type: "custom" };
 		const testEdge = {
 			id: "a-b",
 			from: "a",
@@ -149,13 +172,13 @@ describe("MemoFS Client", () => {
 			type: "relates",
 		};
 
-		await memo.graph.upsertNodes({ nodes: [testNode] });
+		await memo.graph.upsertNodes({ nodes: [testNode, targetNode] });
 		await memo.graph.upsertEdges({ nodes: [], edges: [testEdge] });
 
 		const nodesResult = await memo.graph.listNodes({});
 		const edgesResult = await memo.graph.listEdges({});
 
-		expect(nodesResult.items.length).toBe(1);
+		expect(nodesResult.items.length).toBe(2);
 		expect(nodesResult.items[0]?.id).toBe("a");
 		expect(edgesResult.items.length).toBe(1);
 		expect(edgesResult.items[0]?.id).toBe("a-b");

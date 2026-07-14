@@ -109,7 +109,10 @@ describe("AdvisoryFileLock", () => {
 			startedAt: new Date().toISOString(),
 		});
 
-		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		const lock = new AdvisoryFileLock(lockPath, {
+			fileMode: 0o600,
+			getProcessStartTime: () => "current-process-start",
+		});
 		await expect(lock.acquire()).resolves.toBeUndefined();
 		expect(lock.isHeld).toBe(true);
 
@@ -131,7 +134,7 @@ describe("AdvisoryFileLock", () => {
 		expect(lock.isHeld).toBe(false);
 	});
 
-	test("reclaims a stale lock older than maxAgeMs even if PID is live (PID-reuse net)", async () => {
+	test("does not reclaim a live lock merely because it is old", async () => {
 		const rootDir = await createTempRoot();
 		const lockPath = path.join(rootDir, ".lock");
 
@@ -139,14 +142,9 @@ describe("AdvisoryFileLock", () => {
 		const ancient = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(); // 2h ago
 		await writeLockFile(lockPath, { pid: process.pid, startedAt: ancient });
 
-		const lock = new AdvisoryFileLock(lockPath, {
-			fileMode: 0o600,
-			maxAgeMs: 60 * 60 * 1000, // 1h
-		});
-		await expect(lock.acquire()).resolves.toBeUndefined();
-		expect(lock.isHeld).toBe(true);
-
-		await lock.release();
+		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		await expect(lock.acquire()).rejects.toThrow(LockHeldError);
+		expect(lock.isHeld).toBe(false);
 	});
 
 	test("reclaims a malformed lock file (human hand-edited)", async () => {
@@ -168,7 +166,10 @@ describe("AdvisoryFileLock", () => {
 
 		await fs.writeFile(lockPath, JSON.stringify({ pid: process.pid }), "utf8");
 
-		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		const lock = new AdvisoryFileLock(lockPath, {
+			fileMode: 0o600,
+			getProcessStartTime: () => "current-process-start",
+		});
 		await expect(lock.acquire()).resolves.toBeUndefined();
 
 		await lock.release();
@@ -214,7 +215,10 @@ describe("AdvisoryFileLock", () => {
 			processStartedAt: "Wed Dec 31 16:00:00 1969",
 		});
 
-		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		const lock = new AdvisoryFileLock(lockPath, {
+			fileMode: 0o600,
+			getProcessStartTime: () => "current-process-start",
+		});
 		await expect(lock.acquire()).resolves.toBeUndefined();
 		expect(lock.isHeld).toBe(true);
 
@@ -233,6 +237,22 @@ describe("AdvisoryFileLock", () => {
 		expect(await pathExists(lockPath)).toBe(true);
 
 		await lock.release();
+	});
+
+	test("release leaves a replacement lock owned by another holder intact", async () => {
+		const rootDir = await createTempRoot();
+		const lockPath = path.join(rootDir, ".lock");
+		const lock = new AdvisoryFileLock(lockPath, { fileMode: 0o600 });
+		await lock.acquire();
+
+		await writeLockFile(lockPath, {
+			pid: process.pid,
+			startedAt: new Date().toISOString(),
+			ownerId: "replacement-owner",
+		});
+		await lock.release();
+
+		expect(await pathExists(lockPath)).toBe(true);
 	});
 });
 

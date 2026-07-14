@@ -63,6 +63,7 @@ export class FsGraphStore implements GraphStore {
 	private readonly nodesPath: MemoryPath;
 	private readonly edgesPath: MemoryPath;
 	private hydrated = false;
+	private hydrationPromise: Promise<void> | undefined;
 
 	constructor(options: FsGraphStoreOptions) {
 		this.store = options.store;
@@ -77,7 +78,21 @@ export class FsGraphStore implements GraphStore {
 	 */
 	async hydrate(): Promise<void> {
 		if (this.hydrated) return;
-		this.hydrated = true;
+		if (this.hydrationPromise) return this.hydrationPromise;
+
+		this.hydrationPromise = this.hydrateOnce().then(
+			() => {
+				this.hydrated = true;
+			},
+			(error: unknown) => {
+				this.hydrationPromise = undefined;
+				throw error;
+			},
+		);
+		return this.hydrationPromise;
+	}
+
+	private async hydrateOnce(): Promise<void> {
 		const nodes = await this.readJsonl(this.nodesPath, parseGraphNodesJsonl);
 		const edges = await this.readJsonl(this.edgesPath, parseGraphEdgesJsonl);
 		if (nodes.length > 0 || edges.length > 0) {
@@ -91,12 +106,14 @@ export class FsGraphStore implements GraphStore {
 	}
 
 	async upsertNodes(nodes: GraphNode[]): Promise<StoredGraphNode[]> {
+		await this.hydrate();
 		const result = await this.inner.upsertNodes(nodes);
 		await this.persist();
 		return result;
 	}
 
 	async upsertEdges(edges: GraphEdge[]): Promise<StoredGraphEdge[]> {
+		await this.hydrate();
 		const result = await this.inner.upsertEdges(edges);
 		await this.persist();
 		return result;
@@ -149,6 +166,7 @@ export class FsGraphStore implements GraphStore {
 	}
 
 	async mergeNodes(input: GraphMergeNodesInput): Promise<StoredGraphNode> {
+		await this.hydrate();
 		const result = await this.inner.mergeNodes(input);
 		await this.persist();
 		return result;
@@ -157,6 +175,7 @@ export class FsGraphStore implements GraphStore {
 	async decayEdges(
 		input: GraphDecayInput,
 	): Promise<{ updated: number; deleted: number }> {
+		await this.hydrate();
 		const result = await this.inner.decayEdges(input);
 		await this.persist();
 		return result;
@@ -166,18 +185,21 @@ export class FsGraphStore implements GraphStore {
 		id: string,
 		options?: { cascadeEdges?: boolean },
 	): Promise<boolean> {
+		await this.hydrate();
 		const result = await this.inner.deleteNode(id, options);
 		await this.persist();
 		return result;
 	}
 
 	async deleteEdge(id: string): Promise<boolean> {
+		await this.hydrate();
 		const result = await this.inner.deleteEdge(id);
 		await this.persist();
 		return result;
 	}
 
 	async clear(): Promise<void> {
+		await this.hydrate();
 		await this.inner.clear();
 		await this.persist();
 	}
@@ -196,6 +218,7 @@ export class FsGraphStore implements GraphStore {
 		snapshot: GraphSnapshot,
 		options?: { clear?: boolean },
 	): Promise<void> {
+		await this.hydrate();
 		await this.inner.importSnapshot(snapshot, options);
 		await this.persist();
 	}

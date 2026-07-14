@@ -25,7 +25,7 @@ import type {
 	WriteMemoryResult,
 } from "../types";
 import {
-	hash,
+	fingerprint,
 	stableEdgeKey,
 	toGraphEdgeInput,
 	toGraphNodeInput,
@@ -54,7 +54,7 @@ export async function writeMemory(
 	const durable = tierDecision.tier === "durable";
 	const now = new Date().toISOString();
 
-	const id = input.id ?? `mem_${hash(`${now}:${input.content}`).slice(0, 16)}`;
+	const id = input.id ?? `mem_${fingerprint(`${now}:${input.content}`)}`;
 	await appendTimestampedNote(ctx.options.store, {
 		timestamp: now,
 		kind: input.kind ?? "note",
@@ -169,7 +169,6 @@ export async function updateCoreMemory(
 		});
 	}
 
-	await writeCoreMemory(ctx.options.store, content);
 	return { content: await readCoreMemory(ctx.options.store) };
 }
 

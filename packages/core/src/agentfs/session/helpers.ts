@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { MemoryPath } from "../../core/constants/memory-paths";
 import type { MemoryStore } from "../../core/types/memory-store";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
@@ -10,7 +9,7 @@ export function createDefaultSessionId(): string {
 		.toISOString()
 		.replaceAll(":", "-")
 		.replaceAll(".", "-");
-	return `session_${timestamp}_${randomUUID().slice(0, 8)}`;
+	return `session_${timestamp}_${globalThis.crypto.randomUUID().slice(0, 8)}`;
 }
 
 export async function readMemoryFile(

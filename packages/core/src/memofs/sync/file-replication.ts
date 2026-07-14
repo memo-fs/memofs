@@ -135,7 +135,7 @@ export function createFileSyncLayer(
 			const manifest: FileManifest = {};
 			for (const path of await listPresentPaths()) {
 				const content = await store.read(path);
-				manifest[path] = sha256Hex(content);
+				manifest[path] = await sha256Hex(content);
 			}
 			return manifest;
 		},
@@ -169,7 +169,7 @@ export function createFileSyncLayer(
 					);
 				}
 				const content = await store.read(path);
-				const actualHash = sha256Hex(content);
+				const actualHash = await sha256Hex(content);
 				if (actualHash !== target.sha256) {
 					throw new Error(
 						`sync.upload: sha256 mismatch for ${target.path} (expected ${target.sha256}, got ${actualHash}).`,
@@ -235,7 +235,7 @@ export function createFileSyncLayer(
 			// Download + verify + write each changed file.
 			for (const target of result.files) {
 				const content = await fetchText(target.presignedGetUrl, signal);
-				const actualHash = sha256Hex(content);
+				const actualHash = await sha256Hex(content);
 				if (actualHash !== target.sha256) {
 					throw new Error(
 						`sync.pull: sha256 mismatch for ${target.path} (expected ${target.sha256}, got ${actualHash}).`,

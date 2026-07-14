@@ -1,5 +1,5 @@
 import { InMemoryMemoryStore, NOTES_MEMORY_PATH } from "@memofs/core";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import {
 	createAgentWorkspacePaths,
 	createMemoFsAgentSession,
@@ -119,5 +119,31 @@ describe("MemoFS AgentFS sessions", () => {
 		expect(result.extracted.durableMemory).toBe("");
 		expect(result.durableMemoryWritten).toBe(false);
 		await expect(memory.read(NOTES_MEMORY_PATH)).resolves.toBe("# Notes\n");
+	});
+
+	test("surfaces durable-memory storage failures instead of reporting a partial completion", async () => {
+		const client = new InMemoryAgentfsClient();
+		const memory = new InMemoryMemoryStore({
+			".memofs/memory/notes.md": "# Notes\n",
+		});
+		vi.spyOn(memory, "append").mockRejectedValueOnce(
+			new Error("storage unavailable"),
+		);
+		const session = createMemoFsAgentSession({
+			client,
+			memory,
+			task: "Persist durable output",
+			sessionId: "session_storage_failure",
+		});
+
+		await session.prepare();
+		await client.writeText(
+			session.paths.output.durableMemory,
+			"# Durable Memory\nPersist this finding.\n",
+		);
+
+		await expect(
+			session.complete({ extractDurableMemory: true }),
+		).rejects.toThrow("storage unavailable");
 	});
 });

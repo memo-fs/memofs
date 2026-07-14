@@ -169,17 +169,7 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 		if (!entry) {
 			throw new MemoryNotFoundError(`Memory file not found: ${path}`, { path });
 		}
-		const bytes = await this.blobClient.get(entry.blobKey);
-		if (bytes === null) {
-			// Manifest says the file exists but the blob is gone — a storage-layer
-			// integrity break, not a normal "missing file". Surface as not-found so
-			// callers (bootstrap, recall) follow the same recovery path.
-			throw new MemoryNotFoundError(
-				`Memory file blob missing for path: ${path} (blob key: ${entry.blobKey})`,
-				{ path, blobKey: entry.blobKey },
-			);
-		}
-		return new TextDecoder().decode(bytes);
+		return this.readEntry(path, entry);
 	}
 
 	async write(path: MemoryPath, content: string): Promise<void> {
@@ -273,8 +263,19 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 	): Promise<string> {
 		const entry = await meta.getEntry(path);
 		if (!entry) return "";
+		return this.readEntry(path, entry);
+	}
+
+	/** Reads and decodes a manifest entry, surfacing broken references. */
+	private async readEntry(path: MemoryPath, entry: BlobEntry): Promise<string> {
 		const bytes = await this.blobClient.get(entry.blobKey);
-		return bytes === null ? "" : new TextDecoder().decode(bytes);
+		if (bytes === null) {
+			throw new MemoryNotFoundError(
+				`Memory file blob missing for path: ${path} (blob key: ${entry.blobKey})`,
+				{ path, blobKey: entry.blobKey },
+			);
+		}
+		return new TextDecoder().decode(bytes);
 	}
 }
 
@@ -286,9 +287,9 @@ export class RemoteBlobMemoryStore implements MemoryStore {
  * computes the *same* content identity the cloud file replica uses, without
  * `node:crypto` (keeping the store Worker-loadable unconditionally).
  *
- * Named `hashBytesHex` (not `sha256Hex`) to avoid clashing with the sync-side
- * `sha256Hex(string): string` exported from `./memofs/sync/sha256` — this one
- * takes bytes and is async (Web Crypto's `subtle.digest` is async).
+ * Named `hashBytesHex` (not `sha256Hex`) to distinguish the byte-oriented
+ * primitive from the sync-side string convenience wrapper. Both are async
+ * because Web Crypto's `subtle.digest` is async.
  *
  * @public
  */
