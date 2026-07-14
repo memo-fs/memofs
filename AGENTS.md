@@ -54,4 +54,3 @@ At the **start of every task**, agents MUST:
   - [testing.md](./.agents/rules/testing.md) / [testing-requirements.md](./.agents/rules/testing-requirements.md): Unit testing instructions using Vitest.
   - [core-concepts.md](./.agents/rules/core-concepts.md): High-level architectural overview of MemoFS memory layers.
 - Global skills: `~/.agents/skills/`
-

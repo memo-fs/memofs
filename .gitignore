@@ -66,6 +66,7 @@ packages/**/.tekmemo/
 docs/adr/
 docs/architecture/
 docs/CONTEXT.md
+docs/discovery
 # Internal tooling - not tracked
 research/
 skills-lock.json
