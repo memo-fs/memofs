@@ -30,8 +30,12 @@ export { runDoctorCommand } from "./doctor";
 export { runEventsCommand } from "./events";
 export {
 	AGENT_RULES_TARGETS,
+	HOOK_EMITTER_TARGETS,
 	MAX_AGENT_RULES_LINES,
+	runGenerateAgentCommand,
+	runGenerateAgentHooksCommand,
 	runGenerateAgentRulesCommand,
+	runGenerateMcpCommand,
 } from "./generate";
 export { runInitCommand } from "./init";
 export { runInspectCommand } from "./inspect";
@@ -39,4 +43,5 @@ export { runReadCommand } from "./read";
 export { runRememberCommand } from "./remember";
 export { runSearchCommand } from "./search";
 export { runSnapshotCommand } from "./snapshot";
+export { runStatusCommand } from "./status";
 export { runValidateCommand } from "./validate";

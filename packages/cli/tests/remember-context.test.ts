@@ -99,7 +99,9 @@ describe("remember and context", () => {
 			expect(result.exitCode).toBe(0);
 			const parsed = JSON.parse(result.stdout.join("\n"));
 			expect(parsed.ok).toBe(true);
-			expect(parsed.data.matches.length).toBeGreaterThan(0);
+			expect(parsed.command).toBe("context");
+			expect(typeof parsed.data.text).toBe("string");
+			expect(parsed.data.text).toContain("Billing webhooks");
 		} finally {
 			await temp.cleanup();
 		}

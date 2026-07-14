@@ -28,13 +28,15 @@
 				"types": "./dist/index.d.cts",
 				"default": "./dist/index.cjs"
 			}
-		}
+		},
+		"./schema/config.json": "./schema/config.json"
 	},
 	"bin": {
 		"memofs": "./dist/bin/memofs.mjs"
 	},
 	"files": [
 		"dist",
+		"schema",
 		"README.md",
 		"LICENSE"
 	],
