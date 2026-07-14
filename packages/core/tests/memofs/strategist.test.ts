@@ -72,6 +72,106 @@ describe("rewriteQuery (stage 1)", () => {
 		const jwtCount = result.expandedTerms.filter((t) => t === "jwt").length;
 		expect(jwtCount).toBe(1);
 	});
+
+	it("augments recall query for taskType: debug", () => {
+		const result = rewriteQuery({ query: "login fails", taskType: "debug" });
+		expect(result.expandedTerms).toContain("error");
+		expect(result.expandedTerms).toContain("bug");
+		expect(result.expandedTerms).toContain("fix");
+		expect(result.expandedTerms).toContain("exception");
+	});
+
+	it("augments recall query for taskType: refactor", () => {
+		const result = rewriteQuery({
+			query: "split the auth module",
+			taskType: "refactor",
+		});
+		expect(result.expandedTerms).toContain("architecture");
+		expect(result.expandedTerms).toContain("structure");
+		expect(result.expandedTerms).toContain("dependency");
+		expect(result.expandedTerms).toContain("coupling");
+	});
+
+	it("augments recall query for taskType: coding", () => {
+		const result = rewriteQuery({
+			query: "add billing endpoint",
+			taskType: "coding",
+		});
+		expect(result.expandedTerms).toContain("constraint");
+		expect(result.expandedTerms).toContain("convention");
+		expect(result.expandedTerms).toContain("pattern");
+	});
+
+	it("augments recall query for taskType: docs", () => {
+		const result = rewriteQuery({
+			query: "explain the API",
+			taskType: "docs",
+		});
+		expect(result.expandedTerms).toContain("api");
+		expect(result.expandedTerms).toContain("documentation");
+		expect(result.expandedTerms).toContain("interface");
+		expect(result.expandedTerms).toContain("contract");
+	});
+
+	it("does not add task-type expansions for general (default)", () => {
+		const result = rewriteQuery({ query: "auth", taskType: "general" });
+		expect(result.expandedTerms).not.toContain("error");
+		expect(result.expandedTerms).not.toContain("architecture");
+		expect(result.expandedTerms).not.toContain("constraint");
+	});
+
+	it("does not add task-type expansions when taskType is omitted", () => {
+		const result = rewriteQuery({ query: "auth" });
+		expect(result.expandedTerms).not.toContain("error");
+		expect(result.expandedTerms).not.toContain("architecture");
+	});
+
+	it("prepends task-type query phrase per ADR 0020 ID5", () => {
+		const debugResult = rewriteQuery({
+			query: "login fails",
+			taskType: "debug",
+		});
+		expect(debugResult.expandedTerms).toContain("recent");
+		expect(debugResult.expandedTerms).toContain("errors");
+		expect(debugResult.expandedTerms).toContain("bug");
+		expect(debugResult.expandedTerms).toContain("fix");
+		expect(debugResult.expandedTerms).toContain("context");
+
+		const refactorResult = rewriteQuery({
+			query: "split the auth module",
+			taskType: "refactor",
+		});
+		expect(refactorResult.expandedTerms).toContain("architecture");
+		expect(refactorResult.expandedTerms).toContain("decisions");
+		expect(refactorResult.expandedTerms).toContain("dependency");
+		expect(refactorResult.expandedTerms).toContain("graph");
+
+		const codingResult = rewriteQuery({
+			query: "add billing endpoint",
+			taskType: "coding",
+		});
+		expect(codingResult.expandedTerms).toContain("constraints");
+		expect(codingResult.expandedTerms).toContain("patterns");
+		expect(codingResult.expandedTerms).toContain("recent");
+		expect(codingResult.expandedTerms).toContain("decisions");
+
+		const docsResult = rewriteQuery({
+			query: "explain the API",
+			taskType: "docs",
+		});
+		expect(docsResult.expandedTerms).toContain("public");
+		expect(docsResult.expandedTerms).toContain("api");
+		expect(docsResult.expandedTerms).toContain("contracts");
+		expect(docsResult.expandedTerms).toContain("documentation");
+	});
+
+	it("does not prepend any phrase for general taskType", () => {
+		const result = rewriteQuery({ query: "auth", taskType: "general" });
+		expect(result.expandedTerms).not.toContain("constraints");
+		expect(result.expandedTerms).not.toContain("recent");
+		expect(result.expandedTerms).not.toContain("architecture");
+		expect(result.expandedTerms).not.toContain("public");
+	});
 });
 
 // ---------------------------------------------------------------------------

@@ -68,3 +68,8 @@ export type {
 	WriteMemoryInput,
 	WriteMemoryResult,
 } from "./types";
+export {
+	isTaskType,
+	TASK_TYPES,
+	type TaskType,
+} from "./types";

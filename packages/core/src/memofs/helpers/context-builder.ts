@@ -141,7 +141,10 @@ export async function assembleContext(
 		}
 	}
 
-	const rewrite = rewriteQuery({ query: input.query });
+	const rewrite = rewriteQuery({
+		query: input.query,
+		taskType: input.taskType,
+	});
 
 	let entitiesContent = "";
 	let hasEntities = false;
