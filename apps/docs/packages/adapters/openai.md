@@ -2,8 +2,6 @@
 
 The OpenAI adapter provides vector embedding capabilities utilizing OpenAI's embeddings API endpoint.
 
----
-
 ## Installation
 
 Install the adapter package in your workspace:
@@ -24,6 +22,10 @@ yarn add @memofs/adapter-openai
 
 ```sh [bun]
 bun add @memofs/adapter-openai
+```
+
+```sh [deno]
+deno add npm:@memofs/adapter-openai
 ```
 
 :::
@@ -52,8 +54,6 @@ const memo = new MemoFS({
   }),
 });
 ```
-
----
 
 ## Configuration API (`OpenAIEmbedderConfig`)
 

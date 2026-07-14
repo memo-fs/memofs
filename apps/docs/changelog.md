@@ -12,6 +12,55 @@ This project follows [semantic versioning](https://semver.org/).
 
 <NewsletterSignup event="changelog" title="Get release notes by email" description="Be the first to know when a new version ships." />
 
+## Unreleased
+
+### Agent Behavior Enforcement (ADR 0020)
+
+A four-layer system that ensures agents actually use MemoFS memory at every session — not just when they feel like it.
+
+#### Core (`@memofs/core`)
+
+##### Added
+- `TaskType` enum: `"coding" | "debug" | "refactor" | "docs" | "general"` — exported from `@memofs/core` along with `TASK_TYPES` constant and `isTaskType` guard
+- `MemoryContextInput.taskType` — the strategist now augments the recall query per task type (lexicon expansion + query prepend) so task-relevant memories surface first
+- `TASK_TYPE_EXPANSIONS` and `TASK_TYPE_QUERY_PREPENDS` in the strategist rewrite pipeline
+
+#### CLI (`memofs`)
+
+##### Added
+- `memofs status` — reads `memory-events.jsonl` and renders a compliance summary showing whether the agent loaded context at session start, consulted memory, and persisted facts
+- `memofs context --task-type <type>` — validates against the `TaskType` enum and passes through to `memo.context()` for strategist query augmentation
+- `memofs context --mark-session-start` — writes a `memory.indexed` event with `metadata.hook: "session-start"` so `memofs status` can find the session boundary
+- `memofs generate agent <target>` — umbrella command that emits a slimmed rules file + platform-specific hooks + copies `git-conventions.md` to the platform-local rules directory
+- `memofs generate agent-hooks <target>` — emits platform-specific hook configuration only (SessionStart, PreCompact, Stop) for Claude Code, Codex, Cursor, and opencode
+- `opencode` target support across all generate commands
+- Platform-local rules directory creation with `git-conventions.md` copy on all generate commands
+
+##### Changed
+- `memofs init` now also writes `.memofs/config.json` with a `$schema` reference (previously only `memofs config init` did)
+- `$schema` in `.memofs/config.json` now points to the schema file bundled in the installed `@memofs/cli` package (`node_modules/@memofs/cli/schema/config.schema.json`) instead of a versioned docs URL — no version drift, no separate publishing step
+- `memofs generate agent-rules` now uses `.md` template files as the single source of truth (via `?raw` imports inlined at build time) instead of hardcoding markdown in TypeScript
+- Generated instructions files now include "Workspace Rules" and "Pointers" sections with a Git conventions link to the platform-local rules directory
+- `generate agent-rules` supported targets table now includes `opencode` (AGENTS.md, `opencode.json` MCP config)
+
+##### Removed
+- `configSchemaUrl(version)` — replaced by `resolveSchemaPath(rootDir)` which resolves the schema from the installed package
+- `scripts/version-schema.ts` — no longer needed; the schema ships with the CLI package
+
+#### MCP Server (`@memofs/mcp-server`)
+
+##### Added
+- `memofs.context` tool now accepts an optional `taskType` parameter (`coding`, `debug`, `refactor`, `docs`, `general`) — validated via `isTaskType` guard
+
+#### Hook System
+
+##### Added
+- SessionStart hook: injects MemoFS context at session start (fail-closed on supported platforms)
+- SubagentStart hook: injects context into subagent sessions
+- PreCompact hook: re-injects context after conversation compaction
+- Stop hook: runs `memofs status` and displays compliance summary at session end
+- Per-platform hook emitters for Claude Code (`systemMessage`), Codex (`systemMessage`), Cursor (`fileOnly`), and opencode (`sessionIdle`)
+
 ## v1.0.0-beta.2 — 2026-07-10
 **First public beta**
 

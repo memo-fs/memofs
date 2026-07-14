@@ -13,8 +13,6 @@ MemoFS organizes agent memory into structured, project-scoped layers. By separat
 | **Graph** | `graph/nodes.jsonl`, `graph/edges.jsonl` | Graph queries | Entity-relationship mapping for structured knowledge. |
 | **Snapshots** | `snapshots/snapshots.jsonl` | On demand | Versioned checkpoints for rolling back bad decisions or edits. |
 
----
-
 ## 1. Core Memory (`core.md`)
 
 Core Memory represents the "identity" and "operating rules" of the workspace. It contains the most essential, high-priority facts that the agent must keep in mind at all times.

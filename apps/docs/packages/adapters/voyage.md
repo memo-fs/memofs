@@ -2,8 +2,6 @@
 
 The Voyage AI adapter integrates Voyage's high-performance, domain-optimized vector embedding and reranking endpoints into MemoFS's hybrid recall system.
 
----
-
 ## Installation
 
 ::: code-group
@@ -24,12 +22,14 @@ yarn add @memofs/adapter-voyage
 bun add @memofs/adapter-voyage
 ```
 
+```sh [deno]
+deno add npm:@memofs/adapter-voyage
+```
+
 :::
 
 > [!NOTE]
 > Requires **Node.js >= 22**.
-
----
 
 ## Usage
 
@@ -57,8 +57,6 @@ const memo = new MemoFS({
   }),
 });
 ```
-
----
 
 ## Configuration API
 

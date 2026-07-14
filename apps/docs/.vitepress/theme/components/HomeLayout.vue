@@ -58,7 +58,10 @@ watch(
 
     <template #doc-before>
       <BlogPostHeader v-if="isBlogPost" />
-      <AskAiBar v-else />
+    </template>
+
+    <template #aside-top>
+      <AskAiBar v-if="!isBlogPost" class="ask-ai-bar-aside" />
     </template>
 
     <template #doc-after>
@@ -107,6 +110,10 @@ watch(
 </template>
 
 <style scoped>
+.ask-ai-bar-aside {
+  margin-bottom: 16px;
+}
+
 .container {
   max-width: var(--tek-container-narrow);
   margin: 0 auto;

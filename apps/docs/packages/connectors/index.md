@@ -4,13 +4,16 @@
 
 Following the file-first architecture, connectors execute strictly on the local machine. Only the resulting memory files are synced to the cloud — API tokens and secrets never leave your local environment.
 
----
-
 ## How It Works
 
-```
-.memofs/connectors.json ──► runConnectors() ──► .memofs/notes.md (+ indexes)
- (config, no tokens)          (local engine)      (source: "connector")
+```mermaid
+flowchart LR
+    A[".memofs/connectors.json<br/>(config only, no tokens or secrets)"]
+        --> B["runConnectors()<br/>Local Connector Engine"]
+
+    B --> C[".memofs/notes.md<br/>source: &quot;connector&quot;"]
+
+    B --> D["Chunk Index"]
 ```
 
 1. **Configuration:** Stored in `.memofs/connectors.json` — one of MemoFS's 11 canonical sync units. Each connector row carries an opaque `secretRef`, never the token.
@@ -27,8 +30,6 @@ Every connector-emitted note is written with three guarantees:
 | `source` | `"connector"` | Discriminates connector content from human-authored notes inside `notes.md` (no new region). |
 | `sourceRefs[0].sourceId` | stable external id (`"issue:42"`) | The dedup key — re-ingest skips already-seen items. |
 | `id` | `conn_<sha256(externalId:content)[:16]>` | Content-derived, no wall-clock. Re-ingesting identical content reproduces identical bytes → the sync manifest reports "no change" → no phantom conflict, no needless upload. |
-
----
 
 ## Installation
 
@@ -55,8 +56,6 @@ bun add @memofs/connectors @memofs/core
 > [!NOTE]
 > Requires **Node.js >= 22**.
 
----
-
 ## Quick Start
 
 ```ts
@@ -78,8 +77,6 @@ console.log(result.skipped); // ["issue:42", ...] — already ingested (dedup)
 console.log(result.errors);  // per-connector recoverable errors
 ```
 
----
-
 ## Workspace Configuration (`connectors.json`)
 
 ```json
@@ -98,8 +95,6 @@ console.log(result.errors);  // per-connector recoverable errors
 ```
 
 The schema (`{ id, type, enabled, schedule, sourceMapping, secretRef }`) is locked. A row carrying a `token`/`secret`/`apiKey` field is rejected — tokens never ride in the file replica.
-
----
 
 ## Secret Resolution
 
@@ -159,8 +154,6 @@ class VaultSecretResolver implements SecretResolver {
 }
 ```
 
----
-
 ## Built-in Connectors
 
 | Connector | `type` | Source | Status |
@@ -195,8 +188,6 @@ Ingests Notion pages from a database (`POST /v1/databases/:id/query`) or a works
 | `limit` | `number` | `50` | Max pages to ingest (cost control). |
 
 The token is a Notion internal integration token (`ntn_…` / `secret_…`) with the target database/page shared to the integration. The `Notion-Version: 2022-06-28` header is set automatically. Rate-limit errors (403/429) are surfaced in `result.errors` (no retry/backoff in v1).
-
----
 
 ## Writing a Custom Connector
 
@@ -234,8 +225,6 @@ registry.register(new LinearConnector());
 await runConnectors({ rootDir, memo, secretResolver, connectorRegistry: registry });
 ```
 
----
-
 ## API Reference
 
 ### `runConnectors(options)`
@@ -268,10 +257,8 @@ Fetches tokens from the MemoFS cloud API (production).
 
 Creates a registry seeded with the built-in connectors (GitHub + Notion), plus any extras.
 
----
-
 ## See Also
 
-- [Core Client API](/packages/core/client)
+- [Core Client API](/packages/core/client/)
 - [Configuration](/packages/core/configuration)
 - [CLI `memofs connectors`](/packages/cli/)

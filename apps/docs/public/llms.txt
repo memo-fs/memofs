@@ -74,6 +74,9 @@ Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.mem
 
 - CLI guide: https://docs.memofs.dev/packages/cli/
 - Commands: https://docs.memofs.dev/packages/cli/
+- Agent behavior enforcement: `memofs generate agent <target>` emits rules + hooks that enforce the MemoFS workflow at session start, compaction, and session end. Supports Claude Code, Codex, Cursor, and opencode.
+- Compliance observability: `memofs status` shows whether the agent loaded context, consulted memory, and persisted facts during the most recent session.
+- Task-aware context: `memofs context --task-type <type>` biases recall toward task-relevant memories (`coding`, `debug`, `refactor`, `docs`, `general`).
 
 ## API reference
 

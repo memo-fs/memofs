@@ -2,8 +2,6 @@
 
 The `@memofs/adapter-workers-ai` adapter utilizes Cloudflare's serverless GPUs to perform graph extraction on Cloudflare Workers without incurring API key setup friction.
 
----
-
 ## Installation
 
 ::: code-group
@@ -24,12 +22,14 @@ yarn add @memofs/adapter-workers-ai
 bun add @memofs/adapter-workers-ai
 ```
 
+```sh [deno]
+deno add npm:@memofs/adapter-workers-ai
+```
+
 :::
 
 > [!NOTE]
 > Requires **Node.js >= 22**.
-
----
 
 ## Usage
 
@@ -55,8 +55,6 @@ export default {
   }
 }
 ```
-
----
 
 ## Configuration API (`WorkersAiExtractorConfig`)
 

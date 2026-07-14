@@ -37,11 +37,51 @@ deno install npm:@memofs/mcp-server
 
 AI clients spawn the MCP server as a background process communicating via standard input/output (stdio). Most agents invoke it on demand via `npx` — no separate install required.
 
-### 1. Claude Desktop Setup
+::: code-group
 
-Add the server definition to your `claude_desktop_config.json` configuration file:
+```json [Claude Desktop]
+/// Local setup:
+// macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+// Windows: %APPDATA%\Claude\claude_desktop_config.json
 
-```json
+// Global setup:
+// macOS/Linux: ~/.claude.json
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@memofs/mcp-server",
+        "--runtime",
+        "local",
+        "--root",
+        "/absolute/path/to/your/project"
+      ]
+    }
+  }
+}
+```
+
+```toml [Codex]
+# Workspace: ./.codex/config.toml
+# Global: ~/.codex/config.toml
+[mcp_servers.memofs]
+command = "npx"
+args = [
+  "-y",
+  "@memofs/mcp-server",
+  "--runtime",
+  "local",
+  "--root",
+  "/absolute/path/to/your/project"
+]
+enabled = true
+```
+
+```json [Cursor]
+// Local setup: ./.cursor/mcp.json
+// Global setup: ~/.cursor/mcp.json
 {
   "mcpServers": {
     "memofs": {
@@ -57,14 +97,66 @@ Add the server definition to your `claude_desktop_config.json` configuration fil
 }
 ```
 
-### 2. Cursor Setup
+```jsonc [Open Code]
+// Project-level: ./opencode.jsonc
+// Global: ~/.config/opencode/opencode.jsonc
+{
+  "mcp": {
+    "memofs": {
+      "type": "local",
+      "command": [
+        "npx", "-y", 
+        "@memofs/mcp-server", 
+        "--runtime", "local", 
+        "--root", "/absolute/path/to/your/project"
+        ],
+      "enabled": true
+    }
+  }
+}
+```
 
-1. Go to **Settings** > **Features** > **MCP**.
-2. Click **+ Add New MCP Server**.
-3. Configure the fields:
-   - **Name:** `memofs`
-   - **Type:** `command`
-   - **Command:** `npx -y @memofs/mcp-server --runtime local --root /path/to/project`
+```json [Gemini]
+// Workspace: ./.gemini/settings.json
+// Global: ~/.gemini/settings.json
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@memofs/mcp-server",
+        "--runtime",
+        "local",
+        "--root",
+        "/absolute/path/to/your/project"
+      ]
+    }
+  }
+}
+```
+
+```json [Github Copilot]
+// Workspace: ./.vscode/mcp.json
+// Global (VS Code): settings.json -> add under the "mcp.servers" object
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@memofs/mcp-server",
+        "--runtime",
+        "local",
+        "--root",
+        "/absolute/path/to/your/project"
+      ]
+    }
+  }
+}
+```
+
+:::
 
 ## Command Flags
 
@@ -107,7 +199,7 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 
 | Tool | Safety | Description |
 |---|---|---|
-| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels and progressive disclosure. |
+| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels, progressive disclosure, and optional `taskType` (`coding`, `debug`, `refactor`, `docs`, `general`) to bias recall toward task-relevant memories. |
 | `memofs.recall` | read | Semantic + lexical hybrid search over memory. |
 | `memofs.remember` | write | Persist a durable memory entry (decision, constraint, goal, preference, reference, summary, or note). |
 | `memofs.consolidate` | write | Run a graph consolidation pass — merge duplicate entities and retire superseded facts. |

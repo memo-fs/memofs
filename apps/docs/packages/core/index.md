@@ -39,7 +39,7 @@ deno add npm:@memofs/core
 
 > [!NOTE]
 > Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.<br/> <br/>
-> Requires **Node.js >= 22** to run in Node environments.
+> Requires **Node.js >= 22**
 
 
 ## Quick Start
@@ -69,7 +69,7 @@ console.log(core);
 
 ## Package Architecture
 
-The `@memofs/core` codebase is organized around a strict layering model:
+The `@memofs/core` is organized around a strict layering model:
 
 1. **`core`**: Canonical schemas, documents, events, and in-memory stores.
 2. **`agentfs`**: Virtual file matching and leases.
@@ -84,7 +84,3 @@ As a public open-source core package, `@memofs/core` remains strictly neutral:
 - It **does not** import or bundle any provider-specific packages (e.g., OpenAI, Voyage, or Turso).
 - It **does not** contain proprietary cloud tenancy, pricing models, or dashboard features.
 - All public capabilities are exported directly from the package root or the Node-only `@memofs/core/node-fs` subpath.
-
-## License
-
-MIT

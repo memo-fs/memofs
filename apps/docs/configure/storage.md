@@ -2,8 +2,6 @@
 
 MemoFS uses a **2-axis storage architecture** that decouples file-based content storage from query-based index and metadata tracking. This split ensures high durability and performance across local and cloud environments.
 
----
-
 ## The 2-Axis Storage Model
 
 Storage is separated into two independent systems:
@@ -32,8 +30,6 @@ Tracks indexes, relational graphs, transactional status, and search schemas. It 
 - **Relevant Adapters:**
   - [Turso / libSQL](../packages/adapters/turso)
   - Postgres-compatible databases
-
----
 
 ## Local Development vs. Cloud Deployments
 

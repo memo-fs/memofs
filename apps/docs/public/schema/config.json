@@ -1,5 +1,5 @@
 {
-	"$id": "https://docs.memofs.dev/1.0.0-alpha.0/config.schema.json",
+	"$id": "https://memofs.dev/schema/config.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "MemoFS CLI Configuration",
 	"type": "object",
@@ -10,7 +10,7 @@
 		},
 		"runtime": {
 			"type": "string",
-			"enum": ["local", "hybrid", "memory"],
+			"enum": ["local", "hybrid"],
 			"description": "The runtime mode to use."
 		},
 		"root": {

@@ -2,8 +2,6 @@
 
 The `@memofs/adapter-ai-sdk` adapter provides a runtime bridge and tool definitions to seamlessly integrate MemoFS memory into Vercel AI SDK applications.
 
----
-
 ## Installation
 
 ::: code-group
@@ -24,12 +22,14 @@ yarn add @memofs/adapter-ai-sdk
 bun add @memofs/adapter-ai-sdk
 ```
 
+```sh [deno]
+bun add npm:@memofs/adapter-ai-sdk
+```
+
 :::
 
 > [!NOTE]
 > Requires **Node.js >= 22**.
-
----
 
 ## Usage
 
@@ -71,8 +71,6 @@ const response = await generateText({
 
 console.log(response.text);
 ```
-
----
 
 ## Core Functions
 

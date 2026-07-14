@@ -6,8 +6,6 @@ MemoFS uses a clear priority chain to resolve configuration settings:
 3. **Workspace Configuration File** (`.memofs/config.json`)
 4. **Default Fallbacks** (Lowest priority)
 
----
-
 ## Runtime Modes
 
 When initializing `MemoFS`, you can select one of two runtime modes:
@@ -15,15 +13,13 @@ When initializing `MemoFS`, you can select one of two runtime modes:
 | Mode | Target | Description |
 |---|---|---|
 | `local` | Off-grid / Zero Config | All reads and writes occur directly on the local filesystem. Zero cloud dependencies. |
-| `hybrid` | Cloud Sync Enabled | Same local engine, plus a cloud replica. Sync via explicit `sync.push` / `sync.pull` verbs — no implicit read/write policies. |
+| `hybrid` | Cloud Sync Enabled | Same local engine, plus a cloud replica and runtime (coming soon). Sync via explicit `sync.push` / `sync.pull` verbs — no implicit read/write policies. |
 
 ```ts
 const memo = new MemoFS({
   mode: "local", // or "hybrid"
 });
 ```
-
----
 
 ## Sync Verbs (Hybrid Mode)
 
@@ -44,8 +40,6 @@ const memo = new MemoFS({
 });
 ```
 
----
-
 ## Workspace Config (`.memofs/config.json`)
 
 The `.memofs/config.json` allows team-wide settings to be committed alongside code:
@@ -59,12 +53,10 @@ The `.memofs/config.json` allows team-wide settings to be committed alongside co
     "embeddingModel": "openai/text-embedding-3-small"
   },
   "cloud": {
-    "baseUrl": "https://memo.memofs.dev"
+    "baseUrl": "https://memofs.dev/api/v1"
   }
 }
 ```
-
----
 
 ## Environment Variables
 
