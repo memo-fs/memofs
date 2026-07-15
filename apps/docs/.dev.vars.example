@@ -1,0 +1,4 @@
+# Resend secret API key (re_…). NEVER commit a real key.
+RESEND_API_KEY=
+# UUID of the "Docs newsletter" segment in Resend.
+RESEND_SEGMENT_ID=

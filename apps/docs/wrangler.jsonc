@@ -1,0 +1,7 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "memofs-docs",
+	"pages_build_output_dir": "./.vitepress/dist",
+	"compatibility_date": "2026-07-15",
+	"vars": { "RESEND_SEGMENT_ID": "" }
+}
