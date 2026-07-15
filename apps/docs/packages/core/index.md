@@ -52,7 +52,8 @@ import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Create a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
-  rootDir: "./.memofs",
+  // MemoFS creates `.memofs/` inside this workspace root.
+  rootDir: ".",
 });
 
 // Create the unified client
@@ -62,10 +63,25 @@ const memo = new MemoFS({
   mode: "local",
 });
 
+await memo.bootstrap();
+
 // Retrieve core memory (returns raw markdown string)
 const core = await memo.core.read();
 console.log(core);
 ```
+
+## Runtime Boundaries
+
+The root `@memofs/core` entry can load in Node.js and Workers when you inject a
+compatible `MemoryStore`. The filesystem store is deliberately Node-only:
+
+```ts
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+```
+
+For Workers, inject a Worker-safe store such as `RemoteBlobMemoryStore` with
+your blob and metadata adapters. The root package does not select a storage
+backend automatically.
 
 ## Package Architecture
 

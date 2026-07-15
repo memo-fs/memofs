@@ -63,13 +63,13 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { runConnectors, EnvSecretResolver } from "@memofs/connectors";
 
-const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const store = createNodeFsMemoryStore({ rootDir: "." });
 const memo = new MemoFS({ store, projectId: "my-app" });
 
 const result = await runConnectors({
-  rootDir: "./.memofs",
+  rootDir: ".",
   memo,
-  secretResolver: new EnvSecretResolver({ rootDir: "./.memofs" }),
+  secretResolver: new EnvSecretResolver({ rootDir: "." }),
 });
 
 console.log(result.written); // ["conn_...", ...] — newly ingested note ids
@@ -111,7 +111,7 @@ Reads `.memofs/secrets.json` — a separate, gitignored, non-synced file:
 ```ts
 import { EnvSecretResolver } from "@memofs/connectors";
 
-const resolver = new EnvSecretResolver({ rootDir: "./.memofs" });
+const resolver = new EnvSecretResolver({ rootDir: "." });
 ```
 
 ### `StaticSecretResolver` (tests/programmatic)

@@ -41,7 +41,7 @@ import { createVoyageEmbedder, createVoyageReranker } from "@memofs/adapter-voya
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "voyage-project",
   
   // Vector generation

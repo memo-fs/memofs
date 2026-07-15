@@ -45,7 +45,7 @@ import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "openai-project",
   embedder: createOpenAIEmbedder({
     apiKey: process.env.OPENAI_API_KEY,

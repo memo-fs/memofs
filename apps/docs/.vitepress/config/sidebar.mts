@@ -86,6 +86,13 @@ export const sidebar: DefaultTheme.Sidebar = {
 			],
 		},
 	],
+	"/blog/": [
+		{
+			text: "Blog",
+			items: [],
+			collapsed: false,
+		},
+	],
 	"/api/": [
 		{
 			text: "API Reference",

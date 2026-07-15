@@ -1,27 +1,55 @@
 # Sync Sub-API (Hybrid Mode Only)
 
+Hybrid mode keeps reads and writes local. The sync namespace only replicates
+canonical memory files to the configured cloud service.
+
 ## `memo.sync.status`
 
-Checks sync status, returning counts of local-only changes or remote-only changes.
+Reads the cloud manifest, latest cursor, storage usage, and last-sync time.
 
 ```ts
 const status = await memo.sync.status();
-console.log(`Unpushed changes: ${status.localChangesCount}`);
+console.log(status.cursor, status.storageBytes);
 ```
 
-## `memo.sync.push`
+## `memo.sync.push` and `memo.sync.complete`
 
-Pushes local modifications to the remote cloud replica (two-phase: upload + complete).
+Sync uses an explicit two-phase protocol. First, send a manifest and receive
+presigned upload targets. Upload each target, then confirm the exact files you
+uploaded with the returned cursor.
 
 ```ts
-const pushResult = await memo.sync.push({});
-await memo.sync.complete({ uploadId: pushResult.uploadId });
+import { assertMemoryPath } from "@memofs/core";
+
+const pushed = await memo.sync.push({
+  projectId: memo.projectId,
+  manifest,
+});
+
+for (const target of pushed.upload) {
+  assertMemoryPath(target.path);
+  const content = await memo.store.read(target.path);
+  await fetch(target.presignedPutUrl, { method: "PUT", body: content });
+}
+
+await memo.sync.complete({
+  projectId: memo.projectId,
+  cursor: pushed.cursor,
+  uploaded: pushed.upload.map(({ path, sha256 }) => ({ path, sha256 })),
+});
 ```
+
+`manifest` is a path-to-SHA-256 map for the local canonical files. The cloud
+service verifies every uploaded hash before committing the manifest.
 
 ## `memo.sync.pull`
 
-Pulls remote memory changes and applies them to the local store.
+Pull accepts either your current manifest or a prior cursor. It downloads
+changed files, removes server-deleted paths, and rebuilds local indexes.
 
 ```ts
-await memo.sync.pull({});
+await memo.sync.pull({
+  projectId: memo.projectId,
+  manifest,
+});
 ```

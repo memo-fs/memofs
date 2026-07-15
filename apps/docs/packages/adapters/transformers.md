@@ -41,7 +41,7 @@ import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "local-project",
   embedder: createTransformersEmbedder({
     model: "Xenova/all-MiniLM-L6-v2", // Run locally with Xenova models

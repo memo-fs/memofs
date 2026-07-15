@@ -13,10 +13,13 @@ When initializing `MemoFS`, you can select one of two runtime modes:
 | Mode | Target | Description |
 |---|---|---|
 | `local` | Off-grid / Zero Config | All reads and writes occur directly on the local filesystem. Zero cloud dependencies. |
-| `hybrid` | Cloud Sync Enabled | Same local engine, plus a cloud replica and runtime (coming soon). Sync via explicit `sync.push` / `sync.pull` verbs — no implicit read/write policies. |
+| `hybrid` | Cloud Sync Enabled | Same local engine plus a cloud file replica. Sync uses explicit `sync.push` / `sync.pull` verbs; reads and writes remain local. |
 
 ```ts
-const memo = new MemoFS({
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
   mode: "local", // or "hybrid"
 });
 ```
@@ -31,7 +34,10 @@ In `hybrid` mode, the cloud is reached via two explicit verbs only — there are
 Reads and writes always hit the local engine. The cloud is a file replica, not a runtime mode.
 
 ```ts
-const memo = new MemoFS({
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
   mode: "hybrid",
   cloud: {
     baseUrl: process.env.MEMOFS_CLOUD_URL!,
@@ -46,6 +52,7 @@ The `.memofs/config.json` allows team-wide settings to be committed alongside co
 
 ```json
 {
+  "$schema": "./node_modules/@memofs/cli/schema/config.json",
   "runtime": "local",
   "projectId": "project-abc",
   "recall": {

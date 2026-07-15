@@ -1,6 +1,7 @@
 ---
 title: Contributing
 description: How to contribute to MemoFS
+sidebar: false
 ---
 
 # Contributing
@@ -25,29 +26,26 @@ corepack prepare pnpm@9 --activate
 git clone https://github.com/memo-fs/memofs.git
 cd memofs
 pnpm install
-pnpm build
-pnpm test
+pnpm validate:workspace
 ```
 
 ## Development workflow
 
-1. Create a branch from `main`:
+### 1. Create a branch from `main`:
 
 ```bash
 git checkout -b feat/my-feature main
 ```
 
-2. Make your changes in the relevant package under `packages/`.
+### 2. Make your changes in the relevant package under `packages/`.
 
-3. Run checks before committing:
+### 3. Validate workspace before committing:
 
 ```bash
-pnpm typecheck
-pnpm test
-pnpm lint
+pnpm validate:workspace
 ```
 
-4. Commit using [Conventional Commits](https://www.conventionalcommits.org/):
+### 4. Commit using [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 feat(core): add memory compaction
@@ -55,11 +53,11 @@ fix(cli): handle missing config gracefully
 docs: update API reference
 ```
 
-5. Open a PR against `main`. The PR template will guide you through the checklist.
+### 5. Open a PR against `main`. The PR template will guide you through the checklist.
 
 ## Where to help
 
-- **Good first issues**: [View on GitHub](https://github.com/memo-fs/memofs/conissues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+- **Good first issues**: [View on GitHub](https://github.com/memo-fs/memofs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 - **Documentation**: Improving guides, fixing typos, adding examples
 - **Tests**: Adding test coverage for edge cases
 - **Adapters**: Building new embedding or storage adapters
@@ -68,14 +66,15 @@ docs: update API reference
 
 ```
 packages/
-  core/          # Memory runtime
-  cli/           # Command line interface
-  server/        # Server deployment
-  mcp/           # MCP server
-  connectors/    # Connector framework
-  adapters/      # Provider adapters (OpenAI, Voyage, etc.)
-  testing/       # Test utilities
-  benchmark-kit/ # Performance benchmarks
+  core/           # Memory runtime
+  cli/            # Command line interface
+  server/         # Server deployment
+  mcp-server/     # MCP server
+  connectors/     # Connector framework
+  adapter-*/      # Provider adapters (OpenAI, Voyage, R2, Turso, etc.)
+  json-rpc/       # JSON-RPC 2.0 primitives
+  testing/        # Test utilities
+  benchmark-kit/  # Performance benchmarks
 ```
 
 ## Package boundaries
@@ -91,5 +90,5 @@ Keep packages provider-neutral and cloud-optional.
 ## Need help?
 
 - Open a [discussion](https://github.com/memo-fs/memofs/discussions) for questions
-- Check the [roadmap](https://docs.memofs.dev/roadmap) for planned work
-- Read the [architecture docs](https://docs.memofs.dev/packages/core/concepts) for design context
+- Check the [roadmap](./roadmap) for planned work
+- Read the [architecture docs](/packages/core/concepts) for design context

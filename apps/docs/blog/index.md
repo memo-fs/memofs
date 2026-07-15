@@ -9,10 +9,10 @@ tags: [product, launch, memory, ai-agents]
 
 # Blog
 
-Updates, insights, and deep dives from the team building MemoFS — file-first memory for AI apps and coding agents.
+Updates, insights, and deep dives from the team building MemoFS.
 
 <BlogIndex />
 
 ---
 
-**Stay in the loop** — follow [@memofs](https://x.com/memofss) on X or watch the [GitHub repo](https://github.com/memo-fs/memofs).
+**Stay in the loop** — follow [@sezugh](https://x.com/sezugh) on X or watch the [GitHub repo](https://github.com/memo-fs/memofs).

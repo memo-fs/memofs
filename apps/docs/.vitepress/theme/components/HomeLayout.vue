@@ -4,6 +4,7 @@ import DefaultTheme from "vitepress/theme";
 import { computed, nextTick, onMounted, watch } from "vue";
 import AnnouncementPill from "./AnnouncementPill.vue";
 import AskAiBar from "./AskAiBar.vue";
+import BlogSidebar from "./BlogSidebar.vue";
 import AudienceSection from "./AudienceSection.vue";
 import BentoShowcase from "./BentoShowcase.vue";
 import BlogPostFooter from "./BlogPostFooter.vue";
@@ -54,6 +55,7 @@ watch(
   <Layout>
     <template #sidebar-nav-before>
       <SidebarBrand />
+      <BlogSidebar v-if="isBlogPost" />
     </template>
 
     <template #doc-before>

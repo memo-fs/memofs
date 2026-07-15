@@ -41,7 +41,7 @@ import { createTursoMetadataStore } from "@memofs/adapter-turso";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "turso-project",
   
   // Inject Turso/libSQL for metadata tracking

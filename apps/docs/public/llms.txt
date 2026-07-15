@@ -34,13 +34,13 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "my-app",
   mode: "local",
 });
 
-await memo.write({ content: "Use D1 for tenant metadata.", kind: "decision" });
-const hits = await memo.recall({ query: "database decisions" });
+await memo.notes.record({ content: "Use D1 for tenant metadata.", kind: "decision" });
+const hits = await memo.recall("database decisions");
 ```
 
 ## Docs
