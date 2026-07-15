@@ -15,9 +15,7 @@ decision-maker.
 
 - **Small changes** — PRs reviewed and merged by the maintainer.
 - **Significant changes** (architecture, public API, package boundaries) are
-  recorded as an **ADR** in [`docs/adr/`](./docs/adr/) before they land. An ADR
-  captures the decision, the alternatives considered, and the rationale, so the
-  reasoning survives the people who made it.
+  recorded as ADRs before they land. An ADR captures the decision, the alternatives considered, and the rationale, so the reasoning survives the people who made it.
 - **Direction** lives in [`ROADMAP.md`](./ROADMAP.md). Priorities shift as we
   learn from users; the roadmap communicates direction, not deadlines.
 
@@ -45,7 +43,7 @@ project can trust, not titles.
 
 Everyone participating in MemoFS agrees to abide by the
 [Code of Conduct](./CODE_OF_CONDUCT.md). Reports of conduct violations go to
-**christopher@memofs.dev** and are handled confidentially by the maintainer.
+**chris@memofs.dev** and are handled confidentially by the maintainer.
 
 ## License
 

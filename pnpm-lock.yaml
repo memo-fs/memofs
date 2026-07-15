@@ -59,6 +59,9 @@ importers:
 
   apps/docs:
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260630.1
+        version: 4.20260630.1
       '@iconify-json/radix-icons':
         specifier: ^1.2.6
         version: 1.2.6

@@ -16,9 +16,9 @@
 "@memofs/cli": major
 ---
 
-# MemoFS 1.0.0-beta.1 — Initial OSS publication
+# MemoFS 1.0.0-beta.2 — Initial OSS publication
 
-First public release of the MemoFS workspace to npm. 15 packages, published together at `1.0.0-beta.1`. All packages are tagged with the `beta` npm dist-tag during the beta period.
+First public release of the MemoFS workspace to npm. 15 packages, published together at `1.0.0-beta.2`. All packages are tagged with the `beta` npm dist-tag during the beta period.
 
 ## Highlights
 
