@@ -8,10 +8,11 @@
 
 import type { JsonObject } from "@memofs/core";
 import type { ConnectorRecord } from "../../types";
+import { formatContent, MAX_BODY_CHARS, truncate } from "../shared/normalize";
 import type { NotionPage, NotionSourceMapping } from "./types";
 
-/** Cap on body excerpt length in the note content (keeps notes.md scannable). */
-export const MAX_BODY_CHARS = 4000;
+/** Re-exported for tests/consumers — see {@link MAX_BODY_CHARS} in `../shared/normalize`. */
+export { MAX_BODY_CHARS };
 
 /**
  * Normalize a single Notion page into a {@link ConnectorRecord}.
@@ -41,21 +42,6 @@ export function normalizeNotionPage(page: NotionPage): ConnectorRecord {
 		...(page.createdAt === undefined ? {} : { occurredAt: page.createdAt }),
 		metadata,
 	};
-}
-
-/** Title + body excerpt + URL, markdown-formatted. */
-function formatContent(title: string, body: string, url: string): string {
-	const lines = [`# ${title}`];
-	if (body.length > 0) {
-		lines.push("", body);
-	}
-	lines.push("", `Source: ${url}`);
-	return lines.join("\n");
-}
-
-function truncate(value: string, max: number): string {
-	if (value.length <= max) return value;
-	return `${value.slice(0, max)}…`;
 }
 
 /**

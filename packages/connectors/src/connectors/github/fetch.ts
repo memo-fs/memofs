@@ -12,20 +12,17 @@
  * @internal
  */
 
+import {
+	isAbortError,
+	REQUEST_TIMEOUT_MS,
+	withRequestTimeout,
+} from "../shared/http";
+import { PAGE_SIZE, resolveLimit } from "../shared/normalize";
 import { parseRepository, resolveKinds } from "./normalize";
 import type { GitHubNode, GitHubSourceMapping } from "./types";
 
-/** Per-kind page size (cost control; GitHub GraphQL has a node limit). */
-const PAGE_SIZE = 25;
-
-/** Default `sourceMapping.limit` — max items per kind. */
-const DEFAULT_LIMIT = 50;
-
 /** GraphQL endpoint. */
 const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
-
-/** Per-request timeout (ms). A stalled endpoint must not hang the whole run. */
-const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * Fetch GitHub nodes (issues / PRs / discussions) for a repository.
@@ -44,7 +41,7 @@ export async function fetchGitHubNodes(
 ): Promise<GitHubNode[]> {
 	const { owner, repo } = parseRepository(sourceMapping);
 	const kinds = resolveKinds(sourceMapping);
-	const limit = resolveLimit(sourceMapping);
+	const limit = resolveLimit(sourceMapping?.limit);
 
 	const nodes: GitHubNode[] = [];
 	for (const kind of kinds) {
@@ -245,14 +242,6 @@ function mapNode(raw: RawGraphQLNode, kind: GitHubNode["kind"]): GitHubNode {
 	};
 }
 
-function resolveLimit(sourceMapping: GitHubSourceMapping | undefined): number {
-	const raw = sourceMapping?.limit;
-	if (typeof raw !== "number" || !Number.isFinite(raw) || raw <= 0) {
-		return DEFAULT_LIMIT;
-	}
-	return Math.floor(raw);
-}
-
 function graphqlHeaders(token: string): Record<string, string> {
 	return {
 		Authorization: `Bearer ${token}`,
@@ -276,41 +265,6 @@ export class GitHubRateLimitError extends Error {
 			if (Number.isFinite(epoch)) this.resetEpoch = epoch;
 		}
 	}
-}
-
-// --- request timeout + abort helpers (shared with the notion connector) ---
-
-/**
- * Combine an optional caller signal with a per-request timeout so a stalled
- * endpoint can't hang the run. Returns the composite signal and a cleanup fn
- * the caller MUST invoke in its `finally`.
- */
-function withRequestTimeout(signal?: AbortSignal): {
-	signal: AbortSignal;
-	clearTimeout: () => void;
-} {
-	const controller = new AbortController();
-	const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-	if (signal !== undefined) {
-		if (signal.aborted) controller.abort();
-		else
-			signal.addEventListener("abort", () => controller.abort(), {
-				once: true,
-			});
-	}
-	return {
-		signal: controller.signal,
-		clearTimeout: () => clearTimeout(timer),
-	};
-}
-
-/** Whether an error is an abort (fetch throws DOMException "AbortError"). */
-function isAbortError(error: unknown): boolean {
-	return (
-		error instanceof Error &&
-		(error.name === "AbortError" ||
-			(error as NodeJS.ErrnoException)?.code === "ABORT_ERR")
-	);
 }
 
 // --- raw GraphQL response shapes (subset) ---

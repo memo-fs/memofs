@@ -13,6 +13,12 @@
  * @internal
  */
 
+import {
+	isAbortError,
+	REQUEST_TIMEOUT_MS,
+	withRequestTimeout,
+} from "../shared/http";
+import { PAGE_SIZE, resolveLimit } from "../shared/normalize";
 import { resolveQuery } from "./normalize";
 import type { NotionPage, NotionSourceMapping } from "./types";
 
@@ -21,15 +27,6 @@ const NOTION_VERSION = "2022-06-28";
 
 /** Notion API base URL. */
 const NOTION_API_BASE = "https://api.notion.com/v1";
-
-/** Per-request page size (Notion caps at 100). */
-const PAGE_SIZE = 25;
-
-/** Default `sourceMapping.limit` — max pages to ingest. */
-const DEFAULT_LIMIT = 50;
-
-/** Per-request timeout (ms). A stalled endpoint must not hang the whole run. */
-const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * Fetch Notion pages per the connector's `sourceMapping`.
@@ -47,7 +44,7 @@ export async function fetchNotionPages(
 	signal?: AbortSignal,
 ): Promise<NotionPage[]> {
 	const query = resolveQuery(sourceMapping);
-	const limit = resolveLimit(sourceMapping);
+	const limit = resolveLimit(sourceMapping?.limit);
 
 	const pages: NotionPage[] = [];
 	let cursor: string | null = null;
@@ -239,14 +236,6 @@ function propertyToText(value: NotionPropertyValue): string {
 	}
 }
 
-function resolveLimit(sourceMapping: NotionSourceMapping | undefined): number {
-	const raw = sourceMapping?.limit;
-	if (typeof raw !== "number" || !Number.isFinite(raw) || raw <= 0) {
-		return DEFAULT_LIMIT;
-	}
-	return Math.floor(raw);
-}
-
 function notionHeaders(token: string): Record<string, string> {
 	return {
 		Authorization: `Bearer ${token}`,
@@ -280,41 +269,6 @@ export class NotionAuthError extends Error {
 		super(message);
 		this.name = "NotionAuthError";
 	}
-}
-
-// --- request timeout + abort helpers (shared with the github connector) ---
-
-/**
- * Combine an optional caller signal with a per-request timeout so a stalled
- * endpoint can't hang the run. Returns the composite signal and a cleanup fn
- * the caller MUST invoke in its `finally`.
- */
-function withRequestTimeout(signal?: AbortSignal): {
-	signal: AbortSignal;
-	clearTimeout: () => void;
-} {
-	const controller = new AbortController();
-	const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-	if (signal !== undefined) {
-		if (signal.aborted) controller.abort();
-		else
-			signal.addEventListener("abort", () => controller.abort(), {
-				once: true,
-			});
-	}
-	return {
-		signal: controller.signal,
-		clearTimeout: () => clearTimeout(timer),
-	};
-}
-
-/** Whether an error is an abort (fetch throws DOMException "AbortError"). */
-function isAbortError(error: unknown): boolean {
-	return (
-		error instanceof Error &&
-		(error.name === "AbortError" ||
-			(error as NodeJS.ErrnoException)?.code === "ABORT_ERR")
-	);
 }
 
 // --- raw REST response shapes (subset) ---
