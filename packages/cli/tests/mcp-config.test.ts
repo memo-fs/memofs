@@ -37,6 +37,21 @@ describe("mcp-config (pure emitter)", () => {
 		expect(parsed.mcpServers.memofs.args).toContain("/proj");
 	});
 
+	it("copilot emits the VS Code servers shape with an explicit stdio type", () => {
+		const { content, path } = emitMcpConfig({
+			target: "copilot",
+			scope: "local",
+			rootDir: "/proj",
+		});
+		expect(path).toBe(".vscode/mcp.json");
+		const parsed = JSON.parse(content);
+		// VS Code reads `servers` (not `mcpServers`) and requires a type field.
+		expect(parsed.mcpServers).toBeUndefined();
+		expect(parsed.servers.memofs.type).toBe("stdio");
+		expect(parsed.servers.memofs.command).toBe("npx");
+		expect(parsed.servers.memofs.args).toEqual(["-y", "@memofs/mcp-server"]);
+	});
+
 	it("opencode emits the json-mcp shape with a command array", () => {
 		const { content } = emitMcpConfig({
 			target: "opencode",

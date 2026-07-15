@@ -5,8 +5,11 @@
  * `@memofs/mcp-server` stdio server with an agent platform. Each platform
  * stores its MCP config in a different place and shape:
  *
- * - `json-mcpServers` — Claude Code, Gemini, Copilot, Cursor: a JSON file with
+ * - `json-mcpServers` — Claude Code, Gemini, Cursor: a JSON file with
  *   an `mcpServers` object (`{ command, args }` per server).
+ * - `json-servers` — Copilot (VS Code `.vscode/mcp.json`): a JSON file with a
+ *   `servers` object (`{ type: "stdio", command, args }` per server). VS Code
+ *   silently ignores an `mcpServers` key and requires an explicit `type`.
  * - `json-mcp` — opencode: a JSON file with an `mcp` object
  *   (`{ type: "local", command: [...] }` per server).
  * - `toml-mcp_servers` — Codex: a TOML file with `[mcp_servers.<name>]` tables.
@@ -54,6 +57,7 @@ export type McpScope = "local" | "global";
  */
 export type McpConfigFormat =
 	| "json-mcpServers"
+	| "json-servers"
 	| "json-mcp"
 	| "toml-mcp_servers";
 
@@ -115,7 +119,7 @@ export const MCP_CONFIG_META: Record<AgentRulesTarget, McpConfigMeta> = {
 		defaultScope: "local",
 	},
 	copilot: {
-		format: "json-mcpServers",
+		format: "json-servers",
 		localPath: ".vscode/mcp.json",
 		globalPath: null,
 		defaultScope: "local",
@@ -235,6 +239,10 @@ function buildJsonServerEntry(
 	if (format === "json-mcp") {
 		return { type: "local", command: [SERVER_COMMAND, ...args] };
 	}
+	if (format === "json-servers") {
+		// VS Code requires an explicit type on every server entry.
+		return { type: "stdio", command: SERVER_COMMAND, args };
+	}
 	return { command: SERVER_COMMAND, args };
 }
 
@@ -258,7 +266,9 @@ function buildTomlBlock(scope: McpScope, rootDir: string): string[] {
  * The top-level JSON key that holds MCP servers, per JSON format.
  */
 function jsonTopKey(format: McpConfigFormat): string {
-	return format === "json-mcp" ? "mcp" : "mcpServers";
+	if (format === "json-mcp") return "mcp";
+	if (format === "json-servers") return "servers";
+	return "mcpServers";
 }
 
 /**
