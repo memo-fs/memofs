@@ -316,7 +316,7 @@ export async function computeLocalManifest(
 	for (const path of CANONICAL_MEMOFS_FILES) {
 		if (!(await store.exists(path))) continue;
 		const content = await store.read(path);
-		manifest[path] = sha256Hex(content);
+		manifest[path] = await sha256Hex(content);
 	}
 	return manifest;
 }
