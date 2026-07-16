@@ -9,6 +9,7 @@ node_modules
 .pnp
 .pnp.js
 .pnpm-store
+.mcp.json
 
 # Local env files
 .env
@@ -71,3 +72,4 @@ docs/discovery
 research/
 skills-lock.json
 .agents/skills/
+YC

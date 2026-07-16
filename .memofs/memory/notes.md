@@ -242,3 +242,21 @@ Commits:
 Total: 35 new tests (22 OSS + 13 cloud). All pass alongside 209 pre-existing. 10 pre-existing failures (oauth-providers + rate-limit env validation) unchanged.
 
 Code review + security review completed. Key findings addressed: file header on sync-rate-limit.test.ts, TSDoc on ApiKeyPin/NewApiKeyPin, comment on consumeSyncToken env-fail catch.
+
+## 2026-07-15T05:08:45.479Z — sha256Hex is async — callers must await
+- kind: decision
+- tags: sha256Hex, connectors, cli, async-discipline, SSOT
+- confidence: 1
+- source: assistant:codex
+- metadata: {"id":"mem_a2202f912cce3c80"}
+
+`@memofs/core`'s `sha256Hex(value: string): Promise<string>` (exported from `packages/core/src/memofs/sync/sha256.ts`) is ASYNC — it composes `hashBytesHex` which returns a Promise. Callers MUST `await` it. Two historical sync-callers were bugs: `packages/connectors/src/id.ts` (connectorNoteId) and `packages/cli/src/commands/cloud.ts:319` (manifest assignment). Both fixed 2026-07-15 to `await sha256Hex(...)`. The correct pattern is shown in `packages/core/src/memofs/sync/file-replication.ts:138,172,238`: `manifest[path] = await sha256Hex(content);`. `connectorNoteId` is now `async function connectorNoteId(record): Promise<string>` and the runner awaits it at the dedup site.
+
+## 2026-07-15T05:08:54.687Z — connectors shared module layout
+- kind: reference
+- tags: connectors, DRY, SSOT, shared-module
+- confidence: 1
+- source: assistant:codex
+- metadata: {"id":"mem_66f5a891420c41ae"}
+
+`packages/connectors/src/connectors/shared/` is the DRY home for cross-connector primitives shared by the GitHub + Notion built-ins. Two modules: `http.ts` — `withRequestTimeout(signal?)`, `isAbortError(error)`, `REQUEST_TIMEOUT_MS = 30_000`; `normalize.ts` — `truncate(value, max)`, `formatContent(title, body, url)`, `resolveLimit(raw)`, `MAX_BODY_CHARS = 4000`, `PAGE_SIZE = 25`, `DEFAULT_LIMIT = 50`. The github/notion `fetch.ts` import from `shared/http` (+ `PAGE_SIZE`, `resolveLimit` from `shared/normalize`); the github/notion `normalize.ts` import `formatContent`, `truncate`, `MAX_BODY_CHARS` and re-export `MAX_BODY_CHARS` for tests. Add a new built-in connector → reuse these, don't re-copy.

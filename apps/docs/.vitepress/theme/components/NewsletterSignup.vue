@@ -130,7 +130,7 @@ async function handleSubmit() {
 
 <style scoped>
 .newsletter {
-  margin: 40px 0;
+  margin: 20px 0;
   padding: 20px;
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--tek-radius);

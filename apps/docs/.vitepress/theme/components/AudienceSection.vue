@@ -11,9 +11,9 @@
               <path d="m9 12 2 2 4-4" />
             </svg>
           </span>
-          <h3>Building AI apps</h3>
+          <h3>Building AI agents/apps</h3>
           <p>
-            Give your app durable memory. Import <code>@memofs/core</code> — the same API
+            Give your agent/app durable memory. Import <code>@memofs/core</code> — the same API
             whether memory lives in local files, the cloud, or both.
           </p>
           <span class="audience-link">See the API reference →</span>

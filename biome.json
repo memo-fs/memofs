@@ -11,6 +11,7 @@
 		"includes": [
 			"**",
 			"!**/*.css",
+			"!**/*.vue",
 			"!**/worker-configuration.d.ts",
 			"!skills-lock.json",
 			"!**/components/ui/**",

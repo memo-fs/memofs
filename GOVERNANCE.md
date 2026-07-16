@@ -7,7 +7,7 @@ structure it hasn't earned yet.
 
 ## Maintainer
 
-**Christopher Sesugh** ([@christophersesugh](https://github.com/christophersesugh))
+**Christopher S. Aondona** ([@christophersesugh](https://github.com/christophersesugh))
 is the founder and lead maintainer. Today, Christopher is the sole committer and
 decision-maker.
 
@@ -43,7 +43,7 @@ project can trust, not titles.
 
 Everyone participating in MemoFS agrees to abide by the
 [Code of Conduct](./CODE_OF_CONDUCT.md). Reports of conduct violations go to
-**chris@memofs.dev** and are handled confidentially by the maintainer.
+**support@memofs.dev** and are handled confidentially by the maintainer.
 
 ## License
 

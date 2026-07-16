@@ -221,9 +221,17 @@ Before opening a pull request, verify:
 
 ## Package boundary rules
 
-Each product package should own one concern. MemoFS is one unified package where all public APIs are exported from `memofs`.
+MemoFS is a monorepo of focused packages under the `@memofs/` scope, each owning
+one concern. The runtime lives in `@memofs/core`; provider integrations live in
+optional `@memofs/adapter-*` packages; the CLI (`@memofs/cli`, published with the
+`memofs` bin), `@memofs/mcp-server`, `@memofs/server`, and `@memofs/connectors`
+each wrap the core for a specific interface. See the zone table in
+[`.agents/rules/package-boundaries.md`](./.agents/rules/package-boundaries.md).
 
-Internally, code is organized by feature area (such as `fs`, `recall`, `agentfs`, `ai-sdk`, etc.), but these are not exposed as separate package entrypoints. All public features are imported directly from `memofs`.
+Within `@memofs/core`, code is organized by feature area (such as `fs`, `recall`,
+`agentfs`, `ai-runtime`, etc.). These are internal modules re-exported from the
+package root — they are not separate package entrypoints, so import them from
+`@memofs/core`, not from deep paths.
 
 Packages in this OSS repo must not contain private MemoFS Cloud logic such as:
 
@@ -239,9 +247,11 @@ Packages in this OSS repo must not contain private MemoFS Cloud logic such as:
 ---
 
 ## Adding a new package or feature
-- **MemoFS features**: Add all new MemoFS capabilities as internal modules under `packages/core/src/<feature>/` and re-export them from the package root [index.ts](./packages/core/src/index.ts). Do not create separate adapter packages or introduce public subpath imports.
+- **Core runtime features**: Add new core capabilities as internal modules under `packages/core/src/<feature>/` and re-export them from the package root [index.ts](./packages/core/src/index.ts). Keep `@memofs/core` provider-neutral — do not introduce public subpath imports for internal modules.
 
-- **New workspace packages**: Future workspace packages (such as MemoFS components) should live beside `packages/core/` under `packages/<package-name>/` and conform to the following directory structure:
+- **Provider or interface packages**: Provider-specific integrations (embedders, rerankers, blob/metadata stores) belong in their own `@memofs/adapter-*` package, and interface layers (CLI, MCP, server, connectors) in their respective packages. They import `@memofs/core` and must not add core memory logic. See [`.agents/rules/package-boundaries.md`](./.agents/rules/package-boundaries.md).
+
+- **New workspace packages**: New workspace packages should live beside `packages/core/` under `packages/<package-name>/` and conform to the following directory structure:
 
 ```txt
 packages/package-name/
@@ -275,13 +285,14 @@ The package should include:
 
 ## Public API rule
 
-The public API should be exported from:
+Each package's public API is exported from its own:
 
 ```txt
 src/index.ts
 ```
 
-Avoid deep imports. Since everything is exported from the root entrypoint `memofs`, import directly from `memofs`.
+Avoid deep imports. Consumers import from the package root — for the runtime
+that's `@memofs/core`, not an internal subpath.
 
 If something is public, export it intentionally.
 
@@ -358,10 +369,10 @@ Run all tests:
 pnpm test
 ```
 
-Run tests for a product package:
+Run tests for a single package:
 
 ```bash
-pnpm --filter memofs test
+pnpm --filter @memofs/core test
 ```
 
 ---
@@ -412,7 +423,8 @@ major:
 Rename public recall adapter interface.
 ```
 
-When changesets are versioned (`pnpm version-packages`), both individual package changelogs and the root `CHANGELOG.md` are updated by Changesets.
+When changesets are versioned (`pnpm version-packages`), each affected package's
+`CHANGELOG.md` is updated by Changesets.
 
 ---
 

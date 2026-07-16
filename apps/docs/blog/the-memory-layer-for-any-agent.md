@@ -1,9 +1,9 @@
 ---
-title: "The Memory Layer for Any Agent"
+title: "The Memory Layer for Any AI Agent"
 description: "Your coding agent is brilliant and has amnesia. MemoFS gives it durable, portable, file-first memory that works with Claude Code, Codex, Cursor, Copilot, opencode — any agent that speaks hooks or MCP — and syncs across machines and teammates through the cloud. Here's the architecture, and how to wire it into whatever you already use."
 date: 2026-07-15
 author: Christopher S. Aondona
-tags: [architecture, memory, ai-agents, hooks, mcp, cloud, local-first]
+tags: [architecture, memory, ai-agents, hooks, mcp, cloud, file-first]
 cover: null
 blog: post
 pageClass: blog-post-page
@@ -14,7 +14,7 @@ Your coding agent is the smartest pair-programmer you've ever had — for exactl
 
 We keep papering over it with bigger context windows. But a context window is working memory, not long-term memory — expensive, capped, and gone the instant it overflows. What agents actually need is a place to *keep* things: decisions, constraints, preferences, the shape of your project. Not a transcript. A memory.
 
-The industry's reflexive answer is "spin up a vector database." We think that's the wrong default — and so, quietly, do most of the highest-traffic production agents, which have converged on something much simpler underneath: **plain files.** MemoFS is the memory runtime built around that insight, and it plugs into whatever agent you already use.
+The industry's reflexive answer is "spin up a vector database." We think that's the wrong default — and quietly, so does a growing share of the ecosystem, which keeps converging on something much simpler underneath: **plain files.** MemoFS is the memory runtime built around that insight, and it plugs into whatever agent you already use.
 
 This post is the argument in full: why files beat a database for agent memory, the six disciplines that separate a real memory runtime from a folder of notes, and — the part you can act on today — how to give memory to *any* agent, whether it supports hooks or not, and share that memory across every machine and teammate you have.
 
@@ -104,7 +104,7 @@ MemoFS ships the parts that are genuinely solved and is candid about the parts t
 
 ---
 
-Those six are the architecture. Now the part you can use this afternoon.
+Those six are the architecture. Now the part you can use this time of the day.
 
 ## Give memory to the agent you already use
 
@@ -144,9 +144,9 @@ The result: you open Claude Code the next morning and it *already knows* your st
 Plenty of excellent agents don't have context-injecting hooks — **Cursor**, **Gemini CLI**, **GitHub Copilot**. That's completely fine. They speak MCP, and MCP is all MemoFS needs.
 
 ```bash
-memofs generate mcp cursor      # writes .cursor/mcp.json
-memofs generate mcp copilot     # writes .vscode/mcp.json
-memofs generate mcp gemini      # writes .gemini/settings.json
+memofs generate mcp cursor      # writes .cursor/mcp.json & .cursor/rules/memofs.mdc
+memofs generate mcp copilot     # writes .vscode/mcp.json & .github/copilot-instructions.md
+memofs generate mcp gemini      # writes .gemini/settings.json & GEMINI.md
 ```
 
 That registers the MemoFS MCP server, which exposes memory as standard tools the agent calls when it needs them. The rules file MemoFS also generates instructs the agent to load context at the start of a task, recall before answering, and persist decisions as it makes them. Slightly less magic than hooks — the agent asks for memory instead of having it handed over — but the exact same memory, the exact same intelligence pipeline underneath.
@@ -225,30 +225,30 @@ And memory doesn't only come from conversations. **Connectors** pull external co
 
 ## What we haven't solved yet
 
-A memory system that claims to be finished is lying. In the spirit of Problem 3 and Problem 6, here's what's still open — and, where it's on the [roadmap](https://docs.memofs.dev/community/roadmap), where it's headed.
+A memory system that claims to be finished is lying. In the spirit of Problem 3 and Problem 6, here's what's still open — and, where it's on the [roadmap](/community/roadmap), where it's headed.
 
 - **Staleness on high-confidence facts.** Today MemoFS mitigates it (supersession, consolidation, recency decay) but doesn't autonomously re-verify a confident memory against reality. This one is actively being worked: **per-kind staleness windows** (facts expire on a schedule that matches their kind — identity lasts a year, logistics a week, flagged inline at query time) are in the *Now* phase, with **model-driven staleness re-verification** and parseable **validity windows** queued behind them.
 - **Memory-poisoning calibration.** The blocklist stops secrets, not adversarial intent — and trust-scoring against crafted, manipulative memories has no calibration-free solution in the current literature. But the building blocks are a whole planned phase: **write-channel provenance** (a required `channel` on every write that sets default confidence), a **trust gate** that holds suspicious writes out of the recall index while keeping them in the audit trail, a `pending_verification` lifecycle, and a **second-layer PII classifier** layered against the blocklist. Provenance-aware, not solved — but moving.
 - **Fully automatic context on every platform.** Agents without context-injecting hooks (Cursor, Gemini, Copilot) rely on the agent *calling* tools rather than having context handed to it. This is the one genuine limit we can't roadmap away: it's an upstream platform capability gap. When those agents add session-start context hooks, MemoFS is ready to use them — until then, MCP tools + a rules file is the honest best we can do, and it works well.
 
-We'd rather ship these as named limits than bury them, and tell you plainly which are moving and which are blocked upstream. A memory you can audit is a memory you can trust — and part of trust is knowing exactly where the edges are, and which ones we're actively pushing outward. The full picture lives on the [public roadmap](https://docs.memofs.dev/community/roadmap).
+We'd rather ship these as named limits than bury them, and tell you plainly which are moving and which are blocked upstream. A memory you can audit is a memory you can trust — and part of trust is knowing exactly where the edges are, and which ones we're actively pushing outward. The full picture lives on the [public roadmap](/community/roadmap).
 
 ## Start remembering
 
 Five minutes, no cloud account required:
 
 ```bash
-npm i @memofs/core          # the runtime
-npx memofs init             # scaffold .memofs/ in your project
+npm i -g @memofs/cli           # the runtime
+npx memofs init                # scaffold .memofs/ in your project
 memofs generate agent claude   # wire up hooks + MCP for your agent
 ```
 
 Then open your agent and watch it start the next session already knowing your project.
 
-- **Core runtime** — `@memofs/core` · [docs](https://docs.memofs.dev/packages/core/)
-- **CLI** — `npx memofs` · [commands](https://docs.memofs.dev/packages/cli/)
-- **MCP server** (Claude Code, Cursor, Codex, Copilot, opencode, Zed, any MCP client) — `npx -y @memofs/mcp-server` · [setup](https://docs.memofs.dev/packages/mcp/)
-- **Connectors** — GitHub, Notion, and your own · [docs](https://docs.memofs.dev/packages/connectors/)
+- **Core runtime** — `@memofs/core` · [docs](/packages/core/)
+- **CLI** — `npx memofs` · [commands](/packages/cli/)
+- **MCP server** (Claude Code, Cursor, Codex, Copilot, opencode, Zed, any MCP client) — `npx -y @memofs/mcp-server` · [setup](/packages/mcp/)
+- **Connectors** — GitHub, Notion, and your own · [docs](/packages/connectors/)
 
 ---
 

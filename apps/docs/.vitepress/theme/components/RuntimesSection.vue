@@ -27,7 +27,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 <span class="token comment">// All memory stays on disk — offline-first.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsStore</span>(
-    { rootDir: <span class="token string">"./.memofs"</span> }
+    { rootDir: <span class="token string">"."</span> }
   ),
   projectId: <span class="token string">"my-app"</span>,
   mode: <span class="token string">"local"</span>,
@@ -52,7 +52,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 <span class="token comment">// Local speed + cloud replica.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsStore</span>(
-    { rootDir: <span class="token string">"./.memofs"</span> }
+    { rootDir: <span class="token string">"."</span> }
   ),
   mode: <span class="token string">"hybrid"</span>,
   cloud: {
