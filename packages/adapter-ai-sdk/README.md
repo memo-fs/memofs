@@ -27,10 +27,6 @@ provider packages).
 
 ```bash
 npm install @memofs/adapter-ai-sdk
-
-# or: pnpm add @memofs/adapter-ai-sdk
-# or: yarn add @memofs/adapter-ai-sdk
-# or: bun add @memofs/adapter-ai-sdk
 ```
 
 > Requires **Node.js >= 22**.
@@ -51,7 +47,7 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createAiSdkRuntimeFromMemofs } from "@memofs/adapter-ai-sdk";
 
-const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const store = createNodeFsMemoryStore({ rootDir: "." });
 const memo = new MemoFS({ store, projectId: "demo" });
 const runtime = createAiSdkRuntimeFromMemofs(memo);
 ```

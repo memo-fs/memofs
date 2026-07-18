@@ -19,10 +19,6 @@ Benchmark kit, workloads, and runners for MemoFS.
 
 ```bash
 npm install @memofs/benchmark-kit
-
-# or: pnpm add @memofs/benchmark-kit
-# or: yarn add @memofs/benchmark-kit
-# or: bun add @memofs/benchmark-kit
 ```
 
 > Requires **Node.js >= 22**.

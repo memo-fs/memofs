@@ -19,10 +19,6 @@ OpenAI embeddings adapter for MemoFS.
 
 ```bash
 npm install @memofs/adapter-openai
-
-# or: pnpm add @memofs/adapter-openai
-# or: yarn add @memofs/adapter-openai
-# or: bun add @memofs/adapter-openai
 ```
 
 > Requires **Node.js >= 22**.
@@ -79,7 +75,7 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createOpenAIEmbedder } from "@memofs/adapter-openai";
 
-const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const store = createNodeFsMemoryStore({ rootDir: "." });
 
 const memo = new MemoFS({
   store,

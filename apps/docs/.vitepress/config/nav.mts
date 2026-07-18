@@ -11,7 +11,7 @@ export const nav: DefaultTheme.NavItem[] = [
 		link: "/api/",
 		activeMatch: "/api/",
 	},
-	
+
 	{
 		text: "Changelog",
 		link: "/community/changelog",

@@ -30,10 +30,6 @@ Turso metadata store, without touching the runtime.
 
 ```bash
 npm install @memofs/adapter-r2
-
-# or: pnpm add @memofs/adapter-r2
-# or: yarn add @memofs/adapter-r2
-# or: bun add @memofs/adapter-r2
 ```
 
 > Requires **Node.js >= 22**.

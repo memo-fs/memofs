@@ -155,7 +155,7 @@ MemoFS is structured as a monorepo containing 15 published public packages under
 
 The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run MemoFS.
 
-**MemoFS Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
+**MemoFS Cloud** is the memory plane for your agents: it keeps every machine, teammate, and agent on the same memory, and gives you a dashboard to see and govern it.
 
 | Feature | Open source (this repo) | MemoFS Cloud |
 | --- | --- | --- |
@@ -163,9 +163,10 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 | CLI + stdio MCP server | ✅ | ✅ |
 | All adapters (OpenAI, Voyage, etc.) | ✅ | ✅ |
 | Hosted sync (keep memory in sync) | ✅ client | ✅ hosted |
-| Hosted managed MCP endpoint | — | ✅ available |
-| Team Workspaces & Access Control | — | Planned |
-| Managed-runtime (Recall/Graph host) | — | Roadmap |
+| Team workspaces & access control | — | ✅ available |
+| Memory dashboard (explore, consolidate) | — | ✅ available |
+| Hosted managed MCP endpoint | — | Soon |
+| Managed runtime (memory API over HTTPS) | — | Soon |
 
 [Join the Cloud waitlist →](https://memofs.dev)
 

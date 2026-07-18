@@ -21,10 +21,6 @@ The adapter talks to Voyage's REST API directly using the built-in `fetch`, so t
 
 ```bash
 npm install @memofs/adapter-voyage
-
-# or: pnpm add @memofs/adapter-voyage
-# or: yarn add @memofs/adapter-voyage
-# or: bun add @memofs/adapter-voyage
 ```
 
 > Requires **Node.js >= 22**.
@@ -120,7 +116,7 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createVoyageEmbedder } from "@memofs/adapter-voyage";
 
-const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const store = createNodeFsMemoryStore({ rootDir: "." });
 
 const memo = new MemoFS({
   store,

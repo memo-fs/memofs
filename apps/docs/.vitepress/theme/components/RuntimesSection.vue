@@ -67,11 +67,13 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
         <div class="runtime-card runtime-card--full tek-reveal" data-delay="3">
           <div class="runtime-managed-left">
             <span class="tek-kicker">Managed · Coming soon</span>
-            <h3>Cloud hosted</h3>
+            <h3>Memory as an API</h3>
             <p>
-              MemoFS Cloud hosts the engine. Thin clients — CI pipelines, edge functions, dashboards —
-              can read and write memory over HTTPS with zero local files.
-              The same <code>@memofs/core</code> API, no checkout required.
+              MemoFS Cloud hosts the engine. Thin clients — CI pipelines, edge functions,
+              chatbots, hosted agents — query and write memory over HTTPS or a hosted MCP
+              endpoint, with zero local files. The same <code>@memofs/core</code> surface,
+              no checkout required. Your files stay the source of truth: leaving is a
+              config change, not a migration.
             </p>
             <a
               href="https://memofs.dev/waitlist"
@@ -86,15 +88,15 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
             <li>
               <span class="rmf-icon">☁</span>
               <span class="rmf-body">
-                <strong>Cloud-hosted engine</strong>
-                No local checkout, no disk writes
+                <strong>One memory, everywhere</strong>
+                Every machine, agent, and teammate reads the same brain
               </span>
             </li>
             <li>
               <span class="rmf-icon">⚡</span>
               <span class="rmf-body">
-                <strong>Read &amp; write over HTTPS</strong>
-                Works from CI, serverless, or browser
+                <strong>Read &amp; write over HTTPS or MCP</strong>
+                Works from CI, serverless, or any MCP client — one URL + key
               </span>
             </li>
             <li>
@@ -107,8 +109,8 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
             <li>
               <span class="rmf-icon">⚙</span>
               <span class="rmf-body">
-                <strong>Team memory sync</strong>
-                Shared knowledge across every developer on the project
+                <strong>See your memory think</strong>
+                A dashboard to inspect, govern, and consolidate what agents remember
               </span>
             </li>
           </ul>

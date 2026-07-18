@@ -27,10 +27,6 @@ If you want to install the server as a dev dependency instead:
 
 ```bash
 npm install -D @memofs/mcp-server
-
-# or: pnpm add -D @memofs/mcp-server
-# or: yarn add -D @memofs/mcp-server
-# or: bun add -d @memofs/mcp-server
 ```
 
 > Requires **Node.js >= 22**.
@@ -43,24 +39,25 @@ npx -y @memofs/mcp-server --help
 
 ## Quick Start
 
-You can configure your MCP client (e.g., Claude Desktop or Cursor) to start the server via stdio.
+You can configure your MCP client (e.g., Claude Desktop, Cursor, or any MCP client) to start the server via stdio.
 
-### Claude Desktop / Cursor Config
+### MCP clients config
 
 ```json
 {
- "mcpServers": {
-  "memofs": {
-  "command": 
-    "npx",
-    "args": [
- "-y",
- "@memofs/mcp-server",
- "--runtime", "local",
- "--root", "/absolute/path/to/project"
- ]
- }
- }
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@memofs/mcp-server",
+        "--runtime",
+        "local",
+        "--root",
+        "/absolute/path/to/project"
+      ]
+    }
+  }
 }
 ```
 

@@ -120,6 +120,5 @@ export default withMermaid(
 		mermaidPlugin: {
 			class: "mermaid",
 		},
-
 	}),
 );

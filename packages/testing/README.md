@@ -19,10 +19,6 @@ Shared contract tests, fixtures, fakes, and assertion helpers for MemoFS package
 
 ```bash
 npm install -D @memofs/testing vitest
-
-# or: pnpm add -D @memofs/testing vitest
-# or: yarn add -D @memofs/testing vitest
-# or: bun add -d @memofs/testing vitest
 ```
 
 `vitest` is a peer dependency.

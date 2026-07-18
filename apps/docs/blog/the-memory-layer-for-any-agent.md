@@ -197,7 +197,7 @@ The full surface is namespaced and honest about what it does: `memo.core`, `memo
 
 Local memory is the foundation. But a memory that only exists on one laptop isn't a memory you can build on. This is where MemoFS Cloud comes in — and its design is deliberately, almost aggressively, boring in the best way.
 
-**The cloud is a file replica, not an engine.** It stores byte-for-byte copies of your `.memofs/` files and syncs them by path and content hash. It never embeds, never recalls, never runs your graph, never hosts an agent. All the intelligence stays local, on your machine, where it's fast and private. The cloud's only job is to make your files *fresh everywhere.* That's a freshness enhancement, not an intelligence transplant — and it means your memory works identically whether the cloud is reachable or not.
+**The sync path is a file replica, not an engine.** It stores byte-for-byte copies of your `.memofs/` files and syncs them by path and content hash — it never parses, indexes, or embeds what it carries. All the local intelligence stays local, on your machine, where it's fast and private. The sync layer's only job is to make your files *fresh everywhere.* That's a freshness enhancement, not an intelligence transplant — and it means your memory works identically whether the cloud is reachable or not. (The optional hosted runtime — the same open-source engine, run for you in the cloud dashboard — is a separate, opt-in surface; when you use it, it processes those projects' content solely to power recall and consolidation for you.)
 
 Sync is explicit and content-addressed:
 
@@ -215,7 +215,7 @@ That unlocks the things people actually want:
 - **Multi-agent.** Point Claude Code, Cursor, and a custom SDK agent at the same project. They read from one shared brain and write back to it. Your Codex session benefits from what your Claude Code session learned.
 - **Teams.** A team is the unit of shared memory. Invite teammates, and everyone's agents draw on the same project knowledge — onboarding a new engineer means their agent inherits months of accumulated context on day one, instead of them re-discovering it the hard way.
 
-For hosted setups there's also a cloud MCP server over HTTP with bearer-token auth, read-only by default — so you can give an agent read access to shared memory without handing it write privileges.
+For hosted setups, a cloud MCP endpoint is coming soon — one URL plus a bearer API key, read-only by default — so you'll be able to give an agent on a checkout-less machine read access to shared memory without handing it write privileges.
 
 ## It's not just for coding
 

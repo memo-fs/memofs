@@ -4,38 +4,48 @@ export const sidebar: DefaultTheme.Sidebar = {
 	"/": [
 		{
 			text: "Core Runtime",
-			collapsed:false,
+			collapsed: false,
 			items: [
 				{ text: "Overview", link: "/packages/core/" },
 				{ text: "Core Concepts", link: "/packages/core/concepts" },
 				{ text: "Configuration", link: "/packages/core/configuration" },
 				{ text: "AgentFS", link: "/packages/core/agentfs" },
-				{ text: "Client API", items: [
-					{ text: "Constructor", link: "/packages/core/client/" },
-					{ text: "Memory Sub-Paths", link: "/packages/core/client/sub-paths" },
-					{ text: "Recall & Context", link: "/packages/core/client/recall" },
-					{ text: "Graph Sub-API", link: "/packages/core/client/graph" },
-					{ text: "Snapshots Sub-API", link: "/packages/core/client/snapshots" },
-					{ text: "AgentFS Sub-API", link: "/packages/core/client/agentfs" },
-					{ text: "Sync Sub-API", link: "/packages/core/client/sync" },
-					{ text: "Utilities", link: "/packages/core/client/utilities" }
-				],
-				collapsed:false
+				{
+					text: "Client API",
+					items: [
+						{ text: "Constructor", link: "/packages/core/client/" },
+						{
+							text: "Memory Sub-Paths",
+							link: "/packages/core/client/sub-paths",
+						},
+						{ text: "Recall & Context", link: "/packages/core/client/recall" },
+						{ text: "Graph Sub-API", link: "/packages/core/client/graph" },
+						{
+							text: "Snapshots Sub-API",
+							link: "/packages/core/client/snapshots",
+						},
+						{ text: "AgentFS Sub-API", link: "/packages/core/client/agentfs" },
+						{ text: "Sync Sub-API", link: "/packages/core/client/sync" },
+						{ text: "Utilities", link: "/packages/core/client/utilities" },
+					],
+					collapsed: false,
 				},
 			],
 		},
 		{
 			text: "Self-Hosting",
-			collapsed:false,
+			collapsed: false,
 			items: [
-				{ text: "Server Deployment", items:[
-					{ text: "Overview", link: "/packages/server/" },
-					{ text: "Node.js", link: "/packages/server/node" },
-					{ text: "Cloudflare", link: "/packages/server/cloudflare" },
-					{ text: "HTTP API", link: "/packages/server/http-api" },
-					{ text: "API Reference", link: "/packages/server/api-reference" },
-				],  
-			},
+				{
+					text: "Server Deployment",
+					items: [
+						{ text: "Overview", link: "/packages/server/" },
+						{ text: "Node.js", link: "/packages/server/node" },
+						{ text: "Cloudflare", link: "/packages/server/cloudflare" },
+						{ text: "HTTP API", link: "/packages/server/http-api" },
+						{ text: "API Reference", link: "/packages/server/api-reference" },
+					],
+				},
 				{ text: "Configure Storage", link: "/configure/storage" },
 				{ text: "Configure Intelligence", link: "/configure/intelligence" },
 			],
@@ -56,20 +66,20 @@ export const sidebar: DefaultTheme.Sidebar = {
 		},
 		{
 			text: "Command Line (CLI)",
-			collapsed:false,
+			collapsed: false,
 			items: [
-				{ text: "Overview", link: "/packages/cli/" }, 
+				{ text: "Overview", link: "/packages/cli/" },
 				{ text: "Memory Commands", link: "/packages/cli/memory" },
 				{ text: "Agent Commands", link: "/packages/cli/agent" },
 				{ text: "Generate Commands", link: "/packages/cli/generate" },
 				{ text: "Connectors Commands", link: "/packages/cli/connectors" },
 				{ text: "Cloud Commands", link: "/packages/cli/cloud" },
-				{ text: "Config Commands", link: "/packages/cli/config" }
+				{ text: "Config Commands", link: "/packages/cli/config" },
 			],
 		},
 		{
 			text: "Model Context Protocol (MCP)",
-			collapsed:false,
+			collapsed: false,
 			items: [{ text: "MCP Server", link: "/packages/mcp/" }],
 		},
 		{
@@ -78,7 +88,7 @@ export const sidebar: DefaultTheme.Sidebar = {
 		},
 		{
 			text: "Developer Tooling",
-			collapsed:false,
+			collapsed: false,
 			items: [
 				{ text: "JSON-RPC Primitives", link: "/packages/json-rpc" },
 				{ text: "Testing Framework", link: "/packages/testing" },

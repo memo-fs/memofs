@@ -19,10 +19,6 @@ The `@memofs/cli` package gives you a command-line tool (`memofs`) for managing 
 
 ```bash
 npm install -D @memofs/cli
-
-# or: pnpm add -D @memofs/cli
-# or: yarn add -D @memofs/cli
-# or: bun add -d @memofs/cli
 ```
 
 > Requires **Node.js >= 22**.

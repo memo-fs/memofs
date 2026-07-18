@@ -12,6 +12,25 @@
         contradicts last week's decision. It has no memory of what you chose, because
         there was nowhere to put it.
       </p>
+      <p class="problem-body problem-body-follow">
+        And giving one agent a memory only shrinks the problem — it doesn't solve it.
+        Every agent, machine, and teammate ends up with a <em>different</em> memory,
+        and you can't see any of them:
+      </p>
+      <ul class="problem-symptoms">
+        <li>
+          <strong>Divergent.</strong> Your laptop, CI, and your teammate's agent each
+          remember a different project.
+        </li>
+        <li>
+          <strong>Invisible.</strong> You can't see what your agents have recorded,
+          so you can't trust it — or correct it.
+        </li>
+        <li>
+          <strong>Unreachable.</strong> No checkout means no memory: CI jobs,
+          serverless functions, and hosted agents start from zero.
+        </li>
+      </ul>
     </div>
   </section>
 </template>
@@ -62,6 +81,47 @@
   line-height: 1.75;
   color: var(--vp-c-text-2);
   max-width: 60ch;
+}
+
+.problem-body-follow {
+  margin-top: 20px;
+}
+
+.problem-body-follow em {
+  font-style: italic;
+  color: var(--vp-c-text-1);
+}
+
+.problem-symptoms {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 60ch;
+}
+
+.problem-symptoms li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--vp-c-text-2);
+}
+
+.problem-symptoms li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 8px;
+  height: 2px;
+  background: linear-gradient(120deg, var(--tek-c-cyan), var(--tek-c-gold));
+}
+
+.problem-symptoms strong {
+  color: var(--vp-c-text-1);
 }
 
 @media (max-width: 640px) {

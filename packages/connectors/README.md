@@ -21,10 +21,6 @@ Each source is a plugin implementing the provider-neutral `Connector` interface 
 
 ```bash
 npm install @memofs/connectors @memofs/core
-
-# or: pnpm add @memofs/connectors @memofs/core
-# or: yarn add @memofs/connectors @memofs/core
-# or: bun add @memofs/connectors @memofs/core
 ```
 
 > Requires **Node.js >= 22**.
