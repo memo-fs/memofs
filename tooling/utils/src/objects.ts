@@ -41,6 +41,29 @@ export function cloneRecord<T extends Record<string, unknown> | undefined>(
 }
 
 /**
+ * Returns a shallow copy of `obj` with all `undefined` values removed.
+ *
+ * @remarks
+ * Useful for building option objects where omitted keys must not be passed
+ * (e.g. Transformers.js pipeline config) without repeating the
+ * `...(x === undefined ? {} : { x })` conditional-spread pattern.
+ *
+ * @param obj - The source object.
+ * @returns A new object containing only the entries whose value is not `undefined`.
+ */
+export function omitUndefined<T extends Record<string, unknown>>(
+	obj: T,
+): Partial<T> {
+	const result: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(obj)) {
+		if (value !== undefined) {
+			result[key] = value;
+		}
+	}
+	return result as Partial<T>;
+}
+
+/**
  * Asserts that an object key is safe (not a prototype pollution key).
  *
  * @param key - The key to check.

@@ -17,6 +17,7 @@ export {
 	cloneJsonValue,
 	cloneRecord,
 	isPlainObject,
+	omitUndefined,
 } from "./objects";
 export { PathLock } from "./paths";
 export {
