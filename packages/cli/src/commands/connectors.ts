@@ -120,7 +120,7 @@ export async function runConnectorsAddCommand(
 			sourceMapping = JSON.parse(options.sourceMapping) as JsonObject;
 		} catch (error) {
 			throw new CliUsageError(
-				`--sourceMapping must be valid JSON (got: "${options.sourceMapping}").`,
+				`--source-mapping must be valid JSON (got: "${options.sourceMapping}").`,
 				{ cause: error },
 			);
 		}

@@ -818,13 +818,22 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.command("init")
 		.description("create .memofs/config.json without storing secrets")
 		.option("-f, --force", "overwrite existing config", false)
-		.option("--runtime <mode>", "runtime mode: local or hybrid", "local")
-		.option("--cloud-url <url>", "MemoFS Cloud API URL")
-		.option("--workspace-id <id>", "cloud workspace ID")
-		.option("--project-id <id>", "cloud project ID")
 		.action(async (options) => {
 			setCurrentCommand("config.init");
 			const g = await globals();
+			// `--runtime`, `--cloud-url`, `--workspace-id`, and `--project-id` are
+			// declared as global options on the parent program. Re-declaring them
+			// on this subcommand causes Commander to shadow the subcommand storage
+			// with the parent's, so the parsed values land in `program.opts()` and
+			// the subcommand's options fall back to their defaults. Read them from
+			// the global program opts instead — the documented UX
+			// (`memofs config init --runtime hybrid --cloud-url ...`) keeps working.
+			const programOpts = program.opts() as {
+				runtime?: string;
+				cloudUrl?: string;
+				workspaceId?: string;
+				projectId?: string;
+			};
 			const rootDir = path.resolve(cwd ?? process.cwd(), g.root);
 			const result = await writeDefaultCliConfig({
 				cwd: cwd ?? process.cwd(),
@@ -832,14 +841,17 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 				force: options.force,
 				config: {
 					$schema: resolveSchemaPath(rootDir),
-					runtime: options.runtime,
+					runtime:
+						(programOpts.runtime as MemoFsConfigFile["runtime"]) ?? "local",
 					root: ".",
 					cloud: {
-						...(options.cloudUrl ? { baseUrl: options.cloudUrl } : {}),
-						...(options.workspaceId
-							? { workspaceId: options.workspaceId }
+						...(programOpts.cloudUrl ? { baseUrl: programOpts.cloudUrl } : {}),
+						...(programOpts.workspaceId
+							? { workspaceId: programOpts.workspaceId }
 							: {}),
-						...(options.projectId ? { projectId: options.projectId } : {}),
+						...(programOpts.projectId
+							? { projectId: programOpts.projectId }
+							: {}),
 					},
 				} satisfies MemoFsConfigFile,
 			});

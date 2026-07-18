@@ -7,19 +7,20 @@
  * `memofs init` commands.
  *
  * The JSON schema is shipped inside the CLI package at `schema/config.json`
- * (exposed via the `@memofs/cli/schema/config.json` package export) and
- * resolved at runtime to a relative path from the project's `.memofs/`
- * directory — no versioned URL needed, since `node_modules` already bundles
- * the matching version.
+ * (exposed via the `@memofs/cli/schema/config.json` package export).
+ * `resolveSchemaPath` emits a canonical, portable
+ * `./node_modules/@memofs/cli/schema/config.json` reference (the value the
+ * docs advertise) when that file exists under the project root, and falls
+ * back to a hosted URL otherwise — see `resolveSchemaPath` for why the
+ * previous `require.resolve` + `path.relative` approach was non-portable
+ * inside workspace installs.
  *
  * @module runtime
  */
 
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { MemoFsConfigFile } from "@memofs/core";
 
 export type { MemoFsConfigFile };
@@ -32,56 +33,52 @@ export type { MemoFsConfigFile };
 const FALLBACK_SCHEMA_URL = "https://memofs.dev/schema/config.json";
 
 /**
- * Locates the packaged `schema/config.json` on disk.
+ * Canonical relative `$schema` reference that the docs advertise and that
+ * works for the overwhelmingly common case: `@memofs/cli` installed as a
+ * project dev dependency. Resolved from a project's `.memofs/config.json`,
+ * this points at the schema file shipped inside the installed package.
  *
- * Primary strategy: Node package self-reference — the CLI package declares
- * `"./schema/config.json"` in its `exports`, so `require.resolve` works both
- * when the CLI is installed in a consumer's `node_modules` and when running
- * from the repo itself. Fallback: walk upward from this module's directory
- * (which may be a bundled `dist/` chunk) looking for `schema/config.json`,
- * since the schema always sits at the package root next to `dist/`.
- *
- * @returns Absolute path to the schema file, or undefined if not found.
+ * Kept as a constant so every consumer of the schema reference emits the
+ * same portable, deterministic string instead of a layout-dependent
+ * filesystem path.
  */
-function locateSchemaFile(): string | undefined {
-	try {
-		const require = createRequire(import.meta.url);
-		return require.resolve("@memofs/cli/schema/config.json");
-	} catch {
-		// Fall through to the directory walk.
-	}
-	let dir = path.dirname(fileURLToPath(import.meta.url));
-	for (let depth = 0; depth < 5; depth += 1) {
-		const candidate = path.join(dir, "schema", "config.json");
-		if (existsSync(candidate)) return candidate;
-		const parent = path.dirname(dir);
-		if (parent === dir) break;
-		dir = parent;
-	}
-	return undefined;
-}
+const CANONICAL_SCHEMA_REF = "./node_modules/@memofs/cli/schema/config.json";
 
 /**
- * Resolves the `$schema` value for `.memofs/config.json`: a relative path
- * from the project's `.memofs/` directory to the `config.json` schema shipped
- * inside the installed `@memofs/cli` package.
+ * Resolves the `$schema` value for `.memofs/config.json`.
  *
- * This replaces the previous versioned-URL approach
- * (`https://docs.memofs.dev/<version>/config.schema.json`). Because
- * `node_modules` already bundles the current version of the CLI, the schema
- * is always version-matched — no separate publishing step required. When the
- * packaged file cannot be located, falls back to the hosted schema URL.
+ * Strategy — emit a deterministic, portable reference instead of a path
+ * computed from wherever `require.resolve` happened to land:
+ *
+ * 1. **Canonical node_modules reference** (preferred). If
+ *    `<rootDir>/node_modules/@memofs/cli/schema/config.json` exists, return
+ *    `./node_modules/@memofs/cli/schema/config.json`. This matches the docs
+ *    example and is portable across machines, regardless of whether
+ *    `@memofs/cli` was installed via npm, pnpm (with symlinks), or yarn.
+ *    The `node_modules/@memofs/cli` entry may itself be a symlink to a
+ *    workspace package — `existsSync` follows symlinks, so this works
+ *    inside the MemoFS monorepo too, without the previous bug of emitting
+ *    `../../../Users/.../packages/cli/schema/config.json`.
+ * 2. **Hosted fallback URL.** When the canonical file is not on disk under
+ *    `<rootDir>` (e.g. the CLI was installed globally, bundled without
+ *    `node_modules`, or the schema file was stripped), fall back to the
+ *    hosted schema URL so editors still get validation.
+ *
+ * The previous implementation called `require.resolve` and then
+ * `path.relative(rootDir/.memofs, resolvedFile)`. Inside a workspace
+ * install, `require.resolve` follows the `@memofs/cli` symlink to the
+ * source `packages/cli/schema/config.json`, which lives *outside* the
+ * consumer's project root — `path.relative` then climbs past the root and
+ * emits a non-portable `../../packages/...` (or even `../../../Users/...`)
+ * reference. The canonical-ref-first approach sidesteps that entirely.
  *
  * @param rootDir - Project root directory containing `.memofs/`.
- * @returns A relative path (from `.memofs/`) to the schema file, e.g.
- * `../node_modules/@memofs/cli/schema/config.json`, or the hosted URL.
+ * @returns A portable `./node_modules/...` `$schema` reference, or the
+ * hosted URL when the schema file isn't present under `<rootDir>`.
  */
 export function resolveSchemaPath(rootDir: string): string {
-	const schemaFile = locateSchemaFile();
-	if (!schemaFile) return FALLBACK_SCHEMA_URL;
-	const memofsDir = path.join(rootDir, ".memofs");
-	// JSON Schema `$schema` references use forward slashes on every platform.
-	return path.relative(memofsDir, schemaFile).split(path.sep).join("/");
+	const canonical = path.resolve(rootDir, CANONICAL_SCHEMA_REF);
+	return existsSync(canonical) ? CANONICAL_SCHEMA_REF : FALLBACK_SCHEMA_URL;
 }
 
 /**
