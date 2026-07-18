@@ -76,6 +76,12 @@ export interface TransformersEmbedderOptions {
 	 */
 	batchSize?: number;
 	/**
+	 * Maximum retry attempts when the initial model download/load fails with a
+	 * transient network error. Set to `0` to disable retries.
+	 * @defaultValue `2`
+	 */
+	retries?: number;
+	/**
 	 * Optional injected pipeline factory for testing. When omitted, the real
 	 * Transformers.js `pipeline` is used (loaded lazily on first call).
 	 * @internal

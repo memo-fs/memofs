@@ -26,10 +26,6 @@ the default lexical (BM25 + fuzzy) path, with nothing leaving your machine.
 
 ```bash
 npm install @memofs/adapter-transformers @memofs/core
-
-# or: pnpm add @memofs/adapter-transformers @memofs/core
-# or: yarn add @memofs/adapter-transformers @memofs/core
-# or: bun add @memofs/adapter-transformers @memofs/core
 ```
 
 > Requires **Node.js >= 22**.
@@ -69,7 +65,7 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
-const store = createNodeFsMemoryStore({ rootDir: "./.memofs" });
+const store = createNodeFsMemoryStore({ rootDir: "." });
 
 const memo = new MemoFS({
   store,
@@ -96,7 +92,7 @@ or in `.memofs/config.json`:
 
 ```json
 {
-  "$schema": "../node_modules/@memofs/cli/schema/config.schema.json",
+  "$schema": "./node_modules/@memofs/cli/schema/config.json",
   "runtime": "local",
   "recall": { "engine": "auto", "localEmbeddings": true }
 }
@@ -118,6 +114,7 @@ discoverable and writes are never broken.
 | `device` | `"cpu" \| "gpu" \| "wasm"` | `"cpu"` | Inference device. Use `"gpu"` or `"wasm"` when the runtime supports it. |
 | `dtype` | `"fp32" \| "fp16" \| "q8" \| "int8"` | `"fp32"` | ONNX runtime data type. `"fp32"` is the safest across platforms. |
 | `batchSize` | `number` | `32` | Maximum texts per inference batch. Larger batches trade memory for throughput. |
+| `retries` | `number` | `2` | Maximum retry attempts when the initial model download/load fails with a transient network error. Set to `0` to disable. |
 | `onProgress` | `(info) => void` | — | Callback for model download/load progress. Use it to show a one-time "warming up" notice. |
 
 ### Default model

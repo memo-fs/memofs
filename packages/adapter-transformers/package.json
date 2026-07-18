@@ -92,6 +92,7 @@
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
+		"@repo/utils": "workspace:*",
 		"@memofs/testing": "workspace:^"
 	}
 }
