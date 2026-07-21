@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: 22
+  NODE_VERSION: 24
 
 jobs:
   release:
@@ -50,7 +50,6 @@ jobs:
 
       - name: Upgrade npm for trusted publishing
         run: |
-          npm install -g npm@^11.5.1
           node --version
           npm --version
           pnpm --version
