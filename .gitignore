@@ -1,9 +1,8 @@
-.agents/skills/
-skills-lock.json
+# .agents/skills/
+# skills-lock.json
 social
 .opencode
 .commandcode
-apps/cloud
 # Dependencies
 node_modules
 .pnp
@@ -26,6 +25,8 @@ benchmarks/reports/*
 
 # Turbo
 .turbo
+YC.md
+price-change.md
 
 
 build
@@ -70,6 +71,7 @@ docs/CONTEXT.md
 docs/discovery
 # Internal tooling - not tracked
 research/
+internal/
 skills-lock.json
 .agents/skills/
 YC
