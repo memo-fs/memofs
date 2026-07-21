@@ -74,7 +74,7 @@ they're drop-in.
 - [ ] **OpenAI extractor + LlmClient** — completes the canonical self-host
   bundle: S3 + Postgres + OpenAI.
 
-## Later — Trust, safety & temporal validity
+## Next — Trust, safety & temporal validity
 
 Provenance-aware writes and richer fact lifecycles.
 

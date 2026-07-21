@@ -249,30 +249,9 @@ For clients with prompt support (e.g. slash-command style pickers):
 | `memofs-recall-context` | `query` (required), `workspaceId`, `includeGraph` | Turn a user question into a grounded MemoFS recall instruction. |
 | `memofs-memory-review` | `content` (required), `workspaceId` | Review whether a text should become durable MemoFS memory. |
 
-## Hybrid Mode
-
-For cloud-synced memory, use `--runtime hybrid` with cloud credentials. Supply the API key through the `env` block rather than inline args, so it stays out of committed config:
-
-```json
-{
-  "mcpServers": {
-    "memofs": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@memofs/mcp-server",
-        "--runtime", "hybrid",
-        "--cloud-url", "https://memofs.dev/api/v1"
-      ],
-      "env": {
-        "MEMOFS_API_KEY": "your-api-key"
-      }
-    }
-  }
-}
-```
-
 ## See Also
 
+- [Hybrid Mode](./hybrid-mode) — local stdio server that mirrors writes to the cloud replica.
+- [Hosted MCP Endpoint](./hosted-mcp-endpoint) — HTTP-only variant for agents on machines with no checkout (Pro/Teams).
 - [CLI generate commands](/packages/cli/generate) — one-command MCP + hooks + rules setup per platform.
 - [CLI memory commands](/packages/cli/memory) — `memofs context` gives hooks the same intelligence pipeline these tools use.

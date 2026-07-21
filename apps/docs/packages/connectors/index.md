@@ -134,11 +134,11 @@ import { CloudSecretResolver } from "@memofs/connectors";
 const resolver = new CloudSecretResolver({
   projectId: "my-project",
   apiKey: "tm_...",
-  cloudBaseUrl: "https://memofs.dev",
+  cloudBaseUrl: "https://memofs.dev/api/v1",
 });
 ```
 
-Calls `GET /v1/projects/:projectId/connectors/secret?ref=:secretRef` with the configured Bearer API key.
+Calls `GET {cloudBaseUrl}/projects/:projectId/connectors/secret?ref=:secretRef` with the configured Bearer API key. The `cloudBaseUrl` is the cloud API root — the same value the cloud client uses.
 
 ### Custom resolver
 
@@ -158,8 +158,8 @@ class VaultSecretResolver implements SecretResolver {
 
 | Connector | `type` | Source | Status |
 |-----------|--------|--------|--------|
-| **GitHub** | `"github"` | Issues, PRs, discussions (GraphQL API) | Shipped |
-| **Notion** | `"notion"` | Pages from a database or workspace search (REST API) | Shipped |
+| **GitHub** | `"github"` | Issues, PRs, discussions (GraphQL API) | ✅ |
+| **Notion** | `"notion"` | Pages from a database or workspace search (REST API) | ✅ |
 
 ### GitHub
 

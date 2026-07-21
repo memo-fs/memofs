@@ -165,7 +165,7 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 | Hosted sync (keep memory in sync) | ✅ client | ✅ hosted |
 | Team workspaces & access control | — | ✅ available |
 | Memory dashboard (explore, consolidate) | — | ✅ available |
-| Hosted managed MCP endpoint | — | Soon |
+| Hosted managed MCP endpoint | — | ✅ available (Pro+) |
 | Managed runtime (memory API over HTTPS) | — | Soon |
 
 [Join the Cloud waitlist →](https://memofs.dev)

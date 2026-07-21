@@ -64,13 +64,22 @@ Vercel AI SDK in a Next.js route handler. Demonstrates per-`conversationId`
 scoped memory in a real server context. This example is meant to be copied into
 a Next.js app — see [`nextjs/README.md`](./nextjs/README.md) for setup.
 
-### MCP coding-agent setup — [`mcp-coding-agent/`](./mcp-coding-agent/)
+### CI / hosted agents (no checkout) — [`ci-hosted-mcp/`](./ci-hosted-mcp/)
+
+Wire a **CI runner or cloud agent** to MemoFS with zero local checkout. The
+agent speaks MCP over HTTP against your project's hosted endpoint, with a
+read-only API key by default so CI grounds itself in durable memory but never
+writes. Includes ready-to-run GitHub Actions workflows for Claude Code
+(`anthropics/claude-code-action`) and OpenAI Codex. See
+[`ci-hosted-mcp/README.md`](./ci-hosted-mcp/README.md).
+
+### MCP coding-agent setup — [`coding-agent/`](./coding-agent/)
 
 Give your daily coding agent (Cursor, Claude Code, Codex, Copilot, Gemini)
 persistent MemoFS memory over MCP. Covers `memofs init`, `memofs generate
 agent-rules` for each agent, and the per-platform MCP config. This is MemoFS's
 differentiator for **local daily builders** — memory that lives in your repo,
-not a vendor database. See [`mcp-coding-agent/README.md`](./mcp-coding-agent/README.md).
+not a vendor database. See [`coding-agent/README.md`](./coding-agent/README.md).
 
 ### Self-host the `memofs-server` runtime — [`server/`](./server/)
 

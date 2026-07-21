@@ -80,7 +80,14 @@ export const sidebar: DefaultTheme.Sidebar = {
 		{
 			text: "Model Context Protocol (MCP)",
 			collapsed: false,
-			items: [{ text: "MCP Server", link: "/packages/mcp/" }],
+			items: [
+				{ text: "Local mode", link: "/packages/mcp/" },
+				{ text: "Hybrid mode", link: "/packages/mcp/hybrid-mode" },
+				{
+					text: "Hosted MCP Endpoint",
+					link: "/packages/mcp/hosted-mcp-endpoint",
+				},
+			],
 		},
 		{
 			text: "Connectors",

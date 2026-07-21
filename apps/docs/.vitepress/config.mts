@@ -74,14 +74,19 @@ export default withMermaid(
 					ariaLabel: "MemoFS on GitHub",
 				},
 				{
-					icon: "npm",
-					link: site.npm,
-					ariaLabel: "MemoFS on npm",
-				},
-				{
 					icon: "x",
 					link: site.x,
 					ariaLabel: "MemoFS on X",
+				},
+				{
+					icon: "bluesky",
+					link: site.bluesky,
+					ariaLabel: "MemoFS on Bluesky",
+				},
+				{
+					icon: "youtube",
+					link: site.youtube,
+					ariaLabel: "MemoFS on YouTube",
 				},
 			],
 

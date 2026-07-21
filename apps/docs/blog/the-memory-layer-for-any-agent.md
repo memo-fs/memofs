@@ -1,7 +1,7 @@
 ---
 title: "The Memory Layer for Any AI Agent"
 description: "Your coding agent is brilliant and has amnesia. MemoFS gives it durable, portable, file-first memory that works with Claude Code, Codex, Cursor, Copilot, opencode — any agent that speaks hooks or MCP — and syncs across machines and teammates through the cloud. Here's the architecture, and how to wire it into whatever you already use."
-date: 2026-07-15
+date: 2026-07-21
 author: Christopher S. Aondona
 tags: [architecture, memory, ai-agents, hooks, mcp, cloud, file-first]
 cover: null
@@ -215,7 +215,7 @@ That unlocks the things people actually want:
 - **Multi-agent.** Point Claude Code, Cursor, and a custom SDK agent at the same project. They read from one shared brain and write back to it. Your Codex session benefits from what your Claude Code session learned.
 - **Teams.** A team is the unit of shared memory. Invite teammates, and everyone's agents draw on the same project knowledge — onboarding a new engineer means their agent inherits months of accumulated context on day one, instead of them re-discovering it the hard way.
 
-For hosted setups, a cloud MCP endpoint is coming soon — one URL plus a bearer API key, read-only by default — so you'll be able to give an agent on a checkout-less machine read access to shared memory without handing it write privileges.
+For hosted setups, MemoFS Cloud also serves a hosted MCP endpoint (Pro and Teams plans) — one URL plus a bearer API key — so an agent on a machine with no checkout at all can reach shared memory. Hand it a read-only key and it can `context` and `recall` without ever holding write privileges; writes require a read-write key and land in the cloud replica for everyone's next pull.
 
 ## It's not just for coding
 

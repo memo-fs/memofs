@@ -66,22 +66,22 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 
         <div class="runtime-card runtime-card--full tek-reveal" data-delay="3">
           <div class="runtime-managed-left">
-            <span class="tek-kicker">Managed · Coming soon</span>
+            <span class="tek-kicker">Managed · MCP endpoint live</span>
             <h3>Memory as an API</h3>
             <p>
-              MemoFS Cloud hosts the engine. Thin clients — CI pipelines, edge functions,
-              chatbots, hosted agents — query and write memory over HTTPS or a hosted MCP
-              endpoint, with zero local files. The same <code>@memofs/core</code> surface,
-              no checkout required. Your files stay the source of truth: leaving is a
-              config change, not a migration.
+              MemoFS Cloud hosts the engine. Any MCP client — Cursor, Claude, a hosted
+              agent on a machine with no checkout — reads and writes memory through one
+              hosted MCP URL plus an API key, with zero local files. A raw HTTPS API for
+              CI pipelines, edge functions, and chatbots is next. Your files stay the
+              source of truth: leaving is a config change, not a migration.
             </p>
             <a
-              href="https://memofs.dev/waitlist"
+              href="https://memofs.dev"
               class="runtime-waitlist-btn"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Join the waitlist →
+              Connect your agent →
             </a>
           </div>
           <ul class="runtime-managed-features">
@@ -95,8 +95,8 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
             <li>
               <span class="rmf-icon">⚡</span>
               <span class="rmf-body">
-                <strong>Read &amp; write over HTTPS or MCP</strong>
-                Works from CI, serverless, or any MCP client — one URL + key
+                <strong>Read &amp; write over MCP — HTTPS API next</strong>
+                Works from any MCP client today — one URL + key
               </span>
             </li>
             <li>

@@ -13,6 +13,10 @@ All notable changes to MemoFS cloud and packages are documented here.
 
 ## Unreleased
 
+No unreleased changes.
+
+## v1.1.0-beta.1 — 2026-07-21
+
 Persistence and async-hashing hardening across core, CLI, and connectors, plus a four-layer system that enforces agent memory use across every session.
 
 ### Core Reliability

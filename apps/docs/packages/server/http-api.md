@@ -69,6 +69,19 @@ Both deploy targets serve the same surface:
 
 ## The Write Gate
 
-Every mutating method returns `503` until the concurrency layer lands. This is deliberate: concurrent writes to the same project would silently lose data under last-writer-wins. The gate is "method rejects," never "method present unsafely."
+Every mutating method returns `503` until a **concurrency layer** is injected. This is deliberate: concurrent writes to the same project would silently lose data under last-writer-wins. The gate is "method rejects," never "method present unsafely."
 
-Reads work fully today. To write memory programmatically before the gate lifts, use the `MemoFS` client directly in-process.
+To enable writes, pass a `concurrencyLayer` in the options — an object with a single `acquire(projectId, fn)` method that serializes concurrent writers to the same project (a per-project mutex is enough for a single instance; use a distributed lock across instances):
+
+```ts
+const response = await handleRuntimeRequest(webRequest, {
+  runtime,
+  concurrencyLayer: {
+    acquire: (projectId, fn) => myProjectMutex.runExclusive(projectId, fn),
+  },
+});
+```
+
+When injected, gated methods run inside `acquire` so contended writes serialize instead of corrupting each other. This is exactly how MemoFS Cloud runs this package: its runtime Worker injects a per-project mutex, which is what powers cloud writes — including the hosted MCP endpoint's `memofs.remember` and `memofs.consolidate` tools.
+
+Without a concurrency layer, reads work fully; to write memory programmatically, use the `MemoFS` client directly in-process.
