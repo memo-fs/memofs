@@ -113,7 +113,7 @@ Here's the reframe that matters: **MemoFS is not another agent.** It's a memory 
 One command sets up everything for a supported platform:
 
 ```bash
-npm i -g @memofs/cli    # or: npx memofs ...
+npm i -g @memofs/cli    # or: npx @memofs/cli ...
 memofs init             # creates .memofs/ in your project
 memofs generate agent claude --project-name "My App"
 ```
