@@ -68,10 +68,10 @@ describe("init and inspect", () => {
 				string,
 				unknown
 			>;
-			expect(config["$schema"]).toBeTruthy();
-			expect(typeof config["$schema"]).toBe("string");
-			expect(config["runtime"]).toBe("local");
-			expect(config["root"]).toBe(".");
+			expect(config.$schema).toBeTruthy();
+			expect(typeof config.$schema).toBe("string");
+			expect(config.runtime).toBe("local");
+			expect(config.root).toBe(".");
 		} finally {
 			await temp.cleanup();
 		}

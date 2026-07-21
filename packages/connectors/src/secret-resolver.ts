@@ -181,15 +181,17 @@ export interface CloudSecretResolverOptions {
 	readonly projectId: string;
 	/** The Bearer API key (`tm_...`) to authenticate requests. */
 	readonly apiKey: string;
-	/** The cloud application base URL (e.g. `https://memofs.dev`). */
+	/** The cloud API root URL (e.g. `https://memofs.dev/api/v1`). */
 	readonly cloudBaseUrl: string;
 }
 
 /**
  * Production secret resolver that fetches decrypted tokens from the cloud API.
  *
- * Calls `GET /v1/projects/:projectId/connectors/secret?ref=:secretRef` using
- * the configured Bearer API key.
+ * Calls `GET {cloudBaseUrl}/projects/:projectId/connectors/secret?ref=:secretRef`
+ * using the configured Bearer API key. `cloudBaseUrl` is the API root
+ * (e.g. `https://memofs.dev/api/v1`) — the same value as the cloud client's
+ * `baseUrl` — so no version segment is appended here.
  *
  * @public
  */
@@ -205,7 +207,7 @@ export class CloudSecretResolver implements SecretResolver {
 	}
 
 	async resolve(secretRef: string): Promise<string> {
-		const url = `${this.cloudBaseUrl}/v1/projects/${this.projectId}/connectors/secret?ref=${encodeURIComponent(secretRef)}`;
+		const url = `${this.cloudBaseUrl}/projects/${this.projectId}/connectors/secret?ref=${encodeURIComponent(secretRef)}`;
 		try {
 			const res = await fetch(url, {
 				headers: {

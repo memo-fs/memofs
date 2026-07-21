@@ -30,7 +30,7 @@ export type { MemoFsConfigFile };
  * disk (e.g. a bundler stripped package metadata). Matches the schema's
  * own `$id`.
  */
-const FALLBACK_SCHEMA_URL = "https://memofs.dev/schema/config.json";
+const FALLBACK_SCHEMA_URL = "https://docs.memofs.dev/schema/config.json";
 
 /**
  * Canonical relative `$schema` reference that the docs advertise and that
