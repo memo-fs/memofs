@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 /**
  * Newsletter signup for the docs site.
  *
- * The docs site is a static VitePress build. Resend (unlike Plunk) has no
- * browser-safe API key, so the form POSTs to a same-origin Cloudflare Pages
- * Function (`/api/subscribe`) that holds the secret `RESEND_API_KEY`
- * server-side and forwards the contact to Resend, adding it to the "Docs
- * newsletter" segment. The secret never reaches the browser.
- *
- * The form renders enabled only when `VITE_NEWSLETTER_ENABLED` is set at build
- * time — a non-secret flag, not a key. When it's absent the form renders
- * disabled, mirroring how `apps/docs` degrades when the backend isn't wired.
+ * The docs site is a static VitePress build. Resend has no browser-safe API
+ * key, so the form POSTs to a same-origin Cloudflare Pages Function
+ * (`/api/subscribe`) that holds the secret `RESEND_API_KEY` server-side and
+ * forwards the contact to Resend, adding it to the "Docs newsletter" segment.
+ * The secret never reaches the browser.
  *
  * @see apps/docs/functions/api/subscribe.ts — the server-side proxy.
  */
@@ -36,10 +32,6 @@ withDefaults(
 	},
 );
 
-const isEnabled = computed(
-	() => import.meta.env.VITE_NEWSLETTER_ENABLED === "true",
-);
-
 type Status = "idle" | "submitting" | "success" | "error";
 
 const email = ref("");
@@ -56,12 +48,6 @@ async function handleSubmit() {
 	if (!EMAIL_RE.test(value)) {
 		status.value = "error";
 		errorMessage.value = "Please enter a valid email address.";
-		return;
-	}
-
-	if (!isEnabled.value) {
-		status.value = "error";
-		errorMessage.value = "Newsletter signup is not configured.";
 		return;
 	}
 
@@ -106,13 +92,13 @@ async function handleSubmit() {
           placeholder="you@example.com"
           autocomplete="email"
           aria-label="Email address"
-          :disabled="!isEnabled || status === 'submitting'"
+          :disabled="status === 'submitting'"
           required
         />
         <button
           type="submit"
           class="newsletter-button"
-          :disabled="!isEnabled || status === 'submitting'"
+          :disabled="status === 'submitting'"
         >
           {{ status === "submitting" ? "Subscribing…" : "Subscribe" }}
         </button>
