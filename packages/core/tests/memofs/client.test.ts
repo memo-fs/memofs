@@ -6,6 +6,7 @@ import {
 	InMemoryMemoryStore,
 	MemoFS,
 	NOTES_MEMORY_PATH,
+	readMemoryEvents,
 } from "../../src/index";
 
 describe("MemoFS Client", () => {
@@ -58,6 +59,28 @@ describe("MemoFS Client", () => {
 		const results = await memo.recall("pair programming");
 		expect(results.items.length).toBeGreaterThan(0);
 		expect(results.items[0]?.text).toContain("Simba is pair programming");
+	});
+
+	it("writes core memory exactly once per update", async () => {
+		class CountingMemoryStore extends InMemoryMemoryStore {
+			coreWrites = 0;
+
+			override async write(
+				path: Parameters<InMemoryMemoryStore["write"]>[0],
+				content: string,
+			): Promise<void> {
+				if (path === CORE_MEMORY_PATH) this.coreWrites += 1;
+				await super.write(path, content);
+			}
+		}
+
+		const store = new CountingMemoryStore();
+		const memo = new MemoFS({ store });
+		await memo.bootstrap();
+		store.coreWrites = 0;
+		await memo.core.update("Core content should not be duplicated.");
+
+		expect(store.coreWrites).toBe(1);
 	});
 
 	it("records timestamped notes and synchronizes chunks/embeddings", async () => {
@@ -141,6 +164,7 @@ describe("MemoFS Client", () => {
 		const memo = new MemoFS({ store });
 
 		const testNode = { id: "a", label: "Entity A", type: "custom" };
+		const targetNode = { id: "b", label: "Entity B", type: "custom" };
 		const testEdge = {
 			id: "a-b",
 			from: "a",
@@ -148,13 +172,13 @@ describe("MemoFS Client", () => {
 			type: "relates",
 		};
 
-		await memo.graph.upsertNodes({ nodes: [testNode] });
+		await memo.graph.upsertNodes({ nodes: [testNode, targetNode] });
 		await memo.graph.upsertEdges({ nodes: [], edges: [testEdge] });
 
 		const nodesResult = await memo.graph.listNodes({});
 		const edgesResult = await memo.graph.listEdges({});
 
-		expect(nodesResult.items.length).toBe(1);
+		expect(nodesResult.items.length).toBe(2);
 		expect(nodesResult.items[0]?.id).toBe("a");
 		expect(edgesResult.items.length).toBe(1);
 		expect(edgesResult.items[0]?.id).toBe("a-b");
@@ -243,5 +267,42 @@ describe("MemoFS Client", () => {
 
 		const recall = await memo.recall("test");
 		expect(recall.items.length).toBeGreaterThan(0);
+	});
+
+	it("threads writer to note frontmatter and memory event actor", async () => {
+		const store = new InMemoryMemoryStore();
+		const memo = new MemoFS({ store, projectId: "writer-proj" });
+
+		await memo.writeMemory({
+			content: "Decision made by Alice.",
+			writer: "alice@example.com",
+			source: "dashboard",
+		});
+
+		const notes = await memo.notes.read();
+		expect(notes).toMatch(/- writer: alice@example.com/);
+		expect(notes).toMatch(/- source: dashboard/);
+
+		const events = await readMemoryEvents(store);
+		const writeEvent = events.find((e) => e.type === "memory.created");
+		expect(writeEvent).toBeDefined();
+		expect(writeEvent?.actor?.type).toBe("user");
+		expect(writeEvent?.actor?.id).toBe("alice@example.com");
+	});
+
+	it("defaults to agent actor when writer is omitted (no regression)", async () => {
+		const store = new InMemoryMemoryStore();
+		const memo = new MemoFS({ store, projectId: "no-writer-proj" });
+
+		await memo.writeMemory({ content: "Anonymous note." });
+
+		const notes = await memo.notes.read();
+		expect(notes).not.toMatch(/- writer:/);
+
+		const events = await readMemoryEvents(store);
+		const writeEvent = events.find((e) => e.type === "memory.created");
+		expect(writeEvent).toBeDefined();
+		expect(writeEvent?.actor?.type).toBe("agent");
+		expect(writeEvent?.actor?.id).toBe("memofs");
 	});
 });

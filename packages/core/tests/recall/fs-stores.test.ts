@@ -86,6 +86,51 @@ describe("FsRecallStore", () => {
 			await cleanup();
 		}
 	});
+
+	it("hydrates before a mutation so a fresh process preserves existing documents", async () => {
+		const { rootDir, cleanup } = await createTempMemoFsDir();
+		try {
+			const store = createNodeFsMemoryStore({
+				rootDir,
+				missingFileBehavior: "empty",
+				createRoot: true,
+			});
+			const first = createFsRecallStore({ store });
+			await first.upsert([
+				{
+					id: "first",
+					text: "first document",
+					embedding: [1, 0],
+					metadata: {
+						projectId: "p1",
+						sourceType: "note",
+						sourceId: "n1",
+						memoryType: "notes",
+					},
+				},
+			]);
+
+			const second = createFsRecallStore({ store });
+			await second.upsert([
+				{
+					id: "second",
+					text: "second document",
+					embedding: [0, 1],
+					metadata: {
+						projectId: "p1",
+						sourceType: "note",
+						sourceId: "n2",
+						memoryType: "notes",
+					},
+				},
+			]);
+
+			const reader = createFsRecallStore({ store });
+			expect(await reader.count()).toBe(2);
+		} finally {
+			await cleanup();
+		}
+	});
 });
 
 describe("FsGraphStore", () => {
@@ -289,6 +334,31 @@ describe("FsGraphStore", () => {
 			const reader = createFsGraphStore({ store });
 			expect((await reader.stats()).nodeCount).toBe(0);
 			expect(await reader.getNode("a")).toBeUndefined();
+		} finally {
+			await cleanup();
+		}
+	});
+
+	it("hydrates before a mutation so a fresh process preserves existing nodes", async () => {
+		const { rootDir, cleanup } = await createTempMemoFsDir();
+		try {
+			const store = createNodeFsMemoryStore({
+				rootDir,
+				missingFileBehavior: "empty",
+				createRoot: true,
+			});
+			const first = createFsGraphStore({ store });
+			await first.upsertNodes([
+				{ id: "first", type: "concept", label: "First" },
+			]);
+
+			const second = createFsGraphStore({ store });
+			await second.upsertNodes([
+				{ id: "second", type: "concept", label: "Second" },
+			]);
+
+			const reader = createFsGraphStore({ store });
+			expect((await reader.stats()).nodeCount).toBe(2);
 		} finally {
 			await cleanup();
 		}

@@ -87,7 +87,7 @@ function tick() {
 
 	const line = script[idx];
 
-	if (line.type === "blank") {
+	if (line?.type === "blank") {
 		// Blank lines are instant
 		lines.value = [...lines.value, line];
 		lineIdx.value++;

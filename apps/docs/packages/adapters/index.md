@@ -2,13 +2,13 @@
 
 MemoFS is designed to be completely provider-neutral. The core memory runtime does not bundle or lock you into any specific LLM provider, vector database, or cloud host. Instead, you inject **adapters** to upgrade storage and intelligence capabilities.
 
----
-
 ## Adapter Types
 
-Adapters are divided into two axes: **Storage** (managing raw files and metadata indexes) and **Intelligence** (managing embeddings, reranking, and graph extraction).
+Adapters are divided into two axes: 
+1. **Storage** (managing raw files and metadata indexes)
+2. **Intelligence** (managing embeddings, reranking, and graph extraction).
 
-```
+<!-- ```
 memofs/
 ├── Storage Axis
 │   ├── Blob Stores (R2)
@@ -18,9 +18,43 @@ memofs/
     ├── Rerankers (Voyage AI)
     ├── Extractors (Workers AI)
     └── Agent Bridges (Vercel AI SDK)
-```
+``` -->
 
----
+```mermaid
+flowchart TB
+    MF[MemoFS]
+
+    subgraph Storage["Storage Axis"]
+        BS["Blob Stores"]
+        MS["Metadata Stores"]
+
+        R2["R2"]
+        Turso["Turso"]
+
+        BS --> R2
+        MS --> Turso
+    end
+
+    subgraph Intelligence["Intelligence Axis"]
+        EMB["Embedders"]
+        RER["Rerankers"]
+        EXT["Extractors"]
+        AGT["Agent Bridges"]
+
+        EMB --> OpenAI["OpenAI"]
+        EMB --> VoyageEmbed["Voyage AI"]
+        EMB --> Transformers["Transformers.js"]
+
+        RER --> VoyageRank["Voyage AI"]
+
+        EXT --> WorkersAI["Workers AI"]
+
+        AGT --> VercelAI["Vercel AI SDK"]
+    end
+
+    MF --> Storage
+    MF --> Intelligence
+```
 
 ## Available Adapters
 

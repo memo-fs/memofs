@@ -4,7 +4,7 @@ import { searchMemoryText } from "../../core/search/search-memory";
 import type { JsonObject } from "../../core/types/json";
 import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
-import { candidateShape, hash } from "./helpers";
+import { candidateShape, fingerprint } from "./helpers";
 import type { LocalStrategyContext } from "./types";
 
 export async function localRecall(
@@ -115,7 +115,7 @@ async function runLexicalRecall(
 				mode: "auto",
 			});
 			for (const result of results) {
-				const id = `${source}_${result.index}_${hash(result.text).slice(0, 12)}`;
+				const id = `${source}_${result.index}_${fingerprint(result.text).slice(0, 12)}`;
 				const existing = out.get(id);
 				const score = result.score / 10;
 				if (!existing || score > existing.score) {

@@ -35,17 +35,13 @@ export async function upsertGraphNodes(
 ): Promise<{ nodes: GraphNodeInput[] }> {
 	if (signal?.aborted) throw new Error("Operation aborted.");
 	await ctx.ensureReady();
-	for (const node of input.nodes) ctx.graphNodes.set(node.id, node);
-	try {
-		await ctx.graphStore.upsertNodes(input.nodes as GraphNode[]);
-		for (const node of input.nodes) {
-			ctx.indexLexical({
-				id: `graph:${node.id}`,
-				text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
-			});
-		}
-	} catch {
-		// Fall back to in-memory only.
+	await ctx.graphStore.upsertNodes(input.nodes as GraphNode[]);
+	for (const node of input.nodes) {
+		ctx.graphNodes.set(node.id, node);
+		ctx.indexLexical({
+			id: `graph:${node.id}`,
+			text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
+		});
 	}
 	return { nodes: input.nodes };
 }
@@ -61,14 +57,10 @@ export async function upsertGraphEdges(
 ): Promise<{ edges: GraphEdgeInput[] }> {
 	if (signal?.aborted) throw new Error("Operation aborted.");
 	await ctx.ensureReady();
+	await ctx.graphStore.upsertEdges(input.edges as GraphEdge[]);
 	for (const edge of input.edges) {
 		const key = edgeId(edge);
 		ctx.graphEdges.set(key, { directed: true, weight: 1, ...edge });
-	}
-	try {
-		await ctx.graphStore.upsertEdges(input.edges as GraphEdge[]);
-	} catch {
-		// Fall back to in-memory only.
 	}
 	return { edges: input.edges };
 }

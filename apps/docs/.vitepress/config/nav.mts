@@ -11,21 +11,22 @@ export const nav: DefaultTheme.NavItem[] = [
 		link: "/api/",
 		activeMatch: "/api/",
 	},
+
+	{
+		text: "Changelog",
+		link: "/community/changelog",
+		activeMatch: "/changelog",
+	},
 	{
 		text: "Blog",
 		link: "/blog/",
 		activeMatch: "/blog/",
 	},
 	{
-		text: "Changelog",
-		link: "/changelog",
-		activeMatch: "/changelog",
-	},
-	{
 		text: "Community",
 		items: [
-			{ text: "Contributing", link: "/contributing" },
-			{ text: "Roadmap", link: "/roadmap" },
+			{ text: "Contributing", link: "/community/contributing" },
+			{ text: "Roadmap", link: "/community/roadmap" },
 			{
 				text: "GitHub Discussions",
 				link: "https://github.com/memo-fs/memofs/discussions",

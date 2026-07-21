@@ -7,6 +7,7 @@ import {
 	createMemoFSMcpProtocolServer,
 	createMemoFSMcpRuntimeFromConfig,
 } from "../src/index";
+import { createToolDefinitions } from "../src/tools/definitions";
 
 /**
  * Builds a fake MemoFS Cloud client matching the v1.0.0-alpha.0 §7 contract
@@ -245,5 +246,26 @@ describe("MCP tools", () => {
 		// runtime-only capability, now no longer wrapped as a tool either).
 		expect(runtime.graphNeighbors).toBeUndefined();
 		expect(calls).toEqual([]);
+	});
+});
+
+describe("memofs.context tool schema", () => {
+	const definitions = createToolDefinitions(100);
+	const contextDef = definitions.find((d) => d.name === "memofs.context");
+
+	it("includes taskType with all 5 enum values", () => {
+		expect(contextDef).toBeDefined();
+		const schema = contextDef?.inputSchema as Record<string, unknown>;
+		const properties = schema.properties as Record<string, unknown>;
+		const taskTypeProp = properties.taskType as Record<string, unknown>;
+		expect(taskTypeProp).toBeDefined();
+		expect(taskTypeProp.type).toBe("string");
+		expect(taskTypeProp.enum).toEqual([
+			"coding",
+			"debug",
+			"refactor",
+			"docs",
+			"general",
+		]);
 	});
 });

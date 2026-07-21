@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
 	createTransformersEmbedder,
+	type FeatureExtractionPipelineFactory,
+	TransformersInferenceError,
 	TransformersValidationError,
 } from "../src/index";
 import { createFakePipelineFactory } from "../src/testing/fake-pipeline";
@@ -96,6 +98,97 @@ describe("TransformersEmbedder", () => {
 			expect(embedder.dimensions).toBeUndefined();
 			await embedder.embedText("warmup");
 			expect(embedder.dimensions).toBe(256);
+		});
+
+		it("rejects texts exceeding the character limit", async () => {
+			const embedder = embedderWith();
+			const longText = "a".repeat(8193);
+			await expect(
+				embedder.embedTexts({ texts: [longText] }),
+			).rejects.toBeInstanceOf(TransformersValidationError);
+		});
+
+		it("populates both promptTokens and totalTokens in usage", async () => {
+			const embedder = embedderWith();
+			const result = await embedder.embedTexts({
+				texts: ["hello world", "foo bar baz"],
+			});
+			expect(result.usage?.promptTokens).toBe(5);
+			expect(result.usage?.totalTokens).toBe(5);
+		});
+
+		it("throws when expectedDimensions does not match the model output", async () => {
+			const embedder = embedderWith(384);
+			await expect(
+				embedder.embedTexts({ texts: ["test"], expectedDimensions: 512 }),
+			).rejects.toBeInstanceOf(TransformersValidationError);
+		});
+
+		it("accepts expectedDimensions that matches the model output", async () => {
+			const embedder = embedderWith(384);
+			const result = await embedder.embedTexts({
+				texts: ["test"],
+				expectedDimensions: 384,
+			});
+			expect(result.embeddings[0]?.dimensions).toBe(384);
+		});
+	});
+
+	describe("error handling", () => {
+		it("wraps non-retryable pipeline load failures in TransformersInferenceError", async () => {
+			const failingFactory: FeatureExtractionPipelineFactory = async () => {
+				throw new Error("model not found");
+			};
+			const embedder = createTransformersEmbedder({
+				model: "fake/missing",
+				retries: 2,
+				pipelineFactory: failingFactory,
+			});
+			await expect(embedder.embedText("test")).rejects.toBeInstanceOf(
+				TransformersInferenceError,
+			);
+		});
+
+		it("retries pipeline load on transient network errors", async () => {
+			let calls = 0;
+			const fake = createFakePipelineFactory({ dimensions: 384 });
+			const retryableFactory: FeatureExtractionPipelineFactory = async (
+				options,
+			) => {
+				calls += 1;
+				if (calls < 2) throw new Error("network error: fetch failed");
+				return fake(options);
+			};
+			const embedder = createTransformersEmbedder({
+				model: "fake/retry",
+				retries: 1,
+				pipelineFactory: retryableFactory,
+			});
+			const record = await embedder.embedText("retry me");
+			expect(record.dimensions).toBe(384);
+			expect(calls).toBe(2);
+		});
+
+		it("clears the cached promise after failure so a subsequent call retries", async () => {
+			let shouldFail = true;
+			const fake = createFakePipelineFactory({ dimensions: 384 });
+			const flakyFactory: FeatureExtractionPipelineFactory = async (
+				options,
+			) => {
+				if (shouldFail) throw new Error("network error: fetch failed");
+				return fake(options);
+			};
+			const embedder = createTransformersEmbedder({
+				model: "fake/flaky",
+				retries: 0,
+				pipelineFactory: flakyFactory,
+			});
+			await expect(embedder.embedText("first")).rejects.toBeInstanceOf(
+				TransformersInferenceError,
+			);
+			shouldFail = false;
+			const record = await embedder.embedText("second");
+			expect(record.dimensions).toBe(384);
 		});
 	});
 

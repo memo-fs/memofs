@@ -9,14 +9,18 @@
 		"preview": "vitepress preview .",
 		"typecheck": "tsc --noEmit --skipLibCheck",
 		"check:links": "node scripts/check-doc-links.mjs",
-		"check": "npm run check:links && npm run typecheck"
+		"check": "npm run check:links && npm run typecheck",
+		"typecheck:functions": "tsc --noEmit --project functions/tsconfig.json"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260630.1",
 		"@iconify-json/radix-icons": "^1.2.6",
 		"@iconify/vue": "^5.0.1",
 		"@repo/typescript": "workspace:*",
+		"mermaid": "^11.16.0",
 		"tailwindcss": "^4.3.2",
 		"vitepress": "2.0.0-alpha.17",
+		"vitepress-plugin-mermaid": "^2.0.17",
 		"vue": "^3.5.35"
 	},
 	"repository": {

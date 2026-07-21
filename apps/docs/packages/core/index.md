@@ -39,7 +39,7 @@ deno add npm:@memofs/core
 
 > [!NOTE]
 > Since `@memofs/core` is designed to be environment-agnostic (runnable on Node.js, Cloudflare Workers, etc.), it does not include a filesystem adapter by default. For Node.js applications, use the subpath export `@memofs/core/node-fs`.<br/> <br/>
-> Requires **Node.js >= 22** to run in Node environments.
+> Requires **Node.js >= 22**
 
 
 ## Quick Start
@@ -52,7 +52,8 @@ import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Create a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
-  rootDir: "./.memofs",
+  // MemoFS creates `.memofs/` inside this workspace root.
+  rootDir: ".",
 });
 
 // Create the unified client
@@ -62,14 +63,29 @@ const memo = new MemoFS({
   mode: "local",
 });
 
+await memo.bootstrap();
+
 // Retrieve core memory (returns raw markdown string)
 const core = await memo.core.read();
 console.log(core);
 ```
 
+## Runtime Boundaries
+
+The root `@memofs/core` entry can load in Node.js and Workers when you inject a
+compatible `MemoryStore`. The filesystem store is deliberately Node-only:
+
+```ts
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+```
+
+For Workers, inject a Worker-safe store such as `RemoteBlobMemoryStore` with
+your blob and metadata adapters. The root package does not select a storage
+backend automatically.
+
 ## Package Architecture
 
-The `@memofs/core` codebase is organized around a strict layering model:
+The `@memofs/core` is organized around a strict layering model:
 
 1. **`core`**: Canonical schemas, documents, events, and in-memory stores.
 2. **`agentfs`**: Virtual file matching and leases.
@@ -84,7 +100,3 @@ As a public open-source core package, `@memofs/core` remains strictly neutral:
 - It **does not** import or bundle any provider-specific packages (e.g., OpenAI, Voyage, or Turso).
 - It **does not** contain proprietary cloud tenancy, pricing models, or dashboard features.
 - All public capabilities are exported directly from the package root or the Node-only `@memofs/core/node-fs` subpath.
-
-## License
-
-MIT

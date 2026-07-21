@@ -1,14 +1,14 @@
-.agents/skills/
-skills-lock.json
+# .agents/skills/
+# skills-lock.json
 social
 .opencode
 .commandcode
-apps/cloud
 # Dependencies
 node_modules
 .pnp
 .pnp.js
 .pnpm-store
+.mcp.json
 
 # Local env files
 .env
@@ -25,6 +25,8 @@ benchmarks/reports/*
 
 # Turbo
 .turbo
+YC.md
+price-change.md
 
 
 build
@@ -66,7 +68,9 @@ packages/**/.tekmemo/
 docs/adr/
 docs/architecture/
 docs/CONTEXT.md
+docs/discovery
 # Internal tooling - not tracked
 research/
+internal/
 skills-lock.json
 .agents/skills/

@@ -1,3 +1,4 @@
+import type { TaskType } from "../types";
 import type { RewriteInput, RewriteResult } from "./types";
 
 interface LexiconEntry {
@@ -29,6 +30,62 @@ const REWRITE_LEXICON: ReadonlyArray<LexiconEntry> = [
 
 const TOKEN_SPLIT = /[\s,./\\[\]{}()<>:;'"!?|`~@#$%^&*+=—–-]+/u;
 
+const TASK_TYPE_EXPANSIONS: Record<Exclude<TaskType, "general">, string[]> = {
+	coding: [
+		"constraint",
+		"rule",
+		"convention",
+		"pattern",
+		"standard",
+		"style",
+		"guideline",
+	],
+	debug: [
+		"error",
+		"bug",
+		"fix",
+		"exception",
+		"crash",
+		"failure",
+		"stack trace",
+		"debug",
+		"issue",
+	],
+	refactor: [
+		"architecture",
+		"refactor",
+		"structure",
+		"design",
+		"pattern",
+		"dependency",
+		"coupling",
+		"interface",
+		"module",
+	],
+	docs: [
+		"api",
+		"documentation",
+		"docs",
+		"interface",
+		"contract",
+		"type",
+		"schema",
+		"readme",
+	],
+};
+
+/**
+ * Phrases prepended to the recall query per task type, per ADR 0020 ID5.
+ * These steer the recall engine toward the most relevant memories before
+ * lexicon expansion adds synonyms.
+ */
+const TASK_TYPE_QUERY_PREPENDS: Record<Exclude<TaskType, "general">, string> = {
+	coding: "Constraints, patterns, and recent decisions",
+	debug: "Recent errors and bug-fix context",
+	refactor: "Architecture decisions and dependency graph",
+	docs: "Public API contracts and documentation decisions",
+};
+
 export function tokenize(query: string): string[] {
 	const raw = query.toLowerCase().split(TOKEN_SPLIT);
 	const out: string[] = [];
@@ -40,7 +97,12 @@ export function tokenize(query: string): string[] {
 }
 
 export function rewriteQuery(input: RewriteInput): RewriteResult {
-	const tokens = tokenize(input.query);
+	const prepend =
+		input.taskType !== undefined && input.taskType !== "general"
+			? TASK_TYPE_QUERY_PREPENDS[input.taskType]
+			: "";
+	const query = prepend ? `${prepend} ${input.query}` : input.query;
+	const tokens = tokenize(query);
 	const expanded = new Set<string>(tokens);
 	for (const token of tokens) {
 		const entry = REWRITE_LEXICON.find((e) => e.trigger === token);
@@ -51,6 +113,11 @@ export function rewriteQuery(input: RewriteInput): RewriteResult {
 	}
 	for (const extra of input.adapterExpansions ?? []) {
 		expanded.add(extra.toLowerCase());
+	}
+	if (input.taskType && input.taskType !== "general") {
+		for (const term of TASK_TYPE_EXPANSIONS[input.taskType]) {
+			expanded.add(term.toLowerCase());
+		}
 	}
 	return {
 		original: input.query,

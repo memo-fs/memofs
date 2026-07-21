@@ -1,5 +1,5 @@
-### Open-Source vs. Managed Cloud Replica
+### Open-Source vs. MemoFS Cloud
 
 MemoFS is designed around a file-first architecture:
 * **Open-Source Software (OSS):** The core memory engine (`@memofs/core`), command-line interface (`memofs`), and adapters run completely locally. Primitives, memories, and indexes are stored in `.memofs/` within your workspace directory.
-* **MemoFS Cloud:** An optional, secure cloud replica. It acts as a sync transport, enabling you to replicate your local memory files across multiple machines. The Cloud is a repository sync backend, not a separate closed-source memory system.
+* **MemoFS Cloud:** The optional memory plane on top of your local files. Its sync layer replicates your `.memofs/` across machines and teammates, and its dashboard lets you see and govern what your agents remember. **The sync path never processes your content** — synced files are stored as opaque, content-addressed blobs, never parsed, indexed, or embedded. **The hosted runtime is a separate, opt-in surface**: the same open-source engine, run for you; when you use hosted memory features (dashboard recall and consolidation today, the external API when it launches), the runtime processes those projects' content solely to provide those features. Your files remain the source of truth either way — leaving is a config change, not a migration.

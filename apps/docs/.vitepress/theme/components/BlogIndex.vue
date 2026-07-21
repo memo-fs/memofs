@@ -15,7 +15,6 @@ import { data as posts } from "../../../blog/posts.data";
           <span>{{ post.readingTime }}</span>
         </div>
         <h3 class="blog-card-title">{{ post.title }}</h3>
-        <p class="blog-card-excerpt">{{ post.description }}</p>
         <div class="blog-card-footer">
           <span class="blog-card-author">{{ post.author }}</span>
           <span v-if="post.tags.length" class="blog-card-tags">
@@ -88,6 +87,10 @@ import { data as posts } from "../../../blog/posts.data";
   flex: 1;
 }
 
+.blog-card-body > *:last-child {
+  margin-top: auto;
+}
+
 .blog-card-meta {
   display: flex;
   align-items: center;
@@ -113,14 +116,6 @@ import { data as posts } from "../../../blog/posts.data";
 
 .blog-card:hover .blog-card-title {
   color: var(--vp-c-brand-1);
-}
-
-.blog-card-excerpt {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--vp-c-text-2);
-  margin: 0;
-  flex: 1;
 }
 
 .blog-card-footer {

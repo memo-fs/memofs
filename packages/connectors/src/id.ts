@@ -22,6 +22,9 @@ import type { ConnectorRecord } from "./types";
  * @param record the normalized external item
  * @returns a stable id of the form `conn_<16 hex chars>`
  */
-export function connectorNoteId(record: ConnectorRecord): string {
-	return `conn_${sha256Hex(`${record.externalId}:${record.content}`).slice(0, 16)}`;
+export async function connectorNoteId(
+	record: ConnectorRecord,
+): Promise<string> {
+	const hash = await sha256Hex(`${record.externalId}:${record.content}`);
+	return `conn_${hash.slice(0, 16)}`;
 }

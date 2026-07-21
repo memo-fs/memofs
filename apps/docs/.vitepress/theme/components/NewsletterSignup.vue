@@ -2,26 +2,26 @@
 import { computed, ref } from "vue";
 
 /**
- * Newsletter signup backed by Plunk's public `/v1/track` endpoint.
+ * Newsletter signup for the docs site.
  *
- * The docs site is a static VitePress build with no backend, so we call Plunk
- * directly from the browser. Plunk's public key (`pk_…`) is scoped to the
- * track endpoint exactly for this — it can be shipped in client code. Triggering
- * an event auto-subscribes the contact unless `subscribed: false` is passed, so
- * one POST both records the signup and subscribes the email.
+ * The docs site is a static VitePress build. Resend (unlike Plunk) has no
+ * browser-safe API key, so the form POSTs to a same-origin Cloudflare Pages
+ * Function (`/api/subscribe`) that holds the secret `RESEND_API_KEY`
+ * server-side and forwards the contact to Resend, adding it to the "Docs
+ * newsletter" segment. The secret never reaches the browser.
  *
- * The key is read from `VITE_PLUNK_PUBLIC_KEY` (Vite inlines `VITE_`-prefixed
- * env at build). When it's absent the form renders disabled rather than failing
- * at runtime, mirroring how `apps/cloud` degrades when `PLUNK_API_KEY` is unset.
+ * The form renders enabled only when `VITE_NEWSLETTER_ENABLED` is set at build
+ * time — a non-secret flag, not a key. When it's absent the form renders
+ * disabled, mirroring how `apps/docs` degrades when the backend isn't wired.
  *
- * @see apps/cloud/src/server/email.ts — the server-side Plunk transport (secret key).
+ * @see apps/docs/functions/api/subscribe.ts — the server-side proxy.
  */
 
-const PLUNK_TRACK_ENDPOINT = "https://api.useplunk.com/v1/track";
+const SUBSCRIBE_ENDPOINT = "/api/subscribe";
 
-const props = withDefaults(
+withDefaults(
 	defineProps<{
-		/** Plunk event name fired on signup — scopes the source (e.g. "blog", "changelog"). */
+		/** Source label — accepted for caller compatibility; the segment is applied server-side. */
 		event?: string;
 		/** Headline above the form. */
 		title?: string;
@@ -36,8 +36,9 @@ const props = withDefaults(
 	},
 );
 
-const publicKey = import.meta.env.VITE_PLUNK_PUBLIC_KEY as string | undefined;
-const isConfigured = computed(() => Boolean(publicKey));
+const isEnabled = computed(
+	() => import.meta.env.VITE_NEWSLETTER_ENABLED === "true",
+);
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -45,7 +46,7 @@ const email = ref("");
 const status = ref<Status>("idle");
 const errorMessage = ref("");
 
-/** Pragmatic email shape check — the real validation is Plunk's. */
+/** Pragmatic email shape check — the real validation runs server-side. */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function handleSubmit() {
@@ -58,7 +59,7 @@ async function handleSubmit() {
 		return;
 	}
 
-	if (!publicKey) {
+	if (!isEnabled.value) {
 		status.value = "error";
 		errorMessage.value = "Newsletter signup is not configured.";
 		return;
@@ -68,21 +69,14 @@ async function handleSubmit() {
 	errorMessage.value = "";
 
 	try {
-		const response = await fetch(PLUNK_TRACK_ENDPOINT, {
+		const response = await fetch(SUBSCRIBE_ENDPOINT, {
 			method: "POST",
-			headers: {
-				Authorization: `Bearer ${publicKey}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				event: props.event,
-				email: value,
-				subscribed: true,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ email: value }),
 		});
 
 		if (!response.ok) {
-			throw new Error(`Plunk track failed (${response.status})`);
+			throw new Error(`Subscribe failed (${response.status})`);
 		}
 
 		status.value = "success";
@@ -112,13 +106,13 @@ async function handleSubmit() {
           placeholder="you@example.com"
           autocomplete="email"
           aria-label="Email address"
-          :disabled="!isConfigured || status === 'submitting'"
+          :disabled="!isEnabled || status === 'submitting'"
           required
         />
         <button
           type="submit"
           class="newsletter-button"
-          :disabled="!isConfigured || status === 'submitting'"
+          :disabled="!isEnabled || status === 'submitting'"
         >
           {{ status === "submitting" ? "Subscribing…" : "Subscribe" }}
         </button>
@@ -136,7 +130,7 @@ async function handleSubmit() {
 
 <style scoped>
 .newsletter {
-  margin: 40px 0;
+  margin: 20px 0;
   padding: 20px;
   border: 1px solid var(--vp-c-divider);
   border-radius: var(--tek-radius);

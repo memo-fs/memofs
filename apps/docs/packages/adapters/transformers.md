@@ -2,8 +2,6 @@
 
 The `@memofs/adapter-transformers` adapter enables vector embeddings to run completely locally, offline, and browser/worker-safely using ONNX runtimes and Xenova's Transformers.js.
 
----
-
 ## Installation
 
 ::: code-group
@@ -24,12 +22,14 @@ yarn add @memofs/adapter-transformers
 bun add @memofs/adapter-transformers
 ```
 
+```sh [deno]
+deno add npm:@memofs/adapter-transformers
+```
+
 :::
 
 > [!NOTE]
 > Requires **Node.js >= 22**.
-
----
 
 ## Usage
 
@@ -41,15 +41,13 @@ import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "local-project",
   embedder: createTransformersEmbedder({
     model: "Xenova/all-MiniLM-L6-v2", // Run locally with Xenova models
   }),
 });
 ```
-
----
 
 ## Configuration API (`TransformersEmbedderConfig`)
 

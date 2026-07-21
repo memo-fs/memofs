@@ -1,5 +1,6 @@
+import path from "node:path";
+import { isTaskType, TASK_TYPES, type TaskType } from "@memofs/core";
 import type { Command } from "commander";
-import pkg from "../../package.json" with { type: "json" };
 import {
 	runAgentCompleteCommand,
 	runAgentExtractCommand,
@@ -19,23 +20,35 @@ import {
 	runDiffCommand,
 	runDoctorCommand,
 	runEventsCommand,
+	runGenerateAgentCommand,
+	runGenerateAgentHooksCommand,
 	runGenerateAgentRulesCommand,
+	runGenerateMcpCommand,
 	runInitCommand,
 	runInspectCommand,
 	runReadCommand,
 	runRememberCommand,
 	runSearchCommand,
 	runSnapshotCommand,
+	runStatusCommand,
 	runValidateCommand,
 } from "../commands";
 import type { MemoFsConfigFile } from "../config";
-import { configSchemaUrl, writeDefaultCliConfig } from "../config";
+import { resolveSchemaPath, writeDefaultCliConfig } from "../config";
 import { CliUsageError } from "../errors/cli-errors";
 import { printJsonEnvelope } from "../output/output";
 
 function collect(value: string, previous: string[]): string[] {
 	previous.push(value);
 	return previous;
+}
+
+function parseScope(value: string | undefined): "local" | "global" | undefined {
+	if (value === undefined) return undefined;
+	if (value === "local" || value === "global") return value;
+	throw new CliUsageError(
+		`--scope must be "local" or "global", got "${value}"`,
+	);
 }
 
 export interface CLIContext {
@@ -108,13 +121,28 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.description("pack project memory into context block")
 		.option("-q, --query <query>", "prioritize lines matching a task/query")
 		.option(
+			"--task-type <type>",
+			"task type: coding | debug | refactor | docs | general",
+			(value: string) => {
+				if (!isTaskType(value)) {
+					throw new Error(
+						`Invalid task type "${value}". Must be one of: ${TASK_TYPES.join(", ")}.`,
+					);
+				}
+				return value as TaskType;
+			},
+		)
+		.option(
 			"--max-chars <n>",
 			"maximum output characters",
 			parsePositiveOption,
 			12000,
 		)
-		.option("--include-events", "include recent memory events", false)
-		.option("--include-chunks", "include recent chunk records", false)
+		.option(
+			"--mark-session-start",
+			"write a session-start event marker (used by hook scripts)",
+			false,
+		)
 		.action(async (options) => {
 			setCurrentCommand("context");
 			const g = await globals();
@@ -124,9 +152,9 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 					output,
 					json: g.json,
 					query: options.query,
+					taskType: options.taskType,
 					maxChars: options.maxChars,
-					includeEvents: options.includeEvents,
-					includeChunks: options.includeChunks,
+					markSessionStart: options.markSessionStart,
 				}),
 			);
 		});
@@ -311,6 +339,27 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		});
 
 	program
+		.command("status")
+		.description("show memory compliance status for the most recent session")
+		.option(
+			"--hook",
+			'emit Stop-hook JSON ({"systemMessage": ...}) for agent hooks',
+			false,
+		)
+		.action(async (options) => {
+			setCurrentCommand("status");
+			const g = await globals();
+			setExitCode(
+				await runStatusCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					hook: options.hook,
+				}),
+			);
+		});
+
+	program
 		.command("diff")
 		.description("compare two memory snapshots by ID or label")
 		.argument("<labelA>", "first snapshot ID or label")
@@ -345,6 +394,10 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 			"agents | claude | gemini | copilot | cursor (omit with --list)",
 		)
 		.option("--project-name <name>", "project name in the header")
+		.option(
+			"--scope <scope>",
+			"MCP config scope reflected in the pointer: local or global",
+		)
 		.option("-f, --force", "overwrite an existing instructions file", false)
 		.option(
 			"--list",
@@ -361,6 +414,92 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 					json: g.json,
 					target,
 					projectName: options.projectName,
+					mcpScope: parseScope(options.scope),
+					force: options.force,
+					list: options.list,
+				}),
+			);
+		});
+
+	generate
+		.command("agent-hooks")
+		.description(
+			"emit platform-specific MemoFS hook configuration (no rules file)",
+		)
+		.argument("[target]", "claude | codex | opencode (omit with --list)")
+		.option("-f, --force", "overwrite existing hook files", false)
+		.option("--list", "list supported targets and their capabilities", false)
+		.action(async (target, options) => {
+			setCurrentCommand("generate.agent-hooks");
+			const g = await globals();
+			setExitCode(
+				await runGenerateAgentHooksCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					target,
+					force: options.force,
+					list: options.list,
+				}),
+			);
+		});
+
+	generate
+		.command("mcp")
+		.description(
+			"write (or merge) the platform MCP server config for @memofs/mcp-server",
+		)
+		.argument("[target]", "any agent target (omit with --list)")
+		.option(
+			"--scope <scope>",
+			"MCP config scope: local or global (defaults to the platform default)",
+		)
+		.option("-f, --force", "overwrite an existing memofs MCP entry", false)
+		.option("--list", "list supported targets, formats, and scope paths", false)
+		.action(async (target, options) => {
+			setCurrentCommand("generate.mcp");
+			const g = await globals();
+			setExitCode(
+				await runGenerateMcpCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					target,
+					scope: parseScope(options.scope),
+					force: options.force,
+					list: options.list,
+				}),
+			);
+		});
+
+	generate
+		.command("agent")
+		.description(
+			"emit rules + hooks + MCP config for an agent platform (one-go)",
+		)
+		.argument("[target]", "any agent target (omit with --list)")
+		.option("--project-name <name>", "project name in the header")
+		.option("--no-hooks", "emit rules + MCP only (no hooks file)")
+		.option("--no-mcp", "emit rules + hooks only (no MCP server config)")
+		.option(
+			"--scope <scope>",
+			"MCP config scope: local or global (defaults to the platform default)",
+		)
+		.option("-f, --force", "overwrite existing files / MCP entry", false)
+		.option("--list", "list supported targets and their capabilities", false)
+		.action(async (target, options) => {
+			setCurrentCommand("generate.agent");
+			const g = await globals();
+			setExitCode(
+				await runGenerateAgentCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					target,
+					projectName: options.projectName,
+					hooks: options.hooks,
+					mcp: options.mcp,
+					mcpScope: parseScope(options.scope),
 					force: options.force,
 					list: options.list,
 				}),
@@ -679,27 +818,40 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.command("init")
 		.description("create .memofs/config.json without storing secrets")
 		.option("-f, --force", "overwrite existing config", false)
-		.option("--runtime <mode>", "runtime mode: local or hybrid", "local")
-		.option("--cloud-url <url>", "MemoFS Cloud API URL")
-		.option("--workspace-id <id>", "cloud workspace ID")
-		.option("--project-id <id>", "cloud project ID")
 		.action(async (options) => {
 			setCurrentCommand("config.init");
 			const g = await globals();
+			// `--runtime`, `--cloud-url`, `--workspace-id`, and `--project-id` are
+			// declared as global options on the parent program. Re-declaring them
+			// on this subcommand causes Commander to shadow the subcommand storage
+			// with the parent's, so the parsed values land in `program.opts()` and
+			// the subcommand's options fall back to their defaults. Read them from
+			// the global program opts instead — the documented UX
+			// (`memofs config init --runtime hybrid --cloud-url ...`) keeps working.
+			const programOpts = program.opts() as {
+				runtime?: string;
+				cloudUrl?: string;
+				workspaceId?: string;
+				projectId?: string;
+			};
+			const rootDir = path.resolve(cwd ?? process.cwd(), g.root);
 			const result = await writeDefaultCliConfig({
 				cwd: cwd ?? process.cwd(),
 				root: g.root,
 				force: options.force,
 				config: {
-					$schema: configSchemaUrl(pkg.version),
-					runtime: options.runtime,
+					$schema: resolveSchemaPath(rootDir),
+					runtime:
+						(programOpts.runtime as MemoFsConfigFile["runtime"]) ?? "local",
 					root: ".",
 					cloud: {
-						...(options.cloudUrl ? { baseUrl: options.cloudUrl } : {}),
-						...(options.workspaceId
-							? { workspaceId: options.workspaceId }
+						...(programOpts.cloudUrl ? { baseUrl: programOpts.cloudUrl } : {}),
+						...(programOpts.workspaceId
+							? { workspaceId: programOpts.workspaceId }
 							: {}),
-						...(options.projectId ? { projectId: options.projectId } : {}),
+						...(programOpts.projectId
+							? { projectId: programOpts.projectId }
+							: {}),
 					},
 				} satisfies MemoFsConfigFile,
 			});

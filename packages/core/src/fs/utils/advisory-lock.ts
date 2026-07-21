@@ -10,10 +10,10 @@
  * attempting a mutating op gets a clear {@link LockHeldError}. Non-mutating
  * reads never block.
  *
- * Lock file contents are JSON (`{ pid, startedAt }`) so a stale lock left by a
- * crashed process is detectable (PID-liveness probe) and reclaimable. The
- * `maxAgeMs` safety net guards against PID reuse. Malformed/partial lock files
- * (a human hand-edited `.lock`) are treated as stale and reclaimed.
+ * Lock file contents are JSON (`{ pid, startedAt, ownerId }`) so a stale lock
+ * left by a crashed process is detectable (PID-liveness probe) and
+ * reclaimable. The process start signature guards against PID reuse. Files
+ * are published only after their complete contents are written.
  *
  * This is the local counterpart to's cloud concurrency-control layer:
  * local *serializes* (a second local process is accidental, not a workload);
@@ -24,6 +24,7 @@
  */
 
 import { execSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import { isNotFoundError } from "../../core/internal/is-not-found-error";
@@ -37,6 +38,8 @@ export interface LockFileContents {
 	startedAt: string;
 	/** The unique process start time from the OS to guard against PID reuse. */
 	processStartedAt?: string;
+	/** Random per-acquisition token used to protect a subsequent holder's lock. */
+	ownerId?: string;
 }
 
 /**
@@ -73,14 +76,13 @@ export function getProcessStartTime(pid: number): string | null {
 /** Options for {@link AdvisoryFileLock}. */
 export interface AdvisoryFileLockOptions {
 	/**
-	 * Max age (ms) before a lock is considered stale regardless of PID liveness.
-	 * Guards against PID reuse. Default: 1 hour.
+	 * @deprecated A live process is never reclaimed by age because that can
+	 * delete its valid lock. PID reuse is guarded by `processStartedAt` instead.
 	 */
 	maxAgeMs?: number;
+	/** Optional process-start probe, primarily for portable deterministic tests. */
+	getProcessStartTime?: (pid: number) => string | null;
 }
-
-/** Default staleness window for a held lock (1 hour). */
-const DEFAULT_MAX_AGE_MS = 60 * 60 * 1000;
 
 /**
  * Cross-process advisory file lock held process-lifetime.
@@ -91,11 +93,19 @@ const DEFAULT_MAX_AGE_MS = 60 * 60 * 1000;
  * leaves a stale lock reclaimed by the next process via the PID-liveness probe.
  */
 export class AdvisoryFileLock {
+	private static readonly heldLocks = new Set<AdvisoryFileLock>();
+	private static exitHandlerRegistered = false;
+	private static readonly processExitHandler = (): void => {
+		for (const lock of AdvisoryFileLock.heldLocks) {
+			lock.releaseSync();
+		}
+	};
+
 	private held = false;
 	private readonly lockPath: string;
-	private readonly maxAgeMs: number;
 	private readonly fileMode: number;
-	private readonly exitHandler: () => void;
+	private readonly ownerId = randomUUID();
+	private readonly processStartTime: (pid: number) => string | null;
 	private registered = false;
 	/**
 	 * In-flight acquire promise, so concurrent same-process calls (e.g. 50
@@ -108,7 +118,7 @@ export class AdvisoryFileLock {
 	 * Creates a new advisory lock bound to a lock-file path.
 	 *
 	 * @param lockPath - Absolute path to the `.lock` file.
-	 * @param options - Store options (file mode) + lock options (max age).
+	 * @param options - Store options and lock options.
 	 */
 	constructor(
 		lockPath: string,
@@ -117,9 +127,8 @@ export class AdvisoryFileLock {
 		},
 	) {
 		this.lockPath = lockPath;
-		this.maxAgeMs = options.maxAgeMs ?? DEFAULT_MAX_AGE_MS;
 		this.fileMode = options.fileMode;
-		this.exitHandler = () => this.releaseSync();
+		this.processStartTime = options.getProcessStartTime ?? getProcessStartTime;
 	}
 
 	/** Whether this instance currently holds the lock. */
@@ -157,7 +166,11 @@ export class AdvisoryFileLock {
 		await this.tryCreateOrReclaim();
 		this.held = true;
 		if (!this.registered) {
-			process.on("exit", this.exitHandler);
+			AdvisoryFileLock.heldLocks.add(this);
+			if (!AdvisoryFileLock.exitHandlerRegistered) {
+				process.on("exit", AdvisoryFileLock.processExitHandler);
+				AdvisoryFileLock.exitHandlerRegistered = true;
+			}
 			this.registered = true;
 		}
 	}
@@ -169,7 +182,9 @@ export class AdvisoryFileLock {
 		if (!this.held) return;
 		this.deregister();
 		try {
-			await fsPromises.unlink(this.lockPath);
+			if (await this.isCurrentOwner()) {
+				await fsPromises.unlink(this.lockPath);
+			}
 		} catch {
 			// Already gone (another process reclaimed, or never persisted).
 			// Release must never throw during teardown.
@@ -185,7 +200,9 @@ export class AdvisoryFileLock {
 		if (!this.held) return;
 		this.deregister();
 		try {
-			fs.unlinkSync(this.lockPath);
+			if (this.isCurrentOwnerSync()) {
+				fs.unlinkSync(this.lockPath);
+			}
 		} catch {
 			// Swallow all errors during process exit.
 		}
@@ -199,7 +216,14 @@ export class AdvisoryFileLock {
 
 	private deregister(): void {
 		if (this.registered) {
-			process.removeListener("exit", this.exitHandler);
+			AdvisoryFileLock.heldLocks.delete(this);
+			if (
+				AdvisoryFileLock.heldLocks.size === 0 &&
+				AdvisoryFileLock.exitHandlerRegistered
+			) {
+				process.removeListener("exit", AdvisoryFileLock.processExitHandler);
+				AdvisoryFileLock.exitHandlerRegistered = false;
+			}
 			this.registered = false;
 		}
 	}
@@ -208,7 +232,8 @@ export class AdvisoryFileLock {
 		const contents: LockFileContents = {
 			pid: process.pid,
 			startedAt: new Date().toISOString(),
-			processStartedAt: getProcessStartTime(process.pid) ?? undefined,
+			processStartedAt: this.processStartTime(process.pid) ?? undefined,
+			ownerId: this.ownerId,
 		};
 
 		const created = await this.tryWriteLockFile(contents);
@@ -229,17 +254,31 @@ export class AdvisoryFileLock {
 	}
 
 	private async tryWriteLockFile(contents: LockFileContents): Promise<boolean> {
+		const temporaryPath = `${this.lockPath}.${process.pid}.${randomUUID()}.tmp`;
 		try {
-			const handle = await fsPromises.open(this.lockPath, "wx", this.fileMode);
+			const handle = await fsPromises.open(temporaryPath, "wx", this.fileMode);
 			try {
 				await handle.writeFile(JSON.stringify(contents), "utf8");
 			} finally {
 				await handle.close();
 			}
+			try {
+				await fsPromises.link(temporaryPath, this.lockPath);
+			} catch (error) {
+				if (isAlreadyExistsError(error)) return false;
+				throw error;
+			}
 			return true;
 		} catch (error) {
 			if (isAlreadyExistsError(error)) return false;
 			throw error;
+		} finally {
+			try {
+				await fsPromises.unlink(temporaryPath);
+			} catch {
+				// The temporary path is best-effort cleanup; do not mask the lock
+				// operation's result if another actor has already removed it.
+			}
 		}
 	}
 
@@ -271,8 +310,7 @@ export class AdvisoryFileLock {
 	}
 
 	/**
-	 * A lock is stale if its holder process is dead OR it exceeds the max age
-	 * (PID-reuse safety net).
+	 * A lock is stale if its holder process is dead or its PID was reused.
 	 */
 	private isStale(contents: LockFileContents): boolean {
 		if (typeof contents.pid !== "number" || !Number.isFinite(contents.pid)) {
@@ -282,17 +320,29 @@ export class AdvisoryFileLock {
 
 		// Verify PID reuse:
 		if (contents.processStartedAt) {
-			const currentStartTime = getProcessStartTime(contents.pid);
+			const currentStartTime = this.processStartTime(contents.pid);
 			if (currentStartTime && currentStartTime !== contents.processStartedAt) {
 				return true;
 			}
 		}
 
-		const startedAt = Date.parse(contents.startedAt);
-		if (Number.isNaN(startedAt)) return true;
-		if (Date.now() - startedAt > this.maxAgeMs) return true;
+		return Number.isNaN(Date.parse(contents.startedAt));
+	}
 
-		return false;
+	private async isCurrentOwner(): Promise<boolean> {
+		const current = await this.readLock();
+		return current?.ownerId === this.ownerId;
+	}
+
+	private isCurrentOwnerSync(): boolean {
+		try {
+			return (
+				parseLockContents(fs.readFileSync(this.lockPath, "utf8"))?.ownerId ===
+				this.ownerId
+			);
+		} catch {
+			return false;
+		}
 	}
 }
 

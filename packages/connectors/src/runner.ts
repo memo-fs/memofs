@@ -148,7 +148,7 @@ async function runOne(
 		// Same externalId + same content → same id → skip. Changed content → a
 		// new id → write (the underlying fact genuinely changed). This works
 		// identically across all store strategies because the id is on the note.
-		const noteId = connectorNoteId(record);
+		const noteId = await connectorNoteId(record);
 		if (existingNoteIds.has(noteId)) {
 			skipped.push(record.externalId);
 			continue;

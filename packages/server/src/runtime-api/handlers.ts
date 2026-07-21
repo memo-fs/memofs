@@ -177,6 +177,9 @@ export const RUNTIME_HANDLERS: Record<string, RuntimeMethodHandler> = {
 			...(optionalString(params, "title") === undefined
 				? {}
 				: { title: optionalString(params, "title") }),
+			...(optionalString(params, "writer") === undefined
+				? {}
+				: { writer: optionalString(params, "writer") }),
 		})) as unknown as JsonValue;
 	},
 

@@ -117,6 +117,7 @@ export class FsRecallStore implements RecallStore {
 	private readonly path: typeof EMBEDDINGS_INDEX_PATH;
 	private readonly now: () => string;
 	private hydrated = false;
+	private hydrationPromise: Promise<void> | undefined;
 
 	constructor(options: FsRecallStoreOptions) {
 		this.store = options.store;
@@ -137,7 +138,21 @@ export class FsRecallStore implements RecallStore {
 	 */
 	async hydrate(): Promise<void> {
 		if (this.hydrated) return;
-		this.hydrated = true;
+		if (this.hydrationPromise) return this.hydrationPromise;
+
+		this.hydrationPromise = this.hydrateOnce().then(
+			() => {
+				this.hydrated = true;
+			},
+			(error: unknown) => {
+				this.hydrationPromise = undefined;
+				throw error;
+			},
+		);
+		return this.hydrationPromise;
+	}
+
+	private async hydrateOnce(): Promise<void> {
 		let content: string;
 		try {
 			content = await this.store.read(this.path);
@@ -177,6 +192,7 @@ export class FsRecallStore implements RecallStore {
 	}
 
 	async upsert(documents: RecallDocument[]): Promise<void> {
+		await this.hydrate();
 		await this.inner.upsert(documents);
 		await this.persist();
 	}
@@ -187,11 +203,13 @@ export class FsRecallStore implements RecallStore {
 	}
 
 	async delete(ids: string[], options?: { namespace?: string }): Promise<void> {
+		await this.hydrate();
 		await this.inner.delete(ids, options);
 		await this.persist();
 	}
 
 	async deleteBySource(input: DeleteBySourceInput): Promise<void> {
+		await this.hydrate();
 		await this.inner.deleteBySource(input);
 		await this.persist();
 	}

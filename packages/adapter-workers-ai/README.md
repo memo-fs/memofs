@@ -22,10 +22,6 @@ graph.
 
 ```bash
 npm install @memofs/adapter-workers-ai
-
-# or: pnpm add @memofs/adapter-workers-ai
-# or: yarn add @memofs/adapter-workers-ai
-# or: bun add @memofs/adapter-workers-ai
 ```
 
 > Requires **Node.js >= 22**.

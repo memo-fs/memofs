@@ -44,4 +44,6 @@ pnpm --filter @memofs/docs check:links
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `VITE_PLUNK_PUBLIC_KEY` | optional | Plunk **public** key (`pk_…`) for the newsletter signup on the blog and changelog. Vite inlines it at build time. When unset, the signup form renders disabled. The public key is scoped to Plunk's `/v1/track` endpoint and is safe to ship in client code. |
+| `VITE_NEWSLETTER_ENABLED` | optional | Set to `true` to enable the newsletter signup form on the blog and changelog. A non-secret build-time flag (not a key) — Vite inlines `VITE_`-prefixed env at build. When unset, the form renders disabled. |
+| `RESEND_API_KEY` | required server-side | Resend **secret** API key (`re_…`) used by the `functions/api/subscribe.ts` Pages Function to create contacts. Set via `wrangler pages secret put` — never inline as a `VITE_` var or commit it. |
+| `RESEND_SEGMENT_ID` | required server-side | UUID of the Resend segment for docs newsletter contacts. Mirrors the cloud app's `RESEND_SEGMENT_ID` pattern (one segment per audience). Set via `wrangler pages secret put` or in `wrangler.jsonc` `vars` (it's not secret). |

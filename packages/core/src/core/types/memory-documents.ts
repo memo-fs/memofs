@@ -53,6 +53,11 @@ export interface TimestampedNote {
 	tags?: string[];
 	/** Optional source identifier (where the note originated). */
 	source?: string;
+	/**
+	 * Optional human writer attribution (email or name). Recorded in the note
+	 * frontmatter alongside `source`. Distinct from `source` — both can be set.
+	 */
+	writer?: string;
 	/** Confidence score between 0 and 1 (defaults to 1). */
 	confidence?: number;
 	/** Optional arbitrary metadata attached to the note. */

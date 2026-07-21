@@ -17,54 +17,60 @@ describe("connectorNoteId", () => {
 		} as ConnectorRecord;
 	}
 
-	it("produces a `conn_<16 hex>` id", () => {
-		const id = connectorNoteId(record());
+	it("produces a `conn_<16 hex>` id", async () => {
+		const id = await connectorNoteId(record());
 		expect(id).toMatch(/^conn_[0-9a-f]{16}$/);
 	});
 
-	it("is deterministic for identical records (no wall-clock)", () => {
+	it("is deterministic for identical records (no wall-clock)", async () => {
 		// Two separate calls — if the id were wall-clock-seeded, these would
 		// differ. They must be byte-identical.
-		const a = connectorNoteId(record());
-		const b = connectorNoteId(record());
+		const [a, b] = await Promise.all([
+			connectorNoteId(record()),
+			connectorNoteId(record()),
+		]);
 		expect(a).toBe(b);
 	});
 
-	it("changes when externalId changes", () => {
-		const a = connectorNoteId(record({ externalId: "issue:42" }));
-		const b = connectorNoteId(record({ externalId: "issue:43" }));
+	it("changes when externalId changes", async () => {
+		const [a, b] = await Promise.all([
+			connectorNoteId(record({ externalId: "issue:42" })),
+			connectorNoteId(record({ externalId: "issue:43" })),
+		]);
 		expect(a).not.toBe(b);
 	});
 
-	it("changes when content changes", () => {
-		const a = connectorNoteId(record({ content: "Login returns 500." }));
-		const b = connectorNoteId(record({ content: "Login returns 502." }));
+	it("changes when content changes", async () => {
+		const [a, b] = await Promise.all([
+			connectorNoteId(record({ content: "Login returns 500." })),
+			connectorNoteId(record({ content: "Login returns 502." })),
+		]);
 		expect(a).not.toBe(b);
 	});
 
-	it("is stable across two distinct record objects with the same fields", () => {
+	it("is stable across two distinct record objects with the same fields", async () => {
 		// Simulating two devices re-ingesting the same external item.
-		const device1 = connectorNoteId(
-			record({ externalId: "pr:7", content: "Add OAuth" }),
-		);
-		const device2 = connectorNoteId(
-			record({ externalId: "pr:7", content: "Add OAuth" }),
-		);
+		const [device1, device2] = await Promise.all([
+			connectorNoteId(record({ externalId: "pr:7", content: "Add OAuth" })),
+			connectorNoteId(record({ externalId: "pr:7", content: "Add OAuth" })),
+		]);
 		expect(device1).toBe(device2);
 	});
 
-	it("ignores title/url/metadata in the hash (only externalId + content)", () => {
+	it("ignores title/url/metadata in the hash (only externalId + content)", async () => {
 		// Different title/url/metadata but same externalId + content → same id.
 		// This is deliberate: re-pushed records may carry refreshed metadata
 		// (e.g. a label added) but the underlying fact is unchanged.
-		const base = connectorNoteId(record());
-		const withExtras = connectorNoteId(
-			record({
-				title: "Different title",
-				url: "https://example.com/x",
-				metadata: { extra: true },
-			}),
-		);
+		const [base, withExtras] = await Promise.all([
+			connectorNoteId(record()),
+			connectorNoteId(
+				record({
+					title: "Different title",
+					url: "https://example.com/x",
+					metadata: { extra: true },
+				}),
+			),
+		]);
 		expect(withExtras).toBe(base);
 	});
 });

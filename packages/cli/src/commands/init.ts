@@ -1,6 +1,10 @@
 /**
  * CLI command handler for initializing a new MemoFS local workspace.
  *
+ * Creates the canonical `.memofs/` directory structure, seeds all memory
+ * files, and writes a default `.memofs/config.json` with a `$schema`
+ * reference pointing to the schema bundled in the installed CLI package.
+ *
  * @module init
  */
 
@@ -14,6 +18,7 @@ import {
 	readTextIfExists,
 	writeText,
 } from "../cli/store-helpers";
+import { resolveSchemaPath, writeDefaultCliConfig } from "../config";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import {
@@ -93,10 +98,21 @@ export async function runInitCommand(
 		MEMOFS_CLI_PATHS.manifest,
 	);
 	if (existingManifest && !options.force) {
+		const configResult = await writeDefaultCliConfig({
+			cwd: rootDir,
+			root: ".",
+			force: options.force,
+			config: {
+				$schema: resolveSchemaPath(rootDir),
+				runtime: "local",
+				root: ".",
+			},
+		});
 		const data = {
 			created: false,
 			rootDir,
 			message: ".memofs already exists. Use --force to overwrite seed files.",
+			config: configResult,
 		};
 		if (options.json) printJsonEnvelope(options.output, "init", data);
 		else options.output.write(data.message);
@@ -131,11 +147,23 @@ export async function runInitCommand(
 		}
 	}
 
+	const configResult = await writeDefaultCliConfig({
+		cwd: rootDir,
+		root: ".",
+		force: options.force,
+		config: {
+			$schema: resolveSchemaPath(rootDir),
+			runtime: "local",
+			root: ".",
+		},
+	});
+
 	const data = {
 		created: true,
 		rootDir,
 		manifest,
 		files: { created, overwritten, skipped },
+		config: configResult,
 	};
 	if (options.json) printJsonEnvelope(options.output, "init", data);
 	else

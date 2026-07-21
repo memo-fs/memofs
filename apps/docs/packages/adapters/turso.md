@@ -2,8 +2,6 @@
 
 The `@memofs/adapter-turso` adapter integrates Turso and libSQL databases into MemoFS, providing a query-optimized metadata axis for index matching, graph relationships, and semantic search tracking.
 
----
-
 ## Installation
 
 ::: code-group
@@ -24,12 +22,14 @@ yarn add @memofs/adapter-turso
 bun add @memofs/adapter-turso
 ```
 
+```sh [deno]
+deno add npm:@memofs/adapter-turso
+```
+
 :::
 
 > [!NOTE]
 > Requires **Node.js >= 22**.
-
----
 
 ## Usage
 
@@ -41,7 +41,7 @@ import { createTursoMetadataStore } from "@memofs/adapter-turso";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "turso-project",
   
   // Inject Turso/libSQL for metadata tracking
@@ -51,8 +51,6 @@ const memo = new MemoFS({
   }),
 });
 ```
-
----
 
 ## Configuration API (`TursoMetadataStoreConfig`)
 

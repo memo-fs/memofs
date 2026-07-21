@@ -130,25 +130,21 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		if (bootstrapped) return;
 		if (options.autoBootstrap) {
 			await bootstrapMemoryStore(store, { projectId });
-			try {
-				await graphStore.hydrate?.();
-				const nodes = await graphStore.queryNodes();
-				const edges = await graphStore.queryEdges();
-				for (const node of nodes) {
-					graphNodes.set(node.id, toGraphNodeInput(node));
-				}
-				for (const edge of edges) {
-					const id = stableEdgeKey(edge.from, edge.type, edge.to);
-					graphEdges.set(id, toGraphEdgeInput(edge));
-				}
-				for (const node of nodes) {
-					indexLexical({
-						id: `graph:${node.id}`,
-						text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
-					});
-				}
-			} catch {
-				// Best-effort.
+			await graphStore.hydrate?.();
+			const nodes = await graphStore.queryNodes();
+			const edges = await graphStore.queryEdges();
+			for (const node of nodes) {
+				graphNodes.set(node.id, toGraphNodeInput(node));
+			}
+			for (const edge of edges) {
+				const id = stableEdgeKey(edge.from, edge.type, edge.to);
+				graphEdges.set(id, toGraphEdgeInput(edge));
+			}
+			for (const node of nodes) {
+				indexLexical({
+					id: `graph:${node.id}`,
+					text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
+				});
 			}
 		}
 		bootstrapped = true;

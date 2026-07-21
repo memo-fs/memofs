@@ -6,8 +6,6 @@ MemoFS uses a clear priority chain to resolve configuration settings:
 3. **Workspace Configuration File** (`.memofs/config.json`)
 4. **Default Fallbacks** (Lowest priority)
 
----
-
 ## Runtime Modes
 
 When initializing `MemoFS`, you can select one of two runtime modes:
@@ -15,15 +13,16 @@ When initializing `MemoFS`, you can select one of two runtime modes:
 | Mode | Target | Description |
 |---|---|---|
 | `local` | Off-grid / Zero Config | All reads and writes occur directly on the local filesystem. Zero cloud dependencies. |
-| `hybrid` | Cloud Sync Enabled | Same local engine, plus a cloud replica. Sync via explicit `sync.push` / `sync.pull` verbs — no implicit read/write policies. |
+| `hybrid` | Cloud Sync Enabled | Same local engine plus a cloud file replica. Sync uses explicit `sync.push` / `sync.pull` verbs; reads and writes remain local. |
 
 ```ts
-const memo = new MemoFS({
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
   mode: "local", // or "hybrid"
 });
 ```
-
----
 
 ## Sync Verbs (Hybrid Mode)
 
@@ -35,7 +34,10 @@ In `hybrid` mode, the cloud is reached via two explicit verbs only — there are
 Reads and writes always hit the local engine. The cloud is a file replica, not a runtime mode.
 
 ```ts
-const memo = new MemoFS({
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
   mode: "hybrid",
   cloud: {
     baseUrl: process.env.MEMOFS_CLOUD_URL!,
@@ -44,14 +46,13 @@ const memo = new MemoFS({
 });
 ```
 
----
-
 ## Workspace Config (`.memofs/config.json`)
 
 The `.memofs/config.json` allows team-wide settings to be committed alongside code:
 
 ```json
 {
+  "$schema": "./node_modules/@memofs/cli/schema/config.json",
   "runtime": "local",
   "projectId": "project-abc",
   "recall": {
@@ -59,12 +60,10 @@ The `.memofs/config.json` allows team-wide settings to be committed alongside co
     "embeddingModel": "openai/text-embedding-3-small"
   },
   "cloud": {
-    "baseUrl": "https://memo.memofs.dev"
+    "baseUrl": "https://memofs.dev/api/v1"
   }
 }
 ```
-
----
 
 ## Environment Variables
 

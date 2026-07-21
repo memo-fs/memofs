@@ -8,6 +8,7 @@ import AudienceSection from "./AudienceSection.vue";
 import BentoShowcase from "./BentoShowcase.vue";
 import BlogPostFooter from "./BlogPostFooter.vue";
 import BlogPostHeader from "./BlogPostHeader.vue";
+import BlogSidebar from "./BlogSidebar.vue";
 
 import BottomCta from "./BottomCta.vue";
 import ComparisonSection from "./ComparisonSection.vue";
@@ -54,11 +55,15 @@ watch(
   <Layout>
     <template #sidebar-nav-before>
       <SidebarBrand />
+      <BlogSidebar v-if="isBlogPost" />
     </template>
 
     <template #doc-before>
       <BlogPostHeader v-if="isBlogPost" />
-      <AskAiBar v-else />
+    </template>
+
+    <template #aside-top>
+      <AskAiBar v-if="!isBlogPost" class="ask-ai-bar-aside" />
     </template>
 
     <template #doc-after>
@@ -107,6 +112,10 @@ watch(
 </template>
 
 <style scoped>
+.ask-ai-bar-aside {
+  margin-bottom: 16px;
+}
+
 .container {
   max-width: var(--tek-container-narrow);
   margin: 0 auto;

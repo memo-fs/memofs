@@ -4,6 +4,7 @@
  * @module handlers
  */
 
+import { isTaskType, TASK_TYPES, type TaskType } from "@memofs/core";
 import {
 	McpAuthorizationError,
 	McpValidationError,
@@ -309,6 +310,16 @@ function validateToolArguments(
 		}
 		case "memofs.context": {
 			const scope = scopeArgs(object);
+			const taskTypeRaw = optionalString(object.taskType, "taskType", 16);
+			let taskType: TaskType | undefined;
+			if (taskTypeRaw !== undefined) {
+				if (!isTaskType(taskTypeRaw)) {
+					throw new McpValidationError(
+						`taskType must be one of: ${TASK_TYPES.join(", ")}.`,
+					);
+				}
+				taskType = taskTypeRaw;
+			}
 			const limit = optionalInteger(object.limit, "limit", 1, maxPageSize);
 			const maxBytes = optionalInteger(
 				object.maxBytes,
@@ -366,6 +377,7 @@ function validateToolArguments(
 				args: {
 					query: requiredString(object.query, "query", 4096),
 					...scope,
+					...(taskType === undefined ? {} : { taskType }),
 					...(limit === undefined ? {} : { limit }),
 					...(maxBytes === undefined ? {} : { maxBytes }),
 					...(detail === undefined ? {} : { detail }),

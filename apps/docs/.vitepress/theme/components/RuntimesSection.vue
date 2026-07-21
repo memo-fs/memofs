@@ -27,7 +27,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 <span class="token comment">// All memory stays on disk — offline-first.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsStore</span>(
-    { rootDir: <span class="token string">"./.memofs"</span> }
+    { rootDir: <span class="token string">"."</span> }
   ),
   projectId: <span class="token string">"my-app"</span>,
   mode: <span class="token string">"local"</span>,
@@ -52,7 +52,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 <span class="token comment">// Local speed + cloud replica.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsStore</span>(
-    { rootDir: <span class="token string">"./.memofs"</span> }
+    { rootDir: <span class="token string">"."</span> }
   ),
   mode: <span class="token string">"hybrid"</span>,
   cloud: {
@@ -66,35 +66,37 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
 
         <div class="runtime-card runtime-card--full tek-reveal" data-delay="3">
           <div class="runtime-managed-left">
-            <span class="tek-kicker">Managed · Coming soon</span>
-            <h3>Cloud hosted</h3>
+            <span class="tek-kicker">Managed · MCP endpoint live</span>
+            <h3>Memory as an API</h3>
             <p>
-              MemoFS Cloud hosts the engine. Thin clients — CI pipelines, edge functions, dashboards —
-              can read and write memory over HTTPS with zero local files.
-              The same <code>@memofs/core</code> API, no checkout required.
+              MemoFS Cloud hosts the engine. Any MCP client — Cursor, Claude, a hosted
+              agent on a machine with no checkout — reads and writes memory through one
+              hosted MCP URL plus an API key, with zero local files. A raw HTTPS API for
+              CI pipelines, edge functions, and chatbots is next. Your files stay the
+              source of truth: leaving is a config change, not a migration.
             </p>
             <a
-              href="https://memofs.dev/waitlist"
+              href="https://memofs.dev"
               class="runtime-waitlist-btn"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Join the waitlist →
+              Connect your agent →
             </a>
           </div>
           <ul class="runtime-managed-features">
             <li>
               <span class="rmf-icon">☁</span>
               <span class="rmf-body">
-                <strong>Cloud-hosted engine</strong>
-                No local checkout, no disk writes
+                <strong>One memory, everywhere</strong>
+                Every machine, agent, and teammate reads the same brain
               </span>
             </li>
             <li>
               <span class="rmf-icon">⚡</span>
               <span class="rmf-body">
-                <strong>Read &amp; write over HTTPS</strong>
-                Works from CI, serverless, or browser
+                <strong>Read &amp; write over MCP — HTTPS API next</strong>
+                Works from any MCP client today — one URL + key
               </span>
             </li>
             <li>
@@ -107,8 +109,8 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
             <li>
               <span class="rmf-icon">⚙</span>
               <span class="rmf-body">
-                <strong>Team memory sync</strong>
-                Shared knowledge across every developer on the project
+                <strong>See your memory think</strong>
+                A dashboard to inspect, govern, and consolidate what agents remember
               </span>
             </li>
           </ul>

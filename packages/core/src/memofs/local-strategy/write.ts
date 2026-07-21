@@ -25,7 +25,7 @@ import type {
 	WriteMemoryResult,
 } from "../types";
 import {
-	hash,
+	fingerprint,
 	stableEdgeKey,
 	toGraphEdgeInput,
 	toGraphNodeInput,
@@ -54,7 +54,7 @@ export async function writeMemory(
 	const durable = tierDecision.tier === "durable";
 	const now = new Date().toISOString();
 
-	const id = input.id ?? `mem_${hash(`${now}:${input.content}`).slice(0, 16)}`;
+	const id = input.id ?? `mem_${fingerprint(`${now}:${input.content}`)}`;
 	await appendTimestampedNote(ctx.options.store, {
 		timestamp: now,
 		kind: input.kind ?? "note",
@@ -65,6 +65,7 @@ export async function writeMemory(
 		...(input.source === undefined
 			? { source: "memofs" }
 			: { source: input.source }),
+		...(input.writer === undefined ? {} : { writer: input.writer }),
 		metadata: {
 			id,
 			...(input.workspaceId === undefined
@@ -84,7 +85,9 @@ export async function writeMemory(
 			...((input.projectId ?? ctx.options.projectId)
 				? { projectId: input.projectId ?? ctx.options.projectId }
 				: {}),
-			actor: { type: "agent", id: "memofs" },
+			actor: input.writer
+				? { type: "user", id: input.writer }
+				: { type: "agent", id: "memofs" },
 			summary: input.title ?? input.content.slice(0, 160),
 			metadata: {
 				id,
@@ -166,7 +169,6 @@ export async function updateCoreMemory(
 		});
 	}
 
-	await writeCoreMemory(ctx.options.store, content);
 	return { content: await readCoreMemory(ctx.options.store) };
 }
 

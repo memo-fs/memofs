@@ -36,7 +36,8 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  // The store root is your workspace; MemoFS creates `.memofs/` inside it.
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "my-project",
   mode: "local",
 });
@@ -48,13 +49,19 @@ const core = await memo.core.read();
 console.log(core);
 ```
 
-## Subpath Exports
+## Runtime Boundaries
 
-The `@memofs/core` package is designed to be environment-agnostic. The root barrel is Worker-safe (no `node:fs`); Node-only utilities live behind a subpath.
+The root `@memofs/core` entry is Worker-loadable when you provide a Worker-safe
+`MemoryStore`. Node filesystem utilities live behind a separate subpath and
+must not be imported from a Worker.
 
 - **Root barrel**: `import { MemoFS, createInMemoryGraphStore, createFsRecallStore } from "@memofs/core"`
 - **Node filesystem store**: `import { createNodeFsMemoryStore, createNodeMemoFs } from "@memofs/core/node-fs"`
 - **Cloud client contracts**: `import { createMemoFsCloudClient } from "@memofs/core/cloud-client"`
+
+For Workers, inject a compatible store such as `RemoteBlobMemoryStore` with
+your blob and metadata adapters. The root package does not choose a storage
+backend for you.
 
 Provider-specific adapters (OpenAI, Voyage, Transformers) live in separate `@memofs/adapter-*` packages — core defines the contracts, adapters implement them.
 

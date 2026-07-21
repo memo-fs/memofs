@@ -1,4 +1,4 @@
-import type { RecallItem } from "../types";
+import type { RecallItem, TaskType } from "../types";
 
 export interface ResolveGraphNode {
 	id: string;
@@ -28,6 +28,7 @@ export interface ResolveGraphSourceRef {
 export interface RewriteInput {
 	query: string;
 	adapterExpansions?: string[];
+	taskType?: TaskType;
 }
 
 export interface RewriteResult {

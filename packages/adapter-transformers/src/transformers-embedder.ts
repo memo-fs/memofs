@@ -15,6 +15,7 @@ import type {
 	EmbedTextsResult,
 	MemoryEmbedder,
 } from "@memofs/core";
+import { omitUndefined, withRetry } from "@repo/utils";
 import {
 	TransformersInferenceError,
 	TransformersValidationError,
@@ -30,6 +31,7 @@ const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
 const DEFAULT_DEVICE = "cpu";
 const DEFAULT_DTYPE = "fp32";
 const DEFAULT_BATCH_SIZE = 32;
+const DEFAULT_RETRIES = 2;
 const MAX_TEXT_LENGTH = 8192;
 
 /**
@@ -100,6 +102,31 @@ function batch<T>(items: T[], size: number): T[][] {
 }
 
 /**
+ * Determine whether a pipeline-load failure is worth retrying.
+ *
+ * Transformers.js model loading is a network operation on first download and
+ * a local file operation thereafter. We retry on network-like failures
+ * (fetch errors, connection resets, timeouts) but not on configuration or
+ * model-not-found errors, where retrying would only waste time.
+ *
+ * @param error - The error thrown by the pipeline factory.
+ * @returns `true` when the error looks transient and a retry may succeed.
+ */
+function isPipelineLoadRetryable(error: unknown): boolean {
+	if (!(error instanceof Error)) return false;
+	const message = error.message.toLowerCase();
+	return (
+		message.includes("network") ||
+		message.includes("fetch") ||
+		message.includes("econnrefused") ||
+		message.includes("etimedout") ||
+		message.includes("enotfound") ||
+		message.includes("socket hang up") ||
+		message.includes("timeout")
+	);
+}
+
+/**
  * Local ONNX embedder implementing MemoFS's {@link MemoryEmbedder} contract.
  *
  * @public
@@ -110,6 +137,7 @@ export class TransformersEmbedder implements MemoryEmbedder {
 	private readonly device: string;
 	private readonly dtype: string;
 	private readonly batchSize: number;
+	private readonly retries: number;
 	private readonly onProgress?: TransformersProgressCallback;
 	private readonly pipelineFactory: FeatureExtractionPipelineFactory;
 
@@ -122,6 +150,7 @@ export class TransformersEmbedder implements MemoryEmbedder {
 		this.device = options.device ?? DEFAULT_DEVICE;
 		this.dtype = options.dtype ?? DEFAULT_DTYPE;
 		this.batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
+		this.retries = options.retries ?? DEFAULT_RETRIES;
 		this.onProgress = options.onProgress;
 		// Lazy default: only resolved on first use so the heavy runtime is not
 		// pulled in at construction time (keeps zero-config boot fast).
@@ -166,7 +195,11 @@ export class TransformersEmbedder implements MemoryEmbedder {
 		validateTexts(input.texts, allowEmpty);
 
 		if (input.texts.length === 0) {
-			return { embeddings: [], model: this.model, usage: { totalTokens: 0 } };
+			return {
+				embeddings: [],
+				model: this.model,
+				usage: { promptTokens: 0, totalTokens: 0 },
+			};
 		}
 
 		const pipeline = await this.loadPipeline();
@@ -197,6 +230,15 @@ export class TransformersEmbedder implements MemoryEmbedder {
 			}
 
 			const dim = this.inferredDimensions;
+			if (
+				input.expectedDimensions !== undefined &&
+				input.expectedDimensions !== dim
+			) {
+				throw new TransformersValidationError(
+					`Embedding dimension mismatch: model "${this.model}" produces ${dim}-dimensional vectors but expectedDimensions was ${input.expectedDimensions}.`,
+					{ expected: input.expectedDimensions, actual: dim },
+				);
+			}
 			for (const [i, text] of texts.entries()) {
 				const start = i * dim;
 				const embedding = flat.slice(start, start + dim);
@@ -218,24 +260,36 @@ export class TransformersEmbedder implements MemoryEmbedder {
 		return {
 			embeddings: records,
 			model: this.model,
-			usage: { totalTokens: approxTokens },
+			usage: { promptTokens: approxTokens, totalTokens: approxTokens },
 		};
 	}
 
 	/**
 	 * Lazily resolve (and memoize) the feature-extraction pipeline.
+	 *
+	 * The underlying model download/load is wrapped in {@link withRetry} so
+	 * transient network failures during the first weight download are retried
+	 * automatically. If all retries are exhausted the rejection is cleared so
+	 * a subsequent call can try again.
 	 */
 	private loadPipeline(): Promise<FeatureExtractionPipeline> {
 		if (this.pipelinePromise) return this.pipelinePromise;
-		this.pipelinePromise = this.pipelineFactory({
-			model: this.model,
-			...(this.cacheDir === undefined ? {} : { cacheDir: this.cacheDir }),
-			device: this.device,
-			dtype: this.dtype,
-			...(this.onProgress === undefined
-				? {}
-				: { progress_callback: this.onProgress }),
-		}).catch((error: unknown) => {
+		this.pipelinePromise = withRetry(
+			() =>
+				this.pipelineFactory({
+					model: this.model,
+					device: this.device,
+					dtype: this.dtype,
+					...omitUndefined({
+						cacheDir: this.cacheDir,
+						progress_callback: this.onProgress,
+					}),
+				}),
+			{
+				maxRetries: this.retries,
+				isRetryable: isPipelineLoadRetryable,
+			},
+		).catch((error: unknown) => {
 			// Allow a subsequent call to retry instead of caching the rejection.
 			this.pipelinePromise = undefined;
 			throw new TransformersInferenceError(
@@ -277,15 +331,15 @@ function createDefaultPipelineFactory(): FeatureExtractionPipelineFactory {
 			model: string,
 			cfg?: Record<string, unknown>,
 		) => Promise<FeatureExtractionPipeline>;
-		return pipeline("feature-extraction", options.model, {
-			...(options.cacheDir === undefined
-				? {}
-				: { cache_dir: options.cacheDir }),
-			device: options.device,
-			dtype: options.dtype,
-			...(options.progress_callback === undefined
-				? {}
-				: { progress_callback: options.progress_callback }),
-		});
+		return pipeline(
+			"feature-extraction",
+			options.model,
+			omitUndefined({
+				cache_dir: options.cacheDir,
+				device: options.device,
+				dtype: options.dtype,
+				progress_callback: options.progress_callback,
+			}),
+		);
 	};
 }

@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/connectors",
-	"version": "1.0.0-beta.2",
+	"version": "1.1.0-beta.1",
 	"private": false,
 	"description": "Local connector framework for ingesting external sources into MemoFS memory.",
 	"license": "MIT",

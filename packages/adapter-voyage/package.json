@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/adapter-voyage",
-	"version": "1.0.0-beta.2",
+	"version": "1.1.0-beta.1",
 	"private": false,
 	"description": "Voyage AI embedder and reranker adapter for MemoFS.",
 	"license": "MIT",

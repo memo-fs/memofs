@@ -5,6 +5,7 @@
  */
 
 import { NOTES_MEMORY_PATH } from "../../core/constants/memory-paths";
+import { MemoryWriteBlockedError } from "../../core/errors/errors";
 import { assertWriteAllowed } from "../../security/secret-blocklist";
 import { syncAfterSession } from "../sync/sync-after-session";
 import { syncBeforeSession } from "../sync/sync-before-session";
@@ -83,7 +84,8 @@ export function createMemoFsAgentSession(
 						formatDurableMemoryNote(sessionId, extracted.durableMemory),
 					);
 					durableMemoryWritten = true;
-				} catch {
+				} catch (error) {
+					if (!(error instanceof MemoryWriteBlockedError)) throw error;
 					// Secret material detected — drop the write, do not surface the
 					// secret in the error path.
 				}

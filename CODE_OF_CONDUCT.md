@@ -158,7 +158,7 @@ Enforcement decisions are based on impact, severity, and repeated behavior.
 If you experience or witness unacceptable behavior, contact a maintainer privately through GitHub or report it to:
 
 ```txt
-conduct@memofs.dev
+support@memofs.dev
 ```
 
 If the email is not active, use a private GitHub maintainer contact path.

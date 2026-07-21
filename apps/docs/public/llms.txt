@@ -1,6 +1,6 @@
 # MemoFS
 
-> MemoFS is a file-first memory runtime for AI agents and coding assistants. It gives LLMs durable, project-scoped context so they stay accurate and consistent across sessions. Memory lives as plain text and JSON in a `.memofs/` folder (local) or in MemoFS Cloud (hosted).
+> MemoFS is a file-first memory runtime for AI apps and agents. It gives LLMs durable, project-scoped context so they stay accurate and consistent across sessions. Memory lives as plain text and JSON in a `.memofs/` folder (local) or in MemoFS Cloud (hosted).
 
 MemoFS is published as focused packages:
 - `@memofs/core` — the core memory runtime (the `MemoFS` client, filesystem store, graph memory, recall, and cloud client contracts).
@@ -34,13 +34,13 @@ import { MemoFS } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 const memo = new MemoFS({
-  store: createNodeFsMemoryStore({ rootDir: "./.memofs" }),
+  store: createNodeFsMemoryStore({ rootDir: "." }),
   projectId: "my-app",
   mode: "local",
 });
 
-await memo.write({ content: "Use D1 for tenant metadata.", kind: "decision" });
-const hits = await memo.recall({ query: "database decisions" });
+await memo.notes.record({ content: "Use D1 for tenant metadata.", kind: "decision" });
+const hits = await memo.recall("database decisions");
 ```
 
 ## Docs
@@ -74,6 +74,9 @@ Client setup (Claude Code, Cursor, Codex, etc.) for both paths: https://docs.mem
 
 - CLI guide: https://docs.memofs.dev/packages/cli/
 - Commands: https://docs.memofs.dev/packages/cli/
+- Agent behavior enforcement: `memofs generate agent <target>` emits rules + hooks that enforce the MemoFS workflow at session start, compaction, and session end. Supports Claude Code, Codex, Cursor, and opencode.
+- Compliance observability: `memofs status` shows whether the agent loaded context, consulted memory, and persisted facts during the most recent session.
+- Task-aware context: `memofs context --task-type <type>` biases recall toward task-relevant memories (`coding`, `debug`, `refactor`, `docs`, `general`).
 
 ## API reference
 

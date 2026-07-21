@@ -2,8 +2,6 @@
 
 AgentFS is the virtual filesystem layer built into the `@memofs/core` runtime. It abstracts directory access, file reading, writing, and synchronization into a single interface.
 
----
-
 ## Canonical Memory Path Structure
 
 Inside the project root directory, AgentFS manages memory assets within the `.memofs/` subfolder:
@@ -28,8 +26,6 @@ Inside the project root directory, AgentFS manages memory assets within the `.me
     └── snapshots.jsonl        # Snapshot index
 ```
 
----
-
 ## The Virtual Path Contract
 
 AgentFS does not interact directly with Node's `fs` or other runtime environments. Instead, it interacts with an injected `MemoryStore` interface. This allows AgentFS to run seamlessly in any JavaScript execution context, including web browsers and Cloudflare Workers.
@@ -43,8 +39,6 @@ An implementation of `MemoryStore` exposes five primitives:
 - `append(path: string, content: string): Promise<void>`
 - `exists(path: string): Promise<boolean>`
 - `delete(path: string): Promise<void>`
-
----
 
 ## Agent Sessions
 

@@ -949,6 +949,21 @@ div[class*="language-"] pre {
 }
 
 /* ===================================================================
+   BLOG SIDEBAR
+   =================================================================== */
+.VPSidebar .blog-sidebar {
+	border-top: 1px solid var(--vp-c-divider);
+}
+
+/* Hide the VitePress-generated placeholder heading — the BlogSidebar
+   component provides its own "BLOG POSTS" heading. Scoped to blog pages so
+   docs section titles ("Core Runtime", "Adapters", …) stay visible. */
+.blog-index-page .VPSidebar .VPSidebarItem.level-0 > .item,
+.blog-post-page .VPSidebar .VPSidebarItem.level-0 > .item {
+	display: none;
+}
+
+/* ===================================================================
    RESPONSIVE
    =================================================================== */
 @media (max-width: 768px) {

@@ -18,6 +18,7 @@
  * @module definitions
  */
 
+import { TASK_TYPES } from "@memofs/core";
 import {
 	booleanSchema,
 	numberSchema,
@@ -206,6 +207,12 @@ export function createToolDefinitions(
 				{
 					query: stringSchema("Current user task or context query.", 4096),
 					...commonScopeProperties,
+					taskType: {
+						type: "string",
+						enum: [...TASK_TYPES],
+						description:
+							'Kind of task the agent is performing. The strategist tailors the recall query per task type. Defaults to "general".',
+					},
 					limit: {
 						type: "integer",
 						minimum: 1,

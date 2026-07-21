@@ -26,7 +26,10 @@ import type {
 	MemoryContextResult,
 	RecallItem,
 } from "../types";
-import type { BuildContextOperations } from "./context-builder";
+import {
+	assembleContext,
+	type BuildContextOperations,
+} from "./context-builder";
 import {
 	AGENT_CONTEXT_DIRECTIVE,
 	renderEntities,
@@ -171,13 +174,12 @@ export async function expandContext(
 	};
 }
 
-async function assembleFresh(
+function assembleFresh(
 	operations: BuildContextOperations,
 	input: MemoryContextInput,
 	warnings: string[],
 	signal: AbortSignal | undefined,
 ): Promise<MemoryContextResult> {
-	const { assembleContext } = await import("./context-builder");
 	return assembleContext(operations, input, warnings, signal, {
 		mode: "compact",
 		cache: operations.cache,

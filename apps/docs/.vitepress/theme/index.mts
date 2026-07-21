@@ -18,7 +18,7 @@ export default {
 	enhanceApp({ app, router }) {
 		// Used inside blog/index.md to render the data-driven post grid.
 		app.component("BlogIndex", BlogIndex);
-		// Newsletter signup (Plunk) — embedded in blog + changelog markdown.
+		// Newsletter signup (Resend via /api/subscribe Pages Function) — embedded in blog + changelog markdown.
 		app.component("NewsletterSignup", NewsletterSignup);
 		// Inline copy-to-clipboard for install commands + code snippets.
 		app.component("CopyButton", CopyButton);

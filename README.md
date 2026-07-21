@@ -56,7 +56,7 @@ import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
 // Initialize a Node.js filesystem-backed memory store
 const store = createNodeFsMemoryStore({
-  rootDir: "./.memofs",
+  rootDir: ".",
 });
 
 // Create the unified client
@@ -67,19 +67,17 @@ const memo = new MemoFS({
 });
 
 // Read project-wide core memory (core.md)
-const core = await memo.read({ kind: "core" });
-console.log(core.content);
+const core = await memo.core.read();
+console.log(core);
 
 // Record a durable note (notes.md)
-await memo.write({
-  kind: "notes",
+await memo.notes.record({
   content: "User prefers TypeScript with ESM modules.",
+  kind: "preference",
 });
 
 // Recall works offline (lexical BM25 + fuzzy matching) with zero config
-const hits = await memo.recall({
-  query: "TypeScript configuration",
-});
+const hits = await memo.recall("TypeScript configuration");
 ```
 
 To upgrade to semantic/vector search, plug in an embedder adapter like OpenAI (`@memofs/adapter-openai`) or Voyage AI (`@memofs/adapter-voyage`). For **zero-API-key local vector search**, enable the ONNX embedder (`@memofs/adapter-transformers`) to run embeddings completely in-process.
@@ -119,7 +117,7 @@ Three runtime modes are supported: **`local`** (filesystem-only, default), **`hy
 
 ## Packages
 
-MemoFS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope (with the unscoped `memofs` CLI).
+MemoFS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope. The CLI ships as `@memofs/cli` and installs the `memofs` command.
 
 ### Core Engine & Servers
 
@@ -157,7 +155,7 @@ MemoFS is structured as a monorepo containing 15 published public packages under
 
 The **core runtime is open source** (MIT) and fully functional locally. You do not need a cloud account to run MemoFS.
 
-**MemoFS Cloud** acts as a secure replica layer on top of your local files, enabling memory sync across multiple machines.
+**MemoFS Cloud** is the memory plane for your agents: it keeps every machine, teammate, and agent on the same memory, and gives you a dashboard to see and govern it.
 
 | Feature | Open source (this repo) | MemoFS Cloud |
 | --- | --- | --- |
@@ -165,9 +163,10 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 | CLI + stdio MCP server | ✅ | ✅ |
 | All adapters (OpenAI, Voyage, etc.) | ✅ | ✅ |
 | Hosted sync (keep memory in sync) | ✅ client | ✅ hosted |
-| Hosted managed MCP endpoint | — | ✅ available |
-| Team Workspaces & Access Control | — | Planned |
-| Managed-runtime (Recall/Graph host) | — | Roadmap |
+| Team workspaces & access control | — | ✅ available |
+| Memory dashboard (explore, consolidate) | — | ✅ available |
+| Hosted managed MCP endpoint | — | ✅ available (Pro+) |
+| Managed runtime (memory API over HTTPS) | — | Soon |
 
 [Join the Cloud waitlist →](https://memofs.dev)
 
@@ -178,8 +177,7 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 ```text
 memofs/
 ├── apps/
-│   ├── docs/         # VitePress documentation (docs.memofs.dev)
-│   └── cloud/        # MemoFS Cloud dashboard (Cloudflare Worker app)
+│   └── docs/         # VitePress documentation (docs.memofs.dev)
 ├── packages/         # 15 published @memofs/* packages
 ├── tooling/          # Private @repo/* workspace build packages
 ├── benchmarks/       # Workspace benchmarking suite

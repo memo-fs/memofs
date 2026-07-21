@@ -78,4 +78,39 @@ describe("notes memory", () => {
 			}),
 		).toThrow(MemoryValidationError);
 	});
+
+	it("renders writer in frontmatter when present", () => {
+		const output = formatTimestampedNote({
+			timestamp: "2026-05-02T12:00:00.000Z",
+			kind: "decision",
+			content: "Use file-first memory.",
+			source: "meeting",
+			writer: "alice@example.com",
+		});
+		expect(output).toMatch(/- source: meeting/);
+		expect(output).toMatch(/- writer: alice@example.com/);
+	});
+
+	it("omits writer line when writer is not set (no regression)", () => {
+		const output = formatTimestampedNote({
+			timestamp: "2026-05-02T12:00:00.000Z",
+			kind: "note",
+			content: "A note",
+			source: "memofs",
+		});
+		expect(output).not.toMatch(/- writer:/);
+		expect(output).toMatch(/- source: memofs/);
+	});
+
+	it("preserves both writer and source when both are set", () => {
+		const output = formatTimestampedNote({
+			timestamp: "2026-05-02T12:00:00.000Z",
+			kind: "note",
+			content: "A note",
+			source: "connector",
+			writer: "bob",
+		});
+		expect(output).toMatch(/- source: connector/);
+		expect(output).toMatch(/- writer: bob/);
+	});
 });

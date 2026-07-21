@@ -1,10 +1,20 @@
-import { createHash } from "node:crypto";
 import type { JsonObject } from "../../core/types/json";
 import type { GraphEdge, GraphNode } from "../../graph/types";
 import type { GraphEdgeInput, GraphNodeInput } from "../types";
 
-export function hash(value: string): string {
-	return createHash("sha256").update(value).digest("hex");
+/**
+ * Produces a stable 64-bit fingerprint for local identifiers.
+ *
+ * This is not a cryptographic digest; use `sha256Hex` for content integrity.
+ * FNV-1a keeps identifier generation synchronous and runtime-neutral.
+ */
+export function fingerprint(value: string): string {
+	let hash = 0xcbf29ce484222325n;
+	for (const byte of new TextEncoder().encode(value)) {
+		hash ^= BigInt(byte);
+		hash = BigInt.asUintN(64, hash * 0x100000001b3n);
+	}
+	return hash.toString(16).padStart(16, "0");
 }
 
 export function candidateShape(

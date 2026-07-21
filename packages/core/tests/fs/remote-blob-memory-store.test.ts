@@ -200,6 +200,19 @@ describe("RemoteBlobMemoryStore", () => {
 		);
 	});
 
+	it("does not overwrite a manifest entry when append finds a missing blob", async () => {
+		const { store, blobs, metadata } = createStore();
+		await store.write(CORE_MEMORY_PATH, "original");
+		const originalEntry = metadata.entries.get(CORE_MEMORY_PATH);
+		expect(originalEntry).toBeDefined();
+		if (originalEntry) await blobs.delete(originalEntry.blobKey);
+
+		await expect(
+			store.append(CORE_MEMORY_PATH, " replacement"),
+		).rejects.toBeInstanceOf(MemoryNotFoundError);
+		expect(metadata.entries.get(CORE_MEMORY_PATH)).toEqual(originalEntry);
+	});
+
 	it("rejects unsupported paths at runtime", async () => {
 		const { store } = createStore();
 		await expect(

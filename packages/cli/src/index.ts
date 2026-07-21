@@ -7,7 +7,7 @@
 export type { CliMemoFSOptions } from "./cli/memofs";
 export { createMemoFSFromCli } from "./cli/memofs";
 export type { MemoFsConfigFile } from "./config";
-export { configSchemaUrl, writeDefaultCliConfig } from "./config";
+export { resolveSchemaPath, writeDefaultCliConfig } from "./config";
 export type { CliErrorCode } from "./errors/cli-errors";
 export {
 	CliError,

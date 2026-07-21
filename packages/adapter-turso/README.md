@@ -29,10 +29,6 @@ adapter — so a Node self-hoster can pair this metadata store with any
 
 ```bash
 npm install @memofs/adapter-turso
-
-# or: pnpm add @memofs/adapter-turso
-# or: yarn add @memofs/adapter-turso
-# or: bun add @memofs/adapter-turso
 ```
 
 > Requires **Node.js >= 22**.

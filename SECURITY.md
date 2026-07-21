@@ -8,11 +8,7 @@ This document explains how to report vulnerabilities and what security practices
 
 ## Scope
 
-This policy applies to the public MemoFS repository and the published MemoFS package surfaces, including:
-
-```txt
-memofs
-```
+This policy applies to the public MemoFS repository and the published MemoFS package surfaces — the runtime (`@memofs/core`), the CLI (`@memofs/cli`, `memofs` bin), and the other published `@memofs/*` packages (adapters, connectors, server, mcp-server, json-rpc).
 
 This policy also covers:
 

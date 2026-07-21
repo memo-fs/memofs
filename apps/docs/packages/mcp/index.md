@@ -1,10 +1,31 @@
 # Model Context Protocol (MCP) Server
 
-`@memofs/mcp-server` allows AI coding agents (such as Claude Desktop, Cursor, and Zed) to securely interact with MemoFS memory layers using standard Model Context Protocol (MCP) tools.
+`@memofs/mcp-server` lets AI coding agents (Claude Code, Claude Desktop, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot, Zed, and any other MCP client) securely read and write MemoFS memory through standard Model Context Protocol tools.
+
+## Quick Setup (Recommended)
+
+The MemoFS CLI writes the correct MCP config for your platform in one command — no hand-editing JSON:
+
+```bash
+memofs generate mcp claude                 # project .mcp.json
+memofs generate mcp codex                  # ~/.codex/config.toml
+memofs generate mcp cursor --scope global  # ~/.cursor/mcp.json
+memofs generate mcp --list                 # all targets + paths
+```
+
+Or set up everything at once — rules file, hooks, and MCP config:
+
+```bash
+memofs generate agent claude
+```
+
+Writes are merge-safe: existing servers and settings are preserved, and a prior `memofs` entry is only replaced with `--force`. See the [CLI generate commands](/packages/cli/generate) for scopes and per-platform details.
+
+The sections below cover manual configuration for when you can't (or don't want to) use the CLI.
 
 ## Installation
 
-Install the MCP server package:
+Most agents launch the server on demand via `npx` — no install required. To pin it as a project dependency instead:
 
 ::: code-group
 
@@ -31,17 +52,36 @@ deno install npm:@memofs/mcp-server
 :::
 
 > [!NOTE]
-> The MCP server runs on **Node.js >= 22**. When configuring it for an AI agent, ensure Node 22+ is available on the machine that hosts the agent (e.g. your dev laptop, a CI runner, or the agent's sandboxed runtime).
+> The MCP server runs on **Node.js >= 22**. Ensure Node 22+ is available on the machine that hosts the agent (your dev laptop, a CI runner, or the agent's sandboxed runtime).
 
-## Integration
+## Manual Integration
 
-AI clients spawn the MCP server as a background process communicating via standard input/output (stdio). Most agents invoke it on demand via `npx` — no separate install required.
+AI clients spawn the MCP server as a background process communicating over standard input/output (stdio).
 
-### 1. Claude Desktop Setup
+Two conventions apply across all platforms:
 
-Add the server definition to your `claude_desktop_config.json` configuration file:
+- **Project-scoped configs** (committed to the repo) omit `--root` — the client launches the server with the project root as its working directory, keeping the config portable across machines.
+- **Global / app-level configs** (in your home directory) include an absolute `--root` so the server knows which project's `.memofs/` to serve.
 
-```json
+::: code-group
+
+```json [Claude Code]
+// Project: ./.mcp.json (committable — no --root needed)
+// Global:  ~/.claude.json (add "--root", "/absolute/path/to/project" to args)
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
+    }
+  }
+}
+```
+
+```json [Claude Desktop]
+// macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json
+// Windows: %APPDATA%\Claude\claude_desktop_config.json
+// Desktop has no project cwd, so --root is required.
 {
   "mcpServers": {
     "memofs": {
@@ -49,22 +89,79 @@ Add the server definition to your `claude_desktop_config.json` configuration fil
       "args": [
         "-y",
         "@memofs/mcp-server",
-        "--runtime", "local",
-        "--root", "/absolute/path/to/your/project"
+        "--root",
+        "/absolute/path/to/your/project"
       ]
     }
   }
 }
 ```
 
-### 2. Cursor Setup
+```toml [Codex]
+# Global (Codex convention): ~/.codex/config.toml
+# Project: ./.codex/config.toml (drop the --root args)
+[mcp_servers.memofs]
+command = "npx"
+args = ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
+```
 
-1. Go to **Settings** > **Features** > **MCP**.
-2. Click **+ Add New MCP Server**.
-3. Configure the fields:
-   - **Name:** `memofs`
-   - **Type:** `command`
-   - **Command:** `npx -y @memofs/mcp-server --runtime local --root /path/to/project`
+```json [Cursor]
+// Project: ./.cursor/mcp.json
+// Global:  ~/.cursor/mcp.json (add "--root", "/absolute/path/to/project")
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
+    }
+  }
+}
+```
+
+```jsonc [opencode]
+// Project: ./opencode.json (or .jsonc)
+// Global:  ~/.config/opencode/opencode.json (add "--root", "/absolute/path/to/project")
+{
+  "mcp": {
+    "memofs": {
+      "type": "local",
+      "command": ["npx", "-y", "@memofs/mcp-server"],
+      "enabled": true
+    }
+  }
+}
+```
+
+```json [Gemini CLI]
+// Project: ./.gemini/settings.json
+// Global:  ~/.gemini/settings.json (add "--root", "/absolute/path/to/project")
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
+    }
+  }
+}
+```
+
+```json [GitHub Copilot (VS Code)]
+// Project: ./.vscode/mcp.json
+{
+  "servers": {
+    "memofs": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
+    }
+  }
+}
+```
+
+:::
+
+> [!WARNING]
+> VS Code's `.vscode/mcp.json` uses a `servers` top-level key and requires an explicit `"type"` on every entry. An `mcpServers` key copy-pasted from another client's config is **silently ignored** — no error, no server.
 
 ## Command Flags
 
@@ -88,15 +185,18 @@ Customize the server instantiation using standard flags:
 
 ### Environment Variables
 
+Every flag has an environment-variable equivalent — useful because most MCP client configs support an `env` block, which keeps secrets out of committed files:
+
 | Variable | Description |
 |---|---|
 | `MEMOFS_RUNTIME` | Runtime mode: `local` or `hybrid`. |
 | `MEMOFS_ROOT` | Local workspace root. |
-| `MEMOFS_CLOUD_URL` | MemoFS Cloud API root. |
+| `MEMOFS_CLOUD_URL` | MemoFS Cloud API root (`MEMOFS_API_URL` is accepted as an alias). |
 | `MEMOFS_API_KEY` | MemoFS Cloud API key. |
 | `MEMOFS_PROJECT_ID` | Default project ID. |
 | `MEMOFS_WORKSPACE_ID` | Default cloud workspace ID. |
-| `MEMOFS_LOCAL_EMBEDDINGS` | Enable local ONNX embeddings (`"1"` on, `"0"` off; on by default). |
+| `MEMOFS_CLOUD_TIMEOUT_MS` | Cloud request timeout in milliseconds. |
+| `MEMOFS_LOCAL_EMBEDDINGS` | Local ONNX embeddings — **on by default**; set to `0` or `false` to disable. |
 | `MEMOFS_MCP_READ_ONLY` | Set to `"true"` to block write tools. |
 
 ## Exposed MCP Tools
@@ -107,10 +207,13 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 
 | Tool | Safety | Description |
 |---|---|---|
-| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels and progressive disclosure. |
+| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels, progressive disclosure, and optional `taskType` (`coding`, `debug`, `refactor`, `docs`, `general`) to bias recall toward task-relevant memories. |
 | `memofs.recall` | read | Semantic + lexical hybrid search over memory. |
 | `memofs.remember` | write | Persist a durable memory entry (decision, constraint, goal, preference, reference, summary, or note). |
 | `memofs.consolidate` | write | Run a graph consolidation pass — merge duplicate entities and retire superseded facts. |
+
+> [!TIP]
+> `memofs.context` returns a **compact briefing** (~6 KB) by default: core memory in full plus an `expandable` list naming each truncated section with an opaque cursor. Agents expand only the sections they need (`section` + `expand`), or pass `detail: "full"` for the whole dump in one call.
 
 ### AgentFS Session Tools
 
@@ -137,24 +240,18 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs://agent-sessions/{sessionId}/context/core` | `text/markdown` | Session core context file. |
 | `memofs://agent-sessions/{sessionId}/output/durable-memory` | `text/markdown` | Session durable memory output. |
 
-## Hybrid Mode
+## Exposed MCP Prompts
 
-For cloud-synced memory, use `--runtime hybrid` with cloud credentials:
+For clients with prompt support (e.g. slash-command style pickers):
 
-```json
-{
-  "mcpServers": {
-    "memofs": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@memofs/mcp-server",
-        "--runtime", "hybrid",
-        "--root", "/path/to/project",
-        "--cloud-url", "https://memofs.dev/api/v1",
-        "--api-key", "your-api-key"
-      ]
-    }
-  }
-}
-```
+| Prompt | Arguments | Description |
+|---|---|---|
+| `memofs-recall-context` | `query` (required), `workspaceId`, `includeGraph` | Turn a user question into a grounded MemoFS recall instruction. |
+| `memofs-memory-review` | `content` (required), `workspaceId` | Review whether a text should become durable MemoFS memory. |
+
+## See Also
+
+- [Hybrid Mode](./hybrid-mode) — local stdio server that mirrors writes to the cloud replica.
+- [Hosted MCP Endpoint](./hosted-mcp-endpoint) — HTTP-only variant for agents on machines with no checkout (Pro/Teams).
+- [CLI generate commands](/packages/cli/generate) — one-command MCP + hooks + rules setup per platform.
+- [CLI memory commands](/packages/cli/memory) — `memofs context` gives hooks the same intelligence pipeline these tools use.

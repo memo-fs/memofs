@@ -26,10 +26,6 @@ client. No vendor lock-in. No MemoFS Cloud dependency.
 
 ```bash
 npm install @memofs/server
-
-# or: pnpm add @memofs/server
-# or: yarn add @memofs/server
-# or: bun add @memofs/server
 ```
 
 > Requires **Node.js >= 22**.
