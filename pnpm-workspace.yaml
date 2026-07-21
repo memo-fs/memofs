@@ -5,3 +5,10 @@ packages:
   - "examples"
   - "packages/*"
   - "tooling/*"
+allowBuilds:
+  esbuild: true
+  msw: true
+  onnxruntime-node: true
+  protobufjs: true
+  sharp: true
+  workerd: true
