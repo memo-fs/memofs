@@ -67,6 +67,16 @@
 		"node": ">=22",
 		"pnpm": ">=9.0.0"
 	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"esbuild",
+			"msw",
+			"onnxruntime-node",
+			"protobufjs",
+			"sharp",
+			"workerd"
+		]
+	},
 	"description": "MemoFS — open-source file-first memory runtime for AI applications and agents.",
 	"license": "MIT",
 	"bugs": {
