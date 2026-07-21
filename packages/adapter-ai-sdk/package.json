@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/adapter-ai-sdk",
-	"version": "1.0.0-beta.2",
+	"version": "1.1.0-beta.1",
 	"private": false,
 	"description": "Vercel AI SDK adapter for MemoFS memory tools, runtime bridging, and context builders.",
 	"license": "MIT",

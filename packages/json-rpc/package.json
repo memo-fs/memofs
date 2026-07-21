@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/json-rpc",
-	"version": "1.0.0-beta.2",
+	"version": "1.1.0-beta.1",
 	"private": false,
 	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by MemoFS transports.",
 	"license": "MIT",
