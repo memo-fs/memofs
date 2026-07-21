@@ -126,7 +126,7 @@ Restart your agent, then in a fresh chat ask:
 
 > "What do you know about this project?"
 
-A correctly-wired agent will call `memofs_context` / `memofs_recall` first and
+A correctly-wired agent will call `memofs.context` / `memofs.recall` first and
 ground its answer in `.memofs/memory/`. To watch it learn, tell it a preference
 ("I prefer tabs over spaces") and ask it to remember it. Quit, reopen, and ask
 again — it recalls.
