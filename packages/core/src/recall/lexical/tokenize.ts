@@ -11,11 +11,18 @@
  */
 
 /**
- * A small English stop-word list to reduce noise in BM25 scoring.
+ * English stop-word list — the single source of truth for lexical filtering
+ * across BM25, the retrieval strategist, and the fallback reranker.
  *
- * @internal
+ * - BM25 (`tokenize` with `dropStopWords:true`) drops these to reduce index noise.
+ * - Strategist rewrite reuses `tokenize` so `what is auth` → `["auth"]` matches BM25.
+ * - `tokenizeSimple` in `core/internal/lexical` reuses this tokenizer with
+ *   `dropStopWords:false` to keep a pure overlap score, but shares the same
+ *   split regex and lower-casing. See that file for alignment notes.
+ *
+ * @public
  */
-const STOP_WORDS = new Set([
+export const STOP_WORDS = new Set([
 	"a",
 	"an",
 	"and",

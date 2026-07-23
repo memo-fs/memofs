@@ -22,16 +22,18 @@ export function candidateShape(
 	vector: { text: string; score: number; metadata?: JsonObject } | undefined,
 	lexical: { text: string; score: number; metadata?: JsonObject } | undefined,
 ) {
+	const mergedMetadata = {
+		...(lexical?.metadata ?? {}),
+		...(vector?.metadata ?? {}),
+	};
 	return {
 		id,
 		text: vector?.text ?? lexical?.text ?? "",
 		vectorScore: vector?.score ?? 0,
 		lexicalScore: lexical?.score ?? 0,
-		...((vector?.metadata ?? lexical?.metadata) === undefined
+		...(Object.keys(mergedMetadata).length === 0
 			? {}
-			: {
-					metadata: vector?.metadata ?? lexical?.metadata,
-				}),
+			: { metadata: mergedMetadata as JsonObject }),
 	};
 }
 

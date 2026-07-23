@@ -18,13 +18,21 @@ export function resolveEntities(
 		if (seen.has(node.id)) continue;
 		const candidates = [node.label, ...(node.aliases ?? [])];
 		let matched: string | undefined;
-		for (const candidate of candidates) {
+			for (const candidate of candidates) {
 			const lower = candidate.toLowerCase();
+			// Exact match works for any length, including <3 chars like "db".
+			// This allows "db" to match a node labeled "db" directly, and
+			// "db" → "database" via the rewrite expansion: expandedTerms
+			// contains "database", so a node labeled "database" matches exactly,
+			// not via substring.
 			if (termSet.has(lower)) {
 				matched = lower;
 				break;
 			}
 			for (const term of termSet) {
+				// Substring matching only for ≥3 chars to avoid "db" matching
+				// "mongodb" or every "ad" occurrence. Short terms must use
+				// exact or expansion path.
 				if (term.length < 3) continue;
 				if (lower.includes(term)) {
 					matched = term;

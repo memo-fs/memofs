@@ -8,6 +8,12 @@
  * `recall` → `rerank` dependency one-way: rerank no longer re-implements the
  * algorithm and recall does not reach into rerank for it.
  *
+ * Tokenization SSOT: this module reuses the central tokenizer from
+ * `recall/lexical/tokenize` for split/lower-case behavior. `tokenizeSimple`
+ * calls it with `dropStopWords:false` to keep stop words for pure overlap,
+ * while BM25 and the strategist use `dropStopWords:true`. The shared
+ * `STOP_WORDS` set lives in `recall/lexical/tokenize`.
+ *
  * @internal
  */
 
@@ -53,24 +59,24 @@ export function tokenOverlapScore(
 	return (exact + partial) / queryTerms.length;
 }
 
+import { tokenize } from "../../recall/lexical/tokenize";
+
 /**
  * Splits text into lowercase alphanumeric tokens.
  *
  * @remarks
- * Minimal tokenizer shared by the deterministic fallback reranker. It
- * intentionally applies no stop-word removal so rerank scoring stays a pure
- * function of the input tokens. Use {@link tokenize} from
- * `recall/lexical/tokenize` when stop-word filtering is desired.
+ * Aligned with the central tokenizer in `recall/lexical/tokenize` — same
+ * lower-casing and `[^a-z0-9]+` split. Intentionally keeps stop words
+ * (`dropStopWords:false`) so the deterministic fallback reranker's overlap
+ * score stays a pure function of input tokens, while BM25 and the strategist
+ * drop stop words via the same tokenizer. Shared `STOP_WORDS` lives in
+ * `recall/lexical/tokenize`.
  *
  * @param value - The text to tokenize.
- * @returns Lowercase alphanumeric tokens.
+ * @returns Lowercase alphanumeric tokens, stop words retained.
  *
  * @internal
  */
 export function tokenizeSimple(value: string): string[] {
-	return value
-		.toLowerCase()
-		.split(/[^a-z0-9]+/i)
-		.map((term) => term.trim())
-		.filter(Boolean);
+	return tokenize(value, { dropStopWords: false });
 }

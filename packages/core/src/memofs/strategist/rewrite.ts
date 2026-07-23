@@ -1,3 +1,4 @@
+import { tokenize as tokenizeLexical } from "../../recall/lexical/tokenize";
 import type { TaskType } from "../types";
 import type { RewriteInput, RewriteResult } from "./types";
 
@@ -27,8 +28,6 @@ const REWRITE_LEXICON: ReadonlyArray<LexiconEntry> = [
 	{ trigger: "package", expansions: ["pkg", "pnpm", "npm"] },
 	{ trigger: "config", expansions: ["configuration"] },
 ];
-
-const TOKEN_SPLIT = /[\s,./\\[\]{}()<>:;'"!?|`~@#$%^&*+=—–-]+/u;
 
 const TASK_TYPE_EXPANSIONS: Record<Exclude<TaskType, "general">, string[]> = {
 	coding: [
@@ -86,14 +85,15 @@ const TASK_TYPE_QUERY_PREPENDS: Record<Exclude<TaskType, "general">, string> = {
 	docs: "Public API contracts and documentation decisions",
 };
 
+/**
+ * Tokenize a query using the central lexical tokenizer — SSOT for BM25 and
+ * the strategist. Drops stop words so `what is auth` → `["auth"]`, consistent
+ * with BM25 indexing.
+ *
+ * Re-exported from `recall/lexical/tokenize` for backwards compatibility.
+ */
 export function tokenize(query: string): string[] {
-	const raw = query.toLowerCase().split(TOKEN_SPLIT);
-	const out: string[] = [];
-	for (const token of raw) {
-		if (token.length === 0) continue;
-		out.push(token);
-	}
-	return out;
+	return tokenizeLexical(query);
 }
 
 export function rewriteQuery(input: RewriteInput): RewriteResult {
