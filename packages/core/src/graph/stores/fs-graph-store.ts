@@ -357,17 +357,6 @@ function collectValidJsonlLines(content: string): {
 }
 
 /**
- * Standalone fallback for external callers (no logger) — reuses SSOT collector.
- */
-function parseWithSkip<T>(
-	content: string,
-	parse: (content: string) => T[],
-): T[] {
-	const { kept } = collectValidJsonlLines(content);
-	return parse(kept.join("\n"));
-}
-
-/**
  * Factory for {@link FsGraphStore}.
  *
  * @public

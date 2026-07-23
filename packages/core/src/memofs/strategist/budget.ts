@@ -94,6 +94,8 @@ function compressSectionContent(
 		.split(delimiter)
 		.filter((item) => item.trim().length > 0);
 
+	const tokenBudget = Math.max(1, Math.ceil(bodyBudget / 4));
+
 	let currentText = "";
 	const included: string[] = [];
 	const omitted: string[] = [...items];
@@ -106,7 +108,10 @@ function compressSectionContent(
 
 		const nextIncludedText = nextIncluded.join(delimiter);
 		if (nextOmitted.length === 0) {
-			if (utf8ByteLength(nextIncludedText) <= bodyBudget) {
+			if (
+				utf8ByteLength(nextIncludedText) <= bodyBudget &&
+				tokenEstimator(nextIncludedText) <= tokenBudget
+			) {
 				currentText = nextIncludedText;
 				included.push(item);
 				omitted.shift();
@@ -114,8 +119,8 @@ function compressSectionContent(
 			break;
 		}
 
-		const nextOutlineLines = nextOmitted.map((item) => {
-			const firstLine = item.split("\n")[0] || "";
+		const nextOutlineLines = nextOmitted.map((lineItem) => {
+			const firstLine = lineItem.split("\n")[0] || "";
 			let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
 			if (summary.length > 80) {
 				summary = `${summary.slice(0, 77)}...`;
@@ -131,12 +136,10 @@ function compressSectionContent(
 
 		const nextOutlineText = `\n\n[Omitted ${nextOmitted.length} items to fit context budget:\n${nextOutlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${nextSuffix}\nTo view these, run recall with specific search terms]`;
 
-		// Token-aware measure: byte cap remains hard, but we also estimate tokens
-		// via TextEncoder length/4 (or injected estimator). Both must fit.
-		const totalBytes = utf8ByteLength(nextIncludedText + nextOutlineText);
-		const totalTokens = tokenEstimator(nextIncludedText + nextOutlineText);
-		const tokenBudget = Math.max(1, Math.ceil(bodyBudget / 4));
-		if (totalBytes <= bodyBudget && totalTokens <= tokenBudget + 5) {
+		const candidateText = nextIncludedText + nextOutlineText;
+		const totalBytes = utf8ByteLength(candidateText);
+		const totalTokens = tokenEstimator(candidateText);
+		if (totalBytes <= bodyBudget && totalTokens <= tokenBudget) {
 			currentText = nextIncludedText;
 			included.push(item);
 			omitted.shift();
@@ -150,8 +153,8 @@ function compressSectionContent(
 	}
 
 	// Build the final outline for the items that remain omitted
-	const outlineLines = omitted.map((item) => {
-		const firstLine = item.split("\n")[0] || "";
+	const outlineLines = omitted.map((lineItem) => {
+		const firstLine = lineItem.split("\n")[0] || "";
 		let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
 		if (summary.length > 80) {
 			summary = `${summary.slice(0, 77)}...`;
@@ -167,33 +170,32 @@ function compressSectionContent(
 
 	const outlineText = `\n\n[Omitted ${omitted.length} items to fit context budget:\n${outlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${suffix}\nTo view these, run recall with specific search terms]`;
 
-	const totalBytes = utf8ByteLength(currentText + outlineText);
-	const totalTokensOutline = tokenEstimator(currentText + outlineText);
-	const tokenBudget = Math.max(1, Math.ceil(bodyBudget / 4));
+	const withOutline = currentText + outlineText;
 	if (
-		totalBytes <= bodyBudget &&
-		totalTokensOutline <= tokenBudget + 10
+		utf8ByteLength(withOutline) <= bodyBudget &&
+		tokenEstimator(withOutline) <= tokenBudget
 	) {
-		return currentText + outlineText;
+		return withOutline;
 	}
 
 	const fallbackOutline = `\n\n[Omitted ${omitted.length} items due to context budget limits]`;
-	const fallbackBytes = utf8ByteLength(currentText + fallbackOutline);
-	const fallbackTokens = tokenEstimator(currentText + fallbackOutline);
-	if (fallbackBytes <= bodyBudget && fallbackTokens <= tokenBudget + 5) {
-		return currentText + fallbackOutline;
+	const withFallback = currentText + fallbackOutline;
+	if (
+		utf8ByteLength(withFallback) <= bodyBudget &&
+		tokenEstimator(withFallback) <= tokenBudget
+	) {
+		return withFallback;
 	}
 
-	const contentTokens = tokenEstimator(content);
-	// Token-aware slice: ultimate hard cap is still maxBytes (byte budget),
-	// but we report approximate tokens and ensure slice respects token budget.
-	const effectiveTokenBudget = Math.min(tokenBudget, contentTokens);
-	void effectiveTokenBudget;
+	// Ultimate fallback: hard byte cap with token-aware slice reporting.
+	// Byte cap is still hard per ticket; token count is reported for observability.
 	const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes ~${tokenBudget} tokens]`;
 	const noticeBytes = utf8ByteLength(NOTICE);
+	if (noticeBytes > bodyBudget) {
+		// Even the notice doesn't fit — return raw slice respecting byte cap.
+		return sliceUtf8ByBytes(content, bodyBudget).trimEnd();
+	}
 	const sliceable = Math.max(0, bodyBudget - noticeBytes);
-	// sliceUtf8ByBytes is byte-honest via TextEncoder, which is token-aware
-	// because token estimate is bytes/4. Keeps byte cap as hard limit.
 	const sliced = sliceUtf8ByBytes(content, sliceable).trimEnd();
 	return `${sliced}${NOTICE}`;
 }

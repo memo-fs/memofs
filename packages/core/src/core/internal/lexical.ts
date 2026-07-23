@@ -10,8 +10,9 @@
  *
  * Tokenization SSOT: this module reuses the central tokenizer from
  * `recall/lexical/tokenize` for split/lower-case behavior. `tokenizeSimple`
- * calls it with `dropStopWords:false` to keep stop words for pure overlap,
- * while BM25 and the strategist use `dropStopWords:true`. The shared
+ * drops stop words (`dropStopWords:true`) to avoid `what,is,the` inflating
+ * scores in the deterministic fallback reranker (ticket: Intelligence hardening).
+ * BM25 and the strategist also use `dropStopWords:true`. The shared
  * `STOP_WORDS` set lives in `recall/lexical/tokenize`.
  *
  * @internal
