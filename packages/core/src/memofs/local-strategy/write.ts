@@ -134,6 +134,10 @@ export async function writeMemory(
 		}
 	}
 
+	// Invalidate progressive cache so expand after write returns fresh recall
+	// including the new memory, not a stale cached list.
+	ctx.contextCache.clear();
+
 	return {
 		id,
 		created: true,
@@ -180,6 +184,8 @@ export async function updateCoreMemory(
 			sourceId: "core",
 		});
 	}
+
+	ctx.contextCache.clear();
 
 	return { content: await readCoreMemory(ctx.options.store) };
 }

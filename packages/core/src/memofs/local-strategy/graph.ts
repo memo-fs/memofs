@@ -43,6 +43,7 @@ export async function upsertGraphNodes(
 			text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
 		});
 	}
+	ctx.contextCache.clear();
 	return { nodes: input.nodes };
 }
 
@@ -62,6 +63,7 @@ export async function upsertGraphEdges(
 		const key = edgeId(edge);
 		ctx.graphEdges.set(key, { directed: true, weight: 1, ...edge });
 	}
+	ctx.contextCache.clear();
 	return { edges: input.edges };
 }
 
@@ -259,6 +261,7 @@ export async function consolidateMemory(
 		...plan.retiredNodes.map((r) => `graph:${r.id}`),
 		...plan.merges.map((m) => `graph:${m.sourceId}`),
 	]);
+	ctx.contextCache.clear();
 	return {
 		plan: {
 			merges: plan.merges.length,

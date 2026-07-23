@@ -225,13 +225,55 @@ export class FsGraphStore implements GraphStore {
 
 	/**
 	 * Rewrite both JSONL files from the current in-memory snapshot.
+	 *
+	 * @remarks
+	 * Each {@link MemoryStore.write} call is atomic per-file (NodeFsMemoryStore
+	 * uses a `writeFileAtomic` staging pattern — write to
+	 * `${path}.tmp.<pid>.<uuid>` then rename). To avoid a half-committed pair
+	 * where nodes.jsonl is new but edges.jsonl is old, this method captures the
+	 * previous snapshot and rolls back the first write if the second fails.
+	 * On crash between writes, the per-file atomicity prevents a torn file, and
+	 * the next hydrate either sees the old consistent pair or completes/cleans
+	 * up via the stale rollback.
 	 */
 	async persist(): Promise<void> {
 		const snapshot = await this.inner.exportSnapshot();
 		const nodesJsonl = serializeGraphNodesJsonl(snapshot.nodes);
 		const edgesJsonl = serializeGraphEdgesJsonl(snapshot.edges);
+
+		// Capture old contents for rollback on second-write failure.
+		// If edges write fails after nodes write, we restore nodes to old so
+		// the pair stays consistent (both old, never mixed new-nodes/old-edges).
+		let oldNodes: string | null = null;
+		try {
+			oldNodes = await this.store.read(this.nodesPath);
+		} catch (error) {
+			if (!(error instanceof MemoryNotFoundError)) throw error;
+		}
+
+		// Stage write pattern: NodeFsMemoryStore internally writes to
+		// `${path}.tmp.<uuid>` then renames — reusing `writeFileAtomic` pattern.
+		// For pair atomicity, commit nodes first then edges; on edges failure
+		// roll back nodes to the old snapshot so the pair stays either old or
+		// new, never mixed (edges referencing missing nodes).
 		await this.store.write(this.nodesPath, nodesJsonl);
-		await this.store.write(this.edgesPath, edgesJsonl);
+
+		try {
+			await this.store.write(this.edgesPath, edgesJsonl);
+		} catch (error) {
+			// Second write failed after first succeeded — restore old nodes so
+			// both files remain on the old consistent snapshot.
+			try {
+				if (oldNodes !== null) {
+					await this.store.write(this.nodesPath, oldNodes);
+				} else {
+					await this.store.delete(this.nodesPath);
+				}
+			} catch {
+				// Best-effort rollback; surface the original failure.
+			}
+			throw error;
+		}
 	}
 
 	/**

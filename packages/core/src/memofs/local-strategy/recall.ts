@@ -62,10 +62,20 @@ export async function localRecall(
 		candidates.set(id, candidateShape(id, v, l));
 	}
 
+	// Dynamic weighting: when one path is empty, give full weight to the other
+	// so scores are not deflated by the static 0.6/0.4 split.
+	let vectorWeight: number | undefined;
+	if (!hasVector && hasLexical) {
+		vectorWeight = 0; // lexical weight becomes 1.0
+	} else if (hasVector && !hasLexical) {
+		vectorWeight = 1; // lexical weight becomes 0, vector full
+	}
+
 	const items = await mergeHybridCandidates(candidates as never, {
 		query: input.query,
 		topK: limit,
 		reranker: ctx.reranker,
+		...(vectorWeight === undefined ? {} : { vectorWeight }),
 	});
 
 	return { items };

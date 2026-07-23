@@ -94,13 +94,26 @@ export async function mergeHybridCandidates(
 	const relevanceWeight = options.relevanceWeight ?? 0.7;
 	const recencyWeight = options.recencyWeight ?? 0.2;
 	const confidenceWeight = options.confidenceWeight ?? 0.1;
-	const vectorWeight = options.vectorWeight ?? 0.6;
-	const lexicalWeight = 1 - vectorWeight;
+	let vectorWeight = options.vectorWeight ?? 0.6;
 	const halfLifeDays = options.halfLifeDays ?? 30;
 	const now = (options.now ?? (() => new Date()))();
 
 	const all = [...candidates.values()];
 	if (all.length === 0) return [];
+
+	// Dynamic weighting: if one retrieval path produced no signal, give full
+	// weight to the other so scores are not deflated (e.g. lexical-only when
+	// vector path is empty should not be capped at 0.4).
+	if (options.vectorWeight === undefined) {
+		const hasVectorSignal = all.some((c) => c.vectorScore > 0);
+		const hasLexicalSignal = all.some((c) => c.lexicalScore > 0);
+		if (!hasVectorSignal && hasLexicalSignal) {
+			vectorWeight = 0;
+		} else if (hasVectorSignal && !hasLexicalSignal) {
+			vectorWeight = 1;
+		}
+	}
+	const lexicalWeight = 1 - vectorWeight;
 
 	// Blend the two retrieval signals into a base relevance score per candidate.
 	const blended = new Map<string, { text: string; baseScore: number }>();

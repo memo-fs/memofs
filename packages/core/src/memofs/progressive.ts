@@ -215,11 +215,14 @@ export class ContextCache {
 		input: Pick<MemoryContextInput, "query" | "workspaceId" | "projectId">,
 		expandedTerms: string[],
 	): string {
+		// Sort expandedTerms for order-independent caching — same terms shuffled
+		// must hit the same cache entry.
+		const sortedTerms = [...expandedTerms].sort();
 		const payload = JSON.stringify({
 			q: input.query,
 			w: input.workspaceId ?? null,
 			p: input.projectId ?? null,
-			t: expandedTerms,
+			t: sortedTerms,
 		});
 		return payload;
 	}
