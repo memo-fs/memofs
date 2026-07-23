@@ -54,7 +54,19 @@ export async function writeMemory(
 	const durable = tierDecision.tier === "durable";
 	const now = new Date().toISOString();
 
-	const id = input.id ?? `mem_${fingerprint(`${now}:${input.content}`)}`;
+	function randomUuid(): string {
+		try {
+			const c = globalThis.crypto as { randomUUID?: () => string } | undefined;
+			if (c?.randomUUID) return c.randomUUID();
+		} catch {
+			// fall through to Math.random fallback
+		}
+		return `${Math.random().toString(16).slice(2, 10)}${Date.now().toString(16)}`;
+	}
+
+	const id =
+		input.id ??
+		`mem_${fingerprint(`${now}:${input.content}:${randomUuid()}`)}`;
 	await appendTimestampedNote(ctx.options.store, {
 		timestamp: now,
 		kind: input.kind ?? "note",

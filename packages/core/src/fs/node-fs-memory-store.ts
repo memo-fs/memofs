@@ -36,11 +36,28 @@ import { writeFileAtomic } from "./utils/write-file-atomic";
  * @param options - Configuration options for the store.
  */
 export class NodeFsMemoryStore implements MemoryStore {
+	private static readonly MAX_READ_HASHES = 100;
 	private readonly options: NormalizedNodeFsMemoryStoreOptions;
 	/** @internal */
 	private readonly locks = new PathLock();
 	private readonly lock: AdvisoryFileLock | null;
 	private readonly readHashes = new Map<string, string>();
+
+	/**
+	 * LRU-capped setter for read hashes to prevent unbounded growth in long-lived sessions.
+	 */
+	private setReadHash(absolutePath: string, hash: string): void {
+		if (this.readHashes.has(absolutePath)) {
+			this.readHashes.delete(absolutePath);
+		}
+		this.readHashes.set(absolutePath, hash);
+		if (this.readHashes.size > NodeFsMemoryStore.MAX_READ_HASHES) {
+			const oldest = this.readHashes.keys().next().value;
+			if (oldest !== undefined) {
+				this.readHashes.delete(oldest);
+			}
+		}
+	}
 
 	/**
 	 * Creates a new filesystem-backed memory store.
@@ -116,6 +133,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 	 */
 	async dispose(): Promise<void> {
 		await this.lock?.release();
+		this.readHashes.clear();
 	}
 
 	/**
@@ -134,7 +152,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 			await assertNoSymlinkPath(absolutePath, this.options);
 			const content = await fs.readFile(absolutePath, "utf8");
 			const hash = createHash("sha256").update(content, "utf8").digest("hex");
-			this.readHashes.set(absolutePath, hash);
+			this.setReadHash(absolutePath, hash);
 			return content;
 		} catch (error) {
 			if (isNotFoundError(error)) {
@@ -202,7 +220,7 @@ export class NodeFsMemoryStore implements MemoryStore {
 				const newHash = createHash("sha256")
 					.update(content, "utf8")
 					.digest("hex");
-				this.readHashes.set(absolutePath, newHash);
+				this.setReadHash(absolutePath, newHash);
 			} catch (error) {
 				if (
 					error instanceof Error &&

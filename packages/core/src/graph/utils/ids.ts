@@ -50,7 +50,10 @@ export function slugifyGraphPart(input: string): string {
 }
 
 export function stableNodeId(type: string, label: string): string {
-	return `${slugifyGraphPart(type)}:${slugifyGraphPart(label)}`;
+	const typeSlug = slugifyGraphPart(type);
+	const labelSlug = slugifyGraphPart(label);
+	const suffix = fnv1a(label).slice(0, 8);
+	return `${typeSlug}:${labelSlug}-${suffix}`;
 }
 
 export function stableEdgeId(input: {

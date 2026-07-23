@@ -117,8 +117,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	}
 
 	const graphNodes = new Map<string, GraphNodeInput>();
-	// biome-ignore lint/suspicious/noExplicitAny: graphEdges stored as any for compatibility with LocalStrategyContext which expects GraphEdgeInput but receives ResolveGraphEdge
-	const graphEdges = new Map<string, any>();
+	const graphEdges = new Map<string, GraphEdgeInput>();
 	const contextCache = new ContextCache();
 	let bootstrapped = false;
 

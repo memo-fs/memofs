@@ -77,7 +77,20 @@ export function snapshotId(label?: string): string {
 		.toLowerCase()
 		.replace(/[^a-z0-9_.-]+/g, "-")
 		.replace(/^-+|-+$/g, "");
-	return suffix ? `snap_${timestamp}_${suffix}` : `snap_${timestamp}`;
+	function random4(): string {
+		try {
+			const cryptoObj = globalThis.crypto as
+				| { randomUUID?: () => string }
+				| undefined;
+			const uuid = cryptoObj?.randomUUID?.();
+			if (uuid) return uuid.replace(/-/g, "").slice(0, 4);
+		} catch {
+			// fallback below
+		}
+		return Math.random().toString(16).slice(2, 6).padEnd(4, "0");
+	}
+	const rand = random4();
+	return suffix ? `snap_${timestamp}_${suffix}_${rand}` : `snap_${timestamp}_${rand}`;
 }
 
 export function message(error: unknown): string {
