@@ -1,3 +1,4 @@
+import { sliceUtf8ByBytes, utf8ByteLength } from "../helpers/utils";
 import type { BudgetInput, BudgetSection } from "./types";
 
 export function allocateBudget(input: BudgetInput): {
@@ -9,15 +10,13 @@ export function allocateBudget(input: BudgetInput): {
 	let truncated = false;
 	let used = 0;
 	const SEPARATOR = "\n\n";
-	const separatorBytes = Buffer.byteLength(SEPARATOR, "utf8");
+	const separatorBytes = utf8ByteLength(SEPARATOR);
 
 	const accountSection = (section: BudgetSection, isFirst: boolean): number => {
 		const heading = `## ${section.title}\n\n`;
 		const body = section.content;
 		const sep = isFirst ? 0 : separatorBytes;
-		return (
-			Buffer.byteLength(heading, "utf8") + Buffer.byteLength(body, "utf8") + sep
-		);
+		return utf8ByteLength(heading) + utf8ByteLength(body) + sep;
 	};
 
 	let isFirst = true;
@@ -42,9 +41,9 @@ export function allocateBudget(input: BudgetInput): {
 				: 0;
 		const heading = `## ${section.title}\n\n`;
 		const sep = packed.length === 0 ? 0 : separatorBytes;
-		const headingBytes = Buffer.byteLength(heading, "utf8") + sep;
+		const headingBytes = utf8ByteLength(heading) + sep;
 		const bodyBudget = Math.max(0, share - headingBytes);
-		const bodyBytes = Buffer.byteLength(section.content, "utf8");
+		const bodyBytes = utf8ByteLength(section.content);
 		if (bodyBytes <= bodyBudget) {
 			const cost = headingBytes + bodyBytes;
 			used += cost;
@@ -56,7 +55,7 @@ export function allocateBudget(input: BudgetInput): {
 				section.content,
 				bodyBudget,
 			);
-			const cost = headingBytes + Buffer.byteLength(truncatedContent, "utf8");
+			const cost = headingBytes + utf8ByteLength(truncatedContent);
 			used += cost;
 			remaining -= cost;
 			packed.push({ ...section, content: truncatedContent });
@@ -93,7 +92,7 @@ function compressSectionContent(
 
 		const nextIncludedText = nextIncluded.join(delimiter);
 		if (nextOmitted.length === 0) {
-			if (Buffer.byteLength(nextIncludedText, "utf8") <= bodyBudget) {
+			if (utf8ByteLength(nextIncludedText) <= bodyBudget) {
 				currentText = nextIncludedText;
 				included.push(item);
 				omitted.shift();
@@ -118,10 +117,7 @@ function compressSectionContent(
 
 		const nextOutlineText = `\n\n[Omitted ${nextOmitted.length} items to fit context budget:\n${nextOutlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${nextSuffix}\nTo view these, run recall with specific search terms]`;
 
-		const totalBytes = Buffer.byteLength(
-			nextIncludedText + nextOutlineText,
-			"utf8",
-		);
+		const totalBytes = utf8ByteLength(nextIncludedText + nextOutlineText);
 		if (totalBytes <= bodyBudget) {
 			currentText = nextIncludedText;
 			included.push(item);
@@ -153,37 +149,22 @@ function compressSectionContent(
 
 	const outlineText = `\n\n[Omitted ${omitted.length} items to fit context budget:\n${outlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${suffix}\nTo view these, run recall with specific search terms]`;
 
-	const totalBytes = Buffer.byteLength(currentText + outlineText, "utf8");
+	const totalBytes = utf8ByteLength(currentText + outlineText);
 	if (totalBytes <= bodyBudget) {
 		return currentText + outlineText;
 	}
 
 	const fallbackOutline = `\n\n[Omitted ${omitted.length} items due to context budget limits]`;
-	const fallbackBytes = Buffer.byteLength(
-		currentText + fallbackOutline,
-		"utf8",
-	);
+	const fallbackBytes = utf8ByteLength(currentText + fallbackOutline);
 	if (fallbackBytes <= bodyBudget) {
 		return currentText + fallbackOutline;
 	}
 
 	const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes]`;
-	const noticeBytes = Buffer.byteLength(NOTICE, "utf8");
+	const noticeBytes = utf8ByteLength(NOTICE);
 	const sliceable = Math.max(0, bodyBudget - noticeBytes);
-	const sliced = sliceUtf8(content, sliceable).trimEnd();
+	const sliced = sliceUtf8ByBytes(content, sliceable).trimEnd();
 	return `${sliced}${NOTICE}`;
-}
-
-function sliceUtf8(text: string, maxBytes: number): string {
-	if (Buffer.byteLength(text, "utf8") <= maxBytes) return text;
-	let low = 0;
-	let high = text.length;
-	while (low < high) {
-		const mid = Math.floor((low + high + 1) / 2);
-		if (Buffer.byteLength(text.slice(0, mid), "utf8") <= maxBytes) low = mid;
-		else high = mid - 1;
-	}
-	return text.slice(0, low);
 }
 
 export const SECTION_WEIGHTS = {

@@ -1,13 +1,43 @@
 import { MemoryValidationError } from "../../core/errors/errors";
 import type { JsonObject, Page } from "../types";
 
-export function truncateUtf8(text: string, maxBytes: number): string {
-	if (Buffer.byteLength(text, "utf8") <= maxBytes) return text;
+const utf8Encoder = new TextEncoder();
+const utf8Decoder = new TextDecoder();
+
+/**
+ * Byte length of a string in UTF-8, worker-safe (no Node `Buffer`).
+ *
+ * @internal
+ */
+export function utf8ByteLength(text: string): number {
+	return utf8Encoder.encode(text).length;
+}
+
+/**
+ * Slice a string so its UTF-8 byte length does not exceed `maxBytes`.
+ * Uses binary search with `utf8ByteLength`, worker-safe.
+ *
+ * @internal
+ */
+export function sliceUtf8ByBytes(text: string, maxBytes: number): string {
+	if (utf8ByteLength(text) <= maxBytes) return text;
 	let low = 0;
 	let high = text.length;
 	while (low < high) {
 		const mid = Math.floor((low + high + 1) / 2);
-		if (Buffer.byteLength(text.slice(0, mid), "utf8") <= maxBytes) low = mid;
+		if (utf8ByteLength(text.slice(0, mid)) <= maxBytes) low = mid;
+		else high = mid - 1;
+	}
+	return text.slice(0, low);
+}
+
+export function truncateUtf8(text: string, maxBytes: number): string {
+	if (utf8ByteLength(text) <= maxBytes) return text;
+	let low = 0;
+	let high = text.length;
+	while (low < high) {
+		const mid = Math.floor((low + high + 1) / 2);
+		if (utf8ByteLength(text.slice(0, mid)) <= maxBytes) low = mid;
 		else high = mid - 1;
 	}
 	return `${text.slice(0, low).trimEnd()}\n\n[Output truncated to ${maxBytes} bytes]`;
@@ -130,8 +160,8 @@ export function paginateArray<T>(
 	};
 }
 
-function encodeBase64Url(value: string): string {
-	const bytes = new TextEncoder().encode(value);
+export function encodeBase64Url(value: string): string {
+	const bytes = utf8Encoder.encode(value);
 	let binary = "";
 	for (const byte of bytes) binary += String.fromCharCode(byte);
 	return btoa(binary)
@@ -140,12 +170,12 @@ function encodeBase64Url(value: string): string {
 		.replaceAll("=", "");
 }
 
-function decodeBase64Url(value: string): string {
+export function decodeBase64Url(value: string): string {
 	const base64 = value
 		.replaceAll("-", "+")
 		.replaceAll("_", "/")
 		.padEnd(Math.ceil(value.length / 4) * 4, "=");
 	const binary = atob(base64);
 	const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-	return new TextDecoder().decode(bytes);
+	return utf8Decoder.decode(bytes);
 }

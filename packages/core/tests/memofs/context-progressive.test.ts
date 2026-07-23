@@ -9,6 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 import { InMemoryMemoryStore, MemoFS } from "../../src/index";
+import { utf8ByteLength } from "../../src/memofs/helpers/utils";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
@@ -77,7 +78,7 @@ describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", (
 				// The affordance lines appear in the rendered text.
 				expect(result.text).toMatch(/expand.*memofs\.context/);
 				// Compact stays small (well under the 64kb full budget).
-				expect(Buffer.byteLength(result.text, "utf8")).toBeLessThan(10_000);
+				expect(utf8ByteLength(result.text)).toBeLessThan(10_000);
 			} finally {
 				await cleanup();
 			}

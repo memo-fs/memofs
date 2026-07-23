@@ -8,6 +8,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { encodeBase64Url } from "../../src/memofs/helpers/utils";
 import {
 	buildExpansionAffordances,
 	type CachedRecentEvent,
@@ -130,31 +131,26 @@ describe("expansion cursor encode/decode", () => {
 	});
 
 	it("returns undefined for malformed JSON", () => {
-		const badJson = Buffer.from("{not json", "utf8").toString("base64url");
+		const badJson = encodeBase64Url("{not json");
 		expect(decodeExpansionCursor(badJson)).toBeUndefined();
 	});
 
 	it("returns undefined for a wrong version", () => {
-		const wrongVersion = Buffer.from(
+		const wrongVersion = encodeBase64Url(
 			JSON.stringify({ v: 99, key: "k", section: "recall" }),
-			"utf8",
-		).toString("base64url");
+		);
 		expect(decodeExpansionCursor(wrongVersion)).toBeUndefined();
 	});
 
 	it("returns undefined for a missing key", () => {
-		const noKey = Buffer.from(
-			JSON.stringify({ v: 1, section: "recall" }),
-			"utf8",
-		).toString("base64url");
+		const noKey = encodeBase64Url(JSON.stringify({ v: 1, section: "recall" }));
 		expect(decodeExpansionCursor(noKey)).toBeUndefined();
 	});
 
 	it("returns undefined for an invalid section", () => {
-		const badSection = Buffer.from(
+		const badSection = encodeBase64Url(
 			JSON.stringify({ v: 1, key: "k", section: "bogus" }),
-			"utf8",
-		).toString("base64url");
+		);
 		expect(decodeExpansionCursor(badSection)).toBeUndefined();
 	});
 });
@@ -273,5 +269,27 @@ describe("expandAffordanceLine", () => {
 		});
 		expect(line).not.toMatch(/\(\d+ more\)/);
 		expect(line).toContain('section="notes"');
+	});
+});
+
+describe("worker-safe (no Buffer global)", () => {
+	it("encodes and decodes cursor without Node Buffer", () => {
+		const originalBuffer = (globalThis as unknown as { Buffer?: unknown }).Buffer;
+		// Simulate workerd where Buffer is not available
+		// biome-ignore lint/suspicious/noExplicitAny: test simulating worker env
+		(globalThis as any).Buffer = undefined;
+		try {
+			const cursor = encodeExpansionCursor({
+				v: 1,
+				key: "worker-key",
+				section: "notes",
+			});
+			expect(typeof cursor).toBe("string");
+			const decoded = decodeExpansionCursor(cursor);
+			expect(decoded).toEqual({ v: 1, key: "worker-key", section: "notes" });
+		} finally {
+			// biome-ignore lint/suspicious/noExplicitAny: restore
+			(globalThis as any).Buffer = originalBuffer;
+		}
 	});
 });

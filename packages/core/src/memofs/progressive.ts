@@ -29,6 +29,7 @@
  * @public
  */
 
+import { decodeBase64Url, encodeBase64Url } from "./helpers/utils";
 import type {
 	MemoryContextExpandableSection,
 	MemoryContextExpansion,
@@ -87,11 +88,12 @@ interface ExpansionCursorPayload {
 
 /**
  * Encode an expansion cursor payload to an opaque base64url string.
+ * Worker-safe: uses web `TextEncoder`/`btoa` path via `encodeBase64Url`.
  *
  * @internal
  */
 export function encodeExpansionCursor(payload: ExpansionCursorPayload): string {
-	return Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+	return encodeBase64Url(JSON.stringify(payload));
 }
 
 /**
@@ -106,7 +108,7 @@ export function decodeExpansionCursor(
 ): ExpansionCursorPayload | undefined {
 	try {
 		const decoded = JSON.parse(
-			Buffer.from(cursor, "base64url").toString("utf8"),
+			decodeBase64Url(cursor),
 		) as Partial<ExpansionCursorPayload>;
 		if (decoded.v !== 1) return undefined;
 		if (typeof decoded.key !== "string") return undefined;
