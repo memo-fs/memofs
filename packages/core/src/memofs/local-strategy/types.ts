@@ -1,8 +1,18 @@
+/**
+ * @file Local strategy context and options types.
+ *
+ * @remarks
+ * Defines the shared types for the local-first strategy, including the
+ * graph store abstraction and the optional {@link Logger} for observable
+ * best-effort warnings (ticket 8 intelligence hardening).
+ */
+
 import type { AgentfsLikeClient } from "../../agentfs/client/agentfs-like";
 import type { LlmClient } from "../../ai-runtime/llm-client";
 import type { MemoryEmbedder } from "../../core/types/embeddings";
 import type { JsonObject } from "../../core/types/json";
 import type { MemoryStore } from "../../core/types/memory-store";
+import type { Logger } from "../../core/types/logger";
 import type { Extractor } from "../../graph/extraction/extractor";
 import type { InMemoryGraphStore } from "../../graph/stores/in-memory-graph-store";
 import type { BM25Store } from "../../recall/lexical/bm25";
@@ -17,6 +27,13 @@ import type {
 	SnapshotMemoryResult,
 } from "../types";
 
+export type { Logger } from "../../core/types/logger";
+
+/**
+ * Minimal graph store interface used by the local strategy.
+ *
+ * @public
+ */
 export type LocalGraphStore = Pick<
 	InMemoryGraphStore,
 	| "upsertNodes"
@@ -33,12 +50,6 @@ export type LocalGraphStore = Pick<
 	| "exportSnapshot"
 	| "importSnapshot"
 > & { hydrate?: () => Promise<void> };
-
-export interface Logger {
-	warn: (message: string, meta?: unknown) => void;
-	debug?: (message: string, meta?: unknown) => void;
-	info?: (message: string, meta?: unknown) => void;
-}
 
 export interface LocalStrategyOptions {
 	store: MemoryStore;

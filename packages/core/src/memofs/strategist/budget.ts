@@ -1,3 +1,13 @@
+/**
+ * @file Token-aware context budgeting with byte-honest slicing.
+ *
+ * @remarks
+ * Implements token-aware budget capping for the strategist context builder.
+ * Uses `TextEncoder` byte length for Worker safety and a pluggable
+ * token estimator (default bytes/4). Caps by `maxBytes` hard but measures
+ * tokens for observability and early truncation when token budget is exceeded.
+ */
+
 import { sliceUtf8ByBytes, utf8ByteLength } from "../helpers/utils";
 import type { BudgetInput, BudgetSection } from "./types";
 
@@ -10,6 +20,21 @@ import type { BudgetInput, BudgetSection } from "./types";
  */
 export function defaultTokenEstimator(text: string): number {
 	return Math.max(1, Math.ceil(utf8ByteLength(text) / 4));
+}
+
+/**
+ * Format a single omitted item into a short summary line for budget notices.
+ *
+ * @param raw - The raw omitted item text.
+ * @returns A formatted `[Omitted: "..."]` line, truncated to 80 chars.
+ */
+function toOmittedLine(raw: string): string {
+	const firstLine = raw.split("\n")[0] || "";
+	let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
+	if (summary.length > 80) {
+		summary = `${summary.slice(0, 77)}...`;
+	}
+	return `[Omitted: "${summary}"]`;
 }
 
 export function allocateBudget(input: BudgetInput): {
@@ -119,14 +144,7 @@ function compressSectionContent(
 			break;
 		}
 
-		const nextOutlineLines = nextOmitted.map((lineItem) => {
-			const firstLine = lineItem.split("\n")[0] || "";
-			let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
-			if (summary.length > 80) {
-				summary = `${summary.slice(0, 77)}...`;
-			}
-			return `[Omitted: "${summary}"]`;
-		});
+		const nextOutlineLines = nextOmitted.map(toOmittedLine);
 
 		const maxOutlineItems = 5;
 		const nextOutlineToShow = nextOutlineLines.slice(0, maxOutlineItems);
@@ -153,14 +171,7 @@ function compressSectionContent(
 	}
 
 	// Build the final outline for the items that remain omitted
-	const outlineLines = omitted.map((lineItem) => {
-		const firstLine = lineItem.split("\n")[0] || "";
-		let summary = firstLine.replace(/^\d+\.\s*/, "").replace(/^-\s*/, "");
-		if (summary.length > 80) {
-			summary = `${summary.slice(0, 77)}...`;
-		}
-		return `[Omitted: "${summary}"]`;
-	});
+	const outlineLines = omitted.map(toOmittedLine);
 
 	const maxOutlineItems = 5;
 	const outlineToShow = outlineLines.slice(0, maxOutlineItems);

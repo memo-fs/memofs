@@ -26,6 +26,7 @@ import type {
 } from "../types";
 import {
 	fingerprint,
+	message,
 	stableEdgeKey,
 	toGraphEdgeInput,
 	toGraphNodeInput,
@@ -252,7 +253,7 @@ export async function indexDocument(
 	} catch (error) {
 		// Best effort.
 		ctx.options.logger?.warn("vector indexing failed (best-effort)", {
-			error: error instanceof Error ? error.message : String(error),
+			error: message(error),
 			sourceType: meta.sourceType,
 			sourceId: meta.sourceId,
 		});
@@ -311,7 +312,7 @@ export async function autoExtractGraph(
 			} catch (error) {
 				// Skip an edge that the store rejects.
 				ctx.options.logger?.warn("graph edge upsert rejected (best-effort)", {
-					error: error instanceof Error ? error.message : String(error),
+					error: message(error),
 					edgeType: edge.type,
 					from: edge.from,
 					to: edge.to,
@@ -321,7 +322,7 @@ export async function autoExtractGraph(
 	} catch (error) {
 		// Best effort.
 		ctx.options.logger?.warn("auto graph extraction failed (best-effort)", {
-			error: error instanceof Error ? error.message : String(error),
+			error: message(error),
 			sourceType: source.sourceType,
 			sourceId: source.sourceId,
 		});

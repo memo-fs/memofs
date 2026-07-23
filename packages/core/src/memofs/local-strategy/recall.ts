@@ -4,7 +4,7 @@ import { searchMemoryText } from "../../core/search/search-memory";
 import type { JsonObject } from "../../core/types/json";
 import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
-import { candidateShape, fingerprint } from "./helpers";
+import { candidateShape, fingerprint, message } from "./helpers";
 import type { LocalStrategyContext } from "./types";
 
 export async function localRecall(
@@ -43,7 +43,7 @@ export async function localRecall(
 			// Vector path is an enhancement; fall through to lexical-only.
 			// Observable best-effort: warn when embedder fails.
 			ctx.options.logger?.warn("hybrid fell back to lexical", {
-				error: error instanceof Error ? error.message : String(error),
+				error: message(error),
 				query: input.query,
 			});
 		}
@@ -115,7 +115,7 @@ async function runLexicalRecall(
 	} catch (error) {
 		// Best-effort BM25.
 		ctx.options.logger?.warn("lexical BM25 recall failed, using fallback", {
-			error: error instanceof Error ? error.message : String(error),
+			error: message(error),
 			query,
 		});
 	}
@@ -153,7 +153,7 @@ async function runLexicalRecall(
 	} catch (error) {
 		// Best-effort substring recall.
 		ctx.options.logger?.warn("core/notes substring recall failed", {
-			error: error instanceof Error ? error.message : String(error),
+			error: message(error),
 			query,
 		});
 	}

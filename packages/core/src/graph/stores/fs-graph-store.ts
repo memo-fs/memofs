@@ -41,7 +41,14 @@ import type {
 } from "../types";
 import { InMemoryGraphStore } from "./in-memory-graph-store";
 
-import type { Logger } from "../../memofs/local-strategy/types";
+import type { Logger } from "../../core/types/logger";
+
+/**
+ * Convert unknown error to message string for best-effort logging.
+ */
+function toErrorMessage(error: unknown): string {
+	return error instanceof Error ? error.message : String(error);
+}
 
 export interface FsGraphStoreOptions {
 	/** Memory store used for file I/O (typically NodeFsMemoryStore). */
@@ -278,15 +285,12 @@ export class FsGraphStore implements GraphStore {
 			} catch (rollbackError) {
 				// Best-effort rollback; surface the original failure.
 				this.logger?.warn("graph persist rollback failed (best-effort)", {
-					error:
-						rollbackError instanceof Error
-							? rollbackError.message
-							: String(rollbackError),
-					originalError: error instanceof Error ? error.message : String(error),
+					error: toErrorMessage(rollbackError),
+					originalError: toErrorMessage(error),
 				});
 			}
 			this.logger?.warn("graph persist edges write failed, rolled back nodes", {
-				error: error instanceof Error ? error.message : String(error),
+				error: toErrorMessage(error),
 			});
 			throw error;
 		}
@@ -312,7 +316,7 @@ export class FsGraphStore implements GraphStore {
 		} catch (error) {
 			this.logger?.warn("graph JSONL parse failed, trying skip-malformed", {
 				path,
-				error: error instanceof Error ? error.message : String(error),
+				error: toErrorMessage(error),
 			});
 			return this.parseWithSkip(content, parse);
 		}
