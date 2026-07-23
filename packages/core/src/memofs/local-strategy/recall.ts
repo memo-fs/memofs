@@ -39,8 +39,13 @@ export async function localRecall(
 						: { metadata: r.metadata as JsonObject }),
 				});
 			}
-		} catch {
+		} catch (error) {
 			// Vector path is an enhancement; fall through to lexical-only.
+			// Observable best-effort: warn when embedder fails.
+			ctx.options.logger?.warn("hybrid fell back to lexical", {
+				error: error instanceof Error ? error.message : String(error),
+				query: input.query,
+			});
 		}
 	}
 
@@ -107,8 +112,12 @@ async function runLexicalRecall(
 				metadata: { source: "bm25" },
 			});
 		}
-	} catch {
+	} catch (error) {
 		// Best-effort BM25.
+		ctx.options.logger?.warn("lexical BM25 recall failed, using fallback", {
+			error: error instanceof Error ? error.message : String(error),
+			query,
+		});
 	}
 
 	try {
@@ -126,6 +135,10 @@ async function runLexicalRecall(
 			});
 			for (const result of results) {
 				const id = `${source}_${result.index}_${fingerprint(result.text).slice(0, 12)}`;
+				// Same staleness filter as BM25 path: skip retired graph docs
+				// that were already indexed. For core/notes ids this is a no-op,
+				// but satisfies the robustness contract if ids ever overlap.
+				if (ctx.isRetiredGraphDoc(id)) continue;
 				const existing = out.get(id);
 				const score = result.score / 10;
 				if (!existing || score > existing.score) {
@@ -137,8 +150,12 @@ async function runLexicalRecall(
 				}
 			}
 		}
-	} catch {
+	} catch (error) {
 		// Best-effort substring recall.
+		ctx.options.logger?.warn("core/notes substring recall failed", {
+			error: error instanceof Error ? error.message : String(error),
+			query,
+		});
 	}
 	return out;
 }

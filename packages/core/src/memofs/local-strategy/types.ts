@@ -34,6 +34,12 @@ export type LocalGraphStore = Pick<
 	| "importSnapshot"
 > & { hydrate?: () => Promise<void> };
 
+export interface Logger {
+	warn: (message: string, meta?: unknown) => void;
+	debug?: (message: string, meta?: unknown) => void;
+	info?: (message: string, meta?: unknown) => void;
+}
+
 export interface LocalStrategyOptions {
 	store: MemoryStore;
 	embedder?: MemoryEmbedder;
@@ -49,6 +55,7 @@ export interface LocalStrategyOptions {
 	graphStore?: LocalGraphStore;
 	autoExtractGraph?: boolean;
 	syncLayer?: FileSyncLayer;
+	logger?: Logger;
 	createAgentfsClient?: (opts: {
 		store: MemoryStore;
 		projectId: string;

@@ -23,10 +23,11 @@
  * @internal
  */
 
-import { execSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
+import { promisify } from "node:util";
 import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import { LockHeldError } from "../errors/fs-memory-store-error";
 
@@ -42,31 +43,98 @@ export interface LockFileContents {
 	ownerId?: string;
 }
 
+const execFileAsync = promisify(execFile);
+
+// Cached own process start time to avoid repeated `ps` calls.
+// `undefined` means not yet resolved, `null` means resolution failed.
+let cachedOwnStartTime: string | null | undefined = undefined;
+
 /**
- * Retrieves the start time signature of a process from the OS.
+ * Parses Linux `/proc/<pid>/stat` to extract starttime ticks.
+ *
+ * @param stat - Raw contents of `/proc/<pid>/stat`.
+ * @returns The starttime tick string or null if unparseable.
+ */
+function parseLinuxStatForStartTime(stat: string): string | null {
+	const lastParen = stat.lastIndexOf(")");
+	if (lastParen === -1) return null;
+	const afterName = stat.substring(lastParen + 2);
+	const fields = afterName.split(" ");
+	const starttimeTicks = fields[19];
+	return starttimeTicks ? starttimeTicks.trim() : null;
+}
+
+/**
+ * Retrieves the start time signature of a process from the OS (sync, non-blocking on darwin).
+ *
+ * @param pid - Process id to probe.
+ * @returns Start-time signature or null if unavailable.
+ * @remarks
+ * Darwin path no longer uses `execSync` so `acquire()` hot path stays non-blocking.
+ * It returns the cached own start time when available, otherwise `null` (PID-reuse
+ * check is best-effort; liveness via `kill(pid,0)` is still enforced). The async
+ * variant {@link getProcessStartTimeAsync} performs the non-blocking `ps` probe.
  */
 export function getProcessStartTime(pid: number): string | null {
 	if (process.platform === "linux") {
 		try {
 			const stat = fs.readFileSync(`/proc/${pid}/stat`, "utf8");
-			const lastParen = stat.lastIndexOf(")");
-			if (lastParen === -1) return null;
-			const afterName = stat.substring(lastParen + 2);
-			const fields = afterName.split(" ");
-			const starttimeTicks = fields[19];
-			return starttimeTicks ? starttimeTicks.trim() : null;
+			return parseLinuxStatForStartTime(stat);
 		} catch {
 			return null;
 		}
 	} else if (process.platform === "darwin") {
+		// Non-blocking: never call execSync in acquire hot path.
+		// Return cached own start time if resolved, otherwise null and let async
+		// path resolve it.
+		if (pid === process.pid && cachedOwnStartTime !== undefined) {
+			return cachedOwnStartTime;
+		}
+		return null;
+	}
+	return null;
+}
+
+/**
+ * Retrieves the start time signature of a process from the OS (async, non-blocking).
+ *
+ * @param pid - Process id to probe.
+ * @returns Start-time signature or null if unavailable.
+ * @remarks
+ * - Linux: async `fs/promises` read of `/proc/<pid>/stat` (parsed same as sync).
+ * - Darwin: async `ps -p <pid> -o lstart=` via `execFile` (non-blocking) plus
+ *   caching of own PID result so repeated `acquire()` does not re-spawn `ps`.
+ */
+export async function getProcessStartTimeAsync(
+	pid: number,
+): Promise<string | null> {
+	if (process.platform === "linux") {
 		try {
-			const stdout = execSync(`ps -p ${pid} -o lstart=`, {
-				stdio: ["pipe", "pipe", "ignore"],
+			const stat = await fsPromises.readFile(`/proc/${pid}/stat`, "utf8");
+			return parseLinuxStatForStartTime(stat);
+		} catch {
+			return null;
+		}
+	} else if (process.platform === "darwin") {
+		// Fast path: cached own.
+		if (pid === process.pid && cachedOwnStartTime !== undefined) {
+			return cachedOwnStartTime;
+		}
+		try {
+			const result = await execFileAsync("ps", ["-p", String(pid), "-o", "lstart="], {
 				encoding: "utf8",
 			});
+			const stdout = (result as { stdout: string }).stdout ?? "";
 			const trimmed = stdout.trim();
-			return trimmed || null;
+			const parsed = trimmed || null;
+			if (pid === process.pid) {
+				cachedOwnStartTime = parsed;
+			}
+			return parsed;
 		} catch {
+			if (pid === process.pid) {
+				cachedOwnStartTime = null;
+			}
 			return null;
 		}
 	}
@@ -80,8 +148,15 @@ export interface AdvisoryFileLockOptions {
 	 * delete its valid lock. PID reuse is guarded by `processStartedAt` instead.
 	 */
 	maxAgeMs?: number;
-	/** Optional process-start probe, primarily for portable deterministic tests. */
-	getProcessStartTime?: (pid: number) => string | null;
+	/**
+	 * Optional process-start probe, primarily for portable deterministic tests.
+	 * May be sync or async.
+	 */
+	getProcessStartTime?: (
+		pid: number,
+	) => string | null | Promise<string | null>;
+	/** Async variant, takes precedence when provided together with sync probe. */
+	getProcessStartTimeAsync?: (pid: number) => Promise<string | null>;
 }
 
 /**
@@ -105,7 +180,10 @@ export class AdvisoryFileLock {
 	private readonly lockPath: string;
 	private readonly fileMode: number;
 	private readonly ownerId = randomUUID();
-	private readonly processStartTime: (pid: number) => string | null;
+	/** Resolved to async for darwin non-blocking path; may still be sync for tests. */
+	private readonly processStartTime: (
+		pid: number,
+	) => string | null | Promise<string | null>;
 	private registered = false;
 	/**
 	 * In-flight acquire promise, so concurrent same-process calls (e.g. 50
@@ -128,7 +206,14 @@ export class AdvisoryFileLock {
 	) {
 		this.lockPath = lockPath;
 		this.fileMode = options.fileMode;
-		this.processStartTime = options.getProcessStartTime ?? getProcessStartTime;
+		// Prefer explicit async variant; fall back to sync-or-async probe; default to async non-blocking.
+		if (options.getProcessStartTimeAsync) {
+			this.processStartTime = options.getProcessStartTimeAsync;
+		} else if (options.getProcessStartTime) {
+			this.processStartTime = options.getProcessStartTime;
+		} else {
+			this.processStartTime = getProcessStartTimeAsync;
+		}
 	}
 
 	/** Whether this instance currently holds the lock. */
@@ -229,10 +314,13 @@ export class AdvisoryFileLock {
 	}
 
 	private async tryCreateOrReclaim(): Promise<void> {
+		const processStartedAt = (await this.processStartTime(process.pid)) ?? undefined;
 		const contents: LockFileContents = {
 			pid: process.pid,
 			startedAt: new Date().toISOString(),
-			processStartedAt: this.processStartTime(process.pid) ?? undefined,
+			...(processStartedAt === undefined
+				? {}
+				: { processStartedAt }),
 			ownerId: this.ownerId,
 		};
 
@@ -245,7 +333,7 @@ export class AdvisoryFileLock {
 		// reclaim rather than hard-erroring (the local contract says a stale
 		// lock is reclaimable; a malformed file can't prove a live holder).
 		const existing = await this.readLock();
-		if (existing === null || this.isStale(existing)) {
+		if (existing === null || (await this.isStale(existing))) {
 			await this.reclaimAndCreate(contents);
 			return;
 		}
@@ -312,15 +400,15 @@ export class AdvisoryFileLock {
 	/**
 	 * A lock is stale if its holder process is dead or its PID was reused.
 	 */
-	private isStale(contents: LockFileContents): boolean {
+	private async isStale(contents: LockFileContents): Promise<boolean> {
 		if (typeof contents.pid !== "number" || !Number.isFinite(contents.pid)) {
 			return true;
 		}
 		if (!isProcessAlive(contents.pid)) return true;
 
-		// Verify PID reuse:
+		// Verify PID reuse (async, non-blocking on darwin):
 		if (contents.processStartedAt) {
-			const currentStartTime = this.processStartTime(contents.pid);
+			const currentStartTime = await this.processStartTime(contents.pid);
 			if (currentStartTime && currentStartTime !== contents.processStartedAt) {
 				return true;
 			}

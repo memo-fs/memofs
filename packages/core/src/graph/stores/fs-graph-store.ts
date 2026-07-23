@@ -41,6 +41,8 @@ import type {
 } from "../types";
 import { InMemoryGraphStore } from "./in-memory-graph-store";
 
+import type { Logger } from "../../memofs/local-strategy/types";
+
 export interface FsGraphStoreOptions {
 	/** Memory store used for file I/O (typically NodeFsMemoryStore). */
 	store: MemoryStore;
@@ -50,6 +52,8 @@ export interface FsGraphStoreOptions {
 	nodesPath?: typeof GRAPH_NODES_PATH;
 	/** Canonical edges JSONL path. */
 	edgesPath?: typeof GRAPH_EDGES_PATH;
+	/** Optional logger for best-effort warnings. */
+	logger?: Logger;
 }
 
 /**
@@ -62,6 +66,7 @@ export class FsGraphStore implements GraphStore {
 	private readonly inner: InMemoryGraphStore;
 	private readonly nodesPath: MemoryPath;
 	private readonly edgesPath: MemoryPath;
+	private readonly logger?: Logger;
 	private hydrated = false;
 	private hydrationPromise: Promise<void> | undefined;
 
@@ -70,6 +75,7 @@ export class FsGraphStore implements GraphStore {
 		this.inner = options.inner ?? new InMemoryGraphStore();
 		this.nodesPath = options.nodesPath ?? GRAPH_NODES_PATH;
 		this.edgesPath = options.edgesPath ?? GRAPH_EDGES_PATH;
+		this.logger = options.logger;
 	}
 
 	/**
@@ -269,9 +275,19 @@ export class FsGraphStore implements GraphStore {
 				} else {
 					await this.store.delete(this.nodesPath);
 				}
-			} catch {
+			} catch (rollbackError) {
 				// Best-effort rollback; surface the original failure.
+				this.logger?.warn("graph persist rollback failed (best-effort)", {
+					error:
+						rollbackError instanceof Error
+							? rollbackError.message
+							: String(rollbackError),
+					originalError: error instanceof Error ? error.message : String(error),
+				});
 			}
+			this.logger?.warn("graph persist edges write failed, rolled back nodes", {
+				error: error instanceof Error ? error.message : String(error),
+			});
 			throw error;
 		}
 	}
@@ -293,22 +309,40 @@ export class FsGraphStore implements GraphStore {
 		// Skip-malformed: tolerate stray lines from prior versions.
 		try {
 			return parse(content);
-		} catch {
-			return parseWithSkip(content, parse);
+		} catch (error) {
+			this.logger?.warn("graph JSONL parse failed, trying skip-malformed", {
+				path,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			return this.parseWithSkip(content, parse);
 		}
+	}
+
+	/**
+	 * Fallback parser wrapper that tolerates malformed lines.
+	 */
+	private parseWithSkip<T>(
+		content: string,
+		parse: (content: string) => T[],
+	): T[] {
+		const { kept, dropped } = collectValidJsonlLines(content);
+		if (dropped > 0) {
+			this.logger?.warn("dropped malformed graph JSONL lines (best-effort)", {
+				dropped,
+			});
+		}
+		return parse(kept.join("\n"));
 	}
 }
 
-/**
- * Fallback parser wrapper that tolerates malformed lines. The graph JSONL
- * parsers expose a "detailed" variant; here we simply drop bad lines.
- */
-function parseWithSkip<T>(
-	content: string,
-	parse: (content: string) => T[],
-): T[] {
+/** Shared JSONL line collector — SSOT for malformed-line skipping. */
+function collectValidJsonlLines(content: string): {
+	kept: string[];
+	dropped: number;
+} {
 	const lines = content.split(/\r?\n/);
 	const kept: string[] = [];
+	let dropped = 0;
 	for (const line of lines) {
 		const trimmed = line.trim();
 		if (!trimmed) continue;
@@ -316,9 +350,20 @@ function parseWithSkip<T>(
 			JSON.parse(trimmed);
 			kept.push(trimmed);
 		} catch {
-			// drop malformed line
+			dropped++;
 		}
 	}
+	return { kept, dropped };
+}
+
+/**
+ * Standalone fallback for external callers (no logger) — reuses SSOT collector.
+ */
+function parseWithSkip<T>(
+	content: string,
+	parse: (content: string) => T[],
+): T[] {
+	const { kept } = collectValidJsonlLines(content);
 	return parse(kept.join("\n"));
 }
 

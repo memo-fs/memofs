@@ -17,8 +17,8 @@
  * - BM25 (`tokenize` with `dropStopWords:true`) drops these to reduce index noise.
  * - Strategist rewrite reuses `tokenize` so `what is auth` → `["auth"]` matches BM25.
  * - `tokenizeSimple` in `core/internal/lexical` reuses this tokenizer with
- *   `dropStopWords:false` to keep a pure overlap score, but shares the same
- *   split regex and lower-casing. See that file for alignment notes.
+ *   `dropStopWords:true` to avoid `what,is,the` inflating scores in
+ *   `DeterministicFallbackReranker`. See that file for alignment notes.
  *
  * @public
  */

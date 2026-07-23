@@ -154,7 +154,22 @@ function scoreBlock(text: string, loweredQuery: string): number {
 	}
 
 	if (lowered.startsWith(loweredQuery)) score += 2;
-	if (lowered.includes(`## ${loweredQuery}`)) score += 3;
+
+	// Heading boost: support multi-word lowercased headings.
+	// Checks any ## line whether heading contains query (multi-word tolerant),
+	// so "## My Auth Flow Implementation" boosts for "auth flow" and
+	// "## auth flow" still works via substring.
+	const lines = lowered.split("\n");
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (trimmed.startsWith("## ")) {
+			const heading = trimmed.slice(2).trim();
+			if (heading.includes(loweredQuery)) {
+				score += 3;
+				break;
+			}
+		}
+	}
 
 	return score;
 }

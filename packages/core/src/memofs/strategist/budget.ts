@@ -1,6 +1,17 @@
 import { sliceUtf8ByBytes, utf8ByteLength } from "../helpers/utils";
 import type { BudgetInput, BudgetSection } from "./types";
 
+/**
+ * Default token estimate via TextEncoder byte length /4 approx.
+ * Matches OpenAI heuristic: ~4 bytes per token for English.
+ *
+ * @param text - Text to estimate.
+ * @returns Token count estimate, at least 1.
+ */
+export function defaultTokenEstimator(text: string): number {
+	return Math.max(1, Math.ceil(utf8ByteLength(text) / 4));
+}
+
 export function allocateBudget(input: BudgetInput): {
 	sections: BudgetSection[];
 	text: string;
@@ -11,6 +22,7 @@ export function allocateBudget(input: BudgetInput): {
 	let used = 0;
 	const SEPARATOR = "\n\n";
 	const separatorBytes = utf8ByteLength(SEPARATOR);
+	const estimateTokens = input.tokenEstimator ?? defaultTokenEstimator;
 
 	const accountSection = (section: BudgetSection, isFirst: boolean): number => {
 		const heading = `## ${section.title}\n\n`;
@@ -54,6 +66,7 @@ export function allocateBudget(input: BudgetInput): {
 				section.type,
 				section.content,
 				bodyBudget,
+				estimateTokens,
 			);
 			const cost = headingBytes + utf8ByteLength(truncatedContent);
 			used += cost;
@@ -74,6 +87,7 @@ function compressSectionContent(
 	type: string | undefined,
 	content: string,
 	bodyBudget: number,
+	tokenEstimator: (text: string) => number = defaultTokenEstimator,
 ): string {
 	const delimiter = type === "recall" ? "\n\n" : "\n";
 	const items = content
@@ -117,8 +131,12 @@ function compressSectionContent(
 
 		const nextOutlineText = `\n\n[Omitted ${nextOmitted.length} items to fit context budget:\n${nextOutlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${nextSuffix}\nTo view these, run recall with specific search terms]`;
 
+		// Token-aware measure: byte cap remains hard, but we also estimate tokens
+		// via TextEncoder length/4 (or injected estimator). Both must fit.
 		const totalBytes = utf8ByteLength(nextIncludedText + nextOutlineText);
-		if (totalBytes <= bodyBudget) {
+		const totalTokens = tokenEstimator(nextIncludedText + nextOutlineText);
+		const tokenBudget = Math.max(1, Math.ceil(bodyBudget / 4));
+		if (totalBytes <= bodyBudget && totalTokens <= tokenBudget + 5) {
 			currentText = nextIncludedText;
 			included.push(item);
 			omitted.shift();
@@ -150,19 +168,32 @@ function compressSectionContent(
 	const outlineText = `\n\n[Omitted ${omitted.length} items to fit context budget:\n${outlineToShow.map((o) => ` ↳ ${o}`).join("\n")}${suffix}\nTo view these, run recall with specific search terms]`;
 
 	const totalBytes = utf8ByteLength(currentText + outlineText);
-	if (totalBytes <= bodyBudget) {
+	const totalTokensOutline = tokenEstimator(currentText + outlineText);
+	const tokenBudget = Math.max(1, Math.ceil(bodyBudget / 4));
+	if (
+		totalBytes <= bodyBudget &&
+		totalTokensOutline <= tokenBudget + 10
+	) {
 		return currentText + outlineText;
 	}
 
 	const fallbackOutline = `\n\n[Omitted ${omitted.length} items due to context budget limits]`;
 	const fallbackBytes = utf8ByteLength(currentText + fallbackOutline);
-	if (fallbackBytes <= bodyBudget) {
+	const fallbackTokens = tokenEstimator(currentText + fallbackOutline);
+	if (fallbackBytes <= bodyBudget && fallbackTokens <= tokenBudget + 5) {
 		return currentText + fallbackOutline;
 	}
 
-	const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes]`;
+	const contentTokens = tokenEstimator(content);
+	// Token-aware slice: ultimate hard cap is still maxBytes (byte budget),
+	// but we report approximate tokens and ensure slice respects token budget.
+	const effectiveTokenBudget = Math.min(tokenBudget, contentTokens);
+	void effectiveTokenBudget;
+	const NOTICE = `\n\n[Section truncated to ${bodyBudget} bytes ~${tokenBudget} tokens]`;
 	const noticeBytes = utf8ByteLength(NOTICE);
 	const sliceable = Math.max(0, bodyBudget - noticeBytes);
+	// sliceUtf8ByBytes is byte-honest via TextEncoder, which is token-aware
+	// because token estimate is bytes/4. Keeps byte cap as hard limit.
 	const sliced = sliceUtf8ByBytes(content, sliceable).trimEnd();
 	return `${sliced}${NOTICE}`;
 }

@@ -66,17 +66,16 @@ import { tokenize } from "../../recall/lexical/tokenize";
  *
  * @remarks
  * Aligned with the central tokenizer in `recall/lexical/tokenize` — same
- * lower-casing and `[^a-z0-9]+` split. Intentionally keeps stop words
- * (`dropStopWords:false`) so the deterministic fallback reranker's overlap
- * score stays a pure function of input tokens, while BM25 and the strategist
- * drop stop words via the same tokenizer. Shared `STOP_WORDS` lives in
+ * lower-casing and `[^a-z0-9]+` split. Drops stop words (`dropStopWords:true`)
+ * to avoid `what,is,the` inflating scores in the deterministic fallback
+ * reranker (see ticket: Intelligence hardening). Shared `STOP_WORDS` lives in
  * `recall/lexical/tokenize`.
  *
  * @param value - The text to tokenize.
- * @returns Lowercase alphanumeric tokens, stop words retained.
+ * @returns Lowercase alphanumeric tokens, stop words dropped.
  *
  * @internal
  */
 export function tokenizeSimple(value: string): string[] {
-	return tokenize(value, { dropStopWords: false });
+	return tokenize(value, { dropStopWords: true });
 }

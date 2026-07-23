@@ -74,4 +74,9 @@ export interface BudgetInput {
 	sections: BudgetSection[];
 	maxBytes: number;
 	truncationNotice?: string;
+	/**
+	 * Optional token estimator. Defaults to `TextEncoder` byte length /4 approx.
+	 * Injected for tests or when host has a tokenizer (e.g. tiktoken).
+	 */
+	tokenEstimator?: (text: string) => number;
 }

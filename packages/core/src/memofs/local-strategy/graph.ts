@@ -132,8 +132,10 @@ export async function graphPath(
 		edgePath: GraphEdgeInput[];
 	}> = [{ id: input.from, nodePath: [start], edgePath: [] }];
 	const seen = new Set<string>([input.from]);
-	while (queue.length > 0) {
-		const current = queue.shift();
+	// Index pointer instead of shift() to avoid O(n²) moves on large graphs.
+	let head = 0;
+	while (head < queue.length) {
+		const current = queue[head++];
 		if (!current) break;
 		if (current.id === input.to) {
 			const totalWeight = current.edgePath.reduce(

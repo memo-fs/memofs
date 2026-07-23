@@ -249,8 +249,13 @@ export async function indexDocument(
 			};
 		});
 		await ctx.options.recallStore.upsert(docs);
-	} catch {
+	} catch (error) {
 		// Best effort.
+		ctx.options.logger?.warn("vector indexing failed (best-effort)", {
+			error: error instanceof Error ? error.message : String(error),
+			sourceType: meta.sourceType,
+			sourceId: meta.sourceId,
+		});
 	}
 }
 
@@ -303,11 +308,22 @@ export async function autoExtractGraph(
 					weight: 1,
 					...toGraphEdgeInput(edge),
 				});
-			} catch {
+			} catch (error) {
 				// Skip an edge that the store rejects.
+				ctx.options.logger?.warn("graph edge upsert rejected (best-effort)", {
+					error: error instanceof Error ? error.message : String(error),
+					edgeType: edge.type,
+					from: edge.from,
+					to: edge.to,
+				});
 			}
 		}
-	} catch {
+	} catch (error) {
 		// Best effort.
+		ctx.options.logger?.warn("auto graph extraction failed (best-effort)", {
+			error: error instanceof Error ? error.message : String(error),
+			sourceType: source.sourceType,
+			sourceId: source.sourceId,
+		});
 	}
 }
