@@ -1,0 +1,30 @@
+{
+  "runId": "test-run-e2e-0021-005",
+  "api": "voyage-rerank",
+  "sanitized": true,
+  "secretRedacted": "test-token-***",
+  "payload": {
+    "object": "list",
+    "data": [
+      {
+        "index": 0,
+        "relevance_score": 0.9,
+        "document": "Document A [RUN_ID test-run-e2e-0021-005]"
+      },
+      {
+        "index": 1,
+        "relevance_score": 0.5,
+        "document": "Document B"
+      },
+      {
+        "index": 2,
+        "relevance_score": 0.2,
+        "document": "Document C"
+      }
+    ],
+    "model": "rerank-2",
+    "usage": {
+      "total_tokens": 30
+    }
+  }
+}

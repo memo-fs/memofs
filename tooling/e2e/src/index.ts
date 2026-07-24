@@ -74,5 +74,52 @@ export {
 	assertTransformersValidationBehavior,
 } from "./harness/transformers-harness";
 
-// Placeholder re-exports for future tickets — commented until implemented
-// export type { ConnectorRealHarness } from "./harness/connector-harness";
+// MSW + connectors + remote adapters (ticket 64)
+export { mswServer, allHandlers } from "./msw/server.js";
+export type {
+	ConnectorRealHarness,
+	CreateRealConnectorHarnessOptions,
+} from "./harness/connector-harness";
+export { createRealConnectorHarness } from "./harness/connector-harness";
+
+export type {
+	OpenAIRealHarness,
+	CreateRealOpenAIHarnessOptions,
+} from "./harness/openai-harness";
+export { createRealOpenAIHarness, assertNoTokenLeak as assertOpenAINoTokenLeak } from "./harness/openai-harness";
+
+export type {
+	VoyageRealHarness,
+	CreateRealVoyageHarnessOptions,
+	VoyageRerankRealHarness,
+	CreateRealVoyageRerankHarnessOptions,
+} from "./harness/voyage-harness";
+export {
+	createRealVoyageHarness,
+	createRealVoyageRerankHarness,
+	assertNoTokenLeak as assertVoyageNoTokenLeak,
+} from "./harness/voyage-harness";
+
+// MSW handler state helpers (for dedup mutable tests)
+export {
+	setGitHubNodes,
+	setGitHubPayload,
+	resetGitHubFixture,
+	getGitHubFixtureMeta,
+} from "./msw/handlers/github.js";
+export {
+	setNotionResults,
+	setNotionPayload,
+	resetNotionFixture,
+	getNotionFixtureMeta,
+} from "./msw/handlers/notion.js";
+export {
+	setOpenAIErrorMode,
+	resetOpenAIFixture,
+	getOpenAIFixtureMeta,
+} from "./msw/handlers/openai.js";
+export {
+	setVoyageErrorMode,
+	resetVoyageFixture,
+	getVoyageFixtureMeta,
+} from "./msw/handlers/voyage.js";

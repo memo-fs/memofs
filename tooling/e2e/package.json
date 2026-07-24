@@ -36,9 +36,12 @@
 	},
 	"dependencies": {
 		"@libsql/client": "^0.17.4",
+		"@memofs/adapter-openai": "workspace:*",
 		"@memofs/adapter-r2": "workspace:*",
 		"@memofs/adapter-transformers": "workspace:*",
 		"@memofs/adapter-turso": "workspace:*",
+		"@memofs/adapter-voyage": "workspace:*",
+		"@memofs/connectors": "workspace:*",
 		"@memofs/core": "workspace:*",
 		"@memofs/mcp-server": "workspace:*",
 		"@memofs/server": "workspace:*",
@@ -50,6 +53,7 @@
 		"@repo/tsdown": "workspace:*",
 		"@repo/typescript": "workspace:*",
 		"@types/node": "^25.9.2",
+		"msw": "^2.7.0",
 		"tsx": "^4.21.0",
 		"vitest": "^4.1.5"
 	}
