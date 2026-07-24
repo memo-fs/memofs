@@ -465,9 +465,18 @@ importers:
       '@memofs/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@memofs/mcp-server':
+        specifier: workspace:*
+        version: link:../../packages/mcp-server
+      '@memofs/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@memofs/testing':
         specifier: workspace:*
         version: link:../../packages/testing
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(zod@4.4.3)
     devDependencies:
       '@repo/tsdown':
         specifier: workspace:*
@@ -3055,6 +3064,7 @@ packages:
 
   libsql@0.5.29:
     resolution: {integrity: sha512-8lMP8iMgiBzzoNbAPQ59qdVcj6UaE/Vnm+fiwX4doX4Narook0a4GPKWBEv+CR8a1OwbfkgL18uBfBjWdF0Fzg==}
+    cpu: [x64, arm64, wasm32, arm]
     os: [darwin, linux, win32]
 
   lightningcss-android-arm64@1.32.0:

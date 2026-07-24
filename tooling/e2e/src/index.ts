@@ -32,10 +32,27 @@ export type {
 } from "./harness/cli-harness";
 export { createRealCliHarness } from "./harness/cli-harness";
 
+// MCP + Server harnesses (ticket 62)
+export type {
+	McpStdioHarness,
+	CreateRealMcpStdioHarnessOptions,
+	McpTool,
+} from "./harness/mcp-stdio-harness";
+export { createRealMcpStdioHarness } from "./harness/mcp-stdio-harness";
+
+export type {
+	McpHttpHarness,
+	CreateRealMcpHttpHarnessOptions,
+} from "./harness/mcp-http-harness";
+export { createRealMcpHttpHarness } from "./harness/mcp-http-harness";
+
+export type {
+	ServerRealHarness,
+	CreateRealServerHarnessOptions,
+} from "./harness/server-harness";
+export { createRealServerHarness } from "./harness/server-harness";
+
 // Placeholder re-exports for future tickets — commented until implemented
-// export type { McpStdioHarness } from "./harness/mcp-stdio-harness";
-// export type { McpHttpHarness } from "./harness/mcp-http-harness";
-// export type { ServerRealHarness } from "./harness/server-harness";
 // export type { TursoRealHarness } from "./harness/turso-harness";
 // export type { R2RealHarness } from "./harness/r2-harness";
 // export type { TransformersRealHarness } from "./harness/transformers-harness";
