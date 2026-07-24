@@ -144,4 +144,11 @@ export {
 	saveGoldenSnapshot,
 	buildGoldenFromSnapshot,
 	generateGoldenSnapshots,
+	runSeededLoopScenario,
+	runOrchestratorScenario,
 } from "./scenarios/index.js";
+
+// Sim (ticket 66) — seeded-loop + orchestrator (aliases)
+export { runSeededLoopScenario as runSeededLoop } from "./sim/seeded-loop.js";
+export { runOrchestratorScenario as runOrchestrator } from "./sim/orchestrator.js";
+export type { SeededLoopStats } from "./sim/seeded-loop.js";

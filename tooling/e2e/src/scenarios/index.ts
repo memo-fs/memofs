@@ -23,3 +23,7 @@ export {
 	generateGoldenSnapshots,
 	type GoldenSnapshotFile,
 } from "./golden-snapshots.js";
+
+// Sim runners re-exported for convenience (also available via ../sim)
+export { runSeededLoopScenario } from "../sim/seeded-loop.js";
+export { runOrchestratorScenario } from "../sim/orchestrator.js";

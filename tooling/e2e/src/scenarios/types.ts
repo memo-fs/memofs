@@ -67,7 +67,10 @@ export type ScenarioName =
 	| "agentfs-interleaved"
 	| "connectors-merge"
 	| "failure-recovery"
-	| "golden-snapshots";
+	| "golden-snapshots"
+	| "seeded-loop"
+	| "orchestrator"
+	| "simulation";
 
 /**
  * Result returned by each scenario runner.
