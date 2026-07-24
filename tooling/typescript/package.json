@@ -2,5 +2,8 @@
 	"name": "@repo/typescript",
 	"version": "1.0.0",
 	"private": true,
-	"license": "MIT"
+	"license": "MIT",
+	"exports": {
+		"./base.json": "./base.json"
+	}
 }
