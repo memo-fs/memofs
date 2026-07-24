@@ -462,6 +462,18 @@ importers:
 
   tooling/e2e:
     dependencies:
+      '@libsql/client':
+        specifier: ^0.17.4
+        version: 0.17.4
+      '@memofs/adapter-r2':
+        specifier: workspace:*
+        version: link:../../packages/adapter-r2
+      '@memofs/adapter-transformers':
+        specifier: workspace:*
+        version: link:../../packages/adapter-transformers
+      '@memofs/adapter-turso':
+        specifier: workspace:*
+        version: link:../../packages/adapter-turso
       '@memofs/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -477,6 +489,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.4.3)
+      miniflare:
+        specifier: ^4.20260630.0
+        version: 4.20260630.0
     devDependencies:
       '@repo/tsdown':
         specifier: workspace:*

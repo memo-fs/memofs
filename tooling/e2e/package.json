@@ -35,11 +35,16 @@
 		"node": ">=22"
 	},
 	"dependencies": {
+		"@libsql/client": "^0.17.4",
+		"@memofs/adapter-r2": "workspace:*",
+		"@memofs/adapter-transformers": "workspace:*",
+		"@memofs/adapter-turso": "workspace:*",
 		"@memofs/core": "workspace:*",
 		"@memofs/mcp-server": "workspace:*",
 		"@memofs/server": "workspace:*",
 		"@memofs/testing": "workspace:*",
-		"@modelcontextprotocol/sdk": "^1.29.0"
+		"@modelcontextprotocol/sdk": "^1.29.0",
+		"miniflare": "^4.20260630.0"
 	},
 	"devDependencies": {
 		"@repo/tsdown": "workspace:*",

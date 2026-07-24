@@ -52,8 +52,27 @@ export type {
 } from "./harness/server-harness";
 export { createRealServerHarness } from "./harness/server-harness";
 
+// Adapter harnesses (ticket 63)
+export type {
+	TursoRealHarness,
+	CreateRealTursoHarnessOptions,
+} from "./harness/turso-harness";
+export { createRealTursoHarness } from "./harness/turso-harness";
+
+export type {
+	R2RealHarness,
+	CreateRealR2HarnessOptions,
+} from "./harness/r2-harness";
+export { createRealR2Harness } from "./harness/r2-harness";
+
+export type {
+	TransformersRealHarness,
+	CreateRealTransformersHarnessOptions,
+} from "./harness/transformers-harness";
+export {
+	createRealTransformersHarness,
+	assertTransformersValidationBehavior,
+} from "./harness/transformers-harness";
+
 // Placeholder re-exports for future tickets — commented until implemented
-// export type { TursoRealHarness } from "./harness/turso-harness";
-// export type { R2RealHarness } from "./harness/r2-harness";
-// export type { TransformersRealHarness } from "./harness/transformers-harness";
 // export type { ConnectorRealHarness } from "./harness/connector-harness";
