@@ -24,8 +24,15 @@ export type {
 } from "./harness/core-harness";
 export { createRealCoreHarness } from "./harness/core-harness";
 
+// CLI harness (ticket 61)
+export type {
+	CliRealHarness,
+	CliExecResult,
+	CreateRealCliHarnessOptions,
+} from "./harness/cli-harness";
+export { createRealCliHarness } from "./harness/cli-harness";
+
 // Placeholder re-exports for future tickets — commented until implemented
-// export type { CliRealHarness } from "./harness/cli-harness";
 // export type { McpStdioHarness } from "./harness/mcp-stdio-harness";
 // export type { McpHttpHarness } from "./harness/mcp-http-harness";
 // export type { ServerRealHarness } from "./harness/server-harness";

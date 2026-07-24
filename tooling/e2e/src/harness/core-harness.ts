@@ -13,13 +13,20 @@
  * @public
  */
 
-import { mkdir, mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, relative } from "node:path";
+import { join } from "node:path";
 
 import { MemoFS } from "@memofs/core";
 import type { NodeFsMemoryStore } from "@memofs/core/node-fs";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+
+import {
+	assertFileExistsAt,
+	assertFileNotExistsAt,
+	listFilesRecursive,
+	snapshotFsRecursive,
+} from "./fs-helpers.js";
 
 /**
  * Base real harness — tmpDir + cleanup + file assertions.
@@ -148,36 +155,11 @@ export async function createRealCoreHarness(
 	};
 
 	const assertFileExists = async (relPath: string): Promise<void> => {
-		const abs = join(tmpDir, relPath);
-		try {
-			await stat(abs);
-		} catch {
-			// Provide helpful listing on failure
-			const files = await listFilesRecursive(tmpDir).catch(() => []);
-			throw new Error(
-				`RealHarness: expected file to exist: ${relPath} (abs: ${abs})\n` +
-					`tmpDir: ${tmpDir}\n` +
-					`Existing files (${files.length}):\n${files.slice(0, 50).join("\n")}`,
-			);
-		}
+		await assertFileExistsAt(tmpDir, relPath);
 	};
 
 	const assertFileNotExists = async (relPath: string): Promise<void> => {
-		const abs = join(tmpDir, relPath);
-		try {
-			await stat(abs);
-			throw new Error(
-				`RealHarness: expected file NOT to exist but found: ${relPath}`,
-			);
-		} catch (error) {
-			if (
-				error instanceof Error &&
-				error.message.includes("expected file NOT to exist")
-			) {
-				throw error;
-			}
-			// stat threw -> file does not exist, success
-		}
+		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 
 	const listFiles = async (): Promise<string[]> => {
@@ -185,24 +167,7 @@ export async function createRealCoreHarness(
 	};
 
 	const snapshotFs = async (): Promise<Record<string, string>> => {
-		const files = await listFilesRecursive(tmpDir);
-		const record: Record<string, string> = {};
-		for (const rel of files) {
-			const abs = join(tmpDir, rel);
-			try {
-				const st = await stat(abs);
-				if (!st.isFile()) continue;
-				// Read as utf8; if binary, keep placeholder but still show existence
-				try {
-					record[rel] = await readFile(abs, "utf8");
-				} catch {
-					record[rel] = "<binary or unreadable>";
-				}
-			} catch {
-				// file disappeared between list and read, ignore
-			}
-		}
-		return record;
+		return snapshotFsRecursive(tmpDir);
 	};
 
 	const remember = async (fact: string): Promise<{ id: string }> => {
@@ -233,38 +198,4 @@ export async function createRealCoreHarness(
 		search,
 		context,
 	};
-}
-
-async function listFilesRecursive(root: string): Promise<string[]> {
-	const result: string[] = [];
-
-	async function walk(dir: string): Promise<void> {
-		let entries: Array<{
-			name: string;
-			isDirectory(): boolean;
-			isFile(): boolean;
-		}>;
-		try {
-			entries = (await readdir(dir, {
-				withFileTypes: true,
-			})) as unknown as typeof entries;
-		} catch {
-			return;
-		}
-		for (const entry of entries) {
-			const abs = join(dir, entry.name);
-			const rel = relative(root, abs);
-			if (entry.isDirectory()) {
-				// Skip node_modules if accidentally nested
-				if (entry.name === "node_modules") continue;
-				await walk(abs);
-			} else if (entry.isFile()) {
-				result.push(rel);
-			}
-		}
-	}
-
-	await walk(root);
-	result.sort();
-	return result;
 }
