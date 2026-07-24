@@ -200,7 +200,7 @@ export async function runFailureRecoveryScenario(
 						enabled: true,
 						secretRef: "ss_test_a",
 						sourceMapping: { repository: "example/repo" },
-					} as never,
+					},
 				]);
 
 				// Inject MSW 500 for GitHub GraphQL — one-time failure

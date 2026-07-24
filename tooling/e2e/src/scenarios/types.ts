@@ -59,12 +59,23 @@ export type FileFirstTruthProof = {
 };
 
 /**
+ * Known scenario names.
+ * @public
+ */
+export type ScenarioName =
+	| "lifecycle"
+	| "agentfs-interleaved"
+	| "connectors-merge"
+	| "failure-recovery"
+	| "golden-snapshots";
+
+/**
  * Result returned by each scenario runner.
  * @public
  */
 export type ScenarioResult = {
 	/** Name of scenario (lifecycle, agentfs-interleaved, etc.) */
-	scenario: string;
+	scenario: ScenarioName;
 	/** tmpDir used (may have been cleaned after, but path recorded) */
 	tmpDir: string;
 	/** Whether scenario passed its internal assertions */

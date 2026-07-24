@@ -47,27 +47,20 @@ export async function runConnectorsMergeScenario(
 				enabled: true,
 				secretRef: "ss_test_a",
 				sourceMapping: { repository: "example/repo" },
-			} as never,
+			},
 			{
 				id: "notion-e2e",
 				type: "notion",
 				enabled: true,
 				secretRef: "ss_test_notion",
 				sourceMapping: { databaseId: "test-db-id" },
-			} as never,
+			},
 		]);
 
-		// Assert opaque secretRef never raw token
+		// Assert opaque secretRef never raw token — connectors.json must not contain raw token, only secretRef
 		const rawConnectors = await harness.readConnectorsFileRaw();
-		if (rawConnectors.includes("test-token-") && rawConnectors.includes("ss_test_a") === false) {
-			// The file should contain secretRef ids, not raw token values
-			// But we check it doesn't contain raw token as literal token leaked
-			// Since test-token-*** is the redacted placeholder, it should NOT appear as actual secret value in connectors.json
-			// connectors.json should have secretRef, not api key
-			// Our fixture token is test-token-***, which should not be in connectors.json
-			if (rawConnectors.includes("test-token-***")) {
-				throw new Error("connectors.json leaked raw token test-token-***, should only have secretRef");
-			}
+		if (rawConnectors.includes("test-token-***")) {
+			throw new Error("connectors.json leaked raw token test-token-***, should only have secretRef");
 		}
 		if (!rawConnectors.includes("secretRef")) {
 			throw new Error("connectors.json missing secretRef, expected opaque ref");

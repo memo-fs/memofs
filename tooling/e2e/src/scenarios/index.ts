@@ -8,6 +8,7 @@
  * @public
  */
 
+export type { ScenarioName } from "./types.js";
 export * from "./types.js";
 export { runLifecycleScenario } from "./lifecycle.js";
 export { runAgentFsInterleavedScenario } from "./agentfs-interleaved.js";

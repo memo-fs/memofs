@@ -156,8 +156,6 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 			};
 
 			// Step 6: No data loss — search after consolidate still finds facts
-			const searchAfter = await core.search("lifecycle scenario Mongo?");
-			// Actually search for known fact that should still exist
 			const searchAfterReal = await core.search("TypeScript");
 			details.searchAfterCount = searchAfterReal.length;
 			if (searchAfterReal.length === 0) {

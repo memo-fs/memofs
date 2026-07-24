@@ -107,23 +107,22 @@ export function buildGoldenFromSnapshot(scenarioName: string, snapshot: Scenario
 
 	// For file list, we normalize dynamic UUIDs in file names to <id> placeholder for stability
 	// e.g. ".memofs/memory/abc-123-def.md" => ".memofs/memory/<id>.md"
-	const normalizedFiles = snapshot.files.map((f) => {
-		// Replace hex-like id segments with <id>
-		return f
-			.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
-			.replace(/\b[a-z0-9]{20,}\b/g, (m) => (m.length > 20 ? "<id>" : m));
-	});
+	// We keep duplicates to preserve file count (20 memory files may normalize to same placeholder, but count matters)
+	const normalizedFiles = snapshot.files
+		.map((f) => {
+			// Replace hex-like id segments with <id>
+			return f
+				.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
+				.replace(/\b[a-z0-9]{20,}\b/g, (m) => (m.length > 20 ? "<id>" : m));
+		})
+		.sort();
 
-	// Unique + sorted
-	const uniqSorted = [...new Set(normalizedFiles)].sort();
-
-	// Hashes: use normalized file keys as well
+	// Hashes: use normalized file keys as well — if duplicates, keep first occurrence for hash map, but file list retains duplicates
 	const normalizedHashes: Record<string, string> = {};
 	for (const [origFile, hash] of Object.entries(snapshot.hashes)) {
 		const norm = origFile
-			.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
+			.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
 			.replace(/\b[a-z0-9]{20,}\b/g, (m) => (m.length > 20 ? "<id>" : m));
-		// If duplicate normalized key, keep first
 		if (!(norm in normalizedHashes)) {
 			normalizedHashes[norm] = hash;
 		}
@@ -131,7 +130,7 @@ export function buildGoldenFromSnapshot(scenarioName: string, snapshot: Scenario
 
 	return {
 		scenario: scenarioName,
-		files: uniqSorted,
+		files: normalizedFiles,
 		hashes: normalizedHashes,
 		minFileCount: Math.max(1, Math.floor(snapshot.fileCount * 0.8)), // allow 20% variance for dynamic files
 		requiredFiles,
@@ -409,29 +408,30 @@ export async function runGoldenSnapshotsScenario(
  * @public
  */
 export async function generateGoldenSnapshots(): Promise<Record<string, string>> {
-	const runLifecycleScenario = _runLifecycleForGenerate;
-	const runAgentFsInterleavedScenario = _runAgentFsForGenerate;
-	const runConnectorsMergeScenario = _runConnectorsForGenerate;
-	const runFailureRecoveryScenario = _runFailureForGenerate;
+	// Use the statically imported runners directly (no shadowing)
+	const runLifecycle = _runLifecycleForGenerate;
+	const runAgentFs = _runAgentFsForGenerate;
+	const runConnectors = _runConnectorsForGenerate;
+	const runFailure = _runFailureForGenerate;
 
 	const results: Record<string, string> = {};
 
-	const lifecycleResult = await runLifecycleScenario({ keepTmpDir: false });
+	const lifecycleResult = await runLifecycle({ keepTmpDir: false });
 	const goldenLifecycle = buildGoldenFromSnapshot("lifecycle", lifecycleResult.snapshot);
 	await saveGoldenSnapshot(goldenLifecycle);
 	results.lifecycle = `generated ${goldenLifecycle.files.length} files`;
 
-	const agentfsResult = await runAgentFsInterleavedScenario({ keepTmpDir: false });
+	const agentfsResult = await runAgentFs({ keepTmpDir: false });
 	const goldenAgentfs = buildGoldenFromSnapshot("agentfs-interleaved", agentfsResult.snapshot);
 	await saveGoldenSnapshot(goldenAgentfs);
 	results["agentfs-interleaved"] = `generated ${goldenAgentfs.files.length} files`;
 
-	const connectorsResult = await runConnectorsMergeScenario({ keepTmpDir: false });
+	const connectorsResult = await runConnectors({ keepTmpDir: false });
 	const goldenConnectors = buildGoldenFromSnapshot("connectors-merge", connectorsResult.snapshot);
 	await saveGoldenSnapshot(goldenConnectors);
 	results["connectors-merge"] = `generated ${goldenConnectors.files.length} files`;
 
-	const failureResult = await runFailureRecoveryScenario({ keepTmpDir: false });
+	const failureResult = await runFailure({ keepTmpDir: false });
 	const goldenFailure = buildGoldenFromSnapshot("failure-recovery", failureResult.snapshot);
 	await saveGoldenSnapshot(goldenFailure);
 	results["failure-recovery"] = `generated ${goldenFailure.files.length} files`;
