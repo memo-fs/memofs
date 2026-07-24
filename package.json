@@ -42,7 +42,12 @@
 		"release:package-check": "turbo run release:check --filter=./packages/*",
 		"release:preflight": "pnpm validate:workspace && pnpm release:package-check && pnpm release:dry-run",
 		"publish:docs": "pnpm docs:build",
-		"validate:publish": "pnpm release:preflight"
+		"validate:publish": "pnpm release:preflight",
+		"e2e:release": "pnpm --filter @repo/e2e build && pnpm --filter @repo/e2e test:e2e",
+		"e2e:release:live": "pnpm --filter @repo/e2e build && pnpm --filter @repo/e2e test:e2e:live",
+		"e2e:record": "pnpm --filter @repo/e2e msw:record",
+		"e2e:core": "pnpm --filter @repo/e2e exec vitest run --config vitest.e2e.config.ts src/e2e/core.e2e.test.ts",
+		"e2e:simulation": "pnpm --filter @repo/e2e exec vitest run --config vitest.e2e.config.ts src/e2e/simulation.e2e.test.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.16",

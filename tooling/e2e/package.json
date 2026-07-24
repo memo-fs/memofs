@@ -26,8 +26,12 @@
 		"build": "tsdown",
 		"build:watch": "tsdown --watch",
 		"typecheck": "tsc --noEmit",
+		"test:run": "echo \"@repo/e2e internal — use pnpm test:e2e (manual, not in CI)\"",
 		"test:e2e": "vitest run --config vitest.e2e.config.ts",
 		"test:e2e:live": "MEMOFS_E2E_LIVE=1 vitest run --config vitest.e2e.config.ts",
+		"e2e:release": "pnpm build && vitest run --config vitest.e2e.config.ts",
+		"e2e:release:simulation": "pnpm build && vitest run --config vitest.e2e.config.ts src/e2e/simulation.e2e.test.ts",
+		"e2e:release:live": "pnpm build && MEMOFS_E2E_LIVE=1 vitest run --config vitest.e2e.config.ts",
 		"msw:record": "tsx src/msw/record.ts",
 		"clean": "rm -rf dist coverage .turbo"
 	},

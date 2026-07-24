@@ -10,9 +10,8 @@
  * - file-first truth tmpDir isolation (optional)
  */
 
-import { describe, expect, it } from "vitest";
-
 import { defineEmbedderContractTests } from "@memofs/testing";
+import { describe, expect, it } from "vitest";
 
 import {
 	createRealOpenAIHarness,
@@ -20,10 +19,10 @@ import {
 	createRealVoyageRerankHarness,
 	getOpenAIFixtureMeta,
 	getVoyageFixtureMeta,
-	setOpenAIErrorMode,
-	setVoyageErrorMode,
 	resetOpenAIFixture,
 	resetVoyageFixture,
+	setOpenAIErrorMode,
+	setVoyageErrorMode,
 } from "../index.js";
 
 describe("remote adapters real harness — OpenAI via MSW (ticket 64)", () => {
@@ -48,7 +47,13 @@ describe("remote adapters real harness — OpenAI via MSW (ticket 64)", () => {
 				batchSize: 2,
 			});
 			expect(batch.embeddings.map((r) => r.index)).toEqual([0, 1, 2, 3, 4]);
-			expect(batch.embeddings.map((r) => r.text)).toEqual(["alpha", "beta", "gamma", "delta", "epsilon"]);
+			expect(batch.embeddings.map((r) => r.text)).toEqual([
+				"alpha",
+				"beta",
+				"gamma",
+				"delta",
+				"epsilon",
+			]);
 			for (const rec of batch.embeddings) {
 				expect(rec.embedding).toHaveLength(384);
 			}
@@ -87,7 +92,10 @@ describe("remote adapters real harness — OpenAI via MSW (ticket 64)", () => {
 		const harness = await createRealOpenAIHarness({ dimensions: 384 });
 		try {
 			// Force MSW to return 401 with message that could leak token if not redacted
-			setOpenAIErrorMode(true, "Invalid API key: sk-*** redacted proof — real token would be test-token-*** only");
+			setOpenAIErrorMode(
+				true,
+				"Invalid API key: sk-*** redacted proof — real token would be test-token-*** only",
+			);
 
 			try {
 				await harness.embedder.embedTexts({
@@ -260,16 +268,25 @@ describe("MSW fixture layer — sanitized, RUN_ID, secret redacted (ticket 64)",
 		expect(notionRaw).toContain("test-run-e2e-0021-");
 		expect(notionRaw).toContain("test-token-***");
 
-		const openaiRaw = readFileSync(join(fixturesDir, "openai", "embed.json"), "utf8");
+		const openaiRaw = readFileSync(
+			join(fixturesDir, "openai", "embed.json"),
+			"utf8",
+		);
 		expect(openaiRaw).toContain("test-run-e2e-0021-");
 		expect(openaiRaw).toContain("test-token-***");
 		expect(openaiRaw).not.toMatch(/sk-[A-Za-z0-9_-]{20,}/);
 
-		const voyageEmbedRaw = readFileSync(join(fixturesDir, "voyage", "embed.json"), "utf8");
+		const voyageEmbedRaw = readFileSync(
+			join(fixturesDir, "voyage", "embed.json"),
+			"utf8",
+		);
 		expect(voyageEmbedRaw).toContain("test-run-e2e-0021-");
 		expect(voyageEmbedRaw).toContain("test-token-***");
 
-		const voyageRerankRaw = readFileSync(join(fixturesDir, "voyage", "rerank.json"), "utf8");
+		const voyageRerankRaw = readFileSync(
+			join(fixturesDir, "voyage", "rerank.json"),
+			"utf8",
+		);
 		expect(voyageRerankRaw).toContain("test-run-e2e-0021-");
 		expect(voyageRerankRaw).toContain("test-token-***");
 	});

@@ -11,10 +11,9 @@
  * - Cleanup removes tmpDir even on spawn failure
  */
 
-import { describe, expect, it, afterAll } from "vitest";
-
-import { createRealCoreHarness } from "../index.js";
+import { afterAll, describe, expect, it } from "vitest";
 import { createRealCliHarness } from "../harness/cli-harness.js";
+import { createRealCoreHarness } from "../index.js";
 
 describe("cli real harness — spawn, file-first truth, cross-visibility (ticket 61)", () => {
 	it("resolves built binary and spawns via child_process", async () => {
@@ -38,7 +37,9 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 			// init may say "Initialized" on first run or "already exists" if bootstrap pre-creates
 			// (both are okay as long as exit 0). File truth is what matters.
 			const out = (init.stdout + init.stderr).toLowerCase();
-			expect(out.includes("initialized") || out.includes("already exists")).toBe(true);
+			expect(
+				out.includes("initialized") || out.includes("already exists"),
+			).toBe(true);
 
 			// File-first truth
 			await cli.assertFileExists(".memofs");
@@ -50,7 +51,9 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 
 			// Snapshot captures layout
 			const snap = await cli.snapshotFs();
-			expect(Object.keys(snap).some((k) => k.includes("manifest.json"))).toBe(true);
+			expect(Object.keys(snap).some((k) => k.includes("manifest.json"))).toBe(
+				true,
+			);
 		} finally {
 			await cli.cleanup();
 		}
@@ -60,7 +63,8 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 		const cli = await createRealCliHarness();
 		try {
 			await cli.exec(["init", "--no-input"]);
-			const fact = "CLI e2e fact: Simba prefers TypeScript for memofs real proof";
+			const fact =
+				"CLI e2e fact: Simba prefers TypeScript for memofs real proof";
 
 			const remember = await cli.exec(["remember", fact, "--json"]);
 			expect(remember.exitCode).toBe(0);
@@ -69,7 +73,12 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 			expect(rememberJson).toBeTruthy();
 
 			// context --json should contain the fact (via lexical recall + core)
-			const ctx = await cli.exec(["context", "--json", "--query", "Simba TypeScript"]);
+			const ctx = await cli.exec([
+				"context",
+				"--json",
+				"--query",
+				"Simba TypeScript",
+			]);
 			expect(ctx.exitCode).toBe(0);
 			const parsed = JSON.parse(ctx.stdout);
 			// envelope shape: { command, data: { text, ... }} or similar
@@ -87,16 +96,22 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 			await cli.exec(["init", "--no-input"]);
 
 			// invalid flag
-			const invalid = await cli.exec(["remember", "test", "--invalid-flag-xyz"]);
+			const invalid = await cli.exec([
+				"remember",
+				"test",
+				"--invalid-flag-xyz",
+			]);
 			expect(invalid.exitCode).not.toBe(0);
-			expect((invalid.stderr + invalid.stdout).toLowerCase()).toContain("unknown option");
+			expect((invalid.stderr + invalid.stdout).toLowerCase()).toContain(
+				"unknown option",
+			);
 
 			// malformed --metadata-json
 			const malformed = await cli.exec([
 				"remember",
 				"test malformed metadata",
-				'--metadata-json',
-				'{not-valid-json',
+				"--metadata-json",
+				"{not-valid-json",
 			]);
 			expect(malformed.exitCode).not.toBe(0);
 			const combined = (malformed.stderr + malformed.stdout).toLowerCase();
@@ -129,7 +144,9 @@ describe("cli real harness — spawn, file-first truth, cross-visibility (ticket
 				"dup-id",
 			]);
 			expect(add2.exitCode).not.toBe(0);
-			expect((add2.stderr + add2.stdout).toLowerCase()).toContain("already exists");
+			expect((add2.stderr + add2.stdout).toLowerCase()).toContain(
+				"already exists",
+			);
 		} finally {
 			await cli.cleanup();
 		}

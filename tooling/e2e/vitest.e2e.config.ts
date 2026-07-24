@@ -21,18 +21,13 @@ export default defineConfig({
 		testTimeout: 300_000,
 		hookTimeout: 300_000,
 		pool: "forks",
-		poolOptions: {
-			forks: {
-				singleFork: true,
-			},
-		},
+		maxWorkers: 1,
+		isolate: false,
 		// Ensure single thread to avoid tmpDir race conditions
 		sequence: {
 			concurrent: false,
 		},
 		maxConcurrency: 1,
-		// Future: MSW setup. For ticket 60, placeholder that does nothing.
-		// Ticket 64 will implement `src/msw/setup.ts` with setupServer.
 		setupFiles: ["src/msw/setup.ts"],
 		// Don't run fast-path tests
 		exclude: ["tests/**/*", "node_modules/**"],
