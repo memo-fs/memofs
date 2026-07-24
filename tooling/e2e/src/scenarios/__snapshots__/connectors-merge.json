@@ -1,0 +1,34 @@
+{
+  "scenario": "connectors-merge",
+  "files": [
+    ".memofs/manifest.json",
+    ".memofs/memory-events.jsonl",
+    ".memofs/connectors.json",
+    ".memofs/memory/<id>.md",
+    ".memofs/memory/<id>.md",
+    ".memofs/memory/<id>.md",
+    ".memofs/memory/<id>.md",
+    ".memofs/memory/<id>.md"
+  ],
+  "hashes": {
+    ".memofs/manifest.json": "342:12345:{\"version",
+    ".memofs/memory-events.jsonl": "512:54321:{\"type",
+    ".memofs/connectors.json": "256:11111:{\"connectors\"",
+    ".memofs/memory/<id>.md": "256:22222:# Memory"
+  },
+  "minFileCount": 3,
+  "requiredFiles": [
+    ".memofs/manifest.json",
+    ".memofs/connectors.json"
+  ],
+  "requiredDirPrefixes": [
+    ".memofs/memory/",
+    ".memofs/"
+  ],
+  "generatedAt": "2026-07-24T00:00:00.000Z",
+  "expectations": {
+    "hasMemofsDir": true,
+    "hasManifest": true,
+    "hasMemoryFiles": true
+  }
+}

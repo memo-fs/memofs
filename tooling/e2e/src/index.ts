@@ -123,3 +123,25 @@ export {
 	resetVoyageFixture,
 	getVoyageFixtureMeta,
 } from "./msw/handlers/voyage.js";
+
+// Scenarios (ticket 65) — deterministic flows proving file-first truth, cross-visibility, golden snapshots
+export type {
+	ScenarioResult,
+	ScenarioFsSnapshot,
+	CrossVisibilityProof,
+	FileFirstTruthProof,
+	ScenarioOptions,
+} from "./scenarios/types.js";
+export type { GoldenSnapshotFile } from "./scenarios/golden-snapshots.js";
+export {
+	runLifecycleScenario,
+	runAgentFsInterleavedScenario,
+	runConnectorsMergeScenario,
+	runFailureRecoveryScenario,
+	runGoldenSnapshotsScenario,
+	assertGoldenSnapshot,
+	loadGoldenSnapshot,
+	saveGoldenSnapshot,
+	buildGoldenFromSnapshot,
+	generateGoldenSnapshots,
+} from "./scenarios/index.js";
