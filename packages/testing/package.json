@@ -68,6 +68,16 @@
 				"types": "./dist/vitest.d.cts",
 				"default": "./dist/vitest.cjs"
 			}
+		},
+		"./real": {
+			"import": {
+				"types": "./dist/real/index.d.mts",
+				"default": "./dist/real/index.mjs"
+			},
+			"require": {
+				"types": "./dist/real/index.d.cts",
+				"default": "./dist/real/index.cjs"
+			}
 		}
 	},
 	"files": [
@@ -88,6 +98,9 @@
 		"test:run": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
+		"test:e2e": "vitest run --config vitest.e2e.config.ts",
+		"test:e2e:live": "MEMOFS_E2E_LIVE=1 vitest run --config vitest.e2e.config.ts",
+		"msw:record": "tsx src/real/msw/record.ts",
 		"clean": "rm -rf dist coverage .turbo",
 		"lint:package": "publint",
 		"prepack": "pnpm build",
@@ -116,7 +129,10 @@
 		"vitest": "^4.1.5"
 	},
 	"devDependencies": {
+		"@memofs/core": "workspace:*",
 		"@repo/tsdown": "workspace:*",
-		"@repo/typescript": "workspace:*"
+		"@repo/typescript": "workspace:*",
+		"@types/node": "^25.9.2",
+		"tsx": "^4.21.0"
 	}
 }

@@ -64,6 +64,12 @@ packages/**/.tekmemo/
 # Wrangler build cache
 .wrangler/
 
+# E2E model cache (Transformers tiny model, ~100MB quantized) — local only
+.cache/
+.cache/e2e-models/
+packages/testing/.cache/
+packages/testing/.cache/e2e-models/
+
 # Internal docs - not tracked
 docs/adr/
 docs/architecture/
