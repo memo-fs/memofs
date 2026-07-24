@@ -13,13 +13,13 @@
  * @public
  */
 
-import { createRealCliHarness } from "../harness/cli-harness.js";
-import { createRealCoreHarness } from "../harness/core-harness.js";
+import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
 import {
 	buildFsSnapshot,
 	type ScenarioOptions,
 	type ScenarioResult,
-} from "./types.js";
+} from "./types";
 
 const TWENTY_FACTS = [
 	"Simba prefers TypeScript for MemoFS e2e proof — RUN_ID test-run-e2e-0021-lifecycle-01",
@@ -51,7 +51,9 @@ const TWENTY_FACTS = [
  * @returns scenario result
  * @public
  */
-export async function runLifecycleScenario(options: ScenarioOptions = {}): Promise<ScenarioResult> {
+export async function runLifecycleScenario(
+	options: ScenarioOptions = {},
+): Promise<ScenarioResult> {
 	const projectId = options.projectId ?? `e2e-lifecycle-${Date.now()}`;
 	const prefix = options.prefix ?? "memofs-e2e-lifecycle-";
 
@@ -62,17 +64,23 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 		env: { MEMOFS_PROJECT_ID: projectId },
 	});
 
-	let tmpDir = cli.tmpDir;
+	const tmpDir = cli.tmpDir;
 	let passed = true;
 	const details: Record<string, unknown> = {};
 
 	try {
 		// Step 1: CLI init --no-input → creates .memofs/
-		const init = await cli.exec(["init", "--no-input", "--project-id", projectId]);
+		const init = await cli.exec([
+			"init",
+			"--no-input",
+			"--project-id",
+			projectId,
+		]);
 		if (init.exitCode !== 0) {
-			throw new Error(`CLI init failed: exit ${init.exitCode} stdout=${init.stdout.slice(0, 500)} stderr=${init.stderr.slice(0, 500)}`);
+			throw new Error(
+				`CLI init failed: exit ${init.exitCode} stdout=${init.stdout.slice(0, 500)} stderr=${init.stderr.slice(0, 500)}`,
+			);
 		}
-		tmpDir = cli.tmpDir;
 
 		// Verify manifest exists after init
 		await cli.assertFileExists(".memofs/manifest.json");
@@ -93,14 +101,21 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 			}
 
 			// Step 3: Search paraphrase — find TypeScript preferences via lexical recall
-			const searchResults = await core.search("TypeScript preferences e2e proof");
+			const searchResults = await core.search(
+				"TypeScript preferences e2e proof",
+			);
 			details.searchResultsCount = searchResults.length;
 			if (searchResults.length === 0) {
-				throw new Error("search paraphrase returned 0 results, expected >0 for TypeScript lifecycle");
+				throw new Error(
+					"search paraphrase returned 0 results, expected >0 for TypeScript lifecycle",
+				);
 			}
 
 			// Step 4: Context --json via core client (paraphrase)
-			const contextResult = await core.context({ query: "Simba TypeScript preferences", limit: 10 });
+			const contextResult = await core.context({
+				query: "Simba TypeScript preferences",
+				limit: 10,
+			});
 			details.contextResult = {
 				hasContext: Boolean(contextResult.text),
 				sections: contextResult.sections?.length ?? 0,
@@ -108,15 +123,26 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 			};
 
 			// Also via CLI context --json for cross-visibility
-			const cliContext = await cli.exec(["context", "--query", "TypeScript CLI", "--json"]);
+			const cliContext = await cli.exec([
+				"context",
+				"--query",
+				"TypeScript CLI",
+				"--json",
+			]);
 			if (cliContext.exitCode !== 0) {
 				// context may exit 0 even if no results; we only assert JSON parseable when exit 0
 				details.cliContextExitCode = cliContext.exitCode;
 			} else {
 				try {
-					const parsed = JSON.parse(cliContext.stdout) as { text?: string; sections?: unknown[]; items?: unknown[] };
+					const parsed = JSON.parse(cliContext.stdout) as {
+						text?: string;
+						sections?: unknown[];
+						items?: unknown[];
+					};
 					details.cliContextParsed = true;
-					details.cliContextHasContent = Boolean(parsed.text || parsed.sections || parsed.items);
+					details.cliContextHasContent = Boolean(
+						parsed.text || parsed.sections || parsed.items,
+					);
 				} catch {
 					details.cliContextParsed = false;
 				}
@@ -134,13 +160,17 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 			};
 
 			if (preview.applied !== false) {
-				throw new Error(`consolidate preview should have applied=false, got ${preview.applied}`);
+				throw new Error(
+					`consolidate preview should have applied=false, got ${preview.applied}`,
+				);
 			}
 			if (preview.mergesApplied !== 0 || preview.retirementsApplied !== 0) {
 				// preview should not have applied counts
 				// allow mergesApplied 0, retirementsApplied 0
 				if (preview.mergesApplied !== 0) {
-					throw new Error(`preview mergesApplied should be 0, got ${preview.mergesApplied}`);
+					throw new Error(
+						`preview mergesApplied should be 0, got ${preview.mergesApplied}`,
+					);
 				}
 			}
 
@@ -159,7 +189,9 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 			const searchAfterReal = await core.search("TypeScript");
 			details.searchAfterCount = searchAfterReal.length;
 			if (searchAfterReal.length === 0) {
-				throw new Error("no data loss check failed: search after consolidate returned 0");
+				throw new Error(
+					"no data loss check failed: search after consolidate returned 0",
+				);
 			}
 
 			// File-first truth asserts
@@ -168,16 +200,26 @@ export async function runLifecycleScenario(options: ScenarioOptions = {}): Promi
 
 			const hasMemofsDir = files.some((f) => f.startsWith(".memofs/"));
 			const hasManifest = files.some((f) => f.includes("manifest.json"));
-			const hasEvents = files.some((f) => f.includes("memory-events.jsonl") || f.includes("memory-events"));
-			const hasMemoryFiles = files.some((f) => f.includes("memory") && (f.endsWith(".md") || f.includes("chunks")));
+			const hasEvents = files.some(
+				(f) => f.includes("memory-events.jsonl") || f.includes("memory-events"),
+			);
+			const hasMemoryFiles = files.some(
+				(f) =>
+					f.includes("memory") && (f.endsWith(".md") || f.includes("chunks")),
+			);
 			const fileCountGreaterThanZero = files.length > 0;
 
-			if (!hasMemofsDir) throw new Error(".memofs/ dir missing after lifecycle");
-			if (!hasManifest) throw new Error("manifest.json missing after lifecycle");
-			if (!hasMemoryFiles) throw new Error("memory files missing after lifecycle");
+			if (!hasMemofsDir)
+				throw new Error(".memofs/ dir missing after lifecycle");
+			if (!hasManifest)
+				throw new Error("manifest.json missing after lifecycle");
+			if (!hasMemoryFiles)
+				throw new Error("memory files missing after lifecycle");
 
 			// File count assertion: at least 20 memory files or events (may be coalesced)
-			const memoryFileCount = files.filter((f) => f.includes(".memofs/memory") || f.includes("memory")).length;
+			const memoryFileCount = files.filter(
+				(f) => f.includes(".memofs/memory") || f.includes("memory"),
+			).length;
 			details.memoryFileCount = memoryFileCount;
 			details.fileCount = files.length;
 

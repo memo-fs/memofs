@@ -4,5 +4,5 @@
  * @public
  */
 
-export { runSeededLoopScenario, type SeededLoopStats } from "./seeded-loop.js";
-export { runOrchestratorScenario } from "./orchestrator.js";
+export { runOrchestratorScenario } from "./orchestrator";
+export { runSeededLoopScenario, type SeededLoopStats } from "./seeded-loop";

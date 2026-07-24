@@ -1,28 +1,23 @@
 {
-  "scenario": "golden-snapshots",
-  "files": [
-    ".memofs/manifest.json",
-    ".memofs/memory-events.jsonl",
-    ".memofs/memory/<id>.md",
-    ".memofs/memory/<id>.md"
-  ],
-  "hashes": {
-    ".memofs/manifest.json": "342:12345:{\"version",
-    ".memofs/memory-events.jsonl": "256:54321:{\"type",
-    ".memofs/memory/<id>.md": "128:11111:# Memory"
-  },
-  "minFileCount": 2,
-  "requiredFiles": [
-    ".memofs/manifest.json"
-  ],
-  "requiredDirPrefixes": [
-    ".memofs/memory/",
-    ".memofs/"
-  ],
-  "generatedAt": "2026-07-24T00:00:00.000Z",
-  "expectations": {
-    "hasMemofsDir": true,
-    "hasManifest": true,
-    "hasMemoryFiles": true
-  }
+	"scenario": "golden-snapshots",
+	"files": [
+		".memofs/manifest.json",
+		".memofs/memory-events.jsonl",
+		".memofs/memory/<id>.md",
+		".memofs/memory/<id>.md"
+	],
+	"hashes": {
+		".memofs/manifest.json": "342:12345:{\"version",
+		".memofs/memory-events.jsonl": "256:54321:{\"type",
+		".memofs/memory/<id>.md": "128:11111:# Memory"
+	},
+	"minFileCount": 2,
+	"requiredFiles": [".memofs/manifest.json"],
+	"requiredDirPrefixes": [".memofs/memory/", ".memofs/"],
+	"generatedAt": "2026-07-24T00:00:00.000Z",
+	"expectations": {
+		"hasMemofsDir": true,
+		"hasManifest": true,
+		"hasMemoryFiles": true
+	}
 }

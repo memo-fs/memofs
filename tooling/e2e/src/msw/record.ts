@@ -11,7 +11,7 @@
  * Usage: `pnpm --filter @repo/e2e msw:record` or `tsx src/msw/record.ts`
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,7 +41,10 @@ function loadDotEnv(): void {
 					if (eq === -1) continue;
 					const key = trimmed.slice(0, eq).trim();
 					let val = trimmed.slice(eq + 1).trim();
-					if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+					if (
+						(val.startsWith('"') && val.endsWith('"')) ||
+						(val.startsWith("'") && val.endsWith("'"))
+					) {
 						val = val.slice(1, -1);
 					}
 					if (process.env[key] === undefined) {
@@ -110,7 +113,8 @@ function deepSanitize<T>(value: T): T {
 function genEmbedding(dim: number, seed: number): number[] {
 	const arr: number[] = new Array(dim);
 	for (let i = 0; i < dim; i++) {
-		const v = Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
+		const v =
+			Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
 		arr[i] = Math.round(v * 1e6) / 1e6;
 	}
 	return arr;
@@ -122,17 +126,23 @@ function genEmbedding(dim: number, seed: number): number[] {
 async function recordGitHub(): Promise<void> {
 	const token = process.env.GITHUB_TOKEN;
 	if (!token) {
-		logRedacted("[msw:record] GITHUB_TOKEN not set — skipping GitHub live recording, keeping deterministic fixture");
+		logRedacted(
+			"[msw:record] GITHUB_TOKEN not set — skipping GitHub live recording, keeping deterministic fixture",
+		);
 		return;
 	}
 	const repo = process.env.GITHUB_REPO ?? "example/repo";
 	const [owner, name] = repo.split("/");
 	if (!owner || !name) {
-		logRedacted(`[msw:record] GITHUB_REPO invalid: ${repo} — expected owner/name`);
+		logRedacted(
+			`[msw:record] GITHUB_REPO invalid: ${repo} — expected owner/name`,
+		);
 		return;
 	}
 
-	logRedacted(`[msw:record] Recording GitHub fixture for ${owner}/${name} with RUN_ID ${RUN_ID} (token redacted)`);
+	logRedacted(
+		`[msw:record] Recording GitHub fixture for ${owner}/${name} with RUN_ID ${RUN_ID} (token redacted)`,
+	);
 
 	const query = `
 		query($owner: String!, $name: String!, $first: Int!) {
@@ -163,7 +173,9 @@ async function recordGitHub(): Promise<void> {
 			body: JSON.stringify({ query, variables: { owner, name, first: 2 } }),
 		});
 		if (!resp.ok) {
-			logRedacted(`[msw:record] GitHub API failed: ${resp.status} ${resp.statusText} — keeping existing fixture`);
+			logRedacted(
+				`[msw:record] GitHub API failed: ${resp.status} ${resp.statusText} — keeping existing fixture`,
+			);
 			return;
 		}
 		const data = (await resp.json()) as unknown;
@@ -177,10 +189,17 @@ async function recordGitHub(): Promise<void> {
 			payload: sanitized,
 		};
 
-		writeFileSync(join(fixturesDir, "github.json"), JSON.stringify(fixture, null, 2));
-		logRedacted(`[msw:record] Wrote ${join(fixturesDir, "github.json")} with RUN_ID ${RUN_ID}`);
+		writeFileSync(
+			join(fixturesDir, "github.json"),
+			JSON.stringify(fixture, null, 2),
+		);
+		logRedacted(
+			`[msw:record] Wrote ${join(fixturesDir, "github.json")} with RUN_ID ${RUN_ID}`,
+		);
 	} catch (e) {
-		logRedacted(`[msw:record] GitHub recording error: ${(e as Error).message} — redacted, keeping fixture`);
+		logRedacted(
+			`[msw:record] GitHub recording error: ${(e as Error).message} — redacted, keeping fixture`,
+		);
 	}
 }
 
@@ -190,7 +209,9 @@ async function recordGitHub(): Promise<void> {
 async function recordNotion(): Promise<void> {
 	const token = process.env.NOTION_TOKEN;
 	if (!token) {
-		logRedacted("[msw:record] NOTION_TOKEN not set — skipping Notion live recording");
+		logRedacted(
+			"[msw:record] NOTION_TOKEN not set — skipping Notion live recording",
+		);
 		return;
 	}
 	const databaseId = process.env.NOTION_DATABASE_ID;
@@ -200,7 +221,9 @@ async function recordNotion(): Promise<void> {
 		? `https://api.notion.com/v1/databases/${databaseId}/query`
 		: "https://api.notion.com/v1/search";
 
-	logRedacted(`[msw:record] Recording Notion fixture from ${url} RUN_ID ${RUN_ID}`);
+	logRedacted(
+		`[msw:record] Recording Notion fixture from ${url} RUN_ID ${RUN_ID}`,
+	);
 
 	try {
 		const resp = await fetch(url, {
@@ -211,11 +234,19 @@ async function recordNotion(): Promise<void> {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(
-				databaseId ? { page_size: 2 } : { query: searchQuery, page_size: 2, filter: { value: "page", property: "object" } },
+				databaseId
+					? { page_size: 2 }
+					: {
+							query: searchQuery,
+							page_size: 2,
+							filter: { value: "page", property: "object" },
+						},
 			),
 		});
 		if (!resp.ok) {
-			logRedacted(`[msw:record] Notion API failed: ${resp.status} — keeping fixture`);
+			logRedacted(
+				`[msw:record] Notion API failed: ${resp.status} — keeping fixture`,
+			);
 			return;
 		}
 		const data = (await resp.json()) as unknown;
@@ -228,7 +259,10 @@ async function recordNotion(): Promise<void> {
 			secretRedacted: REDACTED,
 			payload: sanitized,
 		};
-		writeFileSync(join(fixturesDir, "notion.json"), JSON.stringify(fixture, null, 2));
+		writeFileSync(
+			join(fixturesDir, "notion.json"),
+			JSON.stringify(fixture, null, 2),
+		);
 		logRedacted(`[msw:record] Wrote ${join(fixturesDir, "notion.json")}`);
 	} catch (e) {
 		logRedacted(`[msw:record] Notion recording error: ${(e as Error).message}`);
@@ -241,7 +275,9 @@ async function recordNotion(): Promise<void> {
 async function recordOpenAI(): Promise<void> {
 	const apiKey = process.env.OPENAI_API_KEY;
 	if (!apiKey) {
-		logRedacted("[msw:record] OPENAI_API_KEY not set — skipping OpenAI live recording");
+		logRedacted(
+			"[msw:record] OPENAI_API_KEY not set — skipping OpenAI live recording",
+		);
 		return;
 	}
 
@@ -262,10 +298,15 @@ async function recordOpenAI(): Promise<void> {
 			}),
 		});
 		if (!resp.ok) {
-			logRedacted(`[msw:record] OpenAI API failed: ${resp.status} — keeping fixture`);
+			logRedacted(
+				`[msw:record] OpenAI API failed: ${resp.status} — keeping fixture`,
+			);
 			return;
 		}
-		const data = (await resp.json()) as { data: { embedding: number[]; index: number }[]; model: string };
+		const data = (await resp.json()) as {
+			data: { embedding: number[]; index: number }[];
+			model: string;
+		};
 		const sanitized = deepSanitize(data);
 
 		const fixture = {
@@ -275,7 +316,10 @@ async function recordOpenAI(): Promise<void> {
 			secretRedacted: REDACTED,
 			payload: sanitized,
 		};
-		writeFileSync(join(openaiDir, "embed.json"), JSON.stringify(fixture, null, 2));
+		writeFileSync(
+			join(openaiDir, "embed.json"),
+			JSON.stringify(fixture, null, 2),
+		);
 		logRedacted(`[msw:record] Wrote ${join(openaiDir, "embed.json")}`);
 	} catch (e) {
 		logRedacted(`[msw:record] OpenAI error: ${(e as Error).message}`);
@@ -288,7 +332,9 @@ async function recordOpenAI(): Promise<void> {
 async function recordVoyage(): Promise<void> {
 	const apiKey = process.env.VOYAGE_API_KEY;
 	if (!apiKey) {
-		logRedacted("[msw:record] VOYAGE_API_KEY not set — skipping Voyage live recording");
+		logRedacted(
+			"[msw:record] VOYAGE_API_KEY not set — skipping Voyage live recording",
+		);
 		return;
 	}
 
@@ -317,7 +363,10 @@ async function recordVoyage(): Promise<void> {
 				secretRedacted: REDACTED,
 				payload: sanitized,
 			};
-			writeFileSync(join(voyageDir, "embed.json"), JSON.stringify(fixture, null, 2));
+			writeFileSync(
+				join(voyageDir, "embed.json"),
+				JSON.stringify(fixture, null, 2),
+			);
 			logRedacted(`[msw:record] Wrote ${join(voyageDir, "embed.json")}`);
 		} else {
 			logRedacted(`[msw:record] Voyage embed failed: ${embedResp.status}`);
@@ -346,7 +395,10 @@ async function recordVoyage(): Promise<void> {
 				secretRedacted: REDACTED,
 				payload: sanitized,
 			};
-			writeFileSync(join(voyageDir, "rerank.json"), JSON.stringify(fixture, null, 2));
+			writeFileSync(
+				join(voyageDir, "rerank.json"),
+				JSON.stringify(fixture, null, 2),
+			);
 			logRedacted(`[msw:record] Wrote ${join(voyageDir, "rerank.json")}`);
 		} else {
 			logRedacted(`[msw:record] Voyage rerank failed: ${rerankResp.status}`);
@@ -384,13 +436,22 @@ function ensureDeterministicFixtures(): void {
 								},
 							],
 						},
-						pullRequests: { pageInfo: { hasNextPage: false, endCursor: null }, nodes: [] },
-						discussions: { pageInfo: { hasNextPage: false, endCursor: null }, nodes: [] },
+						pullRequests: {
+							pageInfo: { hasNextPage: false, endCursor: null },
+							nodes: [],
+						},
+						discussions: {
+							pageInfo: { hasNextPage: false, endCursor: null },
+							nodes: [],
+						},
 					},
 				},
 			},
 		};
-		writeFileSync(join(fixturesDir, "github.json"), JSON.stringify(fixture, null, 2));
+		writeFileSync(
+			join(fixturesDir, "github.json"),
+			JSON.stringify(fixture, null, 2),
+		);
 	}
 	if (!existsSync(join(fixturesDir, "notion.json"))) {
 		writeFileSync(
@@ -412,7 +473,15 @@ function ensureDeterministicFixtures(): void {
 								last_edited_time: "2024-01-02T00:00:00.000Z",
 								created_by: { id: "user-1" },
 								properties: {
-									Name: { type: "title", title: [{ plain_text: "Test Notion Page [RUN_ID test-run-e2e-0021-002]" }] },
+									Name: {
+										type: "title",
+										title: [
+											{
+												plain_text:
+													"Test Notion Page [RUN_ID test-run-e2e-0021-002]",
+											},
+										],
+									},
 								},
 							},
 						],
@@ -437,8 +506,16 @@ function ensureDeterministicFixtures(): void {
 					payload: {
 						object: "list",
 						data: [
-							{ object: "embedding", embedding: genEmbedding(384, 1), index: 0 },
-							{ object: "embedding", embedding: genEmbedding(384, 2), index: 1 },
+							{
+								object: "embedding",
+								embedding: genEmbedding(384, 1),
+								index: 0,
+							},
+							{
+								object: "embedding",
+								embedding: genEmbedding(384, 2),
+								index: 1,
+							},
 						],
 						model: "text-embedding-3-small",
 						usage: { prompt_tokens: 12, total_tokens: 12 },
@@ -461,8 +538,16 @@ function ensureDeterministicFixtures(): void {
 					payload: {
 						object: "list",
 						data: [
-							{ object: "embedding", embedding: genEmbedding(384, 10), index: 0 },
-							{ object: "embedding", embedding: genEmbedding(384, 11), index: 1 },
+							{
+								object: "embedding",
+								embedding: genEmbedding(384, 10),
+								index: 0,
+							},
+							{
+								object: "embedding",
+								embedding: genEmbedding(384, 11),
+								index: 1,
+							},
 						],
 						model: "voyage-4-lite",
 						usage: { total_tokens: 12 },
@@ -485,7 +570,11 @@ function ensureDeterministicFixtures(): void {
 					payload: {
 						object: "list",
 						data: [
-							{ index: 0, relevance_score: 0.9, document: "Doc A [RUN_ID test-run-e2e-0021-005]" },
+							{
+								index: 0,
+								relevance_score: 0.9,
+								document: "Doc A [RUN_ID test-run-e2e-0021-005]",
+							},
 							{ index: 1, relevance_score: 0.5, document: "Doc B" },
 						],
 						model: "rerank-2",
@@ -506,22 +595,35 @@ async function main(): Promise<void> {
 	ensureDirs();
 	ensureDeterministicFixtures();
 
-	const hasAnyKey = !!(process.env.GITHUB_TOKEN || process.env.NOTION_TOKEN || process.env.OPENAI_API_KEY || process.env.VOYAGE_API_KEY);
+	const hasAnyKey = !!(
+		process.env.GITHUB_TOKEN ||
+		process.env.NOTION_TOKEN ||
+		process.env.OPENAI_API_KEY ||
+		process.env.VOYAGE_API_KEY
+	);
 
 	if (!hasAnyKey) {
-		logRedacted("[msw:record] No live keys set — deterministic fixtures already exist, no action needed");
-		logRedacted("[msw:record] Set GITHUB_TOKEN, NOTION_TOKEN, OPENAI_API_KEY, VOYAGE_API_KEY to refresh fixtures live (secrets redacted to test-token-***)");
+		logRedacted(
+			"[msw:record] No live keys set — deterministic fixtures already exist, no action needed",
+		);
+		logRedacted(
+			"[msw:record] Set GITHUB_TOKEN, NOTION_TOKEN, OPENAI_API_KEY, VOYAGE_API_KEY to refresh fixtures live (secrets redacted to test-token-***)",
+		);
 		return;
 	}
 
-	logRedacted(`[msw:record] Starting live recording with RUN_ID ${RUN_ID} — tokens redacted`);
+	logRedacted(
+		`[msw:record] Starting live recording with RUN_ID ${RUN_ID} — tokens redacted`,
+	);
 
 	await recordGitHub();
 	await recordNotion();
 	await recordOpenAI();
 	await recordVoyage();
 
-	logRedacted("[msw:record] Done — all fixtures sanitized, secret redacted to test-token-***, no secret in logs");
+	logRedacted(
+		"[msw:record] Done — all fixtures sanitized, secret redacted to test-token-***, no secret in logs",
+	);
 }
 
 await main();

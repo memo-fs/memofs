@@ -9,7 +9,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const fixturePath = join(__dirname, "..", "fixtures", "openai", "embed.json");
@@ -41,7 +41,8 @@ const original = loadOriginal();
 function generateEmbedding(dim: number, seed: number): number[] {
 	const out: number[] = new Array(dim);
 	for (let i = 0; i < dim; i++) {
-		const v = Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
+		const v =
+			Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
 		out[i] = Math.round(v * 1e6) / 1e6;
 	}
 	return out;
@@ -51,7 +52,11 @@ function generateEmbedding(dim: number, seed: number): number[] {
  * Get OpenAI fixture meta (RUN_ID, redacted).
  * @returns meta or null if fixture missing.
  */
-export function getOpenAIFixtureMeta(): { runId: string; secretRedacted: string; sanitized: boolean } | null {
+export function getOpenAIFixtureMeta(): {
+	runId: string;
+	secretRedacted: string;
+	sanitized: boolean;
+} | null {
 	if (!original) return null;
 	return {
 		runId: original.runId,
@@ -73,7 +78,10 @@ let forceErrorMessage = "Invalid API key (redacted)";
  * @param enabled - Whether to force error.
  * @param message - Redacted error message.
  */
-export function setOpenAIErrorMode(enabled: boolean, message = "Invalid API key (redacted)"): void {
+export function setOpenAIErrorMode(
+	enabled: boolean,
+	message = "Invalid API key (redacted)",
+): void {
 	forceError = enabled;
 	forceErrorMessage = message;
 }
@@ -108,7 +116,12 @@ export const openaiHandlers = [
 			// but if present we redact and don't log.
 		}
 
-		let body: { input?: string | string[]; model?: string; dimensions?: number; encoding_format?: string } = {};
+		let body: {
+			input?: string | string[];
+			model?: string;
+			dimensions?: number;
+			encoding_format?: string;
+		} = {};
 		try {
 			body = (await request.clone().json()) as typeof body;
 		} catch {
@@ -122,7 +135,8 @@ export const openaiHandlers = [
 				: [];
 
 		// Determine dimension — respect requested dimensions, default 384 for e2e fixture proof
-		const requestedDim = typeof body.dimensions === "number" ? body.dimensions : 384;
+		const requestedDim =
+			typeof body.dimensions === "number" ? body.dimensions : 384;
 
 		// If fixture exists and inputs length matches cached data, reuse to keep file truth proof,
 		// otherwise generate deterministic.
@@ -184,7 +198,11 @@ export const openaiHandlers = [
 				{ status: 401 },
 			);
 		}
-		let body: { input?: string | string[]; model?: string; dimensions?: number } = {};
+		let body: {
+			input?: string | string[];
+			model?: string;
+			dimensions?: number;
+		} = {};
 		try {
 			body = (await request.clone().json()) as typeof body;
 		} catch {}
@@ -193,7 +211,8 @@ export const openaiHandlers = [
 			: typeof body.input === "string"
 				? [body.input]
 				: [];
-		const requestedDim = typeof body.dimensions === "number" ? body.dimensions : 384;
+		const requestedDim =
+			typeof body.dimensions === "number" ? body.dimensions : 384;
 		let data: { object: string; embedding: number[]; index: number }[];
 		if (
 			original &&
@@ -237,7 +256,9 @@ export const openaiHandlers = [
 		// If already handled by exact above, this is fallback for custom baseUrl.
 		// Check if request has OpenAI-style auth to avoid colliding with Voyage (which also uses /v1/embeddings)
 		const auth = request.headers.get("authorization") ?? "";
-		const isOpenAI = auth.toLowerCase().includes("bearer") && !request.url.includes("voyageai.com");
+		const isOpenAI =
+			auth.toLowerCase().includes("bearer") &&
+			!request.url.includes("voyageai.com");
 		// We can't reliably distinguish, so only handle if not voyage url and url not already matched.
 		// If it's voyage, let voyage handler handle.
 		if (request.url.includes("voyageai.com")) {
@@ -262,7 +283,11 @@ export const openaiHandlers = [
 			);
 		}
 
-		let body: { input?: string | string[]; model?: string; dimensions?: number } = {};
+		let body: {
+			input?: string | string[];
+			model?: string;
+			dimensions?: number;
+		} = {};
 		try {
 			body = (await request.clone().json()) as typeof body;
 		} catch {}
@@ -273,7 +298,8 @@ export const openaiHandlers = [
 				? [body.input]
 				: [];
 
-		const requestedDim = typeof body.dimensions === "number" ? body.dimensions : 384;
+		const requestedDim =
+			typeof body.dimensions === "number" ? body.dimensions : 384;
 
 		const data = inputs.map((_, i) => ({
 			object: "embedding",
@@ -294,7 +320,10 @@ export const openaiHandlers = [
 			object: "list",
 			data,
 			model: body.model ?? "text-embedding-3-small",
-			usage: { prompt_tokens: inputs.length * 6, total_tokens: inputs.length * 6 },
+			usage: {
+				prompt_tokens: inputs.length * 6,
+				total_tokens: inputs.length * 6,
+			},
 		});
 	}),
 ];

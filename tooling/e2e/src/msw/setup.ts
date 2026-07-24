@@ -11,7 +11,7 @@
 
 import { afterAll, afterEach, beforeAll } from "vitest";
 
-import { mswServer } from "./server.js";
+import { mswServer } from "./server";
 
 beforeAll(() => {
 	mswServer.listen({
@@ -24,10 +24,10 @@ afterEach(async () => {
 	// Reset mutable fixture overrides so each test starts clean
 	try {
 		const [github, notion, openai, voyage] = await Promise.all([
-			import("./handlers/github.js"),
-			import("./handlers/notion.js"),
-			import("./handlers/openai.js"),
-			import("./handlers/voyage.js"),
+			import("./handlers/github"),
+			import("./handlers/notion"),
+			import("./handlers/openai"),
+			import("./handlers/voyage"),
 		]);
 		github.resetGitHubFixture();
 		notion.resetNotionFixture();

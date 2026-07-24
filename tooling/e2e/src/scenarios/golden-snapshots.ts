@@ -16,20 +16,22 @@
  * @public
  */
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { buildFsSnapshot, type ScenarioOptions, type ScenarioResult } from "./types.js";
-import type { ScenarioFsSnapshot } from "./types.js";
-
+import { createRealCoreHarness as _createCoreForGolden } from "../harness/core-harness";
+import { runAgentFsInterleavedScenario as _runAgentFsForGenerate } from "./agentfs-interleaved";
+import { runConnectorsMergeScenario as _runConnectorsForGenerate } from "./connectors-merge";
+import { runFailureRecoveryScenario as _runFailureForGenerate } from "./failure-recovery";
 // Static imports for generate helper (manual refresh) — avoids ineffective dynamic import warnings
 // These are not used in runGoldenSnapshotsScenario itself, only in generate
-import { runLifecycleScenario as _runLifecycleForGenerate } from "./lifecycle.js";
-import { runAgentFsInterleavedScenario as _runAgentFsForGenerate } from "./agentfs-interleaved.js";
-import { runConnectorsMergeScenario as _runConnectorsForGenerate } from "./connectors-merge.js";
-import { runFailureRecoveryScenario as _runFailureForGenerate } from "./failure-recovery.js";
-import { createRealCoreHarness as _createCoreForGolden } from "../harness/core-harness.js";
+import { runLifecycleScenario as _runLifecycleForGenerate } from "./lifecycle";
+import type { ScenarioFsSnapshot } from "./types";
+import {
+	buildFsSnapshot,
+	type ScenarioOptions,
+	type ScenarioResult,
+} from "./types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -68,7 +70,9 @@ export type GoldenSnapshotFile = {
  * @returns golden snapshot or null
  * @public
  */
-export async function loadGoldenSnapshot(scenarioName: string): Promise<GoldenSnapshotFile | null> {
+export async function loadGoldenSnapshot(
+	scenarioName: string,
+): Promise<GoldenSnapshotFile | null> {
 	const path = join(SNAPSHOTS_DIR, `${scenarioName}.json`);
 	try {
 		const raw = await readFile(path, "utf8");
@@ -83,10 +87,12 @@ export async function loadGoldenSnapshot(scenarioName: string): Promise<GoldenSn
  * @param golden - golden snapshot
  * @public
  */
-export async function saveGoldenSnapshot(golden: GoldenSnapshotFile): Promise<void> {
+export async function saveGoldenSnapshot(
+	golden: GoldenSnapshotFile,
+): Promise<void> {
 	await mkdir(SNAPSHOTS_DIR, { recursive: true });
 	const path = join(SNAPSHOTS_DIR, `${golden.scenario}.json`);
-	await writeFile(path, JSON.stringify(golden, null, 2) + "\n", "utf8");
+	await writeFile(path, `${JSON.stringify(golden, null, 2)}\n`, "utf8");
 }
 
 /**
@@ -96,14 +102,19 @@ export async function saveGoldenSnapshot(golden: GoldenSnapshotFile): Promise<vo
  * @returns golden file
  * @public
  */
-export function buildGoldenFromSnapshot(scenarioName: string, snapshot: ScenarioFsSnapshot): GoldenSnapshotFile {
+export function buildGoldenFromSnapshot(
+	scenarioName: string,
+	snapshot: ScenarioFsSnapshot,
+): GoldenSnapshotFile {
 	const requiredFiles = [".memofs/manifest.json"];
 	const requiredDirPrefixes = [".memofs/memory/", ".memofs/"];
 
 	// Determine expectations from actual
 	const hasMemofsDir = snapshot.files.some((f) => f.startsWith(".memofs/"));
 	const hasManifest = snapshot.files.some((f) => f.includes("manifest.json"));
-	const hasMemoryFiles = snapshot.files.some((f) => f.includes(".memofs/memory") || f.includes("memory/"));
+	const hasMemoryFiles = snapshot.files.some(
+		(f) => f.includes(".memofs/memory") || f.includes("memory/"),
+	);
 
 	// For file list, we normalize dynamic UUIDs in file names to <id> placeholder for stability
 	// e.g. ".memofs/memory/abc-123-def.md" => ".memofs/memory/<id>.md"
@@ -112,7 +123,10 @@ export function buildGoldenFromSnapshot(scenarioName: string, snapshot: Scenario
 		.map((f) => {
 			// Replace hex-like id segments with <id>
 			return f
-				.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
+				.replace(
+					/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
+					"<id>",
+				)
 				.replace(/\b[a-z0-9]{20,}\b/g, (m) => (m.length > 20 ? "<id>" : m));
 		})
 		.sort();
@@ -121,7 +135,10 @@ export function buildGoldenFromSnapshot(scenarioName: string, snapshot: Scenario
 	const normalizedHashes: Record<string, string> = {};
 	for (const [origFile, hash] of Object.entries(snapshot.hashes)) {
 		const norm = origFile
-			.replace(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g, "<id>")
+			.replace(
+				/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
+				"<id>",
+			)
 			.replace(/\b[a-z0-9]{20,}\b/g, (m) => (m.length > 20 ? "<id>" : m));
 		if (!(norm in normalizedHashes)) {
 			normalizedHashes[norm] = hash;
@@ -154,29 +171,47 @@ export function buildGoldenFromSnapshot(scenarioName: string, snapshot: Scenario
 export async function assertGoldenSnapshot(
 	scenarioName: string,
 	actual: ScenarioFsSnapshot,
-): Promise<{ passed: boolean; mismatches: string[]; goldenExists: boolean; golden: GoldenSnapshotFile | null }> {
+): Promise<{
+	passed: boolean;
+	mismatches: string[];
+	goldenExists: boolean;
+	golden: GoldenSnapshotFile | null;
+}> {
 	const golden = await loadGoldenSnapshot(scenarioName);
 	const mismatches: string[] = [];
 
 	if (!golden) {
-		return { passed: true, mismatches: [`golden snapshot missing for ${scenarioName} — will be generated`], goldenExists: false, golden: null };
+		return {
+			passed: true,
+			mismatches: [
+				`golden snapshot missing for ${scenarioName} — will be generated`,
+			],
+			goldenExists: false,
+			golden: null,
+		};
 	}
 
 	// Check file count >= min
 	if (actual.fileCount < golden.minFileCount) {
-		mismatches.push(`fileCount ${actual.fileCount} < min ${golden.minFileCount}`);
+		mismatches.push(
+			`fileCount ${actual.fileCount} < min ${golden.minFileCount}`,
+		);
 	}
 
 	// Required files must exist (check actual files include required or prefix match)
 	for (const req of golden.requiredFiles) {
-		const found = actual.files.some((f) => f === req || f.endsWith(req) || f.includes(req));
+		const found = actual.files.some(
+			(f) => f === req || f.endsWith(req) || f.includes(req),
+		);
 		if (!found) {
 			mismatches.push(`required file missing: ${req}`);
 		}
 	}
 
 	for (const prefix of golden.requiredDirPrefixes) {
-		const found = actual.files.some((f) => f.startsWith(prefix) || f.includes(prefix));
+		const found = actual.files.some(
+			(f) => f.startsWith(prefix) || f.includes(prefix),
+		);
 		if (!found) {
 			mismatches.push(`required dir prefix missing: ${prefix}`);
 		}
@@ -209,7 +244,10 @@ export async function assertGoldenSnapshot(
 	});
 	if (unexpectedFiles.length > 0) {
 		// Allow unexpected for specific scenarios that intentionally create temp files, or treat as warning
-		if (scenarioName === "failure-recovery" || scenarioName === "agentfs-interleaved") {
+		if (
+			scenarioName === "failure-recovery" ||
+			scenarioName === "agentfs-interleaved"
+		) {
 			// For these scenarios, unexpected outside check is relaxed — they may create temp or output files
 			// We only warn if file leaks outside tmpDir parent (which we check elsewhere)
 			// So we don't push mismatch for agent-sessions, which is actually allowed
@@ -217,17 +255,25 @@ export async function assertGoldenSnapshot(
 			// For failure-recovery we allow partial .tmp files
 			if (scenarioName === "failure-recovery") {
 				// remove if all unexpected are .tmp or similar
-				const trulyUnexpected = unexpectedFiles.filter((f) => !f.endsWith(".tmp"));
+				const trulyUnexpected = unexpectedFiles.filter(
+					(f) => !f.endsWith(".tmp"),
+				);
 				if (trulyUnexpected.length > 0) {
-					mismatches.push(`unexpected files outside allowed: ${trulyUnexpected.slice(0, 5).join(", ")}`);
+					mismatches.push(
+						`unexpected files outside allowed: ${trulyUnexpected.slice(0, 5).join(", ")}`,
+					);
 				}
 			}
 			// For agentfs-interleaved, we already allowed agent-sessions, so any remaining unexpected is real leak
 			else if (unexpectedFiles.length > 0) {
-				mismatches.push(`unexpected files outside allowed: ${unexpectedFiles.slice(0, 5).join(", ")}`);
+				mismatches.push(
+					`unexpected files outside allowed: ${unexpectedFiles.slice(0, 5).join(", ")}`,
+				);
 			}
 		} else {
-			mismatches.push(`unexpected files outside allowed (.memofs/, agent-sessions/): ${unexpectedFiles.slice(0, 5).join(", ")}`);
+			mismatches.push(
+				`unexpected files outside allowed (.memofs/, agent-sessions/): ${unexpectedFiles.slice(0, 5).join(", ")}`,
+			);
 		}
 	}
 
@@ -235,12 +281,16 @@ export async function assertGoldenSnapshot(
 	// We skip exact hash comparison because content contains timestamps/ids, but we check hash presence
 	// For manifest.json, ensure it exists in hashes and content is JSON
 	if (actual.files.some((f) => f.includes("manifest.json"))) {
-		const manifestFile = actual.files.find((f) => f.includes("manifest.json"))!;
-		const content = actual.contents[manifestFile] ?? "";
-		try {
-			JSON.parse(content);
-		} catch {
-			mismatches.push(`manifest.json not parseable JSON: ${manifestFile}`);
+		const manifestFile = actual.files.find((f) => f.includes("manifest.json"));
+		if (!manifestFile) {
+			mismatches.push("manifest.json expected but not found");
+		} else {
+			const content = actual.contents[manifestFile] ?? "";
+			try {
+				JSON.parse(content);
+			} catch {
+				mismatches.push(`manifest.json not parseable JSON: ${manifestFile}`);
+			}
 		}
 	}
 
@@ -269,23 +319,40 @@ export async function runGoldenSnapshotsScenario(
 	const prefix = options.prefix ?? "memofs-e2e-golden-";
 
 	// We create a simple harness to have a .memofs structure for this scenario itself
-	const harness = await _createCoreForGolden({ tmpDir: options.tmpDir, projectId, prefix });
+	const harness = await _createCoreForGolden({
+		tmpDir: options.tmpDir,
+		projectId,
+		prefix,
+	});
 
 	const details: Record<string, unknown> = {};
 	let passed = true;
 
 	try {
 		// Create a few memories to have some files
-		await harness.remember("Golden snapshot fact 1 RUN_ID test-run-e2e-0021-golden-01");
-		await harness.remember("Golden snapshot fact 2 RUN_ID test-run-e2e-0021-golden-02");
+		await harness.remember(
+			"Golden snapshot fact 1 RUN_ID test-run-e2e-0021-golden-01",
+		);
+		await harness.remember(
+			"Golden snapshot fact 2 RUN_ID test-run-e2e-0021-golden-02",
+		);
 
 		const files = await harness.listFiles();
 		const contents = await harness.snapshotFs();
 		const actualSnapshot = buildFsSnapshot(files, contents);
 
 		// Load all known golden snapshots
-		const scenarioNames = ["lifecycle", "agentfs-interleaved", "connectors-merge", "failure-recovery", "golden-snapshots"];
-		const goldenResults: Record<string, { exists: boolean; fileCount: number }> = {};
+		const scenarioNames = [
+			"lifecycle",
+			"agentfs-interleaved",
+			"connectors-merge",
+			"failure-recovery",
+			"golden-snapshots",
+		];
+		const goldenResults: Record<
+			string,
+			{ exists: boolean; fileCount: number }
+		> = {};
 
 		for (const name of scenarioNames) {
 			const golden = await loadGoldenSnapshot(name);
@@ -309,7 +376,10 @@ export async function runGoldenSnapshotsScenario(
 		details.goldenResults = goldenResults;
 
 		// Assert this scenario's own snapshot against its golden if exists
-		const selfGoldenCheck = await assertGoldenSnapshot("golden-snapshots", actualSnapshot);
+		const selfGoldenCheck = await assertGoldenSnapshot(
+			"golden-snapshots",
+			actualSnapshot,
+		);
 		details.selfGoldenCheck = {
 			passed: selfGoldenCheck.passed,
 			goldenExists: selfGoldenCheck.goldenExists,
@@ -318,14 +388,19 @@ export async function runGoldenSnapshotsScenario(
 
 		// If golden missing, generate it now (for manual refresh) but don't fail
 		if (!selfGoldenCheck.goldenExists) {
-			const newGolden = buildGoldenFromSnapshot("golden-snapshots", actualSnapshot);
+			const newGolden = buildGoldenFromSnapshot(
+				"golden-snapshots",
+				actualSnapshot,
+			);
 			await saveGoldenSnapshot(newGolden);
 			details.generatedGolden = true;
 		} else {
 			// If golden exists but mismatches, fail only if mismatches are about required files
 			if (!selfGoldenCheck.passed) {
 				// Check if mismatches are critical
-				const critical = selfGoldenCheck.mismatches.filter((m) => m.includes("required") || m.includes("manifest"));
+				const critical = selfGoldenCheck.mismatches.filter(
+					(m) => m.includes("required") || m.includes("manifest"),
+				);
 				if (critical.length > 0) {
 					passed = false;
 					details.criticalMismatches = critical;
@@ -407,7 +482,9 @@ export async function runGoldenSnapshotsScenario(
  * Uses statically imported runners to avoid ineffective dynamic import warnings.
  * @public
  */
-export async function generateGoldenSnapshots(): Promise<Record<string, string>> {
+export async function generateGoldenSnapshots(): Promise<
+	Record<string, string>
+> {
 	// Use the statically imported runners directly (no shadowing)
 	const runLifecycle = _runLifecycleForGenerate;
 	const runAgentFs = _runAgentFsForGenerate;
@@ -417,28 +494,45 @@ export async function generateGoldenSnapshots(): Promise<Record<string, string>>
 	const results: Record<string, string> = {};
 
 	const lifecycleResult = await runLifecycle({ keepTmpDir: false });
-	const goldenLifecycle = buildGoldenFromSnapshot("lifecycle", lifecycleResult.snapshot);
+	const goldenLifecycle = buildGoldenFromSnapshot(
+		"lifecycle",
+		lifecycleResult.snapshot,
+	);
 	await saveGoldenSnapshot(goldenLifecycle);
 	results.lifecycle = `generated ${goldenLifecycle.files.length} files`;
 
 	const agentfsResult = await runAgentFs({ keepTmpDir: false });
-	const goldenAgentfs = buildGoldenFromSnapshot("agentfs-interleaved", agentfsResult.snapshot);
+	const goldenAgentfs = buildGoldenFromSnapshot(
+		"agentfs-interleaved",
+		agentfsResult.snapshot,
+	);
 	await saveGoldenSnapshot(goldenAgentfs);
-	results["agentfs-interleaved"] = `generated ${goldenAgentfs.files.length} files`;
+	results["agentfs-interleaved"] =
+		`generated ${goldenAgentfs.files.length} files`;
 
 	const connectorsResult = await runConnectors({ keepTmpDir: false });
-	const goldenConnectors = buildGoldenFromSnapshot("connectors-merge", connectorsResult.snapshot);
+	const goldenConnectors = buildGoldenFromSnapshot(
+		"connectors-merge",
+		connectorsResult.snapshot,
+	);
 	await saveGoldenSnapshot(goldenConnectors);
-	results["connectors-merge"] = `generated ${goldenConnectors.files.length} files`;
+	results["connectors-merge"] =
+		`generated ${goldenConnectors.files.length} files`;
 
 	const failureResult = await runFailure({ keepTmpDir: false });
-	const goldenFailure = buildGoldenFromSnapshot("failure-recovery", failureResult.snapshot);
+	const goldenFailure = buildGoldenFromSnapshot(
+		"failure-recovery",
+		failureResult.snapshot,
+	);
 	await saveGoldenSnapshot(goldenFailure);
 	results["failure-recovery"] = `generated ${goldenFailure.files.length} files`;
 
 	// Self snapshot
 	const selfResult = await runGoldenSnapshotsScenario({ keepTmpDir: false });
-	const goldenSelf = buildGoldenFromSnapshot("golden-snapshots", selfResult.snapshot);
+	const goldenSelf = buildGoldenFromSnapshot(
+		"golden-snapshots",
+		selfResult.snapshot,
+	);
 	await saveGoldenSnapshot(goldenSelf);
 	results["golden-snapshots"] = `generated ${goldenSelf.files.length} files`;
 

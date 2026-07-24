@@ -16,9 +16,9 @@ import {
 	createRealCoreHarness,
 	getGitHubFixtureMeta,
 	getNotionFixtureMeta,
-	setGitHubNodes,
 	resetGitHubFixture,
-} from "../index.js";
+	setGitHubNodes,
+} from "../index";
 
 describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 	it("first run ingests GitHub fixture, second skips unchanged, file-first truth, secretRef opaque", async () => {
@@ -54,11 +54,19 @@ describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 
 			// File-first truth: .memofs/memory/*.md exists
 			const filesAfterFirst = await harness.listFiles();
-			expect(filesAfterFirst.some((f) => f.startsWith(".memofs/memory/"))).toBe(true);
-			expect(filesAfterFirst.some((f) => f.includes("connectors.json"))).toBe(true);
+			expect(filesAfterFirst.some((f) => f.startsWith(".memofs/memory/"))).toBe(
+				true,
+			);
+			expect(filesAfterFirst.some((f) => f.includes("connectors.json"))).toBe(
+				true,
+			);
 
 			const snapAfterFirst = await harness.snapshotFs();
-			expect(Object.keys(snapAfterFirst).some((k) => k.startsWith(".memofs/memory/"))).toBe(true);
+			expect(
+				Object.keys(snapAfterFirst).some((k) =>
+					k.startsWith(".memofs/memory/"),
+				),
+			).toBe(true);
 
 			// Cross-visibility: core recall in same tmpDir finds ingested content (RUN_ID)
 			const core = await createRealCoreHarness({ tmpDir: harness.tmpDir });
@@ -111,12 +119,29 @@ describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 			const { join } = await import("node:path");
 			const { fileURLToPath } = await import("node:url");
 			const __dirname = fileURLToPath(new URL(".", import.meta.url));
-			const fixturePath = join(__dirname, "..", "msw", "fixtures", "github.json");
+			const fixturePath = join(
+				__dirname,
+				"..",
+				"msw",
+				"fixtures",
+				"github.json",
+			);
 			const rawFixture = JSON.parse(readFileSync(fixturePath, "utf8")) as {
 				payload: {
 					data: {
 						repository: {
-							issues: { nodes: { number: number; title: string; body: string; url: string; state: string; createdAt: string; author: { login: string }; labels: { nodes: { name: string }[] } }[] };
+							issues: {
+								nodes: {
+									number: number;
+									title: string;
+									body: string;
+									url: string;
+									state: string;
+									createdAt: string;
+									author: { login: string };
+									labels: { nodes: { name: string }[] };
+								}[];
+							};
 							pullRequests: { nodes: unknown[] };
 							discussions: { nodes: unknown[] };
 						};
@@ -124,8 +149,14 @@ describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 				};
 			};
 			// Change body of issue 1
-			const mutatedIssues = rawFixture.payload.data.repository.issues.nodes.map((n, i) =>
-				i === 0 ? { ...n, body: `${n.body} UPDATED at ${Date.now()} RUN_ID test-run-e2e-0021-001` } : n,
+			const mutatedIssues = rawFixture.payload.data.repository.issues.nodes.map(
+				(n, i) =>
+					i === 0
+						? {
+								...n,
+								body: `${n.body} UPDATED at ${Date.now()} RUN_ID test-run-e2e-0021-001`,
+							}
+						: n,
 			);
 			setGitHubNodes({ issues: mutatedIssues as unknown[] });
 
@@ -207,7 +238,9 @@ describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 				]);
 				const result = await harness.run({ onlyType: "github" });
 				// In live mode without real token, MSW still returns fixture — deterministic
-				expect(result.written.length > 0 || result.skipped.length > 0).toBe(true);
+				expect(result.written.length > 0 || result.skipped.length > 0).toBe(
+					true,
+				);
 			} finally {
 				await harness.cleanup();
 			}

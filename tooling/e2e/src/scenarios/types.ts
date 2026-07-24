@@ -131,7 +131,10 @@ export function computeSimpleHash(content: string): string {
  * @returns snapshot
  * @public
  */
-export function buildFsSnapshot(files: string[], contents: Record<string, string>): ScenarioFsSnapshot {
+export function buildFsSnapshot(
+	files: string[],
+	contents: Record<string, string>,
+): ScenarioFsSnapshot {
 	const hashes: Record<string, string> = {};
 	for (const f of files) {
 		const content = contents[f] ?? "";

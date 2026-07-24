@@ -10,7 +10,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const fixturePath = join(__dirname, "..", "fixtures", "github.json");
@@ -22,9 +22,18 @@ type GitHubFixtureFile = {
 	payload: {
 		data: {
 			repository: {
-				issues: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: unknown[] };
-				pullRequests: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: unknown[] };
-				discussions: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: unknown[] };
+				issues: {
+					pageInfo: { hasNextPage: boolean; endCursor: string | null };
+					nodes: unknown[];
+				};
+				pullRequests: {
+					pageInfo: { hasNextPage: boolean; endCursor: string | null };
+					nodes: unknown[];
+				};
+				discussions: {
+					pageInfo: { hasNextPage: boolean; endCursor: string | null };
+					nodes: unknown[];
+				};
 			};
 		};
 	};
@@ -79,7 +88,9 @@ const original = loadOriginal();
  * Mutable state — copied from fixture payload.
  * Tests may mutate via setGitHubFixture / resetGitHubFixture to prove changed-record re-ingested.
  */
-let currentPayload: GitHubFixtureFile["payload"] = structuredClone(original.payload);
+let currentPayload: GitHubFixtureFile["payload"] = structuredClone(
+	original.payload,
+);
 
 /**
  * Override the whole payload (for advanced scenarios).
@@ -118,7 +129,11 @@ export function resetGitHubFixture(): void {
  * Current fixture meta for assertions (RUN_ID, redacted).
  * @returns meta with runId, secretRedacted, sanitized flag.
  */
-export function getGitHubFixtureMeta(): { runId: string; secretRedacted: string; sanitized: boolean } {
+export function getGitHubFixtureMeta(): {
+	runId: string;
+	secretRedacted: string;
+	sanitized: boolean;
+} {
 	return {
 		runId: original.runId,
 		secretRedacted: original.secretRedacted,
@@ -131,7 +146,9 @@ export const githubHandlers = [
 	http.post("https://api.github.com/graphql", async ({ request }) => {
 		// Never log Authorization; redact in any error path — we just ensure header exists for real code path proof.
 		// The real connector sends Bearer <token>; we accept anything but don't echo it.
-		const auth = request.headers.get("authorization") ?? request.headers.get("Authorization");
+		const auth =
+			request.headers.get("authorization") ??
+			request.headers.get("Authorization");
 		if (!auth) {
 			return HttpResponse.json(
 				{ errors: [{ message: "Unauthorized — missing token (redacted)" }] },

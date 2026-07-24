@@ -16,139 +16,131 @@
  * @public
  */
 
-// Base harness types + core harness
-export type {
-	RealHarness,
-	CoreRealHarness,
-	CreateRealCoreHarnessOptions,
-} from "./harness/core-harness";
-export { createRealCoreHarness } from "./harness/core-harness";
-
 // CLI harness (ticket 61)
 export type {
-	CliRealHarness,
 	CliExecResult,
+	CliRealHarness,
 	CreateRealCliHarnessOptions,
 } from "./harness/cli-harness";
 export { createRealCliHarness } from "./harness/cli-harness";
-
-// MCP + Server harnesses (ticket 62)
-export type {
-	McpStdioHarness,
-	CreateRealMcpStdioHarnessOptions,
-	McpTool,
-} from "./harness/mcp-stdio-harness";
-export { createRealMcpStdioHarness } from "./harness/mcp-stdio-harness";
-
-export type {
-	McpHttpHarness,
-	CreateRealMcpHttpHarnessOptions,
-} from "./harness/mcp-http-harness";
-export { createRealMcpHttpHarness } from "./harness/mcp-http-harness";
-
-export type {
-	ServerRealHarness,
-	CreateRealServerHarnessOptions,
-} from "./harness/server-harness";
-export { createRealServerHarness } from "./harness/server-harness";
-
-// Adapter harnesses (ticket 63)
-export type {
-	TursoRealHarness,
-	CreateRealTursoHarnessOptions,
-} from "./harness/turso-harness";
-export { createRealTursoHarness } from "./harness/turso-harness";
-
-export type {
-	R2RealHarness,
-	CreateRealR2HarnessOptions,
-} from "./harness/r2-harness";
-export { createRealR2Harness } from "./harness/r2-harness";
-
-export type {
-	TransformersRealHarness,
-	CreateRealTransformersHarnessOptions,
-} from "./harness/transformers-harness";
-export {
-	createRealTransformersHarness,
-	assertTransformersValidationBehavior,
-} from "./harness/transformers-harness";
-
-// MSW + connectors + remote adapters (ticket 64)
-export { mswServer, allHandlers } from "./msw/server.js";
 export type {
 	ConnectorRealHarness,
 	CreateRealConnectorHarnessOptions,
 } from "./harness/connector-harness";
 export { createRealConnectorHarness } from "./harness/connector-harness";
+// Base harness types + core harness
+export type {
+	CoreRealHarness,
+	CreateRealCoreHarnessOptions,
+	RealHarness,
+} from "./harness/core-harness";
+export { createRealCoreHarness } from "./harness/core-harness";
 
 export type {
-	OpenAIRealHarness,
+	CreateRealMcpHttpHarnessOptions,
+	McpHttpHarness,
+} from "./harness/mcp-http-harness";
+export { createRealMcpHttpHarness } from "./harness/mcp-http-harness";
+// MCP + Server harnesses (ticket 62)
+export type {
+	CreateRealMcpStdioHarnessOptions,
+	McpStdioHarness,
+	McpTool,
+} from "./harness/mcp-stdio-harness";
+export { createRealMcpStdioHarness } from "./harness/mcp-stdio-harness";
+export type {
 	CreateRealOpenAIHarnessOptions,
+	OpenAIRealHarness,
 } from "./harness/openai-harness";
-export { createRealOpenAIHarness, assertNoTokenLeak as assertOpenAINoTokenLeak } from "./harness/openai-harness";
+export {
+	assertNoTokenLeak as assertOpenAINoTokenLeak,
+	createRealOpenAIHarness,
+} from "./harness/openai-harness";
 
 export type {
-	VoyageRealHarness,
+	CreateRealR2HarnessOptions,
+	R2RealHarness,
+} from "./harness/r2-harness";
+export { createRealR2Harness } from "./harness/r2-harness";
+export type {
+	CreateRealServerHarnessOptions,
+	ServerRealHarness,
+} from "./harness/server-harness";
+export { createRealServerHarness } from "./harness/server-harness";
+export type {
+	CreateRealTransformersHarnessOptions,
+	TransformersRealHarness,
+} from "./harness/transformers-harness";
+export {
+	assertTransformersValidationBehavior,
+	createRealTransformersHarness,
+} from "./harness/transformers-harness";
+// Adapter harnesses (ticket 63)
+export type {
+	CreateRealTursoHarnessOptions,
+	TursoRealHarness,
+} from "./harness/turso-harness";
+export { createRealTursoHarness } from "./harness/turso-harness";
+export type {
 	CreateRealVoyageHarnessOptions,
-	VoyageRerankRealHarness,
 	CreateRealVoyageRerankHarnessOptions,
+	VoyageRealHarness,
+	VoyageRerankRealHarness,
 } from "./harness/voyage-harness";
 export {
+	assertNoTokenLeak as assertVoyageNoTokenLeak,
 	createRealVoyageHarness,
 	createRealVoyageRerankHarness,
-	assertNoTokenLeak as assertVoyageNoTokenLeak,
 } from "./harness/voyage-harness";
-
 // MSW handler state helpers (for dedup mutable tests)
 export {
+	getGitHubFixtureMeta,
+	resetGitHubFixture,
 	setGitHubNodes,
 	setGitHubPayload,
-	resetGitHubFixture,
-	getGitHubFixtureMeta,
-} from "./msw/handlers/github.js";
+} from "./msw/handlers/github";
 export {
-	setNotionResults,
-	setNotionPayload,
-	resetNotionFixture,
 	getNotionFixtureMeta,
-} from "./msw/handlers/notion.js";
+	resetNotionFixture,
+	setNotionPayload,
+	setNotionResults,
+} from "./msw/handlers/notion";
 export {
-	setOpenAIErrorMode,
-	resetOpenAIFixture,
 	getOpenAIFixtureMeta,
-} from "./msw/handlers/openai.js";
+	resetOpenAIFixture,
+	setOpenAIErrorMode,
+} from "./msw/handlers/openai";
 export {
-	setVoyageErrorMode,
-	resetVoyageFixture,
 	getVoyageFixtureMeta,
-} from "./msw/handlers/voyage.js";
-
-// Scenarios (ticket 65) — deterministic flows proving file-first truth, cross-visibility, golden snapshots
-export type {
-	ScenarioResult,
-	ScenarioFsSnapshot,
-	CrossVisibilityProof,
-	FileFirstTruthProof,
-	ScenarioOptions,
-} from "./scenarios/types.js";
-export type { GoldenSnapshotFile } from "./scenarios/golden-snapshots.js";
+	resetVoyageFixture,
+	setVoyageErrorMode,
+} from "./msw/handlers/voyage";
+// MSW + connectors + remote adapters (ticket 64)
+export { allHandlers, mswServer } from "./msw/server";
+export type { GoldenSnapshotFile } from "./scenarios/golden-snapshots";
 export {
-	runLifecycleScenario,
+	assertGoldenSnapshot,
+	buildGoldenFromSnapshot,
+	generateGoldenSnapshots,
+	loadGoldenSnapshot,
 	runAgentFsInterleavedScenario,
 	runConnectorsMergeScenario,
 	runFailureRecoveryScenario,
 	runGoldenSnapshotsScenario,
-	assertGoldenSnapshot,
-	loadGoldenSnapshot,
-	saveGoldenSnapshot,
-	buildGoldenFromSnapshot,
-	generateGoldenSnapshots,
-	runSeededLoopScenario,
+	runLifecycleScenario,
 	runOrchestratorScenario,
-} from "./scenarios/index.js";
-
+	runSeededLoopScenario,
+	saveGoldenSnapshot,
+} from "./scenarios/index";
+// Scenarios (ticket 65) — deterministic flows proving file-first truth, cross-visibility, golden snapshots
+export type {
+	CrossVisibilityProof,
+	FileFirstTruthProof,
+	ScenarioFsSnapshot,
+	ScenarioOptions,
+	ScenarioResult,
+} from "./scenarios/types";
+export { runOrchestratorScenario as runOrchestrator } from "./sim/orchestrator";
+export type { SeededLoopStats } from "./sim/seeded-loop";
 // Sim (ticket 66) — seeded-loop + orchestrator (aliases)
-export { runSeededLoopScenario as runSeededLoop } from "./sim/seeded-loop.js";
-export { runOrchestratorScenario as runOrchestrator } from "./sim/orchestrator.js";
-export type { SeededLoopStats } from "./sim/seeded-loop.js";
+export { runSeededLoopScenario as runSeededLoop } from "./sim/seeded-loop";

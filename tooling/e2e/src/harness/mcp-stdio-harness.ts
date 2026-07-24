@@ -11,22 +11,20 @@
  * Node-only: imports `node:fs`, `node:child_process`.
  */
 
-import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
+import type { Client as SdkClient } from "@modelcontextprotocol/sdk/client/index";
+import type { StdioClientTransport as SdkStdioTransport } from "@modelcontextprotocol/sdk/client/stdio";
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
-import type { Client as SdkClient } from "@modelcontextprotocol/sdk/client/index.js";
-import type { StdioClientTransport as SdkStdioTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+} from "./fs-helpers";
 
 /** Subset of MCP tool result shape used in e2e. */
 export type McpToolCallResult = {
@@ -67,7 +65,10 @@ export type McpStdioHarness = RealHarness & {
 	/** List prompts. */
 	listPrompts: () => Promise<unknown[]>;
 	/** Call a tool by name with arguments. */
-	callTool: (name: string, args?: Record<string, unknown>) => Promise<McpToolCallResult>;
+	callTool: (
+		name: string,
+		args?: Record<string, unknown>,
+	) => Promise<McpToolCallResult>;
 	/** Read a resource by uri. */
 	readResource: (uri: string) => Promise<unknown>;
 	/** Get a prompt. */
@@ -96,13 +97,22 @@ export type CreateRealMcpStdioHarnessOptions = {
 function resolveMcpBin(explicit?: string): string {
 	if (explicit) {
 		if (!existsSync(explicit)) {
-			throw new Error(`McpStdioHarness: explicit mcpBin not found: ${explicit}`);
+			throw new Error(
+				`McpStdioHarness: explicit mcpBin not found: ${explicit}`,
+			);
 		}
 		return resolve(explicit);
 	}
 	const candidates: string[] = [];
-	const fromFileRoot = resolve(__dirname, "../../../../packages/mcp-server/dist/bin/memofs-mcp.mjs");
-	const fromFileRootAlt = resolve(__dirname, "../../../..", "packages/mcp-server/dist/bin/memofs-mcp.mjs");
+	const fromFileRoot = resolve(
+		__dirname,
+		"../../../../packages/mcp-server/dist/bin/memofs-mcp.mjs",
+	);
+	const fromFileRootAlt = resolve(
+		__dirname,
+		"../../../..",
+		"packages/mcp-server/dist/bin/memofs-mcp.mjs",
+	);
 	candidates.push(fromFileRoot, fromFileRootAlt);
 
 	const cwd = process.cwd();
@@ -158,18 +168,24 @@ export async function createRealMcpStdioHarness(
 	try {
 		await stat(mcpBin);
 	} catch {
-		throw new Error(`McpStdioHarness: mcpBin does not exist after resolution: ${mcpBin}`);
+		throw new Error(
+			`McpStdioHarness: mcpBin does not exist after resolution: ${mcpBin}`,
+		);
 	}
 
 	// Dynamic import SDK Client to avoid bundling issues; types imported statically above
 	let Client: typeof SdkClient;
 	let StdioClientTransport: typeof SdkStdioTransport;
 	try {
-		const modClient = (await import("@modelcontextprotocol/sdk/client/index.js")) as unknown as {
+		const modClient = (await import(
+			"@modelcontextprotocol/sdk/client/index"
+		)) as unknown as {
 			Client: typeof SdkClient;
 		};
 		Client = modClient.Client;
-		const modStdio = (await import("@modelcontextprotocol/sdk/client/stdio.js")) as unknown as {
+		const modStdio = (await import(
+			"@modelcontextprotocol/sdk/client/stdio"
+		)) as unknown as {
 			StdioClientTransport: typeof SdkStdioTransport;
 		};
 		StdioClientTransport = modStdio.StdioClientTransport;
@@ -181,7 +197,7 @@ export async function createRealMcpStdioHarness(
 
 	// Build env: isolate, disable color, disable local embeddings for speed, respect readOnly
 	const env: Record<string, string> = {
-		...process.env as Record<string, string>,
+		...(process.env as Record<string, string>),
 		MEMOFS_ROOT: tmpDir,
 		MEMOFS_HOME: tmpDir,
 		MEMOFS_LOCAL_EMBEDDINGS: "0",
@@ -241,30 +257,47 @@ export async function createRealMcpStdioHarness(
 	};
 
 	const listTools = async (): Promise<McpTool[]> => {
-		const result = (await client.listTools()) as unknown as { tools?: McpTool[] } & McpTool[];
+		const result = (await client.listTools()) as unknown as {
+			tools?: McpTool[];
+		} & McpTool[];
 		const toolsField = (result as { tools?: McpTool[] }).tools;
 		const tools = toolsField ?? (result as unknown as McpTool[]);
 		if (Array.isArray(tools)) return tools;
-		const nested = (result as { tools?: { tools?: McpTool[] } }).tools as unknown as { tools?: McpTool[] } | undefined;
+		const nested = (result as { tools?: { tools?: McpTool[] } })
+			.tools as unknown as { tools?: McpTool[] } | undefined;
 		return nested?.tools ?? [];
 	};
 
 	const listResources = async (): Promise<unknown[]> => {
-		const result = (await client.listResources()) as unknown as { resources?: unknown[] };
-		const resources = (result as { resources?: unknown[] }).resources ?? (result as unknown as unknown[]);
+		const result = (await client.listResources()) as unknown as {
+			resources?: unknown[];
+		};
+		const resources =
+			(result as { resources?: unknown[] }).resources ??
+			(result as unknown as unknown[]);
 		if (Array.isArray(resources)) return resources;
 		return [];
 	};
 
 	const listPrompts = async (): Promise<unknown[]> => {
-		const result = (await client.listPrompts()) as unknown as { prompts?: unknown[] };
-		const prompts = (result as { prompts?: unknown[] }).prompts ?? (result as unknown as unknown[]);
+		const result = (await client.listPrompts()) as unknown as {
+			prompts?: unknown[];
+		};
+		const prompts =
+			(result as { prompts?: unknown[] }).prompts ??
+			(result as unknown as unknown[]);
 		if (Array.isArray(prompts)) return prompts;
 		return [];
 	};
 
-	const callTool = async (name: string, args: Record<string, unknown> = {}): Promise<McpToolCallResult> => {
-		const result = (await client.callTool({ name, arguments: args })) as unknown as McpToolCallResult;
+	const callTool = async (
+		name: string,
+		args: Record<string, unknown> = {},
+	): Promise<McpToolCallResult> => {
+		const result = (await client.callTool({
+			name,
+			arguments: args,
+		})) as unknown as McpToolCallResult;
 		return result;
 	};
 
@@ -272,8 +305,14 @@ export async function createRealMcpStdioHarness(
 		return (await client.readResource({ uri })) as unknown;
 	};
 
-	const getPrompt = async (name: string, args: Record<string, unknown> = {}): Promise<unknown> => {
-		return (await client.getPrompt({ name, arguments: args as never })) as unknown;
+	const getPrompt = async (
+		name: string,
+		args: Record<string, unknown> = {},
+	): Promise<unknown> => {
+		return (await client.getPrompt({
+			name,
+			arguments: args as never,
+		})) as unknown;
 	};
 
 	const close = async (): Promise<void> => {

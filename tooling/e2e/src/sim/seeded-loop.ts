@@ -11,8 +11,12 @@
  * @public
  */
 
-import { createRealCoreHarness } from "../harness/core-harness.js";
-import { buildFsSnapshot, type ScenarioOptions, type ScenarioResult } from "../scenarios/types.js";
+import { createRealCoreHarness } from "../harness/core-harness";
+import {
+	buildFsSnapshot,
+	type ScenarioOptions,
+	type ScenarioResult,
+} from "../scenarios/types";
 
 /**
  * Hash string to 32-bit seed (djb2 variant with imul).
@@ -38,7 +42,8 @@ function hashStringToSeed(str: string): number {
 function mulberry32(seed: number): () => number {
 	let state = seed;
 	return () => {
-		let mixed = (state += 0x6d2b79f5);
+		state += 0x6d2b79f5;
+		let mixed = state;
 		mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
 		mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
 		return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
@@ -108,7 +113,13 @@ const QUERY_POOL = [
  * Action union for seeded-loop random steps.
  * @internal
  */
-type Action = "remember" | "recall" | "search" | "context" | "agentfs_write" | "consolidate";
+type Action =
+	| "remember"
+	| "recall"
+	| "search"
+	| "context"
+	| "agentfs_write"
+	| "consolidate";
 
 /**
  * Picks random element from array using rng.
@@ -120,12 +131,6 @@ function pickRandom<T>(rng: () => number, arr: readonly T[]): T {
 	const idx = Math.floor(rng() * arr.length);
 	return arr[Math.max(0, Math.min(arr.length - 1, idx))] as T;
 }
-
-/**
- * Seeded-loop action type — deterministic steps for budget enforcement proof.
- * @internal
- */
-type LoopAction = Action;
 
 /**
  * Result of seeded-loop run.
@@ -160,7 +165,9 @@ export type SeededLoopStats = {
  * @returns scenario result with SeededLoopStats in details
  * @public
  */
-export async function runSeededLoopScenario(options: ScenarioOptions = {}): Promise<ScenarioResult> {
+export async function runSeededLoopScenario(
+	options: ScenarioOptions = {},
+): Promise<ScenarioResult> {
 	const seed = "memofs-e2e-0021";
 	const rng = createSeededRng(seed);
 	const projectId = options.projectId ?? `e2e-seeded-${Date.now()}`;
@@ -172,7 +179,7 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 		prefix,
 	});
 
-	let tmpDir = harness.tmpDir;
+	const tmpDir = harness.tmpDir;
 	const details: Record<string, unknown> = {};
 	let passed = true;
 
@@ -234,7 +241,10 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 			else action = "consolidate";
 
 			// Enforce max consolidations
-			if (action === "consolidate" && consolidations >= BUDGET_MAX_CONSOLIDATIONS) {
+			if (
+				action === "consolidate" &&
+				consolidations >= BUDGET_MAX_CONSOLIDATIONS
+			) {
 				action = "remember";
 			}
 
@@ -248,7 +258,9 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 						rememberedCount++;
 						actionCounts.remember++;
 						if (rememberedFactsForCheck.length < 5) {
-							rememberedFactsForCheck.push(baseFact.split(" ").slice(0, 3).join(" "));
+							rememberedFactsForCheck.push(
+								baseFact.split(" ").slice(0, 3).join(" "),
+							);
 						}
 						break;
 					}
@@ -281,8 +293,12 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 							});
 							activeSessionId = start.sessionId as string;
 							// paths may be nested object
-							const paths = start.paths as unknown as { working?: { notes: string } };
-							activeSessionWorkingNotesPath = paths?.working?.notes ?? `/agent-sessions/${activeSessionId}/working/notes.md`;
+							const paths = start.paths as unknown as {
+								working?: { notes: string };
+							};
+							activeSessionWorkingNotesPath =
+								paths?.working?.notes ??
+								`/agent-sessions/${activeSessionId}/working/notes.md`;
 							agentSessionsCreated++;
 						}
 						if (activeSessionId && activeSessionWorkingNotesPath) {
@@ -309,7 +325,9 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 								});
 							}
 							if (rng() < 0.1) {
-								await harness.client.agentfs.extract({ sessionId: activeSessionId });
+								await harness.client.agentfs.extract({
+									sessionId: activeSessionId,
+								});
 							}
 							// Occasionally complete and start new session
 							if (rng() < 0.15) {
@@ -327,7 +345,9 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 					case "consolidate": {
 						if (consolidations < BUDGET_MAX_CONSOLIDATIONS) {
 							// Preview then apply
-							const preview = await harness.client.consolidate({ apply: false });
+							const preview = await harness.client.consolidate({
+								apply: false,
+							});
 							if (preview.plan.changed) {
 								await harness.client.consolidate({ apply: true });
 							}
@@ -363,7 +383,6 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 		const files = await harness.listFiles();
 		const contents = await harness.snapshotFs();
 		const snapshot = buildFsSnapshot(files, contents);
-		tmpDir = harness.tmpDir;
 
 		// Validate pass: call core validate — must pass per spec, no silent forcing true
 		let validatePassed = true;
@@ -404,14 +423,20 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 		const allowedPrefixes = [".memofs/", "agent-sessions/", ".cache/"];
 		const noFileLeak =
 			files.every((f) => !f.includes("..") && !f.startsWith("/")) &&
-			files.every((f) => f === ".memofs" || allowedPrefixes.some((p) => f.startsWith(p)));
+			files.every(
+				(f) => f === ".memofs" || allowedPrefixes.some((p) => f.startsWith(p)),
+			);
 
 		// File-first truth
 		const hasMemofsDir = files.some((f) => f.startsWith(".memofs/"));
 		const hasManifest = files.some((f) => f.includes("manifest.json"));
 		const hasMemoryEvents = files.some((f) => f.includes("memory-events"));
-		const hasMemoryFiles = files.some((f) => f.includes("memory") || f.includes("chunks"));
-		const hasAgentFiles = files.some((f) => f.includes("agent-sessions") || f.includes("agents"));
+		const hasMemoryFiles = files.some(
+			(f) => f.includes("memory") || f.includes("chunks"),
+		);
+		const hasAgentFiles = files.some(
+			(f) => f.includes("agent-sessions") || f.includes("agents"),
+		);
 
 		if (!hasMemofsDir) passed = false;
 		if (!hasManifest) passed = false;

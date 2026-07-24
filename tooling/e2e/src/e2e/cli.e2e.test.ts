@@ -12,8 +12,8 @@
  */
 
 import { afterAll, describe, expect, it } from "vitest";
-import { createRealCliHarness } from "../harness/cli-harness.js";
-import { createRealCoreHarness } from "../index.js";
+import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealCoreHarness } from "../index";
 
 describe("cli real harness — spawn, file-first truth, cross-visibility (ticket 61)", () => {
 	it("resolves built binary and spawns via child_process", async () => {

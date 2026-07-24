@@ -23,7 +23,7 @@ import {
 	resetVoyageFixture,
 	setOpenAIErrorMode,
 	setVoyageErrorMode,
-} from "../index.js";
+} from "../index";
 
 describe("remote adapters real harness — OpenAI via MSW (ticket 64)", () => {
 	it("real OpenAIEmbedder via MSW returns 384-dim, batch order preserved, file-first truth tmpDir", async () => {

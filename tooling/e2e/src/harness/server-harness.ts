@@ -10,20 +10,22 @@
  * Node-only.
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import {
+	createServer,
+	type IncomingMessage,
+	type ServerResponse,
+} from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-import { headersToObject, readBody } from "./http-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
+import { headersToObject, readBody } from "./http-helpers";
 
 export type ServerRealHarness = RealHarness & {
 	/** Base URL e.g. http://127.0.0.1:port/ */
@@ -31,7 +33,11 @@ export type ServerRealHarness = RealHarness & {
 	port: number;
 	server: ReturnType<typeof createServer>;
 	/** JSON-RPC POST helper returning full envelope. */
-	rpc: (method: string, params?: Record<string, unknown>, id?: number | string) => Promise<unknown>;
+	rpc: (
+		method: string,
+		params?: Record<string, unknown>,
+		id?: number | string,
+	) => Promise<unknown>;
 	/** Convenience: memory.write */
 	writeMemory: (content: string) => Promise<unknown>;
 	/** Convenience: recall */
@@ -50,8 +56,6 @@ export type CreateRealServerHarnessOptions = {
 	env?: Record<string, string>;
 };
 
-
-
 /**
  * Creates a real Server harness with isolated tmpDir and random port.
  * @public
@@ -67,7 +71,9 @@ export async function createRealServerHarness(
 
 	// Dynamic imports
 	const { createNodeFsMemoryStore } = await import("@memofs/core/node-fs");
-	const { createHostedRuntime, handleRuntimeRequest } = await import("@memofs/server");
+	const { createHostedRuntime, handleRuntimeRequest } = await import(
+		"@memofs/server"
+	);
 
 	const store = createNodeFsMemoryStore({
 		rootDir: tmpDir,
@@ -85,14 +91,18 @@ export async function createRealServerHarness(
 
 	// Minimal concurrency layer that just runs fn — enables writes for e2e single writer
 	const concurrencyLayer = {
-		acquire: async <T>(_projectId: string, fn: () => Promise<T>): Promise<T> => fn(),
+		acquire: async <T>(_projectId: string, fn: () => Promise<T>): Promise<T> =>
+			fn(),
 	};
 
 	const server = createServer((req: IncomingMessage, res: ServerResponse) => {
 		void (async () => {
 			try {
 				const method = req.method ?? "GET";
-				const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "127.0.0.1"}`);
+				const url = new URL(
+					req.url ?? "/",
+					`http://${req.headers.host ?? "127.0.0.1"}`,
+				);
 				const headers = new Headers();
 				for (const [key, value] of Object.entries(req.headers)) {
 					if (Array.isArray(value)) {
@@ -127,7 +137,8 @@ export async function createRealServerHarness(
 				res.end(buf);
 			} catch (err) {
 				console.error("[server-harness] request failed", err);
-				if (!res.headersSent) res.writeHead(500, { "Content-Type": "text/plain" });
+				if (!res.headersSent)
+					res.writeHead(500, { "Content-Type": "text/plain" });
 				res.end("Internal server error");
 			}
 		})();
@@ -156,10 +167,20 @@ export async function createRealServerHarness(
 		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 	const listFiles = async (): Promise<string[]> => listFilesRecursive(tmpDir);
-	const snapshotFs = async (): Promise<Record<string, string>> => snapshotFsRecursive(tmpDir);
+	const snapshotFs = async (): Promise<Record<string, string>> =>
+		snapshotFsRecursive(tmpDir);
 
-	const rpc = async (method: string, params: Record<string, unknown> = {}, id: number | string = 1): Promise<unknown> => {
-		const body = JSON.stringify({ jsonrpc: "2.0", id, method, params: { ...params, projectId } });
+	const rpc = async (
+		method: string,
+		params: Record<string, unknown> = {},
+		id: number | string = 1,
+	): Promise<unknown> => {
+		const body = JSON.stringify({
+			jsonrpc: "2.0",
+			id,
+			method,
+			params: { ...params, projectId },
+		});
 		const res = await fetch(url, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -170,34 +191,51 @@ export async function createRealServerHarness(
 		try {
 			json = JSON.parse(text) as unknown;
 		} catch {
-			throw new Error(`ServerHarness: invalid JSON status=${res.status} body=${text.slice(0, 500)}`);
+			throw new Error(
+				`ServerHarness: invalid JSON status=${res.status} body=${text.slice(0, 500)}`,
+			);
 		}
 		return json;
 	};
 
 	const writeMemory = async (content: string): Promise<unknown> => {
-		const envelope = (await rpc("memory.write", { content })) as { error?: unknown; result?: unknown };
+		const envelope = (await rpc("memory.write", { content })) as {
+			error?: unknown;
+			result?: unknown;
+		};
 		if (envelope.error) {
-			throw new Error(`ServerHarness writeMemory failed: ${JSON.stringify(envelope.error)}`);
+			throw new Error(
+				`ServerHarness writeMemory failed: ${JSON.stringify(envelope.error)}`,
+			);
 		}
 		return envelope.result;
 	};
 
 	const recall = async (query: string, limit?: number): Promise<unknown> => {
-		const envelope = (await rpc("recall", { query, ...(limit ? { limit } : {}) })) as {
+		const envelope = (await rpc("recall", {
+			query,
+			...(limit ? { limit } : {}),
+		})) as {
 			error?: unknown;
 			result?: unknown;
 		};
 		if (envelope.error) {
-			throw new Error(`ServerHarness recall failed: ${JSON.stringify(envelope.error)}`);
+			throw new Error(
+				`ServerHarness recall failed: ${JSON.stringify(envelope.error)}`,
+			);
 		}
 		return envelope.result;
 	};
 
 	const context = async (query: string): Promise<unknown> => {
-		const envelope = (await rpc("context", { query })) as { error?: unknown; result?: unknown };
+		const envelope = (await rpc("context", { query })) as {
+			error?: unknown;
+			result?: unknown;
+		};
 		if (envelope.error) {
-			throw new Error(`ServerHarness context failed: ${JSON.stringify(envelope.error)}`);
+			throw new Error(
+				`ServerHarness context failed: ${JSON.stringify(envelope.error)}`,
+			);
 		}
 		return envelope.result;
 	};

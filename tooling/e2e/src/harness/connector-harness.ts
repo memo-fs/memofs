@@ -9,27 +9,28 @@
  * - Proves: file-first truth .memofs/ layout after ingest
  */
 
-import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-
+import {
+	type ConnectorConfig,
+	type ConnectorRegistry,
+	createConnectorRegistry,
+	type RunConnectorsResult,
+	runConnectors,
+	StaticSecretResolver,
+} from "@memofs/connectors";
 import { CONNECTORS_PATH, type MemoFS } from "@memofs/core";
 import type { NodeFsMemoryStore } from "@memofs/core/node-fs";
 import {
-	createConnectorRegistry,
-	runConnectors,
-	StaticSecretResolver,
-	type ConnectorConfig,
-	type RunConnectorsResult,
-	type ConnectorRegistry,
-} from "@memofs/connectors";
-
+	type CreateRealCoreHarnessOptions,
+	createRealCoreHarness,
+} from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-import { createRealCoreHarness, type CreateRealCoreHarnessOptions } from "./core-harness.js";
+} from "./fs-helpers";
 
 /**
  * Options for creating a real connector harness.
@@ -113,7 +114,9 @@ export async function createRealConnectorHarness(
 
 	const secretResolver = new StaticSecretResolver(secrets);
 
-	const writeConnectorsFile = async (connectors: ConnectorConfig[]): Promise<void> => {
+	const writeConnectorsFile = async (
+		connectors: ConnectorConfig[],
+	): Promise<void> => {
 		await mkdir(join(core.tmpDir, ".memofs"), { recursive: true });
 		const filePath = join(core.tmpDir, CONNECTORS_PATH);
 		await writeFile(filePath, JSON.stringify({ connectors }, null, 2), "utf8");
@@ -124,7 +127,9 @@ export async function createRealConnectorHarness(
 		return readFile(filePath, "utf8");
 	};
 
-	const run = async (opts?: { onlyType?: string }): Promise<RunConnectorsResult> => {
+	const run = async (opts?: {
+		onlyType?: string;
+	}): Promise<RunConnectorsResult> => {
 		return runConnectors({
 			rootDir: core.tmpDir,
 			memo: core.client,

@@ -11,14 +11,17 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { createOpenAIEmbedder, type OpenAIEmbedder } from "@memofs/adapter-openai";
+import {
+	createOpenAIEmbedder,
+	type OpenAIEmbedder,
+} from "@memofs/adapter-openai";
 
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
+} from "./fs-helpers";
 
 /**
  * Options for creating a real OpenAI harness.
@@ -76,7 +79,8 @@ export async function createRealOpenAIHarness(
 		// Pass global fetch explicitly so MSW interception (which patches global fetch) is used.
 		// OpenAI SDK captures fetch at construction time; without this it would capture the
 		// original unpatched fetch if imported before server.listen().
-		fetch: (...args: Parameters<typeof fetch>) => (globalThis.fetch as typeof fetch)(...args),
+		fetch: (...args: Parameters<typeof fetch>) =>
+			(globalThis.fetch as typeof fetch)(...args),
 	});
 
 	let cleaned = false;
@@ -116,9 +120,16 @@ export async function createRealOpenAIHarness(
  * Asserts error message does not leak raw token.
  * @public
  */
-export function assertNoTokenLeak(error: unknown, rawToken: string = "sk-"): void {
+export function assertNoTokenLeak(
+	error: unknown,
+	rawToken: string = "sk-",
+): void {
 	const msg = error instanceof Error ? error.message : String(error);
-	if (msg.includes(rawToken) && !msg.includes("test-token-***") && rawToken !== "test-token-***") {
+	if (
+		msg.includes(rawToken) &&
+		!msg.includes("test-token-***") &&
+		rawToken !== "test-token-***"
+	) {
 		throw new Error(`Error message leaks raw token: ${msg}`);
 	}
 	// Also ensure redacted placeholder not containing real token — check that message doesn't contain long secret-like pattern

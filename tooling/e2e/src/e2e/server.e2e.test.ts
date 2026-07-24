@@ -6,9 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
-
-import { createRealCoreHarness } from "../index.js";
-import { createRealServerHarness } from "../harness/server-harness.js";
+import { createRealServerHarness } from "../harness/server-harness";
+import { createRealCoreHarness } from "../index";
 
 describe("server real harness — http random port, memory.write+recall (ticket 62)", () => {
 	it("boots http on random free port, json-rpc fetch proves memory.write + recall", async () => {
@@ -17,7 +16,9 @@ describe("server real harness — http random port, memory.write+recall (ticket 
 			expect(serverHarness.url).toMatch(/http:\/\/127\.0\.0\.1:\d+\//);
 			expect(serverHarness.port).toBeGreaterThan(0);
 
-			const write = await serverHarness.writeMemory("Server harness fact: Simba self-host e2e proof second file");
+			const write = await serverHarness.writeMemory(
+				"Server harness fact: Simba self-host e2e proof second file",
+			);
 			expect(write).toBeDefined();
 
 			const recall = await serverHarness.recall("Simba self-host", 5);
@@ -38,12 +39,17 @@ describe("server real harness — http random port, memory.write+recall (ticket 
 		try {
 			await serverHarness.writeMemory("Cross-visibility server → core fact");
 
-			const core = await createRealCoreHarness({ tmpDir: serverHarness.tmpDir, projectId });
+			const core = await createRealCoreHarness({
+				tmpDir: serverHarness.tmpDir,
+				projectId,
+			});
 			try {
 				const items = await core.search("cross-visibility server");
 				if (items.length === 0) {
 					const snap = await core.snapshotFs();
-					expect(Object.values(snap).join("\n").toLowerCase()).toContain("cross-visibility");
+					expect(Object.values(snap).join("\n").toLowerCase()).toContain(
+						"cross-visibility",
+					);
 				} else {
 					expect(items.length).toBeGreaterThan(0);
 				}

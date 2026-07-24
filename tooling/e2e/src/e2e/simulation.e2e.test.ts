@@ -12,15 +12,18 @@
 
 import { describe, expect, it } from "vitest";
 
-import { assertGoldenSnapshot } from "../scenarios/golden-snapshots.js";
-import { runSeededLoopScenario } from "../sim/seeded-loop.js";
-import { runOrchestratorScenario } from "../sim/orchestrator.js";
+import { assertGoldenSnapshot } from "../scenarios/golden-snapshots";
+import { runOrchestratorScenario } from "../sim/orchestrator";
+import { runSeededLoopScenario } from "../sim/seeded-loop";
 
 describe("seeded-loop — deterministic PRNG 50-100 turns (ticket 66)", () => {
 	it("runs 50-100 turns with budget enforcement, validate pass, no data loss, no file leak", async () => {
 		const result = await runSeededLoopScenario();
 
-		expect(result.passed, `seeded-loop failed: ${JSON.stringify(result.details).slice(0, 1500)}`).toBe(true);
+		expect(
+			result.passed,
+			`seeded-loop failed: ${JSON.stringify(result.details).slice(0, 1500)}`,
+		).toBe(true);
 		expect(result.fileFirstTruth.hasMemofsDir).toBe(true);
 		expect(result.fileFirstTruth.hasManifest).toBe(true);
 		expect(result.fileFirstTruth.hasMemoryFiles).toBe(true);
@@ -50,7 +53,10 @@ describe("seeded-loop — deterministic PRNG 50-100 turns (ticket 66)", () => {
 		expect(stats.noFileLeak).toBe(true);
 
 		// Golden snapshot check (if exists, should pass required)
-		const goldenCheck = await assertGoldenSnapshot("seeded-loop", result.snapshot);
+		const goldenCheck = await assertGoldenSnapshot(
+			"seeded-loop",
+			result.snapshot,
+		);
 		// Golden may not yet exist on first run — if exists, must have no required mismatches
 		if (goldenCheck.goldenExists) {
 			expect(
@@ -65,7 +71,10 @@ describe("orchestrator — single tmpDir full cross-visibility proof (ticket 66)
 	it("CLI init → connectors ingest MSW → MCP remember → core recall → server serve → AgentFS → consolidate → failure injection → doctor, proving cross-visibility at each step", async () => {
 		const result = await runOrchestratorScenario();
 
-		expect(result.passed, `orchestrator failed: ${JSON.stringify(result.details).slice(0, 2000)}`).toBe(true);
+		expect(
+			result.passed,
+			`orchestrator failed: ${JSON.stringify(result.details).slice(0, 2000)}`,
+		).toBe(true);
 		expect(result.fileFirstTruth.hasMemofsDir).toBe(true);
 		expect(result.fileFirstTruth.hasManifest).toBe(true);
 		expect(result.fileFirstTruth.hasMemoryFiles).toBe(true);
@@ -75,16 +84,30 @@ describe("orchestrator — single tmpDir full cross-visibility proof (ticket 66)
 		const files = result.snapshot.files;
 		const hasManifest = files.some((f) => f.includes("manifest.json"));
 		const hasMemoryEvents = files.some((f) => f.includes("memory-events"));
-		const hasMemoryFiles = files.some((f) => f.includes(".memofs/memory") || f.includes("memory/"));
-		const hasChunks = files.some((f) => f.includes("chunks"));
-		const hasAgentFiles = files.some((f) => f.includes("agent-sessions") || f.includes("agents") || f.includes(".memofs/agents"));
+		const hasMemoryFiles = files.some(
+			(f) => f.includes(".memofs/memory") || f.includes("memory/"),
+		);
+		const _hasChunks = files.some((f) => f.includes("chunks"));
+		const hasAgentFiles = files.some(
+			(f) =>
+				f.includes("agent-sessions") ||
+				f.includes("agents") ||
+				f.includes(".memofs/agents"),
+		);
 
 		expect(hasManifest).toBe(true);
 		expect(hasMemoryFiles).toBe(true);
 		// memory-events may be present or not depending on implementation, but we assert if hasMemoryEvents check was true in result
-		expect(result.fileFirstTruth.hasMemoryEvents || hasMemoryEvents || hasMemoryFiles).toBe(true);
+		expect(
+			result.fileFirstTruth.hasMemoryEvents ||
+				hasMemoryEvents ||
+				hasMemoryFiles,
+		).toBe(true);
 		// chunks may not exist if no embedding, but we don't fail if missing — log
-		expect(hasAgentFiles, `expected agent files, got ${files.slice(0, 20).join(", ")}`).toBe(true);
+		expect(
+			hasAgentFiles,
+			`expected agent files, got ${files.slice(0, 20).join(", ")}`,
+		).toBe(true);
 
 		// Cross-visibility full proof
 		const details = result.details as unknown as {
@@ -108,7 +131,11 @@ describe("orchestrator — single tmpDir full cross-visibility proof (ticket 66)
 		expect(details.crossVisibilityFull.serverToCore).toBe(true);
 
 		// Search counts should be >0 or at least file content contains facts
-		expect(details.coreSearchCliCount + details.coreSearchMcpCount + details.coreSearchServerCount).toBeGreaterThanOrEqual(1);
+		expect(
+			details.coreSearchCliCount +
+				details.coreSearchMcpCount +
+				details.coreSearchServerCount,
+		).toBeGreaterThanOrEqual(1);
 		expect(details.finalSearchCount).toBeGreaterThan(0);
 
 		// Connector ingest proof — written >=0, secretRef opaque already asserted inside scenario
@@ -121,7 +148,10 @@ describe("orchestrator — single tmpDir full cross-visibility proof (ticket 66)
 		// Contract superset: search still works after full run => finalSearchCount >0 already asserted
 
 		// Golden snapshot
-		const goldenCheck = await assertGoldenSnapshot("orchestrator", result.snapshot);
+		const goldenCheck = await assertGoldenSnapshot(
+			"orchestrator",
+			result.snapshot,
+		);
 		if (goldenCheck.goldenExists) {
 			expect(
 				goldenCheck.mismatches.filter((m) => m.includes("required")).length,

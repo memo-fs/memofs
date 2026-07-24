@@ -14,13 +14,17 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { createRealCliHarness } from "../harness/cli-harness.js";
-import { createRealConnectorHarness } from "../harness/connector-harness.js";
-import { createRealCoreHarness } from "../harness/core-harness.js";
-import { createRealMcpStdioHarness } from "../harness/mcp-stdio-harness.js";
-import { createRealServerHarness } from "../harness/server-harness.js";
-import { buildFsSnapshot, type ScenarioOptions, type ScenarioResult } from "../scenarios/types.js";
-import { listFilesRecursive, snapshotFsRecursive } from "../harness/fs-helpers.js";
+import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealConnectorHarness } from "../harness/connector-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
+import { listFilesRecursive, snapshotFsRecursive } from "../harness/fs-helpers";
+import { createRealMcpStdioHarness } from "../harness/mcp-stdio-harness";
+import { createRealServerHarness } from "../harness/server-harness";
+import {
+	buildFsSnapshot,
+	type ScenarioOptions,
+	type ScenarioResult,
+} from "../scenarios/types";
 
 /**
  * Creates isolated base tmpDir shared across all surfaces for full cross-visibility proof.
@@ -38,7 +42,9 @@ async function createBaseTmpDir(prefix: string): Promise<string> {
  * @returns scenario result
  * @public
  */
-export async function runOrchestratorScenario(options: ScenarioOptions = {}): Promise<ScenarioResult> {
+export async function runOrchestratorScenario(
+	options: ScenarioOptions = {},
+): Promise<ScenarioResult> {
 	const projectId = options.projectId ?? `e2e-orchestrator-${Date.now()}`;
 	const basePrefix = options.prefix ?? "memofs-e2e-orchestrator-";
 
@@ -54,11 +60,16 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		// Step 1: CLI init --no-input --project-id
 		const cli = await createRealCliHarness({
 			tmpDir: sharedTmpDir,
-			prefix: basePrefix + "cli-",
+			prefix: `${basePrefix}cli-`,
 			env: { MEMOFS_PROJECT_ID: projectId },
 		});
 
-		const initRes = await cli.exec(["init", "--no-input", "--project-id", projectId]);
+		const initRes = await cli.exec([
+			"init",
+			"--no-input",
+			"--project-id",
+			projectId,
+		]);
 		if (initRes.exitCode !== 0) {
 			throw new Error(
 				`CLI init failed: exit ${initRes.exitCode} stdout=${initRes.stdout.slice(0, 500)} stderr=${initRes.stderr.slice(0, 500)}`,
@@ -70,7 +81,9 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const cliFact = `Orchestrator CLI fact: CLI init visible to core+MCP+server RUN_ID test-run-e2e-0021-orchestrator-cli-${Date.now()}`;
 		const cliRemember = await cli.exec(["remember", cliFact]);
 		if (cliRemember.exitCode !== 0) {
-			throw new Error(`CLI remember failed: ${cliRemember.stderr.slice(0, 500)}`);
+			throw new Error(
+				`CLI remember failed: ${cliRemember.stderr.slice(0, 500)}`,
+			);
 		}
 		details.cliFact = cliFact.slice(0, 80);
 
@@ -78,7 +91,7 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const connectorHarness = await createRealConnectorHarness({
 			tmpDir: sharedTmpDir,
 			projectId,
-			prefix: basePrefix + "connector-",
+			prefix: `${basePrefix}connector-`,
 		});
 		disposers.push(async () => {
 			try {
@@ -119,7 +132,8 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 			errors: firstIngest.errors?.length ?? 0,
 		};
 		if (firstIngest.written.length === 0) {
-			details.connectorFirstIngestWarning = "written 0, may be idempotent but expected >0 first run";
+			details.connectorFirstIngestWarning =
+				"written 0, may be idempotent but expected >0 first run";
 		}
 		details.connectorSecretRefOk = rawBefore.includes("secretRef");
 
@@ -127,7 +141,7 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const mcp = await createRealMcpStdioHarness({
 			tmpDir: sharedTmpDir,
 			projectId,
-			prefix: basePrefix + "mcp-",
+			prefix: `${basePrefix}mcp-`,
 		});
 		disposers.push(async () => {
 			try {
@@ -136,9 +150,14 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		});
 
 		const mcpFact = `Orchestrator MCP fact: MCP remember visible to core+server RUN_ID test-run-e2e-0021-orchestrator-mcp-${Date.now()}`;
-		const mcpRememberRes = await mcp.callTool("memofs.remember", { content: mcpFact, projectId });
+		const mcpRememberRes = await mcp.callTool("memofs.remember", {
+			content: mcpFact,
+			projectId,
+		});
 		if (mcpRememberRes.isError) {
-			throw new Error(`MCP remember failed: ${JSON.stringify(mcpRememberRes).slice(0, 500)}`);
+			throw new Error(
+				`MCP remember failed: ${JSON.stringify(mcpRememberRes).slice(0, 500)}`,
+			);
 		}
 		details.mcpRememberOk = true;
 
@@ -148,7 +167,9 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 			limit: 5,
 		});
 		if (mcpContextAfterCli.isError) {
-			details.mcpContextAfterCliError = JSON.stringify(mcpContextAfterCli).slice(0, 500);
+			details.mcpContextAfterCliError = JSON.stringify(
+				mcpContextAfterCli,
+			).slice(0, 500);
 		} else {
 			details.mcpContextAfterCliOk = true;
 		}
@@ -157,7 +178,7 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const core = await createRealCoreHarness({
 			tmpDir: sharedTmpDir,
 			projectId,
-			prefix: basePrefix + "core-",
+			prefix: `${basePrefix}core-`,
 		});
 		disposers.push(async () => {
 			try {
@@ -173,9 +194,15 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		details.coreSearchRunIdCount = coreSearchRunId.length;
 
 		const snapshotAfterMcp = await core.snapshotFs();
-		const allContentAfterMcp = Object.values(snapshotAfterMcp).join("\n").toLowerCase();
-		const cliVisible = allContentAfterMcp.includes("orchestrator cli fact") || coreSearchCli.length > 0;
-		const mcpVisible = allContentAfterMcp.includes("orchestrator mcp fact") || coreSearchMcp.length > 0;
+		const allContentAfterMcp = Object.values(snapshotAfterMcp)
+			.join("\n")
+			.toLowerCase();
+		const cliVisible =
+			allContentAfterMcp.includes("orchestrator cli fact") ||
+			coreSearchCli.length > 0;
+		const mcpVisible =
+			allContentAfterMcp.includes("orchestrator mcp fact") ||
+			coreSearchMcp.length > 0;
 
 		if (!cliVisible) {
 			throw new Error("Cross-visibility failed: CLI fact not visible to core");
@@ -190,7 +217,7 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const server = await createRealServerHarness({
 			tmpDir: sharedTmpDir,
 			projectId,
-			prefix: basePrefix + "server-",
+			prefix: `${basePrefix}server-`,
 		});
 		disposers.push(async () => {
 			try {
@@ -222,8 +249,12 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const coreSearchServer = await core.search("Orchestrator server fact");
 		details.coreSearchServerCount = coreSearchServer.length;
 		const snapshotAfterServer = await core.snapshotFs();
-		const allAfterServer = Object.values(snapshotAfterServer).join("\n").toLowerCase();
-		const serverVisibleToCore = allAfterServer.includes("orchestrator server fact") || coreSearchServer.length > 0;
+		const allAfterServer = Object.values(snapshotAfterServer)
+			.join("\n")
+			.toLowerCase();
+		const serverVisibleToCore =
+			allAfterServer.includes("orchestrator server fact") ||
+			coreSearchServer.length > 0;
 		if (!serverVisibleToCore) {
 			throw new Error("server→core cross-visibility failed");
 		}
@@ -239,7 +270,8 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 			working: { notes: string; plan: string };
 			output: { summary: string };
 		};
-		const notesPath = paths?.working?.notes ?? `/agent-sessions/${sessionId}/working/notes.md`;
+		const notesPath =
+			paths?.working?.notes ?? `/agent-sessions/${sessionId}/working/notes.md`;
 
 		await core.client.agentfs.writeFile({
 			sessionId,
@@ -253,30 +285,47 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 			content: `\nAppended orchestrator step at ${new Date().toISOString()}`,
 		});
 
-		const readBack = await core.client.agentfs.readFile({ sessionId, path: notesPath });
-		details.agentFsReadLength = (readBack as { content: string }).content?.length ?? 0;
+		const readBack = await core.client.agentfs.readFile({
+			sessionId,
+			path: notesPath,
+		});
+		details.agentFsReadLength =
+			(readBack as { content: string }).content?.length ?? 0;
 
 		const extractRes = await core.client.agentfs.extract({ sessionId });
 		details.agentFsExtractOk = Boolean(extractRes);
 
-		await core.client.agentfs.complete({ sessionId, extractDurableMemory: false });
+		await core.client.agentfs.complete({
+			sessionId,
+			extractDurableMemory: false,
+		});
 		details.agentFsCompleteOk = true;
 
 		// Also via MCP AgentFS to prove MCP path
-		const mcpAgentStart = await mcp.callTool("memofs_agent_session_start", { task: "orchestrator MCP AgentFS" });
+		const mcpAgentStart = await mcp.callTool("memofs_agent_session_start", {
+			task: "orchestrator MCP AgentFS",
+		});
 		if (!mcpAgentStart.isError) {
 			const sc = mcpAgentStart as unknown as {
-				structuredContent: { sessionId: string; paths: { working: { notes: string } } };
+				structuredContent: {
+					sessionId: string;
+					paths: { working: { notes: string } };
+				};
 			};
 			const mcpSessionId = sc?.structuredContent?.sessionId;
-			const mcpNotesPath = sc?.structuredContent?.paths?.working?.notes ?? `/agent-sessions/${mcpSessionId}/working/notes.md`;
+			const mcpNotesPath =
+				sc?.structuredContent?.paths?.working?.notes ??
+				`/agent-sessions/${mcpSessionId}/working/notes.md`;
 			if (mcpSessionId) {
 				await mcp.callTool("memofs_agent_session_write", {
 					sessionId: mcpSessionId,
 					path: mcpNotesPath,
 					content: "# MCP orchestrator AgentFS\nSimba orchestrates",
 				});
-				await mcp.callTool("memofs_agent_session_complete", { sessionId: mcpSessionId, extractDurableMemory: false });
+				await mcp.callTool("memofs_agent_session_complete", {
+					sessionId: mcpSessionId,
+					extractDurableMemory: false,
+				});
 				details.mcpAgentFsOk = true;
 			}
 		}
@@ -301,7 +350,10 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const searchAfterConsolidate = await core.search("Orchestrator CLI fact");
 		if (searchAfterConsolidate.length === 0) {
 			const snap = await core.snapshotFs();
-			const contains = Object.values(snap).join("\n").toLowerCase().includes("orchestrator cli fact");
+			const contains = Object.values(snap)
+				.join("\n")
+				.toLowerCase()
+				.includes("orchestrator cli fact");
 			if (!contains) {
 				throw new Error("no data loss check failed after consolidate");
 			}
@@ -311,9 +363,17 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		// Step 8: Failure injection — partial .tmp file
 		const fs = await import("node:fs/promises");
 		const path = await import("node:path");
-		const partialTmpPath = path.join(sharedTmpDir, ".memofs", "partial-write-orchestrator.tmp");
+		const partialTmpPath = path.join(
+			sharedTmpDir,
+			".memofs",
+			"partial-write-orchestrator.tmp",
+		);
 		try {
-			await fs.writeFile(partialTmpPath, "partial content mid-write simulation", "utf8");
+			await fs.writeFile(
+				partialTmpPath,
+				"partial content mid-write simulation",
+				"utf8",
+			);
 			details.partialTmpCreated = true;
 			await fs.unlink(partialTmpPath);
 			details.partialTmpCleaned = true;
@@ -342,11 +402,16 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		// Step 9: Doctor — run CLI doctor --json and validate --json
 		const doctorRes = await cli.exec(["doctor", "--json"]);
 		details.doctorExitCode = doctorRes.exitCode;
-		details.doctorOutputSnippet = (doctorRes.stdout + doctorRes.stderr).slice(0, 500);
+		details.doctorOutputSnippet = (doctorRes.stdout + doctorRes.stderr).slice(
+			0,
+			500,
+		);
 
 		const validateRes = await cli.exec(["validate", "--json"]);
 		details.validateExitCode = validateRes.exitCode;
-		details.validateOutputSnippet = (validateRes.stdout + validateRes.stderr).slice(0, 500);
+		details.validateOutputSnippet = (
+			validateRes.stdout + validateRes.stderr
+		).slice(0, 500);
 
 		// Restore core.md if corrupted
 		if (coreMdBackup && coreMdPathUsed) {
@@ -360,7 +425,7 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const finalCore = await createRealCoreHarness({
 			tmpDir: sharedTmpDir,
 			projectId,
-			prefix: basePrefix + "core-final-",
+			prefix: `${basePrefix}core-final-`,
 		});
 		disposers.push(async () => {
 			try {
@@ -373,8 +438,13 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		if (finalSearch.length === 0) {
 			const snap = await finalCore.snapshotFs();
 			const all = Object.values(snap).join("\n").toLowerCase();
-			if (!all.includes("orchestrator cli fact") && !all.includes("orchestrator mcp fact")) {
-				throw new Error("final no-data-loss check failed: orchestrator facts missing after failure injection+doctor");
+			if (
+				!all.includes("orchestrator cli fact") &&
+				!all.includes("orchestrator mcp fact")
+			) {
+				throw new Error(
+					"final no-data-loss check failed: orchestrator facts missing after failure injection+doctor",
+				);
 			}
 		}
 
@@ -386,10 +456,17 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 		const hasMemofsDir = finalFiles.some((f) => f.startsWith(".memofs/"));
 		const hasManifest = finalFiles.some((f) => f.includes("manifest.json"));
 		const hasMemoryEvents = finalFiles.some((f) => f.includes("memory-events"));
-		const hasMemoryFiles = finalFiles.some((f) => f.includes(".memofs/memory") || f.includes("memory/"));
-		const hasChunks = finalFiles.some((f) => f.includes("chunks/") || f.includes("chunk"));
+		const hasMemoryFiles = finalFiles.some(
+			(f) => f.includes(".memofs/memory") || f.includes("memory/"),
+		);
+		const hasChunks = finalFiles.some(
+			(f) => f.includes("chunks/") || f.includes("chunk"),
+		);
 		const hasAgentFiles = finalFiles.some(
-			(f) => f.includes("agent-sessions") || f.includes("agents") || f.includes(".memofs/agents"),
+			(f) =>
+				f.includes("agent-sessions") ||
+				f.includes("agents") ||
+				f.includes(".memofs/agents"),
 		);
 
 		if (!hasMemofsDir) throw new Error(".memofs/ missing final");
@@ -412,7 +489,8 @@ export async function runOrchestratorScenario(options: ScenarioOptions = {}): Pr
 			cliToServer: Boolean(details.serverRecallOk), // server recall proves server reads CLI fact via shared fs
 			mcpToServer: Boolean(details.serverRecallOk && details.mcpRememberOk),
 			connectorsToCore:
-				(details.connectorFirstIngest as { written: number } | undefined)?.written !== undefined &&
+				(details.connectorFirstIngest as { written: number } | undefined)
+					?.written !== undefined &&
 				(details.coreSearchRunIdCount as number) > 0,
 		};
 

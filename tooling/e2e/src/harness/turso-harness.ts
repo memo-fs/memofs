@@ -19,15 +19,13 @@
 import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
 
 /**
  * DDL for `project_files` — mirrors integration test in adapter-turso.
@@ -62,17 +60,22 @@ export type TursoRealHarness = RealHarness & {
 		execute: (stmt: unknown) => Promise<{ rows: unknown[] }>;
 		close: () => void;
 		// other methods present but not typed strictly
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[key: string]: any;
+		[key: string]: unknown;
 	};
 	/** Real metadata store from adapter-turso (implements MinimalMetadataStore). */
 	metadataStore: {
-		getEntry: (path: string) => Promise<{ sha256: string; blobKey: string; sizeBytes: number } | undefined>;
-		upsertEntry: (path: string, entry: { sha256: string; blobKey: string; sizeBytes: number }) => Promise<void>;
+		getEntry: (
+			path: string,
+		) => Promise<
+			{ sha256: string; blobKey: string; sizeBytes: number } | undefined
+		>;
+		upsertEntry: (
+			path: string,
+			entry: { sha256: string; blobKey: string; sizeBytes: number },
+		) => Promise<void>;
 		removeEntry: (path: string) => Promise<void>;
 		withTransaction?: <T>(fn: (tx: unknown) => Promise<T>) => Promise<T>;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[key: string]: any;
+		[key: string]: unknown;
 	};
 	/** Ensures `project_files` table exists (idempotent). */
 	ensureSchema: () => Promise<void>;
@@ -103,7 +106,9 @@ export type CreateRealTursoHarnessOptions = {
  * Ensures schema via direct SQL execution.
  * @param client - libSQL client
  */
-async function ensureSchemaOnClient(client: { execute: (sql: string) => Promise<unknown> }): Promise<void> {
+async function ensureSchemaOnClient(client: {
+	execute: (sql: string) => Promise<unknown>;
+}): Promise<void> {
 	for (const sql of PROJECT_FILES_DDL) {
 		await client.execute(sql);
 	}
@@ -157,10 +162,12 @@ export async function createRealTursoHarness(
 	let createClient: (config: { url: string; timeout?: number }) => {
 		execute: (stmt: unknown) => Promise<{ rows: unknown[] }>;
 		close: () => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[key: string]: any;
+		[key: string]: unknown;
 	};
-	let createTursoMetadataStore: (opts: { client: unknown; projectId: string }) => TursoRealHarness["metadataStore"];
+	let createTursoMetadataStore: (opts: {
+		client: unknown;
+		projectId: string;
+	}) => TursoRealHarness["metadataStore"];
 
 	try {
 		const libsqlMod = (await import("@libsql/client")) as unknown as {
@@ -186,7 +193,10 @@ export async function createRealTursoHarness(
 
 	let client = createClient({ url: `file:${dbPath}`, timeout: 5000 });
 	await ensureSchemaOnClient(client as never);
-	let metadataStore = createTursoMetadataStore({ client: client as never, projectId });
+	let metadataStore = createTursoMetadataStore({
+		client: client as never,
+		projectId,
+	});
 
 	let cleaned = false;
 
@@ -197,7 +207,8 @@ export async function createRealTursoHarness(
 		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 	const listFiles = async (): Promise<string[]> => listFilesRecursive(tmpDir);
-	const snapshotFs = async (): Promise<Record<string, string>> => snapshotFsRecursive(tmpDir);
+	const snapshotFs = async (): Promise<Record<string, string>> =>
+		snapshotFsRecursive(tmpDir);
 
 	const ensureSchema = async (): Promise<void> => {
 		await ensureSchemaOnClient(client as never);
@@ -241,7 +252,10 @@ export async function createRealTursoHarness(
 		await closeClient();
 		client = createClient({ url: `file:${dbPath}`, timeout: 5000 });
 		await ensureSchemaOnClient(client as never);
-		metadataStore = createTursoMetadataStore({ client: client as never, projectId });
+		metadataStore = createTursoMetadataStore({
+			client: client as never,
+			projectId,
+		});
 		harness.client = client as TursoRealHarness["client"];
 		harness.metadataStore = metadataStore;
 	};

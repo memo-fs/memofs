@@ -10,10 +10,10 @@
 
 import { setupServer } from "msw/node";
 
-import { githubHandlers } from "./handlers/github.js";
-import { notionHandlers } from "./handlers/notion.js";
-import { openaiHandlers } from "./handlers/openai.js";
-import { voyageHandlers } from "./handlers/voyage.js";
+import { githubHandlers } from "./handlers/github";
+import { notionHandlers } from "./handlers/notion";
+import { openaiHandlers } from "./handlers/openai";
+import { voyageHandlers } from "./handlers/voyage";
 
 /** All MSW handlers combined — GitHub, Notion, OpenAI, Voyage. */
 export const allHandlers = [

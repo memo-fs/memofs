@@ -21,20 +21,18 @@
  * @public
  */
 
-import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -126,8 +124,7 @@ export type TransformersRealHarness = RealHarness & {
 		prewarm?: () => Promise<void>;
 		dimensions?: number;
 		modelName?: string;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		[key: string]: any;
+		[key: string]: unknown;
 	};
 	/** Convenience: embedTexts -> embeddings array. */
 	embed: (texts: string[]) => Promise<number[][]>;
@@ -225,7 +222,9 @@ export async function createRealTransformersHarness(
 	}
 
 	// Dynamic import adapter
-	let createTransformersEmbedder: (opts: Record<string, unknown>) => TransformersRealHarness["embedder"];
+	let createTransformersEmbedder: (
+		opts: Record<string, unknown>,
+	) => TransformersRealHarness["embedder"];
 	try {
 		const mod = (await import("@memofs/adapter-transformers")) as unknown as {
 			createTransformersEmbedder: typeof createTransformersEmbedder;
@@ -249,7 +248,9 @@ export async function createRealTransformersHarness(
 		embedderOptions.pipelineFactory = options.pipelineFactory;
 	}
 
-	const embedder = createTransformersEmbedder(embedderOptions) as TransformersRealHarness["embedder"];
+	const embedder = createTransformersEmbedder(
+		embedderOptions,
+	) as TransformersRealHarness["embedder"];
 
 	let cleaned = false;
 
@@ -260,7 +261,8 @@ export async function createRealTransformersHarness(
 		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 	const listFiles = async (): Promise<string[]> => listFilesRecursive(tmpDir);
-	const snapshotFs = async (): Promise<Record<string, string>> => snapshotFsRecursive(tmpDir);
+	const snapshotFs = async (): Promise<Record<string, string>> =>
+		snapshotFsRecursive(tmpDir);
 
 	const embed = async (texts: string[]): Promise<number[][]> => {
 		const result = await embedder.embedTexts({
@@ -269,7 +271,9 @@ export async function createRealTransformersHarness(
 			expectedDimensions: dimensions,
 		});
 		// Batch order preserved via index — sort by original index, then map
-		const sorted = [...result.embeddings].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+		const sorted = [...result.embeddings].sort(
+			(a, b) => (a.index ?? 0) - (b.index ?? 0),
+		);
 		return sorted.map((e) => e.embedding);
 	};
 
@@ -283,7 +287,9 @@ export async function createRealTransformersHarness(
 		}
 	};
 
-	const createOfflineReuse = async (): Promise<TransformersRealHarness["embedder"]> => {
+	const createOfflineReuse = async (): Promise<
+		TransformersRealHarness["embedder"]
+	> => {
 		// New embedder with same cacheDir — should hit cache
 		const offlineEmbedder = createTransformersEmbedder({
 			model,
@@ -291,7 +297,9 @@ export async function createRealTransformersHarness(
 			device: options.device ?? "cpu",
 			dtype: options.dtype ?? "fp32",
 			batchSize: options.batchSize ?? 32,
-			...(options.pipelineFactory ? { pipelineFactory: options.pipelineFactory } : {}),
+			...(options.pipelineFactory
+				? { pipelineFactory: options.pipelineFactory }
+				: {}),
 		}) as TransformersRealHarness["embedder"];
 		return offlineEmbedder;
 	};
@@ -336,11 +344,15 @@ export async function createRealTransformersHarness(
  * Exported for reuse in contract superset tests.
  * @public
  */
-export async function assertTransformersValidationBehavior(embedder: TransformersRealHarness["embedder"]): Promise<void> {
+export async function assertTransformersValidationBehavior(
+	embedder: TransformersRealHarness["embedder"],
+): Promise<void> {
 	// Empty input should return empty embeddings (per embedder-contract.ts)
 	const emptyResult = await embedder.embedTexts({ texts: [] });
 	if (emptyResult.embeddings.length !== 0) {
-		throw new Error("Transformers validation: expected empty input to yield 0 embeddings");
+		throw new Error(
+			"Transformers validation: expected empty input to yield 0 embeddings",
+		);
 	}
 
 	// >8192 char should throw TransformersValidationError (per docs)
@@ -352,6 +364,8 @@ export async function assertTransformersValidationBehavior(embedder: Transformer
 		threw = true;
 	}
 	if (!threw) {
-		throw new Error(`Transformers validation: expected >${MAX_TEXT_LENGTH} char to throw`);
+		throw new Error(
+			`Transformers validation: expected >${MAX_TEXT_LENGTH} char to throw`,
+		);
 	}
 }

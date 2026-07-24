@@ -19,28 +19,32 @@
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
 
 /**
  * Minimal R2Bucket surface consumed by adapter-r2.
  * Matches what createR2BlobClient calls: get/put/delete, get returns object with arrayBuffer().
  */
 type R2BucketSurface = {
-	get: (key: string) => Promise<{ arrayBuffer: () => Promise<ArrayBuffer> } | null>;
+	get: (
+		key: string,
+	) => Promise<{ arrayBuffer: () => Promise<ArrayBuffer> } | null>;
 	put: (key: string, body: unknown) => Promise<void>;
 	delete: (key: string) => Promise<void>;
 };
 
 /** Creates an in-memory fake R2 bucket (fallback when Miniflare unavailable). */
-function createFakeR2Bucket(): { bucket: R2BucketSurface; objects: Map<string, ArrayBuffer>; dispose: () => Promise<void> } {
+function createFakeR2Bucket(): {
+	bucket: R2BucketSurface;
+	objects: Map<string, ArrayBuffer>;
+	dispose: () => Promise<void>;
+} {
 	const objects = new Map<string, ArrayBuffer>();
 
 	function r2Object(body: ArrayBuffer) {
@@ -58,7 +62,10 @@ function createFakeR2Bucket(): { bucket: R2BucketSurface; objects: Map<string, A
 		if (typeof Blob !== "undefined" && body instanceof Blob) {
 			return (body as Blob).arrayBuffer();
 		}
-		if (typeof ReadableStream !== "undefined" && body instanceof ReadableStream) {
+		if (
+			typeof ReadableStream !== "undefined" &&
+			body instanceof ReadableStream
+		) {
 			const reader = (body as ReadableStream<Uint8Array>).getReader();
 			const chunks: Uint8Array[] = [];
 			let total = 0;
@@ -118,11 +125,17 @@ export type R2RealHarness = RealHarness & {
 	/** Bucket binding (real Miniflare R2Bucket or fake). */
 	bucket: R2BucketSurface;
 	/** Underlying Miniflare instance when used, else undefined. */
-	miniflare?: { dispose: () => Promise<void>; getR2Bucket: (name: string) => Promise<R2BucketSurface> } & { [k: string]: unknown };
+	miniflare?: {
+		dispose: () => Promise<void>;
+		getR2Bucket: (name: string) => Promise<R2BucketSurface>;
+	} & { [k: string]: unknown };
 	/** Real blob client from adapter-r2. */
 	blobClient: {
 		get: (key: string) => Promise<ArrayBuffer | null>;
-		put: (key: string, body: BufferSource | ReadableStream<Uint8Array>) => Promise<void>;
+		put: (
+			key: string,
+			body: BufferSource | ReadableStream<Uint8Array>,
+		) => Promise<void>;
 		delete: (key: string) => Promise<void>;
 	};
 	/** Whether Miniflare was successfully used (true) or fake fallback (false). */
@@ -153,15 +166,28 @@ export type CreateRealR2HarnessOptions = {
  * Falls back to fake bucket on any failure (workerd missing, import error, etc.).
  */
 async function tryCreateMiniflareBucket(bucketName: string): Promise<
-	{ bucket: R2BucketSurface; miniflare: R2RealHarness["miniflare"]; isMiniflare: true } | { bucket: null; isMiniflare: false }
+	| {
+			bucket: R2BucketSurface;
+			miniflare: R2RealHarness["miniflare"];
+			isMiniflare: true;
+	  }
+	| { bucket: null; isMiniflare: false }
 > {
-	if (typeof process !== "undefined" && process.env.MEMOFS_E2E_R2_FAKE === "1") {
+	if (
+		typeof process !== "undefined" &&
+		process.env.MEMOFS_E2E_R2_FAKE === "1"
+	) {
 		return { bucket: null, isMiniflare: false };
 	}
 	try {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const mod = (await import("miniflare")) as any;
-		const Miniflare = mod.Miniflare as new (opts: unknown) => {
+		const mod = (await import("miniflare")) as unknown as Record<
+			string,
+			unknown
+		>;
+		const Miniflare = (mod as { Miniflare: new (opts: unknown) => unknown })
+			.Miniflare as unknown as new (
+			opts: unknown,
+		) => {
 			getR2Bucket: (name: string) => Promise<R2BucketSurface>;
 			dispose: () => Promise<void>;
 		};
@@ -178,7 +204,11 @@ async function tryCreateMiniflareBucket(bucketName: string): Promise<
 			await mf.dispose();
 			return { bucket: null, isMiniflare: false };
 		}
-		return { bucket, miniflare: mf as R2RealHarness["miniflare"], isMiniflare: true as const };
+		return {
+			bucket,
+			miniflare: mf as R2RealHarness["miniflare"],
+			isMiniflare: true as const,
+		};
 	} catch {
 		return { bucket: null, isMiniflare: false };
 	}
@@ -234,7 +264,9 @@ export async function createRealR2Harness(
 	}
 
 	// Dynamic import adapter-r2
-	let createR2BlobClient: (opts: { binding: unknown }) => R2RealHarness["blobClient"];
+	let createR2BlobClient: (opts: {
+		binding: unknown;
+	}) => R2RealHarness["blobClient"];
 	try {
 		const mod = (await import("@memofs/adapter-r2")) as unknown as {
 			createR2BlobClient: typeof createR2BlobClient;
@@ -257,7 +289,8 @@ export async function createRealR2Harness(
 		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 	const listFiles = async (): Promise<string[]> => listFilesRecursive(tmpDir);
-	const snapshotFs = async (): Promise<Record<string, string>> => snapshotFsRecursive(tmpDir);
+	const snapshotFs = async (): Promise<Record<string, string>> =>
+		snapshotFsRecursive(tmpDir);
 
 	const close = async (): Promise<void> => {
 		if (fakeDispose) {

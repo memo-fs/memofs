@@ -12,12 +12,11 @@
  */
 
 import { describe, expect, it } from "vitest";
-
-import { createRealCoreHarness } from "../index.js";
-import { createRealCliHarness } from "../harness/cli-harness.js";
-import { createRealMcpHttpHarness } from "../harness/mcp-http-harness.js";
-import { createRealMcpStdioHarness } from "../harness/mcp-stdio-harness.js";
-import { createRealServerHarness } from "../harness/server-harness.js";
+import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealMcpHttpHarness } from "../harness/mcp-http-harness";
+import { createRealMcpStdioHarness } from "../harness/mcp-stdio-harness";
+import { createRealServerHarness } from "../harness/server-harness";
+import { createRealCoreHarness } from "../index";
 
 describe("mcp stdio real harness — handshake, tool discovery, cross-visibility (ticket 62)", () => {
 	it("lists tools (4 memory verbs + 6 AgentFS), resources, prompts per docs", async () => {
@@ -54,12 +53,20 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 
 	it("CLI remember → MCP context cross-visibility same tmpDir", async () => {
 		const projectId = `e2e-mcp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-		const cli = await createRealCliHarness({ env: { MEMOFS_PROJECT_ID: projectId } });
+		const cli = await createRealCliHarness({
+			env: { MEMOFS_PROJECT_ID: projectId },
+		});
 		try {
-			const init = await cli.exec(["init", "--no-input", "--project-id", projectId]);
+			const init = await cli.exec([
+				"init",
+				"--no-input",
+				"--project-id",
+				projectId,
+			]);
 			expect(init.exitCode).toBe(0);
 
-			const fact = "MCP cross-visibility fact: CLI writes, MCP reads same tmpDir with TypeScript";
+			const fact =
+				"MCP cross-visibility fact: CLI writes, MCP reads same tmpDir with TypeScript";
 
 			const remember = await cli.exec(["remember", fact]);
 			expect(remember.exitCode).toBe(0);
@@ -71,7 +78,10 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 			});
 			try {
 				// memofs.context query should find CLI fact
-				const ctxResult = await mcp.callTool("memofs.context", { query: "cross-visibility TypeScript", projectId });
+				const ctxResult = await mcp.callTool("memofs.context", {
+					query: "cross-visibility TypeScript",
+					projectId,
+				});
 				expect(ctxResult).toBeDefined();
 				expect(ctxResult.isError).toBeFalsy();
 
@@ -109,14 +119,23 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 				task: "e2e AgentFS test task",
 			});
 			expect(startRes.isError).toBeFalsy();
-			const sc = (startRes as any).structuredContent as any;
-			const sessionId: string = sc?.sessionId ?? "";
-			expect(sessionId, `sessionId missing in ${JSON.stringify(startRes).slice(0, 500)}`).toBeTruthy();
+			const structuredContent = (startRes as { structuredContent?: unknown })
+				.structuredContent as
+				| {
+						sessionId?: string;
+						paths?: { working?: { notes?: string } };
+				  }
+				| undefined;
+			const sessionId: string = structuredContent?.sessionId ?? "";
+			expect(
+				sessionId,
+				`sessionId missing in ${JSON.stringify(startRes).slice(0, 500)}`,
+			).toBeTruthy();
 
 			// The writable paths are returned in structuredContent.paths.working/output
 			// Use full absolute-like path which contains "/working/" substring required by core assert
 			const workingNotesPath: string =
-				sc?.paths?.working?.notes ??
+				structuredContent?.paths?.working?.notes ??
 				`/agent-sessions/${sessionId}/working/notes.md`;
 
 			// write file (full path)
@@ -125,7 +144,10 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 				path: workingNotesPath,
 				content: "# E2E notes\nSimba prefers TS",
 			});
-			expect(writeRes.isError, `write failed: ${JSON.stringify(writeRes).slice(0, 500)}`).toBeFalsy();
+			expect(
+				writeRes.isError,
+				`write failed: ${JSON.stringify(writeRes).slice(0, 500)}`,
+			).toBeFalsy();
 
 			// append same file
 			const appendRes = await harness.callTool("memofs_agent_session_append", {
@@ -146,22 +168,31 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 			expect(readContent).toContain("appended");
 
 			// extract
-			const extractRes = await harness.callTool("memofs_agent_session_extract", {
-				sessionId,
-			});
+			const extractRes = await harness.callTool(
+				"memofs_agent_session_extract",
+				{
+					sessionId,
+				},
+			);
 			expect(extractRes.isError).toBeFalsy();
 
 			// traversal attempt should fail without touching outside
-			const filesBefore = await harness.listFiles();
-			const outsideAttempt = await harness.callTool("memofs_agent_session_write", {
-				sessionId,
-				path: "../../outside.txt",
-				content: "should not escape",
-			});
-			const outsideIsError = (outsideAttempt as any).isError === true;
-			expect(outsideIsError, `traversal should be blocked: ${JSON.stringify(outsideAttempt).slice(0, 500)}`).toBe(true);
+			const _filesBefore = await harness.listFiles();
+			const outsideAttempt = await harness.callTool(
+				"memofs_agent_session_write",
+				{
+					sessionId,
+					path: "../../outside.txt",
+					content: "should not escape",
+				},
+			);
+			const outsideIsError = outsideAttempt.isError === true;
+			expect(
+				outsideIsError,
+				`traversal should be blocked: ${JSON.stringify(outsideAttempt).slice(0, 500)}`,
+			).toBe(true);
 
-			const filesAfter = await harness.listFiles();
+			const _filesAfter = await harness.listFiles();
 
 			// Ensure no file outside tmpDir was created
 			const outsideAbsCandidate = `${harness.tmpDir}/outside.txt`;
@@ -185,15 +216,20 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 			}
 
 			// complete
-			const completeRes = await harness.callTool("memofs_agent_session_complete", {
-				sessionId,
-				extractDurableMemory: false,
-			});
+			const completeRes = await harness.callTool(
+				"memofs_agent_session_complete",
+				{
+					sessionId,
+					extractDurableMemory: false,
+				},
+			);
 			expect(completeRes.isError).toBeFalsy();
 
 			// File-first truth: agent session files exist
 			const snap = await harness.snapshotFs();
-			const hasAgentFiles = Object.keys(snap).some((k) => k.includes("agent-sessions") || k.includes(".memofs"));
+			const hasAgentFiles = Object.keys(snap).some(
+				(k) => k.includes("agent-sessions") || k.includes(".memofs"),
+			);
 			expect(hasAgentFiles).toBe(true);
 		} finally {
 			await harness.cleanup();
@@ -204,20 +240,26 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 		const roHarness = await createRealMcpStdioHarness({ readOnly: true });
 		try {
 			// read should pass and may bootstrap .memofs — snapshot after read
-			const readResult = await roHarness.callTool("memofs.context", { query: "test" });
+			const readResult = await roHarness.callTool("memofs.context", {
+				query: "test",
+			});
 			expect(readResult.isError).toBeFalsy();
 
 			const filesBefore = await roHarness.snapshotFs();
 
 			// write should fail
-			const writeResult = await roHarness.callTool("memofs.remember", { content: "should be blocked" });
+			const writeResult = await roHarness.callTool("memofs.remember", {
+				content: "should be blocked",
+			});
 			expect(writeResult.isError).toBe(true);
 			const writeText = JSON.stringify(writeResult).toLowerCase();
 			expect(writeText).toMatch(/read-only|blocked|authorization/);
 
 			// files unchanged after blocked write
 			const filesAfter = await roHarness.snapshotFs();
-			expect(Object.keys(filesAfter).length).toBe(Object.keys(filesBefore).length);
+			expect(Object.keys(filesAfter).length).toBe(
+				Object.keys(filesBefore).length,
+			);
 			// Also ensure .memofs still exists (read didn't wipe)
 			await roHarness.assertFileExists(".memofs");
 		} finally {
@@ -228,7 +270,13 @@ describe("mcp stdio real harness — handshake, tool discovery, cross-visibility
 	it("cleanup kills child process + removes tmpDir", async () => {
 		const harness = await createRealMcpStdioHarness();
 		const dir = harness.tmpDir;
-		const transportPid = (harness.transport as any)?._process?.pid ?? (harness.transport as any)?.pid;
+		type TransportWithProcess = {
+			_process?: { pid?: number };
+			pid?: number;
+		};
+		const transportPid =
+			(harness.transport as unknown as TransportWithProcess)?._process?.pid ??
+			(harness.transport as unknown as TransportWithProcess)?.pid;
 		// Ensure process exists pre-cleanup (if transport exposes)
 		if (transportPid) {
 			expect(typeof transportPid).toBe("number");
@@ -250,11 +298,16 @@ describe("mcp http real harness — boot Node http random port, json-rpc memory.
 			expect(mcpHttp.port).toBeGreaterThan(0);
 
 			// Write via tools/call memofs.remember
-			const writeRes = (await mcpHttp.callTool("memofs.remember", { content: "HTTP harness fact: Simba likes e2e over http" })) as { isError?: boolean };
+			const writeRes = (await mcpHttp.callTool("memofs.remember", {
+				content: "HTTP harness fact: Simba likes e2e over http",
+			})) as { isError?: boolean };
 			expect(writeRes.isError).toBeFalsy();
 
 			// Recall via tools/call memofs.recall
-			const recallRes = (await mcpHttp.callTool("memofs.recall", { query: "Simba e2e http", limit: 5 })) as { isError?: boolean };
+			const recallRes = (await mcpHttp.callTool("memofs.recall", {
+				query: "Simba e2e http",
+				limit: 5,
+			})) as { isError?: boolean };
 			expect(recallRes.isError).toBeFalsy();
 			const recallText = JSON.stringify(recallRes).toLowerCase();
 			// Should contain fact or at least not error
@@ -273,14 +326,21 @@ describe("mcp http real harness — boot Node http random port, json-rpc memory.
 		const projectId = `e2e-mcp-http-${Date.now()}`;
 		const mcpHttp = await createRealMcpHttpHarness({ projectId });
 		try {
-			await mcpHttp.callTool("memofs.remember", { content: "Cross-visibility http → core fact" });
+			await mcpHttp.callTool("memofs.remember", {
+				content: "Cross-visibility http → core fact",
+			});
 
-			const core = await createRealCoreHarness({ tmpDir: mcpHttp.tmpDir, projectId });
+			const core = await createRealCoreHarness({
+				tmpDir: mcpHttp.tmpDir,
+				projectId,
+			});
 			try {
 				const items = await core.search("cross-visibility http");
 				if (items.length === 0) {
 					const snap = await core.snapshotFs();
-					expect(Object.values(snap).join("\n").toLowerCase()).toContain("cross-visibility");
+					expect(Object.values(snap).join("\n").toLowerCase()).toContain(
+						"cross-visibility",
+					);
 				} else {
 					expect(items.length).toBeGreaterThan(0);
 				}
@@ -301,13 +361,18 @@ describe("server real harness — boot Node http random port, memory.write+recal
 			expect(serverHarness.port).toBeGreaterThan(0);
 
 			// Write via server rpc
-			const write = await serverHarness.writeMemory("Server harness fact: Simba self-host e2e proof");
+			const write = await serverHarness.writeMemory(
+				"Server harness fact: Simba self-host e2e proof",
+			);
 			expect(write).toBeDefined();
 
 			// Recall
 			const recall = await serverHarness.recall("Simba self-host", 5);
 			expect(recall).toBeDefined();
-			const recallObj = recall as { items?: unknown[]; result?: { items?: unknown[] } };
+			const recallObj = recall as {
+				items?: unknown[];
+				result?: { items?: unknown[] };
+			};
 			const recallItems = recallObj.items ?? recallObj.result?.items ?? [];
 			if (Array.isArray(recallItems) && recallItems.length > 0) {
 				expect(JSON.stringify(recallItems).toLowerCase()).toContain("simba");

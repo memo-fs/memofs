@@ -11,20 +11,18 @@
  */
 
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { mkdir, mkdtemp, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,12 +95,19 @@ function resolveCliBin(explicit?: string): string {
 	const candidates: string[] = [];
 
 	// From file location: tooling/e2e/src/harness -> root (4 levels)
-	const fromFileRoot = resolve(__dirname, "../../../../packages/cli/dist/bin/memofs.mjs");
+	const fromFileRoot = resolve(
+		__dirname,
+		"../../../../packages/cli/dist/bin/memofs.mjs",
+	);
 	const fromFileRootCliLegacy = resolve(
 		__dirname,
 		"../../../../packages/cli/dist/bin/memofs-cli.mjs",
 	);
-	const fromFileRootAlt = resolve(__dirname, "../../../..", "packages/cli/dist/bin/memofs.mjs");
+	const fromFileRootAlt = resolve(
+		__dirname,
+		"../../../..",
+		"packages/cli/dist/bin/memofs.mjs",
+	);
 	candidates.push(fromFileRoot, fromFileRootCliLegacy, fromFileRootAlt);
 
 	// From current working directory (vitest may run with cwd = repo root or package root)
@@ -206,7 +211,7 @@ export async function createRealCliHarness(
 
 		// Build env: isolate, disable color for stable JSON parsing
 		const env: Record<string, string> = {
-			...process.env as Record<string, string>,
+			...(process.env as Record<string, string>),
 			MEMOFS_ROOT: tmpDir,
 			MEMOFS_HOME: tmpDir, // legacy ticket name, harmless
 			NO_COLOR: "1",
@@ -280,7 +285,9 @@ export async function createRealCliHarness(
 	try {
 		await stat(cliBin);
 	} catch {
-		throw new Error(`CliRealHarness: cliBin does not exist after resolution: ${cliBin}`);
+		throw new Error(
+			`CliRealHarness: cliBin does not exist after resolution: ${cliBin}`,
+		);
 	}
 
 	return {

@@ -23,7 +23,7 @@ import {
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
+} from "./fs-helpers";
 
 /**
  * Options for Voyage embedder harness.
@@ -88,8 +88,11 @@ export async function createRealVoyageHarness(
 	const embedder = createVoyageEmbedder({
 		apiKey,
 		model,
-		...(options.outputDimension ? { outputDimension: options.outputDimension as never } : {}),
-		fetch: (...args: Parameters<typeof fetch>) => (globalThis.fetch as typeof fetch)(...args),
+		...(options.outputDimension
+			? { outputDimension: options.outputDimension as never }
+			: {}),
+		fetch: (...args: Parameters<typeof fetch>) =>
+			(globalThis.fetch as typeof fetch)(...args),
 	});
 
 	let cleaned = false;
@@ -124,7 +127,8 @@ export async function createRealVoyageRerankHarness(
 	const reranker = createVoyageReranker({
 		apiKey,
 		model,
-		fetch: (...args: Parameters<typeof fetch>) => (globalThis.fetch as typeof fetch)(...args),
+		fetch: (...args: Parameters<typeof fetch>) =>
+			(globalThis.fetch as typeof fetch)(...args),
 	});
 
 	let cleaned = false;
@@ -151,7 +155,11 @@ export function assertNoTokenLeak(error: unknown): void {
 	if (/sk-[A-Za-z0-9_-]{20,}/.test(msg)) {
 		throw new Error(`Voyage error leaks token: ${msg}`);
 	}
-	if (msg.includes("test-token-***") && msg.includes("Bearer test-token-***") && msg.length > 1000) {
+	if (
+		msg.includes("test-token-***") &&
+		msg.includes("Bearer test-token-***") &&
+		msg.length > 1000
+	) {
 		// redacted token presence is okay, but raw token not
 	}
 }

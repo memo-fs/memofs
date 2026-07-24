@@ -14,24 +14,21 @@
  *   batch order preserved, empty + >8192 validation, passes defineEmbedderContractTests
  */
 
-import { describe, expect, it, beforeAll } from "vitest";
-
-import { createRealCoreHarness } from "../index.js";
-import { createRealTursoHarness } from "../harness/turso-harness.js";
-import { createRealR2Harness } from "../harness/r2-harness.js";
-import {
-	createRealTransformersHarness,
-	assertTransformersValidationBehavior,
-} from "../harness/transformers-harness.js";
-
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 import { createFakePipelineFactory } from "@memofs/adapter-transformers/testing";
-
 import {
-	defineMetadataStoreContractTests,
 	defineBlobClientContractTests,
 	defineEmbedderContractTests,
+	defineMetadataStoreContractTests,
 } from "@memofs/testing";
+import { describe, expect, it } from "vitest";
+import { createRealR2Harness } from "../harness/r2-harness";
+import {
+	assertTransformersValidationBehavior,
+	createRealTransformersHarness,
+} from "../harness/transformers-harness";
+import { createRealTursoHarness } from "../harness/turso-harness";
+import { createRealCoreHarness } from "../index";
 
 // ---------------------------------------------------------------------------
 // Turso real harness — file DB, ensureSchema, persist across restart
@@ -106,13 +103,17 @@ describe("adapters real harness — Turso file (ticket 63)", () => {
 				expect(coreFiles.some((f) => f.startsWith(".memofs/"))).toBe(true);
 
 				// Turso entry still readable after core write
-				const entry = await turso.metadataStore.getEntry(".memofs/memory/core.md");
+				const entry = await turso.metadataStore.getEntry(
+					".memofs/memory/core.md",
+				);
 				expect(entry?.sha256).toBe("b".repeat(64));
 
 				// Snapshot captures both
 				const snap = await turso.snapshotFs();
 				expect(Object.keys(snap).some((k) => k.includes("test.db"))).toBe(true);
-				expect(Object.keys(snap).some((k) => k.startsWith(".memofs/"))).toBe(true);
+				expect(Object.keys(snap).some((k) => k.startsWith(".memofs/"))).toBe(
+					true,
+				);
 			} finally {
 				// core cleanup is same dir — only turso cleans after
 				// Avoid double rm race: let turso handle final cleanup, core just dispose store
@@ -128,7 +129,9 @@ describe("adapters real harness — Turso file (ticket 63)", () => {
 	// Contract superset: real impl still satisfies contract tests
 	describe("contract superset — Turso", () => {
 		// Fresh harness per contract scenario; contract helper calls createMetadataStore per it
-		let lastHarness: Awaited<ReturnType<typeof createRealTursoHarness>> | undefined;
+		let lastHarness:
+			| Awaited<ReturnType<typeof createRealTursoHarness>>
+			| undefined;
 		defineMetadataStoreContractTests({
 			name: "createTursoMetadataStore (real file)",
 			createMetadataStore: async () => {
@@ -213,7 +216,9 @@ describe("adapters real harness — R2 Miniflare (ticket 63)", () => {
 				expect(got).not.toBeNull();
 
 				const snap = await r2.snapshotFs();
-				expect(Object.keys(snap).some((k) => k.startsWith(".memofs/"))).toBe(true);
+				expect(Object.keys(snap).some((k) => k.startsWith(".memofs/"))).toBe(
+					true,
+				);
 			} finally {
 				try {
 					await core.store.dispose?.();
@@ -234,7 +239,9 @@ describe("adapters real harness — R2 Miniflare (ticket 63)", () => {
 
 	// Contract superset: passes defineBlobClientContractTests
 	describe("contract superset — R2", () => {
-		let lastHarness: Awaited<ReturnType<typeof createRealR2Harness>> | undefined;
+		let lastHarness:
+			| Awaited<ReturnType<typeof createRealR2Harness>>
+			| undefined;
 		defineBlobClientContractTests({
 			name: "createR2BlobClient (real Miniflare or fake fallback)",
 			createBlobClient: async () => {
@@ -280,7 +287,9 @@ describe("adapters real harness — Transformers tiny (ticket 63)", () => {
 			expect(harness.dimensions).toBe(384);
 
 			// First run — may download. Embed single
-			let single: Awaited<ReturnType<(typeof harness)["embedder"]["embedTexts"]>>;
+			let single: Awaited<
+				ReturnType<(typeof harness)["embedder"]["embedTexts"]>
+			>;
 			try {
 				single = await harness.embedder.embedTexts({
 					texts: ["hello world MemoFS e2e"],
@@ -360,7 +369,11 @@ describe("adapters real harness — Transformers tiny (ticket 63)", () => {
 				await assertTransformersValidationBehavior(harness.embedder);
 			} catch (e) {
 				const msg = (e as Error).message;
-				if (msg.includes("no network") || msg.includes("Failed to load") || msg.includes("fetch")) {
+				if (
+					msg.includes("no network") ||
+					msg.includes("Failed to load") ||
+					msg.includes("fetch")
+				) {
 					// Real model unavailable — prove validation using a fake factory that still validates via adapter class
 					// Create a fake-pipeline harness that still goes through validateTexts path
 					const { createFakePipelineFactory } = (await import(
@@ -370,10 +383,11 @@ describe("adapters real harness — Transformers tiny (ticket 63)", () => {
 					}))) as { createFakePipelineFactory?: (opts: unknown) => unknown };
 
 					if (createFakePipelineFactory) {
+						const fakeFactory = createFakePipelineFactory({
+							dimensions: 384,
+						});
 						const fakeHarness = await createRealTransformersHarness({
-							pipelineFactory: (createFakePipelineFactory as any)({
-								dimensions: 384,
-							}) as any,
+							pipelineFactory: fakeFactory,
 							cacheDir: harness.cacheDir,
 						});
 						try {
@@ -400,11 +414,11 @@ describe("adapters real harness — Transformers tiny (ticket 63)", () => {
 			name: "createTransformersEmbedder (fake pipeline 384-d, shares validation/batch path with real)",
 			createEmbedder: () =>
 				createTransformersEmbedder({
-					pipelineFactory: (createFakePipelineFactory as any)({
+					pipelineFactory: createFakePipelineFactory({
 						dimensions: 384,
-					}) as any,
+					}),
 					model: "fake/Xenova/all-MiniLM-L6-v2",
-				} as any) as never,
+				} as unknown as never) as never,
 			expectedDimensions: 384,
 			supportsEmbedText: true,
 			rejectsEmptyText: true,
@@ -434,8 +448,12 @@ describe("adapters real harness — file-first truth + cross-visibility aggregat
 				const snapshot = await core.snapshotFs();
 
 				// Should contain .memofs/ and test.db
-				expect(Object.keys(snapshot).some((k) => k.includes("test.db"))).toBe(true);
-				expect(Object.keys(snapshot).some((k) => k.startsWith(".memofs/"))).toBe(true);
+				expect(Object.keys(snapshot).some((k) => k.includes("test.db"))).toBe(
+					true,
+				);
+				expect(
+					Object.keys(snapshot).some((k) => k.startsWith(".memofs/")),
+				).toBe(true);
 
 				// Files list also
 				const files = await core.listFiles();

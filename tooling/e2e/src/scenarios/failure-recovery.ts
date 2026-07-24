@@ -14,13 +14,17 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 
-import { createRealCliHarness } from "../harness/cli-harness.js";
-import { createRealConnectorHarness } from "../harness/connector-harness.js";
-import { createRealCoreHarness } from "../harness/core-harness.js";
-import { mswServer } from "../msw/server.js";
-import { buildFsSnapshot, type ScenarioOptions, type ScenarioResult } from "./types.js";
+import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealConnectorHarness } from "../harness/connector-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
+import { mswServer } from "../msw/server";
+import {
+	buildFsSnapshot,
+	type ScenarioOptions,
+	type ScenarioResult,
+} from "./types";
 
 /**
  * Runs failure-recovery scenario.
@@ -40,18 +44,28 @@ export async function runFailureRecoveryScenario(
 		env: { MEMOFS_PROJECT_ID: projectId },
 	});
 
-	let tmpDir = cli.tmpDir;
+	const tmpDir = cli.tmpDir;
 	const details: Record<string, unknown> = {};
 	let passed = true;
 
 	try {
 		// Step 1: Init + 5 remembers (baseline)
-		const init = await cli.exec(["init", "--no-input", "--project-id", projectId]);
-		if (init.exitCode !== 0) throw new Error(`init failed: ${init.stderr.slice(0, 300)}`);
+		const init = await cli.exec([
+			"init",
+			"--no-input",
+			"--project-id",
+			projectId,
+		]);
+		if (init.exitCode !== 0)
+			throw new Error(`init failed: ${init.stderr.slice(0, 300)}`);
 
 		for (let i = 0; i < 5; i++) {
-			const r = await cli.exec(["remember", `Failure recovery baseline fact ${i} RUN_ID test-run-e2e-0021-failure-0${i}`]);
-			if (r.exitCode !== 0) throw new Error(`baseline remember ${i} failed: ${r.stderr}`);
+			const r = await cli.exec([
+				"remember",
+				`Failure recovery baseline fact ${i} RUN_ID test-run-e2e-0021-failure-0${i}`,
+			]);
+			if (r.exitCode !== 0)
+				throw new Error(`baseline remember ${i} failed: ${r.stderr}`);
 		}
 
 		const core = await createRealCoreHarness({ tmpDir, projectId });
@@ -65,10 +79,19 @@ export async function runFailureRecoveryScenario(
 
 			// Step 2: Simulate kill mid-write — write partial file directly via fs, then ensure validate still works
 			// We create a stray .tmp file in memory dir that looks like interrupted write
-			const filesBefore = await core.listFiles();
-			const partialPath = join(tmpDir, ".memofs", "memory", "partial-write-interrupted.tmp");
+			const _filesBefore = await core.listFiles();
+			const partialPath = join(
+				tmpDir,
+				".memofs",
+				"memory",
+				"partial-write-interrupted.tmp",
+			);
 			try {
-				await writeFile(partialPath, "partial content that should be ignored", "utf8");
+				await writeFile(
+					partialPath,
+					"partial content that should be ignored",
+					"utf8",
+				);
 				details.partialFileCreated = true;
 			} catch {
 				details.partialFileCreated = false;
@@ -78,7 +101,9 @@ export async function runFailureRecoveryScenario(
 			const searchAfterPartial = await core.search("Failure recovery");
 			details.searchAfterPartial = searchAfterPartial.length;
 			if (searchAfterPartial.length === 0) {
-				throw new Error("search after partial file creation returned 0 — indicates data loss");
+				throw new Error(
+					"search after partial file creation returned 0 — indicates data loss",
+				);
 			}
 
 			// Cleanup partial file (simulate recovery)
@@ -93,7 +118,10 @@ export async function runFailureRecoveryScenario(
 			// Step 3: Corrupt core.md (or manifest) — then doctor/validate should detect actionable error
 			// Find core.md equivalent: check .memofs/memory/core.md or .memofs/core.md
 			const allFiles = await core.listFiles();
-			const coreMdCandidate = allFiles.find((f) => f.endsWith("core.md")) ?? allFiles.find((f) => f.includes("core")) ?? null;
+			const coreMdCandidate =
+				allFiles.find((f) => f.endsWith("core.md")) ??
+				allFiles.find((f) => f.includes("core")) ??
+				null;
 
 			let corruptedPath: string | null = null;
 			let originalContent: string | null = null;
@@ -103,7 +131,11 @@ export async function runFailureRecoveryScenario(
 				try {
 					originalContent = await readFile(corruptedPath, "utf8");
 					// Corrupt by writing invalid content but not empty (to trigger validate)
-					await writeFile(corruptedPath, "CORRUPTED!!! <<<<< not valid markdown frontmatter", "utf8");
+					await writeFile(
+						corruptedPath,
+						"CORRUPTED!!! <<<<< not valid markdown frontmatter",
+						"utf8",
+					);
 					details.corruptedFile = coreMdCandidate;
 				} catch {
 					corruptedPath = null;
@@ -129,9 +161,9 @@ export async function runFailureRecoveryScenario(
 			details.doctorStdoutSlice = doctorRes.stdout.slice(0, 500);
 			details.doctorStderrSlice = doctorRes.stderr.slice(0, 500);
 
-			let doctorParsed: unknown = null;
+			let _doctorParsed: unknown = null;
 			try {
-				doctorParsed = JSON.parse(doctorRes.stdout);
+				_doctorParsed = JSON.parse(doctorRes.stdout);
 				details.doctorParsed = true;
 			} catch {
 				details.doctorParsed = false;
@@ -142,7 +174,10 @@ export async function runFailureRecoveryScenario(
 			if (corruptedPath) {
 				// At least output should contain code or message about corruption
 				const combined = (doctorRes.stdout + doctorRes.stderr).toLowerCase();
-				details.doctorCombinedContainsError = combined.includes("error") || combined.includes("invalid") || combined.includes("missing");
+				details.doctorCombinedContainsError =
+					combined.includes("error") ||
+					combined.includes("invalid") ||
+					combined.includes("missing");
 				// We don't fail test if doctor still passes for core.md (core.md may not be required), but we need actionable path later
 			}
 
@@ -162,9 +197,13 @@ export async function runFailureRecoveryScenario(
 				if (doctorAfterRestore.exitCode !== 0) {
 					// Try to parse for details
 					try {
-						const parsed = JSON.parse(doctorAfterRestore.stdout) as { ok?: boolean };
+						const parsed = JSON.parse(doctorAfterRestore.stdout) as {
+							ok?: boolean;
+						};
 						if (parsed.ok === false) {
-							throw new Error(`doctor after restore still failing: ${doctorAfterRestore.stdout.slice(0, 500)}`);
+							throw new Error(
+								`doctor after restore still failing: ${doctorAfterRestore.stdout.slice(0, 500)}`,
+							);
 						}
 					} catch {
 						// If parse fails but exit non-zero, maybe still error
@@ -178,10 +217,14 @@ export async function runFailureRecoveryScenario(
 				}
 
 				// Search after restore should still find baseline facts — no data loss
-				const searchAfterRestore = await core.search("Failure recovery baseline");
+				const searchAfterRestore = await core.search(
+					"Failure recovery baseline",
+				);
 				details.searchAfterRestore = searchAfterRestore.length;
 				if (searchAfterRestore.length === 0) {
-					throw new Error("search after restore returned 0 — silent data loss after corruption recovery");
+					throw new Error(
+						"search after restore returned 0 — silent data loss after corruption recovery",
+					);
 				}
 			}
 
@@ -207,7 +250,14 @@ export async function runFailureRecoveryScenario(
 				mswServer.use(
 					http.post("https://api.github.com/graphql", () => {
 						return HttpResponse.json(
-							{ errors: [{ message: "Internal server error — simulated failure (redacted)" }] },
+							{
+								errors: [
+									{
+										message:
+											"Internal server error — simulated failure (redacted)",
+									},
+								],
+							},
 							{ status: 500 },
 						);
 					}),
@@ -226,7 +276,10 @@ export async function runFailureRecoveryScenario(
 				// Ensure actionable error message
 				if (failRun.errors && failRun.errors.length > 0) {
 					const errMsg = JSON.stringify(failRun.errors).toLowerCase();
-					details.failRunErrorMessageContainsActionable = errMsg.includes("error") || errMsg.includes("failed") || errMsg.includes("500");
+					details.failRunErrorMessageContainsActionable =
+						errMsg.includes("error") ||
+						errMsg.includes("failed") ||
+						errMsg.includes("500");
 				}
 
 				// Reset MSW to original fixtures (bypass)
@@ -238,7 +291,10 @@ export async function runFailureRecoveryScenario(
 				details.successRunWritten = successRun.written.length;
 				details.successRunErrors = successRun.errors?.length ?? 0;
 
-				if (successRun.written.length === 0 && successRun.errors?.length === 0) {
+				if (
+					successRun.written.length === 0 &&
+					successRun.errors?.length === 0
+				) {
 					// Might be dedup after previous failure? But we expect written >0 if first failure had 0
 					// Not fatal
 				}
@@ -248,7 +304,9 @@ export async function runFailureRecoveryScenario(
 				const parentOutside = join(tmpDir, "..", "outside-failure-test.txt");
 				try {
 					await stat(parentOutside);
-					throw new Error("file leak detected outside tmpDir after MSW failure");
+					throw new Error(
+						"file leak detected outside tmpDir after MSW failure",
+					);
 				} catch (e) {
 					if ((e as Error).message.includes("file leak")) throw e;
 					// expected not exists

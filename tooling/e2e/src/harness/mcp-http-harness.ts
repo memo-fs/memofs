@@ -10,20 +10,22 @@
  * Node-only.
  */
 
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import {
+	createServer,
+	type IncomingMessage,
+	type ServerResponse,
+} from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
+import type { RealHarness } from "./core-harness";
 import {
 	assertFileExistsAt,
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
-import { headersToObject, readBody } from "./http-helpers.js";
-
-import type { RealHarness } from "./core-harness.js";
+} from "./fs-helpers";
+import { headersToObject, readBody } from "./http-helpers";
 
 export type McpHttpHarness = RealHarness & {
 	/** Base URL e.g. http://127.0.0.1:43821/ */
@@ -33,7 +35,11 @@ export type McpHttpHarness = RealHarness & {
 	/** Underlying http.Server (for advanced). */
 	server: ReturnType<typeof createServer>;
 	/** JSON-RPC POST helper. */
-	rpc: (method: string, params?: Record<string, unknown>, id?: number | string) => Promise<unknown>;
+	rpc: (
+		method: string,
+		params?: Record<string, unknown>,
+		id?: number | string,
+	) => Promise<unknown>;
 	/** Call a tool via tools/call. */
 	callTool: (name: string, args?: Record<string, unknown>) => Promise<unknown>;
 	/** List tools. */
@@ -51,8 +57,6 @@ export type CreateRealMcpHttpHarnessOptions = {
 	env?: Record<string, string>;
 };
 
-
-
 /**
  * Creates a real MCP HTTP harness with isolated tmpDir and random port.
  * @public
@@ -65,7 +69,9 @@ export async function createRealMcpHttpHarness(
 	if (options.tmpDir) await mkdir(tmpDir, { recursive: true });
 
 	// Dynamic import to avoid bundling issues + allow CJS interop
-	const { createMemoFSMcpRuntimeFromConfig } = await import("@memofs/mcp-server");
+	const { createMemoFSMcpRuntimeFromConfig } = await import(
+		"@memofs/mcp-server"
+	);
 	const { handleMemoFSMcpRequest } = await import("@memofs/mcp-server/http");
 
 	const runtime = createMemoFSMcpRuntimeFromConfig({
@@ -83,7 +89,10 @@ export async function createRealMcpHttpHarness(
 		void (async () => {
 			try {
 				const method = req.method ?? "GET";
-				const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "127.0.0.1"}`);
+				const url = new URL(
+					req.url ?? "/",
+					`http://${req.headers.host ?? "127.0.0.1"}`,
+				);
 				const headers = new Headers();
 				for (const [key, value] of Object.entries(req.headers)) {
 					if (Array.isArray(value)) {
@@ -118,7 +127,8 @@ export async function createRealMcpHttpHarness(
 				res.end(buf);
 			} catch (err) {
 				console.error("[mcp-http-harness] request failed", err);
-				if (!res.headersSent) res.writeHead(500, { "Content-Type": "text/plain" });
+				if (!res.headersSent)
+					res.writeHead(500, { "Content-Type": "text/plain" });
 				res.end("Internal server error");
 			}
 		})();
@@ -150,9 +160,14 @@ export async function createRealMcpHttpHarness(
 		await assertFileNotExistsAt(tmpDir, relPath);
 	};
 	const listFiles = async (): Promise<string[]> => listFilesRecursive(tmpDir);
-	const snapshotFs = async (): Promise<Record<string, string>> => snapshotFsRecursive(tmpDir);
+	const snapshotFs = async (): Promise<Record<string, string>> =>
+		snapshotFsRecursive(tmpDir);
 
-	const rpc = async (method: string, params: Record<string, unknown> = {}, id: number | string = 1): Promise<unknown> => {
+	const rpc = async (
+		method: string,
+		params: Record<string, unknown> = {},
+		id: number | string = 1,
+	): Promise<unknown> => {
 		const body = JSON.stringify({ jsonrpc: "2.0", id, method, params });
 		const res = await fetch(url, {
 			method: "POST",
@@ -167,7 +182,9 @@ export async function createRealMcpHttpHarness(
 		try {
 			json = JSON.parse(text) as unknown;
 		} catch {
-			throw new Error(`McpHttpHarness: invalid JSON response status=${res.status} body=${text.slice(0, 500)}`);
+			throw new Error(
+				`McpHttpHarness: invalid JSON response status=${res.status} body=${text.slice(0, 500)}`,
+			);
 		}
 		if (typeof json === "object" && json !== null && "error" in json) {
 			return json;
@@ -184,7 +201,10 @@ export async function createRealMcpHttpHarness(
 		return [];
 	};
 
-	const callTool = async (name: string, args: Record<string, unknown> = {}): Promise<unknown> => {
+	const callTool = async (
+		name: string,
+		args: Record<string, unknown> = {},
+	): Promise<unknown> => {
 		const result = await rpc("tools/call", { name, arguments: args });
 		return result;
 	};

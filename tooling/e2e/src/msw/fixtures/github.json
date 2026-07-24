@@ -1,92 +1,92 @@
 {
-  "runId": "test-run-e2e-0021-001",
-  "api": "github-graphql",
-  "sanitized": true,
-  "secretRedacted": "test-token-***",
-  "payload": {
-    "data": {
-      "repository": {
-        "issues": {
-          "pageInfo": {
-            "hasNextPage": false,
-            "endCursor": null
-          },
-          "nodes": [
-            {
-              "number": 1,
-              "title": "Fix bug A [RUN_ID test-run-e2e-0021-001]",
-              "body": "This is issue 1 body. Contains sanitized content. Original token redacted to test-token-***. RUN_ID: test-run-e2e-0021-001",
-              "url": "https://github.com/example/repo/issues/1",
-              "state": "OPEN",
-              "createdAt": "2024-01-01T00:00:00Z",
-              "author": {
-                "login": "alice"
-              },
-              "labels": {
-                "nodes": [
-                  {
-                    "name": "bug"
-                  },
-                  {
-                    "name": "e2e"
-                  }
-                ]
-              }
-            },
-            {
-              "number": 2,
-              "title": "Add feature B",
-              "body": "Second issue body for e2e fixture. RUN_ID test-run-e2e-0021-001",
-              "url": "https://github.com/example/repo/issues/2",
-              "state": "CLOSED",
-              "createdAt": "2024-01-02T12:00:00Z",
-              "author": {
-                "login": "bob"
-              },
-              "labels": {
-                "nodes": [
-                  {
-                    "name": "enhancement"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "pullRequests": {
-          "pageInfo": {
-            "hasNextPage": false,
-            "endCursor": null
-          },
-          "nodes": [
-            {
-              "number": 10,
-              "title": "PR: Improve harness",
-              "body": "PR body. RUN_ID test-run-e2e-0021-001. Token redacted test-token-***",
-              "url": "https://github.com/example/repo/pull/10",
-              "state": "OPEN",
-              "createdAt": "2024-01-03T00:00:00Z",
-              "author": {
-                "login": "carol"
-              },
-              "labels": {
-                "nodes": [
-                  {
-                    "name": "e2e"
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "discussions": {
-          "pageInfo": {
-            "hasNextPage": false,
-            "endCursor": null
-          },
-          "nodes": []
-        }
-      }
-    }
-  }
+	"runId": "test-run-e2e-0021-001",
+	"api": "github-graphql",
+	"sanitized": true,
+	"secretRedacted": "test-token-***",
+	"payload": {
+		"data": {
+			"repository": {
+				"issues": {
+					"pageInfo": {
+						"hasNextPage": false,
+						"endCursor": null
+					},
+					"nodes": [
+						{
+							"number": 1,
+							"title": "Fix bug A [RUN_ID test-run-e2e-0021-001]",
+							"body": "This is issue 1 body. Contains sanitized content. Original token redacted to test-token-***. RUN_ID: test-run-e2e-0021-001",
+							"url": "https://github.com/example/repo/issues/1",
+							"state": "OPEN",
+							"createdAt": "2024-01-01T00:00:00Z",
+							"author": {
+								"login": "alice"
+							},
+							"labels": {
+								"nodes": [
+									{
+										"name": "bug"
+									},
+									{
+										"name": "e2e"
+									}
+								]
+							}
+						},
+						{
+							"number": 2,
+							"title": "Add feature B",
+							"body": "Second issue body for e2e fixture. RUN_ID test-run-e2e-0021-001",
+							"url": "https://github.com/example/repo/issues/2",
+							"state": "CLOSED",
+							"createdAt": "2024-01-02T12:00:00Z",
+							"author": {
+								"login": "bob"
+							},
+							"labels": {
+								"nodes": [
+									{
+										"name": "enhancement"
+									}
+								]
+							}
+						}
+					]
+				},
+				"pullRequests": {
+					"pageInfo": {
+						"hasNextPage": false,
+						"endCursor": null
+					},
+					"nodes": [
+						{
+							"number": 10,
+							"title": "PR: Improve harness",
+							"body": "PR body. RUN_ID test-run-e2e-0021-001. Token redacted test-token-***",
+							"url": "https://github.com/example/repo/pull/10",
+							"state": "OPEN",
+							"createdAt": "2024-01-03T00:00:00Z",
+							"author": {
+								"login": "carol"
+							},
+							"labels": {
+								"nodes": [
+									{
+										"name": "e2e"
+									}
+								]
+							}
+						}
+					]
+				},
+				"discussions": {
+					"pageInfo": {
+						"hasNextPage": false,
+						"endCursor": null
+					},
+					"nodes": []
+				}
+			}
+		}
+	}
 }

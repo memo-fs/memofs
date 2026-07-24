@@ -13,9 +13,13 @@
  * @public
  */
 
-import { createRealConnectorHarness } from "../harness/connector-harness.js";
-import { createRealCoreHarness } from "../harness/core-harness.js";
-import { buildFsSnapshot, type ScenarioOptions, type ScenarioResult } from "./types.js";
+import { createRealConnectorHarness } from "../harness/connector-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
+import {
+	buildFsSnapshot,
+	type ScenarioOptions,
+	type ScenarioResult,
+} from "./types";
 
 /**
  * Runs connectors-merge scenario.
@@ -60,7 +64,9 @@ export async function runConnectorsMergeScenario(
 		// Assert opaque secretRef never raw token — connectors.json must not contain raw token, only secretRef
 		const rawConnectors = await harness.readConnectorsFileRaw();
 		if (rawConnectors.includes("test-token-***")) {
-			throw new Error("connectors.json leaked raw token test-token-***, should only have secretRef");
+			throw new Error(
+				"connectors.json leaked raw token test-token-***, should only have secretRef",
+			);
 		}
 		if (!rawConnectors.includes("secretRef")) {
 			throw new Error("connectors.json missing secretRef, expected opaque ref");
@@ -75,12 +81,16 @@ export async function runConnectorsMergeScenario(
 		};
 
 		if (firstRun.written.length === 0) {
-			throw new Error(`first run should write >0, got 0: ${JSON.stringify(firstRun).slice(0, 500)}`);
+			throw new Error(
+				`first run should write >0, got 0: ${JSON.stringify(firstRun).slice(0, 500)}`,
+			);
 		}
 
 		// Step 3: File-first truth after first ingest
 		const filesAfterFirst = await harness.listFiles();
-		const memAfterFirst = filesAfterFirst.filter((f) => f.includes("memory") || f.includes(".memofs")).length;
+		const memAfterFirst = filesAfterFirst.filter(
+			(f) => f.includes("memory") || f.includes(".memofs"),
+		).length;
 		details.filesAfterFirstCount = filesAfterFirst.length;
 		details.memFilesAfterFirst = memAfterFirst;
 
@@ -92,7 +102,9 @@ export async function runConnectorsMergeScenario(
 		const snapshotAfterFirst = await harness.snapshotFs();
 		const allContentFirst = Object.values(snapshotAfterFirst).join("\n");
 		if (!allContentFirst.includes("test-run-e2e-0021")) {
-			throw new Error("first ingest snapshot missing RUN_ID test-run-e2e-0021, expected fixture content");
+			throw new Error(
+				"first ingest snapshot missing RUN_ID test-run-e2e-0021, expected fixture content",
+			);
 		}
 
 		// Step 4: Second run idempotent — should skip unchanged
@@ -107,7 +119,9 @@ export async function runConnectorsMergeScenario(
 			// Second run should write 0 if dedup works, at least not write more than first
 			// Allow but log — dedup may not be perfect if timestamp changes; we assert skipped >= first written
 			if (secondRun.skipped.length < firstRun.written.length) {
-				throw new Error(`second run expected idempotent: written=${secondRun.written.length} skipped=${secondRun.skipped.length} but first written=${firstRun.written.length}`);
+				throw new Error(
+					`second run expected idempotent: written=${secondRun.written.length} skipped=${secondRun.skipped.length} but first written=${firstRun.written.length}`,
+				);
 			}
 		}
 
@@ -118,7 +132,9 @@ export async function runConnectorsMergeScenario(
 		});
 
 		try {
-			await core.remember("Local merge fact: Simba merges connector ingest with local memory RUN_ID test-run-e2e-0021-merge-01");
+			await core.remember(
+				"Local merge fact: Simba merges connector ingest with local memory RUN_ID test-run-e2e-0021-merge-01",
+			);
 
 			// Search should find both connector fact and local fact
 			const searchLocal = await core.search("Simba local merge");
@@ -132,7 +148,9 @@ export async function runConnectorsMergeScenario(
 				const snap = await core.snapshotFs();
 				const all = Object.values(snap).join("\n").toLowerCase();
 				if (!all.includes("local merge") && !all.includes("fix bug")) {
-					throw new Error("local merge + connector search both 0 and snapshot missing both");
+					throw new Error(
+						"local merge + connector search both 0 and snapshot missing both",
+					);
 				}
 			}
 
@@ -144,7 +162,9 @@ export async function runConnectorsMergeScenario(
 			const hasMemofsDir = finalFiles.some((f) => f.startsWith(".memofs/"));
 			const hasManifest = finalFiles.some((f) => f.includes("manifest.json"));
 			const hasEvents = finalFiles.some((f) => f.includes("memory-events"));
-			const hasMemoryFiles = finalFiles.some((f) => f.includes("memory") && f.endsWith(".md"));
+			const hasMemoryFiles = finalFiles.some(
+				(f) => f.includes("memory") && f.endsWith(".md"),
+			);
 			const fileCountGreaterThanZero = finalFiles.length > 0;
 
 			return {
@@ -161,7 +181,12 @@ export async function runConnectorsMergeScenario(
 				crossVisibility: {
 					cliToCore: true,
 					coreToCli: true,
-					coreToConnector: searchConnector.length > 0 || Object.values(finalSnapshot).join("\n").toLowerCase().includes("fix bug"),
+					coreToConnector:
+						searchConnector.length > 0 ||
+						Object.values(finalSnapshot)
+							.join("\n")
+							.toLowerCase()
+							.includes("fix bug"),
 				},
 				snapshot: fsSnapshot,
 				details: {

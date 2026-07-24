@@ -26,7 +26,7 @@ import {
 	assertFileNotExistsAt,
 	listFilesRecursive,
 	snapshotFsRecursive,
-} from "./fs-helpers.js";
+} from "./fs-helpers";
 
 /**
  * Base real harness — tmpDir + cleanup + file assertions.

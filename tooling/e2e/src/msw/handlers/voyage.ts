@@ -9,11 +9,23 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-const embedFixturePath = join(__dirname, "..", "fixtures", "voyage", "embed.json");
-const rerankFixturePath = join(__dirname, "..", "fixtures", "voyage", "rerank.json");
+const embedFixturePath = join(
+	__dirname,
+	"..",
+	"fixtures",
+	"voyage",
+	"embed.json",
+);
+const rerankFixturePath = join(
+	__dirname,
+	"..",
+	"fixtures",
+	"voyage",
+	"rerank.json",
+);
 
 type VoyageEmbedFixtureFile = {
 	runId: string;
@@ -41,7 +53,9 @@ type VoyageRerankFixtureFile = {
 
 function loadEmbed(): VoyageEmbedFixtureFile | null {
 	try {
-		return JSON.parse(readFileSync(embedFixturePath, "utf8")) as VoyageEmbedFixtureFile;
+		return JSON.parse(
+			readFileSync(embedFixturePath, "utf8"),
+		) as VoyageEmbedFixtureFile;
 	} catch {
 		return null;
 	}
@@ -49,7 +63,9 @@ function loadEmbed(): VoyageEmbedFixtureFile | null {
 
 function loadRerank(): VoyageRerankFixtureFile | null {
 	try {
-		return JSON.parse(readFileSync(rerankFixturePath, "utf8")) as VoyageRerankFixtureFile;
+		return JSON.parse(
+			readFileSync(rerankFixturePath, "utf8"),
+		) as VoyageRerankFixtureFile;
 	} catch {
 		return null;
 	}
@@ -61,7 +77,8 @@ const originalRerank = loadRerank();
 function generateEmbedding(dim: number, seed: number): number[] {
 	const out: number[] = new Array(dim);
 	for (let i = 0; i < dim; i++) {
-		const v = Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
+		const v =
+			Math.sin(i * 0.13 + seed * 0.7) * 0.5 + Math.cos(i * 0.07 + seed) * 0.3;
 		out[i] = Math.round(v * 1e6) / 1e6;
 	}
 	return out;
@@ -79,7 +96,8 @@ export function getVoyageFixtureMeta(): {
 	return {
 		embedRunId: originalEmbed?.runId,
 		rerankRunId: originalRerank?.runId,
-		secretRedacted: originalEmbed?.secretRedacted ?? originalRerank?.secretRedacted,
+		secretRedacted:
+			originalEmbed?.secretRedacted ?? originalRerank?.secretRedacted,
 	};
 }
 
@@ -90,7 +108,10 @@ let forceRerankError = false;
  * Enable/disable Voyage error mode for embed/rerank.
  * @param opts - Which endpoint to force error.
  */
-export function setVoyageErrorMode(opts: { embed?: boolean; rerank?: boolean }): void {
+export function setVoyageErrorMode(opts: {
+	embed?: boolean;
+	rerank?: boolean;
+}): void {
 	forceEmbedError = opts.embed ?? false;
 	forceRerankError = opts.rerank ?? false;
 }
@@ -107,7 +128,10 @@ export const voyageHandlers = [
 		if (forceEmbedError) {
 			return HttpResponse.json(
 				{
-					error: { message: "Invalid API key (redacted)", code: "invalid_api_key" },
+					error: {
+						message: "Invalid API key (redacted)",
+						code: "invalid_api_key",
+					},
 				},
 				{ status: 401 },
 			);
@@ -126,7 +150,8 @@ export const voyageHandlers = [
 
 		// Determine dimension: if output_dimension requested, respect it; else 384 for e2e proof
 		// Voyage flexible dims are 256,512,1024,2048 but we allow 384 for contract proof when output_dimension not set.
-		const requestedDim = typeof body.output_dimension === "number" ? body.output_dimension : 384;
+		const requestedDim =
+			typeof body.output_dimension === "number" ? body.output_dimension : 384;
 
 		let data: { object: string; embedding: number[]; index: number }[];
 		if (
@@ -168,12 +193,22 @@ export const voyageHandlers = [
 	http.post("https://api.voyageai.com/v1/rerank", async ({ request }) => {
 		if (forceRerankError) {
 			return HttpResponse.json(
-				{ error: { message: "Rerank failed (redacted)", code: "invalid_request" } },
+				{
+					error: {
+						message: "Rerank failed (redacted)",
+						code: "invalid_request",
+					},
+				},
 				{ status: 400 },
 			);
 		}
 
-		let body: { query?: string; documents?: string[]; model?: string; top_k?: number } = {};
+		let body: {
+			query?: string;
+			documents?: string[];
+			model?: string;
+			top_k?: number;
+		} = {};
 		try {
 			body = (await request.clone().json()) as typeof body;
 		} catch {}
@@ -214,14 +249,19 @@ export const voyageHandlers = [
 	// Fallback for custom baseUrl containing voyageai.com path
 	http.post(/voyageai\.com\/v1\/embeddings$/, async ({ request }) => {
 		if (forceEmbedError) {
-			return HttpResponse.json({ error: { message: "Invalid API key (redacted)" } }, { status: 401 });
+			return HttpResponse.json(
+				{ error: { message: "Invalid API key (redacted)" } },
+				{ status: 401 },
+			);
 		}
-		let body: { input?: string[]; model?: string; output_dimension?: number } = {};
+		let body: { input?: string[]; model?: string; output_dimension?: number } =
+			{};
 		try {
 			body = (await request.clone().json()) as typeof body;
 		} catch {}
 		const inputs = Array.isArray(body.input) ? body.input : [];
-		const requestedDim = typeof body.output_dimension === "number" ? body.output_dimension : 384;
+		const requestedDim =
+			typeof body.output_dimension === "number" ? body.output_dimension : 384;
 		const data = inputs.map((_, i) => ({
 			object: "embedding",
 			embedding: generateEmbedding(requestedDim, i + 50),
@@ -237,7 +277,10 @@ export const voyageHandlers = [
 
 	http.post(/voyageai\.com\/v1\/rerank$/, async ({ request }) => {
 		if (forceRerankError) {
-			return HttpResponse.json({ error: { message: "Rerank failed (redacted)" } }, { status: 400 });
+			return HttpResponse.json(
+				{ error: { message: "Rerank failed (redacted)" } },
+				{ status: 400 },
+			);
 		}
 		let body: { documents?: string[]; model?: string; top_k?: number } = {};
 		try {
