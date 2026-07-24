@@ -22,13 +22,13 @@ import {
 	defineMetadataStoreContractTests,
 } from "@memofs/testing";
 import { describe, expect, it } from "vitest";
+import { createRealCoreHarness } from "../harness/core-harness";
 import { createRealR2Harness } from "../harness/r2-harness";
 import {
 	assertTransformersValidationBehavior,
 	createRealTransformersHarness,
 } from "../harness/transformers-harness";
 import { createRealTursoHarness } from "../harness/turso-harness";
-import { createRealCoreHarness } from "../index";
 
 // ---------------------------------------------------------------------------
 // Turso real harness — file DB, ensureSchema, persist across restart

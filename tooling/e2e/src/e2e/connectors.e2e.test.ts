@@ -11,14 +11,14 @@
 
 import { describe, expect, it } from "vitest";
 
+import { createRealConnectorHarness } from "../harness/connector-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
 import {
-	createRealConnectorHarness,
-	createRealCoreHarness,
 	getGitHubFixtureMeta,
-	getNotionFixtureMeta,
 	resetGitHubFixture,
 	setGitHubNodes,
-} from "../index";
+} from "../msw/handlers/github";
+import { getNotionFixtureMeta } from "../msw/handlers/notion";
 
 describe("connectors real harness — MSW fixtures + dedup (ticket 64)", () => {
 	it("first run ingests GitHub fixture, second skips unchanged, file-first truth, secretRef opaque", async () => {

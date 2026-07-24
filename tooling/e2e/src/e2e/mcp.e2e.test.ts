@@ -13,10 +13,10 @@
 
 import { describe, expect, it } from "vitest";
 import { createRealCliHarness } from "../harness/cli-harness";
+import { createRealCoreHarness } from "../harness/core-harness";
 import { createRealMcpHttpHarness } from "../harness/mcp-http-harness";
 import { createRealMcpStdioHarness } from "../harness/mcp-stdio-harness";
 import { createRealServerHarness } from "../harness/server-harness";
-import { createRealCoreHarness } from "../index";
 
 describe("mcp stdio real harness — handshake, tool discovery, cross-visibility (ticket 62)", () => {
 	it("lists tools (4 memory verbs + 6 AgentFS), resources, prompts per docs", async () => {

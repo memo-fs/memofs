@@ -13,7 +13,7 @@
 
 import { afterAll, describe, expect, it } from "vitest";
 import { createRealCliHarness } from "../harness/cli-harness";
-import { createRealCoreHarness } from "../index";
+import { createRealCoreHarness } from "../harness/core-harness";
 
 describe("cli real harness — spawn, file-first truth, cross-visibility (ticket 61)", () => {
 	it("resolves built binary and spawns via child_process", async () => {

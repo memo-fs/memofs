@@ -13,17 +13,21 @@
 import { defineEmbedderContractTests } from "@memofs/testing";
 import { describe, expect, it } from "vitest";
 
+import { createRealOpenAIHarness } from "../harness/openai-harness";
 import {
-	createRealOpenAIHarness,
 	createRealVoyageHarness,
 	createRealVoyageRerankHarness,
+} from "../harness/voyage-harness";
+import {
 	getOpenAIFixtureMeta,
-	getVoyageFixtureMeta,
 	resetOpenAIFixture,
-	resetVoyageFixture,
 	setOpenAIErrorMode,
+} from "../msw/handlers/openai";
+import {
+	getVoyageFixtureMeta,
+	resetVoyageFixture,
 	setVoyageErrorMode,
-} from "../index";
+} from "../msw/handlers/voyage";
 
 describe("remote adapters real harness — OpenAI via MSW (ticket 64)", () => {
 	it("real OpenAIEmbedder via MSW returns 384-dim, batch order preserved, file-first truth tmpDir", async () => {

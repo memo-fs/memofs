@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { createRealCoreHarness } from "../harness/core-harness";
 import { createRealServerHarness } from "../harness/server-harness";
-import { createRealCoreHarness } from "../index";
 
 describe("server real harness — http random port, memory.write+recall (ticket 62)", () => {
 	it("boots http on random free port, json-rpc fetch proves memory.write + recall", async () => {

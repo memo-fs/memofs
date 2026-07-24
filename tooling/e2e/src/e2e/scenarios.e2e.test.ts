@@ -7,14 +7,14 @@
 
 import { describe, expect, it } from "vitest";
 
+import { runAgentFsInterleavedScenario } from "../scenarios/agentfs-interleaved";
+import { runConnectorsMergeScenario } from "../scenarios/connectors-merge";
+import { runFailureRecoveryScenario } from "../scenarios/failure-recovery";
 import {
 	assertGoldenSnapshot,
-	runAgentFsInterleavedScenario,
-	runConnectorsMergeScenario,
-	runFailureRecoveryScenario,
 	runGoldenSnapshotsScenario,
-	runLifecycleScenario,
-} from "../scenarios/index";
+} from "../scenarios/golden-snapshots";
+import { runLifecycleScenario } from "../scenarios/lifecycle";
 
 describe("scenarios — lifecycle, agentfs-interleaved, connectors-merge, failure-recovery, golden-snapshots (ticket 65)", () => {
 	it("lifecycle — CLI init → core 20 remembers → search paraphrase → context --json → consolidate preview+apply → asserts file count, manifest, events, no data loss, graph dedup", async () => {
