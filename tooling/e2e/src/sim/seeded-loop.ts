@@ -29,17 +29,19 @@ function hashStringToSeed(str: string): number {
 }
 
 /**
- * Mulberry32 PRNG — fast deterministic.
+ * Mulberry32 PRNG — fast deterministic, avoids extra `seedrandom` dependency.
+ * Converts string seed via hashStringToSeed then mulberry32.
+ * Same determinism as `seedrandom('memofs-e2e-0021')` for ticket 66, without adding dep.
  * @param seed - 32-bit seed
  * @returns rng returning [0,1)
  */
 function mulberry32(seed: number): () => number {
-	let a = seed;
+	let state = seed;
 	return () => {
-		let t = (a += 0x6d2b79f5);
-		t = Math.imul(t ^ (t >>> 15), t | 1);
-		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+		let mixed = (state += 0x6d2b79f5);
+		mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+		mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+		return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
 	};
 }
 
@@ -53,6 +55,10 @@ function createSeededRng(seedStr: string): () => number {
 	return mulberry32(seed);
 }
 
+/**
+ * Pool of facts for deterministic remembers — includes RUN_ID for fixture tracking.
+ * @internal
+ */
 const FACT_POOL = [
 	"Simba prefers TypeScript for MemoFS e2e RUN_ID test-run-e2e-0021-seeded-01",
 	"Alice is a backend engineer who likes Go [seeded-02]",
@@ -76,6 +82,10 @@ const FACT_POOL = [
 	"Trent documents release gate [seeded-20]",
 ] as const;
 
+/**
+ * Pool of queries for recall/search/context — deterministic via seeded rng.
+ * @internal
+ */
 const QUERY_POOL = [
 	"TypeScript preferences",
 	"CLI package docs",
@@ -94,15 +104,28 @@ const QUERY_POOL = [
 	"orchestrator proof",
 ] as const;
 
+/**
+ * Action union for seeded-loop random steps.
+ * @internal
+ */
 type Action = "remember" | "recall" | "search" | "context" | "agentfs_write" | "consolidate";
 
 /**
  * Picks random element from array using rng.
+ * @param rng - seeded rng returning [0,1)
+ * @param arr - array to pick from
+ * @returns random element
  */
 function pickRandom<T>(rng: () => number, arr: readonly T[]): T {
 	const idx = Math.floor(rng() * arr.length);
 	return arr[Math.max(0, Math.min(arr.length - 1, idx))] as T;
 }
+
+/**
+ * Seeded-loop action type — deterministic steps for budget enforcement proof.
+ * @internal
+ */
+type LoopAction = Action;
 
 /**
  * Result of seeded-loop run.
@@ -181,7 +204,7 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 
 	try {
 		for (let turn = 0; turn < totalTurns && turn < BUDGET_MAX_TURNS; turn++) {
-			const r = rng();
+			const randomValue = rng();
 
 			// Budget check file count occasionally
 			if (turn % 10 === 0) {
@@ -203,11 +226,11 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 			}
 
 			let action: Action;
-			if (r < 0.4) action = "remember";
-			else if (r < 0.6) action = "recall";
-			else if (r < 0.7) action = "search";
-			else if (r < 0.8) action = "context";
-			else if (r < 0.9) action = "agentfs_write";
+			if (randomValue < 0.4) action = "remember";
+			else if (randomValue < 0.6) action = "recall";
+			else if (randomValue < 0.7) action = "search";
+			else if (randomValue < 0.8) action = "context";
+			else if (randomValue < 0.9) action = "agentfs_write";
 			else action = "consolidate";
 
 			// Enforce max consolidations
@@ -342,26 +365,25 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 		const snapshot = buildFsSnapshot(files, contents);
 		tmpDir = harness.tmpDir;
 
-		// Validate pass: call core validate
+		// Validate pass: call core validate — must pass per spec, no silent forcing true
 		let validatePassed = true;
 		try {
 			const validateResult = await harness.client.validate();
-			// validate returns {valid, issues}
 			validatePassed = (validateResult as { valid?: boolean }).valid ?? true;
-			details.validateIssues = (validateResult as { issues?: unknown[] }).issues;
-			if (!validatePassed) {
-				// Allow if issues empty? But we assert valid
-				const issues = (validateResult as { issues?: unknown[] }).issues;
-				if (Array.isArray(issues) && issues.length > 0) {
-					validatePassed = false;
-				} else {
-					validatePassed = true;
-				}
+			const issues = (validateResult as { issues?: unknown[] }).issues;
+			details.validateIssues = issues;
+			// If valid false and issues non-empty, fail
+			if (!validatePassed && Array.isArray(issues) && issues.length > 0) {
+				validatePassed = false;
+			} else if (Array.isArray(issues) && issues.length > 0) {
+				// If issues exist but valid flag missing, treat issues as failure
+				validatePassed = issues.length === 0;
 			}
 		} catch (e) {
-			// If validate throws, record but don't necessarily fail if fs still ok
 			details.validateError = (e as Error).message;
-			validatePassed = true; // treat as passed if throws not critical
+			// Per spec, validate must pass — if it throws, we treat as fail unless file-first truth still holds
+			// Log and set false to surface problem, not force true
+			validatePassed = false;
 		}
 
 		// No data loss: search for earlier facts should return >0 if we remembered
@@ -378,10 +400,11 @@ export async function runSeededLoopScenario(options: ScenarioOptions = {}): Prom
 			}
 		}
 
-		// No file leak: all files under tmpDir (by definition listFiles only lists under tmpDir)
-		// Check no unexpected files outside allowed prefixes already handled by harness.listFiles
-		// Additional check: ensure no file path escapes tmpDir parent
-		const noFileLeak = files.every((f) => !f.includes("..") && !f.startsWith("/"));
+		// No file leak: all files must be under tmpDir and not escape, and under allowed prefixes .memofs/, agent-sessions/, .cache/
+		const allowedPrefixes = [".memofs/", "agent-sessions/", ".cache/"];
+		const noFileLeak =
+			files.every((f) => !f.includes("..") && !f.startsWith("/")) &&
+			files.every((f) => f === ".memofs" || allowedPrefixes.some((p) => f.startsWith(p)));
 
 		// File-first truth
 		const hasMemofsDir = files.some((f) => f.startsWith(".memofs/"));
