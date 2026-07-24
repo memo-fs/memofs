@@ -1,0 +1,48 @@
+{
+	"name": "@repo/e2e",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Real e2e simulation harness — file-first truth, cross-visibility, golden snapshots. Private, Node-only, local/manual, not in CI.",
+	"license": "MIT",
+	"type": "module",
+	"sideEffects": false,
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"files": ["dist"],
+	"scripts": {
+		"build": "tsdown",
+		"build:watch": "tsdown --watch",
+		"typecheck": "tsc --noEmit",
+		"test:e2e": "vitest run --config vitest.e2e.config.ts",
+		"test:e2e:live": "MEMOFS_E2E_LIVE=1 vitest run --config vitest.e2e.config.ts",
+		"msw:record": "tsx src/msw/record.ts",
+		"clean": "rm -rf dist coverage .turbo"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"dependencies": {
+		"@memofs/core": "workspace:*",
+		"@memofs/testing": "workspace:*"
+	},
+	"devDependencies": {
+		"@repo/tsdown": "workspace:*",
+		"@repo/typescript": "workspace:*",
+		"@types/node": "^25.9.2",
+		"tsx": "^4.21.0",
+		"vitest": "^4.1.5"
+	}
+}

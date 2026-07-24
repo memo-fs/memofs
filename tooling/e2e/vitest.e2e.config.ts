@@ -3,16 +3,16 @@ import { defineConfig } from "vitest/config";
 /**
  * Real e2e vitest config — heavy, Node-only, local/manual, not in CI.
  *
- * - include: `src/e2e/** /*.e2e.test.ts` only
+ * - include: src/e2e glob (dot-e2e-dot-test-dot-ts) only
  * - timeout: 300s (Transformers model load, Turso file, MCP spawn)
  * - pool: forks, singleThread: true to avoid tmpDir races
  * - setupFiles: MSW server lifecycle (currently no-op placeholder, real in ticket 64)
  *
  * Run via:
- * - `pnpm --filter @memofs/testing test:e2e` (MSW by default)
- * - `MEMOFS_E2E_LIVE=1 pnpm --filter @memofs/testing test:e2e:live` (one live call)
+ * - `pnpm --filter @repo/e2e test:e2e` (MSW by default)
+ * - `MEMOFS_E2E_LIVE=1 pnpm --filter @repo/e2e test:e2e:live` (one live call)
  *
- * Excluded from turbo `test:run` (CI fast path) — see turbo.json.
+ * Excluded from turbo test:run (CI fast path).
  */
 export default defineConfig({
 	test: {
@@ -32,8 +32,8 @@ export default defineConfig({
 		},
 		maxConcurrency: 1,
 		// Future: MSW setup. For ticket 60, placeholder that does nothing.
-		// Ticket 64 will implement `src/real/msw/setup.ts` with setupServer.
-		setupFiles: ["src/real/msw/setup.ts"],
+		// Ticket 64 will implement `src/msw/setup.ts` with setupServer.
+		setupFiles: ["src/msw/setup.ts"],
 		// Don't run fast-path tests
 		exclude: ["tests/**/*", "node_modules/**"],
 	},

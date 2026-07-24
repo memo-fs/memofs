@@ -7,7 +7,6 @@ export default pkgConfig({
 		"src/fakes/index.ts",
 		"src/fixtures/index.ts",
 		"src/vitest.ts",
-		"src/real/index.ts",
 	],
 	treeshake: true,
 });

@@ -1,28 +1,26 @@
 /**
- * Real e2e harness entry — Node-only.
+ * Real e2e harness — private, Node-only, local/manual.
  *
  * @remarks
- * This subpath is **Node-only** and imports `node:fs`, `node:os`, `node:path`
- * and real MemoFS implementations (`@memofs/core/node-fs`). It must NOT be
- * imported from Workers or edge runtimes. The main `@memofs/testing` barrel
- * does NOT re-export this — same pattern as `@memofs/core/node-fs`.
+ * Private package `@repo/e2e` — never published. This is the primary seam
+ * for real e2e (ADR 0021). It imports real implementations (`@memofs/core/node-fs`)
+ * and provides isolated tmpDir factories. Must NOT be imported from Workers.
  *
  * ```ts
- * import { createRealCoreHarness } from "@memofs/testing/real";
+ * import { createRealCoreHarness } from "@repo/e2e";
  * ```
  *
- * This is the primary seam for real e2e (ADR 0021). Future harnesses
- * (CLI, MCP, server, Turso, R2, Transformers, connectors, MSW) will be
- * exported from here.
+ * Future harnesses (CLI, MCP, server, Turso, R2, Transformers, connectors, MSW)
+ * will be exported from here.
  *
  * @public
  */
 
 // Base harness types + core harness
 export type {
+	RealHarness,
 	CoreRealHarness,
 	CreateRealCoreHarnessOptions,
-	RealHarness,
 } from "./harness/core-harness";
 export { createRealCoreHarness } from "./harness/core-harness";
 

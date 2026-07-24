@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { createRealCoreHarness } from "../real/index";
+import { createRealCoreHarness } from "../index.js";
 
 describe("core real harness — file-first truth (ticket 60)", () => {
 	it("1 remember proves .memofs/memory/*.md exists on disk", async () => {
