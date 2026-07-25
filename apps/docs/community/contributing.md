@@ -90,5 +90,4 @@ Keep packages provider-neutral and cloud-optional.
 ## Need help?
 
 - Open a [discussion](https://github.com/memo-fs/memofs/discussions) for questions
-- Check the [roadmap](./roadmap) for planned work
 - Read the [architecture docs](/packages/core/concepts) for design context
