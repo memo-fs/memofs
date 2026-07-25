@@ -1,3 +1,7 @@
 # Resend secret API key (re_…). NEVER commit a real key.
 RESEND_API_KEY=
+# UUID of the "Docs newsletter" segment in Resend.
+RESEND_SEGMENT_ID=35f954a3-f5b7-4f40-8c61-032710a93bb3
+# Sender for welcome email (optional but recommended for prod).
+RESEND_FROM=MemoFS Team <team@mail.memofs.dev>
 

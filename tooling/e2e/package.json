@@ -21,7 +21,9 @@
 			}
 		}
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "tsdown",
 		"build:watch": "tsdown --watch",
