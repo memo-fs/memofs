@@ -1,19 +1,20 @@
 /**
  * CLI config file writer for `.memofs/config.json`.
  *
- * Config resolution (env vars, flags, config file merging) is now handled by
- * `MemoFS`'s internal `resolveMemoFsConfig` — this module only retains the
- * `writeDefaultCliConfig` function for the `memofs config init` and
- * `memofs init` commands.
+ * Configuration resolution (environment variables, CLI flags, and config file
+ * merging) is handled by MemoFS's internal `resolveMemoFsConfig`. This module
+ * only provides `writeDefaultCliConfig`, which is used by the
+ * `memofs config init` and `memofs init` commands.
  *
- * The JSON schema is shipped inside the CLI package at `schema/config.json`
- * (exposed via the `@memofs/cli/schema/config.json` package export).
- * `resolveSchemaPath` emits a canonical, portable
- * `./node_modules/@memofs/cli/schema/config.json` reference (the value the
- * docs advertise) when that file exists under the project root, and falls
- * back to a hosted URL otherwise — see `resolveSchemaPath` for why the
- * previous `require.resolve` + `path.relative` approach was non-portable
- * inside workspace installs.
+ * The JSON schema is shipped with the CLI package at
+ * `schema/config.json` (exposed via the
+ * `@memofs/cli/schema/config.json` package export).
+ *
+ * `resolveSchemaPath` emits the canonical relative schema reference,
+ * `../node_modules/@memofs/cli/schema/config.json`, when that file exists
+ * under the project root. Otherwise, it falls back to the hosted schema URL.
+ * This avoids the non-portable paths that can result from resolving the
+ * package's physical installation location inside workspace-based installs.
  *
  * @module runtime
  */
@@ -27,65 +28,81 @@ export type { MemoFsConfigFile };
 
 /**
  * Hosted fallback used when the packaged schema file cannot be located on
- * disk (e.g. a bundler stripped package metadata). Matches the schema's
- * own `$id`.
+ * disk (for example, when package metadata has been stripped by a bundler).
+ * Matches the schema's own `$id`.
  */
 const FALLBACK_SCHEMA_URL = "https://docs.memofs.dev/schema/config.json";
 
 /**
- * Canonical relative `$schema` reference that the docs advertise and that
- * works for the overwhelmingly common case: `@memofs/cli` installed as a
- * project dev dependency. Resolved from a project's `.memofs/config.json`,
- * this points at the schema file shipped inside the installed package.
+ * Filesystem location to check for the schema, relative to the project root.
+ * We look for:
  *
- * Kept as a constant so every consumer of the schema reference emits the
- * same portable, deterministic string instead of a layout-dependent
- * filesystem path.
+ * `<rootDir>/node_modules/@memofs/cli/schema/config.json`
  */
-const CANONICAL_SCHEMA_REF = "./node_modules/@memofs/cli/schema/config.json";
+const FS_SCHEMA_PATH = "node_modules/@memofs/cli/schema/config.json";
 
 /**
- * Resolves the `$schema` value for `.memofs/config.json`.
+ * Canonical relative `$schema` reference written into `.memofs/config.json`.
+ * Since `config.json` lives inside `.memofs/`, the correct relative path is:
  *
- * Strategy — emit a deterministic, portable reference instead of a path
- * computed from wherever `require.resolve` happened to land:
+ * `../node_modules/@memofs/cli/schema/config.json`
  *
- * 1. **Canonical node_modules reference** (preferred). If
- *    `<rootDir>/node_modules/@memofs/cli/schema/config.json` exists, return
- *    `./node_modules/@memofs/cli/schema/config.json`. This matches the docs
- *    example and is portable across machines, regardless of whether
- *    `@memofs/cli` was installed via npm, pnpm (with symlinks), or yarn.
- *    The `node_modules/@memofs/cli` entry may itself be a symlink to a
- *    workspace package — `existsSync` follows symlinks, so this works
- *    inside the MemoFS monorepo too, without the previous bug of emitting
- *    `../../../Users/.../packages/cli/schema/config.json`.
- * 2. **Hosted fallback URL.** When the canonical file is not on disk under
- *    `<rootDir>` (e.g. the CLI was installed globally, bundled without
- *    `node_modules`, or the schema file was stripped), fall back to the
- *    hosted schema URL so editors still get validation.
+ * ## Strategy
  *
- * The previous implementation called `require.resolve` and then
- * `path.relative(rootDir/.memofs, resolvedFile)`. Inside a workspace
- * install, `require.resolve` follows the `@memofs/cli` symlink to the
- * source `packages/cli/schema/config.json`, which lives *outside* the
- * consumer's project root — `path.relative` then climbs past the root and
- * emits a non-portable `../../packages/...` (or even `../../../Users/...`)
- * reference. The canonical-ref-first approach sidesteps that entirely.
+ * Prefer a deterministic, portable reference instead of computing one from
+ * the package's resolved installation path.
+ *
+ * 1. **Canonical `node_modules` reference (preferred).**
+ *    If
+ *    `<rootDir>/node_modules/@memofs/cli/schema/config.json`
+ *    exists, return
+ *    `../node_modules/@memofs/cli/schema/config.json`.
+ *
+ *    This reference is stable across npm, pnpm, and Yarn installations.
+ *    Even if `node_modules/@memofs/cli` is a symlink, editors resolve the
+ *    relative path correctly because it is anchored to the project's own
+ *    `node_modules` directory.
+ *
+ * 2. **Hosted fallback URL.**
+ *    If the schema file does not exist under the project root (for example,
+ *    when the CLI is installed globally, bundled without `node_modules`, or
+ *    the schema file has been stripped), return the hosted schema URL so that
+ *    editors can still provide JSON schema validation.
+ *
+ * ### Why not `require.resolve`?
+ *
+ * The previous implementation resolved the package using `require.resolve()`
+ * and then generated a relative path from `.memofs/` using `path.relative()`.
+ * In workspace installs, `require.resolve()` may follow a symlink into the
+ * package's source directory (for example,
+ * `packages/cli/schema/config.json`), which can live outside the consumer's
+ * project. As a result, the generated `$schema` value could become something
+ * like:
+ *
+ * - `../../packages/cli/schema/config.json`
+ * - `../../../Users/alice/dev/memofs/packages/cli/schema/config.json`
+ *
+ * These paths are machine-specific and cannot be committed or shared
+ * reliably. Checking for the canonical file under the project's own
+ * `node_modules` directory avoids that problem entirely.
  *
  * @param rootDir - Project root directory containing `.memofs/`.
- * @returns A portable `./node_modules/...` `$schema` reference, or the
- * hosted URL when the schema file isn't present under `<rootDir>`.
+ * @returns A portable `../node_modules/...` `$schema` reference, or the
+ * hosted schema URL when the schema file is not present under the project
+ * root.
  */
 export function resolveSchemaPath(rootDir: string): string {
-	const canonical = path.resolve(rootDir, CANONICAL_SCHEMA_REF);
-	return existsSync(canonical) ? CANONICAL_SCHEMA_REF : FALLBACK_SCHEMA_URL;
+	const fsPath = path.resolve(rootDir, FS_SCHEMA_PATH);
+	return existsSync(fsPath) ? `../${FS_SCHEMA_PATH}` : FALLBACK_SCHEMA_URL;
 }
 
 /**
- * Seeds or overrides a local workspace config file (`.memofs/config.json`) with defaults.
+ * Creates or overwrites the local workspace configuration file
+ * (`.memofs/config.json`) with the provided defaults.
  *
- * @param input - Config write instructions.
- * @returns Status object detailing paths and whether file was created/overwritten.
+ * @param input - Configuration write instructions.
+ * @returns Status object describing the output path and whether the file was
+ * created or overwritten.
  */
 export async function writeDefaultCliConfig(input: {
 	cwd: string;
@@ -95,21 +112,36 @@ export async function writeDefaultCliConfig(input: {
 }): Promise<{ path: string; created: boolean; overwritten: boolean }> {
 	const root = path.resolve(input.cwd, input.root ?? ".");
 	const configPath = path.join(root, ".memofs", "config.json");
+
 	await fs.mkdir(path.dirname(configPath), { recursive: true });
+
 	const exists = await fileExists(configPath);
-	if (exists && !input.force)
-		return { path: configPath, created: false, overwritten: false };
+
+	if (exists && !input.force) {
+		return {
+			path: configPath,
+			created: false,
+			overwritten: false,
+		};
+	}
+
 	const config = input.config ?? {
 		$schema: resolveSchemaPath(root),
 		runtime: "local" as const,
 		root: ".",
 	};
+
 	await fs.writeFile(
 		configPath,
 		`${JSON.stringify(config, null, 2)}\n`,
 		"utf8",
 	);
-	return { path: configPath, created: !exists, overwritten: exists };
+
+	return {
+		path: configPath,
+		created: !exists,
+		overwritten: exists,
+	};
 }
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -117,8 +149,9 @@ async function fileExists(filePath: string): Promise<boolean> {
 		await fs.stat(filePath);
 		return true;
 	} catch (error) {
-		if (error instanceof Error && "code" in error && error.code === "ENOENT")
+		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 			return false;
+		}
 		throw error;
 	}
 }

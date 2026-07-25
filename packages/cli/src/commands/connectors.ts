@@ -116,14 +116,7 @@ export async function runConnectorsAddCommand(
 
 	let sourceMapping: JsonObject | undefined;
 	if (options.sourceMapping) {
-		try {
-			sourceMapping = JSON.parse(options.sourceMapping) as JsonObject;
-		} catch (error) {
-			throw new CliUsageError(
-				`--source-mapping must be valid JSON (got: "${options.sourceMapping}").`,
-				{ cause: error },
-			);
-		}
+		sourceMapping = parseSourceMappingInput(options.sourceMapping);
 	}
 
 	const newConnector: ConnectorConfig = {
@@ -275,6 +268,44 @@ export async function runConnectorsRunCommand(
 }
 
 // --- helpers ---
+
+/** Parses --source-mapping allowing JSON or shorthand strings (owner/repo, databaseId). */
+function parseSourceMappingInput(input: string): JsonObject {
+	// Try JSON first
+	try {
+		const parsed = JSON.parse(input) as unknown;
+		if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+			return parsed as JsonObject;
+		}
+	} catch {
+		// fall through to shorthand handling
+	}
+
+	const trimmed = input.trim();
+
+	// GitHub shorthand owner/repo
+	if (
+		/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?\/[A-Za-z0-9._-]{1,100}$/.test(
+			trimmed,
+		)
+	) {
+		return { repository: trimmed } as unknown as JsonObject;
+	}
+
+	// Notion shorthand 32 hex or UUID
+	if (
+		/^[a-f0-9]{32}$/.test(trimmed.toLowerCase()) ||
+		/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+			trimmed,
+		)
+	) {
+		return { databaseId: trimmed } as unknown as JsonObject;
+	}
+
+	throw new CliUsageError(
+		`--source-mapping must be valid JSON (e.g. '{"repository":"owner/repo"}') or shorthand "owner/repo" / Notion database id. Got: "${input}".`,
+	);
+}
 
 /** Read + validate `.memofs/connectors.json` through the store. */
 async function readConnectorsFile(memo: MemoFS): Promise<ConnectorsFile> {

@@ -12,20 +12,11 @@ import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import readline from "node:readline/promises";
 import type { MemoFS } from "@memofs/core";
-import {
-	exists,
-	getRootDir,
-	readTextIfExists,
-	writeText,
-} from "../cli/store-helpers";
+import { getRootDir, readTextIfExists } from "../cli/store-helpers";
 import { resolveSchemaPath, writeDefaultCliConfig } from "../config";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
-import {
-	MEMOFS_CLI_PATHS,
-	REQUIRED_DIRS,
-	REQUIRED_FILES,
-} from "../protocol/constants";
+import { MEMOFS_CLI_PATHS, REQUIRED_DIRS } from "../protocol/constants";
 import { createDefaultManifest } from "../protocol/manifest";
 
 /**
@@ -68,31 +59,9 @@ export async function runInitCommand(
 	options: InitCommandOptions,
 ): Promise<number> {
 	const rootDir = getRootDir(options.memo.store);
-	await options.memo.bootstrap();
 
-	let projectId: string | undefined = options.projectId?.trim();
-	if (projectId !== undefined && projectId.length === 0) projectId = undefined;
-
-	if (!projectId && !options.json && !options.noInput && process.stdout.isTTY) {
-		options.output.write("Initializing MemoFS...");
-		const rl = readline.createInterface({
-			input: process.stdin,
-			output: process.stdout,
-		});
-		try {
-			const answer = await rl.question(
-				"Enter project ID (leave empty for random): ",
-			);
-			if (answer.trim()) projectId = answer.trim();
-		} finally {
-			rl.close();
-		}
-	}
-
-	for (const dir of REQUIRED_DIRS) {
-		await mkdir(resolve(rootDir, dir), { recursive: true });
-	}
-
+	// Check existence BEFORE bootstrapping — bootstrap creates the manifest,
+	// so checking after would always report ".memofs already exists" on first init.
 	const existingManifest = await readTextIfExistsSafe(
 		options.memo.store,
 		MEMOFS_CLI_PATHS.manifest,
@@ -119,32 +88,48 @@ export async function runInitCommand(
 		return 0;
 	}
 
-	const manifest = createDefaultManifest(projectId ? { projectId } : undefined);
-	const seedFiles: Record<string, string> = {
-		[MEMOFS_CLI_PATHS.manifest]: `${JSON.stringify(manifest, null, 2)}\n`,
-		[MEMOFS_CLI_PATHS.coreMemory]: "# Core Memory\n\n",
-		[MEMOFS_CLI_PATHS.notesMemory]: "# Notes\n\n",
-		[MEMOFS_CLI_PATHS.memoryEvents]: "",
-		[MEMOFS_CLI_PATHS.conversations]: "",
-		[MEMOFS_CLI_PATHS.chunks]: "",
-		[MEMOFS_CLI_PATHS.graphNodes]: "",
-		[MEMOFS_CLI_PATHS.graphEdges]: "",
-		[MEMOFS_CLI_PATHS.snapshots]: "",
-	};
+	let projectId: string | undefined = options.projectId?.trim();
+	if (projectId !== undefined && projectId.length === 0) projectId = undefined;
 
-	const created: string[] = [];
-	const overwritten: string[] = [];
-	const skipped: string[] = [];
-
-	for (const file of REQUIRED_FILES) {
-		const fileExists = await exists(options.memo.store, file);
-		if (!fileExists || options.force) {
-			await writeText(options.memo.store, file, seedFiles[file] ?? "");
-			if (fileExists) overwritten.push(file);
-			else created.push(file);
-		} else {
-			skipped.push(file);
+	if (!projectId && !options.json && !options.noInput && process.stdout.isTTY) {
+		const rl = readline.createInterface({
+			input: process.stdin,
+			output: process.stdout,
+		});
+		try {
+			const answer = await rl.question(
+				"Enter project ID (leave empty for random): ",
+			);
+			if (answer.trim()) projectId = answer.trim();
+		} finally {
+			rl.close();
 		}
+	}
+
+	for (const dir of REQUIRED_DIRS) {
+		await mkdir(resolve(rootDir, dir), { recursive: true });
+	}
+
+	// Bootstrap is the canonical file creator — single source of truth for
+	// default templates. Pass projectId and force so first init is correctly
+	// recorded and --force overwrites.
+	const bootstrapResult = await options.memo.bootstrap({
+		...(projectId ? { projectId } : {}),
+		...(options.force ? { overwriteExisting: true } : {}),
+	});
+
+	// Read back the manifest that bootstrap wrote (it contains the resolved projectId).
+	const manifestRaw = await readTextIfExistsSafe(
+		options.memo.store,
+		MEMOFS_CLI_PATHS.manifest,
+	);
+	let manifest: ReturnType<typeof createDefaultManifest>;
+	try {
+		manifest = manifestRaw
+			? (JSON.parse(manifestRaw) as ReturnType<typeof createDefaultManifest>)
+			: createDefaultManifest(projectId ? { projectId } : undefined);
+	} catch {
+		manifest = createDefaultManifest(projectId ? { projectId } : undefined);
 	}
 
 	const configResult = await writeDefaultCliConfig({
@@ -162,7 +147,7 @@ export async function runInitCommand(
 		created: true,
 		rootDir,
 		manifest,
-		files: { created, overwritten, skipped },
+		files: bootstrapResult,
 		config: configResult,
 	};
 	if (options.json) printJsonEnvelope(options.output, "init", data);

@@ -85,10 +85,17 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.description("initialize canonical .memofs/ files")
 		.option("-f, --force", "overwrite existing seed files", false)
 		.option("-p, --project-id <id>", "explicit project ID")
-		.option("--no-input", "skip interactive prompts", false)
+		.option("--no-input", "skip interactive prompts")
 		.action(async (options) => {
 			setCurrentCommand("init");
 			const g = await globals();
+			// Commander treats --no-input as negatable: it sets options.input = false
+			// when --no-input is passed. Handle both shapes (input === false and
+			// noInput === true) and fall back to non-TTY auto-detection.
+			const optsAny = options as { input?: boolean; noInput?: boolean };
+			const explicitNoInput =
+				optsAny.input === false || optsAny.noInput === true;
+			const noInput = explicitNoInput ? true : !process.stdout.isTTY;
 			setExitCode(
 				await runInitCommand({
 					memo: g.memo,
@@ -96,7 +103,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 					json: g.json,
 					force: options.force,
 					projectId: options.projectId,
-					noInput: options.noInput ?? !process.stdout.isTTY,
+					noInput,
 				}),
 			);
 		});

@@ -2,8 +2,8 @@
  * opencode hook emitter.
  *
  * Translates platform-agnostic hook modules into an opencode plugin at
- * `.opencode/plugin/memofs.ts` (opencode auto-loads plugin files from that
- * directory; verified against opencode.ai/docs/plugins, July 2026). The
+ * `.opencode/plugins/memofs.ts` (opencode auto-loads plugin files from that
+ * directory per https://opencode.ai/docs/plugins/). The
  * plugin receives `{ $, client }` and subscribes to bus events via the
  * generic `event` hook.
  *
@@ -50,10 +50,15 @@ function buildPluginContent(modules: readonly HookModule[]): string {
 		" *",
 		" * opencode cannot inject context automatically — the agent loads memory",
 		" * itself via the memofs MCP tools (see AGENTS.md).",
+		" *",
+		" * This file is intentionally dependency-free (no @opencode-ai/plugin import)",
+		" * so it works without installing extra packages. If you want types, add",
+		" * @opencode-ai/plugin to .opencode/package.json and change the export to:",
+		' *   import type { Plugin } from "@opencode-ai/plugin";',
+		" *   export const MemofsPlugin: Plugin = async (...) => ...",
 		" */",
-		'import type { Plugin } from "@opencode-ai/plugin";',
 		"",
-		"export const MemofsPlugin: Plugin = async ({ $, client }) => {",
+		"export const MemofsPlugin = async ({ $, client }) => {",
 		"\treturn {",
 		"\t\tevent: async ({ event }) => {",
 	];
@@ -96,6 +101,8 @@ export const opencodeEmitter: HookEmitter = {
 			m.requires.every((r) => OPENCODE_CAPABILITIES[r]),
 		);
 		const content = buildPluginContent(supportedModules);
-		return [{ path: ".opencode/plugin/memofs.ts", content }];
+		return [{ path: ".opencode/plugins/memofs.js", content }];
 	},
 };
+
+

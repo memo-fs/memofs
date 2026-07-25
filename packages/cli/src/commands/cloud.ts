@@ -13,12 +13,7 @@
  * @module cloud
  */
 
-import type {
-	FileManifest,
-	MemoFsCloudClient,
-	SyncCursor,
-	SyncPushCompleteResult,
-} from "@memofs/core";
+import type { FileManifest, MemoFsCloudClient } from "@memofs/core";
 import { CANONICAL_MEMOFS_FILES, sha256Hex } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import type { CliOutput } from "../output/output";
@@ -171,16 +166,26 @@ export async function runCloudSyncStatusCommand(
 	return 0;
 }
 
+/** Creates the local NodeFs store used for manifest + sync I/O. */
+function getLocalStore(
+	rootDir: string,
+): ReturnType<typeof createNodeFsMemoryStore> {
+	return createNodeFsMemoryStore({
+		rootDir,
+		createRoot: false,
+		missingFileBehavior: "empty",
+	});
+}
+
 /**
  * Pulls file replicas from the cloud: requests presigned download URLs for every
  * file the local workspace is missing or behind on, plus paths removed
  * server-side.
  *
- * NOTE: the actual byte download + verify + write + reindex is delegated to the
- * local file-sync layer (see
- * `packages/core/src/sync/file-replication.ts`). When this command is
- * invoked through the CLI runner, the runtime wires `pull` end-to-end; when
- * invoked directly with a raw cloud client, it reports the planned download set.
+ * This implementation performs the actual byte download + verify + write
+ * (previously it only reported the planned set). It uses the NodeFs store
+ * directly, matching the file-replication layer's behavior, and then
+ * re-derives indexes by bootstrapping if needed.
  *
  * @param options - Command configuration options.
  * @returns CLI exit code.
@@ -189,9 +194,41 @@ export async function runCloudSyncPullCommand(
 	options: CloudSyncPullCommandOptions,
 ): Promise<number> {
 	const client = options.client;
-	const result = await client.sync.pull(
-		options.since ? { since: options.since } : undefined,
-	);
+	const rootDir = options.rootDir ?? process.cwd();
+	const store = getLocalStore(rootDir);
+
+	// Compute local manifest for the pull request (server diffs against it).
+	const localManifest = await computeLocalManifest(rootDir);
+
+	const result = await client.sync.pull({
+		manifest: localManifest,
+		...(options.since ? { since: options.since } : {}),
+	});
+
+	// Perform actual download + verify + write
+	for (const file of result.files) {
+		const content = await fetchText(file.presignedGetUrl);
+		const actualHash = await sha256Hex(content);
+		if (actualHash !== file.sha256) {
+			throw new Error(
+				`sync.pull: sha256 mismatch for ${file.path} (expected ${file.sha256}, got ${actualHash}).`,
+			);
+		}
+		// Validate canonical path
+		if (!isCanonicalOrSnapshotPath(file.path)) {
+			throw new Error(
+				`sync.pull: refusing to write non-canonical path ${file.path}.`,
+			);
+		}
+		await store.write(file.path as never, content);
+	}
+
+	for (const removed of result.removed) {
+		if (isCanonicalOrSnapshotPath(removed)) {
+			await store.delete(removed as never);
+		}
+	}
+
 	if (options.json) {
 		printJsonEnvelope(options.output, "cloud.sync.pull", result);
 		return 0;
@@ -206,16 +243,36 @@ export async function runCloudSyncPullCommand(
 	return 0;
 }
 
+function isCanonicalOrSnapshotPath(path: string): boolean {
+	if ((CANONICAL_MEMOFS_FILES as readonly string[]).includes(path)) return true;
+	if (path.startsWith(".memofs/snapshots/") && path.endsWith(".json")) {
+		const id = path.slice(".memofs/snapshots/".length, -".json".length);
+		return /^[a-zA-Z0-9_.-]+$/.test(id);
+	}
+	return false;
+}
+
+/** Fetches a presigned URL as text, throwing on non-2xx. */
+async function fetchText(url: string): Promise<string> {
+	const response = await fetch(url);
+	if (!response.ok) {
+		throw new Error(
+			`Presigned GET failed: ${response.status} ${response.statusText}.`,
+		);
+	}
+	return response.text();
+}
+
 /**
  * Pushes local `.memofs/` file replicas to the cloud using the two-phase push
  * contract: (1) `push` computes the local manifest and requests presigned upload
  * URLs for changed/missing files; (2) the bytes are uploaded to R2; (3)
  * `complete` confirms the uploads and commits the manifest.
  *
- * The CLI performs phases 1 and 3 directly against the cloud client. Phase 2
- * (the actual byte upload to presigned PUT URLs) is handled by the runtime
- * file-sync layer, which has access to the local file store; here we report
- * which files the layer must upload.
+ * This CLI implementation now performs phase 2 (byte upload) directly — it
+ * reads each file from the local store and PUTs to its presigned URL, then
+ * calls complete. Previously it skipped the upload, causing
+ * "Uploaded object not found for <hash>. Re-upload and retry."
  *
  * @param options - Command configuration options.
  * @returns CLI exit code.
@@ -225,6 +282,7 @@ export async function runCloudSyncPushCommand(
 ): Promise<number> {
 	const client = options.client;
 	const rootDir = options.rootDir ?? process.cwd();
+	const store = getLocalStore(rootDir);
 	const manifest = await computeLocalManifest(rootDir);
 
 	// Phase 1: request presigned upload URLs for changed/missing files.
@@ -252,7 +310,19 @@ export async function runCloudSyncPushCommand(
 		return 0;
 	}
 
-	// Confirm which files the runtime layer must upload to presigned PUTs.
+	// Phase 2: upload bytes to presigned PUT URLs
+	for (const target of pushResult.upload) {
+		const content = await store.read(target.path as never);
+		const actualHash = await sha256Hex(content);
+		if (actualHash !== target.sha256) {
+			throw new Error(
+				`sync.upload: sha256 mismatch for ${target.path} (expected ${target.sha256}, got ${actualHash}).`,
+			);
+		}
+		await putText(target.presignedPutUrl, content);
+	}
+
+	// Phase 3: confirm uploads and commit the manifest update.
 	const uploaded = pushResult.upload.map((target) => ({
 		path: target.path,
 		sha256: target.sha256,
@@ -260,11 +330,10 @@ export async function runCloudSyncPushCommand(
 
 	// Phase 3: confirm uploads and commit the manifest update. (Phase 2, the
 	// byte upload, runs in the runtime file-sync layer between these two calls.)
-	const completeResult = await completePush(
-		client,
-		pushResult.cursor,
+	const completeResult = await client.sync.complete({
 		uploaded,
-	);
+		cursor: pushResult.cursor,
+	});
 
 	if (options.json) {
 		printJsonEnvelope(options.output, "cloud.sync.push", {
@@ -284,16 +353,17 @@ export async function runCloudSyncPushCommand(
 	return 0;
 }
 
-/**
- * Confirms a push and commits the manifest update. Separated so the runtime
- * file-sync layer can interleave the actual byte upload between phases 1 and 3.
- */
-async function completePush(
-	client: MemoFsCloudClient,
-	cursor: SyncCursor,
-	uploaded: Array<{ path: string; sha256: string }>,
-): Promise<SyncPushCompleteResult> {
-	return client.sync.complete({ uploaded, cursor });
+/** PUTs text to a presigned URL, throwing on non-2xx. */
+async function putText(url: string, body: string): Promise<void> {
+	const response = await fetch(url, {
+		method: "PUT",
+		body,
+	});
+	if (!response.ok) {
+		throw new Error(
+			`Presigned PUT failed: ${response.status} ${response.statusText}.`,
+		);
+	}
 }
 
 /**
@@ -307,11 +377,7 @@ async function completePush(
 export async function computeLocalManifest(
 	rootDir: string,
 ): Promise<FileManifest> {
-	const store = createNodeFsMemoryStore({
-		rootDir,
-		createRoot: false,
-		missingFileBehavior: "empty",
-	});
+	const store = getLocalStore(rootDir);
 	const manifest: FileManifest = {};
 	for (const path of CANONICAL_MEMOFS_FILES) {
 		if (!(await store.exists(path))) continue;

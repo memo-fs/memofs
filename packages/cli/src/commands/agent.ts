@@ -5,17 +5,41 @@
  */
 
 import {
+	appendFile,
+	mkdir,
+	readFile,
+	rm,
+	stat,
+	writeFile,
+} from "node:fs/promises";
+import { dirname, resolve, sep } from "node:path";
+import {
 	type AgentfsLikeClient,
 	createMemoFsAgentSession,
 	extractSessionMemory,
 	type MemoFS,
 } from "@memofs/core";
-import { appendText, exists, readText, writeText } from "../cli/store-helpers";
+import { getRootDir, readText, writeText } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { MEMOFS_CLI_PATHS } from "../protocol/constants";
 
 const LATEST_AGENT_SESSION_PATH = `${MEMOFS_CLI_PATHS.tmpDir}/agent-sessions/latest.json`;
+
+/** Resolves a POSIX-like agent remote path inside the workspace root, preventing traversal. */
+function resolveAgentPath(rootDir: string, remotePath: string): string {
+	if (remotePath.includes("\0")) {
+		throw new Error("Agent session path contains invalid characters.");
+	}
+	// const relative = remotePath.replace(/^\/+/, "");
+	const relative = remotePath.replace(/^[/\\]+/, "");
+	const resolved = resolve(rootDir, relative);
+	const normalizedRoot = rootDir.endsWith(sep) ? rootDir : rootDir + sep;
+	if (resolved !== rootDir && !resolved.startsWith(normalizedRoot)) {
+		throw new Error("Agent session path escaped the workspace root.");
+	}
+	return resolved;
+}
 
 /**
  * Shared options for local AgentFS session commands.
@@ -223,24 +247,44 @@ export async function runAgentCompleteCommand(
 }
 
 /**
- * Adapts the CLI filesystem to the AgentFS-like client contract.
+ * Uses Node's filesystem directly (like the core local-strategy client)
+ * so agent sessions live at `<rootDir>/agent-sessions/...` (gitignored at
+ * project root) and do NOT go through the MemoryStore, which only allows
+ * `.memofs/` paths and would throw "Memory path must be inside the canonical
+ * .memofs directory."
  *
  * @param memo - MemoFS client instance.
  * @returns AgentFS-like client.
  */
 function createLocalAgentfsClient(memo: MemoFS): AgentfsLikeClient {
+	const rootDir = getRootDir(memo.store);
 	return {
-		readText(path: string) {
-			return readText(memo.store, toRelativeAgentPath(path));
+		async readText(remotePath: string) {
+			const target = resolveAgentPath(rootDir, remotePath);
+			return readFile(target, "utf8");
 		},
-		writeText(path: string, content: string) {
-			return writeText(memo.store, toRelativeAgentPath(path), content);
+		async writeText(remotePath: string, content: string) {
+			const target = resolveAgentPath(rootDir, remotePath);
+			await mkdir(dirname(target), { recursive: true });
+			await writeFile(target, content, "utf8");
 		},
-		appendText(path: string, content: string) {
-			return appendText(memo.store, toRelativeAgentPath(path), content);
+		async appendText(remotePath: string, content: string) {
+			const target = resolveAgentPath(rootDir, remotePath);
+			await mkdir(dirname(target), { recursive: true });
+			await appendFile(target, content, "utf8");
 		},
-		exists(path: string) {
-			return exists(memo.store, toRelativeAgentPath(path));
+		async exists(remotePath: string) {
+			const target = resolveAgentPath(rootDir, remotePath);
+			try {
+				await stat(target);
+				return true;
+			} catch {
+				return false;
+			}
+		},
+		async deleteText(remotePath: string) {
+			const target = resolveAgentPath(rootDir, remotePath);
+			await rm(target, { force: true });
 		},
 		sync: {
 			pull: async () => {},
@@ -248,16 +292,6 @@ function createLocalAgentfsClient(memo: MemoFS): AgentfsLikeClient {
 			checkpoint: async () => {},
 		},
 	};
-}
-
-/**
- * Converts AgentFS absolute-ish paths into project-relative CLI paths.
- *
- * @param path - AgentFS path.
- * @returns Project-relative path.
- */
-function toRelativeAgentPath(path: string): string {
-	return path.replace(/^\/+/, "");
 }
 
 /**

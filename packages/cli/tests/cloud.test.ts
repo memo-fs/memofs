@@ -95,6 +95,17 @@ describe("cloud commands", () => {
 				async (input: RequestInfo | URL, init?: RequestInit) => {
 					const url = String(input);
 					calls.push(`${init?.method ?? "GET"} ${url}`);
+
+					if (url.startsWith("https://r2.example.com/put/")) {
+						expect(init?.method).toBe("PUT");
+						expect(
+							(init?.headers as Record<string, string> | undefined)
+								?.Authorization,
+						).toBeUndefined();
+						expect(init?.body).toBe("# Core\n\nTwo-phase push smoke test.");
+						return new Response(null, { status: 200 });
+					}
+
 					expect((init?.headers as Record<string, string>).Authorization).toBe(
 						"Bearer tm_test_123",
 					);
@@ -192,6 +203,7 @@ describe("cloud commands", () => {
 			// Both phases of the two-phase push must hit the project-scoped sync API.
 			expect(calls).toEqual([
 				"POST https://memofs.dev/api/v1/projects/proj_123/sync/push",
+				"PUT https://r2.example.com/put/core.md?sig=abc",
 				"POST https://memofs.dev/api/v1/projects/proj_123/sync/push/complete",
 			]);
 		} finally {

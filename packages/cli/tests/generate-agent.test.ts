@@ -156,7 +156,7 @@ describe("generate agent (CLI)", () => {
 		}
 	});
 
-	it("generate agent opencode creates AGENTS.md + .opencode/plugin/memofs.ts", async () => {
+	it("generate agent opencode creates AGENTS.md + .opencode/plugins/memofs.ts", async () => {
 		const temp = await createTempMemoFsDir();
 		try {
 			const result = await runMemoFsCli({
@@ -169,10 +169,9 @@ describe("generate agent (CLI)", () => {
 			// "call memofs.context yourself" phrasing.
 			expect(agentsMd).not.toContain("hooks are installed");
 			const plugin = await readFile(
-				join(temp.rootDir, ".opencode/plugin/memofs.ts"),
+				join(temp.rootDir, ".opencode/plugins/memofs.js"),
 				"utf8",
 			);
-			expect(plugin).toContain('from "@opencode-ai/plugin"');
 			expect(plugin).toContain("session.created");
 			expect(plugin).toContain("session.idle");
 			expect(plugin).not.toContain("SubagentStart");
@@ -493,9 +492,8 @@ describe("hook emitters (pure unit tests)", () => {
 
 	it("opencode emitter generates a real plugin (context + $, no bare exec)", () => {
 		const files = opencodeEmitter.emitHooks(ALL_MODULES);
-		expect(files[0]?.path).toBe(".opencode/plugin/memofs.ts");
+		expect(files[0]?.path).toBe(".opencode/plugins/memofs.js");
 		const content = files[0]?.content ?? "";
-		expect(content).toContain('from "@opencode-ai/plugin"');
 		expect(content).toContain("async ({ $, client })");
 		expect(content).toContain("session.created");
 		expect(content).toContain("session.idle");

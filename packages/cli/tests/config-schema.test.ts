@@ -13,7 +13,7 @@ import { resolveSchemaPath } from "../src/config";
 const PACKAGED_SCHEMA = path.resolve(__dirname, "../schema/config.json");
 
 describe("resolveSchemaPath", () => {
-	it("emits the canonical ./node_modules reference when the schema is installed under the root", async () => {
+	it("emits the canonical ../node_modules reference when the schema is installed under the root", async () => {
 		const temp = await createTempMemoFsDir();
 		try {
 			const parent = path.join(temp.rootDir, "node_modules", "@memofs");
@@ -33,7 +33,7 @@ describe("resolveSchemaPath", () => {
 			).toBe(true);
 
 			expect(resolveSchemaPath(temp.rootDir)).toBe(
-				"./node_modules/@memofs/cli/schema/config.json",
+				"../node_modules/@memofs/cli/schema/config.json",
 			);
 		} finally {
 			await temp.cleanup();
@@ -57,13 +57,16 @@ describe("resolveSchemaPath", () => {
 		// node_modules present — the previous implementation computed a
 		// path.relative() against wherever require.resolve landed, which could
 		// climb past the root. The new implementation either returns the
-		// canonical ./node_modules/ ref or the hosted URL — never an
-		// upwards-climbing relative path.
+		// canonical ../node_modules/ ref or the hosted URL — never a deeply
+		// upwards-climbing relative path like ../../packages/...
 		const temp = await createTempMemoFsDir();
 		try {
 			const result = resolveSchemaPath(temp.rootDir);
-			expect(result.startsWith("..")).toBe(false);
-			expect(result.includes("..")).toBe(false);
+			// The valid canonical ref is exactly one level up: ../node_modules/...
+			// Anything like ../../ or ../../../ is the old bug.
+			expect(result.includes("../../")).toBe(false);
+			expect(result.startsWith("/")).toBe(false);
+			expect(result.includes("packages/cli")).toBe(false);
 		} finally {
 			await temp.cleanup();
 		}
