@@ -100,6 +100,7 @@ describe("MCP tools", () => {
 				runtime: createMemoFSMcpRuntimeFromConfig({
 					mode: "local",
 					store: new InMemoryMemoryStore(),
+					recall: { localEmbeddings: false },
 				}),
 				authorize: ({ safety }) => safety === "read",
 			},
@@ -118,6 +119,7 @@ describe("MCP tools", () => {
 				runtime: createMemoFSMcpRuntimeFromConfig({
 					mode: "local",
 					store: new InMemoryMemoryStore(),
+					recall: { localEmbeddings: false },
 				}),
 			},
 			"memofs.remember",
@@ -142,6 +144,7 @@ describe("MCP tools", () => {
 		const runtime = createMemoFSMcpRuntimeFromConfig({
 			mode: "local",
 			store: new InMemoryMemoryStore(),
+			recall: { localEmbeddings: false },
 		});
 		const write = await callMemoFSTool({ runtime }, "memofs.remember", {
 			content: "a".repeat(5000),
@@ -162,6 +165,7 @@ describe("MCP tools", () => {
 		const runtime = createMemoFSMcpRuntimeFromConfig({
 			mode: "local",
 			store: new InMemoryMemoryStore(),
+			recall: { localEmbeddings: false },
 		});
 		const server = createMemoFSMcpProtocolServer({ runtime });
 		// Seed via the runtime method (graph_upsert_nodes is no longer a tool,

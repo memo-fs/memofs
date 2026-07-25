@@ -14,6 +14,7 @@ import {
 const runtime = createMemoFSMcpRuntimeFromConfig({
 	mode: "local",
 	store: new InMemoryMemoryStore(),
+	recall: { localEmbeddings: false },
 });
 const auth = { requireAuth: true, bearerToken: "test-token" };
 

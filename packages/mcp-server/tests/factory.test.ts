@@ -1,14 +1,24 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { InMemoryMemoryStore } from "@memofs/core";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { InMemoryMemoryStore, type MemoryEmbedder } from "@memofs/core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoFSMcpRuntimeFromConfig } from "../src/index";
+
+const { createTransformersEmbedder } = vi.hoisted(() => ({
+	createTransformersEmbedder: vi.fn<(options: unknown) => unknown>(() => {
+		throw new Error("transformers adapter unavailable");
+	}),
+}));
+
+vi.mock("@memofs/adapter-transformers", () => ({
+	createTransformersEmbedder,
+}));
 
 /**
  * Create a throwaway MemoFS root dir for filesystem-backed local-mode tests.
- * The MCP server test suite otherwise only exercises memory mode; local mode
- * needs a real rootDir with the bootstrap files present.
+ * Most MCP server tests inject an in-memory store; filesystem-backed tests need
+ * a real rootDir with the bootstrap files present.
  */
 async function createTempRoot(): Promise<{
 	rootDir: string;
@@ -32,6 +42,13 @@ afterEach(async () => {
 	}
 });
 
+beforeEach(() => {
+	createTransformersEmbedder.mockReset();
+	createTransformersEmbedder.mockImplementation(() => {
+		throw new Error("transformers adapter unavailable");
+	});
+});
+
 async function tempRoot() {
 	const { rootDir, cleanup } = await createTempRoot();
 	dirsToClean.push(rootDir);
@@ -43,30 +60,26 @@ async function tempRoot() {
  *
  * The factory decides whether to wire a lazy local ONNX embedder based on
  * `recall.localEmbeddings`, the `MEMOFS_LOCAL_EMBEDDINGS` env var, and the
- * runtime mode. The embedder itself is lazy (loaded on first vector query), so
+ * runtime configuration. The embedder itself is lazy (loaded on first vector
+ * operation), so
  * these tests assert the *observable* consequences of the wiring decision:
  *
- * - memory mode never attempts the local vector path,
+ * - non-vector operations never initialize the local embedder,
  * - local mode stays functional with zero API keys (lexical fallback),
  * - a missing adapter never breaks recall (graceful degradation),
  * - disabling local embeddings keeps the runtime import-light.
  */
 
 describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
-	describe("mode-gated wiring", () => {
-		it("memory mode: runtime is healthy and never wires the local embedder", async () => {
+	describe("lazy wiring", () => {
+		it("health does not initialize the local embedder", async () => {
 			const runtime = createMemoFSMcpRuntimeFromConfig({
 				mode: "local",
 				store: new InMemoryMemoryStore(),
 			});
 			const health = await runtime.health();
 			expect(health.ok).toBe(true);
-			// memory mode is volatile; recall returns no items but must not throw.
-			// The local factory always wires `recall`, so the non-null assertion
-			// is safe here and keeps the result type non-optional.
-			// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
-			const result = await runtime.recall!({ query: "anything" });
-			expect(result.items).toEqual([]);
+			expect(createTransformersEmbedder).not.toHaveBeenCalled();
 		});
 
 		it("hybrid mode: constructs with cloud config and never throws on wiring", async () => {
@@ -82,14 +95,65 @@ describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 			// Constructing the runtime must not throw and must not import the
 			// (absent) local adapter eagerly.
 			expect(runtime).toBeDefined();
+			expect(createTransformersEmbedder).not.toHaveBeenCalled();
+		});
+
+		it("initializes on the first vector operation and recalls semantically", async () => {
+			const semanticEmbedder: MemoryEmbedder = {
+				async embedTexts(input) {
+					return {
+						embeddings: input.texts.map((text, index) => ({
+							text,
+							embedding: [1, 0],
+							index,
+							model: "semantic-test",
+							dimensions: 2,
+						})),
+						model: "semantic-test",
+					};
+				},
+				async embedText(text) {
+					return {
+						text,
+						embedding: [1, 0],
+						index: 0,
+						model: "semantic-test",
+						dimensions: 2,
+					};
+				},
+			};
+			createTransformersEmbedder.mockReturnValueOnce(semanticEmbedder);
+
+			const runtime = createMemoFSMcpRuntimeFromConfig({
+				mode: "local",
+				store: new InMemoryMemoryStore(),
+				recall: { localEmbeddings: true, engine: "hybrid" },
+			});
+			expect(createTransformersEmbedder).not.toHaveBeenCalled();
+
+			// biome-ignore lint/style/noNonNullAssertion: local factory always wires writeMemory
+			await runtime.writeMemory!({
+				content: "PostgreSQL stores the account records.",
+				kind: "decision",
+			});
+			expect(createTransformersEmbedder).toHaveBeenCalledTimes(1);
+
+			// No lexical terms overlap; this result must come from vector retrieval.
+			// biome-ignore lint/style/noNonNullAssertion: local factory always wires recall
+			const result = await runtime.recall!({
+				query: "relational database",
+				limit: 5,
+			});
+			expect(result.items[0]?.text).toMatch(/PostgreSQL/i);
+			expect(createTransformersEmbedder).toHaveBeenCalledTimes(1);
 		});
 	});
 
 	describe("local mode with zero API keys", () => {
 		it("recall falls back to the lexical path when the adapter is absent", async () => {
 			// Force the factory toward the local-embedder path, but the adapter
-			// package is an optional peer that is not installed in this test
-			// environment. Recall must degrade gracefully to lexical-only.
+			// package is an optional peer and mocked as unavailable here. Recall
+			// must degrade gracefully to lexical-only.
 			const { rootDir, cleanup } = await tempRoot();
 			try {
 				const runtime = createMemoFSMcpRuntimeFromConfig({
@@ -115,6 +179,7 @@ describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 				// could not initialize (no adapter).
 				expect(result.items.length).toBeGreaterThan(0);
 				expect(result.items[0]?.text).toMatch(/authentication/i);
+				expect(createTransformersEmbedder).toHaveBeenCalled();
 			} finally {
 				await cleanup();
 			}
@@ -187,6 +252,7 @@ describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 					mode: "local",
 					rootDir,
 					projectId: "mcp-factory",
+					recall: { localEmbeddings: false },
 				});
 				const readCoreMemory = runtime.readCoreMemory;
 				if (!readCoreMemory) throw new Error("readCoreMemory is missing");

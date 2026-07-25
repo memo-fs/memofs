@@ -76,12 +76,6 @@ export function createMemoFSMcpRuntimeFromConfig(
 			})
 		: undefined;
 
-	if (embedder && typeof embedder.prewarm === "function") {
-		embedder.prewarm().catch((err: unknown) => {
-			console.error("[mcp] embedder pre-warm failed in background:", err);
-		});
-	}
-
 	const memo = createNodeMemoFs({
 		...(options.rootDir !== undefined ? { rootDir: options.rootDir } : {}),
 		...(options.mode !== undefined ? { mode: options.mode } : {}),
