@@ -19,10 +19,6 @@ MemoFS core memory runtime and provider-neutral contracts for AI apps and agents
 
 ```bash
 npm install @memofs/core
-
-# or: pnpm add @memofs/core
-# or: yarn add @memofs/core
-# or: bun add @memofs/core
 ```
 
 > Requires **Node.js >= 22**.

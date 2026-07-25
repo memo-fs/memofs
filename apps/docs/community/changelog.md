@@ -13,6 +13,12 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 ## Unreleased
 
+No changes
+
+## v1.2.0-beta.1 — July 25, 2026
+
+Core hardening, recall improvements, connector enhancements, and cloud app release.
+
 ### Cloud
 
 #### Added
@@ -35,15 +41,24 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 - Improved recall so results aren't held back when only one search method (keyword or vector) finds matches.
 - Improved reliability of context building across more JavaScript runtimes, including web workers.
 - Added optional logging for background operations like indexing and graph updates, to make debugging easier.
+- The recall pipeline now automatically resolves the appropriate recall store without requiring manual configuration.
 
 ### CLI
 
 #### Fixed
 - Fixed an incorrect default schema URL in generated configuration files.
 
+#### Changed
+- Optimized runtime configuration and commander option handling for lower startup overhead.
+
+### Connectors
+
+#### Added
+- GitHub Discussions connector now maps the discussion category as a label on the resulting note.
+
 ### Agents / Hosted MCP
 
-- Documentation updated for the agent generation and hook commands introduced in beta.1 (agent rules and getting-started guides).
+- Documentation updated for the agent generation and hook commands introduced in `1.1.0-beta.1` (agent rules and getting-started guides).
 
 ## v1.1.0-beta.1 — July 21, 2026
 

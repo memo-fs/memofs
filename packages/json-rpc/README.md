@@ -39,10 +39,6 @@ dependency-free package fixes both:
 
 ```sh
 npm install @memofs/json-rpc
-
-# or: pnpm add @memofs/json-rpc
-# or: yarn add @memofs/json-rpc
-# or: bun add @memofs/json-rpc
 ```
 
 > Requires **Node.js >= 22**.
