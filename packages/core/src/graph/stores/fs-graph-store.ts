@@ -15,6 +15,7 @@ import {
 	GRAPH_NODES_PATH,
 } from "../../core/constants/memory-paths";
 import { MemoryNotFoundError } from "../../core/errors/errors";
+import type { Logger } from "../../core/types/logger";
 import type { MemoryPath, MemoryStore } from "../../core/types/memory-store";
 import {
 	parseGraphEdgesJsonl,
@@ -40,8 +41,6 @@ import type {
 	StoredGraphNode,
 } from "../types";
 import { InMemoryGraphStore } from "./in-memory-graph-store";
-
-import type { Logger } from "../../core/types/logger";
 
 /**
  * Convert unknown error to message string for best-effort logging.

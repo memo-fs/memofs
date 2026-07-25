@@ -23,6 +23,8 @@ import type {
 	SnapshotRecord,
 	TimestampedNote,
 } from "../../core/types/memory-documents";
+import { resolveAutoRecallStore } from "../../recall/stores/auto-recall-store";
+import type { RecallStore } from "../../recall/types";
 import { createHybridStrategy } from "../hybrid-strategy";
 import { createLocalStrategy } from "../local-strategy";
 import type { MemoFS } from "../memo-fs";
@@ -156,6 +158,15 @@ export function agentfsCreateSession(
 	} as CreateMemoFSAgentSessionOptions);
 }
 
+/** Resolves the recall store, auto-creating a file-backed one when an embedder exists. */
+function resolveRecallStore(self: MemoFS): RecallStore | undefined {
+	return resolveAutoRecallStore({
+		store: self.store,
+		existing: self.recallStore,
+		embedderPresent: Boolean(self.embedder),
+	});
+}
+
 export function createStrategy(
 	self: MemoFS,
 	resolved: { mode: string; autoBootstrap?: boolean },
@@ -182,7 +193,7 @@ export function createStrategy(
 			extractor: self.extractor,
 			reranker: self.reranker,
 			llmClient: self.llmClient,
-			recallStore: self.recallStore,
+			recallStore: resolveRecallStore(self),
 			projectId: self.projectId,
 			tenantId: self.tenantId,
 			autoBootstrap: resolved.autoBootstrap ?? false,
@@ -202,7 +213,7 @@ export function createStrategy(
 		extractor: self.extractor,
 		reranker: self.reranker,
 		llmClient: self.llmClient,
-		recallStore: self.recallStore,
+		recallStore: resolveRecallStore(self),
 		projectId: self.projectId,
 		tenantId: self.tenantId,
 		autoBootstrap: resolved.autoBootstrap ?? false,

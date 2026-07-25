@@ -66,8 +66,7 @@ export async function writeMemory(
 	}
 
 	const id =
-		input.id ??
-		`mem_${fingerprint(`${now}:${input.content}:${randomUuid()}`)}`;
+		input.id ?? `mem_${fingerprint(`${now}:${input.content}:${randomUuid()}`)}`;
 	await appendTimestampedNote(ctx.options.store, {
 		timestamp: now,
 		kind: input.kind ?? "note",

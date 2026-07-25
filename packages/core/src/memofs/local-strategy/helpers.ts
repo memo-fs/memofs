@@ -92,7 +92,9 @@ export function snapshotId(label?: string): string {
 		return Math.random().toString(16).slice(2, 6).padEnd(4, "0");
 	}
 	const rand = random4();
-	return suffix ? `snap_${timestamp}_${suffix}_${rand}` : `snap_${timestamp}_${rand}`;
+	return suffix
+		? `snap_${timestamp}_${suffix}_${rand}`
+		: `snap_${timestamp}_${rand}`;
 }
 
 export function message(error: unknown): string {

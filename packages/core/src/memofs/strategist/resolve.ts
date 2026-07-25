@@ -18,7 +18,7 @@ export function resolveEntities(
 		if (seen.has(node.id)) continue;
 		const candidates = [node.label, ...(node.aliases ?? [])];
 		let matched: string | undefined;
-			for (const candidate of candidates) {
+		for (const candidate of candidates) {
 			const lower = candidate.toLowerCase();
 			// Exact match works for any length, including <3 chars like "db".
 			// This allows "db" to match a node labeled "db" directly, and

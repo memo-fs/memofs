@@ -23,8 +23,8 @@
  * @internal
  */
 
-import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import fsPromises from "node:fs/promises";
 import { promisify } from "node:util";
@@ -47,7 +47,7 @@ const execFileAsync = promisify(execFile);
 
 // Cached own process start time to avoid repeated `ps` calls.
 // `undefined` means not yet resolved, `null` means resolution failed.
-let cachedOwnStartTime: string | null | undefined = undefined;
+let cachedOwnStartTime: string | null | undefined;
 
 /**
  * Parses Linux `/proc/<pid>/stat` to extract starttime ticks.
@@ -121,9 +121,13 @@ export async function getProcessStartTimeAsync(
 			return cachedOwnStartTime;
 		}
 		try {
-			const result = await execFileAsync("ps", ["-p", String(pid), "-o", "lstart="], {
-				encoding: "utf8",
-			});
+			const result = await execFileAsync(
+				"ps",
+				["-p", String(pid), "-o", "lstart="],
+				{
+					encoding: "utf8",
+				},
+			);
 			const stdout = (result as { stdout: string }).stdout ?? "";
 			const trimmed = stdout.trim();
 			const parsed = trimmed || null;
@@ -152,9 +156,7 @@ export interface AdvisoryFileLockOptions {
 	 * Optional process-start probe, primarily for portable deterministic tests.
 	 * May be sync or async.
 	 */
-	getProcessStartTime?: (
-		pid: number,
-	) => string | null | Promise<string | null>;
+	getProcessStartTime?: (pid: number) => string | null | Promise<string | null>;
 	/** Async variant, takes precedence when provided together with sync probe. */
 	getProcessStartTimeAsync?: (pid: number) => Promise<string | null>;
 }
@@ -314,13 +316,12 @@ export class AdvisoryFileLock {
 	}
 
 	private async tryCreateOrReclaim(): Promise<void> {
-		const processStartedAt = (await this.processStartTime(process.pid)) ?? undefined;
+		const processStartedAt =
+			(await this.processStartTime(process.pid)) ?? undefined;
 		const contents: LockFileContents = {
 			pid: process.pid,
 			startedAt: new Date().toISOString(),
-			...(processStartedAt === undefined
-				? {}
-				: { processStartedAt }),
+			...(processStartedAt === undefined ? {} : { processStartedAt }),
 			ownerId: this.ownerId,
 		};
 

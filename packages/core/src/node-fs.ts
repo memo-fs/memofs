@@ -40,7 +40,9 @@ import {
 	type MemoFsConfig,
 	type MemoFsConfigFile,
 } from "./memofs/config";
+import { createLazyLocalEmbedder } from "./memofs/local-embedder";
 import { MemoFS } from "./memofs/memo-fs";
+import { resolveAutoRecallStore } from "./recall/stores/auto-recall-store";
 
 /**
  * Reads + parses `.memofs/config.json` synchronously (Node-only).
@@ -66,6 +68,23 @@ export function readMemoFsConfigFileSync(rootDir: string): MemoFsConfigFile {
 	}
 }
 
+/** Returns true when local embeddings are enabled via config, file, or env. */
+function isLocalEmbeddingsEnabled(
+	config: MemoFsConfig,
+	fileConfig: MemoFsConfigFile,
+): boolean {
+	if (config.recall?.localEmbeddings === true) return true;
+	if (fileConfig.recall?.localEmbeddings === true) return true;
+	if (
+		config.recall?.localEmbeddings === undefined &&
+		fileConfig.recall?.localEmbeddings === undefined
+	) {
+		const env = process.env.MEMOFS_LOCAL_EMBEDDINGS;
+		return env === "1" || env?.toLowerCase() === "true";
+	}
+	return false;
+}
+
 /**
  * Constructs a `MemoFS` instance from Node-only options — the shared factory
  * for every Node consumer (the CLI, the MCP server, OSS self-hosters).
@@ -88,16 +107,47 @@ export function readMemoFsConfigFileSync(rootDir: string): MemoFsConfigFile {
  */
 export function createNodeMemoFs(config: MemoFsConfig = {}): MemoFS {
 	const rootDir = config.rootDir ?? ".";
+	const fileConfig = config.fileConfig ?? readMemoFsConfigFileSync(rootDir);
+	const store =
+		config.store ??
+		createNodeFsMemoryStore({
+			rootDir,
+			createRoot: true,
+			missingFileBehavior: "empty",
+		});
+
+	const shouldUseLocalEmbedder =
+		config.embedder === undefined &&
+		isLocalEmbeddingsEnabled(config, fileConfig);
+
+	const embedder =
+		config.embedder ??
+		(shouldUseLocalEmbedder
+			? createLazyLocalEmbedder({
+					...(config.recall?.embeddingModel !== undefined
+						? { model: config.recall.embeddingModel }
+						: fileConfig.recall?.embeddingModel !== undefined
+							? { model: fileConfig.recall.embeddingModel }
+							: {}),
+				})
+			: undefined);
+
+	// Auto-create a filesystem recall store when an embedder is present but
+	// no recallStore was explicitly provided. This makes the "embedder + store"
+	// example work for hybrid recall without requiring manual
+	// `createFsRecallStore` wiring — the vector path needs both pieces.
+	const recallStore = resolveAutoRecallStore({
+		store,
+		existing: config.recallStore,
+		embedderPresent: Boolean(embedder),
+	});
+
 	return new MemoFS({
 		...config,
 		rootDir,
-		fileConfig: config.fileConfig ?? readMemoFsConfigFileSync(rootDir),
-		store:
-			config.store ??
-			createNodeFsMemoryStore({
-				rootDir,
-				createRoot: true,
-				missingFileBehavior: "empty",
-			}),
+		fileConfig,
+		store,
+		...(recallStore ? { recallStore } : {}),
+		...(embedder ? { embedder } : {}),
 	});
 }
