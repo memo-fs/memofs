@@ -274,7 +274,8 @@ describe("expandAffordanceLine", () => {
 
 describe("worker-safe (no Buffer global)", () => {
 	it("encodes and decodes cursor without Node Buffer", () => {
-		const originalBuffer = (globalThis as unknown as { Buffer?: unknown }).Buffer;
+		const originalBuffer = (globalThis as unknown as { Buffer?: unknown })
+			.Buffer;
 		// Simulate workerd where Buffer is not available
 		// biome-ignore lint/suspicious/noExplicitAny: test simulating worker env
 		(globalThis as any).Buffer = undefined;

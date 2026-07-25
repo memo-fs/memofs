@@ -1,17 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { searchMemoryText } from "../../src/core/search/search-memory";
 import { tokenizeSimple } from "../../src/core/internal/lexical";
+import { searchMemoryText } from "../../src/core/search/search-memory";
+import { InMemoryMemoryStore } from "../../src/core/stores/in-memory-store";
+import { createInMemoryGraphStore } from "../../src/graph/stores/in-memory-graph-store";
+import { utf8ByteLength } from "../../src/memofs/helpers/utils";
+import { localRecall } from "../../src/memofs/local-strategy/recall";
+import type {
+	LocalStrategyContext,
+	LocalStrategyOptions,
+} from "../../src/memofs/local-strategy/types";
+import { indexDocument } from "../../src/memofs/local-strategy/write";
 import {
 	allocateBudget,
 	defaultTokenEstimator,
 } from "../../src/memofs/strategist/budget";
-import { utf8ByteLength } from "../../src/memofs/helpers/utils";
-import type { LocalStrategyOptions } from "../../src/memofs/local-strategy/types";
-import { localRecall } from "../../src/memofs/local-strategy/recall";
-import { indexDocument } from "../../src/memofs/local-strategy/write";
-import type { LocalStrategyContext } from "../../src/memofs/local-strategy/types";
-import { InMemoryMemoryStore } from "../../src/core/stores/in-memory-store";
-import { createInMemoryGraphStore } from "../../src/graph/stores/in-memory-graph-store";
 import { BM25Store } from "../../src/recall/lexical/bm25";
 import { createDeterministicFallbackReranker } from "../../src/rerank/fallback/deterministic-fallback-reranker";
 
@@ -38,8 +40,8 @@ A random line mentioning auth flow in body.
 			// First result should be the heading with implementation, boosted score >=3
 			const first = results[0];
 			expect(first).toBeDefined();
-			expect(first!.text.toLowerCase()).toContain("auth flow implementation");
-			expect(first!.score).toBeGreaterThanOrEqual(3);
+			expect(first?.text.toLowerCase()).toContain("auth flow implementation");
+			expect(first?.score).toBeGreaterThanOrEqual(3);
 		});
 
 		it("still works for exact lowercased heading", () => {
@@ -71,9 +73,7 @@ nothing
 		it("the quick brown fox drops the", () => {
 			const tokens = tokenizeSimple("the quick brown fox");
 			expect(tokens).not.toContain("the");
-			expect(tokens).toEqual(
-				expect.arrayContaining(["quick", "brown", "fox"]),
-			);
+			expect(tokens).toEqual(expect.arrayContaining(["quick", "brown", "fox"]));
 		});
 	});
 
@@ -94,7 +94,8 @@ nothing
 			};
 			const longItems = Array.from(
 				{ length: 20 },
-				(_, i) => `item${i} with some longer description that will exceed budget`,
+				(_, i) =>
+					`item${i} with some longer description that will exceed budget`,
 			).join("\n");
 
 			const result = allocateBudget({
@@ -155,9 +156,7 @@ nothing
 			const warn = vi.fn();
 			const store = new InMemoryMemoryStore();
 			const lexicalStore = new BM25Store();
-			lexicalStore.upsert([
-				{ id: "doc1", text: "auth flow implementation" },
-			]);
+			lexicalStore.upsert([{ id: "doc1", text: "auth flow implementation" }]);
 			const ctx = {
 				options: {
 					store,
@@ -230,9 +229,14 @@ nothing
 				reranker: createDeterministicFallbackReranker(),
 				graphNodes: new Map(),
 				graphEdges: new Map(),
-				contextCache: { clear: () => {} } as unknown as LocalStrategyContext["contextCache"],
+				contextCache: {
+					clear: () => {},
+				} as unknown as LocalStrategyContext["contextCache"],
 				graphStore: createInMemoryGraphStore(),
-				extractor: { name: "test", extract: async () => ({ nodes: [], edges: [] }) } as unknown as LocalStrategyContext["extractor"],
+				extractor: {
+					name: "test",
+					extract: async () => ({ nodes: [], edges: [] }),
+				} as unknown as LocalStrategyContext["extractor"],
 				indexLexical: () => {},
 			} as unknown as LocalStrategyContext;
 

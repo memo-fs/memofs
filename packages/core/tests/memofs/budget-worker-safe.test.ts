@@ -1,11 +1,20 @@
 import { describe, expect, it } from "vitest";
+import {
+	decodeBase64Url,
+	encodeBase64Url,
+	truncateUtf8,
+	utf8ByteLength,
+} from "../../src/memofs/helpers/utils";
+import {
+	decodeExpansionCursor,
+	encodeExpansionCursor,
+} from "../../src/memofs/progressive";
 import { allocateBudget } from "../../src/memofs/strategist/budget";
-import { decodeExpansionCursor, encodeExpansionCursor } from "../../src/memofs/progressive";
-import { utf8ByteLength, truncateUtf8, encodeBase64Url, decodeBase64Url } from "../../src/memofs/helpers/utils";
 
 describe("worker-safe budgeting and cursor (no Buffer)", () => {
 	it("budget allocates without Buffer global", () => {
-		const originalBuffer = (globalThis as unknown as { Buffer?: unknown }).Buffer;
+		const originalBuffer = (globalThis as unknown as { Buffer?: unknown })
+			.Buffer;
 		// biome-ignore lint/suspicious/noExplicitAny: simulate workerd
 		(globalThis as any).Buffer = undefined;
 		try {
@@ -13,7 +22,12 @@ describe("worker-safe budgeting and cursor (no Buffer)", () => {
 				maxBytes: 500,
 				sections: [
 					{ title: "Core", content: "core content here", nonNegotiable: true },
-					{ title: "Recall", content: "a\nb\nc\nd\ne", type: "recall", weight: 3 },
+					{
+						title: "Recall",
+						content: "a\nb\nc\nd\ne",
+						type: "recall",
+						weight: 3,
+					},
 					{ title: "Notes", content: "note 1\nnote 2", type: "notes" },
 				],
 			});
@@ -28,7 +42,8 @@ describe("worker-safe budgeting and cursor (no Buffer)", () => {
 	});
 
 	it("truncateUtf8 and base64url work without Buffer", () => {
-		const originalBuffer = (globalThis as unknown as { Buffer?: unknown }).Buffer;
+		const originalBuffer = (globalThis as unknown as { Buffer?: unknown })
+			.Buffer;
 		// biome-ignore lint/suspicious/noExplicitAny: simulate workerd
 		(globalThis as any).Buffer = undefined;
 		try {
@@ -46,11 +61,16 @@ describe("worker-safe budgeting and cursor (no Buffer)", () => {
 	});
 
 	it("expansion cursor round-trips without Buffer", () => {
-		const originalBuffer = (globalThis as unknown as { Buffer?: unknown }).Buffer;
+		const originalBuffer = (globalThis as unknown as { Buffer?: unknown })
+			.Buffer;
 		// biome-ignore lint/suspicious/noExplicitAny: simulate workerd
 		(globalThis as any).Buffer = undefined;
 		try {
-			const cursor = encodeExpansionCursor({ v: 1, key: "abc123", section: "recall" });
+			const cursor = encodeExpansionCursor({
+				v: 1,
+				key: "abc123",
+				section: "recall",
+			});
 			const decoded = decodeExpansionCursor(cursor);
 			expect(decoded?.section).toBe("recall");
 			expect(decoded?.key).toBe("abc123");
