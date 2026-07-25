@@ -144,6 +144,23 @@ describe("createLazyLocalEmbedder", () => {
 			await embedder.embedText("warmup");
 			expect(seen.mock.calls[0]?.[0]).not.toHaveProperty("cacheDir");
 		});
+
+		it("forwards onProgress callback to the adapter factory", async () => {
+			const seen = vi.fn();
+			const onProgress = vi.fn();
+			const embedder = createLazyLocalEmbedder({
+				onProgress,
+				adapterFactory: async (opts) => {
+					seen(opts);
+					return fakeEmbedder();
+				},
+			});
+			await embedder.embedText("warmup");
+			expect(seen).toHaveBeenCalledWith({
+				model: "Xenova/all-MiniLM-L6-v2",
+				onProgress,
+			});
+		});
 	});
 
 	describe("error handling", () => {

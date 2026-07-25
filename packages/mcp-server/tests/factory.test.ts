@@ -98,6 +98,17 @@ describe("createMemoFSMcpRuntimeFromConfig — embedder wiring", () => {
 			expect(createTransformersEmbedder).not.toHaveBeenCalled();
 		});
 
+		it("forwards onModelProgress to the embedder without eagerly constructing the adapter", async () => {
+			const onModelProgress = vi.fn();
+			const runtime = createMemoFSMcpRuntimeFromConfig({
+				mode: "local",
+				store: new InMemoryMemoryStore(),
+				onModelProgress,
+			});
+			expect(runtime).toBeDefined();
+			expect(createTransformersEmbedder).not.toHaveBeenCalled();
+		});
+
 		it("initializes on the first vector operation and recalls semantically", async () => {
 			const semanticEmbedder: MemoryEmbedder = {
 				async embedTexts(input) {

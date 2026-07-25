@@ -28,7 +28,7 @@ import {
 
 const DEFAULT_MAX_INPUT_BYTES = 256_000;
 const DEFAULT_MAX_OUTPUT_BYTES = 512_000;
-const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_TIMEOUT_MS = 60_000;
 
 /**
  * Main dispatcher to parse arguments, validate safety authorization, and run

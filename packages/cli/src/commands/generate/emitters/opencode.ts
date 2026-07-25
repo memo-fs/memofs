@@ -104,5 +104,3 @@ export const opencodeEmitter: HookEmitter = {
 		return [{ path: ".opencode/plugins/memofs.js", content }];
 	},
 };
-
-

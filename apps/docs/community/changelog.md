@@ -51,6 +51,15 @@ Core hardening, recall improvements, connector enhancements, and cloud app relea
 #### Changed
 - Optimized runtime configuration and commander option handling for lower startup overhead.
 
+### MCP Server
+
+#### Added
+- Non-blocking HuggingFace model prewarming on server startup when `localEmbeddings` is enabled, eliminating cold-start latency on the first memory tool call.
+- Progress updates output to `stderr` during initial model weight downloads (`[memofs] Downloading local embedding model weights...`).
+
+#### Changed
+- Increased default per-tool request timeout from 30s to 60s to prevent false timeout failures during first-time weight downloads on slower connections.
+
 ### Connectors
 
 #### Added

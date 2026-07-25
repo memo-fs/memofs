@@ -42,12 +42,27 @@ export interface LazyLocalEmbedderOptions {
 	 */
 	cacheDir?: string;
 	/**
+	 * Optional progress callback forwarded to the adapter during model
+	 * download/load. Use this to surface a "warming up" notice to users on
+	 * first run.
+	 */
+	onProgress?: (info: {
+		progress: number;
+		status: string;
+		file?: string;
+	}) => void;
+	/**
 	 * Injected factory for tests so the dynamic import is not exercised. When
 	 * provided, it must return a {@link MemoryEmbedder}.
 	 */
 	adapterFactory?: (options: {
 		model: string;
 		cacheDir?: string;
+		onProgress?: (info: {
+			progress: number;
+			status: string;
+			file?: string;
+		}) => void;
 	}) => Promise<MemoryEmbedder>;
 }
 
@@ -79,6 +94,9 @@ export function createLazyLocalEmbedder(
 					...(options.cacheDir === undefined
 						? {}
 						: { cacheDir: options.cacheDir }),
+					...(options.onProgress === undefined
+						? {}
+						: { onProgress: options.onProgress }),
 				});
 			}
 			// Dynamic import keeps the adapter an optional peer dependency.
@@ -88,6 +106,11 @@ export function createLazyLocalEmbedder(
 				createTransformersEmbedder?: (opts: {
 					model: string;
 					cacheDir?: string;
+					onProgress?: (info: {
+						progress: number;
+						status: string;
+						file?: string;
+					}) => void;
 				}) => MemoryEmbedder;
 			};
 			const factory = mod.createTransformersEmbedder;
@@ -101,6 +124,9 @@ export function createLazyLocalEmbedder(
 				...(options.cacheDir === undefined
 					? {}
 					: { cacheDir: options.cacheDir }),
+				...(options.onProgress === undefined
+					? {}
+					: { onProgress: options.onProgress }),
 			});
 		})().catch((error: unknown) => {
 			// Allow a subsequent call to retry instead of caching the rejection.

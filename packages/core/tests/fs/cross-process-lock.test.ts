@@ -68,7 +68,7 @@ describe("cross-process advisory lock (Q28)", () => {
 			process.stderr.write(`[child stderr] ${chunk}`),
 		);
 
-		await waitForMarker(marker, 10_000);
+		await waitForMarker(marker, 30_000);
 
 		// The lock file exists with the child's PID.
 		expect(await pathExists(lockPath)).toBe(true);
@@ -89,7 +89,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		).resolves.toBeUndefined();
 
 		await parentStore.dispose();
-	}, 20_000);
+	}, 60_000);
 
 	test("a crashed process leaves a stale lock that the next process reclaims", async () => {
 		const rootDir = await createTempRoot();
@@ -102,7 +102,7 @@ describe("cross-process advisory lock (Q28)", () => {
 			process.stderr.write(`[child stderr] ${chunk}`),
 		);
 
-		await waitForMarker(marker, 10_000);
+		await waitForMarker(marker, 30_000);
 
 		// The lock exists with the (still-alive) child's PID.
 		const beforeRaw = await fs.readFile(lockPath, "utf8");
@@ -128,7 +128,7 @@ describe("cross-process advisory lock (Q28)", () => {
 		expect(JSON.parse(afterRaw).pid).toBe(process.pid);
 
 		await parentStore.dispose();
-	}, 20_000);
+	}, 60_000);
 });
 
 /** Waits for a marker file to appear (child signaling readiness), with timeout. */

@@ -41,6 +41,8 @@ async function main(): Promise<void> {
 			rootDir: args.root as string | undefined,
 			projectId: args.projectId as string | undefined,
 			workspaceId: args.workspaceId as string | undefined,
+			onModelProgress: createStderrModelProgress(),
+			prewarm: true,
 			cloud: {
 				baseUrl: args.cloudUrl as string | undefined,
 				apiKey: args.apiKey as string | undefined,
@@ -67,7 +69,7 @@ async function main(): Promise<void> {
 		readOnly,
 		requestTimeoutMs: numberArg(
 			args.requestTimeoutMs as string | undefined,
-			30_000,
+			60_000,
 		),
 		maxInputBytes: numberArg(args.maxInputBytes as string | undefined, 256_000),
 		maxOutputBytes: numberArg(
@@ -178,7 +180,7 @@ Options:
  --cloud-timeout-ms <number> Cloud request timeout. Defaults to cloud-client default.
  --read-only Block all write tools.
  --allow-writes Allow write tools when host authorizes them.
- --request-timeout-ms <number> Per-tool timeout. Defaults to 30000.
+ --request-timeout-ms <number> Per-tool timeout. Defaults to 60000.
  --max-input-bytes <number> Max tool argument bytes.
  --max-output-bytes <number> Max tool result bytes.
  --help Show this help.
@@ -193,4 +195,27 @@ Environment:
  MEMOFS_CLOUD_TIMEOUT_MS Cloud request timeout.
  MEMOFS_MCP_READ_ONLY true to block write tools.
  `);
+}
+
+/**
+ * Creates a progress callback that outputs a clean one-liner to stderr
+ * when downloading model weights on first-time localEmbeddings initialization.
+ */
+function createStderrModelProgress(): (info: {
+	progress: number;
+	status: string;
+	file?: string;
+}) => void {
+	let announced = false;
+	return (info) => {
+		if (!announced && info.status === "download") {
+			process.stderr.write(
+				"[memofs] Downloading local embedding model weights (first run only)...\n",
+			);
+			announced = true;
+		}
+		if (info.status === "progress" && info.progress >= 1) {
+			process.stderr.write("[memofs] Local embedding model ready.\n");
+		}
+	};
 }

@@ -44,6 +44,21 @@ export interface RuntimeFactoryOptions {
 	 * `localEmbeddings: false` to keep the runtime import-light (lexical-only).
 	 */
 	recall?: MemoFsConfig["recall"];
+	/**
+	 * Optional progress callback invoked during local embedding model
+	 * download/load. Forwarded to the Transformers.js adapter. Use this to
+	 * surface a "warming up" notice to users on first run.
+	 */
+	onModelProgress?: (info: {
+		progress: number;
+		status: string;
+		file?: string;
+	}) => void;
+	/**
+	 * When true, kicks off background prewarming of local embedding weights
+	 * immediately upon runtime creation instead of waiting for the first vector operation.
+	 */
+	prewarm?: boolean;
 }
 
 /**
@@ -73,6 +88,9 @@ export function createMemoFSMcpRuntimeFromConfig(
 	const embedder = useLocalEmbedder
 		? createLazyLocalEmbedder({
 				...(embeddingModel === undefined ? {} : { model: embeddingModel }),
+				...(options.onModelProgress === undefined
+					? {}
+					: { onProgress: options.onModelProgress }),
 			})
 		: undefined;
 
@@ -93,6 +111,12 @@ export function createMemoFSMcpRuntimeFromConfig(
 		...(options.recall !== undefined ? { recall: options.recall } : {}),
 		...(options.cloud !== undefined ? { cloud: options.cloud } : {}),
 	});
+
+	if (options.prewarm && embedder?.prewarm) {
+		embedder.prewarm().catch(() => {
+			// Swallowed — retry happens lazily on first recall.
+		});
+	}
 
 	return createMemoFSMcpRuntimeFromMemoFS(memo);
 }
