@@ -173,9 +173,21 @@ function buildQuery(kind: "issues" | "prs" | "discussions"): string {
 			: kind === "prs"
 				? "pullRequests"
 				: "discussions";
-	// Field selection is the same shape across all three; GitHub accepts these
-	// fields on Issue / PullRequest / Discussion nodes.
-	const fields = `
+	// Discussion does NOT have `state` or `labels` — those fields exist only on
+	// Issue / PullRequest. Querying them on Discussion triggers:
+	// "Field 'state' doesn't exist on type 'Discussion'".
+	const fields =
+		kind === "discussions"
+			? `
+		number
+		title
+		body
+		url
+		createdAt
+		author { login }
+		category { name }
+	`
+			: `
 		number
 		title
 		body
@@ -224,9 +236,14 @@ function extractPage(
 
 /** Map a raw GraphQL node into a {@link GitHubNode}. */
 function mapNode(raw: RawGraphQLNode, kind: GitHubNode["kind"]): GitHubNode {
-	const labels = raw.labels?.nodes
+	const labelNodes = raw.labels?.nodes
 		?.map((n) => n?.name)
 		.filter((n): n is string => typeof n === "string");
+	// Discussions have `category { name }` instead of labels — surface it as a label
+	// so downstream filtering still works.
+	const categoryLabel =
+		raw.category?.name !== undefined ? [raw.category.name] : undefined;
+	const labels = labelNodes ?? categoryLabel;
 	return {
 		kind,
 		number: raw.number,
@@ -299,4 +316,5 @@ interface RawGraphQLNode {
 	readonly labels?: {
 		readonly nodes?: readonly ({ readonly name?: string } | null)[] | null;
 	} | null;
+	readonly category?: { readonly name?: string } | null;
 }
