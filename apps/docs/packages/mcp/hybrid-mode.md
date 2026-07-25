@@ -64,6 +64,7 @@ Every flag has an environment-variable equivalent (passed through the `env` bloc
 | Variable | Description |
 |---|---|
 | `MEMOFS_RUNTIME` | Runtime mode: `local` or `hybrid`. |
+| `MEMOFS_ROOT` | Local workspace root — equivalent to `--root`. |
 | `MEMOFS_CLOUD_URL` (or `MEMOFS_API_URL`) | MemoFS Cloud API root. |
 | `MEMOFS_API_KEY` | MemoFS Cloud API key — preferred over `--api-key`. |
 | `MEMOFS_PROJECT_ID` | Default project ID. |
@@ -99,13 +100,13 @@ The server can't reach the cloud because both a URL and an API key are missing. 
 Your API key is read-only. Either mint a read-write key on the API Keys page, or check that the dashboard role you assigned wasn't scoped to read-only by accident. (A read-only key intentionally can't bypass this.)
 
 ### Teammates don't see your writes
-Hybrid mode pushes writes to the cloud replica, but **other machines don't pull automatically**. Anyone working on the project needs `memofs cloud sync pull` to fetch the latest, or `memofs cloud sync push` to keep their local `.memofs/` up to date in the background.
+Hybrid mode mirrors your writes to the cloud replica automatically, but **other machines don't pull automatically**. Anyone working on the project needs to run `memofs cloud sync pull` to fetch the latest — there's no background process that updates another machine's local `.memofs/` for them.
 
 ### No `.memofs/` directory found
 The server defaults `--root` to the current working directory. If you launched the agent from outside your project (common with global / app-level MCP configs), add `"--root", "/absolute/path/to/project"` to `args`.
 
 ## See Also
 
-- [MCP Server index](./index) — the four memory tools, all flags, and per-client config snippets.
+- [Local Mode](./index) — the four memory tools, all flags, and per-client config snippets.
 - [Hosted MCP Endpoint](./hosted-mcp-endpoint) — HTTP-only variant for machines with no checkout.
 - [CLI memory commands](/packages/cli/memory) — `memofs cloud sync pull` / `memofs cloud sync status` to reconcile local memory with the cloud replica.

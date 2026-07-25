@@ -107,12 +107,12 @@ memofs config init --runtime hybrid --cloud-url https://memofs.dev/api/v1
 
 ```json
 {
-  "$schema": "./node_modules/@memofs/cli/schema/config.json",
+  "$schema": "../node_modules/@memofs/cli/schema/config.json",
   "runtime": "hybrid",
   "root": ".",
   "cloud": {
     "baseUrl": "https://memofs.dev/api/v1",
-    "workspaceId": "ws_abc123"
+    "projectId": "pro_abc123"
   },
   "recall": {
     "engine": "hybrid",

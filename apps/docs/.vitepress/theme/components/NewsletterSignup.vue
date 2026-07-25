@@ -61,15 +61,26 @@ async function handleSubmit() {
 			body: JSON.stringify({ email: value }),
 		});
 
-		if (!response.ok) {
-			throw new Error(`Subscribe failed (${response.status})`);
+		// Parse body even on error for actionable message.
+		let data: { ok?: boolean; error?: string } | null = null;
+		try {
+			data = (await response.json()) as { ok?: boolean; error?: string };
+		} catch {
+			// non-JSON — will be handled by ok check
+		}
+
+		if (!response.ok || (data && data.error)) {
+			throw new Error(data?.error || `Subscribe failed (${response.status})`);
 		}
 
 		status.value = "success";
 		email.value = "";
-	} catch {
+	} catch (err) {
 		status.value = "error";
-		errorMessage.value = "Something went wrong. Please try again.";
+		errorMessage.value =
+			err instanceof Error && err.message
+				? err.message
+				: "Something went wrong. Please try again.";
 	}
 }
 </script>
@@ -105,7 +116,7 @@ async function handleSubmit() {
       </form>
 
       <p v-if="status === 'success'" class="newsletter-note success">
-        ✓ You're in. Check your inbox to confirm.
+        ✓ You're in. Welcome email on its way.
       </p>
       <p v-else-if="status === 'error'" class="newsletter-note error">
         {{ errorMessage }}

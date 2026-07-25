@@ -7,7 +7,7 @@ Use it when the machine hosting your agent has no working copy of the repo:
 - CI runners and ephemeral build agents
 - Cloud-hosted agents (Claude.ai web, server-side Copilot, etc.)
 - A teammate's laptop *before* they've cloned the repo
-- Any cloud hosted agents/AI apps that speak MCP
+- Any other cloud-hosted agent or AI app that speaks MCP
 
 If the agent runs on a machine with a full checkout and you want it to benefit from local-first reads, use [Hybrid Mode](./hybrid-mode) instead.
 
@@ -16,13 +16,15 @@ If the agent runs on a machine with a full checkout and you want it to benefit f
 
 ## Quick start
 
-The dashboard's **Memory page** shows your project's exact URL plus copy-paste snippets for the three clients whose config shapes need one. The URL has the form:
+Find your project's exact URL on the dashboard's **Memory page**. It has the form:
 
 ```
 https://memofs.dev/api/v1/projects/<project-id>/mcp
 ```
 
-Replace `<project-id>` with the project's real ID (shown on the dashboard) and `<your-api-key>` with a key from the **API Keys page**. The hosted endpoint speaks standard MCP streamable-HTTP, so any MCP client that supports that transport works (Claude Desktop, Claude Code, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot in VS Code, Zed, Continue, and others). The dashboard ships copy-paste snippets for the three clients whose config shapes differ enough to need one — Claude Code, Cursor, and VS Code:
+Replace `<project-id>` with your project's real ID (shown on the dashboard). You'll also need an API key from the **API Keys page** — pass it as a Bearer token in the `Authorization` header, exactly as shown in each snippet below.
+
+The hosted endpoint speaks standard MCP streamable-HTTP, so any client that supports that transport works: Claude Desktop, Claude Code, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot in VS Code, Zed, Continue, and others. Config shapes are mostly interchangeable, but three clients differ enough to need their own snippet — Claude Code, Cursor, and VS Code — shown below (the dashboard's Memory page pre-fills these same three for you):
 
 ::: code-group
 
@@ -103,11 +105,11 @@ A read-only key never rejects `context`/`recall` — only the write tools fail, 
 
 ### Write attribution
 
-Writes are stamped with the API key's label as the `writer` field (the submitted tool call has no `writer` field, so clients can't forge attribution). Each successful write is also logged as a `memory_events` row visible on the dashboard's Memory page.
+Writes are stamped with the API key's label as the `writer` field. Clients can't forge this — the tool call schema has no `writer` parameter, so the server derives it solely from the authenticated key. Each successful write is also logged as a `memory_events` row visible on the dashboard's Memory page.
 
 ### Local pickup of cloud writes
 
-Writes land in the project's hosted replica. A local checkout picks them up on its next `memofs cloud sync pull` (or `memofs cloud sync push` background pass). The hosted endpoint does **not** push writes back to the local `.memofs/` directory of every machine automatically — pulls are explicit, just like with [Hybrid Mode](./hybrid-mode).
+Writes land in the project's hosted replica. A local checkout only picks them up when it runs `memofs cloud sync pull` — pulls are always explicit, the same as with [Hybrid Mode](./hybrid-mode). The hosted endpoint does **not** push writes back to any machine's local `.memofs/` directory automatically.
 
 ## Rate limits
 
@@ -143,6 +145,6 @@ Those surfaces are stdio-only — the hosted endpoint exposes just the four memo
 
 ## See Also
 
-- [MCP Server index](./index) — the full tool/flag surface for the stdio server.
+- [Local Mode](./index) — the full tool/flag surface for the stdio server.
 - [Hybrid Mode](./hybrid-mode) — local stdio server that mirrors writes to the cloud replica.
 - [CLI memory commands](/packages/cli/memory) — `memofs cloud sync push` to provision a project's hosted replica; `memofs cloud sync pull` to reconcile local memory with cloud writes.

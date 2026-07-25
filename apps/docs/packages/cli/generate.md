@@ -90,7 +90,7 @@ What each platform's hooks do:
 |----------|--------------|----------------|--------------------|-------------|
 | Claude Code (`.claude/settings.json`) | Inject context (+ cloud pull) | Inject context | Re-inject via `SessionStart` `compact` matcher | Compliance summary (`systemMessage`) |
 | Codex (`.codex/hooks.json`) | Inject context (+ cloud pull) | Inject context | Re-inject via `SessionStart` `compact` matcher | Compliance summary (`systemMessage`) |
-| opencode (`.opencode/plugin/memofs.ts`) | Cloud pull + session marker (no injection — the agent loads context via MCP tools) | — | — | Compliance toast |
+| opencode (`.opencode/plugins/memofs.js`) | Cloud pull + session marker (no injection — the agent loads context via MCP tools) | — | — | Compliance toast |
 
 > [!IMPORTANT]
 > Claude Code and Codex inject hook stdout as model-visible context, so the generated rules file says context is auto-loaded. opencode plugins cannot inject context — its rules file keeps the "call `memofs.context` yourself" phrasing, and the plugin only handles the cloud pull, the session-start compliance marker, and the end-of-session status toast.

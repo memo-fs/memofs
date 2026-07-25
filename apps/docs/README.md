@@ -46,3 +46,4 @@ pnpm --filter @memofs/docs check:links
 | --- | --- | --- |
 | `RESEND_API_KEY` | required server-side | Resend **secret** API key (`re_…`) used by the `functions/api/subscribe.ts` Pages Function to create contacts. Set via `wrangler pages secret put` — never inline as a `VITE_` var or commit it. |
 | `RESEND_SEGMENT_ID` | required server-side | UUID of the Resend segment for docs newsletter contacts. Mirrors the cloud app's `RESEND_SEGMENT_ID` pattern (one segment per audience). Set via `wrangler pages secret put` or in `wrangler.jsonc` `vars` (it's not secret). |
+| `RESEND_FROM` | optional | Sender for welcome email — e.g. `MemoFS Team <team@mail.memofs.dev>`. Set in `wrangler.jsonc` `vars` or via secret. If missing, contact is still created but no welcome email is sent. |

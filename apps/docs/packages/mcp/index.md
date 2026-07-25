@@ -2,7 +2,7 @@
 
 `@memofs/mcp-server` lets AI coding agents (Claude Code, Claude Desktop, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot, Zed, and any other MCP client) securely read and write MemoFS memory through standard Model Context Protocol tools.
 
-## Quick Setup (Recommended)
+## Quick setup (recommended)
 
 The MemoFS CLI writes the correct MCP config for your platform in one command — no hand-editing JSON:
 
@@ -54,7 +54,7 @@ deno install npm:@memofs/mcp-server
 > [!NOTE]
 > The MCP server runs on **Node.js >= 22**. Ensure Node 22+ is available on the machine that hosts the agent (your dev laptop, a CI runner, or the agent's sandboxed runtime).
 
-## Manual Integration
+## Manual integration
 
 AI clients spawn the MCP server as a background process communicating over standard input/output (stdio).
 
@@ -98,8 +98,8 @@ Two conventions apply across all platforms:
 ```
 
 ```toml [Codex]
-# Global (Codex convention): ~/.codex/config.toml
 # Project: ./.codex/config.toml (drop the --root args)
+# Global (Codex convention): ~/.codex/config.toml (add --root)
 [mcp_servers.memofs]
 command = "npx"
 args = ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
@@ -163,7 +163,7 @@ args = ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
 > [!WARNING]
 > VS Code's `.vscode/mcp.json` uses a `servers` top-level key and requires an explicit `"type"` on every entry. An `mcpServers` key copy-pasted from another client's config is **silently ignored** — no error, no server.
 
-## Command Flags
+## Command flags
 
 Customize the server instantiation using standard flags:
 
@@ -183,7 +183,7 @@ Customize the server instantiation using standard flags:
 | `--max-output-bytes <n>` | `512000` | Max tool result bytes. |
 | `--help` | — | Show help text. |
 
-### Environment Variables
+### Environment variables
 
 Every flag has an environment-variable equivalent — useful because most MCP client configs support an `env` block, which keeps secrets out of committed files:
 
@@ -199,11 +199,11 @@ Every flag has an environment-variable equivalent — useful because most MCP cl
 | `MEMOFS_LOCAL_EMBEDDINGS` | Local ONNX embeddings — **on by default**; set to `0` or `false` to disable. |
 | `MEMOFS_MCP_READ_ONLY` | Set to `"true"` to block write tools. |
 
-## Exposed MCP Tools
+## Exposed MCP tools
 
 The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS session tools:
 
-### Memory Tools
+### Memory tools
 
 | Tool | Safety | Description |
 |---|---|---|
@@ -215,7 +215,7 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 > [!TIP]
 > `memofs.context` returns a **compact briefing** (~6 KB) by default: core memory in full plus an `expandable` list naming each truncated section with an opaque cursor. Agents expand only the sections they need (`section` + `expand`), or pass `detail: "full"` for the whole dump in one call.
 
-### AgentFS Session Tools
+### AgentFS session tools
 
 | Tool | Safety | Description |
 |---|---|---|
@@ -226,7 +226,7 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs_agent_session_extract` | read | Extract summary, durable memory, and follow-ups from a session. |
 | `memofs_agent_session_complete` | write | Extract, checkpoint, sync, and optionally persist durable memory. |
 
-## Exposed MCP Resources
+## Exposed MCP resources
 
 | URI | MIME Type | Description |
 |---|---|---|
@@ -240,7 +240,7 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs://agent-sessions/{sessionId}/context/core` | `text/markdown` | Session core context file. |
 | `memofs://agent-sessions/{sessionId}/output/durable-memory` | `text/markdown` | Session durable memory output. |
 
-## Exposed MCP Prompts
+## Exposed MCP prompts
 
 For clients with prompt support (e.g. slash-command style pickers):
 

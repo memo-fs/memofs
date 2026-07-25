@@ -25,8 +25,6 @@ export const nav: DefaultTheme.NavItem[] = [
 	{
 		text: "Community",
 		items: [
-			{ text: "Contributing", link: "/community/contributing" },
-			{ text: "Roadmap", link: "/community/roadmap" },
 			{
 				text: "GitHub Discussions",
 				link: "https://github.com/memo-fs/memofs/discussions",

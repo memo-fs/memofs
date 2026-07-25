@@ -225,13 +225,13 @@ And memory doesn't only come from conversations. **Connectors** pull external co
 
 ## What we haven't solved yet
 
-A memory system that claims to be finished is lying. In the spirit of Problem 3 and Problem 6, here's what's still open — and, where it's on the [roadmap](/community/roadmap), where it's headed.
+A memory system that claims to be finished is lying. Memory is an evolving system, not a completed one. The improvements discussed in Problem 3 and Problem 6 are already planned and on our roadmap.
 
 - **Staleness on high-confidence facts.** Today MemoFS mitigates it (supersession, consolidation, recency decay) but doesn't autonomously re-verify a confident memory against reality. This one is actively being worked: **per-kind staleness windows** (facts expire on a schedule that matches their kind — identity lasts a year, logistics a week, flagged inline at query time) are in the *Now* phase, with **model-driven staleness re-verification** and parseable **validity windows** queued behind them.
 - **Memory-poisoning calibration.** The blocklist stops secrets, not adversarial intent — and trust-scoring against crafted, manipulative memories has no calibration-free solution in the current literature. But the building blocks are a whole planned phase: **write-channel provenance** (a required `channel` on every write that sets default confidence), a **trust gate** that holds suspicious writes out of the recall index while keeping them in the audit trail, a `pending_verification` lifecycle, and a **second-layer PII classifier** layered against the blocklist. Provenance-aware, not solved — but moving.
 - **Fully automatic context on every platform.** Agents without context-injecting hooks (Cursor, Gemini, Copilot) rely on the agent *calling* tools rather than having context handed to it. This is the one genuine limit we can't roadmap away: it's an upstream platform capability gap. When those agents add session-start context hooks, MemoFS is ready to use them — until then, MCP tools + a rules file is the honest best we can do, and it works well.
 
-We'd rather ship these as named limits than bury them, and tell you plainly which are moving and which are blocked upstream. A memory you can audit is a memory you can trust — and part of trust is knowing exactly where the edges are, and which ones we're actively pushing outward. The full picture lives on the [public roadmap](/community/roadmap).
+We'd rather ship these as named limits than bury them, and tell you plainly which are moving and which are blocked upstream. A memory you can audit is a memory you can trust—and part of that trust is knowing exactly where the edges are, and which ones we're actively pushing outward. We'll continue shrinking those limits over time, and the next set of improvements is already on our roadmap.
 
 ## Start remembering
 
