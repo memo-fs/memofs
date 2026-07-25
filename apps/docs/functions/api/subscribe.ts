@@ -25,6 +25,8 @@ interface Env {
 	RESEND_API_KEY: string;
 	/** UUID of the Resend segment for docs newsletter subscribers. */
 	RESEND_SEGMENT_ID: string;
+	/** Optional sender for welcome email — e.g. `MemoFS Team <team@memofs.dev>`. */
+	RESEND_FROM?: string;
 }
 
 interface SubscribeBody {
@@ -32,6 +34,7 @@ interface SubscribeBody {
 }
 
 const RESEND_CONTACTS_ENDPOINT = "https://api.resend.com/contacts";
+const RESEND_EMAILS_ENDPOINT = "https://api.resend.com/emails";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -67,9 +70,13 @@ function clientIp(ctx: EventContext<Env, string, unknown>): string {
 export async function onRequestPost(
 	ctx: EventContext<Env, string, unknown>,
 ): Promise<Response> {
-	const { RESEND_API_KEY, RESEND_SEGMENT_ID } = ctx.env;
+	const { RESEND_API_KEY, RESEND_SEGMENT_ID, RESEND_FROM } = ctx.env;
 
 	if (!RESEND_API_KEY || !RESEND_SEGMENT_ID) {
+		console.error("[newsletter] missing env", {
+			hasKey: Boolean(RESEND_API_KEY),
+			hasSegment: Boolean(RESEND_SEGMENT_ID),
+		});
 		return json({ error: "Newsletter is not configured." }, 503);
 	}
 
@@ -89,31 +96,129 @@ export async function onRequestPost(
 		return json({ error: "Please enter a valid email address." }, 400);
 	}
 
-	const response = await fetch(RESEND_CONTACTS_ENDPOINT, {
-		method: "POST",
-		headers: {
-			Authorization: `Bearer ${RESEND_API_KEY}`,
-			"Content-Type": "application/json",
-			// Resend rejects requests without a User-Agent (403, code 1010).
-			"User-Agent": "memofs-docs-newsletter/1.0",
-		},
-		body: JSON.stringify({
-			email,
-			unsubscribed: false,
-			segments: [{ id: RESEND_SEGMENT_ID }],
-		}),
-	});
-
-	if (!response.ok) {
-		// A 422 from Resend typically means the contact already exists — treat
-		// as success so duplicate signups don't surface an error to the user.
-		if (response.status === 422) {
-			return json({ ok: true, duplicate: true });
-		}
+	let contactRes: Response;
+	try {
+		contactRes = await fetch(RESEND_CONTACTS_ENDPOINT, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${RESEND_API_KEY}`,
+				"Content-Type": "application/json",
+				// Resend rejects requests without a User-Agent (403, code 1010).
+				"User-Agent": "memofs-docs-newsletter/1.0",
+			},
+			body: JSON.stringify({
+				email,
+				first_name: "AI",
+				last_name: "Engineer",
+				unsubscribed: false,
+				segments: [{ id: RESEND_SEGMENT_ID }],
+			}),
+		});
+	} catch (err) {
+		console.error("[newsletter] fetch failed", {
+			message: err instanceof Error ? err.message : String(err),
+		});
 		return json({ error: "Subscription failed. Please try again." }, 502);
 	}
 
-	return json({ ok: true });
+	if (contactRes.ok) {
+		// Fire-and-forget welcome email — best-effort, must not block success.
+		if (RESEND_FROM) {
+			ctx.waitUntil(
+				sendWelcomeEmail(RESEND_API_KEY, RESEND_FROM, email).catch((err) => {
+					console.error("[newsletter] welcome email failed", {
+						to: email,
+						message: err instanceof Error ? err.message : String(err),
+					});
+				}),
+			);
+		}
+		return json({ ok: true });
+	}
+
+	// Non-ok — parse Resend error for observability and correct duplicate detection.
+	let errorBody = "";
+	let errorJson: unknown = null;
+	try {
+		errorBody = await contactRes.text();
+		try {
+			errorJson = JSON.parse(errorBody);
+		} catch {
+			// not JSON
+		}
+	} catch {
+		// ignore
+	}
+
+	const status = contactRes.status;
+	const errorMessage =
+		typeof errorJson === "object" &&
+		errorJson !== null &&
+		"message" in errorJson &&
+		typeof (errorJson as { message: unknown }).message === "string"
+			? (errorJson as { message: string }).message
+			: errorBody;
+
+	// Only treat as duplicate when Resend explicitly says contact already exists.
+	// Previous code treated ANY 422 as duplicate, which masked invalid-segment errors
+	// as success — showing success UI while no contact was created.
+	const isDuplicate =
+		status === 422 &&
+		/already exists|already a contact|duplicate/i.test(errorMessage);
+
+	if (isDuplicate) {
+		return json({ ok: true, duplicate: true });
+	}
+
+	console.error("[newsletter] Resend contact create failed", {
+		status,
+		email,
+		error: errorMessage.slice(0, 500),
+	});
+
+	// Surface 4xx from Resend as 502 to avoid leaking internals, but include a safe message.
+	if (status === 400 || status === 403 || status === 404) {
+		return json(
+			{ error: "Subscription failed — newsletter not configured correctly." },
+			502,
+		);
+	}
+
+	return json({ error: "Subscription failed. Please try again." }, 502);
+}
+
+async function sendWelcomeEmail(
+	apiKey: string,
+	from: string,
+	to: string,
+): Promise<void> {
+	const html = `
+		<div style="font-family: ui-sans-system, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; color: #111; max-width: 560px; margin: 0 auto; padding: 24px;">
+			<h1 style="font-size: 20px; margin: 0 0 12px;">You're in — welcome to MemoFS</h1>
+			<p style="margin: 0 0 12px;">Thanks for subscribing to the MemoFS changelog & blog.</p>
+			<p style="margin: 0 0 12px;">You'll get new posts, release highlights, and the occasional deep dive — no spam.</p>
+			<p style="margin: 24px 0 0;">
+				<a href="https://docs.memofs.dev" style="color: #111; text-decoration: underline;">Read the docs</a> ·
+				<a href="https://github.com/memo-fs/memofs" style="color: #111; text-decoration: underline;">Star on GitHub</a>
+			</p>
+			<p style="margin: 24px 0 0; font-size: 12px; color: #666;">You’re receiving this because you subscribed at docs.memofs.dev. Unsubscribe anytime via the link in future emails.</p>
+		</div>
+	`.trim();
+
+	await fetch(RESEND_EMAILS_ENDPOINT, {
+		method: "POST",
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": "application/json",
+			"User-Agent": "memofs-docs-newsletter/1.0",
+		},
+		body: JSON.stringify({
+			from,
+			to,
+			subject: "Welcome to MemoFS — you're subscribed",
+			html,
+		}),
+	});
 }
 
 function json(payload: unknown, status = 200): Response {
