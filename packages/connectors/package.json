@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/connectors",
-	"version": "1.2.0-beta.1",
+	"version": "1.2.0-beta.2",
 	"private": false,
 	"description": "Local connector framework for ingesting external sources into MemoFS memory.",
 	"license": "MIT",
@@ -37,8 +37,7 @@
 	],
 	"publishConfig": {
 		"access": "public",
-		"registry": "https://registry.npmjs.org/",
-		"provenance": true
+		"registry": "https://registry.npmjs.org/"
 	},
 	"scripts": {
 		"build": "tsdown",

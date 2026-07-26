@@ -1,6 +1,6 @@
 {
 	"name": "@memofs/json-rpc",
-	"version": "1.2.0-beta.1",
+	"version": "1.2.0-beta.2",
 	"private": false,
 	"description": "Dependency-free JSON-RPC 2.0 protocol primitives shared by MemoFS transports.",
 	"license": "MIT",
@@ -37,8 +37,7 @@
 	],
 	"publishConfig": {
 		"access": "public",
-		"registry": "https://registry.npmjs.org/",
-		"provenance": true
+		"registry": "https://registry.npmjs.org/"
 	},
 	"scripts": {
 		"build": "tsdown",
