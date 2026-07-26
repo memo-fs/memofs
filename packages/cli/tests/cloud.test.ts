@@ -142,7 +142,7 @@ describe("cloud commands", () => {
 					if (url.endsWith("/sync/push/complete")) {
 						// Phase 3: server commits the manifest update.
 						const body = JSON.parse(String(init?.body));
-						expect(body.cursor).toBe("cursor_push");
+						expect(body.cursor).toBe("cursor_prev");
 						expect(body.uploaded).toHaveLength(1);
 						expect(body.uploaded[0]).toMatchObject({
 							path: ".memofs/memory/core.md",

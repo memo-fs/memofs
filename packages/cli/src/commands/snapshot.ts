@@ -101,11 +101,7 @@ export async function createCliSnapshot(
 		checksum: checksum(bundleWithoutChecksum),
 	};
 
-	await writeText(
-		store,
-		path,
-		`${JSON.stringify(bundle, null, 2)}\n`,
-	);
+	await writeText(store, path, `${JSON.stringify(bundle, null, 2)}\n`);
 
 	const record = {
 		id,
@@ -121,11 +117,7 @@ export async function createCliSnapshot(
 		},
 	};
 
-	await appendText(
-		store,
-		MEMOFS_CLI_PATHS.snapshots,
-		stringifyJsonl([record]),
-	);
+	await appendText(store, MEMOFS_CLI_PATHS.snapshots, stringifyJsonl([record]));
 	await appendText(
 		store,
 		MEMOFS_CLI_PATHS.memoryEvents,
@@ -167,6 +159,7 @@ export async function runSnapshotCommand(
 	});
 
 	if (options.json) printJsonEnvelope(options.output, "snapshot", data);
-	else options.output.success(`Created snapshot "${data.label}" at ${data.path}`);
+	else
+		options.output.success(`Created snapshot "${data.label}" at ${data.path}`);
 	return 0;
 }

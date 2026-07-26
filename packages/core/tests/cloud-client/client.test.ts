@@ -145,17 +145,22 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			expect(fetch).not.toHaveBeenCalled();
 		});
 
-		it("requires a project id (configured or per-call) for push", async () => {
-			const fetch = vi.fn() as unknown as MemoFsCloudFetch;
+		it("defaults project id to default when omitted for push", async () => {
+			const calls: string[] = [];
+			const fetch: MemoFsCloudFetch = async (url) => {
+				calls.push(String(url));
+				return jsonResponse({
+					data: { upload: [], cursor: "c1" },
+					meta: { requestId: "req1" },
+				});
+			};
 			const client = createMemoFsCloudClient({
 				baseUrl: "https://x.test/api/v1",
 				apiKey: "mfs_live_test",
 				fetch,
 			});
-			await expect(client.sync.push({ manifest: {} })).rejects.toBeInstanceOf(
-				MemoFsCloudValidationError,
-			);
-			expect(fetch).not.toHaveBeenCalled();
+			await client.sync.push({ manifest: {} });
+			expect(calls[0]).toContain("/projects/default/sync/push");
 		});
 	});
 
@@ -453,10 +458,9 @@ describe("@memofs/core/cloud — file-replica contract", () => {
 			expect(calls).toEqual([
 				"https://memofs.dev/api/v1/projects/env_proj/sync/status",
 			]);
-			// env path must throw when no URL is configured
-			expect(() => createMemoFsCloudClientFromEnv({})).toThrow(
-				/MEMOFS_CLOUD_URL/,
-			);
+			// env path defaults to DEFAULT_CLOUD_BASE_URL when no URL is configured
+			const envClient = createMemoFsCloudClientFromEnv({});
+			expect(typeof envClient.sync.push).toBe("function");
 			// smoke-check the env-built client is shaped correctly
 			expect(typeof client.sync.push).toBe("function");
 		});
