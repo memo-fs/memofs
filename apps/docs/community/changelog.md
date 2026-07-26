@@ -11,9 +11,23 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 <NewsletterSignup event="changelog" title="Get release notes by email" description="Be the first to know when a new version ships." />
 
-## Unreleased
+## v1.2.0-beta.2 — July 26, 2026
 
-No changes
+Project manifest fallback, global CLI flag polish, and cloud sync snapshot fixes.
+
+### Core
+
+#### Fixed
+- Improved project ID resolution so local workspace operations automatically fall back to the project manifest when omitted in configuration or flags.
+
+### CLI
+
+#### Added
+- Added short flag support for global project ID selection across all cloud and sync subcommands.
+
+#### Fixed
+- Fixed an issue during cloud sync pulls where mandatory pre-sync snapshots were skipped prior to overwriting local workspace files.
+- Fixed cloud sync push to properly forward explicit base cursor values when confirming upload completion.
 
 ## v1.2.0-beta.1 — July 25, 2026
 
