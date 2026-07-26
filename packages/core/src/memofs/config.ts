@@ -11,6 +11,7 @@
  */
 
 import type { LlmClient } from "../ai-runtime/llm-client";
+import { DEFAULT_CLOUD_BASE_URL } from "../cloud-client/client";
 import type { MemoFsCloudClientOptions } from "../cloud-client/types";
 import type { MemoryEmbedder } from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
@@ -297,16 +298,17 @@ function resolveCloudOptions(
 	const configCloud = config.cloud;
 	const fileCloud = file.cloud;
 
+	const apiKey = configCloud?.apiKey ?? env.MEMOFS_API_KEY;
 	const baseUrl =
 		configCloud?.baseUrl ??
 		env.MEMOFS_CLOUD_URL ??
 		env.MEMOFS_API_URL ??
-		fileCloud?.baseUrl;
+		fileCloud?.baseUrl ??
+		(apiKey ? DEFAULT_CLOUD_BASE_URL : undefined);
 
 	if (baseUrl === undefined && config.cloudClient === undefined)
 		return undefined;
 
-	const apiKey = configCloud?.apiKey ?? env.MEMOFS_API_KEY;
 	const timeoutMs =
 		configCloud?.timeoutMs ??
 		(env.MEMOFS_CLOUD_TIMEOUT_MS

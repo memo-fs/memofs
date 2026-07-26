@@ -18,6 +18,7 @@ import { CANONICAL_MEMOFS_FILES, sha256Hex } from "@memofs/core";
 import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
+import { createCliSnapshot } from "./snapshot";
 
 /**
  * Base options shared by all cloud commands.
@@ -205,6 +206,14 @@ export async function runCloudSyncPullCommand(
 		...(options.since ? { since: options.since } : {}),
 	});
 
+	// Mandatory pre-sync snapshot before mutating local files (§8, D6)
+	if (result.files.length > 0 || result.removed.length > 0) {
+		await createCliSnapshot(store as never, {
+			label: "pre-sync-pull",
+			type: "pre-sync",
+		});
+	}
+
 	// Perform actual download + verify + write
 	for (const file of result.files) {
 		const content = await fetchText(file.presignedGetUrl);
@@ -332,7 +341,7 @@ export async function runCloudSyncPushCommand(
 	// byte upload, runs in the runtime file-sync layer between these two calls.)
 	const completeResult = await client.sync.complete({
 		uploaded,
-		cursor: pushResult.cursor,
+		cursor: options.baseCursor ?? pushResult.cursor,
 	});
 
 	if (options.json) {

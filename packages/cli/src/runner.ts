@@ -96,7 +96,7 @@ export async function runMemoFsCli(
 		.option("--cloud-url <url>", "MemoFS Cloud API URL")
 		.option("--api-key <key>", "MemoFS Cloud API key")
 		.option("--workspace-id <id>", "default cloud workspace ID")
-		.option("--project-id <id>", "default cloud project ID")
+		.option("-p, --project-id <id>", "default cloud project ID")
 		.option(
 			"--timeout-ms <n>",
 			"cloud request timeout in milliseconds",

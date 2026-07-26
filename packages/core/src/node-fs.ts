@@ -59,13 +59,32 @@ import { resolveAutoRecallStore } from "./recall/stores/auto-recall-store";
  * @returns the parsed config-file values (empty when absent/invalid).
  */
 export function readMemoFsConfigFileSync(rootDir: string): MemoFsConfigFile {
+	let fileConfig: MemoFsConfigFile = {};
 	try {
 		const path = resolve(rootDir, ".memofs", "config.json");
 		const raw = readFileSync(path, "utf8");
-		return extractConfigFile(JSON.parse(raw) as Record<string, unknown>);
+		fileConfig = extractConfigFile(JSON.parse(raw) as Record<string, unknown>);
 	} catch {
-		return {};
+		fileConfig = {};
 	}
+
+	if (!fileConfig.projectId) {
+		try {
+			const manifestPath = resolve(rootDir, ".memofs", "manifest.json");
+			const rawManifest = readFileSync(manifestPath, "utf8");
+			const parsedManifest = JSON.parse(rawManifest) as { projectId?: string };
+			if (
+				typeof parsedManifest.projectId === "string" &&
+				parsedManifest.projectId.trim()
+			) {
+				fileConfig.projectId = parsedManifest.projectId.trim();
+			}
+		} catch {
+			// ignore missing manifest
+		}
+	}
+
+	return fileConfig;
 }
 
 /** Returns true when local embeddings are enabled via config, file, or env. */

@@ -50,9 +50,7 @@ export function createMemoFSFromCli(options: CliMemoFSOptions = {}): MemoFS {
 		(typeof timeoutMs === "number" && timeoutMs > 0)
 			? {
 					cloud: {
-						...(options.cloudUrl !== undefined
-							? { baseUrl: options.cloudUrl }
-							: {}),
+						baseUrl: options.cloudUrl,
 						...(options.apiKey !== undefined ? { apiKey: options.apiKey } : {}),
 						...(typeof timeoutMs === "number" && timeoutMs > 0
 							? { timeoutMs }

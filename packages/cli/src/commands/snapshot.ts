@@ -58,14 +58,26 @@ function checksum(value: unknown): string {
 }
 
 /**
- * Runs the snapshot command, packing current database files and saving the bundle.
+ * Creates a local snapshot bundle of tracked database files.
  *
- * @param options - Command configuration options.
- * @returns CLI exit code.
+ * @param store - The MemoFS store instance.
+ * @param options - Snapshot options (label, type).
+ * @returns Metadata describing the created snapshot.
  */
-export async function runSnapshotCommand(
-	options: SnapshotCommandOptions,
-): Promise<number> {
+export async function createCliSnapshot(
+	store: MemoFS["store"],
+	options: {
+		label: string;
+		type?: "manual" | "pre-sync" | "automatic" | "pre-restore";
+	},
+): Promise<{
+	id: string;
+	label: string;
+	path: string;
+	createdAt: string;
+	checksum: string;
+	fileCount: number;
+}> {
 	const label = validateSnapshotLabel(options.label);
 	const createdAt = new Date().toISOString();
 	const id = createSafeIdFromLabel(label, createdAt);
@@ -73,7 +85,7 @@ export async function runSnapshotCommand(
 	const files: Record<string, string> = {};
 
 	for (const filePath of REQUIRED_FILES) {
-		const content = await readTextIfExists(options.memo.store, filePath);
+		const content = await readTextIfExists(store, filePath);
 		if (content !== undefined) files[filePath] = content;
 	}
 
@@ -90,7 +102,7 @@ export async function runSnapshotCommand(
 	};
 
 	await writeText(
-		options.memo.store,
+		store,
 		path,
 		`${JSON.stringify(bundle, null, 2)}\n`,
 	);
@@ -98,7 +110,7 @@ export async function runSnapshotCommand(
 	const record = {
 		id,
 		path,
-		type: "manual",
+		type: options.type ?? "manual",
 		status: "available",
 		createdAt,
 		checksum: bundle.checksum,
@@ -110,12 +122,12 @@ export async function runSnapshotCommand(
 	};
 
 	await appendText(
-		options.memo.store,
+		store,
 		MEMOFS_CLI_PATHS.snapshots,
 		stringifyJsonl([record]),
 	);
 	await appendText(
-		options.memo.store,
+		store,
 		MEMOFS_CLI_PATHS.memoryEvents,
 		stringifyJsonl([
 			{
@@ -130,7 +142,7 @@ export async function runSnapshotCommand(
 		]),
 	);
 
-	const data = {
+	return {
 		id,
 		label,
 		path,
@@ -138,7 +150,23 @@ export async function runSnapshotCommand(
 		checksum: bundle.checksum,
 		fileCount: Object.keys(files).length,
 	};
+}
+
+/**
+ * Runs the snapshot command, packing current database files and saving the bundle.
+ *
+ * @param options - Command configuration options.
+ * @returns CLI exit code.
+ */
+export async function runSnapshotCommand(
+	options: SnapshotCommandOptions,
+): Promise<number> {
+	const data = await createCliSnapshot(options.memo.store, {
+		label: options.label,
+		type: "manual",
+	});
+
 	if (options.json) printJsonEnvelope(options.output, "snapshot", data);
-	else options.output.success(`Created snapshot "${label}" at ${path}`);
+	else options.output.success(`Created snapshot "${data.label}" at ${data.path}`);
 	return 0;
 }

@@ -63,7 +63,7 @@ export function assertSha256(
 
 export function assertProjectId(value: unknown, fallback?: string): string {
 	const projectId =
-		typeof value === "string" && value.trim() ? value : fallback;
+		(typeof value === "string" && value.trim() ? value : fallback) ?? "default";
 	assertNonEmptyString(projectId, "projectId");
 	return projectId.trim();
 }
@@ -184,7 +184,8 @@ export function normalizeBaseUrl(baseUrl: string): string {
 	url.pathname = url.pathname.replace(/\/+$/, "");
 	url.search = "";
 	url.hash = "";
-	return url.toString().replace(/\/$/, "");
+	const normalized = url.toString().replace(/\/$/, "");
+	return normalized.endsWith("/api/v1") ? normalized : `${normalized}/api/v1`;
 }
 
 export function normalizeApiKey(

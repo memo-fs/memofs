@@ -151,14 +151,14 @@ export function createMemoFsCloudClient(
 	};
 }
 
+export const DEFAULT_CLOUD_BASE_URL = "https://memofs.dev/api/v1";
+
 export function createMemoFsCloudClientFromEnv(
 	env: Record<string, string | undefined> = defaultEnv(),
 	options: Partial<Omit<MemoFsCloudClientOptions, "baseUrl" | "apiKey">> = {},
 ): MemoFsCloudClient {
-	const baseUrl = env.MEMOFS_CLOUD_URL ?? env.MEMOFS_API_URL;
-	if (!baseUrl) {
-		throw new Error("MEMOFS_CLOUD_URL or MEMOFS_API_URL is required.");
-	}
+	const baseUrl =
+		env.MEMOFS_CLOUD_URL ?? env.MEMOFS_API_URL ?? DEFAULT_CLOUD_BASE_URL;
 	return createMemoFsCloudClient({
 		...options,
 		baseUrl,
