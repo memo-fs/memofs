@@ -8,7 +8,7 @@ import AudienceSection from "./AudienceSection.vue";
 import BentoShowcase from "./BentoShowcase.vue";
 import BlogPostFooter from "./BlogPostFooter.vue";
 import BlogPostHeader from "./BlogPostHeader.vue";
-import BlogSidebar from "./BlogSidebar.vue";
+import CookbookHeader from "./CookbookHeader.vue";
 
 import BottomCta from "./BottomCta.vue";
 import ComparisonSection from "./ComparisonSection.vue";
@@ -19,12 +19,22 @@ import ProblemSection from "./ProblemSection.vue";
 import RuntimesSection from "./RuntimesSection.vue";
 import SidebarBrand from "./SidebarBrand.vue";
 import StatsStrip from "./StatsStrip.vue";
+import EngramAI from "./EngramAI.vue";
 
 const { Layout } = DefaultTheme;
 
 const { frontmatter } = useData();
 /** Blog posts opt in with `blog: post` frontmatter to get editorial chrome. */
 const isBlogPost = computed(() => frontmatter.value.blog === "post");
+const isCookbook = computed(() => {
+  const path = route.path;
+  const layout = frontmatter.value.layout;
+  return layout !== 'page' && (path.includes('/cookbooks/') || path.includes('/learn/cookbooks/')) && !path.endsWith('/cookbooks/') && !path.endsWith('/cookbooks/index.html');
+});
+const showEngramAI = computed(() => {
+  const layout = frontmatter.value.layout;
+  return !layout || layout === 'doc' || isBlogPost.value;
+});
 
 const route = useRoute();
 
@@ -55,11 +65,11 @@ watch(
   <Layout>
     <template #sidebar-nav-before>
       <SidebarBrand />
-      <BlogSidebar v-if="isBlogPost" />
     </template>
 
     <template #doc-before>
       <BlogPostHeader v-if="isBlogPost" />
+      <CookbookHeader v-else-if="isCookbook" />
     </template>
 
     <template #aside-top>
@@ -107,6 +117,10 @@ watch(
         <ComparisonSection />
         <BottomCta />
       </div>
+    </template>
+    
+    <template #layout-bottom>
+      <EngramAI v-if="showEngramAI" />
     </template>
   </Layout>
 </template>

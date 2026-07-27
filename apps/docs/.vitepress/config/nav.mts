@@ -18,9 +18,13 @@ export const nav: DefaultTheme.NavItem[] = [
 		activeMatch: "/changelog",
 	},
 	{
-		text: "Blog",
-		link: "/blog/",
-		activeMatch: "/blog/",
+		text: "Learn",
+		items: [
+			{ text: "Tracks", link: "/learn/tracks/" },
+			{ text: "Cookbooks", link: "/learn/cookbooks/" },
+			{ text: "Blog", link: "/blog/" },
+		],
+		activeMatch: "/learn/",
 	},
 	{
 		text: "Community",
