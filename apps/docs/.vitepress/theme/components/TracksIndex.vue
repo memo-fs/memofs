@@ -13,25 +13,25 @@ const categories = [
 ]
 
 const filteredTracks = computed(() => {
-  return tracks.filter(item => {
-    const cat = (item.frontmatter?.category || 'ai').toLowerCase()
-    const matchesCat = selectedCategory.value === 'all' || cat === selectedCategory.value
+  return tracks.filter(track => {
+    const matchesCat = selectedCategory.value === 'all' || 
+      (track.frontmatter?.category && track.frontmatter.category.toLowerCase() === selectedCategory.value)
     if (!matchesCat) return false
 
     if (!searchQuery.value) return true
     const q = searchQuery.value.toLowerCase()
     return (
-      item.frontmatter?.title?.toLowerCase().includes(q) ||
-      item.frontmatter?.description?.toLowerCase().includes(q)
+      track.frontmatter?.title?.toLowerCase().includes(q) ||
+      track.frontmatter?.description?.toLowerCase().includes(q)
     )
   })
 })
 
 const getTrackGradientClass = (category) => {
-  if (category === 'ai-memory') {
-    return 'gradient-ai-memory'
-  }
-  return 'gradient-ai'
+  const cat = (category || '').toLowerCase()
+  if (cat.includes('memory')) return 'gradient-purple'
+  if (cat.includes('agent')) return 'gradient-cyan'
+  return 'gradient-blue'
 }
 </script>
 
@@ -41,9 +41,9 @@ const getTrackGradientClass = (category) => {
       <!-- Header -->
       <div class="tracks-header">
         <span class="tracks-kicker">Learning Paths</span>
-        <h1 class="tracks-title">MemoFS Tracks</h1>
+        <h1 class="tracks-title">Tracks</h1>
         <p class="tracks-subtitle">
-          Deep-dive tutorials and comprehensive guides to building production-ready AI applications, memory systems, and agents.
+          Deep-dive tutorials, hands-on architectural blueprints, and comprehensive guides to building production-ready AI applications & agents.
         </p>
       </div>
 
@@ -74,32 +74,33 @@ const getTrackGradientClass = (category) => {
         </div>
       </div>
 
-      <!-- Grid of Track Cards (3 per row on desktop) -->
+      <!-- Grid of Cards (3 per row on desktop, full-bleed dimmed image background) -->
       <div v-if="filteredTracks.length > 0" class="tracks-grid">
-        <a
+        <a 
           v-for="track in filteredTracks" 
           :key="track.url"
           :href="withBase(track.url)"
           class="track-card"
         >
           <div class="card-inner">
-            <!-- Top hover line -->
+            <!-- Top hover glow line -->
             <div class="hover-glow-line"></div>
 
-            <!-- Visual Banner Slot -->
-            <div class="banner-slot">
-              <div class="banner-gradient" :class="getTrackGradientClass(track.frontmatter?.category)"></div>
-              <div class="banner-bottom-fade"></div>
-              <div class="banner-vignette"></div>
+            <!-- Full-card Dimmed Background Layer -->
+            <div class="card-bg-layer">
+              <div class="bg-gradient" :class="getTrackGradientClass(track.frontmatter?.category)"></div>
+              <div class="bg-dim-overlay"></div>
+              <div class="bg-vignette"></div>
 
-              <div class="center-icon-box">
-                <svg class="banner-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <!-- Decorative Watermark Icon in Background -->
+              <div class="bg-icon-watermark">
+                <svg class="watermark-svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
             </div>
 
-            <!-- Content Body -->
+            <!-- Content Body Positioned On Top of Dimmed Image -->
             <div class="card-body">
               <!-- Badges Row -->
               <div class="badges-row">
@@ -182,10 +183,10 @@ const getTrackGradientClass = (category) => {
 }
 
 .tracks-subtitle {
-  font-size: 17px;
+  font-size: 16px;
   color: var(--vp-c-text-2);
-  margin-top: 14px;
-  max-width: 672px;
+  margin-top: 12px;
+  max-width: 640px;
   line-height: 1.6;
 }
 
@@ -283,13 +284,20 @@ const getTrackGradientClass = (category) => {
 
 .track-card {
   display: block;
-  height: 100%;
   text-decoration: none !important;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .track-card:hover {
-  transform: translateY(-3px);
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.4), 0 0 20px rgba(124, 209, 249, 0.15);
+  transform: translateY(-2px);
 }
 
 .card-inner {
@@ -297,16 +305,10 @@ const getTrackGradientClass = (category) => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
+  min-height: 240px;
   overflow: hidden;
   border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.track-card:hover .card-inner {
-  border-color: color-mix(in srgb, var(--vp-c-brand-1) 50%, transparent);
-  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.3);
 }
 
 .hover-glow-line {
@@ -315,156 +317,176 @@ const getTrackGradientClass = (category) => {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--vp-c-brand-1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(124, 209, 249, 0.6), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
+  z-index: 10;
 }
 
 .track-card:hover .hover-glow-line {
   opacity: 1;
 }
 
-.banner-slot {
-  position: relative;
-  height: 140px;
-  background: var(--vp-c-bg-mute);
-  border-bottom: 1px solid var(--vp-c-divider);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.banner-gradient {
+/* Full-bleed dimmed background layer */
+.card-bg-layer {
   position: absolute;
   inset: 0;
-  opacity: 0.75;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-gradient {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  transition: opacity 0.3s ease, transform 0.5s ease;
+}
+
+.gradient-cyan {
+  background: radial-gradient(circle at 80% 20%, rgba(124, 209, 249, 0.4), rgba(13, 148, 136, 0.2), transparent 70%);
+}
+
+.gradient-purple {
+  background: radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.4), rgba(217, 70, 239, 0.2), transparent 70%);
+}
+
+.gradient-blue {
+  background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.4), rgba(124, 209, 249, 0.2), transparent 70%);
+}
+
+.track-card:hover .bg-gradient {
+  opacity: 0.55;
+  transform: scale(1.04);
+}
+
+.bg-dim-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 17, 23, 0.78) 0%,
+    rgba(15, 17, 23, 0.88) 50%,
+    rgba(15, 17, 23, 0.96) 100%
+  );
   transition: opacity 0.3s ease;
 }
 
-.gradient-ai {
-  background: linear-gradient(135deg, rgba(8, 145, 178, 0.25) 0%, rgba(183, 121, 31, 0.15) 100%);
+.track-card:hover .bg-dim-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 17, 23, 0.68) 0%,
+    rgba(15, 17, 23, 0.82) 50%,
+    rgba(15, 17, 23, 0.94) 100%
+  );
 }
 
-.gradient-ai-memory {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(6, 182, 212, 0.15) 100%);
-}
-
-.track-card:hover .banner-gradient {
-  opacity: 1;
-}
-
-.banner-bottom-fade {
+.bg-vignette {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, var(--vp-c-bg-soft) 100%);
+  background: radial-gradient(circle at 70% 30%, transparent 20%, rgba(0, 0, 0, 0.6) 100%);
 }
 
-.banner-vignette {
+.bg-icon-watermark {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.45) 100%);
+  right: -10px;
+  top: -10px;
+  width: 160px;
+  height: 160px;
+  opacity: 0.08;
+  color: #7cd1f9;
+  transition: opacity 0.3s ease, transform 0.5s ease;
 }
 
-.center-icon-box {
+.track-card:hover .bg-icon-watermark {
+  opacity: 0.16;
+  transform: scale(1.08) rotate(-5deg);
+}
+
+.watermark-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Content Body Positioned On Top */
+.card-body {
   position: relative;
   z-index: 2;
-  width: 48px;
-  height: 48px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.track-card:hover .center-icon-box {
-  transform: scale(1.08);
-}
-
-.banner-svg {
-  width: 24px;
-  height: 24px;
-  color: var(--vp-c-brand-1);
-}
-
-.card-body {
-  padding: 20px;
   display: flex;
   flex-direction: column;
+  padding: 24px;
+  height: 100%;
   flex: 1;
 }
 
 .badges-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
   flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 
 .badge-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 4px;
-  background: var(--vp-c-brand-soft);
-  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 30%, transparent);
-  padding: 2px 6px;
   font-family: var(--vp-font-family-mono);
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--vp-c-brand-1);
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #a1a1aa;
+  backdrop-filter: blur(4px);
 }
 
 .badge-pill.difficulty {
-  background: var(--vp-c-bg-mute);
-  border-color: var(--vp-c-divider);
-  color: var(--vp-c-text-2);
+  color: #7cd1f9;
+  border-color: rgba(124, 209, 249, 0.25);
+  background: rgba(124, 209, 249, 0.08);
 }
 
 .card-title {
   font-family: var(--vp-font-family-display);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
   color: var(--vp-c-text-1);
-  line-height: 1.35;
-  margin-bottom: 8px;
+  margin: 0 0 10px 0;
   transition: color 0.2s ease;
 }
 
 .track-card:hover .card-title {
-  color: var(--vp-c-brand-1);
+  color: #7cd1f9;
 }
 
 .card-desc {
-  font-size: 13.5px;
-  color: var(--vp-c-text-2);
+  font-size: 13px;
   line-height: 1.55;
+  color: var(--vp-c-text-2);
+  margin: 0 0 20px 0;
+  flex-grow: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
 }
 
 .card-action {
-  margin-top: 20px;
+  margin-top: auto;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--vp-c-text-1);
-  transition: color 0.2s ease;
+  color: #7cd1f9;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .track-card:hover .card-action {
-  color: var(--vp-c-brand-1);
+  color: #7cd1f9;
 }
 
 .arrow-svg {

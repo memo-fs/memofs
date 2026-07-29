@@ -49,11 +49,11 @@ const post = computed(() =>
       />
       <!-- Author Details -->
       <div class="blog-author-card">
-        <img :src="frontmatter.authorAvatar || 'https://github.com/shadcn.png'" class="author-avatar" />
+        <img :src="frontmatter.authorAvatar || 'https://github.com/christophersesugh.png'" class="author-avatar" :alt="frontmatter.author || 'Christopher S. Aondona'" />
         <div class="author-info">
-          <p class="author-name">{{ frontmatter.author || 'MemoFS Team' }}</p>
+          <p class="author-name">{{ frontmatter.author || 'Christopher S. Aondona' }}</p>
           <p class="author-role">
-            {{ frontmatter.authorRole || 'Core Team' }} @ <a href="https://memofs.dev" target="_blank" rel="noopener noreferrer" class="author-link">MemoFS</a>
+            {{ frontmatter.authorRole || 'Lead Engineer' }} @ <a href="https://memofs.dev" target="_blank" rel="noopener noreferrer" class="author-link">MemoFS</a>
           </p>
         </div>
       </div>

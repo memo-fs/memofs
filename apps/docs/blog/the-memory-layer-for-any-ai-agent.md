@@ -1,8 +1,10 @@
 ---
 title: "The Memory Layer for Any AI Agent"
 description: "Your coding agent is brilliant and has amnesia. MemoFS gives it durable, portable, file-first memory that works with Claude Code, Codex, Cursor, Copilot, opencode — any agent that speaks hooks or MCP — and syncs across machines and teammates through the cloud. Here's the architecture, and how to wire it into whatever you already use."
-date: 2026-07-21
+date: 2026-07-28
 author: Christopher S. Aondona
+authorAvatar: "https://github.com/christophersesugh.png"
+authorRole: "Lead Engineer"
 tags: [architecture, memory, ai-agents, hooks, mcp, cloud, file-first]
 cover: null
 blog: post

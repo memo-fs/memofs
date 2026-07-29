@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { Icon } from '@iconify/vue'
 import { data as cookbooks } from '../cookbooks.data.ts'
 import { withBase } from 'vitepress'
 
@@ -8,7 +9,7 @@ const selectedCategory = ref('all')
 
 const categories = [
   { id: 'all', name: 'All' },
-  { id: 'cli', name: 'SDK & CLI' },
+  { id: 'cli', name: 'Apps & CLI' },
   { id: 'connectors', name: 'Connectors' },
   { id: 'mcp', name: 'MCP & Cloud' }
 ]
@@ -16,7 +17,7 @@ const categories = [
 const getRecipeCategory = (recipe) => {
   const url = (recipe.url || '').toLowerCase()
   const title = (recipe.frontmatter?.title || '').toLowerCase()
-  if (url.includes('connector') || title.includes('connector') || title.includes('github') || title.includes('notion')) {
+  if (url.includes('connector') || title.includes('connector') || title.includes('github') || title.includes('notion') || title.includes('linear')) {
     return 'connectors'
   }
   if (url.includes('mcp') || url.includes('sync') || url.includes('hosted') || title.includes('mcp') || title.includes('sync')) {
@@ -44,13 +45,50 @@ const getBrandIconType = (recipe) => {
   const title = (recipe.frontmatter?.title || '').toLowerCase()
   const combined = url + ' ' + title
 
-  if (combined.includes('codex')) return 'codex'
+  if (combined.includes('aider')) return 'aider'
+  if (combined.includes('amazon')) return 'amazon-q'
+  if (combined.includes('antigravity')) return 'antigravity'
   if (combined.includes('claude')) return 'claude'
-  if (combined.includes('opencode')) return 'opencode'
+  if (combined.includes('cline')) return 'cline'
+  if (combined.includes('codex')) return 'codex'
+  if (combined.includes('command')) return 'command-code'
+  if (combined.includes('copilot')) return 'copilot'
   if (combined.includes('cursor')) return 'cursor'
+  if (combined.includes('gemini')) return 'gemini'
   if (combined.includes('github')) return 'github'
+  if (combined.includes('jetbrains')) return 'jetbrains'
+  if (combined.includes('kilo')) return 'kilo-code'
   if (combined.includes('notion')) return 'notion'
+  if (combined.includes('opencode')) return 'opencode'
+  if (combined.includes('windsurf')) return 'windsurf'
+  if (combined.includes('zed')) return 'zed'
   return 'memofs'
+}
+
+const brandMap = {
+  'aider': { name: 'Aider', icon: 'simple-icons:python' },
+  'amazon-q': { name: 'Amazon Q', icon: 'simple-icons:amazonaws' },
+  'antigravity': { name: 'Google Antigravity', icon: 'logos:google-icon' },
+  'claude': { name: 'Claude Code', icon: 'simple-icons:anthropic' },
+  'cline': { name: 'Cline', icon: 'ph:robot-bold' },
+  'codex': { name: 'OpenAI Codex', icon: 'simple-icons:openai' },
+  'command-code': { name: 'Command Code', icon: 'ph:terminal-window-bold' },
+  'copilot': { name: 'GitHub Copilot', icon: 'simple-icons:githubcopilot' },
+  'cursor': { name: 'Cursor', icon: 'simple-icons:cursor' },
+  'gemini': { name: 'Gemini CLI', icon: 'simple-icons:googlegemini' },
+  'github': { name: 'GitHub', icon: 'simple-icons:github' },
+  'jetbrains': { name: 'JetBrains AI', icon: 'simple-icons:jetbrains' },
+  'kilo-code': { name: 'Kilo Code', icon: 'ph:lightning-bold' },
+  'notion': { name: 'Notion', icon: 'simple-icons:notion' },
+  'opencode': { name: 'OpenCode', icon: 'ph:code-bold' },
+  'windsurf': { name: 'Windsurf', icon: 'simple-icons:codeium' },
+  'zed': { name: 'Zed AI', icon: 'simple-icons:zeddotdev' },
+  'memofs': { name: 'MemoFS', icon: 'ph:brain-bold' }
+}
+
+const getBrandInfo = (recipe) => {
+  const type = getBrandIconType(recipe)
+  return brandMap[type] || brandMap['memofs']
 }
 </script>
 
@@ -62,7 +100,7 @@ const getBrandIconType = (recipe) => {
         <span class="cookbook-kicker">Recipes</span>
         <h1 class="cookbook-title">Cookbooks</h1>
         <p class="cookbook-subtitle">
-          Step-by-step how-to tutorials for installing, configuring, and mastering MemoFS for AI memory with screenshot step-throughs and video walkthroughs.
+          Step-by-step tutorials for installing, configuring, and using MemoFS.
         </p>
       </div>
 
@@ -117,57 +155,18 @@ const getBrandIconType = (recipe) => {
 
           <div class="card-footer">
             <!-- Brand Icon -->
-            <div v-if="getBrandIconType(recipe) === 'codex'" class="brand-badge">
-              <svg class="icon-svg text-emerald" viewBox="0 0 24 24">
-                <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" />
+            <div class="brand-badge">
+              <svg v-if="getBrandIconType(recipe) === 'memofs'" class="icon-svg" viewBox="0 0 100 100">
+                <polygon fill="#4cae61" points="50,82 12,62 50,45 88,62" />
+                <polygon fill="#2c9ab8" points="50,63 12,43 50,26 88,43" />
+                <polygon fill="#258acb" points="50,45 12,25 50,8 88,25" />
+                <circle fill="#ffffff" cx="50" cy="23" r="3.5" />
+                <circle fill="#ffffff" cx="35" cy="30" r="1.5" opacity="0.6" />
+                <circle fill="#ffffff" cx="65" cy="30" r="1.5" opacity="0.6" />
+                <circle fill="#ffffff" cx="50" cy="37" r="1.5" opacity="0.6" />
               </svg>
-              <span>OpenAI Codex</span>
-            </div>
-
-            <div v-else-if="getBrandIconType(recipe) === 'claude'" class="brand-badge">
-              <svg class="icon-svg text-claude" viewBox="0 0 24 24">
-                <path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z" />
-              </svg>
-              <span>Claude Code</span>
-            </div>
-
-            <div v-else-if="getBrandIconType(recipe) === 'opencode'" class="brand-badge">
-              <svg class="icon-svg text-opencode" viewBox="0 0 512 512">
-                <path d="M320 224V352H192V224H320Z" fill="#5A5858" />
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M384 416H128V96H384V416ZM320 160H192V352H320V160Z" fill="currentColor" />
-              </svg>
-              <span>OpenCode</span>
-            </div>
-
-            <div v-else-if="getBrandIconType(recipe) === 'cursor'" class="brand-badge">
-              <svg class="icon-svg text-cursor" viewBox="0 0 24 24">
-                <path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23" />
-              </svg>
-              <span>Cursor</span>
-            </div>
-
-            <div v-else-if="getBrandIconType(recipe) === 'github'" class="brand-badge">
-              <svg class="icon-svg text-github" viewBox="0 0 24 24">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-              </svg>
-              <span>GitHub</span>
-            </div>
-
-            <div v-else-if="getBrandIconType(recipe) === 'notion'" class="brand-badge">
-              <svg class="icon-svg text-notion" viewBox="0 0 24 24">
-                <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z" opacity="1" />
-              </svg>
-              <span>Notion</span>
-            </div>
-
-            <div v-else class="brand-badge">
-              <svg class="icon-svg text-memofs" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" stroke="var(--vp-c-brand-1)" stroke-width="2" stroke-dasharray="68 18" />
-                <polygon points="16,25 7,20.5 16,16 25,20.5" fill="var(--vp-c-brand-1)" opacity="0.35" />
-                <polygon points="16,20 7,15.5 16,11 25,15.5" fill="var(--vp-c-brand-1)" opacity="0.7" />
-                <polygon points="16,15 7,10.5 16,6 25,10.5" stroke="var(--vp-c-brand-1)" stroke-width="1.5" fill="var(--vp-c-bg)" />
-              </svg>
-              <span>MemoFS</span>
+              <Icon v-else :icon="getBrandInfo(recipe).icon" class="icon-svg" />
+              <span>{{ getBrandInfo(recipe).name }}</span>
             </div>
 
             <span class="read-link">
@@ -407,16 +406,7 @@ const getBrandIconType = (recipe) => {
 .icon-svg {
   width: 16px;
   height: 16px;
-  fill: currentColor;
 }
-
-.text-emerald { color: #34d399; }
-.text-claude { color: #d97757; }
-.text-opencode { color: #22d3ee; }
-.text-cursor { color: #60a5fa; }
-.text-github { color: var(--vp-c-text-1); }
-.text-notion { color: var(--vp-c-text-1); }
-.text-memofs { color: var(--vp-c-brand-1); }
 
 .read-link {
   font-size: 12px;

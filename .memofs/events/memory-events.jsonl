@@ -1,1 +1,2 @@
 {"id":"evt_1784979277210_4dcae407359e28","type":"memory.created","timestamp":"2026-07-25T11:34:37.176Z","sourcePath":".memofs/memory/notes.md","actor":{"type":"user"},"summary":"Use VoyageAI for vector embeddings","metadata":{"kind":"decision","tags":[],"confidence":1,"createdBy":"memofs/cli"}}
+{"id":"evt_1785206286185_f4f97c628042f8","type":"memory.created","timestamp":"2026-07-28T02:38:06.155Z","sourcePath":".memofs/memory/notes.md","actor":{"type":"user"},"summary":"Yo bro","metadata":{"kind":"note","tags":[],"confidence":1,"createdBy":"memofs/cli"}}
