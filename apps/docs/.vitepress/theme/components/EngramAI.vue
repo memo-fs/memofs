@@ -172,7 +172,10 @@ const handleSendMessage = async (overridePrompt?: string) => {
               const data = JSON.parse(line.slice(6))
               if (data.response) {
                 replyContent += data.response
-                messages.value[messages.value.length - 1].content = replyContent
+                const lastMessage = messages.value[messages.value.length - 1];
+                if (lastMessage) {
+                  lastMessage.content = replyContent;
+                }
                 scrollToBottom()
               }
             } catch (e) {}

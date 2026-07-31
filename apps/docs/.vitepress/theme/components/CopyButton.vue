@@ -14,7 +14,7 @@ const failed = ref(false);
 let resetTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function copy(): Promise<void> {
-	if (!import.meta.client) return;
+  if (typeof window === "undefined") return;
 	const value = props.text;
 	if (!value) return;
 

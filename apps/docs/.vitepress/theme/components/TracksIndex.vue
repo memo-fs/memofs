@@ -43,7 +43,7 @@ const getTrackGradientClass = (category) => {
         <span class="tracks-kicker">Learning Paths</span>
         <h1 class="tracks-title">Tracks</h1>
         <p class="tracks-subtitle">
-          Deep-dive tutorials, hands-on architectural blueprints, and comprehensive guides to building production-ready AI applications & agents.
+          Courses, hands-on architectural blueprints, and comprehensive guides to building production-ready AI applications & agents.
         </p>
       </div>
 

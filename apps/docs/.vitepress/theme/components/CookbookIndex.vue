@@ -26,18 +26,23 @@ const getRecipeCategory = (recipe) => {
   return 'cli'
 }
 
-const filteredCookbooks = computed(() => {
-  return cookbooks.filter(item => {
-    const matchesCat = selectedCategory.value === 'all' || getRecipeCategory(item) === selectedCategory.value
-    if (!matchesCat) return false
+const isComingSoon = (recipe) => recipe.frontmatter?.status === 'coming-soon'
 
-    if (!searchQuery.value) return true
-    const q = searchQuery.value.toLowerCase()
-    return (
-      item.frontmatter?.title?.toLowerCase().includes(q) ||
-      item.url?.toLowerCase().includes(q)
-    )
-  })
+const filteredCookbooks = computed(() => {
+  return cookbooks
+    .filter(item => {
+      const matchesCat = selectedCategory.value === 'all' || getRecipeCategory(item) === selectedCategory.value
+      if (!matchesCat) return false
+
+      if (!searchQuery.value) return true
+      const q = searchQuery.value.toLowerCase()
+      return (
+        item.frontmatter?.title?.toLowerCase().includes(q) ||
+        item.url?.toLowerCase().includes(q)
+      )
+    })
+    // Keep shipped guides ahead of coming-soon stubs within each category.
+    .sort((a, b) => Number(isComingSoon(a)) - Number(isComingSoon(b)))
 })
 
 const getBrandIconType = (recipe) => {
@@ -137,8 +142,10 @@ const getBrandInfo = (recipe) => {
           v-for="recipe in filteredCookbooks" 
           :key="recipe.url"
           :href="withBase(recipe.url)"
-          class="cookbook-card"
+          :class="['cookbook-card', { 'is-coming-soon': isComingSoon(recipe) }]"
         >
+          <span v-if="isComingSoon(recipe)" class="coming-soon-ribbon">Coming Soon</span>
+
           <div class="card-main-content">
             <div class="card-meta">
               <span class="meta-label">How-To Guide</span>
@@ -170,7 +177,7 @@ const getBrandInfo = (recipe) => {
             </div>
 
             <span class="read-link">
-              Read Guide &rarr;
+              {{ isComingSoon(recipe) ? 'Preview' : 'Read Guide' }} &rarr;
             </span>
           </div>
         </a>
@@ -325,6 +332,7 @@ const getBrandInfo = (recipe) => {
 }
 
 .cookbook-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -342,6 +350,36 @@ const getBrandInfo = (recipe) => {
   background: var(--vp-c-bg-alt);
   box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.25);
   transform: translateY(-2px);
+}
+
+.cookbook-card.is-coming-soon {
+  opacity: 0.72;
+  border-style: dashed;
+}
+
+.cookbook-card.is-coming-soon:hover {
+  opacity: 1;
+}
+
+.coming-soon-ribbon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.dark .coming-soon-ribbon {
+  color: #fde68a;
+  background: rgba(146, 64, 14, 0.35);
+  border-color: rgba(252, 211, 77, 0.5);
 }
 
 .card-main-content {

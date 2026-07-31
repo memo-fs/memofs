@@ -10,6 +10,8 @@ export const sidebar: DefaultTheme.Sidebar = {
 				{ text: "Core Concepts", link: "/packages/core/concepts" },
 				{ text: "Configuration", link: "/packages/core/configuration" },
 				{ text: "AgentFS", link: "/packages/core/agentfs" },
+				{ text: "Configure Storage", link: "/configure/storage" },
+				{ text: "Configure Intelligence", link: "/configure/intelligence" },
 				{
 					text: "Client API",
 					items: [
@@ -35,14 +37,17 @@ export const sidebar: DefaultTheme.Sidebar = {
 		{
 			text: "Self-Hosting",
 			collapsed: false,
+			items: [
+				{
+					text: "Server Deployment",
 					items: [
 						{ text: "Overview", link: "/packages/server/" },
 						{ text: "Node.js", link: "/packages/server/node" },
 						{ text: "Cloudflare", link: "/packages/server/cloudflare" },
 						{ text: "HTTP API", link: "/packages/server/http-api" },
-						{ text: "Configure Storage", link: "/configure/storage" },
-				{ text: "Configure Intelligence", link: "/configure/intelligence" },
 						{ text: "API Reference", link: "/packages/server/api-reference" },
+					],
+				},
 			],
 		},
 		{
@@ -99,8 +104,52 @@ export const sidebar: DefaultTheme.Sidebar = {
 		},
 	],
 	"/blog/": [],
-	"/learn/cookbooks/": [],
-	"/cookbooks/": [],
+	"/learn/cookbooks/": [
+		{
+			text: "Popular Agents",
+			collapsed: false,
+			items: [
+				{ text: "Claude Code", link: "/learn/cookbooks/a-claude-code" },
+				{ text: "Cursor", link: "/learn/cookbooks/a-cursor" },
+				{ text: "Codex", link: "/learn/cookbooks/a-codex" },
+				{ text: "OpenCode", link: "/learn/cookbooks/a-opencode" },
+			],
+		},
+		{
+			text: "More Agents",
+			collapsed: true,
+			items: [
+				{ text: "Aider", link: "/learn/cookbooks/c-aider" },
+				{ text: "Amazon Q", link: "/learn/cookbooks/c-amazon-q" },
+				{ text: "Google Antigravity", link: "/learn/cookbooks/b-antigravity" },
+				{ text: "Cline", link: "/learn/cookbooks/b-cline" },
+				{ text: "Command Code", link: "/learn/cookbooks/b-command-code" },
+				{ text: "GitHub Copilot", link: "/learn/cookbooks/b-copilot" },
+				{ text: "Gemini CLI", link: "/learn/cookbooks/b-gemini" },
+				{ text: "JetBrains AI", link: "/learn/cookbooks/c-jetbrains" },
+				{ text: "Kilo Code", link: "/learn/cookbooks/b-kilo-code" },
+				{ text: "Windsurf", link: "/learn/cookbooks/b-windsurf" },
+				{ text: "Zed AI", link: "/learn/cookbooks/b-zed" },
+			],
+		},
+		{
+			text: "Connectors",
+			collapsed: false,
+			items: [
+				{ text: "GitHub Connector", link: "/learn/cookbooks/github-connector" },
+				{ text: "Notion Connector", link: "/learn/cookbooks/notion-connector" },
+			],
+		},
+		{
+			text: "Cloud & Sync",
+			collapsed: false,
+			items: [
+				{ text: "CLI Sync", link: "/learn/cookbooks/sync" },
+				{ text: "Pre-Sync Snapshots & Rollback", link: "/learn/cookbooks/rollback" },
+				{ text: "Hosted MCP & HTTP Endpoints", link: "/learn/cookbooks/hosted-mcp" },
+			],
+		},
+	],
 	"/learn/tracks/": [],
 	"/api/": [
 		{

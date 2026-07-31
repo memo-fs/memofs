@@ -57,7 +57,7 @@ function readingTime(src: string | undefined): string {
 	return `${Math.max(1, Math.round(words / WORDS_PER_MINUTE))} min read`;
 }
 
-export default createContentLoader("blog/*.md", {
+ const loader = createContentLoader("blog/*.md", {
 	includeSrc: true,
 	transform(raw): BlogPost[] {
 		return raw
@@ -79,3 +79,5 @@ export default createContentLoader("blog/*.md", {
 			.sort((a, b) => b.dateTime - a.dateTime);
 	},
 });
+
+export default loader as ReturnType<typeof createContentLoader>;

@@ -1,6 +1,6 @@
 import { createContentLoader } from "vitepress";
 
-export default createContentLoader("learn/tracks/**/index.md", {
+const loader = createContentLoader("learn/tracks/**/index.md", {
 	includeSrc: false,
 	render: false,
 	transform(rawData) {
@@ -21,3 +21,5 @@ export default createContentLoader("learn/tracks/**/index.md", {
 			});
 	},
 });
+
+export default loader as ReturnType<typeof createContentLoader>;

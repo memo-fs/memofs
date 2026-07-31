@@ -1,6 +1,6 @@
 import { createContentLoader } from "vitepress";
 
-export default createContentLoader("learn/cookbooks/*.md", {
+const loader = createContentLoader("learn/cookbooks/*.md", {
 	includeSrc: false,
 	render: false,
 	transform(rawData) {
@@ -17,3 +17,6 @@ export default createContentLoader("learn/cookbooks/*.md", {
 			);
 	},
 });
+
+// Prevent leaking VitePress internal types
+export default loader as ReturnType<typeof createContentLoader>;
