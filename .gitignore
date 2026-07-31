@@ -78,6 +78,7 @@ docs/discovery
 # Internal tooling - not tracked
 research/
 internal/
+articles/
 skills-lock.json
 .agents/skills/
 manual-e2e-go-live.md
