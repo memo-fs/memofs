@@ -1,5 +1,6 @@
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vitepress";
+import llmstxtPlugin from "vitepress-plugin-llmstxt";
 import { withMermaid } from "vitepress-plugin-mermaid";
 
 import { head } from "./config/head.mts";
@@ -20,6 +21,7 @@ export default withMermaid(
 					"@": fileURLToPath(new URL("..", import.meta.url)),
 				},
 			},
+			plugins: [llmstxtPlugin()],
 		},
 
 		title: site.title,

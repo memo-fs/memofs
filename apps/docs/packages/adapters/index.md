@@ -8,18 +8,6 @@ Adapters are divided into two axes:
 1. **Storage** (managing raw files and metadata indexes)
 2. **Intelligence** (managing embeddings, reranking, and graph extraction).
 
-<!-- ```
-memofs/
-├── Storage Axis
-│   ├── Blob Stores (R2)
-│   └── Metadata Stores (Turso)
-└── Intelligence Axis
-    ├── Embedders (OpenAI, Voyage AI, Transformers.js)
-    ├── Rerankers (Voyage AI)
-    ├── Extractors (Workers AI)
-    └── Agent Bridges (Vercel AI SDK)
-``` -->
-
 ```mermaid
 flowchart TB
     MF[MemoFS]
