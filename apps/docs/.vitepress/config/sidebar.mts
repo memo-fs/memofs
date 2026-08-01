@@ -1,6 +1,23 @@
 import type { DefaultTheme } from "vitepress";
 
 export const sidebar: DefaultTheme.Sidebar = {
+	"/introduction": [
+		{
+			// text: "API Reference",
+			items: [
+				{ text: "Cookbooks", link: "/learn/cookbooks/" },
+				{ text: "Blog", link: "/blog/" },
+				{ text: "Tracks", link: "/learn/tracks/" },
+				{ text: "Core Runtime & SDK", link: "/packages/core/" },
+				{ text: "Self-Hosting", link: "/packages/server/" },
+				{ text: "Adapters", link: "/packages/adapters/" },
+				{ text: "Command Line (CLI)", link: "/packages/cli/" },
+				{ text: "Model Context Protocol (MCP)", link: "/packages/mcp/" },
+				{ text: "Connectors", link: "/packages/connectors/" },
+				{ text: "API Reference", link: "/api/" },
+			],
+		},
+	],
 	"/": [
 		{
 			text: "Core Runtime",
@@ -11,7 +28,7 @@ export const sidebar: DefaultTheme.Sidebar = {
 				{ text: "Configuration", link: "/packages/core/configuration" },
 				{ text: "AgentFS", link: "/packages/core/agentfs" },
 				{
-					text: "Client API",
+					text: "Client API & SDK",
 					items: [
 						{ text: "Constructor", link: "/packages/core/client/" },
 						{
@@ -35,14 +52,14 @@ export const sidebar: DefaultTheme.Sidebar = {
 		{
 			text: "Self-Hosting",
 			collapsed: false,
-					items: [
-						{ text: "Overview", link: "/packages/server/" },
-						{ text: "Node.js", link: "/packages/server/node" },
-						{ text: "Cloudflare", link: "/packages/server/cloudflare" },
-						{ text: "HTTP API", link: "/packages/server/http-api" },
-						{ text: "Configure Storage", link: "/configure/storage" },
+			items: [
+				{ text: "Overview", link: "/packages/server/" },
+				{ text: "Node.js", link: "/packages/server/node" },
+				{ text: "Cloudflare", link: "/packages/server/cloudflare" },
+				{ text: "HTTP API", link: "/packages/server/http-api" },
+				{ text: "Configure Storage", link: "/configure/storage" },
 				{ text: "Configure Intelligence", link: "/configure/intelligence" },
-						{ text: "API Reference", link: "/packages/server/api-reference" },
+				{ text: "API Reference", link: "/packages/server/api-reference" },
 			],
 		},
 		{

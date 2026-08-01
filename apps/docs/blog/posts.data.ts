@@ -57,7 +57,7 @@ function readingTime(src: string | undefined): string {
 	return `${Math.max(1, Math.round(words / WORDS_PER_MINUTE))} min read`;
 }
 
- const loader = createContentLoader("blog/*.md", {
+const loader = createContentLoader("blog/*.md", {
 	includeSrc: true,
 	transform(raw): BlogPost[] {
 		return raw

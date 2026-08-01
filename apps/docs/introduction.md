@@ -1,7 +1,7 @@
 ---
 title: Introduction
 description: What MemoFS is, and which doc to read first depending on what you're building.
-sidebar: false
+# sidebar: false
 ---
 
 # Introduction
