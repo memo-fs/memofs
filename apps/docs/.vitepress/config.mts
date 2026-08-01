@@ -32,7 +32,6 @@ export default withMermaid(
 		cleanUrls: true,
 		lastUpdated: true,
 		ignoreDeadLinks: false,
-		srcExclude: ["**/includes/**"],
 
 		head,
 

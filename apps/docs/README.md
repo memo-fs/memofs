@@ -26,11 +26,6 @@ lives in [`docs/architecture/docs-drift-triage.md`][triage].
 [adr8]: https://github.com/memo-fs/memofs/blob/main/docs/adr/0008-docs-information-architecture.md
 [triage]: https://github.com/memo-fs/memofs/blob/main/docs/architecture/docs-drift-triage.md
 
-> **Note on repeated content:** shared prose (install snippets, the OSS-vs-Cloud
-> framing, canonical-files tables) lives under `apps/docs/includes/` and is pulled
-> in via VitePress markdown includes — copy-paste is a defect waiting to
-> desynchronize. See ADR 0008 Rule 4.
-
 ## Commands
 
 ```bash
