@@ -1,5 +1,4 @@
 import type { HeadConfig } from "vitepress";
-import { site } from "./site.mts";
 
 export const GTAG_ID = "G-D6Q96NPN7K";
 
@@ -21,15 +20,10 @@ export const head: HeadConfig[] = [
 			href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap",
 		},
 	],
-	["meta", { property: "og:title", content: "MemoFS" }],
-	["meta", { property: "og:description", content: site.description }],
-	["meta", { property: "og:type", content: "website" }],
-	["meta", { property: "og:url", content: site.cloud }],
-	["meta", { property: "og:image", content: `${site.cloud}/logo.svg` }],
+	["meta", { property: "og:site_name", content: "MemoFS" }],
+	["meta", { property: "og:locale", content: "en_US" }],
 	["meta", { name: "twitter:card", content: "summary_large_image" }],
-	["meta", { name: "twitter:title", content: "MemoFS" }],
-	["meta", { name: "twitter:description", content: site.description }],
-	["meta", { name: "twitter:image", content: `${site.cloud}/logo.svg` }],
+	["meta", { name: "twitter:site", content: "@memofsdev" }],
 	// Modern browsers prefer the crisp SVG; .ico is the multi-size fallback.
 	["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
 	["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],

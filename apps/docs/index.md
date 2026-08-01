@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: "Get Started"
-      link: /packages/core/
+      link: /introduction
     - theme: alt
       text: "Star on GitHub"
       link: https://github.com/memo-fs/memofs

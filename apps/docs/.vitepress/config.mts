@@ -23,7 +23,7 @@ export default withMermaid(
 		},
 
 		title: site.title,
-		titleTemplate: ":title | MemoFS",
+		titleTemplate: ":title",
 		description: site.description,
 
 		base: "/",
@@ -78,11 +78,11 @@ export default withMermaid(
 					link: site.x,
 					ariaLabel: "MemoFS on X",
 				},
-				{
-					icon: "bluesky",
-					link: site.bluesky,
-					ariaLabel: "MemoFS on Bluesky",
-				},
+				// {
+				// 	icon: "bluesky",
+				// 	link: site.bluesky,
+				// 	ariaLabel: "MemoFS on Bluesky",
+				// },
 				{
 					icon: "youtube",
 					link: site.youtube,
