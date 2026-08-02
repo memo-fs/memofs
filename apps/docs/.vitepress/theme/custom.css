@@ -980,15 +980,15 @@ div[class*="language-"] pre {
 	.tek-pill-wrap {
 		margin-bottom: 16px;
 	}
-}
 
-@media (max-width: 480px) {
+	.tek-pill-badge,
+	.tek-pill-arrow {
+		display: none !important;
+	}
+
 	.tek-announcement-pill {
+		padding: 6px 14px;
 		white-space: normal;
 		text-align: center;
-		padding: 8px 12px;
-		display: inline-flex;
-		flex-direction: column;
-		gap: 6px;
 	}
 }
