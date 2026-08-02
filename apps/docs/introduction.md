@@ -6,19 +6,19 @@ description: What MemoFS is, and which doc to read first depending on what you'r
 
 # Introduction
 
-MemoFS is a **file-first memory runtime for AI agents**. Instead of a database or a vector store, memory lives as plain Markdown and JSONL files under a `.memofs/` directory in your project — versioned, diffable, and committed alongside your code.
+MemoFS is a **file-first memory runtime for AI agents**, designed equally for two paths: developers **using coding agents** day-to-day, and developers **building AI agents**.
 
 Everything in these docs branches off one question: **how are you using MemoFS?**
 
 ## Which path fits you?
 
-### I use a coding agent day-to-day
-Claude Code, Cursor, Codex, Copilot, and others can all read and write MemoFS memory automatically once configured — most agents are set up in under 5 minutes.
+### 1. I'm using coding agents day-to-day
+Claude Code, Cursor, Codex, Copilot, and opencode can all read and write MemoFS memory automatically via MCP or lifecycle hooks — setup takes under 5 minutes.
 
-→ **[Find your agent in Cookbooks](/learn/cookbooks/)**
+→ **[Find your agent in Cookbooks](/learn/cookbooks/)** · **[MCP Server Overview](/packages/mcp/)**
 
-### I'm building an agent or app and want memory as a library
-Import `@memofs/core` directly. Same API whether memory lives in local files, MemoFS Cloud, or both.
+### 2. I'm building AI agents & applications
+Import `@memofs/core` or `@memofs/server` directly to equip custom agents with a lightweight, file-first, zero-database memory runtime.
 
 → **[`@memofs/core` overview](/packages/core/)** · **[API reference](/api/core)**
 

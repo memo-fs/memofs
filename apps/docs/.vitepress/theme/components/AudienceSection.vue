@@ -4,20 +4,6 @@
       <p class="tek-kicker">Built for how you work</p>
       <h2 class="tek-h2">Two ways in</h2>
       <div class="audience-grid">
-        <a href="/api/core" class="audience-card tek-glow-hover">
-          <span class="audience-icon cyan" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
-              <path d="m9 12 2 2 4-4" />
-            </svg>
-          </span>
-          <h3>Building AI agents/apps</h3>
-          <p>
-            Give your agent/app durable memory. Import <code>@memofs/core</code> — the same API
-            whether memory lives in local files, the cloud, or both.
-          </p>
-          <span class="audience-link">See the API reference →</span>
-        </a>
         <a href="/packages/mcp/" class="audience-card tek-glow-hover-gold">
           <span class="audience-icon gold" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -28,12 +14,24 @@
               <path d="M9 17h6" />
             </svg>
           </span>
-          <h3>Using a coding agent</h3>
+          <h3>Using coding agents</h3>
           <p>
-            Your coding agent finally remembers your project. Install the MCP server and
-            your agent gets project context every session — automatically.
+            Give Claude Code, Cursor, Codex, and opencode durable project memory via MCP or lifecycle hooks.
           </p>
           <span class="audience-link gold">Connect your agent →</span>
+        </a>
+        <a href="/api/core" class="audience-card tek-glow-hover">
+          <span class="audience-icon cyan" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+          </span>
+          <h3>Building AI agents</h3>
+          <p>
+            Embed <code>@memofs/core</code> and adapters directly into your custom agent frameworks and runtimes.
+          </p>
+          <span class="audience-link">See the API reference →</span>
         </a>
       </div>
     </div>

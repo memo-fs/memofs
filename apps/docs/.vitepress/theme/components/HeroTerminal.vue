@@ -23,7 +23,7 @@ interface TLine {
 }
 
 const script: TLine[] = [
-	{ type: "cmd", text: "npx memofs init" },
+	{ type: "cmd", text: "memofs init" },
 	{ type: "out", text: "✓ Created .memofs/ with core memory, notes &" },
 	{ type: "out", text: "  recall indexes." },
 	{ type: "blank", text: "" },

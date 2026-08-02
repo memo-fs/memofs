@@ -2,7 +2,7 @@ export const site = {
 	title: "MemoFS",
 	url: "https://docs.memofs.dev",
 	description:
-		"File-first memory layer for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
+		"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
 	repo: "https://github.com/memo-fs/memofs",
 	npm: "https://www.npmjs.com/package/@memofs/core",
 	cloud: "https://memofs.dev",

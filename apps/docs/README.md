@@ -18,13 +18,7 @@ billing, legal, roadmap, competitor content — belong in the MemoFS Cloud app,
 not here**, and are blocked from the OSS docs by `scripts/check-doc-links.mjs`.
 
 **MemoFS Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
-and sync content is documented here too — not deferred to a separate CMS. Per
-[ADR 0008][adr8], every doc claim must be derivable from code/tests/ADRs; when
-code and docs disagree, code wins and the doc is the bug. The drift worklist
-lives in [`docs/architecture/docs-drift-triage.md`][triage].
-
-[adr8]: https://github.com/memo-fs/memofs/blob/main/docs/adr/0008-docs-information-architecture.md
-[triage]: https://github.com/memo-fs/memofs/blob/main/docs/architecture/docs-drift-triage.md
+and sync content is documented here too — not deferred to a separate CMS. Every doc claim must be derivable from code and tests; when code and docs disagree, code wins and the doc is the bug.
 
 ## Commands
 
