@@ -50,7 +50,8 @@ const checkSelection = () => {
     }
 
     const top = Math.max(12, rect.top - 44)
-    const left = Math.max(16, Math.min(window.innerWidth - 170, rect.left + rect.width / 2 - 75))
+    const popoverWidth = 150
+    const left = Math.max(16, Math.min(window.innerWidth - popoverWidth - 16, rect.left + rect.width / 2 - popoverWidth / 2))
 
     popoverPos.value = { top, left, text }
   } catch {
@@ -293,12 +294,17 @@ const closeDialog = () => {
 </template>
 
 <style scoped>
+.engram-ai-wrapper {
+  max-width: 100vw;
+}
+
 .engram-popover {
   position: fixed;
   z-index: 50;
   pointer-events: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   transition: all 0.15s ease;
+  max-width: calc(100vw - 32px);
 }
 
 .engram-popover-btn {
@@ -380,16 +386,22 @@ const closeDialog = () => {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background-color: rgba(124, 209, 249, 0.2);
-  animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  box-shadow: 0 0 0 0 rgba(124, 209, 249, 0.4);
+  animation: ping-ring 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
 }
 
 .engram-fab-container:hover .engram-fab-ping {
   opacity: 0;
 }
 
-@keyframes ping {
-  75%, 100% { transform: scale(1.5); opacity: 0; }
+@keyframes ping-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(124, 209, 249, 0.4);
+  }
+  70%, 100% {
+    box-shadow: 0 0 0 12px rgba(124, 209, 249, 0);
+  }
 }
 
 .engram-icon-large {
