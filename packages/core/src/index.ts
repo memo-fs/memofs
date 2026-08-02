@@ -1,5 +1,5 @@
 /**
- * MemoFS core — file-first memory runtime for agents and AI applications.
+ * MemoFS core — file-first memory runtime for AI agents.
  *
  * This package provides the core memory model, document types, validation,
  * patching, and canonical file path conventions used by all MemoFS adapters.

@@ -83,7 +83,7 @@
 			"workerd"
 		]
 	},
-	"description": "MemoFS — open-source file-first memory runtime for AI applications and agents.",
+	"description": "MemoFS — open-source file-first memory runtime for AI agents.",
 	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/memo-fs/memofs/issues"

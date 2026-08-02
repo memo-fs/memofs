@@ -9,7 +9,7 @@
   <a href="https://github.com/memo-fs/memofs/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge" alt="MIT License" /></a>
 </p>
 
-MemoFS core memory runtime and provider-neutral contracts for AI apps and agents.
+MemoFS core memory runtime and provider-neutral contracts for AI agents.
 
 ## What is this?
 

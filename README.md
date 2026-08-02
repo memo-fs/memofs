@@ -4,7 +4,7 @@
 
 # MemoFS
 
-Open-source, file-first memory for AI applications and agents.
+Open-source, file-first memory runtime for AI agents.
 
 </div>
 
@@ -20,7 +20,7 @@ Open-source, file-first memory for AI applications and agents.
 
 ## What is MemoFS?
 
-**File-first memory for AI applications and agents.** Store, recall, and synchronize memory using plain files on disk — local-first by default, with optional cloud sync.
+**File-first memory runtime for AI agents.** Store, recall, and synchronize memory using plain files on disk — local-first by default, with optional cloud sync.
 
 Most AI memory systems are database-first, vendor-locked, hard to inspect, and hard to version. MemoFS inverts that: your agent's memory lives as Markdown and JSONL under a `.memofs/` directory you can `cat`, `git diff`, and roll back.
 
