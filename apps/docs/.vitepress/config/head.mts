@@ -1,4 +1,5 @@
 import type { HeadConfig } from "vitepress";
+import { resolveImageUrl } from "./site.mts";
 
 export const GTAG_ID = "G-D6Q96NPN7K";
 
@@ -22,8 +23,16 @@ export const head: HeadConfig[] = [
 	],
 	["meta", { property: "og:site_name", content: "MemoFS" }],
 	["meta", { property: "og:locale", content: "en_US" }],
+	[
+		"meta",
+		{ property: "og:image", content: resolveImageUrl("/og-default.png") },
+	],
 	["meta", { name: "twitter:card", content: "summary_large_image" }],
 	["meta", { name: "twitter:site", content: "@memofsdev" }],
+	[
+		"meta",
+		{ name: "twitter:image", content: resolveImageUrl("/og-default.png") },
+	],
 	// Modern browsers prefer the crisp SVG; .ico is the multi-size fallback.
 	["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
 	["link", { rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],

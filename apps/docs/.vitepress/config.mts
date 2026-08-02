@@ -6,7 +6,7 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 import { head } from "./config/head.mts";
 import { nav } from "./config/nav.mts";
 import { sidebar } from "./config/sidebar.mts";
-import { site } from "./config/site.mts";
+import { resolveImageUrl, site } from "./config/site.mts";
 
 export default withMermaid(
 	defineConfig({
@@ -34,6 +34,22 @@ export default withMermaid(
 		ignoreDeadLinks: false,
 
 		head,
+
+		transformHead(ctx) {
+			const resHead = [...ctx.head];
+			for (const tag of resHead) {
+				if (tag[0] === "meta" && tag[1]) {
+					const prop = tag[1].property || tag[1].name;
+					if (
+						(prop === "og:image" || prop === "twitter:image") &&
+						typeof tag[1].content === "string"
+					) {
+						tag[1].content = resolveImageUrl(tag[1].content);
+					}
+				}
+			}
+			return resHead;
+		},
 
 		markdown: {
 			theme: {
