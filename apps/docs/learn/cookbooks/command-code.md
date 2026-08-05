@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with Command Code in 6 minutes"
+title: "How to use MemoFS with Command Code"
 date: "2026-07-28"
 estimatedMinutes: 6
 ---

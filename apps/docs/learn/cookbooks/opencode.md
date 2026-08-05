@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with opencode in 3 minutes"
+title: "How to use MemoFS with opencode"
 date: "2026-07-28"
 estimatedMinutes: 3
 ---

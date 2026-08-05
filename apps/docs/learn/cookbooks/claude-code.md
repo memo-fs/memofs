@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with Claude Code in 3 minutes"
+title: "How to use MemoFS with Claude Code"
 date: "2026-07-27"
 estimatedMinutes: 3
 ---

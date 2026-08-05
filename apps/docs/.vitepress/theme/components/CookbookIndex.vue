@@ -63,8 +63,10 @@ const getBrandIconType = (recipe) => {
   if (combined.includes('github')) return 'github'
   if (combined.includes('jetbrains')) return 'jetbrains'
   if (combined.includes('kilo')) return 'kilo-code'
+  if (combined.includes('linear')) return 'linear'
   if (combined.includes('notion')) return 'notion'
   if (combined.includes('opencode')) return 'opencode'
+  if (combined.includes('vercel')) return 'vercel'
   if (combined.includes('windsurf')) return 'windsurf'
   if (combined.includes('zed')) return 'zed'
   return 'memofs'
@@ -76,7 +78,7 @@ const brandMap = {
   'antigravity': { name: 'Google Antigravity', icon: 'logos:google-icon' },
   'claude': { name: 'Claude Code', icon: 'simple-icons:anthropic' },
   'cline': { name: 'Cline', icon: 'ph:robot-bold' },
-  'codex': { name: 'OpenAI Codex', icon: 'simple-icons:openai' },
+  'codex': { name: 'Codex', icon: 'simple-icons:openai' },
   'command-code': { name: 'Command Code', icon: 'ph:terminal-window-bold' },
   'copilot': { name: 'GitHub Copilot', icon: 'simple-icons:githubcopilot' },
   'cursor': { name: 'Cursor', icon: 'simple-icons:cursor' },
@@ -84,11 +86,14 @@ const brandMap = {
   'github': { name: 'GitHub', icon: 'simple-icons:github' },
   'jetbrains': { name: 'JetBrains AI', icon: 'simple-icons:jetbrains' },
   'kilo-code': { name: 'Kilo Code', icon: 'ph:lightning-bold' },
+  'linear': { name: 'Linear', icon: 'simple-icons:linear' },
   'notion': { name: 'Notion', icon: 'simple-icons:notion' },
   'opencode': { name: 'OpenCode', icon: 'ph:code-bold' },
+  'vercel': { name: 'Vercel AI SDK', icon: 'simple-icons:vercel' },
   'windsurf': { name: 'Windsurf', icon: 'simple-icons:codeium' },
   'zed': { name: 'Zed AI', icon: 'simple-icons:zeddotdev' },
-  'memofs': { name: 'MemoFS', icon: 'ph:brain-bold' }
+  'memofs': { name: 'MemoFS', icon: 'ph:brain-bold' },
+
 }
 
 const getBrandInfo = (recipe) => {

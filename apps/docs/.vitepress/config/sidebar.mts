@@ -103,7 +103,12 @@ export const sidebar: DefaultTheme.Sidebar = {
 		},
 		{
 			text: "Connectors",
-			items: [{ text: "Connectors Framework", link: "/packages/connectors/" }],
+			collapsed: false,
+			items: [
+				{ text: "Framework", link: "/packages/connectors/" },
+				{ text: "Built-In Connectors", link: "/packages/connectors/built-in-connectors" },
+				{ text: "Custom Connectors", link: "/packages/connectors/custom-connectors" }
+			],
 		},
 		{
 			text: "Developer Tooling",

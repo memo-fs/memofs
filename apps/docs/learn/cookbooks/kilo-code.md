@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with Kilo Code in 5 minutes"
+title: "How to use MemoFS with Kilo Code"
 date: "2026-07-28"
 estimatedMinutes: 5
 ---

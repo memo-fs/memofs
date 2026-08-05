@@ -20,8 +20,8 @@ export const nav: DefaultTheme.NavItem[] = [
 	{
 		text: "Learn",
 		items: [
-			{ text: "Tracks", link: "/learn/tracks/" },
 			{ text: "Cookbooks", link: "/learn/cookbooks/" },
+			{ text: "Tracks", link: "/learn/tracks/" },
 			{ text: "Blog", link: "/blog/" },
 		],
 		activeMatch: "/learn/",

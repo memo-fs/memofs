@@ -1,12 +1,12 @@
 ---
-title: "How to use MemoFS with Gemini (CLI / Code Assist) in 3 minutes"
+title: "How to use MemoFS with Gemini (CLI / Code Assist)"
 date: "2026-07-28"
 estimatedMinutes: 3
 ---
 
 # ⚠️ Before you start: check which tool you're actually running
 
-As of June 18, 2026, Gemini CLI stopped serving requests for Google AI Pro, Ultra, and free-tier users — Google replaced it with **Google Antigravity** (Antigravity IDE & Antigravity CLI `agy`). **If you are using Google Antigravity or `agy`, this cookbook's MCP step won't apply to you — use the [Antigravity cookbook](./b-antigravity.md) instead.**
+As of June 18, 2026, Gemini CLI stopped serving requests for Google AI Pro, Ultra, and free-tier users — Google replaced it with **Google Antigravity** (Antigravity IDE & Antigravity CLI `agy`). **If you are using Google Antigravity or `agy`, this cookbook's MCP step won't apply to you — use the [Antigravity cookbook](./antigravity.md) instead.**
 
 This page covers memofs's official `gemini` generate target, which remains correct for:
 
@@ -50,7 +50,7 @@ Restart Gemini CLI / Gemini Code Assist. No hooks means no auto-injection — co
 
 ## Next Steps
 
-If you've since migrated to Google Antigravity (IDE or CLI), go to the [Antigravity cookbook](./b-antigravity.md) — rules carry over, but MCP configuration uses `.agents/mcp_settings.json` (IDE) or `agy mcp add` (CLI).
+If you've since migrated to Google Antigravity (IDE or CLI), go to the [Antigravity cookbook](./antigravity.md) — rules carry over, but MCP configuration uses `.agents/mcp_settings.json` (IDE) or `agy mcp add` (CLI).
 
 - [Semantic search](/packages/adapters/transformers).
 - [Team memory sync](/packages/mcp/hybrid-mode).

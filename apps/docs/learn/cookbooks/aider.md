@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with Aider in 4 minutes"
+title: "How to use MemoFS with Aider"
 date: "2026-07-28"
 estimatedMinutes: 4
 ---

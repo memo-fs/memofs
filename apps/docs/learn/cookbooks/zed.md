@@ -1,5 +1,5 @@
 ---
-title: "How to use MemoFS with Zed in 4 minutes"
+title: "How to use MemoFS with Zed"
 date: "2026-07-28"
 estimatedMinutes: 4
 ---
