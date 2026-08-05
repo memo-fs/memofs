@@ -33,6 +33,10 @@ export default withMermaid(
 		lastUpdated: true,
 		ignoreDeadLinks: false,
 
+		sitemap: {
+			hostname: site.url,
+		},
+
 		head,
 
 		transformHead(ctx) {
