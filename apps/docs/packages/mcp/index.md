@@ -66,32 +66,13 @@ Two conventions apply across all platforms:
 ::: code-group
 
 ```json [Claude Code]
-// Project: ./.mcp.json (committable — no --root needed)
+// Project: ./.mcp.json
 // Global:  ~/.claude.json (add "--root", "/absolute/path/to/project" to args)
 {
   "mcpServers": {
     "memofs": {
       "command": "npx",
       "args": ["-y", "@memofs/mcp-server"]
-    }
-  }
-}
-```
-
-```json [Claude Desktop]
-// macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json
-// Windows: %APPDATA%\Claude\claude_desktop_config.json
-// Desktop has no project cwd, so --root is required.
-{
-  "mcpServers": {
-    "memofs": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@memofs/mcp-server",
-        "--root",
-        "/absolute/path/to/your/project"
-      ]
     }
   }
 }
@@ -127,6 +108,18 @@ args = ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
       "type": "local",
       "command": ["npx", "-y", "@memofs/mcp-server"],
       "enabled": true
+    }
+  }
+}
+```
+```json [Antigravity]
+// Project: ./.agents/mcp_config.json
+// Global:  ~/.agents/mcp_config.json (add "--root", "/absolute/path/to/project")
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
     }
   }
 }

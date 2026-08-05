@@ -28,7 +28,7 @@ Run the MemoFS server yourself — on Node.js or Cloudflare Workers — instead 
 → **[Self-hosting overview](/packages/server/)**
 
 ### I just want the hosted version, no infrastructure
-MemoFS Cloud gives you a managed MCP endpoint and team workspaces without running anything yourself.
+MemoFS Cloud gives you a file replica, managed MCP endpoint, and team workspaces without running anything yourself.
 
 → **[MemoFS Cloud](https://memofs.dev)**
 

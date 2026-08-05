@@ -112,7 +112,7 @@ memofs config init --runtime hybrid --cloud-url https://memofs.dev/api/v1
   "root": ".",
   "cloud": {
     "baseUrl": "https://memofs.dev/api/v1",
-    "projectId": "pro_abc123"
+    "projectId": "frozen-crest"
   },
   "recall": {
     "engine": "hybrid",

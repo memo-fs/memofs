@@ -196,10 +196,11 @@ async function sendWelcomeEmail(
 		<div style="font-family: ui-sans-system, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; color: #111; max-width: 560px; margin: 0 auto; padding: 24px;">
 			<h1 style="font-size: 20px; margin: 0 0 12px;">You're in — welcome to MemoFS</h1>
 			<p style="margin: 0 0 12px;">Thanks for subscribing to the MemoFS changelog & blog.</p>
-			<p style="margin: 0 0 12px;">You'll get new posts, release highlights, and the occasional deep dive — no spam.</p>
+			<p style="margin: 0 0 12px;">You'll get new posts, release highlights, and the occasional deep dive.</p>
 			<p style="margin: 24px 0 0;">
 				<a href="https://docs.memofs.dev" style="color: #111; text-decoration: underline;">Read the docs</a> ·
 				<a href="https://github.com/memo-fs/memofs" style="color: #111; text-decoration: underline;">Star on GitHub</a>
+				<a href="https://memofs.dev" style="color: #111; text-decoration: underline;">MemoFS Cloud</a>
 			</p>
 			<p style="margin: 24px 0 0; font-size: 12px; color: #666;">You’re receiving this because you subscribed at docs.memofs.dev. Unsubscribe anytime via the link in future emails.</p>
 		</div>

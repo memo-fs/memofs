@@ -117,9 +117,9 @@ Rate limits are tiered per **API key**:
 
 | Plan | Requests per minute |
 |---|---|
-| Free | Upgrade to Pro/Teams |
+| Free | Upgrade to Pro/Workspaces |
 | Pro | 60 |
-| Teams | 300 |
+| Workspaces | 300 |
 
 Exceeding the limit returns HTTP `429` with a `Retry-After` indicating when the bucket resets. The MCP client surfaces that as a transport error; most agents retry transparently.
 
