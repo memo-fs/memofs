@@ -45,7 +45,7 @@ async function agentTurn(userPrompt: string): Promise<string> {
 	// 2. Tool-augmented — let the model recall more, read core memory, and
 	//    record durable facts across up to 6 reasoning steps.
 	const { text } = await generateText({
-		model: openai("gpt-4.1-mini"),
+		model: openai("gpt-4o-mini"),
 		system,
 		prompt: userPrompt,
 		tools: {
