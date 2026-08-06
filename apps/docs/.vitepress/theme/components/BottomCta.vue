@@ -14,7 +14,7 @@ import CopyButton from "./CopyButton.vue";
         </div>
         <div class="cta-buttons">
           <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
-          <a href="https://memofs.dev" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
+          <a href="https://memofs.dev" class="cta-button secondary" target="_blank" rel="noopener">
             Explore MemoFS Cloud →
           </a>
         </div>

@@ -79,7 +79,7 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
               href="https://memofs.dev"
               class="runtime-waitlist-btn"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener"
             >
               Connect your agent →
             </a>

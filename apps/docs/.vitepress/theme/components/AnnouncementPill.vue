@@ -23,7 +23,7 @@ withDefaults(
 
 <template>
   <div class="tek-pill-wrap">
-    <a :href="href" target="_blank" rel="noopener noreferrer" class="tek-announcement-pill" aria-label="Announcement">
+    <a :href="href" target="_blank" rel="noopener" class="tek-announcement-pill" aria-label="Announcement">
       <span class="tek-pill-badge">{{ badge }}</span>
       <span class="tek-pill-text">{{ text }}</span>
       <span class="tek-pill-arrow" aria-hidden="true">→</span>
