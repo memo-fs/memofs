@@ -6,11 +6,14 @@
  */
 
 import { runMemoFsCli } from "../runner";
+import { registerSignalHandlers } from "../utils/signals";
 
 /**
  * Main execution function parsing process arguments, invoking CLI runner, and formatting stdout/stderr.
  */
 async function main() {
+	registerSignalHandlers();
+
 	const result = await runMemoFsCli({
 		argv: process.argv.slice(2),
 		cwd: process.cwd(),

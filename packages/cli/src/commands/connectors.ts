@@ -223,48 +223,68 @@ export interface ConnectorsRunCommandOptions extends ConnectorsCommandOptions {
 export async function runConnectorsRunCommand(
 	options: ConnectorsRunCommandOptions,
 ): Promise<number> {
-	const { runConnectors } = await import("@memofs/connectors");
-	const rootDir = getRootDir(options.memo.store);
-	const registry = options.registry ?? new ConnectorRegistry();
+	const spinner = options.output.spinner({ json: options.json });
+	spinner.start("Running external connectors sync...");
 
-	const cloudOpts = options.memo.getCloudOptions();
-	const secretResolver =
-		cloudOpts?.apiKey && cloudOpts?.baseUrl
-			? new CloudSecretResolver({
-					projectId: options.memo.projectId,
-					apiKey: cloudOpts.apiKey,
-					cloudBaseUrl: cloudOpts.baseUrl,
-				})
-			: new EnvSecretResolver({ rootDir });
+	try {
+		const { runConnectors } = await import("@memofs/connectors");
+		const rootDir = getRootDir(options.memo.store);
+		const registry = options.registry ?? new ConnectorRegistry();
 
-	const result: RunConnectorsResult = await runConnectors({
-		rootDir,
-		memo: options.memo,
-		secretResolver,
-		connectorRegistry: registry,
-		...(options.onlyType === undefined ? {} : { onlyType: options.onlyType }),
-	});
+		const cloudOpts = options.memo.getCloudOptions();
+		const secretResolver =
+			cloudOpts?.apiKey && cloudOpts?.baseUrl
+				? new CloudSecretResolver({
+						projectId: options.memo.projectId,
+						apiKey: cloudOpts.apiKey,
+						cloudBaseUrl: cloudOpts.baseUrl,
+					})
+				: new EnvSecretResolver({ rootDir });
 
-	if (options.json) {
-		printJsonEnvelope(options.output, "connectors.run", result);
-		return result.errors.length > 0 ? 1 : 0;
-	}
+		const result: RunConnectorsResult = await runConnectors({
+			rootDir,
+			memo: options.memo,
+			secretResolver,
+			connectorRegistry: registry,
+			...(options.onlyType === undefined ? {} : { onlyType: options.onlyType }),
+		});
 
-	const lines: string[] = [];
-	lines.push(`Connectors run complete.`);
-	lines.push(
-		`- ran: ${result.ran.length > 0 ? result.ran.join(", ") : "(none)"}`,
-	);
-	lines.push(`- written: ${result.written.length}`);
-	lines.push(`- skipped (already ingested): ${result.skipped.length}`);
-	if (result.errors.length > 0) {
-		lines.push(`- errors: ${result.errors.length}`);
-		for (const err of result.errors) {
-			lines.push(` [${err.connectorType}] ${err.message}`);
+		spinner.stop();
+
+		if (options.json) {
+			printJsonEnvelope(options.output, "connectors.run", result);
+			return result.errors.length > 0 ? 1 : 0;
 		}
+
+		if (result.errors.length === 0) {
+			options.output.success(
+				`✓ Connectors run complete (${result.written.length} written, ${result.skipped.length} skipped)`,
+			);
+		} else {
+			options.output.warn(
+				`⚠ Connectors run completed with ${result.errors.length} error(s)`,
+			);
+		}
+
+		const lines: string[] = [];
+		lines.push(`Connectors run summary:`);
+		lines.push(
+			`- ran: ${result.ran.length > 0 ? result.ran.join(", ") : "(none)"}`,
+		);
+		lines.push(`- written: ${result.written.length}`);
+		lines.push(`- skipped (already ingested): ${result.skipped.length}`);
+		if (result.errors.length > 0) {
+			lines.push(`- errors: ${result.errors.length}`);
+			for (const err of result.errors) {
+				lines.push(` [${err.connectorType}] ${err.message}`);
+			}
+		}
+		options.output.write(lines.join("\n"));
+		return result.errors.length > 0 ? 1 : 0;
+	} catch (error) {
+		spinner.fail("Connectors run failed");
+		throw error;
 	}
-	options.output.write(lines.join("\n"));
-	return result.errors.length > 0 ? 1 : 0;
 }
 
 // --- helpers ---

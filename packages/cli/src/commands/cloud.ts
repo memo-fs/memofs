@@ -92,24 +92,42 @@ export async function runCloudHealthCommand(
 	options: CloudHealthCommandOptions,
 ): Promise<number> {
 	const client = options.client;
-	const result = await client.health();
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.health", result);
-		return 0;
+	const spinner = options.output.spinner({ json: options.json });
+	spinner.start("Checking MemoFS Cloud health...");
+
+	try {
+		const result = await client.health();
+		spinner.stop();
+
+		if (options.json) {
+			printJsonEnvelope(options.output, "cloud.health", result);
+			return 0;
+		}
+
+		if (result.ok) {
+			options.output.success(
+				`MemoFS Cloud is operational (${result.name ?? "cloud"} v${result.version ?? "1.0"})`,
+			);
+		} else {
+			options.output.error(`MemoFS Cloud health check failed`);
+		}
+
+		options.output.write(
+			[
+				`ok: ${result.ok}`,
+				`name: ${result.name ?? "unknown"}`,
+				`version: ${result.version ?? "unknown"}`,
+				`capabilities: ${(result.capabilities ?? []).join(", ") || "none"}`,
+				...(result.warnings?.length
+					? result.warnings.map((warning) => `warning: ${warning}`)
+					: []),
+			].join("\n"),
+		);
+		return result.ok ? 0 : 1;
+	} catch (error) {
+		spinner.fail("Cloud health check failed");
+		throw error;
 	}
-	options.output.write(
-		[
-			"MemoFS Cloud",
-			`ok: ${result.ok}`,
-			`name: ${result.name ?? "unknown"}`,
-			`version: ${result.version ?? "unknown"}`,
-			`capabilities: ${(result.capabilities ?? []).join(", ") || "none"}`,
-			...(result.warnings?.length
-				? result.warnings.map((warning) => `warning: ${warning}`)
-				: []),
-		].join("\n"),
-	);
-	return result.ok ? 0 : 1;
 }
 
 /**
@@ -122,23 +140,40 @@ export async function runCloudReadinessCommand(
 	options: CloudReadinessCommandOptions,
 ): Promise<number> {
 	const client = options.client;
-	const result = await client.readiness();
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.readiness", result);
-		return 0;
+	const spinner = options.output.spinner({ json: options.json });
+	spinner.start("Checking MemoFS Cloud readiness...");
+
+	try {
+		const result = await client.readiness();
+		spinner.stop();
+
+		if (options.json) {
+			printJsonEnvelope(options.output, "cloud.readiness", result);
+			return 0;
+		}
+
+		if (result.ok) {
+			options.output.success("MemoFS Cloud service is ready for sync");
+		} else {
+			options.output.error("MemoFS Cloud service is not ready");
+		}
+
+		options.output.write(
+			[
+				`ok: ${result.ok}`,
+				`name: ${result.name ?? "unknown"}`,
+				`version: ${result.version ?? "unknown"}`,
+				`capabilities: ${(result.capabilities ?? []).join(", ") || "none"}`,
+				...(result.warnings?.length
+					? result.warnings.map((warning) => `warning: ${warning}`)
+					: []),
+			].join("\n"),
+		);
+		return result.ok ? 0 : 1;
+	} catch (error) {
+		spinner.fail("Cloud readiness check failed");
+		throw error;
 	}
-	options.output.write(
-		[
-			`ok: ${result.ok}`,
-			`name: ${result.name ?? "unknown"}`,
-			`version: ${result.version ?? "unknown"}`,
-			`capabilities: ${(result.capabilities ?? []).join(", ") || "none"}`,
-			...(result.warnings?.length
-				? result.warnings.map((warning) => `warning: ${warning}`)
-				: []),
-		].join("\n"),
-	);
-	return result.ok ? 0 : 1;
 }
 
 /**
@@ -151,20 +186,31 @@ export async function runCloudSyncStatusCommand(
 	options: CloudSyncStatusCommandOptions,
 ): Promise<number> {
 	const client = options.client;
-	const result = await client.sync.status();
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.sync.status", result);
+	const spinner = options.output.spinner({ json: options.json });
+	spinner.start("Fetching cloud sync status...");
+
+	try {
+		const result = await client.sync.status();
+		spinner.stop();
+
+		if (options.json) {
+			printJsonEnvelope(options.output, "cloud.sync.status", result);
+			return 0;
+		}
+
+		options.output.write(
+			[
+				`cursor: ${result.cursor}`,
+				`files: ${Object.keys(result.manifest).length}`,
+				`storageBytes: ${result.storageBytes}`,
+				...(result.lastSyncAt ? [`lastSyncAt: ${result.lastSyncAt}`] : []),
+			].join("\n"),
+		);
 		return 0;
+	} catch (error) {
+		spinner.fail("Failed to fetch cloud sync status");
+		throw error;
 	}
-	options.output.write(
-		[
-			`cursor: ${result.cursor}`,
-			`files: ${Object.keys(result.manifest).length}`,
-			`storageBytes: ${result.storageBytes}`,
-			...(result.lastSyncAt ? [`lastSyncAt: ${result.lastSyncAt}`] : []),
-		].join("\n"),
-	);
-	return 0;
 }
 
 /** Creates the local NodeFs store used for manifest + sync I/O. */
@@ -183,11 +229,6 @@ function getLocalStore(
  * file the local workspace is missing or behind on, plus paths removed
  * server-side.
  *
- * This implementation performs the actual byte download + verify + write
- * (previously it only reported the planned set). It uses the NodeFs store
- * directly, matching the file-replication layer's behavior, and then
- * re-derives indexes by bootstrapping if needed.
- *
  * @param options - Command configuration options.
  * @returns CLI exit code.
  */
@@ -197,59 +238,92 @@ export async function runCloudSyncPullCommand(
 	const client = options.client;
 	const rootDir = options.rootDir ?? process.cwd();
 	const store = getLocalStore(rootDir);
+	const spinner = options.output.spinner({ json: options.json });
+	const progress = options.output.progress({ json: options.json });
 
-	// Compute local manifest for the pull request (server diffs against it).
-	const localManifest = await computeLocalManifest(rootDir);
+	try {
+		spinner.start("[1/4] Computing local workspace file manifest...");
+		const localManifest = await computeLocalManifest(rootDir);
 
-	const result = await client.sync.pull({
-		manifest: localManifest,
-		...(options.since ? { since: options.since } : {}),
-	});
-
-	// Mandatory pre-sync snapshot before mutating local files (§8, D6)
-	if (result.files.length > 0 || result.removed.length > 0) {
-		await createCliSnapshot(store as never, {
-			label: "pre-sync-pull",
-			type: "pre-sync",
+		spinner.update("[2/4] Requesting server sync pull status...");
+		const result = await client.sync.pull({
+			manifest: localManifest,
+			...(options.since ? { since: options.since } : {}),
 		});
-	}
 
-	// Perform actual download + verify + write
-	for (const file of result.files) {
-		const content = await fetchText(file.presignedGetUrl);
-		const actualHash = await sha256Hex(content);
-		if (actualHash !== file.sha256) {
-			throw new Error(
-				`sync.pull: sha256 mismatch for ${file.path} (expected ${file.sha256}, got ${actualHash}).`,
+		// Mandatory pre-sync snapshot before mutating local files (§8, D6)
+		if (result.files.length > 0 || result.removed.length > 0) {
+			spinner.update(
+				"[3/4] Creating pre-sync safety snapshot (pre-sync-pull)...",
 			);
+			await createCliSnapshot(store as never, {
+				label: "pre-sync-pull",
+				type: "pre-sync",
+			});
 		}
-		// Validate canonical path
-		if (!isCanonicalOrSnapshotPath(file.path)) {
-			throw new Error(
-				`sync.pull: refusing to write non-canonical path ${file.path}.`,
+
+		spinner.stop();
+
+		// Perform actual download + verify + write
+		const totalFiles = result.files.length;
+		let completedFiles = 0;
+
+		for (const file of result.files) {
+			completedFiles += 1;
+			progress.update(
+				completedFiles,
+				totalFiles,
+				`Downloading file replica: ${file.path}`,
 			);
-		}
-		await store.write(file.path as never, content);
-	}
 
-	for (const removed of result.removed) {
-		if (isCanonicalOrSnapshotPath(removed)) {
-			await store.delete(removed as never);
+			const content = await fetchText(file.presignedGetUrl);
+			const actualHash = await sha256Hex(content);
+			if (actualHash !== file.sha256) {
+				progress.stop();
+				throw new Error(
+					`sync.pull: sha256 mismatch for ${file.path} (expected ${file.sha256}, got ${actualHash}).`,
+				);
+			}
+			// Validate canonical path
+			if (!isCanonicalOrSnapshotPath(file.path)) {
+				progress.stop();
+				throw new Error(
+					`sync.pull: refusing to write non-canonical path ${file.path}.`,
+				);
+			}
+			await store.write(file.path as never, content);
 		}
-	}
 
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.sync.pull", result);
+		progress.stop();
+
+		for (const removed of result.removed) {
+			if (isCanonicalOrSnapshotPath(removed)) {
+				await store.delete(removed as never);
+			}
+		}
+
+		if (options.json) {
+			printJsonEnvelope(options.output, "cloud.sync.pull", result);
+			return 0;
+		}
+
+		options.output.success(
+			`✓ Cloud pull complete (${result.files.length} downloaded, ${result.removed.length} removed, cursor: ${result.cursor})`,
+		);
+
+		options.output.write(
+			[
+				`files: ${result.files.length}`,
+				`removed: ${result.removed.length}`,
+				`cursor: ${result.cursor}`,
+			].join("\n"),
+		);
 		return 0;
+	} catch (error) {
+		spinner.fail("Cloud sync pull failed");
+		progress.stop();
+		throw error;
 	}
-	options.output.write(
-		[
-			`files: ${result.files.length}`,
-			`removed: ${result.removed.length}`,
-			`cursor: ${result.cursor}`,
-		].join("\n"),
-	);
-	return 0;
 }
 
 function isCanonicalOrSnapshotPath(path: string): boolean {
@@ -274,14 +348,7 @@ async function fetchText(url: string): Promise<string> {
 
 /**
  * Pushes local `.memofs/` file replicas to the cloud using the two-phase push
- * contract: (1) `push` computes the local manifest and requests presigned upload
- * URLs for changed/missing files; (2) the bytes are uploaded to R2; (3)
- * `complete` confirms the uploads and commits the manifest.
- *
- * This CLI implementation now performs phase 2 (byte upload) directly — it
- * reads each file from the local store and PUTs to its presigned URL, then
- * calls complete. Previously it skipped the upload, causing
- * "Uploaded object not found for <hash>. Re-upload and retry."
+ * contract.
  *
  * @param options - Command configuration options.
  * @returns CLI exit code.
@@ -292,74 +359,107 @@ export async function runCloudSyncPushCommand(
 	const client = options.client;
 	const rootDir = options.rootDir ?? process.cwd();
 	const store = getLocalStore(rootDir);
-	const manifest = await computeLocalManifest(rootDir);
+	const spinner = options.output.spinner({ json: options.json });
+	const progress = options.output.progress({ json: options.json });
 
-	// Phase 1: request presigned upload URLs for changed/missing files.
-	const pushResult = await client.sync.push({
-		manifest,
-		...(options.baseCursor ? { baseCursor: options.baseCursor } : {}),
-	});
+	try {
+		spinner.start("[1/4] Computing local workspace file manifest...");
+		const manifest = await computeLocalManifest(rootDir);
 
-	if (pushResult.upload.length === 0) {
-		// Nothing to upload — the cloud is already in sync with this manifest.
+		spinner.update(
+			"[2/4] Requesting presigned upload URLs from MemoFS Cloud...",
+		);
+		const pushResult = await client.sync.push({
+			manifest,
+			...(options.baseCursor ? { baseCursor: options.baseCursor } : {}),
+		});
+
+		if (pushResult.upload.length === 0) {
+			spinner.succeed("Cloud workspace is already up to date.");
+			if (options.json) {
+				printJsonEnvelope(options.output, "cloud.sync.push", {
+					upload: pushResult.upload,
+					cursor: pushResult.cursor,
+					complete: null,
+				});
+				return 0;
+			}
+			options.output.write(
+				[
+					"Nothing to push — cloud is already in sync.",
+					`cursor: ${pushResult.cursor}`,
+				].join("\n"),
+			);
+			return 0;
+		}
+
+		spinner.stop();
+
+		// Phase 2: upload bytes to presigned PUT URLs
+		const totalUploads = pushResult.upload.length;
+		let completedUploads = 0;
+
+		for (const target of pushResult.upload) {
+			completedUploads += 1;
+			progress.update(
+				completedUploads,
+				totalUploads,
+				`Uploading file replica: ${target.path}`,
+			);
+
+			const content = await store.read(target.path as never);
+			const actualHash = await sha256Hex(content);
+			if (actualHash !== target.sha256) {
+				progress.stop();
+				throw new Error(
+					`sync.upload: sha256 mismatch for ${target.path} (expected ${target.sha256}, got ${actualHash}).`,
+				);
+			}
+			await putText(target.presignedPutUrl, content);
+		}
+
+		progress.stop();
+
+		spinner.start("[4/4] Committing uploaded manifest to MemoFS Cloud...");
+
+		const uploaded = pushResult.upload.map((target) => ({
+			path: target.path,
+			sha256: target.sha256,
+		}));
+
+		const completeResult = await client.sync.complete({
+			uploaded,
+			cursor: options.baseCursor ?? pushResult.cursor,
+		});
+
+		spinner.stop();
+
 		if (options.json) {
 			printJsonEnvelope(options.output, "cloud.sync.push", {
 				upload: pushResult.upload,
 				cursor: pushResult.cursor,
-				complete: null,
+				complete: completeResult,
 			});
 			return 0;
 		}
+
+		options.output.success(
+			`✓ Cloud push complete (${uploaded.length} uploaded, cursor: ${completeResult.cursor})`,
+		);
+
 		options.output.write(
 			[
-				"Nothing to push — cloud is already in sync.",
-				`cursor: ${pushResult.cursor}`,
+				`uploaded: ${uploaded.length}`,
+				`cursor: ${completeResult.cursor}`,
+				`files: ${Object.keys(completeResult.manifest).length}`,
 			].join("\n"),
 		);
 		return 0;
+	} catch (error) {
+		spinner.fail("Cloud sync push failed");
+		progress.stop();
+		throw error;
 	}
-
-	// Phase 2: upload bytes to presigned PUT URLs
-	for (const target of pushResult.upload) {
-		const content = await store.read(target.path as never);
-		const actualHash = await sha256Hex(content);
-		if (actualHash !== target.sha256) {
-			throw new Error(
-				`sync.upload: sha256 mismatch for ${target.path} (expected ${target.sha256}, got ${actualHash}).`,
-			);
-		}
-		await putText(target.presignedPutUrl, content);
-	}
-
-	// Phase 3: confirm uploads and commit the manifest update.
-	const uploaded = pushResult.upload.map((target) => ({
-		path: target.path,
-		sha256: target.sha256,
-	}));
-
-	// Phase 3: confirm uploads and commit the manifest update. (Phase 2, the
-	// byte upload, runs in the runtime file-sync layer between these two calls.)
-	const completeResult = await client.sync.complete({
-		uploaded,
-		cursor: options.baseCursor ?? pushResult.cursor,
-	});
-
-	if (options.json) {
-		printJsonEnvelope(options.output, "cloud.sync.push", {
-			upload: pushResult.upload,
-			cursor: pushResult.cursor,
-			complete: completeResult,
-		});
-		return 0;
-	}
-	options.output.write(
-		[
-			`uploaded: ${uploaded.length}`,
-			`cursor: ${completeResult.cursor}`,
-			`files: ${Object.keys(completeResult.manifest).length}`,
-		].join("\n"),
-	);
-	return 0;
 }
 
 /** PUTs text to a presigned URL, throwing on non-2xx. */
@@ -376,9 +476,7 @@ async function putText(url: string, body: string): Promise<void> {
 }
 
 /**
- * Computes the local file manifest (canonical path → sha256) for the given
- * workspace root by reading the canonical `.memofs/` files through the public
- * node FS memory store. Missing files are skipped (they contribute no entry).
+ * Computes the local file manifest for the given workspace root.
  *
  * @param rootDir - Workspace root containing the `.memofs/` directory.
  * @returns the local file manifest.

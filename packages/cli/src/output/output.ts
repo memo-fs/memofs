@@ -4,6 +4,15 @@
  * @module output
  */
 
+import {
+	CliProgressBar,
+	CliSpinner,
+	createProgressBar,
+	createSpinner,
+} from "./spinner";
+
+export { CliProgressBar, CliSpinner, createProgressBar, createSpinner };
+
 /**
  * Interface defining a structured CLI output writer for stdout and stderr.
  */
@@ -32,6 +41,14 @@ export interface CliOutput {
 	 * Appends a color-coded warning message to stdout.
 	 */
 	warn(message: string): void;
+	/**
+	 * Creates a new TTY spinner instance.
+	 */
+	spinner(options?: { json?: boolean }): CliSpinner;
+	/**
+	 * Creates a new TTY progress bar instance.
+	 */
+	progress(options?: { json?: boolean }): CliProgressBar;
 }
 
 /**
@@ -136,6 +153,12 @@ export function createBufferedOutput(
 		},
 		warn(message) {
 			stdout.push(`${c.yellow}${message}${c.reset}`);
+		},
+		spinner(opts) {
+			return createSpinner({ noColor: disabled, json: opts?.json });
+		},
+		progress(opts) {
+			return createProgressBar({ noColor: disabled, json: opts?.json });
 		},
 	};
 }
