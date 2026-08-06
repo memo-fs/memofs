@@ -29,6 +29,7 @@ jobs:
   release:
     name: Release packages
     runs-on: ubuntu-latest
+    environment: publish
     timeout-minutes: 20
 
     steps:
