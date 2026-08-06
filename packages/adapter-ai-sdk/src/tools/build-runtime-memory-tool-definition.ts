@@ -16,6 +16,7 @@ export function buildRuntimeMemoryToolDefinition(
 	return {
 		description:
 			"Use MemoFS memory with safe project/user/conversation scope boundaries. Supports local, cloud, or hybrid runtimes.",
+		parameters: runtimeMemoryToolInputSchema,
 		inputSchema: runtimeMemoryToolInputSchema,
 		execute: async (input: unknown) => {
 			const parsed = runtimeMemoryToolInputSchema.parse(input);
@@ -42,6 +43,11 @@ export async function runRuntimeMemoryTool(
 					"Core memory updates are disabled for this AI SDK tool.",
 				);
 			}
+			if (!input.content) {
+				throw new Error(
+					"content parameter is required for update_core_memory command.",
+				);
+			}
 			assertSafeContent(input.content, options.allowSecrets, maxContentChars);
 			const result = await options.runtime.updateCoreMemory({
 				content: input.content,
@@ -51,6 +57,9 @@ export async function runRuntimeMemoryTool(
 		case "remember": {
 			if (!options.allowWrites) {
 				throw new Error("Memory writes are disabled for this AI SDK tool.");
+			}
+			if (!input.content) {
+				throw new Error("content parameter is required for remember command.");
 			}
 			assertSafeContent(input.content, options.allowSecrets, maxContentChars);
 			const scope = inferWriteScope(access, input.scope);
@@ -94,6 +103,9 @@ export async function runRuntimeMemoryTool(
 			);
 		}
 		case "recall": {
+			if (!input.query) {
+				throw new Error("query parameter is required for recall command.");
+			}
 			const result = await options.runtime.recall({
 				query: input.query,
 				topK: input.topK,

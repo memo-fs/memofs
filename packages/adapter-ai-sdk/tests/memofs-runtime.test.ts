@@ -237,4 +237,36 @@ describe("createAiSdkRuntimeFromMemoFS", () => {
 			await cleanup();
 		}
 	});
+
+	it("runRuntimeMemoryTool throws error when required parameters are missing", async () => {
+		const memo = new MemoFS({
+			projectId: "demo",
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+		});
+		const runtime = createAiSdkRuntimeFromMemoFS(memo);
+
+		await expect(
+			runRuntimeMemoryTool(
+				{ runtime, access: { projectId: "demo" }, allowCoreUpdates: true },
+				{ command: "update_core_memory" },
+			),
+		).rejects.toThrow(
+			"content parameter is required for update_core_memory command.",
+		);
+
+		await expect(
+			runRuntimeMemoryTool(
+				{ runtime, access: { projectId: "demo" }, allowWrites: true },
+				{ command: "remember" },
+			),
+		).rejects.toThrow("content parameter is required for remember command.");
+
+		await expect(
+			runRuntimeMemoryTool(
+				{ runtime, access: { projectId: "demo" } },
+				{ command: "recall" },
+			),
+		).rejects.toThrow("query parameter is required for recall command.");
+	});
 });
