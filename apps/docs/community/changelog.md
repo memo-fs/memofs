@@ -13,6 +13,10 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 ## Unreleased
 
+Upcoming updates and improvements.
+
+## v1.2.0-beta.3 — August 6, 2026
+
 Vercel AI SDK adapter schema refactoring, CLI UI/UX progress indicators, and terminal signal handling.
 
 ### Adapters
