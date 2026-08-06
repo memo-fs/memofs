@@ -11,6 +11,24 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 <NewsletterSignup event="changelog" title="Get release notes by email" description="Be the first to know when a new version ships." />
 
+## Unreleased
+
+Vercel AI SDK adapter schema refactoring, CLI UI/UX progress indicators, and terminal signal handling.
+
+### Adapters
+
+#### Fixed
+- Refactored the Vercel AI SDK tool input schema to a root object format, fixing tool-calling compatibility with OpenAI, Anthropic, and Google Gemini models.
+- Exposed both parameters and inputSchema fields on the memory tool definition for full compatibility across Vercel AI SDK versions.
+
+### CLI
+
+#### Added
+- Added zero-dependency TTY step spinners and itemized progress bars for long-running cloud sync operations.
+- Added animated progress feedback during workspace integrity diagnostics and external connector runs.
+- Added SIGINT and SIGTERM terminal signal handlers to gracefully restore cursor visibility and handle cancellation.
+- Added automatic visual animation suppression when output is piped, NO_COLOR is set, or JSON mode is active.
+
 ## v1.2.0-beta.2 — July 26, 2026
 
 Project manifest fallback, global CLI flag polish, and cloud sync snapshot fixes.

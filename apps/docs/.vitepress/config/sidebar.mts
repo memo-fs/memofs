@@ -106,8 +106,14 @@ export const sidebar: DefaultTheme.Sidebar = {
 			collapsed: false,
 			items: [
 				{ text: "Framework", link: "/packages/connectors/" },
-				{ text: "Built-In Connectors", link: "/packages/connectors/built-in-connectors" },
-				{ text: "Custom Connectors", link: "/packages/connectors/custom-connectors" }
+				{
+					text: "Built-In Connectors",
+					link: "/packages/connectors/built-in-connectors",
+				},
+				{
+					text: "Custom Connectors",
+					link: "/packages/connectors/custom-connectors",
+				},
 			],
 		},
 		{
