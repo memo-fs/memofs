@@ -153,6 +153,18 @@ export interface RecallItem {
 	 * @public
 	 */
 	stale?: boolean;
+	/**
+	 * `true` when the runtime detected the memory's age exceeded its
+	 * kind-specific expiry floor (`EXPIRY_DAYS[kind]`) at query time.
+	 * Unverified items are still surfaced (ranked lower, milder than
+	 * {@link RecallItem.stale}) so the next agent session invokes the
+	 * LLM re-verify lifecycle on them. Absent when the memory has no
+	 * `kind`, the `kind` is outside the expiry table, or the memory is
+	 * younger than its floor.
+	 *
+	 * @public
+	 */
+	unverified?: boolean;
 }
 
 export interface RecallResult {

@@ -23,6 +23,7 @@ const VALID_STATUSES: ReadonlySet<GraphFactStatus> = new Set([
 	"conflicted",
 	"deleted",
 	"stale",
+	"unverified",
 ]);
 const VALID_EDGE_IDENTITY_MODES: ReadonlySet<GraphEdgeIdentityMode> = new Set([
 	"canonical",
@@ -292,7 +293,7 @@ export function normalizeStatus(value: unknown): GraphFactStatus {
 		!VALID_STATUSES.has(value as GraphFactStatus)
 	) {
 		throw new GraphValidationError(
-			"status must be active, deprecated, conflicted, deleted, or stale.",
+			"status must be active, deprecated, conflicted, deleted, stale, or unverified.",
 		);
 	}
 	return value as GraphFactStatus;

@@ -62,6 +62,16 @@ export const STALE_REVERIFY_MESSAGE =
 	"anchored file changed since write — re-verify before trusting";
 
 /**
+ * The re-verify suffix emitted on each unverified (time-decayed) recall
+ * item. Exported so tests track the single source of truth instead of
+ * copy-pinning the literal.
+ *
+ * @internal
+ */
+export const UNVERIFIED_REVERIFY_MESSAGE =
+	"past its kind expiry floor — re-verify before trusting";
+
+/**
  * Renders recall items as a numbered text list with optional scores plus
  * code-anchor and drift annotations. Each rendered item appends, when present:
  *
@@ -76,6 +86,13 @@ export const STALE_REVERIFY_MESSAGE =
  *   session sees drift happened instead of blindly trusting outdated
  *   memory. Omitted when no anchor was set or when the file still matches
  *   its stored hash.
+ * - ` [unverified] <UNVERIFIED_REVERIFY_MESSAGE>` — emitted when the
+ *   runtime detected the memory's age exceeded its kind-specific expiry
+ *   floor at query time. The unverified item is still surfaced (ranked
+ *   lower, milder than stale) so the next agent session invokes the LLM
+ *   re-verify lifecycle. Omitted when the memory has no `kind`, the
+ *   `kind` is outside the expiry table, or the memory is younger than
+ *   its floor.
  *
  * @param items - The recall items to render.
  * @returns Newline-separated text suitable for a context section.
@@ -89,7 +106,10 @@ export function renderRecall(items: RecallItem[]): string {
 				? `\n [anchor: ${item.anchor.file}${item.anchor.symbol ? `#${item.anchor.symbol}` : ""}]`
 				: "";
 			const stale = item.stale ? `\n [stale] ${STALE_REVERIFY_MESSAGE}` : "";
-			return `${head}${score}${anchor}${stale}`;
+			const unverified = item.unverified
+				? `\n [unverified] ${UNVERIFIED_REVERIFY_MESSAGE}`
+				: "";
+			return `${head}${score}${anchor}${stale}${unverified}`;
 		})
 		.join("\n\n");
 }
@@ -110,6 +130,26 @@ export function buildStaleRecallBanner(items: RecallItem[]): string {
 	const staleCount = items.filter((item) => item.stale === true).length;
 	if (staleCount === 0) return "";
 	return `[stale] ${staleCount} of ${items.length} recall fragments are anchored to files that changed since write — re-verify each before trusting.\n\n`;
+}
+
+/**
+ * Builds a one-line unverified-memory banner for the strategist to prepend
+ * to the recall section when one or more surfaced items are flagged
+ * unverified (time-decayed past their kind expiry floor). Returns the
+ * empty string when nothing is unverified so the rendered section is
+ * unchanged for the common case. The banner is the consumer-facing
+ * counterpart to decay detection: it tells the reading agent that some
+ * fragments may be time-stale before it reads them, instead of relying
+ * on per-item `[unverified]` markers alone.
+ *
+ * @param items - The recall items being rendered.
+ * @returns A banner line (with trailing newline) or the empty string.
+ */
+export function buildUnverifiedRecallBanner(items: RecallItem[]): string {
+	const unverifiedCount =
+		items.filter((item) => item.unverified === true).length;
+	if (unverifiedCount === 0) return "";
+	return `[unverified] ${unverifiedCount} of ${items.length} recall fragments are past their kind expiry floor — re-verify each before trusting.\n\n`;
 }
 
 /**

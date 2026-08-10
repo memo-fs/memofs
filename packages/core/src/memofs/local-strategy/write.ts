@@ -106,6 +106,21 @@ export async function writeMemory(
 	if (anchor !== undefined) {
 		ctx.anchorByMemoryId.set(id, anchor);
 	}
+	// Decay metadata (kind + createdAt) is populated for the live write so
+	// the query-time decay seam can compute the memory's age without
+	// waiting for a cold-start hydration cycle. The event timestamp is
+	// the canonical `createdAt`; cold-start recovery reads it back from
+	// `memory-events.jsonl` in `hydrateMemoryMetaFromEvents`.
+	// Only set when the caller explicitly provided a `kind` — an unkinded
+	// write defaults to "note" for the note's frontmatter but must NOT
+	// enter the decay surface (backward-compat: no false-positive
+	// `unverified` 30 days after an unkinded write).
+	if (input.kind !== undefined) {
+		ctx.memoryMetaByMemoryId.set(id, {
+			kind: input.kind,
+			createdAt: now,
+		});
+	}
 	await appendMemoryEvent(
 		ctx.options.store,
 		createMemoryEvent({

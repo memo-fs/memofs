@@ -31,6 +31,7 @@ import {
 	isValidAnchorRef,
 } from "./local-strategy/anchor-drift";
 import { createLocalAgentfsClient } from "./local-strategy/client";
+import { EXPIRY_DAYS, type MemoryDecayMeta } from "./local-strategy/decay";
 import {
 	consolidateMemory,
 	graphNeighbors,
@@ -45,6 +46,8 @@ import {
 	toGraphEdgeInput,
 	toGraphNodeInput,
 } from "./local-strategy/helpers";
+import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
+import { migrateAnchors } from "./local-strategy/migrate-anchors";
 import { localRecall } from "./local-strategy/recall";
 import { listRecentMemories as listRecentMemoriesFn } from "./local-strategy/recent";
 import {
@@ -84,6 +87,7 @@ import type {
 	MemoryContextInput,
 	MemoryContextResult,
 	MemoryDocumentResult,
+	MemoryKind,
 	RecallInput,
 	RecallResult,
 	SnapshotMemoryInput,
@@ -103,6 +107,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	const lexicalTextById = new Map<string, string>();
 	const anchorByMemoryId = new Map<string, AnchorRef>();
 	const anchorHashCache: AnchorHashCache = createAnchorHashCache();
+	const memoryMetaByMemoryId = new Map<string, MemoryDecayMeta>();
 	const graphNodesByMemoryId = new Map<string, string[]>();
 	const rootDir = options.rootDir ?? ".";
 
@@ -152,6 +157,44 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		} catch (error) {
 			options.logger?.warn(
 				"anchor hydration from events failed (best-effort)",
+				{
+					error: error instanceof Error ? error.message : String(error),
+				},
+			);
+		}
+	}
+
+	/**
+	 * Walks `memory-events.jsonl` and populates `memoryMetaByMemoryId`
+	 * with the `kind` + `createdAt` (event timestamp) for each
+	 * `memory.created` event. Cold-start recovery for decay detection —
+	 * a fresh process needs the age of each memory to compute the
+	 * `EXPIRY_DAYS[kind]` floor at query time. Events without a `kind`
+	 * or with a `kind` outside the expiry table are skipped (backward-
+	 * compat — no false-positive `unverified`). Best-effort: malformed
+	 * events don't break the loop. Last event per memory id wins.
+	 */
+	async function hydrateMemoryMetaFromEvents(): Promise<void> {
+		try {
+			const result = await readMemoryEventsWithIssues(store, {
+				malformedLineMode: "skip",
+			});
+			for (const entry of result.entries) {
+				if (entry.type !== "memory.created") continue;
+				const meta = entry.metadata as
+					| { id?: unknown; kind?: unknown }
+					| undefined;
+				if (!meta || typeof meta.id !== "string") continue;
+				if (typeof meta.kind !== "string") continue;
+				if (EXPIRY_DAYS[meta.kind as MemoryKind] === undefined) continue;
+				memoryMetaByMemoryId.set(meta.id as string, {
+					kind: meta.kind as MemoryKind,
+					createdAt: entry.timestamp,
+				});
+			}
+		} catch (error) {
+			options.logger?.warn(
+				"memory-meta hydration from events failed (best-effort)",
 				{
 					error: error instanceof Error ? error.message : String(error),
 				},
@@ -310,6 +353,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			}
 			reindexGraphNodesByMemoryId();
 			await hydrateAnchorsFromEvents();
+			await hydrateMemoryMetaFromEvents();
 			await hydrateLexicalFromNotes();
 			await hydrateAnchorHashCacheFromManifest();
 		}
@@ -359,6 +403,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		flushAnchorHashCache: flushAnchorHashCacheToManifest,
 		graphNodesByMemoryId,
 		reindexGraphNodesByMemoryId,
+		memoryMetaByMemoryId,
 	};
 
 	return {
@@ -574,6 +619,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<ConsolidateMemoryResult> {
 			return consolidateMemory(ctx, input, signal);
+		},
+
+		async migrateAnchors(): Promise<MigrateAnchorsResult> {
+			return migrateAnchors(store, rootDir, options.logger);
 		},
 
 		async syncPush(_input: unknown, signal?: AbortSignal): Promise<never> {

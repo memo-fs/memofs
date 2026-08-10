@@ -49,7 +49,8 @@ export type GraphFactStatus =
 	| "deprecated"
 	| "conflicted"
 	| "deleted"
-	| "stale";
+	| "stale"
+	| "unverified";
 
 export interface GraphSourceSpan {
 	start?: number;

@@ -33,6 +33,7 @@ import {
 import {
 	AGENT_CONTEXT_DIRECTIVE,
 	buildStaleRecallBanner,
+	buildUnverifiedRecallBanner,
 	renderEntities,
 	renderRecall,
 	renderRecent,
@@ -91,10 +92,12 @@ export async function expandContext(
 		expandedRecallItems = entry.recallItems;
 		if (expandedRecallItems.length > 0) {
 			const staleBanner = buildStaleRecallBanner(expandedRecallItems);
+			const unverifiedBanner =
+				buildUnverifiedRecallBanner(expandedRecallItems);
 			negotiable.push({
 				type: "recall",
 				title: "Relevant Recall (expanded)",
-				content: `${staleBanner}${renderRecall(expandedRecallItems)}`,
+				content: `${staleBanner}${unverifiedBanner}${renderRecall(expandedRecallItems)}`,
 				weight: SECTION_WEIGHTS.recall,
 			});
 		}

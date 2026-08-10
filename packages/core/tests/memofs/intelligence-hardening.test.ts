@@ -187,6 +187,7 @@ nothing
 				anchorByMemoryId: new Map(),
 				anchorHashCache: new Map(),
 				graphNodesByMemoryId: new Map(),
+				memoryMetaByMemoryId: new Map(),
 				reindexGraphNodesByMemoryId: () => {},
 				graphNodes: new Map(),
 				graphEdges: new Map(),

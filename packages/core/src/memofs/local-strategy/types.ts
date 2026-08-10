@@ -28,6 +28,7 @@ import type {
 	SnapshotMemoryResult,
 } from "../types";
 import type { AnchorHashCache } from "./anchor-drift";
+import type { MemoryDecayMeta } from "./decay";
 
 export type { Logger } from "../../core/types/logger";
 
@@ -166,4 +167,13 @@ export interface LocalStrategyContext {
 	 * at boot and by `autoExtractGraph` after each upsert batch.
 	 */
 	reindexGraphNodesByMemoryId: () => void;
+	/**
+	 * In-process map of memory id → decay metadata (`kind` + `createdAt`).
+	 * Populated at `ensureReady` time from `memory-events.jsonl`
+	 * (cold-start recovery) and at `writeMemory` time for the live write.
+	 * Read by the query-time decay-detection seam in `localRecall` so
+	 * items with a `kind` + age past their {@link EXPIRY_DAYS} floor can
+	 * be flagged `unverified` + demoted.
+	 */
+	memoryMetaByMemoryId: Map<string, MemoryDecayMeta>;
 }

@@ -5,6 +5,7 @@ import type { JsonObject } from "../../core/types/json";
 import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
 import { applyAnchorDrift } from "./anchor-drift";
+import { applyDecay } from "./decay";
 import { candidateShape, fingerprint, message } from "./helpers";
 import type { LocalStrategyContext } from "./types";
 
@@ -109,6 +110,27 @@ export async function localRecall(
 		// prior session's entries instead of re-hashing every anchored file
 		// on first recall. Best-effort; failures are logged.
 		await ctx.flushAnchorHashCache();
+	}
+
+	// Cognitive decay runs AFTER drift detection so an item that is BOTH
+	// drift-stale AND time-decayed gets both flags + compounded demotion
+	// (`*= 0.5 * 0.6`). For items with a `kind` + age past their
+	// EXPIRY_DAYS floor: status "unverified" + RecallItem.unverified +
+	// metadata.unverified + score *= 0.6 + graph node transitioned.
+	// Items without kind/createdAt or under the floor are skipped
+	// (backward-compat). Pure time check — no I/O, no cache.
+	if (ctx.memoryMetaByMemoryId.size > 0) {
+		await applyDecay({
+			items,
+			memoryMetaByMemoryId: ctx.memoryMetaByMemoryId,
+			now: Date.now(),
+			graphStore: ctx.graphStore,
+			graphNodes: ctx.graphNodes,
+			graphNodesByMemoryId: ctx.graphNodesByMemoryId,
+			...(ctx.options.logger === undefined
+				? {}
+				: { logger: ctx.options.logger }),
+		});
 	}
 
 	return { items };
