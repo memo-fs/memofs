@@ -26,6 +26,7 @@ import {
 	runGenerateMcpCommand,
 	runInitCommand,
 	runInspectCommand,
+	runMigrateAnchorsCommand,
 	runReadCommand,
 	runRememberCommand,
 	runSearchCommand,
@@ -319,6 +320,27 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 			const g = await globals();
 			setExitCode(
 				await runValidateCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+				}),
+			);
+		});
+
+	const migrate = program
+		.command("migrate")
+		.description("one-shot migration utilities for existing .memofs/ data");
+
+	migrate
+		.command("anchors")
+		.description(
+			"backfill AnchorRef onto existing notes.md entries by detecting file-path references",
+		)
+		.action(async () => {
+			setCurrentCommand("migrate.anchors");
+			const g = await globals();
+			setExitCode(
+				await runMigrateAnchorsCommand({
 					memo: g.memo,
 					output,
 					json: g.json,

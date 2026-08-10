@@ -37,6 +37,7 @@ import {
 	resolveMemoFsConfig,
 } from "./config";
 import type { createLocalStrategy } from "./local-strategy";
+import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import {
 	agentfsCreateSession,
 	conversationsAppend,
@@ -423,6 +424,18 @@ export class MemoFS {
 		signal?: AbortSignal,
 	): Promise<ConsolidateMemoryResult> {
 		return this.strategy.consolidateMemory(input ?? {}, signal);
+	}
+
+	/**
+	 * One-shot backfill: walks `notes.md` entries and best-effort attaches
+	 * `AnchorRef` metadata by detecting file-path references in each
+	 * note's content. Idempotent — notes with an existing valid anchor
+	 * are skipped. Invoked by the `memofs migrate anchors` CLI subcommand.
+	 *
+	 * @public
+	 */
+	async migrateAnchors(): Promise<MigrateAnchorsResult> {
+		return this.strategy.migrateAnchors();
 	}
 
 	async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {

@@ -31,7 +31,6 @@ export { runEventsCommand } from "./events";
 export {
 	AGENT_RULES_TARGETS,
 	HOOK_EMITTER_TARGETS,
-	MAX_AGENT_RULES_LINES,
 	runGenerateAgentCommand,
 	runGenerateAgentHooksCommand,
 	runGenerateAgentRulesCommand,
@@ -39,6 +38,7 @@ export {
 } from "./generate";
 export { runInitCommand } from "./init";
 export { runInspectCommand } from "./inspect";
+export { runMigrateAnchorsCommand } from "./migrate";
 export { runReadCommand } from "./read";
 export { runRememberCommand } from "./remember";
 export { runSearchCommand } from "./search";

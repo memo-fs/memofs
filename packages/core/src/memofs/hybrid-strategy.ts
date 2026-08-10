@@ -12,6 +12,7 @@
  * @internal
  */
 
+import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import type { FileSyncLayer } from "./sync/file-replication";
 import type {
 	AgentSessionCompleteInput,
@@ -260,6 +261,10 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<ConsolidateMemoryResult> {
 			return local.consolidateMemory(input, signal);
+		},
+
+		async migrateAnchors(): Promise<MigrateAnchorsResult> {
+			return local.migrateAnchors();
 		},
 
 		// --- Sync surface: the four file-replica methods (§7) ---------------
