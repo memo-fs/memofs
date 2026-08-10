@@ -107,6 +107,13 @@ export class MemoFS {
 	readonly name: string;
 	readonly version: string;
 	readonly recallConfig: ResolvedMemoFsConfig["recall"];
+	/**
+	 * Project root directory (resolved by {@link resolveMemoFsConfig}). Used
+	 * to resolve repo-relative {@link AnchorRef.file} paths at query time
+	 * for code-anchor drift detection. Defaults to `"."` when the caller
+	 * did not supply an absolute root.
+	 */
+	readonly rootDir: string;
 
 	private readonly strategy: Strategy;
 	private readonly resolved: ResolvedMemoFsConfig;
@@ -331,6 +338,7 @@ export class MemoFS {
 		this.reranker = this.resolved.reranker;
 		this.llmClient = this.resolved.llmClient;
 		this.recallStore = this.resolved.recallStore;
+		this.rootDir = this.resolved.rootDir;
 		if (this.resolved.cloudClient) {
 			this.cloud = this.resolved.cloudClient;
 		} else if (this.resolved.cloud) {

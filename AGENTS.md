@@ -27,9 +27,10 @@ At the **start of every task**, agents MUST:
 
 ## General Rules
 
+- **If the task is not simple and relates to understanding the existing codebase, always start with docs/CONTEXT.md**
 - **⚠️ Always use** the `code-review` skill to review your plan implementation after completing the plan (all checkboxes are checked).
 - **⚠️ Always use** the `security-reviewer` skill to review code for security vulnerabilities after code review.
-- **⚠️ Avoid** adding ADR and WF related namings to code documentation, and avoid pointing to ADRs and WFs in code documentation. ADRs and WFs are for internal team reference and not for public documentation. Use ADRs and WFs only for internal team reference and not for public documentation.
+- **⚠️ Do not** add ADR or WF/ticket namings to code documentation. This covers TSDoc/JSDoc on exported APIs and type fields, file-header comments, `describe`/`it` test names, and inline comments. Reference the *behavior or contract* (e.g. "drift detection", "5-minute TTL with manifest persistence", "code anchoring"), never the internal doc number (no `ADR-0022`, `ticket #68`, `Batch-6 default #3`, `§B4`, `ADR 0009 Component 4`). Rationale: ADRs/WFs/tickets live in gitignored paths (`docs/adr/`, `docs/architecture/`, `docs/CONTEXT.md`) that a public reader following such a citation would hit a 404; code docs (`packages/**/*.ts`, including tests) are tracked and public. If a future reader needs the design rationale, they find it via the git-ignored internal docs, not via a code comment that 404s.
 - **⚠️ Never track internal docs or the cloud app in git.** The following paths are gitignored (`.gitignore`) and must never be `git add`-ed (including `git add -f`):
   - `docs/adr/` — ADRs (internal architecture decisions)
   - `docs/architecture/` — decisions log, locked specs, execution plan, archive
@@ -37,6 +38,21 @@ At the **start of every task**, agents MUST:
   - `apps/cloud/` — the cloud app (the SaaS; does not exist in this OSS repo — lives in the private `memofs-cloud` repo)
   
   These are local-only working artifacts. If a file in one of these paths is already tracked, untrack it with `git rm --cached <path>` (keeps the file on disk). Never link to these paths from public/tracked files (READMEs, CONTRIBUTING, GOVERNANCE, package READMEs, `examples/`, `apps/docs/`) — a public reader will hit a 404.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues at `memo-fs/memofs` (via the `gh` CLI). Specs and tickets publish
+as issues; ADRs cited by bare number, never as internal-path links. See
+`docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context — one `docs/CONTEXT.md` + one `docs/adr/` shared by all 14
+packages. Local `docs/architecture/spec-*.md` + `tickets-*.md` are grilling
+records (gitignored); GitHub Issues are the live contract. See
+`docs/agents/domain.md`.
 
 ## Pointers
 

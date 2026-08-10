@@ -19,7 +19,7 @@ import { createDeterministicFallbackReranker } from "../../src/rerank/fallback/d
 
 // Ticket 8 acceptance criteria
 
-describe("intelligence hardening — ticket 8", () => {
+describe("intelligence hardening", () => {
 	describe("searchMemoryText heading boost multi-word", () => {
 		it("boosts ## My Auth Flow Implementation for query auth flow", () => {
 			const content = `
@@ -183,6 +183,15 @@ nothing
 				lexicalTextById: new Map([["doc1", "auth flow implementation"]]),
 				isRetiredGraphDoc: () => false,
 				reranker: createDeterministicFallbackReranker(),
+				rootDir: ".",
+				anchorByMemoryId: new Map(),
+				anchorHashCache: new Map(),
+				graphNodesByMemoryId: new Map(),
+				reindexGraphNodesByMemoryId: () => {},
+				graphNodes: new Map(),
+				graphEdges: new Map(),
+				graphStore: createInMemoryGraphStore(),
+				contextCache: { clear: () => {} },
 			} as unknown as LocalStrategyContext;
 
 			const result = await localRecall(ctx, { query: "auth" }, undefined);

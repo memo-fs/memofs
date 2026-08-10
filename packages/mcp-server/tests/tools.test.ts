@@ -140,6 +140,71 @@ describe("MCP tools", () => {
 		expect(text).toMatch(/path/);
 	});
 
+	it("memofs.remember schema exposes the optional code-anchor field and round-trips it through recall", async () => {
+		// Schema contract: the `memofs.remember` inputSchema MUST expose
+		// the optional `anchor` field so model callers can bind a memory
+		// to a code file.
+		const definitions = createToolDefinitions(100);
+		const remember = definitions.find((d) => d.name === "memofs.remember");
+		expect(remember, "memofs.remember tool must be defined").toBeDefined();
+		const schema = remember?.inputSchema as {
+			properties?: {
+				anchor?: {
+					properties?: { file?: unknown; hash?: unknown; symbol?: unknown };
+					required?: string[];
+				};
+			};
+		};
+		expect(
+			schema.properties?.anchor,
+			"anchor property must be declared",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.file,
+			"anchor.file property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.hash,
+			"anchor.hash property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.symbol,
+			"anchor.symbol property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.required,
+			"anchor requires file+hash",
+		).toEqual(["file", "hash"]);
+
+		// Round-trip: writing with `anchor` must be accepted by the tool
+		// (proves the schema validates the field, not just documents it).
+		const runtime = createMemoFSMcpRuntimeFromConfig({
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+			recall: { localEmbeddings: false },
+		});
+		const write = await callMemoFSTool({ runtime }, "memofs.remember", {
+			content: "Anchor round-trip via MCP.",
+			anchor: { file: "src/auth.py", hash: "deadbeef".repeat(8) },
+		});
+		expect(
+			write.isError,
+			"anchor field must be accepted by the tool",
+		).toBeUndefined();
+
+		// And a follow-up recall must surface the memory (drift detection
+		// runs because `src/auth.py` does not exist on disk → file-deleted
+		// drift; the memory is still surfaced, rank-demoted not suppressed).
+		const recall = await callMemoFSTool({ runtime }, "memofs.recall", {
+			query: "Anchor round-trip",
+			limit: 5,
+		});
+		expect(recall.isError).toBeUndefined();
+		const text =
+			recall.content[0]?.type === "text" ? recall.content[0]?.text : "";
+		expect(text).toContain("Anchor round-trip via MCP.");
+	});
+
 	it("output text is truncated safely when max output bytes is small", async () => {
 		const runtime = createMemoFSMcpRuntimeFromConfig({
 			mode: "local",

@@ -96,12 +96,63 @@ export interface RecallInput {
 	filters?: JsonObject;
 }
 
+/**
+ * Code binding site for self-heal — `where in the code this fact is anchored`.
+ *
+ * - `file` is a repository-relative path (forward slashes, no leading `/`).
+ * - `hash` is the SHA-256 (hex, lowercase, 64 chars) of the anchored file's
+ *   bytes at write time — the drift-detection comparison baseline.
+ * - `symbol` is the optional dotted AST symbol path for `.ts`/`.tsx` files
+ *   (`<repo-relative file path>#<dotted-symbol-path>`, e.g.
+ *   `src/auth/provider.ts#verifyJwt`). Undefined for non-TS files at v1.
+ *
+ * Hash-only is the v1 anchor contract; `symbol` is the optional
+ * TS-Compiler-extracted AST binding. Drift detection (hash mismatch OR
+ * file-deleted) works for any language; only the optional `symbol` field
+ * is TS-only at v1.
+ *
+ * @public
+ */
+export interface AnchorRef {
+	/** Repository-relative file path (forward slashes, no leading `/`). */
+	file: string;
+	/** SHA-256 (hex, lowercase, 64 chars) of the anchored file's bytes at write time. */
+	hash: string;
+	/**
+	 * Optional AST symbol path for `.ts`/`.tsx` files extracted via the
+	 * TypeScript Compiler API at write time. Format:
+	 * `<repo-relative file path>#<dotted-symbol-path>`. Undefined for
+	 * non-TS files at v1.
+	 */
+	symbol?: string;
+}
+
 export interface RecallItem {
 	id: string;
 	text: string;
 	score?: number;
 	sourceRefs?: SourceRef[];
 	metadata?: JsonObject;
+	/**
+	 * The code binding site copied through from the originating
+	 * {@link WriteMemoryInput.anchor} when the memory was written. Absent
+	 * when the memory was written without an anchor (today's default
+	 * behavior). Drift detection reads `anchor.hash` against the live file
+	 * at query time and sets {@link RecallItem.stale} on mismatch.
+	 *
+	 * @public
+	 */
+	anchor?: AnchorRef;
+	/**
+	 * `true` when the runtime detected hash drift (or file deletion) on
+	 * {@link RecallItem.anchor} since the memory was written. Stale items
+	 * are still surfaced (ranked lower) so the next agent session sees
+	 * drift happened. Absent when no anchor was set or when the file
+	 * still matches its stored hash.
+	 *
+	 * @public
+	 */
+	stale?: boolean;
 }
 
 export interface RecallResult {
@@ -257,6 +308,20 @@ export interface WriteMemoryInput {
 	 * both can be set and both are preserved.
 	 */
 	writer?: string;
+	/**
+	 * Optional code binding site for self-heal. When set, the write
+	 * strategy persists the anchor in the note's metadata block AND in the
+	 * `memory.created` event metadata, so the in-process and cold-start
+	 * paths can recover it. At query-time, the recall runtime recomputes
+	 * the anchored file's SHA-256 and compares; mismatch OR
+	 * file-deleted transitions the corresponding graph node's status to
+	 * `"stale"`, sets {@link RecallItem.stale} on the recalled item, and
+	 * demotes `score *= 0.5`. Omitting `anchor` preserves today's behavior
+	 * (status never transitions to `"stale"`, `RecallItem.stale` undefined).
+	 *
+	 * @public
+	 */
+	anchor?: AnchorRef;
 }
 
 export interface WriteMemoryResult {

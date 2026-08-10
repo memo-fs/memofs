@@ -10,7 +10,11 @@
 import { bootstrapMemoryStore } from "../core/bootstrap/bootstrap-memory-store";
 import { readCoreMemory } from "../core/documents/core-memory";
 import { readNotesMemory } from "../core/documents/notes-memory";
+import { readMemoryEventsWithIssues } from "../core/events/memory-events";
+import { readManifest, writeManifest } from "../core/manifest/manifest";
+import { splitSearchBlocks } from "../core/search/search-memory";
 import type { JsonObject } from "../core/types/json";
+import type { AnchorHashCacheEntry } from "../core/types/memory-documents";
 import {
 	createRuleBasedExtractor,
 	type Extractor,
@@ -20,6 +24,12 @@ import type { BM25Store } from "../recall/lexical/bm25";
 import { createBM25Store } from "../recall/lexical/bm25";
 import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
 import { buildContext } from "./helpers";
+import {
+	ANCHOR_HASH_CACHE_TTL_MS,
+	type AnchorHashCache,
+	createAnchorHashCache,
+	isValidAnchorRef,
+} from "./local-strategy/anchor-drift";
 import { createLocalAgentfsClient } from "./local-strategy/client";
 import {
 	consolidateMemory,
@@ -61,6 +71,7 @@ import type {
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	AnchorRef,
 	ConsolidateMemoryInput,
 	ConsolidateMemoryResult,
 	GraphEdgeInput,
@@ -90,6 +101,158 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		options.graphStore ?? createFsGraphStore({ store });
 	const lexicalStore: BM25Store = createBM25Store();
 	const lexicalTextById = new Map<string, string>();
+	const anchorByMemoryId = new Map<string, AnchorRef>();
+	const anchorHashCache: AnchorHashCache = createAnchorHashCache();
+	const graphNodesByMemoryId = new Map<string, string[]>();
+	const rootDir = options.rootDir ?? ".";
+
+	/**
+	 * Rebuilds the `memory id → graph node ids` reverse index from the
+	 * current `graphNodes` map. Called at boot and after each
+	 * `autoExtractGraph` so the drift-detection seam can find bound
+	 * graph nodes without scanning the whole graph per recall call.
+	 */
+	function reindexGraphNodesByMemoryId(): void {
+		graphNodesByMemoryId.clear();
+		for (const [nodeId, node] of graphNodes) {
+			if (!node.sourceRefs) continue;
+			for (const sr of node.sourceRefs) {
+				if (sr.sourceType === "memory" && sr.sourceId) {
+					const list = graphNodesByMemoryId.get(sr.sourceId);
+					if (list === undefined) {
+						graphNodesByMemoryId.set(sr.sourceId, [nodeId]);
+					} else if (!list.includes(nodeId)) {
+						list.push(nodeId);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Walks `memory-events.jsonl` and populates `anchorByMemoryId` from
+	 * event metadata. Cold-start recovery for anchors written by a prior
+	 * process. Events without an `anchor` field are skipped (today's
+	 * default). Best-effort: malformed events don't break the loop.
+	 */
+	async function hydrateAnchorsFromEvents(): Promise<void> {
+		try {
+			const result = await readMemoryEventsWithIssues(store, {
+				malformedLineMode: "skip",
+			});
+			for (const entry of result.entries) {
+				if (entry.type !== "memory.created") continue;
+				const meta = entry.metadata as
+					| { id?: unknown; anchor?: unknown }
+					| undefined;
+				if (!meta || typeof meta.id !== "string") continue;
+				if (!isValidAnchorRef(meta.anchor)) continue;
+				anchorByMemoryId.set(meta.id, meta.anchor);
+			}
+		} catch (error) {
+			options.logger?.warn(
+				"anchor hydration from events failed (best-effort)",
+				{
+					error: error instanceof Error ? error.message : String(error),
+				},
+			);
+		}
+	}
+
+	/**
+	 * Repopulates the BM25 lexical store from `notes.md` sections on cold
+	 * start. Each `## <timestamp>` section carries a `- metadata: <json>`
+	 * line with the original `mem_...` id; indexing the section text under
+	 * that id lets {@link localRecall} surface memories by their original
+	 * id immediately after a fresh process spins up against an existing
+	 * rootDir (no warm `lexicalStore` in memory yet).
+	 *
+	 * Per-id idempotency through `lexicalTextById.has(id)` keeps this a
+	 * safe no-op for entries the live process has already indexed via
+	 * {@link writeMemory} ahead of the first `ensureReady` call.
+	 *
+	 * Best-effort: malformed sections don't break the loop.
+	 */
+	async function hydrateLexicalFromNotes(): Promise<void> {
+		try {
+			const notes = await readNotesMemory(store);
+			const sections = splitSearchBlocks(notes, "markdown-section");
+			for (const section of sections) {
+				const metaMatch = section.match(/^- metadata:\s*(\{.*\})\s*$/m);
+				if (!metaMatch?.[1]) continue;
+				let metadata: { id?: unknown } | undefined;
+				try {
+					metadata = JSON.parse(metaMatch[1]) as { id?: unknown };
+				} catch {
+					continue;
+				}
+				if (!metadata || typeof metadata.id !== "string") continue;
+				const id = metadata.id;
+				if (!id.startsWith("mem_")) continue;
+				if (lexicalTextById.has(id)) continue;
+				indexLexical({ id, text: section });
+			}
+		} catch (error) {
+			options.logger?.warn(
+				"lexical cold-start hydration from notes failed (best-effort)",
+				{
+					error: error instanceof Error ? error.message : String(error),
+				},
+			);
+		}
+	}
+
+	/**
+	 * Warm-starts {@link anchorHashCache} from `.memofs/manifest.json`
+	 * (cross-session cache persistence). Entries past the 5-minute TTL
+	 * are dropped so a stale entry never masks a recomputation.
+	 * Best-effort: a missing or malformed manifest is treated as a cold
+	 * cache (the validator already rejects malformed manifests on read).
+	 */
+	async function hydrateAnchorHashCacheFromManifest(): Promise<void> {
+		try {
+			const manifest = await readManifest(store);
+			const persisted = manifest.anchorHashCache;
+			if (!persisted) return;
+			const now = Date.now();
+			for (const [file, entry] of Object.entries(persisted)) {
+				if (now - entry.ts >= ANCHOR_HASH_CACHE_TTL_MS) continue;
+				if (anchorHashCache.has(file)) continue;
+				anchorHashCache.set(file, entry);
+			}
+		} catch {
+			// Cold start: manifest may not exist yet, or prior process predated
+			// the anchorHashCache field. Treat as empty cache (best-effort).
+		}
+	}
+
+	/**
+	 * Persists {@link anchorHashCache} back to `.memofs/manifest.json`
+	 * (cross-session cache persistence). Entries past the 5-minute TTL
+	 * are not written (they would be recomputed on the next read
+	 * anyway). Best-effort: a write failure logs a warning and does not
+	 * break recall.
+	 */
+	async function flushAnchorHashCacheToManifest(): Promise<void> {
+		try {
+			const manifest = await readManifest(store);
+			const entries: Record<string, AnchorHashCacheEntry> = {};
+			const now = Date.now();
+			for (const [file, entry] of anchorHashCache) {
+				if (now - entry.ts >= ANCHOR_HASH_CACHE_TTL_MS) continue;
+				entries[file] = entry;
+			}
+			manifest.anchorHashCache = entries;
+			await writeManifest(store, manifest);
+		} catch (error) {
+			options.logger?.warn(
+				"anchor-hash cache flush to manifest failed (best-effort)",
+				{
+					error: error instanceof Error ? error.message : String(error),
+				},
+			);
+		}
+	}
 
 	function indexLexical(doc: { id: string; text: string }): void {
 		lexicalTextById.set(doc.id, doc.text);
@@ -145,6 +308,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 					text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
 				});
 			}
+			reindexGraphNodesByMemoryId();
+			await hydrateAnchorsFromEvents();
+			await hydrateLexicalFromNotes();
+			await hydrateAnchorHashCacheFromManifest();
 		}
 		bootstrapped = true;
 	}
@@ -186,6 +353,12 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		collectRetiredGraphDocIds,
 		createSnapshotImpl,
 		listRecentMemories,
+		rootDir,
+		anchorByMemoryId,
+		anchorHashCache,
+		flushAnchorHashCache: flushAnchorHashCacheToManifest,
+		graphNodesByMemoryId,
+		reindexGraphNodesByMemoryId,
 	};
 
 	return {

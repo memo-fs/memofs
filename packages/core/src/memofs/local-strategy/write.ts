@@ -87,9 +87,16 @@ export async function writeMemory(
 			...(input.sourceRefs === undefined
 				? {}
 				: { sourceRefs: input.sourceRefs }),
+			...(input.anchor === undefined ? {} : { anchor: input.anchor }),
 			...(input.metadata ?? {}),
 		},
 	});
+	// Anchor is also persisted into the structured event so the cold-start
+	// hydration in `local-strategy.ts` can recover it from
+	// `memory-events.jsonl` without parsing markdown.
+	if (input.anchor !== undefined) {
+		ctx.anchorByMemoryId.set(id, input.anchor);
+	}
 	await appendMemoryEvent(
 		ctx.options.store,
 		createMemoryEvent({
@@ -105,6 +112,7 @@ export async function writeMemory(
 				id,
 				kind: input.kind ?? "note",
 				tags: input.tags ?? [],
+				...(input.anchor === undefined ? {} : { anchor: input.anchor }),
 			},
 		}),
 	);
@@ -299,6 +307,9 @@ export async function autoExtractGraph(
 					text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
 				});
 			}
+			// refresh the memory-id → graph-node reverse index so the
+			// drift-detection seam can find new nodes on the next recall.
+			ctx.reindexGraphNodesByMemoryId();
 		}
 		for (const edge of edges) {
 			try {

@@ -260,7 +260,7 @@ export function createToolDefinitions(
 			name: "memofs.recall",
 			title: "Recall MemoFS Memory",
 			description:
-				"Semantic + lexical memory search. Use this proactively — before answering, when unsure, or when a fact might already be known. Phrases it understands: synonyms and paraphrases, not just exact keywords. Call it instead of guessing or re-deriving facts. Read-only; never modifies memory.",
+				"Semantic + lexical memory search. Use this proactively — before answering, when unsure, or when a fact might already be known. Phrases it understands: synonyms and paraphrases, not just exact keywords. Call it instead of guessing or re-deriving facts. Read-only; never modifies memory. Each returned item may carry an optional `anchor` (the code file + hash this fact is bound to) and a `stale` flag (true when the anchored file changed since write — re-verify before trusting).",
 			safety: "read",
 			annotations: {
 				readOnlyHint: true,
@@ -317,6 +317,27 @@ export function createToolDefinitions(
 						maxItems: 50,
 					},
 					sourceRefs: { type: "array", items: sourceRefSchema, maxItems: 100 },
+					anchor: {
+						type: "object",
+						description:
+							"Code anchor: bind this memory to a file's bytes for drift detection. When set, recall recomputes the file's SHA-256 and flags this memory stale if the bytes changed or the file was deleted.",
+						properties: {
+							file: stringSchema(
+								"Repo-relative path to the anchored file (or absolute path).",
+								2048,
+							),
+							hash: stringSchema(
+								"SHA-256 (hex) of the anchored file's bytes at write time. The runtime compares this against the file's current hash at recall time.",
+								64,
+							),
+							symbol: stringSchema(
+								"Optional symbol path for TS files (<file>#<dotted-symbol-path>). Non-TS files leave this undefined.",
+								2048,
+							),
+						},
+						required: ["file", "hash"],
+						additionalProperties: false,
+					},
 					metadata: { type: "object", description: "JSON metadata." },
 				},
 				["content"],

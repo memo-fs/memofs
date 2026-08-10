@@ -22,7 +22,10 @@ import {
 	SNAPSHOTS_INDEX_PATH,
 } from "../constants/memory-paths";
 import { MemoryValidationError } from "../errors/errors";
-import type { MemoFsManifest } from "../types/memory-documents";
+import type {
+	AnchorHashCacheEntry,
+	MemoFsManifest,
+} from "../types/memory-documents";
 import type { MemoryStore } from "../types/memory-store";
 import {
 	assertIsoTimestamp,
@@ -171,9 +174,51 @@ export function validateMemoFsManifest(value: unknown): MemoFsManifest {
 	validatePathObject(manifest.snapshots, "manifest.snapshots", {
 		index: SNAPSHOTS_INDEX_PATH,
 	});
+	if (manifest.anchorHashCache !== undefined) {
+		validateAnchorHashCache(manifest.anchorHashCache);
+	}
 	assertJsonSerializable(manifest, "manifest");
 
 	return manifest as MemoFsManifest;
+}
+
+/**
+ * Validates that a value is a well-formed anchor-hash cache
+ * ({@link MemoFsManifest.anchorHashCache}).
+ *
+ * @param value - The unknown value to validate.
+ * @throws {@link MemoryValidationError} If validation fails.
+ */
+function validateAnchorHashCache(
+	value: unknown,
+): asserts value is Record<string, AnchorHashCacheEntry> {
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		throw new MemoryValidationError(
+			"manifest.anchorHashCache must be an object.",
+		);
+	}
+	const record = value as Record<string, unknown>;
+	for (const [file, entry] of Object.entries(record)) {
+		if (typeof entry !== "object" || entry === null || Array.isArray(entry)) {
+			throw new MemoryValidationError(
+				`manifest.anchorHashCache["${file}"] must be an object.`,
+				{ file, entry },
+			);
+		}
+		const e = entry as { hash?: unknown; ts?: unknown };
+		if (typeof e.hash !== "string" || e.hash.length === 0) {
+			throw new MemoryValidationError(
+				`manifest.anchorHashCache["${file}"].hash must be a non-empty string.`,
+				{ file, hash: e.hash },
+			);
+		}
+		if (typeof e.ts !== "number" || !Number.isFinite(e.ts)) {
+			throw new MemoryValidationError(
+				`manifest.anchorHashCache["${file}"].ts must be a finite number.`,
+				{ file, ts: e.ts },
+			);
+		}
+	}
 }
 
 /**

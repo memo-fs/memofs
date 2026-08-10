@@ -32,6 +32,7 @@ import {
 } from "./context-builder";
 import {
 	AGENT_CONTEXT_DIRECTIVE,
+	buildStaleRecallBanner,
 	renderEntities,
 	renderRecall,
 	renderRecent,
@@ -89,10 +90,11 @@ export async function expandContext(
 	if (section === "recall") {
 		expandedRecallItems = entry.recallItems;
 		if (expandedRecallItems.length > 0) {
+			const staleBanner = buildStaleRecallBanner(expandedRecallItems);
 			negotiable.push({
 				type: "recall",
 				title: "Relevant Recall (expanded)",
-				content: renderRecall(expandedRecallItems),
+				content: `${staleBanner}${renderRecall(expandedRecallItems)}`,
 				weight: SECTION_WEIGHTS.recall,
 			});
 		}
