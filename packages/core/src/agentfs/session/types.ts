@@ -1,4 +1,5 @@
 import type { MemoryStore } from "../../core/types/memory-store";
+import type { SessionOutcome } from "../../memofs/types";
 import type { AgentfsLikeClient } from "../client/agentfs-like";
 import type { SyncAfterSessionResult } from "../sync/sync-after-session";
 import type { SyncOperationResult } from "../sync/types";
@@ -54,12 +55,39 @@ export interface CompleteMemoFSAgentSessionOptions {
 	readonly extractDurableMemory?: boolean | undefined;
 	readonly skipCheckpoint?: boolean | undefined;
 	readonly requireSync?: boolean | undefined;
+	/**
+	 * Session outcome. When set to `"failure"`, durable memory is never
+	 * promoted regardless of `extractDurableMemory`. When set to
+	 * `"aborted"`, the workspace is preserved for resume and no promotion
+	 * or cleanup runs. Defaults to `"success"` for backward-compatibility.
+	 */
+	readonly outcome?: SessionOutcome | undefined;
+	/**
+	 * Opt-in cleanup of `working/` + `output/` session files on
+	 * `outcome: "failure"`. Ignored for other outcomes.
+	 */
+	readonly ephemeral?: boolean | undefined;
+	/**
+	 * Structured failure/abort audit text. Carried on `session.failed`
+	 * events written to `memory-events.jsonl`.
+	 */
+	readonly reason?: string | undefined;
 }
 
 export interface CompleteMemoFSAgentSessionResult {
 	readonly extracted: ExtractedSessionMemory;
 	readonly sync: SyncAfterSessionResult;
 	readonly durableMemoryWritten: boolean;
+	/** The resolved session outcome (defaults to `"success"`). */
+	readonly outcome: SessionOutcome;
+	/** Whether `working/` scratchpad files were deleted. */
+	readonly workingCleaned: boolean;
+	/** Whether `output/` audit files were deleted. */
+	readonly outputCleaned: boolean;
+	/** Whether the session workspace was preserved for resume (`aborted`). */
+	readonly preserved: boolean;
+	/** Whether a `session.failed` event was written. */
+	readonly failureEventWritten: boolean;
 }
 
 export interface MemoFSAgentSession {

@@ -16,16 +16,19 @@ export class InMemoryAgentfsClient implements AgentfsLikeClient {
 	failWrite = false;
 	failAppend = false;
 	failExists = false;
+	failDelete = false;
 	readDelayMs = 0;
 	writeDelayMs = 0;
 	appendText?: (path: string, content: string) => Promise<void>;
 	exists?: (path: string) => Promise<boolean>;
+	deleteText?: (path: string) => Promise<void>;
 	sync?: AgentfsLikeSync;
 
 	constructor(
 		options: {
 			nativeAppend?: boolean;
 			exists?: boolean;
+			nativeDelete?: boolean;
 			sync?: AgentfsLikeSync;
 		} = {},
 	) {
@@ -49,6 +52,19 @@ export class InMemoryAgentfsClient implements AgentfsLikeClient {
 					throw new Error("exists failed");
 				}
 				return this.files.has(path);
+			};
+		}
+
+		if (options.nativeDelete ?? true) {
+			this.deleteText = async (path: string): Promise<void> => {
+				this.calls.push(`delete:${path}`);
+				if (this.failDelete) {
+					throw new Error("delete failed");
+				}
+				if (!this.files.has(path)) {
+					throw new NotFoundError(path);
+				}
+				this.files.delete(path);
 			};
 		}
 

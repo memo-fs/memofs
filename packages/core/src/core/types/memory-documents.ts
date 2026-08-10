@@ -228,6 +228,7 @@ export type MemoryEventType =
 	| "memory.archived"
 	| "memory.indexed"
 	| "memory.reindexed"
+	| "session.failed"
 	| "snapshot.created"
 	| "sync.started"
 	| "sync.completed"

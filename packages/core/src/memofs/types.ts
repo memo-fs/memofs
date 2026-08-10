@@ -412,10 +412,61 @@ export interface AgentSessionFileInput extends ReadMemoryInput {
 	content?: string;
 }
 
+/**
+ * The outcome of an AgentFS session, gating durable-memory promotion and
+ * session-file cleanup.
+ *
+ * - `"success"`: the task completed; durable memory promotes when
+ *   `extractDurableMemory: true`; `working/` is auto-cleaned.
+ * - `"failure"`: the task failed; durable memory is NOT promoted; the
+ *   `ephemeral` flag drives cleanup of `working/` + `output/`.
+ * - `"aborted"`: the task was paused; nothing is promoted or cleaned; the
+ *   session workspace is preserved for resume via a future
+ *   `complete({outcome: "success" | "failure"})` with the same `sessionId`.
+ *
+ * @public
+ */
+export type SessionOutcome = "success" | "failure" | "aborted";
+
+/**
+ * The canonical session-outcome values, used for runtime validation of
+ * MCP tool arguments and CLI inputs.
+ *
+ * @public
+ */
+export const SESSION_OUTCOMES: readonly SessionOutcome[] = [
+	"success",
+	"failure",
+	"aborted",
+] as const;
+
+/**
+ * Narrows an unknown value to a {@link SessionOutcome}.
+ *
+ * @param value - The value to test.
+ * @returns `true` if the value is a valid {@link SessionOutcome}.
+ * @public
+ */
+export function isSessionOutcome(value: unknown): value is SessionOutcome {
+	return (
+		typeof value === "string" &&
+		(SESSION_OUTCOMES as readonly string[]).includes(value)
+	);
+}
+
 export interface AgentSessionCompleteInput extends ReadMemoryInput {
 	sessionId: string;
 	extractDurableMemory?: boolean;
 	checkpointLabel?: string;
+	/** Session outcome; absent defaults to `"success"`. */
+	outcome?: SessionOutcome;
+	/**
+	 * Opt-in cleanup of `working/` + `output/` session files on
+	 * `outcome: "failure"`. Ignored for other outcomes.
+	 */
+	ephemeral?: boolean;
+	/** Structured failure audit text; carried on `session.failed` events. */
+	reason?: string;
 }
 
 export interface AgentSessionResult {
@@ -427,6 +478,15 @@ export interface AgentSessionResult {
 export interface AgentSessionExtractResult {
 	sessionId: string;
 	extracted: JsonObject;
+}
+
+export interface AgentSessionCompleteResult extends AgentSessionExtractResult {
+	durableMemoryWritten: boolean;
+	outcome: SessionOutcome;
+	workingCleaned: boolean;
+	outputCleaned: boolean;
+	preserved: boolean;
+	failureEventWritten: boolean;
 }
 
 /**

@@ -34,6 +34,7 @@ export { MemoFS } from "./memo-fs";
 export { sha256BytesHex, sha256Hex } from "./sync/sha256";
 export type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
@@ -76,7 +77,10 @@ export type {
 	WriteMemoryResult,
 } from "./types";
 export {
+	isSessionOutcome,
 	isTaskType,
+	SESSION_OUTCOMES,
+	type SessionOutcome,
 	TASK_TYPES,
 	type TaskType,
 } from "./types";

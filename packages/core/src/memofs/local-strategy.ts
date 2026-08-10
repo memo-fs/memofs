@@ -76,6 +76,7 @@ import { ContextCache } from "./progressive";
 import type { ResolveGraphEdge, ResolveGraphNode } from "./strategist";
 import type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
@@ -568,7 +569,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		async completeAgentSession(
 			input: AgentSessionCompleteInput,
 			signal?: AbortSignal,
-		): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
+		): Promise<AgentSessionCompleteResult> {
 			return completeAgentSession(ctx, input, signal);
 		},
 

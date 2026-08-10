@@ -18,7 +18,7 @@
  * @module definitions
  */
 
-import { TASK_TYPES } from "@memofs/core";
+import { SESSION_OUTCOMES, TASK_TYPES } from "@memofs/core";
 import {
 	booleanSchema,
 	numberSchema,
@@ -172,7 +172,7 @@ export function createToolDefinitions(
 			name: "memofs_agent_session_complete",
 			title: "Complete MemoFS Agent Session",
 			description:
-				"Extract, checkpoint, push, and optionally persist durable memory from an AgentFS session.",
+				'Extract, checkpoint, push, and optionally persist durable memory from an AgentFS session. Set `outcome` explicitly — the `"success"` default is for backward-compatibility only and is NOT recommended for new callers. `outcome: "success"` + `extractDurableMemory: true` promotes durable memory to notes.md and auto-cleans `working/` (output preserved). `outcome: "failure"` never promotes durable; pass `ephemeral: true` to clean `working/` + `output/`, or omit to preserve them as failure audit-trail. `outcome: "aborted"` preserves the entire workspace for resume via a future `complete({outcome:"success"|"failure"})` with the same `sessionId`. A `reason` string on `failure`/`aborted` is recorded in a `session.failed` audit event for telemetry.',
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,
@@ -184,9 +184,22 @@ export function createToolDefinitions(
 				{
 					sessionId: stringSchema("Session id.", 256),
 					extractDurableMemory: booleanSchema(
-						"Persist output/durable-memory.md into MemoFS notes.",
+						'Persist output/durable-memory.md into MemoFS notes (first gate; requires outcome: "success" to promote).',
 					),
 					checkpointLabel: stringSchema("Checkpoint label.", 128),
+					outcome: {
+						type: "string",
+						enum: [...SESSION_OUTCOMES],
+						description:
+							'Session outcome. Defaults to "success" for backward-compatibility. Set explicitly — new callers should NOT rely on the default.',
+					},
+					ephemeral: booleanSchema(
+						'On outcome: "failure", opt-in cleanup of working/ + output/ session files. Ignored for other outcomes.',
+					),
+					reason: stringSchema(
+						"Structured failure/abort audit text; carried on the session.failed audit event.",
+						4096,
+					),
 					...commonScopeProperties,
 				},
 				["sessionId"],

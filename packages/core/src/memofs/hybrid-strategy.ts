@@ -20,6 +20,7 @@ import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import type { FileSyncLayer } from "./sync/file-replication";
 import type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
@@ -199,7 +200,7 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 		async completeAgentSession(
 			input: AgentSessionCompleteInput,
 			signal?: AbortSignal,
-		): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
+		): Promise<AgentSessionCompleteResult> {
 			return local.completeAgentSession(input, signal);
 		},
 

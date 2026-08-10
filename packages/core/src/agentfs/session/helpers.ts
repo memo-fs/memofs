@@ -50,6 +50,49 @@ export async function readAgentfsFile(
 	}
 }
 
+/**
+ * Deletes a file at the given path if the client supports deletion.
+ * Idempotent: missing files are silently ignored (deleteText is optional
+ * and best-effort; a missing file or a client without deleteText leaves
+ * the path in its prior state without throwing).
+ *
+ * @param client - The AgentFS client.
+ * @param path - The remote path to delete.
+ * @returns `true` if a delete was issued and resolved, `false` otherwise.
+ */
+export async function deleteAgentfsFile(
+	client: AgentfsLikeClient,
+	path: string,
+): Promise<boolean> {
+	if (typeof client.deleteText !== "function") return false;
+	try {
+		await client.deleteText(path);
+		return true;
+	} catch (error) {
+		if (isNotFoundError(error)) return false;
+		throw error;
+	}
+}
+
+/**
+ * Deletes every file in the list (best-effort). Missing files are skipped.
+ *
+ * @param client - The AgentFS client.
+ * @param paths - The remote paths to delete.
+ * @returns `true` if at least one delete succeeded, `false` otherwise.
+ */
+export async function deleteAgentfsFiles(
+	client: AgentfsLikeClient,
+	paths: readonly string[],
+): Promise<boolean> {
+	let any = false;
+	for (const path of paths) {
+		const deleted = await deleteAgentfsFile(client, path);
+		if (deleted) any = true;
+	}
+	return any;
+}
+
 export async function writeWorkspaceScaffold(
 	client: AgentfsLikeClient,
 	path: string,

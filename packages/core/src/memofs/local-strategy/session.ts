@@ -6,6 +6,7 @@ import {
 import type { JsonObject } from "../../core/types/json";
 import type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
@@ -97,7 +98,7 @@ export async function completeAgentSession(
 	ctx: LocalStrategyContext,
 	input: AgentSessionCompleteInput,
 	signal?: AbortSignal,
-): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
+): Promise<AgentSessionCompleteResult> {
 	if (signal?.aborted) throw new Error("Operation aborted.");
 	await ctx.ensureReady();
 	const session = createMemoFsAgentSession({
@@ -110,10 +111,18 @@ export async function completeAgentSession(
 	const result = await session.complete({
 		extractDurableMemory: input.extractDurableMemory,
 		checkpointLabel: input.checkpointLabel,
+		outcome: input.outcome,
+		ephemeral: input.ephemeral,
+		reason: input.reason,
 	});
 	return {
 		sessionId: input.sessionId,
 		extracted: result.extracted as unknown as JsonObject,
 		durableMemoryWritten: result.durableMemoryWritten,
+		outcome: result.outcome,
+		workingCleaned: result.workingCleaned,
+		outputCleaned: result.outputCleaned,
+		preserved: result.preserved,
+		failureEventWritten: result.failureEventWritten,
 	};
 }
