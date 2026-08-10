@@ -30,6 +30,12 @@ import {
 	createAnchorHashCache,
 	isValidAnchorRef,
 } from "./local-strategy/anchor-drift";
+import {
+	type ArchiveDeprecatedResult,
+	archiveDeprecated,
+	type RestoreMemoryResult,
+	restoreMemory,
+} from "./local-strategy/archive";
 import { createLocalAgentfsClient } from "./local-strategy/client";
 import { EXPIRY_DAYS, type MemoryDecayMeta } from "./local-strategy/decay";
 import {
@@ -311,13 +317,14 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	function isRetiredGraphDoc(lexicalId: string): boolean {
 		if (!lexicalId.startsWith("graph:")) return false;
 		const node = graphNodes.get(lexicalId.slice("graph:".length));
-		return node?.status === "deprecated";
+		return node?.status === "deprecated" || node?.status === "archived";
 	}
 
 	function collectRetiredGraphDocIds(): Set<string> {
 		const out = new Set<string>();
 		for (const [id, node] of graphNodes) {
-			if (node.status === "deprecated") out.add(`graph:${id}`);
+			if (node.status === "deprecated" || node.status === "archived")
+				out.add(`graph:${id}`);
 		}
 		return out;
 	}
@@ -623,6 +630,18 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 
 		async migrateAnchors(): Promise<MigrateAnchorsResult> {
 			return migrateAnchors(store, rootDir, options.logger);
+		},
+
+		async archiveDeprecated(): Promise<ArchiveDeprecatedResult> {
+			return archiveDeprecated(ctx, options.logger);
+		},
+
+		async restoreMemory(
+			id: string,
+			signal?: AbortSignal,
+		): Promise<RestoreMemoryResult> {
+			if (signal?.aborted) throw new Error("Operation aborted.");
+			return restoreMemory(ctx, id, options.logger);
 		},
 
 		async syncPush(_input: unknown, signal?: AbortSignal): Promise<never> {

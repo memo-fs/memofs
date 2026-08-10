@@ -16,6 +16,7 @@ import {
 	runConnectorsListCommand,
 	runConnectorsRemoveCommand,
 	runConnectorsRunCommand,
+	runConsolidateCommand,
 	runContextCommand,
 	runDiffCommand,
 	runDoctorCommand,
@@ -29,6 +30,7 @@ import {
 	runMigrateAnchorsCommand,
 	runReadCommand,
 	runRememberCommand,
+	runRestoreCommand,
 	runSearchCommand,
 	runSnapshotCommand,
 	runStatusCommand,
@@ -344,6 +346,44 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 					memo: g.memo,
 					output,
 					json: g.json,
+				}),
+			);
+		});
+
+	program
+		.command("consolidate")
+		.description("merge duplicate graph nodes and retire superseded facts")
+		.option(
+			"--archive-deprecated",
+			"physically move deprecated memories to .memofs/archive/<id>.json",
+			false,
+		)
+		.action(async (options) => {
+			setCurrentCommand("consolidate");
+			const g = await globals();
+			setExitCode(
+				await runConsolidateCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					archiveDeprecated: options.archiveDeprecated,
+				}),
+			);
+		});
+
+	program
+		.command("restore")
+		.description("restore an archived memory to active recall")
+		.argument("<id>", "memory id to restore from .memofs/archive/")
+		.action(async (id) => {
+			setCurrentCommand("restore");
+			const g = await globals();
+			setExitCode(
+				await runRestoreCommand({
+					memo: g.memo,
+					output,
+					json: g.json,
+					id,
 				}),
 			);
 		});

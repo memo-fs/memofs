@@ -36,6 +36,7 @@ const MEMORY_EVENT_TYPES = new Set<MemoryEventType>([
 	"memory.decayed",
 	"memory.forgotten",
 	"memory.restored",
+	"memory.archived",
 	"memory.indexed",
 	"memory.reindexed",
 	"snapshot.created",

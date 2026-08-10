@@ -24,6 +24,7 @@ export {
 	runConnectorsRemoveCommand,
 	runConnectorsRunCommand,
 } from "./connectors";
+export { runConsolidateCommand } from "./consolidate";
 export { runContextCommand } from "./context";
 export { runDiffCommand } from "./diff";
 export { runDoctorCommand } from "./doctor";
@@ -41,6 +42,7 @@ export { runInspectCommand } from "./inspect";
 export { runMigrateAnchorsCommand } from "./migrate";
 export { runReadCommand } from "./read";
 export { runRememberCommand } from "./remember";
+export { runRestoreCommand } from "./restore";
 export { runSearchCommand } from "./search";
 export { runSnapshotCommand } from "./snapshot";
 export { runStatusCommand } from "./status";

@@ -50,7 +50,8 @@ export type GraphFactStatus =
 	| "conflicted"
 	| "deleted"
 	| "stale"
-	| "unverified";
+	| "unverified"
+	| "archived";
 
 export interface GraphSourceSpan {
 	start?: number;

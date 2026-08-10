@@ -225,6 +225,7 @@ export type MemoryEventType =
 	| "memory.decayed"
 	| "memory.forgotten"
 	| "memory.restored"
+	| "memory.archived"
 	| "memory.indexed"
 	| "memory.reindexed"
 	| "snapshot.created"

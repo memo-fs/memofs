@@ -24,6 +24,7 @@ const VALID_STATUSES: ReadonlySet<GraphFactStatus> = new Set([
 	"deleted",
 	"stale",
 	"unverified",
+	"archived",
 ]);
 const VALID_EDGE_IDENTITY_MODES: ReadonlySet<GraphEdgeIdentityMode> = new Set([
 	"canonical",

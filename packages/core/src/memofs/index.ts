@@ -24,6 +24,11 @@ export {
 	createLazyLocalEmbedder,
 	type LazyLocalEmbedderOptions,
 } from "./local-embedder";
+export type {
+	ArchiveDeprecatedResult,
+	ArchivedMemoryRecord,
+	RestoreMemoryResult,
+} from "./local-strategy/archive";
 export type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 export { MemoFS } from "./memo-fs";
 export { sha256BytesHex, sha256Hex } from "./sync/sha256";

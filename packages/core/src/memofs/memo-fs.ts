@@ -37,6 +37,10 @@ import {
 	resolveMemoFsConfig,
 } from "./config";
 import type { createLocalStrategy } from "./local-strategy";
+import type {
+	ArchiveDeprecatedResult,
+	RestoreMemoryResult,
+} from "./local-strategy/archive";
 import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import {
 	agentfsCreateSession,
@@ -436,6 +440,38 @@ export class MemoFS {
 	 */
 	async migrateAnchors(): Promise<MigrateAnchorsResult> {
 		return this.strategy.migrateAnchors();
+	}
+
+	/**
+	 * One-shot cold archive: walks `notes.md` entries and physically
+	 * moves each memory whose graph-node `status === "deprecated"` to
+	 * `.memofs/archive/<id>.json` (full-fidelity JSON). Deletes the
+	 * on-disk original from `notes.md`, transitions the bound graph
+	 * nodes from `deprecated` to `archived`, and appends
+	 * `memory.archived` events. Invoked by the `memofs consolidate
+	 * --archive-deprecated` CLI subcommand.
+	 *
+	 * @public
+	 */
+	async archiveDeprecated(): Promise<ArchiveDeprecatedResult> {
+		return this.strategy.archiveDeprecated();
+	}
+
+	/**
+	 * Reverses an archive move: reads `.memofs/archive/<id>.json`,
+	 * writes the note block back to `notes.md`, transitions the bound
+	 * graph nodes from `archived` to `active`, deletes the archive
+	 * file, and appends a `memory.restored` event. Invoked by the
+	 * `memofs restore <id>` CLI subcommand.
+	 *
+	 * @param id - The memory id to restore.
+	 * @public
+	 */
+	async restoreMemory(
+		id: string,
+		signal?: AbortSignal,
+	): Promise<RestoreMemoryResult> {
+		return this.strategy.restoreMemory(id, signal);
 	}
 
 	async health(signal?: AbortSignal): Promise<MemoFSHealthResult> {

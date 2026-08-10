@@ -36,6 +36,7 @@ import {
 	resolveAnchorFilePath,
 } from "./anchor-drift";
 import { isTsFilePath, parseAnchorMarker } from "./anchor-marker";
+import { parseNoteBlocks, rebuildBlock } from "./notes-parser";
 
 /**
  * Result of a migrate-anchors run.
@@ -129,130 +130,6 @@ async function detectAnchorFromContent(
 	}
 
 	return undefined;
-}
-
-/**
- * A parsed note block from `notes.md`.
- */
-interface NoteBlock {
-	/** The full raw text of the block including the `## ` heading. */
-	raw: string;
-	/** The metadata object parsed from the `- metadata: <json>` line, if present. */
-	metadata: Record<string, unknown> | undefined;
-	/** The raw metadata line text (for replacement), if present. */
-	metadataLine: string | undefined;
-	/** The content body (everything after the frontmatter lines). */
-	content: string;
-}
-
-/**
- * Parses `notes.md` into individual note blocks.
- *
- * Each block starts at a `## ` heading and ends at the next `## ` heading
- * or EOF. The `# Notes` header line is NOT a note block.
- *
- * @internal
- */
-function parseNoteBlocks(notesContent: string): {
-	header: string;
-	blocks: NoteBlock[];
-} {
-	const lines = notesContent.split("\n");
-	const blocks: NoteBlock[] = [];
-	let header = "";
-	let current: string[] | null = null;
-
-	for (const line of lines) {
-		if (line.startsWith("## ")) {
-			if (current !== null) {
-				blocks.push(parseBlock(current.join("\n")));
-			}
-			current = [line];
-		} else if (current !== null) {
-			current.push(line);
-		} else {
-			header += `${line}\n`;
-		}
-	}
-	if (current !== null) {
-		blocks.push(parseBlock(current.join("\n")));
-	}
-
-	return { header, blocks };
-}
-
-/**
- * Parses a single note block's raw text into structured fields.
- */
-function parseBlock(raw: string): NoteBlock {
-	const lines = raw.split("\n");
-	let metadataLine: string | undefined;
-	let metadata: Record<string, unknown> | undefined;
-
-	let i = 0;
-	while (i < lines.length && lines[i]?.startsWith("## ")) {
-		i++;
-	}
-	while (i < lines.length) {
-		const line = lines[i];
-		if (line === undefined) break;
-		if (line.startsWith("- metadata:")) {
-			metadataLine = line;
-			const jsonStr = line.slice("- metadata:".length).trim();
-			try {
-				metadata = JSON.parse(jsonStr) as Record<string, unknown>;
-			} catch {
-				// Malformed metadata — leave undefined.
-			}
-			i++;
-		} else if (line.startsWith("- ")) {
-			i++;
-		} else {
-			while (i < lines.length && lines[i] === "") i++;
-			break;
-		}
-	}
-	const content = lines.slice(i).join("\n").trim();
-
-	return { raw, metadata, metadataLine, content };
-}
-
-/**
- * Rebuilds a note block with updated metadata.
- *
- * If the block already had a metadata line, it is replaced in-place.
- * If the block had no metadata line, one is inserted after the last
- * frontmatter line (before the blank line that precedes content).
- */
-function rebuildBlock(
-	block: NoteBlock,
-	newMetadata: Record<string, unknown>,
-): string {
-	const lines = block.raw.split("\n");
-
-	if (block.metadataLine !== undefined) {
-		return lines
-			.map((line) =>
-				line === block.metadataLine
-					? `- metadata: ${JSON.stringify(newMetadata)}`
-					: line,
-			)
-			.join("\n");
-	}
-
-	let insertIdx = 0;
-	while (insertIdx < lines.length && lines[insertIdx]?.startsWith("## ")) {
-		insertIdx++;
-	}
-	while (insertIdx < lines.length && lines[insertIdx]?.startsWith("- ")) {
-		insertIdx++;
-	}
-
-	return [
-		...lines.slice(0, insertIdx),
-		`- metadata: ${JSON.stringify(newMetadata)}`,
-		...lines.slice(insertIdx),
-	].join("\n");
 }
 
 /** Formats an unknown error as a string for logging. */
