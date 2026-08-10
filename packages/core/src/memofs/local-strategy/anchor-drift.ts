@@ -53,7 +53,7 @@
  */
 
 import { readFile, stat } from "node:fs/promises";
-import { isAbsolute, join } from "node:path";
+import { isAbsolute, join, relative, resolve } from "node:path";
 import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import type { Logger } from "../../core/types/logger";
 import type { AnchorHashCacheEntry } from "../../core/types/memory-documents";
@@ -253,6 +253,14 @@ export async function applyAnchorDrift(args: {
 		const anchor = args.anchorByMemoryId.get(item.id);
 		if (anchor === undefined) continue;
 
+		// Security: skip drift detection for anchor paths that escape the
+		// project root. This is defense-in-depth — `resolveWriteAnchor`
+		// already rejects unsafe paths at write time, but cold-start
+		// hydration from `memory-events.jsonl` could load anchors stored
+		// before the fix. Skipping here prevents a hash-confirmation
+		// oracle for arbitrary host files via old data.
+		if (!isSafeAnchorPath(anchor.file, args.rootDir)) continue;
+
 		const absoluteFile = resolveAnchorFilePath(anchor.file, args.rootDir);
 		const current = (
 			await getCachedFileHash({
@@ -314,6 +322,30 @@ export async function applyAnchorDrift(args: {
 export function resolveAnchorFilePath(file: string, rootDir: string): string {
 	if (isAbsolute(file)) return file;
 	return join(rootDir, file);
+}
+
+/**
+ * Rejects anchor file paths that escape the project root via `..`
+ * traversal or absolute paths outside `rootDir`. Returns `true` when
+ * `file` is safe (resolves inside `rootDir`), `false` when it escapes.
+ *
+ * This is the security gate that prevents an `@anchor(file=…)` marker
+ * or an explicit `WriteMemoryInput.anchor` from reading arbitrary files
+ * outside the repo — the `file` value flows into `readFile` for SHA-256
+ * computation and must not grant a file-existence or hash-confirmation
+ * oracle for paths outside the project.
+ *
+ * Note: this is a **lexical** check — it does not call `fs.realpath`.
+ * A symlink inside `rootDir` pointing to an external file would pass
+ * this check. Defense against symlink-based traversal requires a
+ * `realpath`-based check, which is a v1.x refinement.
+ *
+ * @internal
+ */
+export function isSafeAnchorPath(file: string, rootDir: string): boolean {
+	const resolved = resolve(rootDir, file);
+	const rel = relative(rootDir, resolved);
+	return !rel.startsWith("..") && rel !== "";
 }
 
 /**

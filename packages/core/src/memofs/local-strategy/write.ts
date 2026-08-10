@@ -24,6 +24,7 @@ import type {
 	WriteMemoryInput,
 	WriteMemoryResult,
 } from "../types";
+import { resolveWriteAnchor } from "./anchor-marker";
 import {
 	fingerprint,
 	message,
@@ -45,6 +46,14 @@ export async function writeMemory(
 		[input.content, ...(input.title === undefined ? [] : [input.title])],
 		NOTES_MEMORY_PATH,
 	);
+
+	// Resolve anchor: explicit `input.anchor` takes precedence; otherwise
+	// an `@anchor(file=…, symbol=…)` marker in content is parsed.
+	const anchor = await resolveWriteAnchor({
+		content: input.content,
+		...(input.anchor === undefined ? {} : { explicitAnchor: input.anchor }),
+		rootDir: ctx.rootDir,
+	});
 
 	const tierDecision = classifyDurability({
 		content: input.content,
@@ -87,15 +96,15 @@ export async function writeMemory(
 			...(input.sourceRefs === undefined
 				? {}
 				: { sourceRefs: input.sourceRefs }),
-			...(input.anchor === undefined ? {} : { anchor: input.anchor }),
+			...(anchor === undefined ? {} : { anchor }),
 			...(input.metadata ?? {}),
 		},
 	});
 	// Anchor is also persisted into the structured event so the cold-start
 	// hydration in `local-strategy.ts` can recover it from
 	// `memory-events.jsonl` without parsing markdown.
-	if (input.anchor !== undefined) {
-		ctx.anchorByMemoryId.set(id, input.anchor);
+	if (anchor !== undefined) {
+		ctx.anchorByMemoryId.set(id, anchor);
 	}
 	await appendMemoryEvent(
 		ctx.options.store,
@@ -112,7 +121,7 @@ export async function writeMemory(
 				id,
 				kind: input.kind ?? "note",
 				tags: input.tags ?? [],
-				...(input.anchor === undefined ? {} : { anchor: input.anchor }),
+				...(anchor === undefined ? {} : { anchor }),
 			},
 		}),
 	);
