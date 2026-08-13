@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createTempMemoFsDir } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
@@ -42,7 +42,9 @@ describe("generate agent (CLI)", () => {
 			expect(claudeMd).toContain("# Test — Agent Rules");
 			// Unified template: the workflow section is always present; hooks only
 			// change step 1's phrasing (steps 2-4 can never silently disappear).
-			expect(claudeMd).toContain("## MemoFS Memory (REQUIRED)");
+			expect(claudeMd).toContain(
+				"## MemoFS Memory (**REQUIRED** — no exceptions)",
+			);
 			expect(claudeMd).toContain("hooks are installed");
 			expect(claudeMd).toContain("memofs.recall");
 			expect(claudeMd).toContain("memofs.remember");
@@ -200,7 +202,9 @@ describe("generate agent (CLI)", () => {
 			});
 			expect(result.exitCode).toBe(0);
 			const claudeMd = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
-			expect(claudeMd).toContain("## MemoFS Memory (REQUIRED)");
+			expect(claudeMd).toContain(
+				"## MemoFS Memory (**REQUIRED** — no exceptions)",
+			);
 			expect(claudeMd).not.toContain("hooks are installed");
 			// MCP config is independent of hooks.
 			const mcp = JSON.parse(
@@ -317,6 +321,125 @@ describe("generate agent (CLI)", () => {
 			expect(result.stderr.join("\n").toLowerCase()).toContain(
 				"unknown target",
 			);
+		} finally {
+			await temp.cleanup();
+		}
+	});
+
+	it("copies git-conventions.md from repo root to the target rules dir", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			const templateContent =
+				"## Git Conventions\n\n- Branch naming: feat/...\n";
+			await writeFile(
+				join(temp.rootDir, "git-conventions.md"),
+				templateContent,
+				"utf8",
+			);
+
+			const result = await runMemoFsCli({
+				argv: ["generate", "agent", "claude", "--root", temp.rootDir],
+			});
+			expect(result.exitCode).toBe(0);
+
+			const copied = await readFile(
+				join(temp.rootDir, ".claude/rules/git-conventions.md"),
+				"utf8",
+			);
+			expect(copied).toBe(templateContent);
+			// The umbrella also emits the Workspace Rules section that links at
+			// the copied file.
+			const claudeMd = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
+			expect(claudeMd).toContain("./.claude/rules/git-conventions.md");
+		} finally {
+			await temp.cleanup();
+		}
+	});
+
+	it("does not overwrite an existing git-conventions.md without --force", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			await writeFile(
+				join(temp.rootDir, "git-conventions.md"),
+				"template",
+				"utf8",
+			);
+			await mkdir(join(temp.rootDir, ".claude/rules"), { recursive: true });
+			await writeFile(
+				join(temp.rootDir, ".claude/rules/git-conventions.md"),
+				"custom",
+				"utf8",
+			);
+
+			await runMemoFsCli({
+				argv: ["generate", "agent", "claude", "--root", temp.rootDir],
+			});
+
+			const existing = await readFile(
+				join(temp.rootDir, ".claude/rules/git-conventions.md"),
+				"utf8",
+			);
+			expect(existing).toBe("custom");
+		} finally {
+			await temp.cleanup();
+		}
+	});
+
+	it("overwrites an existing git-conventions.md with --force", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			await writeFile(
+				join(temp.rootDir, "git-conventions.md"),
+				"template",
+				"utf8",
+			);
+			await mkdir(join(temp.rootDir, ".claude/rules"), { recursive: true });
+			await writeFile(
+				join(temp.rootDir, ".claude/rules/git-conventions.md"),
+				"custom",
+				"utf8",
+			);
+
+			await runMemoFsCli({
+				argv: [
+					"generate",
+					"agent",
+					"claude",
+					"--root",
+					temp.rootDir,
+					"--force",
+				],
+			});
+
+			const overwritten = await readFile(
+				join(temp.rootDir, ".claude/rules/git-conventions.md"),
+				"utf8",
+			);
+			expect(overwritten).toBe("template");
+		} finally {
+			await temp.cleanup();
+		}
+	});
+
+	it("emits a thin CLAUDE.md (@AGENTS.md) when AGENTS.md exists at root", async () => {
+		const temp = await createTempMemoFsDir();
+		try {
+			await writeFile(join(temp.rootDir, "AGENTS.md"), "# Existing\n", "utf8");
+			const result = await runMemoFsCli({
+				argv: ["generate", "agent", "claude", "--root", temp.rootDir],
+			});
+			expect(result.exitCode).toBe(0);
+			const claudeMd = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
+			expect(claudeMd).toBe("@AGENTS.md\n");
+			// Hooks + MCP still emitted alongside the thin rules file.
+			const settings = JSON.parse(
+				await readFile(join(temp.rootDir, ".claude/settings.json"), "utf8"),
+			);
+			expect(settings.hooks.SessionStart).toBeDefined();
+			const mcp = JSON.parse(
+				await readFile(join(temp.rootDir, ".mcp.json"), "utf8"),
+			);
+			expect(mcp.mcpServers.memofs).toBeDefined();
 		} finally {
 			await temp.cleanup();
 		}
@@ -512,6 +635,40 @@ describe("hook emitters (pure unit tests)", () => {
 		expect(cmd).toContain("MEMOFS_API_KEY");
 		expect(cmd).toContain("memofs cloud sync pull");
 		expect(cmd).toContain("--mark-session-start");
+	});
+
+	it("claude and codex hooks bootstrap `memofs` with an npx -y @memofs/cli fallback", () => {
+		const claudeFiles = claudeEmitter.emitHooks(ALL_MODULES);
+		const claudeParsed = JSON.parse(claudeFiles[0]?.content ?? "{}");
+		const claudeStart = claudeParsed.hooks.SessionStart[0].hooks[0]
+			.command as string;
+		const claudeStop = claudeParsed.hooks.Stop[0].hooks[0].command as string;
+		expect(claudeStart).toContain("command -v memofs");
+		expect(claudeStart).toContain("npx -y @memofs/cli");
+		expect(claudeStart).toContain("memofs context");
+		expect(claudeStart).toContain("memofs cloud sync pull");
+		expect(claudeStop).toContain("command -v memofs");
+		expect(claudeStop).toContain("npx -y @memofs/cli");
+		expect(claudeStop).toContain("memofs status --hook");
+
+		const codexFiles = codexEmitter.emitHooks(ALL_MODULES);
+		const codexParsed = JSON.parse(codexFiles[0]?.content ?? "{}");
+		const codexStop = codexParsed.hooks.Stop[0].hooks[0].command as string;
+		expect(codexStop).toContain("command -v memofs");
+		expect(codexStop).toContain("npx -y @memofs/cli");
+		expect(codexStop).toContain("memofs status --hook");
+	});
+
+	it("opencode plugin bootstraps `memofs` with an npx -y @memofs/cli fallback", () => {
+		const files = opencodeEmitter.emitHooks(ALL_MODULES);
+		const content = files[0]?.content ?? "";
+		expect(content).toContain("command -v memofs");
+		expect(content).toContain("npx -y @memofs/cli");
+		expect(content).toContain("runMemofs");
+		expect(content).toContain('["cloud", "sync", "pull"]');
+		expect(content).toContain('["context",');
+		expect(content).toContain('"project context"');
+		expect(content).toContain("memofs status");
 	});
 
 	it("only requested hooks are emitted", () => {

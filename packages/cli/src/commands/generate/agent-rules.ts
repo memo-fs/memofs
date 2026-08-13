@@ -15,19 +15,14 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 import type { MemoFS } from "@memofs/core";
 import { getRootDir } from "../../cli/store-helpers";
-import {
-	CliError,
-	CliUsageError,
-	CliValidationError,
-} from "../../errors/cli-errors";
+import { CliError, CliUsageError } from "../../errors/cli-errors";
 import type { CliOutput } from "../../output/output";
 import { printJsonEnvelope } from "../../output/output";
 import { writeFileWithForceProtect } from "./file-utils";
 import {
+	MCP_CONFIG_META,
 	type McpScope,
-	resolveMcpGlobal,
 	resolveMcpPath,
-	resolveScope,
 	supportsScope,
 } from "./mcp-config";
 import {
@@ -49,6 +44,13 @@ export interface AgentRulesFile {
 	readonly path: string;
 	/** Full file content including any frontmatter. */
 	readonly content: string;
+	/**
+	 * `true` when the content is a thin `@AGENTS.md` import (claude target
+	 * only, emitted when a root `AGENTS.md` already exists). The runner reads
+	 * this to render the JSON envelope / success line, instead of re-deriving
+	 * the decision on its side. Always undefined for full emission.
+	 */
+	readonly thinImport?: boolean;
 }
 
 /**
@@ -79,10 +81,24 @@ export interface EmitAgentRulesOptions {
 	 * Used by `generate agent` (umbrella command with hooks installed).
 	 */
 	readonly hooksInstalled?: boolean;
+	/**
+	 * When true, emit the `## Workspace Rules` section pointing at the
+	 * platform-local `git-conventions.md` (and copy that template in via
+	 * `copyGitConventionsToRulesDir`). Bare `generate agent-rules` defaults to
+	 * `false` — the emitted file is fully self-contained and references nothing
+	 * the caller did not also generate. The umbrella `generate agent` sets
+	 * `true` because it also copies `git-conventions.md` to the rules dir.
+	 */
+	readonly includeWorkspaceRules?: boolean;
+	/**
+	 * When true, a root `AGENTS.md` already exists. The `claude` target then
+	 * emits a one-line `CLAUDE.md` that imports it via `@AGENTS.md` instead of
+	 * duplicating content, following Claude Code's documented `@import`
+	 * pattern. SSOT: never duplicate rules that the imported file already
+	 * enforces. Has no effect for other targets.
+	 */
+	readonly agentsMdExists?: boolean;
 }
-
-/** Hard cap on generated file length. Project facts belong in MemoFS memory. */
-export const MAX_AGENT_RULES_LINES = 50;
 
 /**
  * Target -> file path + rules directory. MCP config locations live in
@@ -158,23 +174,11 @@ function buildFrontmatter(target: AgentRulesTarget): string | null {
 }
 
 /**
- * Resolves the target-aware MCP config label for use in template interpolation.
- *
- * @param target - The target whose MCP config label to resolve.
- * @param scope - Explicit scope, or undefined to use the platform default.
- * @returns A human-readable label, e.g. "MemoFS MCP server config (project MCP config)".
- */
-function resolveMcpLabel(target: AgentRulesTarget, scope?: McpScope): string {
-	const global = resolveMcpGlobal(target, scope);
-	return `MemoFS MCP server config (${global ? "global" : "project"} MCP config)`;
-}
-
-/**
  * Renders the optional `## Behavioral Rules` section for template interpolation.
  *
  * @param rules - Behavioral rules to embed.
- * @returns A string block (with leading and trailing newlines) or a single
- * newline if no rules are provided.
+ * @returns A string block (with leading and trailing newlines) or an empty
+ * string if no rules are provided.
  */
 function renderRulesSection(rules: readonly string[]): string {
 	if (rules.length === 0) return "";
@@ -182,6 +186,29 @@ function renderRulesSection(rules: readonly string[]): string {
 	for (const rule of rules) lines.push(`- ${rule}`);
 	lines.push("");
 	return lines.join("\n");
+}
+
+/**
+ * Renders the `## Workspace Rules` section for template interpolation.
+ *
+ * Only the umbrella `generate agent` command sets `include=true` — it also
+ * copies `git-conventions.md` into the platform-local rules dir so the link
+ * resolves. The bare `generate agent-rules` command leaves `include=false`
+ * (default) so its output is fully self-contained and links at nothing the
+ * caller did not also generate. The returned string carries no leading
+ * newline (the prior placeholder's trailing newline already separates) but
+ * carries one trailing newline so the final file ends cleanly.
+ *
+ * @param include - Whether to emit the section at all.
+ * @param rulesDir - Project-relative path to the rules directory.
+ * @returns The section block (with trailing newline), or an empty string.
+ */
+function buildWorkspaceRulesSection(
+	include: boolean,
+	rulesDir: string,
+): string {
+	if (!include) return "";
+	return `## Workspace Rules\n\n- [Git conventions](./${rulesDir}/git-conventions.md) — MUST follow, no exceptions.\n`;
 }
 
 /**
@@ -243,34 +270,47 @@ function buildStepOneText(hooksInstalled: boolean): string {
  * (Cursor `.mdc`). Steps 2–4 of the memory workflow are always present;
  * only the lead-in note and step-1 phrasing vary with `hooksInstalled`.
  *
+ * When `agentsMdExists` is set and `target === "claude"`, emits a one-line
+ * `CLAUDE.md` containing `@AGENTS.md` — Claude Code's documented `@import`
+ * pattern for sharing instructions across tools without duplicating them.
+ * All other options are ignored in this case (SSOT win).
+ *
  * @param opts - Emission options.
  * @returns The file path (project-relative) and full content.
- * @throws {CliError} When the result exceeds {@link MAX_AGENT_RULES_LINES}.
  */
 export function emitAgentRules(opts: EmitAgentRulesOptions): AgentRulesFile {
 	const meta = TARGET_META[opts.target];
+
+	// Thin emission: when a repo already has AGENTS.md, the `claude` target
+	// imports it via `@AGENTS.md` instead of duplicating the rules. Claude
+	// Code expands `@path` imports at session start (see Claude Code memory
+	// docs). This avoids the SSOT violation of writing the same rules into
+	// both files, and lets callers using unsupported agents keep AGENTS.md as
+	// their single wired-up source of truth.
+	if (opts.target === "claude" && opts.agentsMdExists) {
+		return { path: meta.file, content: "@AGENTS.md\n", thinImport: true };
+	}
+
 	const hooksInstalled = opts.hooksInstalled ?? false;
-	const scope = resolveScope(opts.target, opts.mcpScope);
+	const includeWorkspaceRules = opts.includeWorkspaceRules ?? false;
 
 	const content = interpolateTemplate(AGENT_RULES_TEMPLATE, {
 		projectName: opts.projectName ?? "Project",
 		hooksNote: buildHooksNote(hooksInstalled),
 		stepOneText: buildStepOneText(hooksInstalled),
 		rulesDir: meta.rulesDir,
-		mcpLabel: resolveMcpLabel(opts.target, scope),
-		mcpPath: resolveMcpPath(opts.target, scope),
 		rules: renderRulesSection(opts.rules ?? []),
+		workspaceRules: buildWorkspaceRulesSection(
+			includeWorkspaceRules,
+			meta.rulesDir,
+		),
 	});
 
 	const frontmatter = buildFrontmatter(opts.target);
-	const fullContent = (frontmatter ?? "") + content;
-
-	const lineCount = fullContent.split("\n").length;
-	if (lineCount > MAX_AGENT_RULES_LINES) {
-		throw new CliValidationError(
-			`Generated ${opts.target} rules exceed ${MAX_AGENT_RULES_LINES} lines (${lineCount}). Trim rules or pointers — project facts belong in MemoFS memory, not this file.`,
-		);
-	}
+	let fullContent = (frontmatter ?? "") + content;
+	// Collapse trailing blank lines left behind by empty `{{rules}}` /
+	// `{{workspaceRules}}` placeholders into a single terminating newline.
+	fullContent = fullContent.replace(/\n{2,}$/, "\n");
 
 	return { path: meta.file, content: fullContent };
 }
@@ -308,19 +348,28 @@ export async function runGenerateAgentRulesCommand(
 	options: GenerateAgentRulesCommandOptions,
 ): Promise<number> {
 	if (options.list) {
-		const targets = AGENT_RULES_TARGETS.map((t) => ({
-			target: t,
-			file: TARGET_META[t].file,
-			mcp: resolveMcpPath(t),
-			rulesDir: TARGET_META[t].rulesDir,
-		}));
+		const targets = AGENT_RULES_TARGETS.map((t) => {
+			const meta = MCP_CONFIG_META[t];
+			// `agents` is MCP-less (localPath + globalPath both null); resolveMcpPath
+			// would throw for it. Use the default-scope path only when the target
+			// actually supports that scope, else null.
+			const mcp = supportsScope(t, meta.defaultScope)
+				? resolveMcpPath(t)
+				: null;
+			return {
+				target: t,
+				file: TARGET_META[t].file,
+				mcp,
+				rulesDir: TARGET_META[t].rulesDir,
+			};
+		});
 		if (options.json) {
 			printJsonEnvelope(options.output, "generate.agent-rules.list", targets);
 		} else {
 			const lines = ["Supported agent-rules targets:", ""];
 			for (const t of targets) {
 				lines.push(` ${t.target.padEnd(8)} -> ${t.file}`);
-				lines.push(` MCP config: ${t.mcp}`);
+				lines.push(` MCP config: ${t.mcp ?? "(none)"}`);
 				lines.push(` Rules dir:  ${t.rulesDir}`);
 			}
 			options.output.write(lines.join("\n"));
@@ -343,6 +392,7 @@ export async function runGenerateAgentRulesCommand(
 
 	const rootDir = getRootDir(options.memo.store);
 	const projectName = options.projectName?.trim() || basename(resolve(rootDir));
+	const agentsMdExists = await agentsMdExistsAt(rootDir);
 
 	if (options.mcpScope && !supportsScope(target, options.mcpScope)) {
 		throw new CliUsageError(
@@ -352,7 +402,12 @@ export async function runGenerateAgentRulesCommand(
 
 	let file: AgentRulesFile;
 	try {
-		file = emitAgentRules({ target, projectName, mcpScope: options.mcpScope });
+		file = emitAgentRules({
+			target,
+			projectName,
+			mcpScope: options.mcpScope,
+			agentsMdExists,
+		});
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		options.output.error(message);
@@ -362,7 +417,9 @@ export async function runGenerateAgentRulesCommand(
 	const fullPath = resolve(rootDir, file.path);
 
 	// Refuse to clobber an existing instructions file unless --force is set.
-	// This protects hand-edited AGENTS.md / CLAUDE.md from silent overwrite.
+	// This protects hand-edited AGENTS.md / CLAUDE.md from silent overwrite,
+	// including a downgrade from a previously full CLAUDE.md to the thin
+	// `@AGENTS.md` form.
 	if (!options.force) {
 		try {
 			await stat(fullPath);
@@ -388,34 +445,30 @@ export async function runGenerateAgentRulesCommand(
 	await mkdir(dirname(fullPath), { recursive: true });
 	await writeFile(fullPath, file.content, "utf8");
 
-	const convResult = await copyGitConventionsToRulesDir(
-		rootDir,
-		target,
-		options.force ?? false,
-	);
+	const thinImport = file.thinImport ?? false;
+
+	// `agents` is MCP-less (localPath + globalPath both null); resolveMcpPath
+	// would throw, so leave mcpConfig null and omit it from the success line.
+	const mcpConfig = supportsScope(target, MCP_CONFIG_META[target].defaultScope)
+		? resolveMcpPath(target, options.mcpScope)
+		: null;
 
 	const data = {
 		created: true,
 		target,
 		path: file.path,
+		thinImport,
 		lines: file.content.split("\n").length,
-		mcpConfig: resolveMcpPath(target, options.mcpScope),
+		mcpConfig,
 		rulesDir: TARGET_META[target].rulesDir,
-		gitConventions: convResult,
 	};
 	if (options.json) {
 		printJsonEnvelope(options.output, "generate.agent-rules", data);
 	} else {
+		const lead = `Generated ${file.path}${thinImport ? " (thin @AGENTS.md import)" : ` (${data.lines} lines)`}`;
 		options.output.success(
-			`Generated ${file.path} (${data.lines} lines) — MemoFS MCP configured at ${data.mcpConfig}`,
+			mcpConfig === null ? lead : `${lead}. MemoFS MCP config: ${mcpConfig}`,
 		);
-		if (convResult?.created) {
-			options.output.success(`Copied git-conventions.md to ${convResult.path}`);
-		} else if (convResult?.skipped) {
-			options.output.warn(
-				`${convResult.path} already exists. Re-run with --force to overwrite.`,
-			);
-		}
 	}
 	return 0;
 }
@@ -464,4 +517,25 @@ function isNotFoundError(err: unknown): boolean {
 	if (!(err instanceof Error)) return false;
 	const code = (err as NodeJS.ErrnoException).code;
 	return code === "ENOENT" || code === "ENOTDIR";
+}
+
+/**
+ * Resolves whether a root `AGENTS.md` already exists at the project root.
+ * Used by both `generate agent-rules` and `generate agent` so the `claude`
+ * target can decide between full emission and a thin `@AGENTS.md` import.
+ *
+ * @param rootDir - Project root directory.
+ * @returns `true` if `AGENTS.md` exists at the root.
+ * @throws {NodeJS.ErrnoException} Re-throws any `stat` error whose code is not
+ * `ENOENT`/`ENOTDIR` (e.g. `EACCES`, `ELOOP`). Missing-file errors are
+ * swallowed and yield `false`.
+ */
+export async function agentsMdExistsAt(rootDir: string): Promise<boolean> {
+	try {
+		await stat(resolve(rootDir, "AGENTS.md"));
+		return true;
+	} catch (err) {
+		if (!isNotFoundError(err)) throw err;
+		return false;
+	}
 }

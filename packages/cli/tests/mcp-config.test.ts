@@ -183,19 +183,26 @@ describe("mcp-config (pure emitter)", () => {
 
 describe("mcp-config (scope resolution)", () => {
 	it("resolveMcpPath defaults to the platform default scope", () => {
-		expect(resolveMcpPath("codex")).toBe("~/.codex/config.toml");
+		// codex default is now local (was global); claude stays local.
+		expect(resolveMcpPath("codex")).toBe(".codex/config.toml");
 		expect(resolveMcpPath("claude")).toBe(".mcp.json");
+		// codex can still be addressed at global scope explicitly.
+		expect(resolveMcpPath("codex", "global")).toBe("~/.codex/config.toml");
 	});
 
 	it("resolveMcpGlobal reflects the resolved scope", () => {
-		expect(resolveMcpGlobal("codex")).toBe(true);
+		// codex default is now local.
+		expect(resolveMcpGlobal("codex")).toBe(false);
+		expect(resolveMcpGlobal("codex", "global")).toBe(true);
 		expect(resolveMcpGlobal("claude")).toBe(false);
 		expect(resolveMcpGlobal("claude", "global")).toBe(true);
 	});
 
 	it("resolveScope falls back to the default", () => {
-		expect(resolveScope("codex")).toBe("global");
+		// codex default is now local (was global); explicit scope still wins.
+		expect(resolveScope("codex")).toBe("local");
 		expect(resolveScope("codex", "local")).toBe("local");
+		expect(resolveScope("codex", "global")).toBe("global");
 	});
 
 	it("supportsScope reports per-platform support", () => {
@@ -205,9 +212,22 @@ describe("mcp-config (scope resolution)", () => {
 	});
 
 	it.each(
-		Object.keys(MCP_CONFIG_META) as AgentRulesTarget[],
+		(Object.keys(MCP_CONFIG_META) as AgentRulesTarget[]).filter(
+			// `agents` is intentionally MCP-less (localPath + globalPath both
+			// null); it has no default-scope path and resolveMcpPath throws.
+			(target) => target !== "agents",
+		),
 	)("%s has a non-null default-scope path", (target) => {
 		expect(resolveMcpPath(target)).toBeTruthy();
+	});
+
+	it("agents is an MCP-less target (localPath + globalPath both null)", () => {
+		expect(MCP_CONFIG_META.agents.localPath).toBeNull();
+		expect(MCP_CONFIG_META.agents.globalPath).toBeNull();
+		// supportsScope returns false for both scopes; resolveMcpPath throws.
+		expect(supportsScope("agents", "local")).toBe(false);
+		expect(supportsScope("agents", "global")).toBe(false);
+		expect(() => resolveMcpPath("agents")).toThrow(/does not support local/);
 	});
 });
 

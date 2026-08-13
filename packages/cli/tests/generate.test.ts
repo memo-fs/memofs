@@ -1,13 +1,9 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createTempMemoFsDir } from "@memofs/core/node-fs";
 import { describe, expect, it } from "vitest";
 import { runMemoFsCli } from "../src";
-import {
-	AGENT_RULES_TARGETS,
-	emitAgentRules,
-	MAX_AGENT_RULES_LINES,
-} from "../src/commands/generate";
+import { AGENT_RULES_TARGETS, emitAgentRules } from "../src/commands/generate";
 
 /**
  * Target -> { file, MCP config, rules dir }. Mirrors TARGET_META in
@@ -51,30 +47,19 @@ const EXPECTED: Record<
 };
 
 describe("generate agent-rules (pure emitter)", () => {
-	it.each(AGENT_RULES_TARGETS)("keeps %s output <= 50 lines", (target) => {
-		const file = emitAgentRules({
-			target,
-			projectName: "MemoFS",
-			rules: ["Do not add deps", "Do not commit secrets"],
-		});
-		const lineCount = file.content.split("\n").length;
-		expect(lineCount).toBeLessThanOrEqual(MAX_AGENT_RULES_LINES);
+	it.each(
+		AGENT_RULES_TARGETS,
+	)("%s output omits the Workspace Rules section by default (bare command)", (target) => {
+		const file = emitAgentRules({ target });
+		expect(file.content).not.toContain("## Workspace Rules");
+		expect(file.content).not.toContain("git-conventions.md");
 	});
 
 	it.each(
 		AGENT_RULES_TARGETS,
-	)("%s output names its target-aware MCP config path", (target) => {
-		const file = emitAgentRules({ target });
-		// The pointer must reference the exact per-platform MCP location so the
-		// generated instructions file is accurate for that platform's tooling.
-		expect(file.content).toContain(EXPECTED[target].mcp);
-	});
-
-	it.each(
-		AGENT_RULES_TARGETS,
-	)("%s output includes a Git conventions pointer to the platform-local rules dir", (target) => {
-		const file = emitAgentRules({ target });
-		expect(file.content).toContain("Git conventions");
+	)("%s output includes a Git conventions pointer only when includeWorkspaceRules is set", (target) => {
+		const file = emitAgentRules({ target, includeWorkspaceRules: true });
+		expect(file.content).toContain("## Workspace Rules");
 		expect(file.content).toContain(EXPECTED[target].rulesDir);
 		expect(file.content).toContain("git-conventions.md");
 	});
@@ -99,7 +84,9 @@ describe("generate agent-rules (pure emitter)", () => {
 
 	it("always embeds the MemoFS MCP workflow directive", () => {
 		const file = emitAgentRules({ target: "agents" });
-		expect(file.content).toContain("MemoFS Memory (REQUIRED)");
+		expect(file.content).toContain(
+			"MemoFS Memory (**REQUIRED** — no exceptions)",
+		);
 		expect(file.content).toContain("memofs.context");
 	});
 
@@ -108,7 +95,9 @@ describe("generate agent-rules (pure emitter)", () => {
 		// The unified template always renders the workflow section — hooks only
 		// change step 1's phrasing and add a lead-in note. Steps 2-4 (recall,
 		// adhere, remember) must never silently disappear for a hooks platform.
-		expect(file.content).toContain("MemoFS Memory (REQUIRED)");
+		expect(file.content).toContain(
+			"MemoFS Memory (**REQUIRED** — no exceptions)",
+		);
 		expect(file.content).toContain("hooks are installed");
 		expect(file.content).toContain("auto-loaded via hooks at session start");
 		expect(file.content).toContain("memofs.recall");
@@ -117,7 +106,9 @@ describe("generate agent-rules (pure emitter)", () => {
 
 	it("no-hooks mode uses the manual context-load phrasing", () => {
 		const file = emitAgentRules({ target: "claude", hooksInstalled: false });
-		expect(file.content).toContain("MemoFS Memory (REQUIRED)");
+		expect(file.content).toContain(
+			"MemoFS Memory (**REQUIRED** — no exceptions)",
+		);
 		expect(file.content).not.toContain("hooks are installed");
 		expect(file.content).toContain(
 			"with the task description to load core memory",
@@ -126,18 +117,32 @@ describe("generate agent-rules (pure emitter)", () => {
 		expect(file.content).toContain("memofs.remember");
 	});
 
-	it("includes Workspace Rules and Pointers sections from the template", () => {
-		const file = emitAgentRules({ target: "claude", projectName: "TestProj" });
-		expect(file.content).toContain("## Workspace Rules");
-		expect(file.content).toContain("## Pointers");
-		expect(file.content).toContain("Global skills");
+	it("includes Workspace Rules section only when includeWorkspaceRules is set", () => {
+		const without = emitAgentRules({
+			target: "claude",
+			projectName: "TestProj",
+		});
+		expect(without.content).not.toContain("## Workspace Rules");
+		expect(without.content).not.toContain("## Pointers");
+		expect(without.content).not.toContain("Global skills");
+
+		const withRules = emitAgentRules({
+			target: "claude",
+			projectName: "TestProj",
+			includeWorkspaceRules: true,
+		});
+		expect(withRules.content).toContain("## Workspace Rules");
+		expect(withRules.content).toContain("./.claude/rules/git-conventions.md");
 	});
 
-	it("interpolates projectName and rulesDir placeholders", () => {
-		const file = emitAgentRules({ target: "claude", projectName: "Acme" });
+	it("interpolates projectName and rulesDir placeholders when the workspace section is included", () => {
+		const file = emitAgentRules({
+			target: "claude",
+			projectName: "Acme",
+			includeWorkspaceRules: true,
+		});
 		expect(file.content).toContain("# Acme — Agent Rules");
 		expect(file.content).toContain("./.claude/rules/git-conventions.md");
-		expect(file.content).not.toContain("{{projectName}}");
 		expect(file.content).not.toContain("{{rulesDir}}");
 	});
 
@@ -156,11 +161,43 @@ describe("generate agent-rules (pure emitter)", () => {
 		expect(file.content).not.toContain("## Behavioral Rules");
 	});
 
-	it("rejects output that would exceed the line cap", () => {
-		const tooManyRules = Array.from({ length: 60 }, (_, i) => `rule ${i}`);
-		expect(() =>
-			emitAgentRules({ target: "agents", rules: tooManyRules }),
-		).toThrow(/exceed 50 lines/);
+	it("emits a thin @AGENTS.md import for claude when agentsMdExists is set", () => {
+		const file = emitAgentRules({
+			target: "claude",
+			agentsMdExists: true,
+			projectName: "Ignored",
+			rules: ["Do not add deps"],
+			includeWorkspaceRules: true,
+			hooksInstalled: true,
+		});
+		expect(file.path).toBe("CLAUDE.md");
+		expect(file.content).toBe("@AGENTS.md\n");
+		// No duplication — the imported file owns the rules.
+		expect(file.content).not.toContain("MemoFS Memory");
+		expect(file.content).not.toContain("## Workspace Rules");
+		expect(file.content).not.toContain("Behavioral Rules");
+	});
+
+	it("emits the full CLAUDE.md for claude when agentsMdExists is unset", () => {
+		const file = emitAgentRules({
+			target: "claude",
+			agentsMdExists: false,
+			projectName: "Acme",
+		});
+		expect(file.content).toContain("# Acme — Agent Rules");
+		expect(file.content).toContain(
+			"MemoFS Memory (**REQUIRED** — no exceptions)",
+		);
+	});
+
+	it("ignores agentsMdExists for non-claude targets", () => {
+		const file = emitAgentRules({
+			target: "agents",
+			agentsMdExists: true,
+			projectName: "Acme",
+		});
+		expect(file.content).toContain("# Acme — Agent Rules");
+		expect(file.content).not.toContain("@AGENTS.md");
 	});
 });
 
@@ -182,7 +219,9 @@ describe("generate agent-rules (CLI)", () => {
 			expect(result.exitCode).toBe(0);
 			const written = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
 			expect(written).toContain("# My Project — Agent Rules");
-			expect(written).toContain(".mcp.json");
+			expect(written).toContain(
+				"## MemoFS Memory (**REQUIRED** — no exceptions)",
+			);
 		} finally {
 			await temp.cleanup();
 		}
@@ -199,7 +238,7 @@ describe("generate agent-rules (CLI)", () => {
 				join(temp.rootDir, ".github/copilot-instructions.md"),
 				"utf8",
 			);
-			expect(written).toContain(".vscode/mcp.json");
+			expect(written).toContain("Agent Rules");
 		} finally {
 			await temp.cleanup();
 		}
@@ -304,93 +343,45 @@ describe("generate agent-rules (CLI)", () => {
 		}
 	});
 
-	it("copies git-conventions.md from repo root to the target rules dir", async () => {
+	it("emits a thin CLAUDE.md (@AGENTS.md) when AGENTS.md exists at root", async () => {
 		const temp = await createTempMemoFsDir();
 		try {
-			// Seed a root git-conventions.md template.
-			const templateContent =
-				"## Git Conventions\n\n- Branch naming: feat/...\n";
-			await writeFile(
-				join(temp.rootDir, "git-conventions.md"),
-				templateContent,
-				"utf8",
-			);
-
+			// Seed an AGENTS.md so the claude target picks the thin path.
+			await writeFile(join(temp.rootDir, "AGENTS.md"), "# Existing\n", "utf8");
 			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "claude", "--root", temp.rootDir],
 			});
 			expect(result.exitCode).toBe(0);
-
-			const copied = await readFile(
-				join(temp.rootDir, ".claude/rules/git-conventions.md"),
-				"utf8",
-			);
-			expect(copied).toBe(templateContent);
+			const written = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
+			expect(written).toBe("@AGENTS.md\n");
 		} finally {
 			await temp.cleanup();
 		}
 	});
 
-	it("does not overwrite an existing git-conventions.md without --force", async () => {
+	it("does not copy git-conventions.md (bare command is rules-only)", async () => {
 		const temp = await createTempMemoFsDir();
 		try {
+			// Seed a root git-conventions.md template — the bare command must
+			// NOT propagate it; that is the umbrella command's job now.
 			await writeFile(
 				join(temp.rootDir, "git-conventions.md"),
-				"template",
+				"## Git Conventions\n",
 				"utf8",
 			);
-			await mkdir(join(temp.rootDir, ".claude/rules"), { recursive: true });
-			await writeFile(
-				join(temp.rootDir, ".claude/rules/git-conventions.md"),
-				"custom",
-				"utf8",
-			);
-
-			await runMemoFsCli({
+			const result = await runMemoFsCli({
 				argv: ["generate", "agent-rules", "claude", "--root", temp.rootDir],
 			});
-
-			const existing = await readFile(
-				join(temp.rootDir, ".claude/rules/git-conventions.md"),
-				"utf8",
-			);
-			expect(existing).toBe("custom");
-		} finally {
-			await temp.cleanup();
-		}
-	});
-
-	it("overwrites an existing git-conventions.md with --force", async () => {
-		const temp = await createTempMemoFsDir();
-		try {
-			await writeFile(
-				join(temp.rootDir, "git-conventions.md"),
-				"template",
-				"utf8",
-			);
-			await mkdir(join(temp.rootDir, ".claude/rules"), { recursive: true });
-			await writeFile(
-				join(temp.rootDir, ".claude/rules/git-conventions.md"),
-				"custom",
-				"utf8",
-			);
-
-			await runMemoFsCli({
-				argv: [
-					"generate",
-					"agent-rules",
-					"claude",
-					"--root",
-					temp.rootDir,
-					"--force",
-				],
-			});
-
-			const overwritten = await readFile(
-				join(temp.rootDir, ".claude/rules/git-conventions.md"),
-				"utf8",
-			);
-			expect(overwritten).toBe("template");
+			expect(result.exitCode).toBe(0);
+			await expect(
+				readFile(
+					join(temp.rootDir, ".claude/rules/git-conventions.md"),
+					"utf8",
+				),
+			).rejects.toThrow();
+			// And the emitted CLAUDE.md must not link at the missing file.
+			const written = await readFile(join(temp.rootDir, "CLAUDE.md"), "utf8");
+			expect(written).not.toContain("git-conventions.md");
 		} finally {
 			await temp.cleanup();
 		}

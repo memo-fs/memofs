@@ -96,15 +96,15 @@ const SERVER_COMMAND = "npx";
 export const MCP_CONFIG_META: Record<AgentRulesTarget, McpConfigMeta> = {
 	agents: {
 		format: "toml-mcp_servers",
-		localPath: ".codex/config.toml",
-		globalPath: "~/.codex/config.toml",
-		defaultScope: "global",
+		localPath: null,
+		globalPath: null,
+		defaultScope: "local",
 	},
 	codex: {
 		format: "toml-mcp_servers",
 		localPath: ".codex/config.toml",
 		globalPath: "~/.codex/config.toml",
-		defaultScope: "global",
+		defaultScope: "local",
 	},
 	claude: {
 		format: "json-mcpServers",

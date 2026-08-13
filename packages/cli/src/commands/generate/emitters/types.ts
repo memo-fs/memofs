@@ -134,6 +134,23 @@ export interface HookEmitContext {
 }
 
 /**
+ * Wraps a `memofs <subcommand>` invocation in a local-or-`npx` bootstrap so the
+ * emitted hook still works when the `memofs` CLI is not installed globally
+ * (the most common silent-failure mode for Codex and Claude Code hooks, since
+ * `npx` is not invoked and `memofs` is missing from `PATH`). The literal
+ * `memofs <sub>` substring is preserved in both branches for tools/grep parity
+ * with the `npx -y @memofs/cli <sub>` fallback path.
+ *
+ * @param subcommand - The `memofs` subcommand string (e.g. `"cloud sync pull"`,
+ * `"context --query \"project context\" --task-type general"`).
+ * @returns A POSIX sh `if/then/else` block that runs `memofs <subcommand>`
+ * when on `PATH` and `npx -y @memofs/cli <subcommand>` otherwise.
+ */
+function bootstrapBlock(subcommand: string): string {
+	return `if command -v memofs >/dev/null 2>&1; then memofs ${subcommand}; else npx -y @memofs/cli ${subcommand}; fi`;
+}
+
+/**
  * The default CLI commands shared by every emitter.
  *
  * The context command renders plain markdown (no `--json`) because the
@@ -143,11 +160,15 @@ export const DEFAULT_HOOK_COMMANDS: Pick<
 	HookEmitContext,
 	"contextCommand" | "reinjectCommand" | "statusCommand"
 > = {
-	contextCommand:
-		'sh -c \'[ -n "$MEMOFS_API_KEY" ] && memofs cloud sync pull; memofs context --query "project context" --task-type general --mark-session-start\'',
-	reinjectCommand:
-		"sh -c 'memofs context --query \"project context\" --task-type general'",
-	statusCommand: "memofs status --hook",
+	contextCommand: `sh -c '[ -n "$MEMOFS_API_KEY" ] && { ${bootstrapBlock(
+		"cloud sync pull",
+	)}; }; ${bootstrapBlock(
+		'context --query "project context" --task-type general --mark-session-start',
+	)}'`,
+	reinjectCommand: `sh -c '${bootstrapBlock(
+		'context --query "project context" --task-type general',
+	)}'`,
+	statusCommand: `sh -c '${bootstrapBlock("status --hook")}'`,
 };
 
 /**

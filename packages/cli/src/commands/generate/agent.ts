@@ -25,6 +25,7 @@ import type { CliOutput } from "../../output/output";
 import { printJsonEnvelope } from "../../output/output";
 import {
 	AGENT_RULES_TARGETS,
+	agentsMdExistsAt,
 	copyGitConventionsToRulesDir,
 	emitAgentRules,
 	parseAgentRulesTarget,
@@ -138,19 +139,26 @@ export async function runGenerateAgentCommand(
 	const emitter = getEmitter(target);
 	const rootDir = getRootDir(options.memo.store);
 	const projectName = options.projectName?.trim() || basename(resolve(rootDir));
-	const includeHooks = options.hooks !== false && emitter !== undefined;
-	const includeMcp = options.mcp !== false;
-	const scope = resolveScope(target, options.mcpScope);
+	const agentsMdExists = await agentsMdExistsAt(rootDir);
 	// Only claim "context is auto-injected" in the rules file when the
 	// platform actually injects hook stdout into the model's context.
 	// opencode hooks run side effects only — its rules keep the
 	// "call memofs.context yourself" phrasing.
+	const includeHooks = options.hooks !== false && emitter !== undefined;
 	const contextAutoInjected =
 		includeHooks && (emitter?.capabilities.contextInjection ?? false);
 
-	if (includeMcp && !supportsScope(target, scope)) {
+	// `agents` is MCP-less: its `MCP_CONFIG_META` has null local + global
+	// paths. Silently skip MCP writing for MCP-less targets instead of
+	// throwing — the umbrella command's contract for them is "rules only".
+	// An explicit `--scope` request on an MCP-less target still surfaces a
+	// usage error below.
+	const scope = resolveScope(target, options.mcpScope);
+	const scopeSupported = supportsScope(target, scope);
+	const includeMcp = options.mcp !== false && scopeSupported;
+	if (options.mcp !== false && options.mcpScope && !scopeSupported) {
 		throw new CliUsageError(
-			`${target} does not support ${scope} MCP config scope`,
+			`${target} does not support ${options.mcpScope} MCP config scope`,
 		);
 	}
 
@@ -158,6 +166,8 @@ export async function runGenerateAgentCommand(
 		target,
 		projectName,
 		hooksInstalled: contextAutoInjected,
+		includeWorkspaceRules: true,
+		agentsMdExists,
 		...(includeMcp ? { mcpScope: scope } : {}),
 	});
 

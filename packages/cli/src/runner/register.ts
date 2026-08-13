@@ -301,6 +301,11 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 		.command("doctor")
 		.description("find missing or corrupt memory files")
 		.option("-s, --strict", "strict protocol validation", false)
+		.option(
+			"--fix",
+			"automatically archive deprecated memories and consolidate graph",
+			false,
+		)
 		.action(async (options) => {
 			setCurrentCommand("doctor");
 			const g = await globals();
@@ -310,6 +315,7 @@ export function registerAllCommands(program: Command, ctx: CLIContext) {
 					output,
 					json: g.json,
 					strict: options.strict,
+					fix: options.fix,
 				}),
 			);
 		});
