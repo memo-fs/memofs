@@ -4,8 +4,6 @@ import DefaultTheme from "vitepress/theme";
 import { computed, nextTick, onMounted, watch } from "vue";
 import AnnouncementPill from "./AnnouncementPill.vue";
 import AskAiBar from "./AskAiBar.vue";
-import AudienceSection from "./AudienceSection.vue";
-import BentoShowcase from "./BentoShowcase.vue";
 import BlogPostFooter from "./BlogPostFooter.vue";
 import BlogPostHeader from "./BlogPostHeader.vue";
 import CookbookHeader from "./CookbookHeader.vue";
@@ -13,6 +11,7 @@ import CookbookHeader from "./CookbookHeader.vue";
 import BottomCta from "./BottomCta.vue";
 import ComparisonSection from "./ComparisonSection.vue";
 import CredibilityBar from "./CredibilityBar.vue";
+import DualEntryHero from "./DualEntryHero.vue";
 import HeroTerminal from "./HeroTerminal.vue";
 import HowItWorks from "./HowItWorks.vue";
 import ProblemSection from "./ProblemSection.vue";
@@ -83,7 +82,7 @@ watch(
     <template #home-hero-before>
       <AnnouncementPill
         badge="Cloud"
-        text="Introducing MemoFS Cloud"
+        text="MemoFS Cloud"
         href="https://memofs.dev"
       />
     </template>
@@ -96,6 +95,7 @@ watch(
 
     <template #home-hero-after>
       <div class="home-custom-sections">
+        <DualEntryHero />
         <CredibilityBar />
       </div>
     </template>
@@ -108,11 +108,7 @@ watch(
         <HowItWorks />
         <StatsStrip />
         <hr class="tek-hairline" />
-        <BentoShowcase />
-        <hr class="tek-hairline" />
         <RuntimesSection />
-        <hr class="tek-hairline" />
-        <AudienceSection />
         <hr class="tek-hairline" />
         <ComparisonSection />
         <BottomCta />

@@ -5,8 +5,10 @@ import { nextTick, watch } from "vue";
 import AnnouncementPill from "./components/AnnouncementPill.vue";
 import BlogIndex from "./components/BlogIndex.vue";
 import CopyButton from "./components/CopyButton.vue";
+import DualEntryHero from "./components/DualEntryHero.vue";
 import HeroTerminal from "./components/HeroTerminal.vue";
 import HomeLayout from "./components/HomeLayout.vue";
+import InteractiveQuickstart from "./components/InteractiveQuickstart.vue";
 import NewsletterSignup from "./components/NewsletterSignup.vue";
 import "./custom.css";
 // styles/app.css design-system tokens are now inlined in custom.css (SSOT)
@@ -146,6 +148,10 @@ export default {
 		app.component("AnnouncementPill", AnnouncementPill);
 		// Animated typewriter terminal — hero right-hand visual.
 		app.component("HeroTerminal", HeroTerminal);
+		// Dual persona entryway launchpad on hero landing page.
+		app.component("DualEntryHero", DualEntryHero);
+		// Interactive framework quickstart switcher.
+		app.component("InteractiveQuickstart", InteractiveQuickstart);
 
 		if (!inBrowser) return;
 

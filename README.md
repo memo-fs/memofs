@@ -36,6 +36,8 @@ Most AI memory systems are database-first, vendor-locked, hard to inspect, and h
 ├── graph/
 │   ├── nodes.jsonl   # Entities extracted from memory
 │   └── edges.jsonl   # Relational connections
+├── archive/          # Cold storage for deprecated memories
+│   └── <id>.json     # Full-fidelity archived memory records
 └── snapshots/
     └── snap_123.json # Versioned restore checkpoints
 ```
@@ -112,6 +114,13 @@ Your App / Agent / MCP client
 
 The runtime resolves configuration from constructor options → env vars → `.memofs/config.json`.
 Three runtime modes are supported: **`local`** (filesystem-only, default), **`hybrid`** (local + cloud sync with read/write policies), and **`memory`** (in-memory volatile, ideal for tests).
+
+### Memory Intelligence
+
+- **Code anchoring & drift detection** — bind memories to source files; stale memories are rank-demoted at recall time when anchored code changes.
+- **Memory decay floors** — kind-specific expiry thresholds (30–365 days) transition old memories to `unverified` status.
+- **Semantic GC** — archive deprecated memories to cold storage; restore on demand via `memofs restore`.
+- **Session outcomes** — `success` / `failure` / `aborted` outcome on `complete()` governing durable memory promotion and workspace cleanup.
 
 ---
 

@@ -22,6 +22,8 @@ Inside the project root directory, AgentFS manages memory assets within the `.me
 │   ├── nodes.jsonl            # Entity nodes
 │   └── edges.jsonl            # Relationship edges
 ├── connectors.json            # Connector config (no secrets)
+├── archive/                   # Cold storage for deprecated memories
+│   └── <id>.json              # Full-fidelity archived memory records
 └── snapshots/
     └── snapshots.jsonl        # Snapshot index
 ```
@@ -91,3 +93,52 @@ await memo.agentfs.complete({
   extractDurableMemory: true,
 });
 ```
+
+### Session Outcomes
+
+The `complete()` method accepts an `outcome` parameter that controls what happens to the session workspace:
+
+```ts
+// Success: promote durable memory, clean working/, preserve output/
+await memo.agentfs.complete({
+  sessionId: session.sessionId,
+  extractDurableMemory: true,
+  outcome: "success",
+});
+
+// Failure: no promotion, preserve workspace as audit trail
+await memo.agentfs.complete({
+  sessionId: session.sessionId,
+  outcome: "failure",
+  reason: "Build failed — unit tests did not pass",
+});
+
+// Failure + ephemeral: no promotion, clean everything
+await memo.agentfs.complete({
+  sessionId: session.sessionId,
+  outcome: "failure",
+  ephemeral: true,
+  reason: "Exploratory attempt, discard all artifacts",
+});
+
+// Aborted: preserve entire workspace for resume
+await memo.agentfs.complete({
+  sessionId: session.sessionId,
+  outcome: "aborted",
+  reason: "User cancelled mid-task",
+});
+// Later, resume by calling complete() again with the same sessionId
+```
+
+**Behavior matrix:**
+
+| Outcome | `extractDurableMemory` | Promote to `notes.md` | Clean `working/` | Clean `output/` | Audit Event |
+|---|---|---|---|---|---|
+| `success` | `true` | ✅ | ✅ | — | — |
+| `success` | `false` | — | ✅ | — | — |
+| `failure` | — | — | — | — | `session.failed` |
+| `failure` + `ephemeral` | — | — | ✅ | ✅ | `session.failed` |
+| `aborted` | — | — | — | — | — |
+
+> [!TIP]
+> Set `outcome` explicitly on every `complete()` call. The default (`"success"`) is for backward-compatibility only — new callers should not rely on it.

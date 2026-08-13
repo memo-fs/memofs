@@ -15,6 +15,12 @@ Model Context Protocol server for MemoFS agent integrations.
 
 The `@memofs/mcp-server` package allows AI coding agents (like Claude Desktop, Cursor, Zed, and OpenCode) to securely read, search, and update project memory using the Model Context Protocol (MCP). It wraps the core runtime and exposes 10 model-facing tools (4 memory verbs + 6 AgentFS session tools) and 9 resources for memory, graph, and session access.
 
+**Key capabilities:**
+
+- **Code anchoring** — `memofs.remember` accepts an optional `anchor` parameter to bind memories to source files; `memofs.recall` surfaces `stale` flags when anchored files change.
+- **Memory decay detection** — recall results carry `unverified` flags when memories exceed their kind-specific decay floors.
+- **Session outcomes** — `memofs_agent_session_complete` accepts `outcome`, `ephemeral`, and `reason` parameters controlling a 5-row behavior matrix for durable memory promotion and workspace cleanup.
+
 ## Installation
 
 Most MCP clients invoke the server on demand via `npx` — no install required:

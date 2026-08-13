@@ -16,7 +16,7 @@ withDefaults(
 	{
 		href: "https://memofs.dev",
 		badge: "Cloud",
-		text: "Introducing MemoFS Cloud",
+		text: "MemoFS Cloud",
 	},
 );
 </script>

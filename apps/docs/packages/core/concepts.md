@@ -68,3 +68,51 @@ Connector configuration for external data sources (GitHub, Notion, etc.). Contai
 - **Location:** `.memofs/connectors.json`
 - **Format:** JSON.
 - **Best Use Case:** Declaring which external sources to ingest into memory.
+
+## Code Anchoring & Drift Detection
+
+Memories can be bound to source code files using an `AnchorRef` — a code anchor containing the file's repo-relative path and SHA-256 hash at write time, with an optional TypeScript symbol path.
+
+When a memory is anchored, MemoFS recomputes the file's hash at recall time:
+
+- **File changed or deleted:** The memory transitions to `stale` status, receives `stale: true` on the recall item, and gets demoted in search relevance (`score *= 0.5`). Stale memories are still surfaced (rank-demoted, not suppressed) so the next agent session sees drift happened.
+- **File unchanged:** The memory is served normally.
+
+Anchoring is opt-in. Use the `anchor` parameter on `memofs.remember` / `memo.writeMemory()`, or use the `@anchor(file=..., symbol=...)` marker syntax inside memory content.
+
+For `.ts`/`.tsx` files, MemoFS uses the TypeScript Compiler API to validate and extract the symbol path at write time. Non-TypeScript files are anchored by file path and hash only.
+
+Hash results are cached in `.memofs/manifest.json` with mtime-based invalidation (5-minute TTL) for efficient recall performance.
+
+## Memory Decay Floors
+
+Memory facts age out of `active` to `unverified` status when they exceed a kind-specific expiry floor. This prevents stale knowledge from being trusted without re-verification.
+
+| Memory Kind | Expiry (days) |
+|---|---|
+| `decision` | 365 |
+| `constraint` | 180 |
+| `reference` | 180 |
+| `goal` | 120 |
+| `preference` | 90 |
+| `summary` | 60 |
+| `note` | 30 |
+
+At recall time, memories exceeding their floor transition to `unverified` status, receive `unverified: true` on the recall item, and get a score demotion (`score *= 0.6` — milder than drift's `0.5`). Unverified memories are still surfaced so the next agent session can re-verify them.
+
+Decay is distinct from drift: `stale` means the anchored code changed; `unverified` means the memory is old enough to warrant human or LLM confirmation.
+
+## Memory Archive & Restore
+
+Deprecated memories can be physically moved to cold storage at `.memofs/archive/<id>.json` via `memofs consolidate --archive-deprecated`. This removes them from active recall while preserving full-fidelity JSON records for recovery.
+
+Archived memories are recoverable via `memofs restore <id>`, which writes the note back to `notes.md` and reactivates its graph node status.
+
+**Lifecycle transitions:**
+
+- `active → stale → active` — anchored file changed, then drift resolved
+- `active → unverified → active` — exceeded decay floor, then re-verified
+- `active → deprecated → archived` — superseded by a newer memory, then consolidated
+- `archived → active` — operator restores from archive
+
+All archive and restore operations emit audit events (`memory.archived`, `memory.restored`) to `events/memory-events.jsonl`.

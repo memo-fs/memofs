@@ -147,11 +147,12 @@ memofs diff before-refactor after-refactor
 
 ## `memofs doctor`
 
-Finds missing or corrupt memory files and validates referential integrity.
+Finds missing or corrupt memory files, checks for pending deprecated memories, and validates referential integrity. The `--fix` flag also archives deprecated memories.
 
 ```bash
 memofs doctor
 memofs doctor --strict
+memofs doctor --fix
 ```
 
 **Options:**
@@ -159,6 +160,7 @@ memofs doctor --strict
 | Flag | Description | Default |
 |------|-------------|---------|
 | `-s, --strict` | Strict protocol validation | `false` |
+| `--fix` | Automatically consolidate memory graph nodes and archive deprecated memories | `false` |
 
 ## `memofs validate`
 
@@ -201,3 +203,41 @@ Root: /path/to/project
 ```
 
 When no session-start event is found, the command degrades gracefully and suggests running `memofs generate agent <target>` to install hooks that mark the session boundary automatically.
+
+## `memofs migrate anchors`
+
+Backfills code anchor metadata onto existing structured note entries by detecting file-path and symbol references in content. Walks `notes.md` entries, regex-detects file-path references, and attaches `AnchorRef` objects (file path + SHA-256 hash + optional TS symbol). Idempotent — re-running skips entries that already have an anchor.
+
+```bash
+memofs migrate anchors
+memofs migrate anchors --json
+```
+
+**Output:**
+
+```text
+Scanned 42 note(s) — Anchored 12 — Skipped (already anchored) 3 — No file reference found 27
+```
+
+## `memofs consolidate`
+
+Merges duplicate graph nodes and retires superseded facts. With `--archive-deprecated`, physically moves deprecated memories to `.memofs/archive/<id>.json` cold storage files and removes them from active recall indexes.
+
+```bash
+memofs consolidate
+memofs consolidate --archive-deprecated
+```
+
+**Options:**
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--archive-deprecated` | Move deprecated memories to `.memofs/archive/<id>.json` | `false` |
+
+## `memofs restore`
+
+Restores an archived memory from `.memofs/archive/<id>.json` back to active memory (`notes.md`) and reactivates its graph node status to `active`.
+
+```bash
+memofs restore abc123
+```

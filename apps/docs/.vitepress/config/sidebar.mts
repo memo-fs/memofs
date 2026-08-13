@@ -1,24 +1,28 @@
 import type { DefaultTheme } from "vitepress";
 
 export const sidebar: DefaultTheme.Sidebar = {
-	"/introduction": [
-		{
-			// text: "API Reference",
-			items: [
-				{ text: "Cookbooks", link: "/learn/cookbooks/" },
-				{ text: "Blog", link: "/blog/" },
-				{ text: "Tracks", link: "/learn/tracks/" },
-				{ text: "Core Runtime & SDK", link: "/packages/core/" },
-				{ text: "Self-Hosting", link: "/packages/server/" },
-				{ text: "Adapters", link: "/packages/adapters/" },
-				{ text: "Command Line (CLI)", link: "/packages/cli/" },
-				{ text: "Model Context Protocol (MCP)", link: "/packages/mcp/" },
-				{ text: "Connectors", link: "/packages/connectors/" },
-				{ text: "API Reference", link: "/api/" },
-			],
-		},
-	],
+	// "/introduction": [
+	// 	{
+	// 		// text: "API Reference",
+	// 		items: [
+	// 			{ text: "Cookbooks", link: "/learn/cookbooks/" },
+	// 			{ text: "Blog", link: "/blog/" },
+	// 			{ text: "Tracks", link: "/learn/tracks/" },
+	// 			{ text: "Core Runtime & SDK", link: "/packages/core/" },
+	// 			{ text: "Self-Hosting", link: "/packages/server/" },
+	// 			{ text: "Adapters", link: "/packages/adapters/" },
+	// 			{ text: "Command Line (CLI)", link: "/packages/cli/" },
+	// 			{ text: "Model Context Protocol (MCP)", link: "/packages/mcp/" },
+	// 			{ text: "Connectors", link: "/packages/connectors/" },
+	// 			{ text: "API Reference", link: "/api/" },
+	// 		],
+	// 	},
+	// ],
 	"/": [
+		{
+			text: "Get Started",
+			link: "/introduction",
+		},
 		{
 			text: "Core Runtime",
 			collapsed: false,
