@@ -1,0 +1,8 @@
+{
+	"mcpServers": {
+		"memofs": {
+			"command": "npx",
+			"args": ["-y", "@memofs/mcp-server"]
+		}
+	}
+}
