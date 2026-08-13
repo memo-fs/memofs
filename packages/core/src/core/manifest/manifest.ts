@@ -205,7 +205,12 @@ function validateAnchorHashCache(
 				{ file, entry },
 			);
 		}
-		const e = entry as { hash?: unknown; ts?: unknown };
+		const e = entry as {
+			hash?: unknown;
+			ts?: unknown;
+			mtimeMs?: unknown;
+			size?: unknown;
+		};
 		if (typeof e.hash !== "string" || e.hash.length === 0) {
 			throw new MemoryValidationError(
 				`manifest.anchorHashCache["${file}"].hash must be a non-empty string.`,
@@ -216,6 +221,24 @@ function validateAnchorHashCache(
 			throw new MemoryValidationError(
 				`manifest.anchorHashCache["${file}"].ts must be a finite number.`,
 				{ file, ts: e.ts },
+			);
+		}
+		if (
+			e.mtimeMs !== undefined &&
+			(typeof e.mtimeMs !== "number" || !Number.isFinite(e.mtimeMs))
+		) {
+			throw new MemoryValidationError(
+				`manifest.anchorHashCache["${file}"].mtimeMs must be a finite number.`,
+				{ file, mtimeMs: e.mtimeMs },
+			);
+		}
+		if (
+			e.size !== undefined &&
+			(typeof e.size !== "number" || !Number.isFinite(e.size))
+		) {
+			throw new MemoryValidationError(
+				`manifest.anchorHashCache["${file}"].size must be a finite number.`,
+				{ file, size: e.size },
 			);
 		}
 	}

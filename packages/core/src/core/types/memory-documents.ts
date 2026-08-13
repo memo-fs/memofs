@@ -211,6 +211,10 @@ export interface AnchorHashCacheEntry {
 	hash: string;
 	/** Epoch milliseconds at which the entry was populated. */
 	ts: number;
+	/** File modification timestamp in milliseconds when cached. */
+	mtimeMs?: number;
+	/** File size in bytes when cached. */
+	size?: number;
 }
 
 /**

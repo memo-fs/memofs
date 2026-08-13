@@ -137,11 +137,13 @@ export async function getCachedFileHash(args: {
 	const ttl = args.ttlMs ?? ANCHOR_HASH_CACHE_TTL_MS;
 	const cached = args.cache.get(args.file);
 
-	// Stat the file — this catches file-deletion AND mtime change in one syscall.
+	// Stat the file — this catches file-deletion AND mtime/size change in one syscall.
 	let mtimeMs: number | undefined;
+	let size: number | undefined;
 	try {
 		const stats = await stat(args.file);
 		mtimeMs = stats.mtimeMs;
+		size = stats.size;
 	} catch (error) {
 		if (isNotFoundError(error)) {
 			// File-deleted drift.
@@ -153,18 +155,22 @@ export async function getCachedFileHash(args: {
 
 	// Cache hits only when ALL of:
 	//   - cached entry exists
-	//   - cache.ts is at least as new as the file's mtime (file unchanged)
+	//   - cached mtimeMs (if present) matches current file mtimeMs
+	//   - cached size (if present) matches current file size
+	//   - cache.ts is at least as new as the file's mtime
 	//   - now - cache.ts < ttl (safety ceiling)
 	if (
 		cached !== undefined &&
 		mtimeMs !== undefined &&
+		(cached.mtimeMs === undefined || cached.mtimeMs === mtimeMs) &&
+		(cached.size === undefined || cached.size === size) &&
 		cached.ts >= mtimeMs &&
 		args.now - cached.ts < ttl
 	) {
 		return { hash: cached.hash, fromCache: true };
 	}
 
-	// Cache miss (or invalidated by mtime/TTL) — recompute.
+	// Cache miss (or invalidated by mtime/size/TTL) — recompute.
 	const hash = await recomputeFileHash(args.file);
 	if (hash === undefined) {
 		// File was deleted between our stat and read — drop and propagate.
@@ -177,6 +183,8 @@ export async function getCachedFileHash(args: {
 	args.cache.set(args.file, {
 		hash,
 		ts: Math.max(args.now, mtimeMs ?? args.now),
+		mtimeMs,
+		size,
 	});
 	return { hash, fromCache: false };
 }
