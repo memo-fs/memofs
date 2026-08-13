@@ -56,3 +56,17 @@ export const REQUIRED_DIRS = [
 	`${MEMOFS_DIR}/snapshots`,
 	`${MEMOFS_DIR}/tmp`,
 ] as const;
+
+/**
+ * Soft advisory line cap for `.memofs/memory/core.md`.
+ *
+ * Core memory is injected in full by `memofs.context` at the start of every
+ * task (the always-loaded equivalent of a `CLAUDE.md`/`AGENTS.md`), so an
+ * oversized file bloats every session's context and erodes adherence. The
+ * 200-line threshold matches the documented soft limit for always-loaded
+ * instruction files (see Claude Code memory docs). This is advisory only —
+ * `memofs doctor` emits a warning, not an error — so the workspace stays
+ * `ok` while signaling drift. `notes.md` is intentionally exempt: notes are
+ * loaded on demand, not always-injected, so the same cap does not apply.
+ */
+export const CORE_MEMORY_SOFT_LIMIT = 200;

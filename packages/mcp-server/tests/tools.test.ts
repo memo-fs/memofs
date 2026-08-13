@@ -140,6 +140,71 @@ describe("MCP tools", () => {
 		expect(text).toMatch(/path/);
 	});
 
+	it("memofs.remember schema exposes the optional code-anchor field and round-trips it through recall", async () => {
+		// Schema contract: the `memofs.remember` inputSchema MUST expose
+		// the optional `anchor` field so model callers can bind a memory
+		// to a code file.
+		const definitions = createToolDefinitions(100);
+		const remember = definitions.find((d) => d.name === "memofs.remember");
+		expect(remember, "memofs.remember tool must be defined").toBeDefined();
+		const schema = remember?.inputSchema as {
+			properties?: {
+				anchor?: {
+					properties?: { file?: unknown; hash?: unknown; symbol?: unknown };
+					required?: string[];
+				};
+			};
+		};
+		expect(
+			schema.properties?.anchor,
+			"anchor property must be declared",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.file,
+			"anchor.file property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.hash,
+			"anchor.hash property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.properties?.symbol,
+			"anchor.symbol property",
+		).toBeDefined();
+		expect(
+			schema.properties?.anchor?.required,
+			"anchor requires file+hash",
+		).toEqual(["file", "hash"]);
+
+		// Round-trip: writing with `anchor` must be accepted by the tool
+		// (proves the schema validates the field, not just documents it).
+		const runtime = createMemoFSMcpRuntimeFromConfig({
+			mode: "local",
+			store: new InMemoryMemoryStore(),
+			recall: { localEmbeddings: false },
+		});
+		const write = await callMemoFSTool({ runtime }, "memofs.remember", {
+			content: "Anchor round-trip via MCP.",
+			anchor: { file: "src/auth.py", hash: "deadbeef".repeat(8) },
+		});
+		expect(
+			write.isError,
+			"anchor field must be accepted by the tool",
+		).toBeUndefined();
+
+		// And a follow-up recall must surface the memory (drift detection
+		// runs because `src/auth.py` does not exist on disk → file-deleted
+		// drift; the memory is still surfaced, rank-demoted not suppressed).
+		const recall = await callMemoFSTool({ runtime }, "memofs.recall", {
+			query: "Anchor round-trip",
+			limit: 5,
+		});
+		expect(recall.isError).toBeUndefined();
+		const text =
+			recall.content[0]?.type === "text" ? recall.content[0]?.text : "";
+		expect(text).toContain("Anchor round-trip via MCP.");
+	});
+
 	it("output text is truncated safely when max output bytes is small", async () => {
 		const runtime = createMemoFSMcpRuntimeFromConfig({
 			mode: "local",
@@ -271,5 +336,99 @@ describe("memofs.context tool schema", () => {
 			"docs",
 			"general",
 		]);
+	});
+});
+
+describe("memofs_agent_session_complete outcome enum", () => {
+	const definitions = createToolDefinitions(100);
+	const completeDef = definitions.find(
+		(d) => d.name === "memofs_agent_session_complete",
+	);
+
+	it("exposes outcome/ephemeral/reason in the input schema", () => {
+		expect(
+			completeDef,
+			"memofs_agent_session_complete tool must be defined",
+		).toBeDefined();
+		const schema = completeDef?.inputSchema as {
+			properties?: Record<string, unknown>;
+		};
+		const properties = schema.properties ?? {};
+		expect(properties.outcome).toBeDefined();
+		const outcomeProp = properties.outcome as {
+			type: string;
+			enum?: unknown[];
+		};
+		expect(outcomeProp.type).toBe("string");
+		expect(outcomeProp.enum).toEqual(["success", "failure", "aborted"]);
+		expect(properties.ephemeral).toBeDefined();
+		expect((properties.ephemeral as { type: string }).type).toBe("boolean");
+		expect(properties.reason).toBeDefined();
+		expect((properties.reason as { type: string }).type).toBe("string");
+	});
+
+	it("description cautions callers to set outcome explicitly", () => {
+		expect(completeDef?.description).toMatch(/set `outcome` explicitly/i);
+		expect(completeDef?.description).toMatch(/NOT recommended/i);
+	});
+
+	it("dispatches outcome through to the runtime surface", async () => {
+		const calls: Array<Record<string, unknown>> = [];
+		const runtime = {
+			completeAgentSession: async (input: Record<string, unknown>) => {
+				calls.push(input);
+				return { sessionId: input.sessionId, outcome: input.outcome };
+			},
+		} as unknown;
+		const result = await callMemoFSTool(
+			{ runtime: runtime as never },
+			"memofs_agent_session_complete",
+			{
+				sessionId: "session_dispatch",
+				outcome: "failure",
+				ephemeral: true,
+				reason: "hallucination",
+			},
+		);
+		expect(result.isError).toBeUndefined();
+		expect(calls).toHaveLength(1);
+		expect(calls[0]?.outcome).toBe("failure");
+		expect(calls[0]?.ephemeral).toBe(true);
+		expect(calls[0]?.reason).toBe("hallucination");
+	});
+
+	it("rejects an invalid outcome value with a validation error", async () => {
+		const runtime = {
+			completeAgentSession: async () => ({}),
+		} as unknown;
+		const result = await callMemoFSTool(
+			{ runtime: runtime as never },
+			"memofs_agent_session_complete",
+			{
+				sessionId: "session_invalid",
+				outcome: "lost",
+			},
+		);
+		expect(result.isError).toBe(true);
+		const text =
+			result.content[0]?.type === "text" ? result.content[0]?.text : "";
+		expect(text).toMatch(/outcome must be one of/);
+	});
+
+	it("omits outcome/ephemeral/reason from args when absent (backward-compat)", async () => {
+		const calls: Array<Record<string, unknown>> = [];
+		const runtime = {
+			completeAgentSession: async (input: Record<string, unknown>) => {
+				calls.push(input);
+				return { sessionId: input.sessionId };
+			},
+		} as unknown;
+		await callMemoFSTool(
+			{ runtime: runtime as never },
+			"memofs_agent_session_complete",
+			{ sessionId: "session_legacy" },
+		);
+		expect(calls[0]).toEqual({ sessionId: "session_legacy" });
+		expect("outcome" in (calls[0] ?? {})).toBe(false);
 	});
 });

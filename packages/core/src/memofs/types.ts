@@ -96,12 +96,75 @@ export interface RecallInput {
 	filters?: JsonObject;
 }
 
+/**
+ * Code binding site for self-heal — `where in the code this fact is anchored`.
+ *
+ * - `file` is a repository-relative path (forward slashes, no leading `/`).
+ * - `hash` is the SHA-256 (hex, lowercase, 64 chars) of the anchored file's
+ *   bytes at write time — the drift-detection comparison baseline.
+ * - `symbol` is the optional dotted AST symbol path for `.ts`/`.tsx` files
+ *   (`<repo-relative file path>#<dotted-symbol-path>`, e.g.
+ *   `src/auth/provider.ts#verifyJwt`). Undefined for non-TS files at v1.
+ *
+ * Hash-only is the v1 anchor contract; `symbol` is the optional
+ * TS-Compiler-extracted AST binding. Drift detection (hash mismatch OR
+ * file-deleted) works for any language; only the optional `symbol` field
+ * is TS-only at v1.
+ *
+ * @public
+ */
+export interface AnchorRef {
+	/** Repository-relative file path (forward slashes, no leading `/`). */
+	file: string;
+	/** SHA-256 (hex, lowercase, 64 chars) of the anchored file's bytes at write time. */
+	hash: string;
+	/**
+	 * Optional AST symbol path for `.ts`/`.tsx` files extracted via the
+	 * TypeScript Compiler API at write time. Format:
+	 * `<repo-relative file path>#<dotted-symbol-path>`. Undefined for
+	 * non-TS files at v1.
+	 */
+	symbol?: string;
+}
+
 export interface RecallItem {
 	id: string;
 	text: string;
 	score?: number;
 	sourceRefs?: SourceRef[];
 	metadata?: JsonObject;
+	/**
+	 * The code binding site copied through from the originating
+	 * {@link WriteMemoryInput.anchor} when the memory was written. Absent
+	 * when the memory was written without an anchor (today's default
+	 * behavior). Drift detection reads `anchor.hash` against the live file
+	 * at query time and sets {@link RecallItem.stale} on mismatch.
+	 *
+	 * @public
+	 */
+	anchor?: AnchorRef;
+	/**
+	 * `true` when the runtime detected hash drift (or file deletion) on
+	 * {@link RecallItem.anchor} since the memory was written. Stale items
+	 * are still surfaced (ranked lower) so the next agent session sees
+	 * drift happened. Absent when no anchor was set or when the file
+	 * still matches its stored hash.
+	 *
+	 * @public
+	 */
+	stale?: boolean;
+	/**
+	 * `true` when the runtime detected the memory's age exceeded its
+	 * kind-specific expiry floor (`EXPIRY_DAYS[kind]`) at query time.
+	 * Unverified items are still surfaced (ranked lower, milder than
+	 * {@link RecallItem.stale}) so the next agent session invokes the
+	 * LLM re-verify lifecycle on them. Absent when the memory has no
+	 * `kind`, the `kind` is outside the expiry table, or the memory is
+	 * younger than its floor.
+	 *
+	 * @public
+	 */
+	unverified?: boolean;
 }
 
 export interface RecallResult {
@@ -257,6 +320,20 @@ export interface WriteMemoryInput {
 	 * both can be set and both are preserved.
 	 */
 	writer?: string;
+	/**
+	 * Optional code binding site for self-heal. When set, the write
+	 * strategy persists the anchor in the note's metadata block AND in the
+	 * `memory.created` event metadata, so the in-process and cold-start
+	 * paths can recover it. At query-time, the recall runtime recomputes
+	 * the anchored file's SHA-256 and compares; mismatch OR
+	 * file-deleted transitions the corresponding graph node's status to
+	 * `"stale"`, sets {@link RecallItem.stale} on the recalled item, and
+	 * demotes `score *= 0.5`. Omitting `anchor` preserves today's behavior
+	 * (status never transitions to `"stale"`, `RecallItem.stale` undefined).
+	 *
+	 * @public
+	 */
+	anchor?: AnchorRef;
 }
 
 export interface WriteMemoryResult {
@@ -335,10 +412,61 @@ export interface AgentSessionFileInput extends ReadMemoryInput {
 	content?: string;
 }
 
+/**
+ * The outcome of an AgentFS session, gating durable-memory promotion and
+ * session-file cleanup.
+ *
+ * - `"success"`: the task completed; durable memory promotes when
+ *   `extractDurableMemory: true`; `working/` is auto-cleaned.
+ * - `"failure"`: the task failed; durable memory is NOT promoted; the
+ *   `ephemeral` flag drives cleanup of `working/` + `output/`.
+ * - `"aborted"`: the task was paused; nothing is promoted or cleaned; the
+ *   session workspace is preserved for resume via a future
+ *   `complete({outcome: "success" | "failure"})` with the same `sessionId`.
+ *
+ * @public
+ */
+export type SessionOutcome = "success" | "failure" | "aborted";
+
+/**
+ * The canonical session-outcome values, used for runtime validation of
+ * MCP tool arguments and CLI inputs.
+ *
+ * @public
+ */
+export const SESSION_OUTCOMES: readonly SessionOutcome[] = [
+	"success",
+	"failure",
+	"aborted",
+] as const;
+
+/**
+ * Narrows an unknown value to a {@link SessionOutcome}.
+ *
+ * @param value - The value to test.
+ * @returns `true` if the value is a valid {@link SessionOutcome}.
+ * @public
+ */
+export function isSessionOutcome(value: unknown): value is SessionOutcome {
+	return (
+		typeof value === "string" &&
+		(SESSION_OUTCOMES as readonly string[]).includes(value)
+	);
+}
+
 export interface AgentSessionCompleteInput extends ReadMemoryInput {
 	sessionId: string;
 	extractDurableMemory?: boolean;
 	checkpointLabel?: string;
+	/** Session outcome; absent defaults to `"success"`. */
+	outcome?: SessionOutcome;
+	/**
+	 * Opt-in cleanup of `working/` + `output/` session files on
+	 * `outcome: "failure"`. Ignored for other outcomes.
+	 */
+	ephemeral?: boolean;
+	/** Structured failure audit text; carried on `session.failed` events. */
+	reason?: string;
 }
 
 export interface AgentSessionResult {
@@ -350,6 +478,15 @@ export interface AgentSessionResult {
 export interface AgentSessionExtractResult {
 	sessionId: string;
 	extracted: JsonObject;
+}
+
+export interface AgentSessionCompleteResult extends AgentSessionExtractResult {
+	durableMemoryWritten: boolean;
+	outcome: SessionOutcome;
+	workingCleaned: boolean;
+	outputCleaned: boolean;
+	preserved: boolean;
+	failureEventWritten: boolean;
 }
 
 /**

@@ -13,7 +13,59 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 ## Unreleased
 
-Upcoming updates and improvements.
+*No changes yet.*
+
+## v1.3.0-beta.1 — August 13, 2026
+
+Anchor drift detection, memory decay floors, semantic GC archive/restore, and session outcomes.
+
+### Core
+
+#### Added
+- Added anchor reference support with file paths, hashes, and optional symbols to memory write inputs and prose content via anchor markers.
+- Added write-time symbol path extraction for TypeScript files using the TypeScript Compiler API with path traversal security validation.
+- Added query-time drift detection inside memory recall and context building. Memories with modified or deleted target files transition to stale status, receive a stale flag on recall items, and get demoted in search relevance with a half score multiplier.
+- Added manifest hash caching with modification time invalidation and persistence for cross-session drift checks.
+- Added kind-specific decay floors for all seven memory kinds ranging from 30 days for notes to 365 days for decisions.
+- Added unverified status for graph facts. Active memories exceeding their decay floor transition to unverified status, set an unverified metadata flag on recall items, and receive a score demotion while remaining accessible for re-verification.
+- Added outcome parameters indicating success, failure, or aborted status, ephemeral cleanup flags, and failure reason inputs to session completion functions.
+- Implemented a five-row outcome matrix that gates durable memory promotion on successful outcome and durable memory extraction, while governing working and output directory cleanup.
+- Added support for session resumption across aborted completions by preserving workspace state.
+- Added session failure audit event logging with failure reason telemetry.
+
+### CLI
+
+#### Added
+- Added a CLI command to backfill anchor metadata onto existing structured note entries by parsing file and symbol references.
+- Added a CLI command option to move deprecated memory entries into cold storage archive files and remove them from active recall indexes.
+- Added a CLI command to restore archived memory records back to active memory files and reactivate their graph node status.
+- Added archived and restored audit event logging to memory events.
+- Added a fix option to the doctor command to automatically consolidate memory graph nodes and move deprecated memory entries into cold storage archive files.
+- Added a diagnostic check to the doctor command that warns when deprecated memory entries are pending archive.
+
+### MCP Server
+
+#### Added
+- Added optional anchor parameters to memory write tool definitions and stale indicators to recall tool output.
+- Added outcome, ephemeral cleanup, and failure reason parameters to the agent session completion tool.
+
+### Agent Behavior Enforcement
+
+#### Changed
+- Strengthened generated agent rules files so the MemoFS memory workflow is binding rather than advisory, adding strict requirement headings, forbidding unverified assumptions, and adding task completion memory checks.
+- Generating agent rules targets now emits only the primary instructions file, while umbrella agent generation commands produce local workspace rules directories and git conventions files.
+- Generating Claude agent rules emits a single import reference when a root agents rules file already exists, maintaining a single source of truth without duplicating content.
+
+#### Added
+- Added advisory warnings to the workspace doctor command when core memory exceeds 200 lines to match instruction file soft limits.
+
+#### Removed
+- Removed the pointers section from the generated agent rules template to streamline configuration.
+- Removed the hard limit and validation errors for maximum agent rules line counts, replacing it with soft line advisories on core memory.
+
+#### Fixed
+- Fixed Claude Code and Codex session hooks from failing silently when the CLI is not installed globally by adding automatic fallback execution.
+- Applied local execution fallback to generated opencode plugin events to ensure compliance markers and status notifications display properly.
 
 ## v1.2.0-beta.3 — August 6, 2026
 

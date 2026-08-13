@@ -45,6 +45,15 @@ npx memofs context --query "current task" --json
 
 # Inspect the current memory state
 npx memofs inspect
+
+# Backfill code anchors onto existing notes (drift detection)
+npx memofs migrate anchors
+
+# Archive deprecated memories to cold storage
+npx memofs consolidate --archive-deprecated
+
+# Restore an archived memory
+npx memofs restore <id>
 ```
 
 ## Configuration and Usage

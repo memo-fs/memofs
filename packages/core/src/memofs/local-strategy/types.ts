@@ -4,7 +4,7 @@
  * @remarks
  * Defines the shared types for the local-first strategy, including the
  * graph store abstraction and the optional {@link Logger} for observable
- * best-effort warnings (ticket 8 intelligence hardening).
+ * best-effort warnings (intelligence hardening).
  */
 
 import type { AgentfsLikeClient } from "../../agentfs/client/agentfs-like";
@@ -21,11 +21,14 @@ import type { Reranker } from "../../rerank";
 import type { ContextCache } from "../progressive";
 import type { FileSyncLayer } from "../sync/file-replication";
 import type {
+	AnchorRef,
 	GraphEdgeInput,
 	GraphNodeInput,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
 } from "../types";
+import type { AnchorHashCache } from "./anchor-drift";
+import type { MemoryDecayMeta } from "./decay";
 
 export type { Logger } from "../../core/types/logger";
 
@@ -67,6 +70,12 @@ export interface LocalStrategyOptions {
 	autoExtractGraph?: boolean;
 	syncLayer?: FileSyncLayer;
 	logger?: Logger;
+	/**
+	 * Project root directory used to resolve {@link AnchorRef.file}.
+	 * Defaults to `"."` (CWD). The drift-detection seam joins anchored
+	 * memory records' repo-relative file paths to absolute OS paths here.
+	 */
+	rootDir?: string;
 	createAgentfsClient?: (opts: {
 		store: MemoryStore;
 		projectId: string;
@@ -110,4 +119,61 @@ export interface LocalStrategyContext {
 		}>;
 		warnings?: string[];
 	}>;
+	/**
+	 * Project root directory used to resolve {@link AnchorRef.file}.
+	 * Defaults to `"."`. Anchored memories' repo-relative `file` paths are
+	 * joined against this root before the runtime reads the file's bytes
+	 * for SHA-256 drift detection.
+	 */
+	rootDir: string;
+	/**
+	 * In-process map of memory id → stored {@link AnchorRef}. Populated at
+	 * `ensureReady` time from `memory-events.jsonl` (cold-start recovery)
+	 * and at `writeMemory` time when the caller passes `WriteMemoryInput.anchor`.
+	 * Read by the query-time drift-detection seam in `localRecall` so items
+	 * with anchors can be hash-compared against the live file.
+	 */
+	anchorByMemoryId: Map<string, AnchorRef>;
+	/**
+	 * In-process 5-minute-TTL cache of absolute file path → SHA-256 hash.
+	 * Cache hits avoid re-reading files on every recall of the same
+	 * anchored-memory set. Hydrated from `.memofs/manifest.json` at
+	 * `ensureReady` time (cross-session warm start) and persisted back via
+	 * {@link LocalStrategyContext.flushAnchorHashCache} after each recall
+	 * that mutated the cache.
+	 */
+	anchorHashCache: AnchorHashCache;
+	/**
+	 * Persists {@link LocalStrategyContext.anchorHashCache} to
+	 * `.memofs/manifest.json` (best-effort). Called by `localRecall`
+	 * after {@link applyAnchorDrift} so a fresh process can warm-start
+	 * from the prior session's cache entries instead of re-hashing
+	 * every anchored file on first recall.
+	 */
+	flushAnchorHashCache: () => Promise<void>;
+	/**
+	 * Reverse index `memory id → graph node ids` for the bound
+	 * `code_symbol` / `concept` / etc. nodes whose `sourceRefs` point at a
+	 * memory. Built at `ensureReady` time and rebuilt after each
+	 * `autoExtractGraph` so the drift-detection seam can find the graph
+	 * node(s) to transition to `"stale"` without scanning the whole graph
+	 * per recall call.
+	 */
+	graphNodesByMemoryId: Map<string, string[]>;
+	/**
+	 * Rebuilds {@link LocalStrategyContext.graphNodesByMemoryId} from
+	 * `graphNodes` so newly written nodes (and any new sourceRefs pointing
+	 * at memory ids) are reflected in the index. Called by `ensureReady`
+	 * at boot and by `autoExtractGraph` after each upsert batch.
+	 */
+	reindexGraphNodesByMemoryId: () => void;
+	/**
+	 * In-process map of memory id → decay metadata (`kind` + `createdAt`).
+	 * Populated at `ensureReady` time from `memory-events.jsonl`
+	 * (cold-start recovery) and at `writeMemory` time for the live write.
+	 * Read by the query-time decay-detection seam in `localRecall` so
+	 * items with a `kind` + age past their {@link EXPIRY_DAYS} floor can
+	 * be flagged `unverified` + demoted.
+	 */
+	memoryMetaByMemoryId: Map<string, MemoryDecayMeta>;
 }

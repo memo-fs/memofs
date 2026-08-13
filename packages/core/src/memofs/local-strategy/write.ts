@@ -24,6 +24,7 @@ import type {
 	WriteMemoryInput,
 	WriteMemoryResult,
 } from "../types";
+import { resolveWriteAnchor } from "./anchor-marker";
 import {
 	fingerprint,
 	message,
@@ -45,6 +46,14 @@ export async function writeMemory(
 		[input.content, ...(input.title === undefined ? [] : [input.title])],
 		NOTES_MEMORY_PATH,
 	);
+
+	// Resolve anchor: explicit `input.anchor` takes precedence; otherwise
+	// an `@anchor(file=…, symbol=…)` marker in content is parsed.
+	const anchor = await resolveWriteAnchor({
+		content: input.content,
+		...(input.anchor === undefined ? {} : { explicitAnchor: input.anchor }),
+		rootDir: ctx.rootDir,
+	});
 
 	const tierDecision = classifyDurability({
 		content: input.content,
@@ -87,9 +96,31 @@ export async function writeMemory(
 			...(input.sourceRefs === undefined
 				? {}
 				: { sourceRefs: input.sourceRefs }),
+			...(anchor === undefined ? {} : { anchor }),
 			...(input.metadata ?? {}),
 		},
 	});
+	// Anchor is also persisted into the structured event so the cold-start
+	// hydration in `local-strategy.ts` can recover it from
+	// `memory-events.jsonl` without parsing markdown.
+	if (anchor !== undefined) {
+		ctx.anchorByMemoryId.set(id, anchor);
+	}
+	// Decay metadata (kind + createdAt) is populated for the live write so
+	// the query-time decay seam can compute the memory's age without
+	// waiting for a cold-start hydration cycle. The event timestamp is
+	// the canonical `createdAt`; cold-start recovery reads it back from
+	// `memory-events.jsonl` in `hydrateMemoryMetaFromEvents`.
+	// Only set when the caller explicitly provided a `kind` — an unkinded
+	// write defaults to "note" for the note's frontmatter but must NOT
+	// enter the decay surface (backward-compat: no false-positive
+	// `unverified` 30 days after an unkinded write).
+	if (input.kind !== undefined) {
+		ctx.memoryMetaByMemoryId.set(id, {
+			kind: input.kind,
+			createdAt: now,
+		});
+	}
 	await appendMemoryEvent(
 		ctx.options.store,
 		createMemoryEvent({
@@ -105,6 +136,7 @@ export async function writeMemory(
 				id,
 				kind: input.kind ?? "note",
 				tags: input.tags ?? [],
+				...(anchor === undefined ? {} : { anchor }),
 			},
 		}),
 	);
@@ -251,7 +283,7 @@ export async function indexDocument(
 		await ctx.options.recallStore.upsert(docs);
 	} catch (error) {
 		// Best effort.
-		ctx.options.logger?.warn("vector indexing failed (best-effort)", {
+		ctx.options.logger?.warn("vector indexing failed", {
 			error: message(error),
 			sourceType: meta.sourceType,
 			sourceId: meta.sourceId,
@@ -296,9 +328,12 @@ export async function autoExtractGraph(
 				ctx.graphNodes.set(node.id, toGraphNodeInput(node));
 				ctx.indexLexical({
 					id: `graph:${node.id}`,
-					text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
+					text: `${node.label}${node?.summary ?? ""}`,
 				});
 			}
+			// refresh the memory-id → graph-node reverse index so the
+			// drift-detection seam can find new nodes on the next recall.
+			ctx.reindexGraphNodesByMemoryId();
 		}
 		for (const edge of edges) {
 			try {
@@ -310,7 +345,7 @@ export async function autoExtractGraph(
 				});
 			} catch (error) {
 				// Skip an edge that the store rejects.
-				ctx.options.logger?.warn("graph edge upsert rejected (best-effort)", {
+				ctx.options.logger?.warn("graph edge upsert rejected", {
 					error: message(error),
 					edgeType: edge.type,
 					from: edge.from,
@@ -320,7 +355,7 @@ export async function autoExtractGraph(
 		}
 	} catch (error) {
 		// Best effort.
-		ctx.options.logger?.warn("auto graph extraction failed (best-effort)", {
+		ctx.options.logger?.warn("auto graph extraction failed", {
 			error: message(error),
 			sourceType: source.sourceType,
 			sourceId: source.sourceId,

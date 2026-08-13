@@ -41,18 +41,40 @@ npx @memofs/cli generate agent-rules gemini --project-name "Your project name"
 
 ### Step 3: Register the MCP Server
 
+> [!IMPORTANT]
+> **Why `--root` is required for Antigravity:**
+> Unlike Claude Code or Codex (which spawn MCP processes with `cwd` set to the project workspace), Antigravity spawns background MCP servers from its central daemon directory (`~/.gemini/antigravity`).
+> 
+> Without `--root <path>` or the `MEMOFS_ROOT` environment variable, MemoFS defaults to `process.cwd()` (`~/.gemini/antigravity`), which fails with `UNEXPECTED_ERROR: Failed to create memory file parent directory.` because Antigravity protects its system app directory from process writes. Always pass `--root /absolute/path/to/your/project` (or `--root .` when launched from the project root) or set `MEMOFS_ROOT`.
+
 Depending on whether you are using **Antigravity IDE** or **Antigravity CLI**, follow the appropriate method below:
 
 #### Option A: Antigravity IDE (Project-Local Configuration)
 
-Add the MemoFS MCP server definition to **`.agents/mcp_settings.json`** in your project root:
+Add the MemoFS MCP server definition to **`.agents/mcp_settings.json`** (or `.agents/mcp_config.json`) in your project root:
 
 ```json
 {
   "mcpServers": {
     "memofs": {
       "command": "npx",
-      "args": ["-y", "@memofs/mcp-server"]
+      "args": ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
+    }
+  }
+}
+```
+
+*Or pass the workspace root dynamically via `env`:*
+
+```json
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"],
+      "env": {
+        "MEMOFS_ROOT": "/absolute/path/to/your/project"
+      }
     }
   }
 }
@@ -62,10 +84,10 @@ If `.agents/mcp_settings.json` does not exist yet, create it with the above cont
 
 #### Option B: Antigravity CLI (`agy`)
 
-Register the MCP server directly via the CLI:
+Register the MCP server directly via the CLI with the `--root` parameter:
 
 ```bash
-agy mcp add memofs -- npx -y @memofs/mcp-server
+agy mcp add memofs -- npx -y @memofs/mcp-server --root /absolute/path/to/your/project
 ```
 
 *Alternatively, run `agy config --edit` to edit your global CLI MCP profile.*

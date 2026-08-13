@@ -4,24 +4,12 @@
 		"memofs-cloud": {
 			"path": "../memofs-cloud",
 			"description": "Use for MemoFS Cloud app reference and implementation details"
-		},
-		"engram": {
-			"path": "../engram",
-			"description": "Use for engram app reference and implementation details"
 		}
 	},
 	"mcp": {
 		"memofs": {
 			"type": "local",
-			"command": [
-				"npx",
-				"-y",
-				"@memofs/mcp-server",
-				"--runtime",
-				"local",
-				"--root",
-				"."
-			],
+			"command": ["npx", "-y", "@memofs/mcp-server"],
 			"enabled": true
 		}
 	}

@@ -2,7 +2,7 @@
   <section id="how-it-works" class="how-it-works-section tek-reveal">
     <div class="container">
       <p class="tek-kicker">How it works</p>
-      <h2 class="tek-h2">Three commands. Your agent remembers.</h2>
+      <h2 class="tek-h2">Four commands. Your agent remembers.</h2>
       <ol class="steps">
         <li class="step">
           <span class="step-number">1</span>
@@ -47,6 +47,23 @@
         </li>
         <li class="step">
           <span class="step-number">3</span>
+          <div class="step-content">
+            <h3>Generate</h3>
+            <div class="terminal-mockup">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+              </div>
+              <div class="terminal-content">
+                <span class="terminal-prompt">$</span> npx memofs generate agent claude<br />
+                <span class="terminal-success">✓ Emitted CLAUDE.md, rules, hooks, and updated .mcp.json.</span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <span class="step-number">4</span>
           <div class="step-content">
             <h3>Record</h3>
             <div class="terminal-mockup">

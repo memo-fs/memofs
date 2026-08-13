@@ -4,7 +4,14 @@
  * @module handlers
  */
 
-import { isTaskType, TASK_TYPES, type TaskType } from "@memofs/core";
+import {
+	isSessionOutcome,
+	isTaskType,
+	SESSION_OUTCOMES,
+	type SessionOutcome,
+	TASK_TYPES,
+	type TaskType,
+} from "@memofs/core";
 import {
 	McpAuthorizationError,
 	McpValidationError,
@@ -295,6 +302,18 @@ function validateToolArguments(
 				"checkpointLabel",
 				128,
 			);
+			const outcomeRaw = optionalString(object.outcome, "outcome", 16);
+			let outcome: SessionOutcome | undefined;
+			if (outcomeRaw !== undefined) {
+				if (!isSessionOutcome(outcomeRaw)) {
+					throw new McpValidationError(
+						`outcome must be one of: ${SESSION_OUTCOMES.join(", ")}.`,
+					);
+				}
+				outcome = outcomeRaw;
+			}
+			const ephemeral = optionalBoolean(object.ephemeral, "ephemeral");
+			const reason = optionalString(object.reason, "reason", 4096);
 			return {
 				args: {
 					sessionId: requiredString(object.sessionId, "sessionId", 256),
@@ -303,6 +322,9 @@ function validateToolArguments(
 						? {}
 						: { extractDurableMemory }),
 					...(checkpointLabel === undefined ? {} : { checkpointLabel }),
+					...(outcome === undefined ? {} : { outcome }),
+					...(ephemeral === undefined ? {} : { ephemeral }),
+					...(reason === undefined ? {} : { reason }),
 				},
 				safety: "write",
 				workspaceId: scope.workspaceId,

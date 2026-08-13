@@ -11,6 +11,7 @@ import type { z } from "zod";
 import { exists, getRootDir, readTextIfExists } from "../cli/store-helpers";
 import type { CliOutput } from "../output/output";
 import {
+	CORE_MEMORY_SOFT_LIMIT,
 	MEMOFS_CLI_PATHS,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
@@ -62,6 +63,11 @@ export interface DoctorCommandOptions {
 	 * If true, throws errors on malformed lines during JSONL parsing.
 	 */
 	strict?: boolean | undefined;
+	/**
+	 * If true, automatically consolidates memory graph nodes and
+	 * physically moves deprecated memories to .memofs/archive/<id>.json.
+	 */
+	fix?: boolean | undefined;
 }
 
 /**
@@ -119,6 +125,22 @@ export async function runDoctorCommand(
 					level: "error",
 					code: "invalid_manifest",
 					message: `manifest.json: ${error instanceof Error ? error.message : String(error)}`,
+				});
+			}
+		}
+
+		spinner.update("Checking core memory size...");
+		const coreContent = await readTextIfExists(
+			options.memo.store,
+			MEMOFS_CLI_PATHS.coreMemory,
+		);
+		if (coreContent !== undefined) {
+			const lineCount = coreContent.split("\n").length;
+			if (lineCount > CORE_MEMORY_SOFT_LIMIT) {
+				issues.push({
+					level: "warning",
+					code: "core_memory_oversize",
+					message: `${MEMOFS_CLI_PATHS.coreMemory}: ${lineCount} lines (soft limit ${CORE_MEMORY_SOFT_LIMIT}). Core memory is injected in full on every session — trim it to keep context tight.`,
 				});
 			}
 		}
@@ -182,6 +204,46 @@ export async function runDoctorCommand(
 			}
 		}
 
+		spinner.update(
+			"Checking for deprecated memories and consolidation status...",
+		);
+		if (options.fix) {
+			await options.memo.consolidate({ apply: true });
+			const archiveResult = await options.memo.archiveDeprecated();
+			if (archiveResult.archived > 0) {
+				issues.push({
+					level: "warning",
+					code: "deprecated_memories_archived",
+					message: `Auto-archived ${archiveResult.archived} deprecated memory item${archiveResult.archived === 1 ? "" : "s"} to cold storage archive.`,
+				});
+			}
+		} else {
+			const nodesContent = await readTextIfExists(
+				options.memo.store,
+				MEMOFS_CLI_PATHS.graphNodes,
+			);
+			if (nodesContent) {
+				const nodeRecords = parseJsonl(nodesContent);
+				let deprecatedCount = 0;
+				for (const record of nodeRecords) {
+					if (
+						typeof record.value === "object" &&
+						record.value !== null &&
+						(record.value as { status?: string }).status === "deprecated"
+					) {
+						deprecatedCount++;
+					}
+				}
+				if (deprecatedCount > 0) {
+					issues.push({
+						level: "warning",
+						code: "deprecated_memories_pending_archive",
+						message: `${deprecatedCount} deprecated memory item${deprecatedCount === 1 ? " is" : "s are"} pending archive. Run "memofs doctor --fix" or "memofs consolidate --archive-deprecated" to move them to cold storage archive.`,
+					});
+				}
+			}
+		}
+
 		const result = {
 			ok: issues.filter((issue) => issue.level === "error").length === 0,
 			issues,
@@ -201,7 +263,7 @@ export async function runDoctorCommand(
 				);
 			} else {
 				options.output.success(
-					"MemoFS doctor passed — workspace repository is healthy.",
+					"MemoFS doctor passed — workspace memory is healthy.",
 				);
 			}
 		} else {

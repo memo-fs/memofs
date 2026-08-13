@@ -58,10 +58,11 @@ deno install npm:@memofs/mcp-server
 
 AI clients spawn the MCP server as a background process communicating over standard input/output (stdio).
 
-Two conventions apply across all platforms:
+Two conventions apply across most platforms:
 
-- **Project-scoped configs** (committed to the repo) omit `--root` — the client launches the server with the project root as its working directory, keeping the config portable across machines.
+- **Project-scoped configs** (committed to the repo) omit `--root` — clients like Claude Code, Codex, Cursor, and opencode launch the server with the project root as its working directory.
 - **Global / app-level configs** (in your home directory) include an absolute `--root` so the server knows which project's `.memofs/` to serve.
+- **Google Antigravity Exception**: Antigravity launches MCP server processes from its daemon app directory (`~/.gemini/antigravity`). Therefore, Antigravity **always requires** `--root /absolute/path/to/project` (or `MEMOFS_ROOT` env var) even in project-scoped configs like `.agents/mcp_settings.json` (or `.agents/mcp_config.json`) to prevent `UNEXPECTED_ERROR: Failed to create memory file parent directory.`.
 
 ::: code-group
 
@@ -113,13 +114,13 @@ args = ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
 }
 ```
 ```json [Antigravity]
-// Project: ./.agents/mcp_config.json
-// Global:  ~/.agents/mcp_config.json (add "--root", "/absolute/path/to/project")
+// Project: ./.agents/mcp_settings.json (or .agents/mcp_config.json - MUST include --root or MEMOFS_ROOT env var)
+// Global:  ~/.gemini/antigravity-cli/settings.json
 {
   "mcpServers": {
     "memofs": {
       "command": "npx",
-      "args": ["-y", "@memofs/mcp-server"]
+      "args": ["-y", "@memofs/mcp-server", "--root", "/absolute/path/to/your/project"]
     }
   }
 }
@@ -200,9 +201,9 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 
 | Tool | Safety | Description |
 |---|---|---|
-| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels, progressive disclosure, and optional `taskType` (`coding`, `debug`, `refactor`, `docs`, `general`) to bias recall toward task-relevant memories. |
-| `memofs.recall` | read | Semantic + lexical hybrid search over memory. |
-| `memofs.remember` | write | Persist a durable memory entry (decision, constraint, goal, preference, reference, summary, or note). |
+| `memofs.context` | read | Build task-ready memory context (core + recall + recent + notes). Supports compact/full detail levels, progressive disclosure, and optional `taskType` (`coding`, `debug`, `refactor`, `docs`, `general`) to bias recall toward task-relevant memories. Includes `[unverified]` banners when recall fragments exceed their kind-specific decay floors. |
+| `memofs.recall` | read | Semantic + lexical hybrid search over memory. Results may carry `stale: true` (anchored file changed since write) or `unverified: true` (memory exceeded its kind-specific decay floor) flags. |
+| `memofs.remember` | write | Persist a durable memory entry (decision, constraint, goal, preference, reference, summary, or note). Accepts an optional `anchor` parameter (`{ file, hash, symbol? }`) to bind the memory to a code file for drift detection. |
 | `memofs.consolidate` | write | Run a graph consolidation pass — merge duplicate entities and retire superseded facts. |
 
 > [!TIP]
@@ -217,7 +218,7 @@ The server exposes 10 model-facing tools — 4 memory verbs and 6 AgentFS sessio
 | `memofs_agent_session_write` | write | Write to a session working/output file. |
 | `memofs_agent_session_append` | write | Append to a session working/output file. |
 | `memofs_agent_session_extract` | read | Extract summary, durable memory, and follow-ups from a session. |
-| `memofs_agent_session_complete` | write | Extract, checkpoint, sync, and optionally persist durable memory. |
+| `memofs_agent_session_complete` | write | Extract, checkpoint, sync, and optionally persist durable memory. Accepts `outcome` (`"success"` \| `"failure"` \| `"aborted"`), `ephemeral` (boolean), and `reason` (string) to control the 5-row behavior matrix governing promotion, cleanup, and audit events. |
 
 ## Exposed MCP resources
 

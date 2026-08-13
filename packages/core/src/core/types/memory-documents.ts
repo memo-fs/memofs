@@ -189,6 +189,32 @@ export interface MemoFsManifest {
 		/** Path to snapshots index JSONL. */
 		index: string;
 	};
+	/**
+	 * Optional persisted hash cache for code-anchor drift detection. The
+	 * cache maps an anchored file's repo-relative path to its last
+	 * computed SHA-256 plus the epoch-millis timestamp at which the
+	 * entry was populated. Query-time reads consult this cache before
+	 * re-reading the file; a 5-minute TTL plus mtime-based invalidation
+	 * keep it fresh. Absent on manifests written by older runtimes;
+	 * absence is equivalent to an empty cache (cold start).
+	 */
+	anchorHashCache?: Record<string, AnchorHashCacheEntry>;
+}
+
+/**
+ * One entry in the persisted anchor-hash cache.
+ *
+ * @public
+ */
+export interface AnchorHashCacheEntry {
+	/** SHA-256 (hex) of the file's bytes at cache time. */
+	hash: string;
+	/** Epoch milliseconds at which the entry was populated. */
+	ts: number;
+	/** File modification timestamp in milliseconds when cached. */
+	mtimeMs?: number;
+	/** File size in bytes when cached. */
+	size?: number;
 }
 
 /**
@@ -203,8 +229,10 @@ export type MemoryEventType =
 	| "memory.decayed"
 	| "memory.forgotten"
 	| "memory.restored"
+	| "memory.archived"
 	| "memory.indexed"
 	| "memory.reindexed"
+	| "session.failed"
 	| "snapshot.created"
 	| "sync.started"
 	| "sync.completed"

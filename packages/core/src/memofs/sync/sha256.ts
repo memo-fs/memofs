@@ -24,3 +24,24 @@ export function sha256Hex(value: string): Promise<string> {
 	bytes.set(encoded);
 	return hashBytesHex(bytes);
 }
+
+/**
+ * Computes the sha256 hex digest of a byte buffer's exact bytes (no
+ * UTF-8 re-encoding). Use this for file-content hashing where the
+ * raw bytes are the integrity unit (code-anchor content hashing).
+ *
+ * @param bytes - The bytes to hash.
+ * @returns A promise for a 64-character lowercase hexadecimal digest.
+ *
+ * @public
+ */
+export function sha256BytesHex(bytes: Uint8Array): Promise<string> {
+	// `hashBytesHex` requires an `ArrayBuffer`-backed `Uint8Array` (not
+	// `SharedArrayBuffer`). `readFile` returns a `Buffer` (an
+	// `ArrayBufferLike`-backed view), so copy into a fresh `ArrayBuffer` to
+	// satisfy the contract without mutating the caller's bytes.
+	const buffer = new ArrayBuffer(bytes.byteLength);
+	const copy = new Uint8Array(buffer);
+	copy.set(bytes);
+	return hashBytesHex(copy);
+}

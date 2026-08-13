@@ -200,6 +200,7 @@ export function createStrategy(
 			name: self.name,
 			version: self.version,
 			syncLayer: sync,
+			rootDir: self.rootDir,
 		});
 		return createHybridStrategy({
 			local,
@@ -219,5 +220,6 @@ export function createStrategy(
 		autoBootstrap: resolved.autoBootstrap ?? false,
 		name: self.name,
 		version: self.version,
+		rootDir: self.rootDir,
 	});
 }

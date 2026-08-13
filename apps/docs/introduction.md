@@ -38,25 +38,8 @@ MemoFS Cloud gives you a file replica, managed MCP endpoint, and team workspaces
 2. **Every capability has a deterministic fallback.** Retrieval, graph extraction, and reranking all work with zero API keys out of the box (BM25 + rule-based parsing); adding an LLM/embedding adapter upgrades them — see [Configure Intelligence](/configure/intelligence).
 3. **Distribution matches the agent.** Agents with lifecycle hooks (Claude Code, Codex, opencode) get memory injected automatically; everything else connects over MCP — see [MCP overview](/packages/mcp/).
 
-## Quick install
+## Quickstart & Interactive Setup
 
-::: code-group
+<InteractiveQuickstart />
 
-```sh [npm]
-npm install -D @memofs/cli
-npx memofs init
-```
-
-```sh [pnpm]
-pnpm add -D @memofs/cli
-pnpm memofs init
-```
-
-```sh [bun]
-bun add -d @memofs/cli
-bunx memofs init
-```
-
-:::
-
-This creates `.memofs/` in your project. From here, jump to whichever path above matches what you're building. Full flag reference: [CLI overview](/packages/cli/).
+From here, jump to whichever path above matches what you're building. Full flag reference: [CLI overview](/packages/cli/).

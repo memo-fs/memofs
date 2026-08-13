@@ -91,10 +91,15 @@ export const MEMORY_PATHS = CANONICAL_MEMOFS_FILES;
 
 export type CanonicalMemoFSFile = (typeof CANONICAL_MEMOFS_FILES)[number];
 export type SnapshotFilePath = `${typeof MEMOFS_DIR}/snapshots/${string}.json`;
-export type MemoryPath = CanonicalMemoFSFile | SnapshotFilePath;
+export type ArchiveFilePath = `${typeof MEMOFS_DIR}/archive/${string}.json`;
+export type MemoryPath =
+	| CanonicalMemoFSFile
+	| SnapshotFilePath
+	| ArchiveFilePath;
 
 const CANONICAL_MEMOFS_FILE_SET = new Set<string>(CANONICAL_MEMOFS_FILES);
 const SNAPSHOT_FILE_PATTERN = /^\.memofs\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
+const ARCHIVE_FILE_PATTERN = /^\.memofs\/archive\/[a-zA-Z0-9_.-]+\.json$/;
 
 /**
  * Checks if a value is a valid memory path.
@@ -105,7 +110,9 @@ const SNAPSHOT_FILE_PATTERN = /^\.memofs\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
 export function isMemoryPath(path: unknown): path is MemoryPath {
 	return (
 		typeof path === "string" &&
-		(CANONICAL_MEMOFS_FILE_SET.has(path) || SNAPSHOT_FILE_PATTERN.test(path))
+		(CANONICAL_MEMOFS_FILE_SET.has(path) ||
+			SNAPSHOT_FILE_PATTERN.test(path) ||
+			ARCHIVE_FILE_PATTERN.test(path))
 	);
 }
 
@@ -150,7 +157,7 @@ export function assertMemoryPath(path: unknown): asserts path is MemoryPath {
 		throw new MemoryPathError(`Unsupported MemoFS path: ${path}`, {
 			path,
 			supported: CANONICAL_MEMOFS_FILES,
-			dynamic: `${MEMOFS_DIR}/snapshots/<safe-name>.json`,
+			dynamic: `${MEMOFS_DIR}/snapshots/<safe-name>.json or ${MEMOFS_DIR}/archive/<safe-name>.json`,
 		});
 	}
 }
@@ -181,6 +188,32 @@ export function createSnapshotPath(snapshotId: string): SnapshotFilePath {
 	return path;
 }
 
+/**
+ * Creates an archive path from a memory ID.
+ *
+ * @param memoryId - The memory ID to create an archive path for.
+ * @returns A valid {@link ArchiveFilePath}.
+ * @throws {@link MemoryPathError} If the memory ID is invalid.
+ */
+export function createArchivePath(memoryId: string): ArchiveFilePath {
+	if (typeof memoryId !== "string" || memoryId.trim().length === 0) {
+		throw new MemoryPathError("memoryId must be a non-empty string.", {
+			memoryId,
+		});
+	}
+
+	const normalized = memoryId.trim();
+	if (!/^[a-zA-Z0-9_.-]+$/.test(normalized)) {
+		throw new MemoryPathError("memoryId contains unsupported characters.", {
+			memoryId,
+		});
+	}
+
+	const path = `${MEMOFS_DIR}/archive/${normalized}.json` as ArchiveFilePath;
+	assertMemoryPath(path);
+	return path;
+}
+
 export type PathKind =
 	| "manifest"
 	| "core"
@@ -193,7 +226,8 @@ export type PathKind =
 	| "graph-edge"
 	| "snapshot-index"
 	| "connector"
-	| "snapshot";
+	| "snapshot"
+	| "archive";
 
 /**
  * Determines the kind of memory path (manifest, core, notes, etc.).
@@ -228,6 +262,7 @@ export function memoryTypeFromPath(path: MemoryPath): PathKind {
 		case CONNECTORS_PATH:
 			return "connector";
 		default:
+			if (ARCHIVE_FILE_PATTERN.test(path)) return "archive";
 			return "snapshot";
 	}
 }

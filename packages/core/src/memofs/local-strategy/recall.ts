@@ -4,6 +4,8 @@ import { searchMemoryText } from "../../core/search/search-memory";
 import type { JsonObject } from "../../core/types/json";
 import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
+import { applyAnchorDrift } from "./anchor-drift";
+import { applyDecay } from "./decay";
 import { candidateShape, fingerprint, message } from "./helpers";
 import type { LocalStrategyContext } from "./types";
 
@@ -82,6 +84,54 @@ export async function localRecall(
 		reranker: ctx.reranker,
 		...(vectorWeight === undefined ? {} : { vectorWeight }),
 	});
+
+	// Code-anchor drift detection runs AFTER candidate merge so every
+	// recalled item that has a stored anchor gets its file hashed and
+	// compared. Mismatch OR file-deleted → status "stale" + RecallItem.stale
+	// + score *= 0.5 + graph node transitioned. Items without an anchor
+	// are skipped (backward-compat). The cache is process-scoped and shared
+	// across calls within the strategy (5-minute TTL).
+	if (ctx.anchorByMemoryId.size > 0) {
+		await applyAnchorDrift({
+			items,
+			anchorByMemoryId: ctx.anchorByMemoryId,
+			cache: ctx.anchorHashCache,
+			now: Date.now(),
+			rootDir: ctx.rootDir,
+			graphStore: ctx.graphStore,
+			graphNodes: ctx.graphNodes,
+			graphNodesByMemoryId: ctx.graphNodesByMemoryId,
+			...(ctx.options.logger === undefined
+				? {}
+				: { logger: ctx.options.logger }),
+		});
+		// persist the (possibly mutated) cache back to
+		// `.memofs/manifest.json` so a fresh process can warm-start from the
+		// prior session's entries instead of re-hashing every anchored file
+		// on first recall. Best-effort; failures are logged.
+		await ctx.flushAnchorHashCache();
+	}
+
+	// Cognitive decay runs AFTER drift detection so an item that is BOTH
+	// drift-stale AND time-decayed gets both flags + compounded demotion
+	// (`*= 0.5 * 0.6`). For items with a `kind` + age past their
+	// EXPIRY_DAYS floor: status "unverified" + RecallItem.unverified +
+	// metadata.unverified + score *= 0.6 + graph node transitioned.
+	// Items without kind/createdAt or under the floor are skipped
+	// (backward-compat). Pure time check — no I/O, no cache.
+	if (ctx.memoryMetaByMemoryId.size > 0) {
+		await applyDecay({
+			items,
+			memoryMetaByMemoryId: ctx.memoryMetaByMemoryId,
+			now: Date.now(),
+			graphStore: ctx.graphStore,
+			graphNodes: ctx.graphNodes,
+			graphNodesByMemoryId: ctx.graphNodesByMemoryId,
+			...(ctx.options.logger === undefined
+				? {}
+				: { logger: ctx.options.logger }),
+		});
+	}
 
 	return { items };
 }

@@ -12,9 +12,15 @@
  * @internal
  */
 
+import type {
+	ArchiveDeprecatedResult,
+	RestoreMemoryResult,
+} from "./local-strategy/archive";
+import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import type { FileSyncLayer } from "./sync/file-replication";
 import type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
@@ -194,7 +200,7 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 		async completeAgentSession(
 			input: AgentSessionCompleteInput,
 			signal?: AbortSignal,
-		): Promise<AgentSessionExtractResult & { durableMemoryWritten: boolean }> {
+		): Promise<AgentSessionCompleteResult> {
 			return local.completeAgentSession(input, signal);
 		},
 
@@ -260,6 +266,21 @@ export function createHybridStrategy(options: HybridStrategyOptions) {
 			signal?: AbortSignal,
 		): Promise<ConsolidateMemoryResult> {
 			return local.consolidateMemory(input, signal);
+		},
+
+		async migrateAnchors(): Promise<MigrateAnchorsResult> {
+			return local.migrateAnchors();
+		},
+
+		async archiveDeprecated(): Promise<ArchiveDeprecatedResult> {
+			return local.archiveDeprecated();
+		},
+
+		async restoreMemory(
+			id: string,
+			signal?: AbortSignal,
+		): Promise<RestoreMemoryResult> {
+			return local.restoreMemory(id, signal);
 		},
 
 		// --- Sync surface: the four file-replica methods (§7) ---------------

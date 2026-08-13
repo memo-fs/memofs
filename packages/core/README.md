@@ -15,6 +15,13 @@ MemoFS core memory runtime and provider-neutral contracts for AI agents.
 
 **Unified core memory runtime.** Core memory contracts, records, chunks, source references, manifest validation, local protocol helpers, and provider-neutral runtime primitives — the `MemoFS` client, hybrid recall (BM25 + fuzzy + vector channel via file-based and in-memory stores), graph, snapshots, sync, and the provider-neutral `MemoryEmbedder` / `Reranker` / `RecallStore` contracts that adapters (OpenAI, Voyage, Transformers) implement.
 
+**Memory intelligence features:**
+
+- **Code anchoring & drift detection** — bind memories to source files via SHA-256 hash; stale memories are rank-demoted at recall time when the anchored file changes.
+- **Memory decay floors** — kind-specific expiry thresholds (30–365 days) transition old memories to `unverified` status for re-verification.
+- **Semantic GC** — archive deprecated memories to `.memofs/archive/` cold storage; restore on demand.
+- **Session outcomes** — `success` / `failure` / `aborted` outcome enum on `complete()` with a 5-row behavior matrix governing durable memory promotion and workspace cleanup.
+
 ## Installation
 
 ```bash

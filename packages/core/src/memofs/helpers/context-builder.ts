@@ -26,6 +26,8 @@ import { expandContext } from "./expand-context";
 import {
 	AGENT_CONTEXT_DIRECTIVE,
 	addAffordances,
+	buildStaleRecallBanner,
+	buildUnverifiedRecallBanner,
 	renderEntities,
 	renderRecall,
 	renderRecent,
@@ -221,10 +223,12 @@ export async function assembleContext(
 		? recallItems.slice(0, COMPACT_BUDGET.recallItems)
 		: recallItems;
 	if (recallSlice.length > 0) {
+		const staleBanner = buildStaleRecallBanner(recallSlice);
+		const unverifiedBanner = buildUnverifiedRecallBanner(recallSlice);
 		negotiable.push({
 			type: "recall",
 			title: "Relevant Recall",
-			content: renderRecall(recallSlice),
+			content: `${staleBanner}${unverifiedBanner}${renderRecall(recallSlice)}`,
 			weight: SECTION_WEIGHTS.recall,
 		});
 	}

@@ -7,7 +7,8 @@
       </header>
 
       <div class="bento-grid">
-        <div class="bento-card bento-wide tek-reveal" data-delay="1">
+        <!-- Card 1: File-First -->
+        <div class="bento-card tek-reveal" data-delay="1">
           <div class="bento-content">
             <p class="tek-kicker">File-first</p>
             <h3>Open it. Diff it. Commit it.</h3>
@@ -31,25 +32,21 @@
                   <div class="file-tree-item indent-2">notes.md</div>
                   <div class="file-tree-item indent-1 folder">events/</div>
                   <div class="file-tree-item indent-2">memory-events.jsonl</div>
-                  <div class="file-tree-item indent-2">conversations.jsonl</div>
                   <div class="file-tree-item indent-1 folder">indexes/</div>
                   <div class="file-tree-item indent-2">chunks.jsonl</div>
-                  <div class="file-tree-item indent-2">embeddings.jsonl</div>
                   <div class="file-tree-item indent-1 folder">graph/</div>
                   <div class="file-tree-item indent-2">nodes.jsonl</div>
                   <div class="file-tree-item indent-2">edges.jsonl</div>
-                  <div class="file-tree-item indent-1">connectors.json</div>
-                  <div class="file-tree-item indent-1 folder">snapshots/</div>
-                  <div class="file-tree-item indent-2">snapshots.jsonl</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="bento-card bento-wide tek-reveal" data-delay="2">
+        <!-- Card 2: Semantic Recall -->
+        <div class="bento-card tek-reveal" data-delay="2">
           <div class="bento-content">
-            <p class="tek-kicker gold">Recall</p>
+            <p class="tek-kicker gold">Recall Engine</p>
             <h3>The right memory, fetched for you</h3>
             <p>
               Stop scrolling through old prompts. MemoFS indexes your memory and returns the
@@ -72,29 +69,78 @@
                     <span class="recall-score">0.94</span>
                     <div class="recall-result-body">
                       <span class="recall-result-title">core.md · Auth decisions</span>
-                      <span class="recall-result-snippet"
-                        >JWT with refresh rotation. Access tokens expire in 15min…</span
-                      >
+                      <span class="recall-result-snippet">JWT with refresh rotation. Access tokens expire in 15min…</span>
                     </div>
                   </div>
                   <div class="recall-result">
                     <span class="recall-score">0.87</span>
                     <div class="recall-result-body">
                       <span class="recall-result-title">notes.md · Auth flow notes</span>
-                      <span class="recall-result-snippet"
-                        >Token validation middleware checks expiry and signature…</span
-                      >
+                      <span class="recall-result-snippet">Token validation middleware checks expiry and signature…</span>
                     </div>
                   </div>
-                  <div class="recall-result">
-                    <span class="recall-score">0.71</span>
-                    <div class="recall-result-body">
-                      <span class="recall-result-title">conversations.jsonl · Session 42</span>
-                      <span class="recall-result-snippet"
-                        >User decided to switch from session-based to JWT auth…</span
-                      >
-                    </div>
-                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Zero-Key Fallback -->
+        <div class="bento-card tek-reveal" data-delay="3">
+          <div class="bento-content">
+            <p class="tek-kicker cyan">Zero-Key Mode</p>
+            <h3>Works 100% offline with zero API keys</h3>
+            <p>
+              Built-in BM25 search and rule-based parser require zero external network calls or subscriptions. Upgrade to Voyage or OpenAI embeddings whenever you choose.
+            </p>
+            <a href="/configure/intelligence" class="showcase-link">
+              Explore Intelligence Drivers →
+            </a>
+          </div>
+          <div class="bento-visual">
+            <div class="visual-frame cyan">
+              <div class="fallback-mockup">
+                <div class="fallback-badge">OFFLINE READY</div>
+                <div class="fallback-code">
+                  <code>const memo = new MemoFS({<br/>
+&nbsp;&nbsp;intelligence: { driver: "bm25" }<br/>
+}); // 0 API keys required</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: 4-Layer Memory -->
+        <div class="bento-card tek-reveal" data-delay="4">
+          <div class="bento-content">
+            <p class="tek-kicker gold">Hybrid Memory</p>
+            <h3>Four integrated memory layers</h3>
+            <p>
+              Unifies active working context, structured facts, semantic vector recall, and knowledge graph relations under one API surface.
+            </p>
+            <a href="/packages/core/concepts" class="showcase-link">
+              Read Core Architecture →
+            </a>
+          </div>
+          <div class="bento-visual">
+            <div class="visual-frame gold">
+              <div class="layers-mockup">
+                <div class="layer-item">
+                  <span class="layer-tag cyan">Layer 1</span>
+                  <span class="layer-name">Working Memory (.memofs/core.md)</span>
+                </div>
+                <div class="layer-item">
+                  <span class="layer-tag gold">Layer 2</span>
+                  <span class="layer-name">Fact Vault (.memofs/notes.md)</span>
+                </div>
+                <div class="layer-item">
+                  <span class="layer-tag cyan">Layer 3</span>
+                  <span class="layer-name">Vector Index (.memofs/indexes/)</span>
+                </div>
+                <div class="layer-item">
+                  <span class="layer-tag gold">Layer 4</span>
+                  <span class="layer-name">Knowledge Graph (.memofs/graph/)</span>
                 </div>
               </div>
             </div>
@@ -337,6 +383,81 @@
   font-size: 12px;
   color: var(--vp-c-text-2);
   line-height: 1.5;
+}
+
+.fallback-mockup {
+  background: #0d1117;
+  padding: 24px 20px;
+  border: 1px solid var(--vp-c-divider);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.fallback-badge {
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tek-c-cyan);
+  background: color-mix(in srgb, var(--tek-c-cyan) 15%, transparent);
+  padding: 4px 10px;
+  border-radius: 4px;
+  width: fit-content;
+  letter-spacing: 0.06em;
+}
+
+.fallback-code {
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  color: #c9d1d9;
+  line-height: 1.7;
+}
+
+.layers-mockup {
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+}
+
+.layer-tag {
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.layer-tag.cyan {
+  color: var(--tek-c-cyan);
+  background: color-mix(in srgb, var(--tek-c-cyan) 15%, transparent);
+}
+
+.layer-tag.gold {
+  color: var(--tek-c-gold);
+  background: color-mix(in srgb, var(--tek-c-gold) 15%, transparent);
+}
+
+.layer-name {
+  font-family: var(--vp-font-family-mono);
+  font-size: 12.5px;
+  color: var(--vp-c-text-1);
 }
 
 @media (max-width: 860px) {

@@ -16,8 +16,6 @@
  * - `{{hooksNote}}` — lead-in note for the hooks-installed case (or empty)
  * - `{{stepOneText}}` — step-1 bullet text (varies by hooksInstalled)
  * - `{{rulesDir}}` — platform-local rules directory (e.g. `.agents/rules`)
- * - `{{mcpLabel}}` — MCP config label (e.g. "MemoFS MCP server config (project MCP config)")
- * - `{{mcpPath}}` — MCP config path (e.g. `.mcp.json`, `~/.codex/config.toml`)
  * - `{{rules}}` — optional behavioral rules section; replaced with empty
  *   string or a `## Behavioral Rules` block
  *

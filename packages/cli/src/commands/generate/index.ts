@@ -26,8 +26,8 @@ export type {
 } from "./agent-rules";
 export {
 	AGENT_RULES_TARGETS,
+	agentsMdExistsAt,
 	emitAgentRules,
-	MAX_AGENT_RULES_LINES,
 	parseAgentRulesTarget,
 	runGenerateAgentRulesCommand,
 } from "./agent-rules";

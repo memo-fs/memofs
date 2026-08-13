@@ -24,14 +24,22 @@ export {
 	createLazyLocalEmbedder,
 	type LazyLocalEmbedderOptions,
 } from "./local-embedder";
+export type {
+	ArchiveDeprecatedResult,
+	ArchivedMemoryRecord,
+	RestoreMemoryResult,
+} from "./local-strategy/archive";
+export type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 export { MemoFS } from "./memo-fs";
-export { sha256Hex } from "./sync/sha256";
+export { sha256BytesHex, sha256Hex } from "./sync/sha256";
 export type {
 	AgentSessionCompleteInput,
+	AgentSessionCompleteResult,
 	AgentSessionExtractResult,
 	AgentSessionFileInput,
 	AgentSessionResult,
 	AgentSessionStartInput,
+	AnchorRef,
 	ConsolidateMemoryInput,
 	ConsolidateMemoryResult,
 	GraphEdgeInput,
@@ -69,7 +77,10 @@ export type {
 	WriteMemoryResult,
 } from "./types";
 export {
+	isSessionOutcome,
 	isTaskType,
+	SESSION_OUTCOMES,
+	type SessionOutcome,
 	TASK_TYPES,
 	type TaskType,
 } from "./types";

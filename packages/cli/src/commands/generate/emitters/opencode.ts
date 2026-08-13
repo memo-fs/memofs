@@ -51,6 +51,10 @@ function buildPluginContent(modules: readonly HookModule[]): string {
 		" * opencode cannot inject context automatically — the agent loads memory",
 		" * itself via the memofs MCP tools (see AGENTS.md).",
 		" *",
+		" * The hook dispatches via `npx -y @memofs/cli` when the `memofs` CLI is not",
+		" * on PATH so the zx `.nothrow()` calls don't silently exit on",
+		" * `memofs: not found` on hosts without a global CLI install.",
+		" *",
 		" * This file is intentionally dependency-free (no @opencode-ai/plugin import)",
 		" * so it works without installing extra packages. If you want types, add",
 		" * @opencode-ai/plugin to .opencode/package.json and change the export to:",
@@ -66,20 +70,24 @@ function buildPluginContent(modules: readonly HookModule[]): string {
 	if (hasSessionStart) {
 		lines.push(
 			'\t\t\tif (event.type === "session.created") {',
+			'\t\t\t\tconst hasMemofs = (await $`command -v memofs`.quiet().nothrow().text()).trim() !== "";',
+			"\t\t\t\tconst runMemofs = (args) => hasMemofs",
+			`\t\t\t\t\t? $\`memofs \${args}\`.quiet().nothrow()`,
+			`\t\t\t\t\t: $\`npx -y @memofs/cli \${args}\`.quiet().nothrow();`,
 			"\t\t\t\tif (process.env.MEMOFS_API_KEY) {",
-			"\t\t\t\t\tawait $`memofs cloud sync pull`.quiet().nothrow();",
+			'\t\t\t\t\tawait runMemofs(["cloud", "sync", "pull"]);',
 			"\t\t\t\t}",
-			"\t\t\t\t// Session boundary marker for `memofs status` compliance checks.",
-			'\t\t\t\tawait $`memofs context --query "project context" --task-type general --mark-session-start`',
-			"\t\t\t\t\t.quiet()",
-			"\t\t\t\t\t.nothrow();",
+			'\t\t\t\tawait runMemofs(["context", "--query", "project context", "--task-type", "general", "--mark-session-start"]);',
 			"\t\t\t}",
 		);
 	}
 	if (hasStop) {
 		lines.push(
 			'\t\t\tif (event.type === "session.idle") {',
-			"\t\t\t\tconst status = await $`memofs status`.quiet().nothrow().text();",
+			'\t\t\t\tconst hasMemofs = (await $`command -v memofs`.quiet().nothrow().text()).trim() !== "";',
+			"\t\t\t\tconst status = hasMemofs",
+			"\t\t\t\t\t? await $`memofs status`.quiet().nothrow().text()",
+			"\t\t\t\t\t: await $`npx -y @memofs/cli status`.quiet().nothrow().text();",
 			"\t\t\t\tawait client.tui",
 			"\t\t\t\t\t.showToast({",
 			'\t\t\t\t\t\tbody: { message: status.trim().slice(0, 500), variant: "info" },',
