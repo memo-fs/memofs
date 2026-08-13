@@ -146,8 +146,9 @@ export function buildStaleRecallBanner(items: RecallItem[]): string {
  * @returns A banner line (with trailing newline) or the empty string.
  */
 export function buildUnverifiedRecallBanner(items: RecallItem[]): string {
-	const unverifiedCount =
-		items.filter((item) => item.unverified === true).length;
+	const unverifiedCount = items.filter(
+		(item) => item.unverified === true,
+	).length;
 	if (unverifiedCount === 0) return "";
 	return `[unverified] ${unverifiedCount} of ${items.length} recall fragments are past their kind expiry floor — re-verify each before trusting.\n\n`;
 }

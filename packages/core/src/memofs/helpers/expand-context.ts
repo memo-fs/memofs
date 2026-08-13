@@ -92,8 +92,7 @@ export async function expandContext(
 		expandedRecallItems = entry.recallItems;
 		if (expandedRecallItems.length > 0) {
 			const staleBanner = buildStaleRecallBanner(expandedRecallItems);
-			const unverifiedBanner =
-				buildUnverifiedRecallBanner(expandedRecallItems);
+			const unverifiedBanner = buildUnverifiedRecallBanner(expandedRecallItems);
 			negotiable.push({
 				type: "recall",
 				title: "Relevant Recall (expanded)",

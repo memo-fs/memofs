@@ -38,8 +38,8 @@
  * @internal
  */
 
-import type { GraphNode } from "../../graph/types";
 import type { Logger } from "../../core/types/logger";
+import type { GraphNode } from "../../graph/types";
 import type { GraphNodeInput, MemoryKind, RecallItem } from "../types";
 import type { LocalGraphStore } from "./types";
 
@@ -178,11 +178,7 @@ export async function applyDecay(args: {
 			// deleted, conflicted, stale, or unverified are left as-is:
 			// a deliberately-retired or drift-flagged fact should not be
 			// re-transitioned by the time-only decay floor.
-			if (
-				node.status !== undefined &&
-				node.status !== "active"
-			)
-				continue;
+			if (node.status !== undefined && node.status !== "active") continue;
 			const updated: GraphNodeInput = { ...node, status: "unverified" };
 			args.graphNodes.set(nodeId, updated);
 			nodesToUpsert.push(updated);

@@ -11,11 +11,11 @@ import { describe, expect, it } from "vitest";
 import { type GraphNodeInput, InMemoryGraphStore } from "../../src/index";
 import {
 	applyDecay,
-	type MemoryDecayMeta,
 	EXPIRY_DAYS,
 	isMemoryDecayed,
-	UNVERIFIED_DEMOTION_FACTOR,
+	type MemoryDecayMeta,
 	MS_PER_DAY,
+	UNVERIFIED_DEMOTION_FACTOR,
 } from "../../src/memofs/local-strategy/decay";
 import type { MemoryKind, RecallItem } from "../../src/memofs/types";
 
@@ -28,9 +28,7 @@ function makeItem(overrides: Partial<RecallItem> = {}): RecallItem {
 	};
 }
 
-function makeMeta(
-	overrides: Partial<MemoryDecayMeta> = {},
-): MemoryDecayMeta {
+function _makeMeta(overrides: Partial<MemoryDecayMeta> = {}): MemoryDecayMeta {
 	return {
 		kind: "note",
 		createdAt: new Date().toISOString(),
@@ -69,9 +67,7 @@ describe("decay — EXPIRY_DAYS table", () => {
 				`EXPIRY_DAYS must cover kind "${kind}"`,
 			).toBeDefined();
 		}
-		expect(Object.keys(EXPIRY_DAYS).sort()).toEqual(
-			[...kinds].sort(),
-		);
+		expect(Object.keys(EXPIRY_DAYS).sort()).toEqual([...kinds].sort());
 	});
 
 	it("matches the canonical per-kind expiry floor values", () => {
@@ -96,9 +92,7 @@ describe("decay — isMemoryDecayed", () => {
 
 	it("returns true one millisecond past the kind floor", () => {
 		const floor = EXPIRY_DAYS.note;
-		const createdAt = new Date(
-			now - (floor * MS_PER_DAY + 1),
-		).toISOString();
+		const createdAt = new Date(now - (floor * MS_PER_DAY + 1)).toISOString();
 		expect(isMemoryDecayed({ kind: "note", createdAt }, now)).toBe(true);
 	});
 
@@ -106,9 +100,7 @@ describe("decay — isMemoryDecayed", () => {
 		// 31 days old: note decays, decision does not.
 		const createdAt = new Date(now - 31 * MS_PER_DAY).toISOString();
 		expect(isMemoryDecayed({ kind: "note", createdAt }, now)).toBe(true);
-		expect(
-			isMemoryDecayed({ kind: "decision", createdAt }, now),
-		).toBe(false);
+		expect(isMemoryDecayed({ kind: "decision", createdAt }, now)).toBe(false);
 	});
 
 	it("returns false when kind is undefined (backward-compat)", () => {
@@ -249,7 +241,12 @@ describe("decay — applyDecay", () => {
 		const createdAt = new Date(now - 31 * MS_PER_DAY).toISOString();
 
 		// Verify each non-active status is skipped (no upsert).
-		for (const status of ["deprecated", "deleted", "stale", "unverified"] as const) {
+		for (const status of [
+			"deprecated",
+			"deleted",
+			"stale",
+			"unverified",
+		] as const) {
 			const graphStore = new InMemoryGraphStore();
 			const graphNodes = new Map<string, GraphNodeInput>();
 			const graphNodesByMemoryId = new Map<string, string[]>();
@@ -279,7 +276,10 @@ describe("decay — applyDecay", () => {
 			});
 
 			expect(upsertCalls, `status "${status}" must not trigger upsert`).toBe(0);
-			expect(graphNodes.get(node.id)?.status, `status "${status}" must be preserved`).toBe(status);
+			expect(
+				graphNodes.get(node.id)?.status,
+				`status "${status}" must be preserved`,
+			).toBe(status);
 		}
 	});
 
@@ -365,7 +365,10 @@ describe("decay — applyDecay", () => {
 
 		const item = makeItem({ id: "mem_nokind", score: 1 });
 		const meta = new Map<string, MemoryDecayMeta>([
-			["mem_nokind", { kind: undefined, createdAt } as unknown as MemoryDecayMeta],
+			[
+				"mem_nokind",
+				{ kind: undefined, createdAt } as unknown as MemoryDecayMeta,
+			],
 		]);
 
 		await applyDecay({

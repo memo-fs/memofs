@@ -23,9 +23,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
-	type MemoryEvent,
 	MEMORY_EVENTS_PATH,
 	MemoFS,
+	type MemoryEvent,
 	readMemoryEvents,
 } from "../../src/index";
 import { UNVERIFIED_REVERIFY_MESSAGE } from "../../src/memofs/helpers/renderers";
@@ -45,15 +45,12 @@ async function backdateMemoryEvent(
 ): Promise<void> {
 	const events = await readMemoryEvents(store);
 	const rewritten = events.map((event) => {
-		if (
-			event.type === "memory.created" &&
-			event.metadata?.id === memoryId
-		) {
+		if (event.type === "memory.created" && event.metadata?.id === memoryId) {
 			return { ...event, timestamp: newTimestamp } as MemoryEvent;
 		}
 		return event;
 	});
-	const jsonl = rewritten.map((e) => JSON.stringify(e)).join("\n") + "\n";
+	const jsonl = `${rewritten.map((e) => JSON.stringify(e)).join("\n")}\n`;
 	await store.write(MEMORY_EVENTS_PATH, jsonl);
 }
 
@@ -61,7 +58,10 @@ async function backdateMemoryEvent(
  * Cold-starts a fresh MemoFS against the same rootDir. The caller must
  * dispose the returned store in a `finally` block.
  */
-function coldStart(rootDir: string): { memo: MemoFS; store: NodeFsMemoryStore } {
+function coldStart(rootDir: string): {
+	memo: MemoFS;
+	store: NodeFsMemoryStore;
+} {
 	const store = new NodeFsMemoryStore({ rootDir });
 	const memo = new MemoFS({ mode: "local", store, rootDir });
 	return { memo, store };
@@ -298,9 +298,7 @@ describe("cognitive decay floor end-to-end", () => {
 			// The structured items[] still carry the typed fields for programmatic
 			// consumers (the banner is the rendered-text counterpart, not a
 			// replacement for the typed payload).
-			const decayedHit = decayedContext.items?.find(
-				(i) => i.id === result.id,
-			);
+			const decayedHit = decayedContext.items?.find((i) => i.id === result.id);
 			expect(decayedHit?.unverified).toBe(true);
 		} finally {
 			await coldStore.dispose();

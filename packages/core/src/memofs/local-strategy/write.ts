@@ -283,7 +283,7 @@ export async function indexDocument(
 		await ctx.options.recallStore.upsert(docs);
 	} catch (error) {
 		// Best effort.
-		ctx.options.logger?.warn("vector indexing failed (best-effort)", {
+		ctx.options.logger?.warn("vector indexing failed", {
 			error: message(error),
 			sourceType: meta.sourceType,
 			sourceId: meta.sourceId,
@@ -328,7 +328,7 @@ export async function autoExtractGraph(
 				ctx.graphNodes.set(node.id, toGraphNodeInput(node));
 				ctx.indexLexical({
 					id: `graph:${node.id}`,
-					text: `${node.label}${node.summary ? ` ${node.summary}` : ""}`,
+					text: `${node.label}${node?.summary ?? ""}`,
 				});
 			}
 			// refresh the memory-id → graph-node reverse index so the
@@ -345,7 +345,7 @@ export async function autoExtractGraph(
 				});
 			} catch (error) {
 				// Skip an edge that the store rejects.
-				ctx.options.logger?.warn("graph edge upsert rejected (best-effort)", {
+				ctx.options.logger?.warn("graph edge upsert rejected", {
 					error: message(error),
 					edgeType: edge.type,
 					from: edge.from,
@@ -355,7 +355,7 @@ export async function autoExtractGraph(
 		}
 	} catch (error) {
 		// Best effort.
-		ctx.options.logger?.warn("auto graph extraction failed (best-effort)", {
+		ctx.options.logger?.warn("auto graph extraction failed", {
 			error: message(error),
 			sourceType: source.sourceType,
 			sourceId: source.sourceId,
