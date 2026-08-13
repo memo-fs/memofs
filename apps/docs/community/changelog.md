@@ -17,6 +17,8 @@ All notable changes to MemoFS & MemoFS Cloud are documented here.
 
 ## v1.3.0-beta.1 — August 13, 2026
 
+Anchor drift detection, memory decay floors, semantic GC archive/restore, and session outcomes.
+
 ### Core
 
 #### Added
