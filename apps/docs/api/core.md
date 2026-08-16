@@ -1,85 +1,321 @@
-# `@memofs/core` API
+---
+title: "@memofs/core API Reference"
+description: "Comprehensive technical API reference for @memofs/core, @memofs/core/node-fs, and @memofs/core/cloud-client."
+---
 
-`@memofs/core` provides the `MemoFS` client, provider-neutral contracts, and
-runtime-safe memory stores. Start with the [core package guide](../packages/core/)
-for setup and runtime boundaries.
+# `@memofs/core` API Reference
 
-## `MemoFS`
+Complete TypeScript API reference for all exported classes, interfaces, types, constants, and functions across the three subpath entry points.
+
+## Subpath Overview
 
 ```ts
-const memo = new MemoFS(config);
+// 1. Root entry (Worker-safe & environment-agnostic)
+import { MemoFS, RemoteBlobMemoryStore, InMemoryMemoryStore } from "@memofs/core";
+
+// 2. Node.js filesystem adapter
+import { createNodeMemoFs, createNodeFsMemoryStore, NodeFsMemoryStore } from "@memofs/core/node-fs";
+
+// 3. Cloud replication client
+import { createMemoFsCloudClient, createMemoFsCloudClientFromEnv } from "@memofs/core/cloud-client";
 ```
 
-The client groups document operations under `core`, `notes`, `conversations`,
-`graph`, `snapshots`, `agentfs`, and (in hybrid mode) `sync`.
+## 1. Primary Client & Factories
 
-- `memo.core.read()` / `memo.core.update(content)` manage Core Memory.
-- `memo.notes.read()` / `memo.notes.record(note)` manage timestamped notes.
-- `memo.recall(query, options)` and `memo.context(input)` retrieve memory.
-- `memo.writeMemory(input)` records a classified memory entry.
-- `memo.snapshots.create()`, `list()`, and `restore(id)` manage checkpoints.
-- `memo.validate()`, `memo.consolidate()`, and `memo.health()` provide runtime utilities.
+### `createNodeMemoFs(config?: MemoFsConfig): MemoFS`
+*(Exported from `@memofs/core/node-fs`)*
 
-See the [client API guides](../packages/core/client/) for examples and input
-details.
+Constructs a `MemoFS` instance configured for Node.js. Automatically parses `.memofs/config.json`, instantiates a `NodeFsMemoryStore` at `rootDir`, and configures local embedders if enabled.
 
-## `MemoryStore`
+```ts
+import { createNodeMemoFs } from "@memofs/core/node-fs";
 
-`MemoryStore` is the canonical-file abstraction implemented by filesystem,
-in-memory, and remote-blob stores:
+const memofs = createNodeMemoFs({
+  rootDir: ".",
+  mode: "local",
+});
+```
 
-- `read(path): Promise<string>`
-- `write(path, content): Promise<void>`
-- `append(path, content): Promise<void>`
-- `exists(path): Promise<boolean>`
-- `delete(path): Promise<void>`
+### `new MemoFS(config?: MemoFsConfig)`
+*(Exported from `@memofs/core`)*
 
-## Provider Contracts
+Instantiates the unified MemoFS client. In non-Node environments (Cloudflare Workers, Browsers), an explicit `store` must be provided.
 
-- `MemoryEmbedder` implements `embedText` and `embedTexts`.
-- `Reranker` reorders retrieval candidates.
-- `RecallStore` persists and queries vector documents.
-- `Extractor` derives graph entities and edges from text.
+```ts
+import { MemoFS, InMemoryMemoryStore } from "@memofs/core";
 
-## Runtime Helpers
+const memofs = new MemoFS({
+  store: new InMemoryMemoryStore(),
+  projectId: "proj_123",
+  mode: "local",
+});
+```
 
-`sha256Hex(value)` returns a `Promise<string>` containing the lowercase
-SHA-256 digest of a UTF-8 string. It uses Web Crypto so it works in both Node and Worker environments.
+## 2. Storage Adapters
 
-## Code Anchoring
+### `MemoryStore`
+The fundamental 5-method interface required by all MemoFS storage adapters:
 
-- `AnchorRef` — `{ file: string, hash: string, symbol?: string }`. Binds a memory to a source file for drift detection.
-- `computeFileHash(filePath)` — returns `Promise<string>` containing the SHA-256 hex digest of a file's bytes.
-- `isSafeAnchorPath(filePath, rootDir)` — validates that an anchor path does not escape the project root (path-traversal guard).
-- `resolveWriteAnchor(input)` — resolves an `AnchorRef` from explicit input or `@anchor(file=…, symbol=…)` markers in content.
-- `applyAnchorDrift(items, rootDir)` — recall-time post-merge seam; recomputes file hashes and flags stale items (`score *= 0.5`).
-- `parseAnchorMarkers(content)` — regex parser for `@anchor(file=…, symbol=…)` markers in memory content.
-- `extractSymbolPath(filePath, symbolName)` — uses the TypeScript Compiler API to extract and validate a dotted symbol path from `.ts`/`.tsx` files.
+```ts
+interface MemoryStore {
+  read(path: MemoryPath): Promise<string>;
+  write(path: MemoryPath, content: string): Promise<void>;
+  append(path: MemoryPath, content: string): Promise<void>;
+  exists(path: MemoryPath): Promise<boolean>;
+  delete(path: MemoryPath): Promise<void>;
+}
+```
 
-## Memory Decay
+### `NodeFsMemoryStore`
+*(Exported from `@memofs/core/node-fs`)*
 
-- `EXPIRY_DAYS` — `Record<MemoryKind, number>` mapping each of the 7 memory kinds to their expiry threshold in days.
-- `isMemoryDecayed(kind, createdAt, now?)` — pure helper returning `true` when a memory exceeds its kind-specific decay floor.
-- `applyDecay(items, graphStore)` — recall-time post-merge seam; flags unverified items (`score *= 0.6`).
+Node.js POSIX filesystem implementation of `MemoryStore`. Supports directory creation, permissions, symlink traversal guards, and advisory cross-process locking (`.memofs/.lock`).
 
-## Memory Archive
+```ts
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
 
-- `memo.archiveDeprecated()` — moves deprecated memories to `.memofs/archive/<id>.json` and removes them from active recall.
-- `memo.restoreMemory(id)` — restores an archived memory back to `notes.md` and reactivates its graph nodes.
-- `memo.migrateAnchors()` — backfills `AnchorRef` onto existing notes by detecting file-path references.
+const store = createNodeFsMemoryStore({
+  rootDir: "./workspace",
+  createRoot: true,
+  missingFileBehavior: "throw", // "throw" | "empty"
+  disallowSymlinks: true,
+  directoryMode: 0o700,
+  fileMode: 0o600,
+  lock: true,
+  lockMaxAgeMs: 3600000,
+});
+```
 
-## Session Outcomes
+### `RemoteBlobMemoryStore`
+*(Exported from `@memofs/core`)*
 
-- `SessionOutcome` — `"success" | "failure" | "aborted"` enum type.
-- `SESSION_OUTCOMES` — `["success", "failure", "aborted"]` const array.
-- `isSessionOutcome(value)` — type guard for `SessionOutcome`.
-- `AgentSessionCompleteInput` — extended with `outcome?`, `ephemeral?`, and `reason?` fields.
-- `AgentSessionCompleteResult` — named result type for `complete()`.
+Worker-safe implementation of `MemoryStore` backed by an opaque `BlobClient` (e.g. Cloudflare R2, S3) and a `MetadataStore` (e.g. Turso, SQLite, D1).
 
-## Graph Fact Status
+```ts
+import { RemoteBlobMemoryStore } from "@memofs/core";
 
-`GraphFactStatus` is a union of six status values: `"active" | "deprecated" | "conflicted" | "deleted" | "stale" | "unverified"`.
+const store = new RemoteBlobMemoryStore({
+  blobClient: r2BlobClient,
+  metadata: tursoMetadataStore,
+  rootKey: "project-123",
+});
+```
 
-## Memory Event Types
+### `InMemoryMemoryStore`
+*(Exported from `@memofs/core`)*
 
-`MemoryEventType` includes `"memory.archived"`, `"memory.restored"`, and `"session.failed"` in addition to the existing event types.
+Testing and ephemeral in-memory implementation of `MemoryStore`.
+
+```ts
+import { InMemoryMemoryStore } from "@memofs/core";
+
+const store = new InMemoryMemoryStore({
+  ".memofs/memory/core.md": "# Initial Rules\n",
+});
+
+const snapshot = store.snapshot();
+store.clear();
+```
+
+## 3. Provider Contracts
+
+Core protocol contracts are strictly provider-neutral:
+
+### `MemoryEmbedder`
+```ts
+interface MemoryEmbedder {
+  readonly name: string;
+  readonly dimension: number;
+  embedText(text: string): Promise<number[]>;
+  embedTexts(texts: string[]): Promise<number[][]>;
+}
+```
+
+### `Reranker`
+```ts
+interface Reranker {
+  rerank(input: {
+    query: string;
+    documents: Array<{ id: string; text: string; metadata?: Record<string, unknown> }>;
+    topK?: number;
+  }): Promise<Array<{ id: string; text: string; score: number; rank: number; metadata?: Record<string, unknown> }>>;
+}
+```
+
+### `Extractor`
+```ts
+interface Extractor {
+  readonly name: string;
+  extract(input: {
+    text: string;
+    sourceRef?: GraphSourceRef;
+    defaultNodeType?: GraphNodeType;
+    maxFacts?: number;
+    mode?: "fast" | "balanced" | "quality";
+  }): Promise<{
+    nodes: GraphNode[];
+    edges: GraphEdge[];
+    contradictions?: Array<{ from: string; to: string; type: string }>;
+    model?: string;
+    usage?: { promptTokens?: number; totalTokens?: number };
+  }>;
+}
+```
+
+### `LlmClient`
+```ts
+interface LlmClient {
+  readonly name: string;
+  complete(input: {
+    system?: string;
+    user: string;
+    schema?: JsonObject;
+    mode?: "fast" | "balanced" | "quality";
+  }): Promise<{
+    text: string;
+    structured?: JsonObject;
+    model?: string;
+    usage?: { promptTokens?: number; totalTokens?: number };
+  }>;
+}
+```
+
+### `MemoFSMemoryRuntime`
+Framework-neutral runtime contract implemented by AI framework adapters (Vercel AI SDK, LangChain, Mastra):
+
+```ts
+interface MemoFSMemoryRuntime {
+  readCoreMemory(signal?: AbortSignal): Promise<{ content: string; updatedAt?: string; version?: number }>;
+  updateCoreMemory(input: { content: string }, signal?: AbortSignal): Promise<{ content: string; updatedAt?: string; version?: number }>;
+  listNotes(input?: MemoryRuntimeListNotesInput, signal?: AbortSignal): Promise<MemoryRuntimePage<MemoryRuntimeNote>>;
+  createNote(input: MemoryRuntimeCreateNoteInput, signal?: AbortSignal): Promise<MemoryRuntimeNote>;
+  recall(input: MemoryRuntimeRecallInput, signal?: AbortSignal): Promise<MemoryRuntimeRecallResult>;
+  index?(input?: MemoryRuntimeIndexInput, signal?: AbortSignal): Promise<MemoryRuntimeIndexResult>;
+}
+```
+
+## 4. Graph Engine & Consolidation
+
+### `GraphStore`
+```ts
+interface GraphStore {
+  upsertNodes(nodes: GraphNode[]): Promise<StoredGraphNode[]>;
+  upsertEdges(edges: GraphEdge[]): Promise<StoredGraphEdge[]>;
+  getNode(id: string): Promise<StoredGraphNode | undefined>;
+  getEdge(id: string): Promise<StoredGraphEdge | undefined>;
+  queryNodes(query?: GraphNodeQuery): Promise<StoredGraphNode[]>;
+  queryEdges(query?: GraphEdgeQuery): Promise<StoredGraphEdge[]>;
+  neighbors(query: GraphNeighborQuery): Promise<GraphNeighbor[]>;
+  fewestHopsPath(query: GraphShortestPathQuery): Promise<GraphPath | undefined>;
+  weightedShortestPath(query: GraphShortestPathQuery): Promise<GraphPath | undefined>;
+  mergeNodes(input: GraphMergeNodesInput): Promise<StoredGraphNode>;
+  decayEdges(input: GraphDecayInput): Promise<{ updated: number; deleted: number }>;
+  deleteNode(id: string, options?: { cascadeEdges?: boolean }): Promise<boolean>;
+  deleteEdge(id: string): Promise<boolean>;
+  clear(): Promise<void>;
+  stats(): Promise<GraphStats>;
+  exportSnapshot(): Promise<GraphSnapshot>;
+  importSnapshot(snapshot: GraphSnapshot, options?: { clear?: boolean }): Promise<void>;
+}
+```
+
+### Graph Functions
+- `createRuleBasedExtractor(): Extractor`: Creates zero-dependency rule-based extractor.
+- `consolidateGraph(input: ConsolidationInput): ConsolidationResult`: Computes pure consolidation plan.
+- `applyConsolidation(store: ConsolidationStore, plan: ConsolidationResult): Promise<{ mergesApplied: number; retirementsApplied: number }>`: Persists consolidation plan.
+- `resolveCurrentFacts(options)`: Filters active facts for temporal validity.
+- `expandFromEntities(input)`: Graph traversal starting from seed entities.
+
+## 5. Security & Write Intelligence
+
+- `classifyDurability(input: DurabilityInput): DurabilityDecision`: Evaluates whether a memory is `"durable"` or `"transient"`.
+- `detectBlockedContent(text: string): BlocklistViolation[]`: Pure scanner detecting secret patterns.
+- `containsBlockedContent(text: string): boolean`: Quick boolean secret check.
+- `assertWriteAllowed(texts: string[], path?: string): void`: Throws `MemoryWriteBlockedError` if secrets are found.
+- `redactSecrets(message: string): string`: Redacts credentials from log and error strings.
+
+## 6. Standalone Cloud Client
+
+*(Exported from `@memofs/core/cloud-client`)*
+
+```ts
+import {
+  createMemoFsCloudClient,
+  createMemoFsCloudClientFromEnv,
+  createProjectScopedClient,
+} from "@memofs/core/cloud-client";
+
+const cloud = createMemoFsCloudClient({
+  baseUrl: "https://memofs.dev/api/v1",
+  apiKey: "tm_live_...",
+  defaultProjectId: "proj_123",
+});
+
+const pushRes = await cloud.sync.push({ manifest: localManifest });
+const commitRes = await cloud.sync.complete({ cursor: pushRes.cursor, uploaded: [] });
+const pullRes = await cloud.sync.pull({ manifest: localManifest });
+const statusRes = await cloud.sync.status();
+```
+
+## 7. Constants & Enums
+
+```ts
+// Canonical Path Constants
+export const MEMOFS_DIR = ".memofs";
+export const MANIFEST_PATH = ".memofs/manifest.json";
+export const CORE_MEMORY_PATH = ".memofs/memory/core.md";
+export const NOTES_MEMORY_PATH = ".memofs/memory/notes.md";
+export const MEMORY_EVENTS_PATH = ".memofs/events/memory-events.jsonl";
+export const CONVERSATIONS_MEMORY_PATH = ".memofs/events/conversations.jsonl";
+export const CHUNKS_INDEX_PATH = ".memofs/indexes/chunks.jsonl";
+export const EMBEDDINGS_INDEX_PATH = ".memofs/indexes/embeddings.jsonl";
+export const GRAPH_NODES_PATH = ".memofs/graph/nodes.jsonl";
+export const GRAPH_EDGES_PATH = ".memofs/graph/edges.jsonl";
+export const SNAPSHOTS_INDEX_PATH = ".memofs/snapshots/snapshots.jsonl";
+export const CONNECTORS_PATH = ".memofs/connectors.json";
+
+// Taxonomy & Thresholds
+export const TASK_TYPES = ["coding", "debug", "refactor", "docs", "general"] as const;
+export const SESSION_OUTCOMES = ["success", "failure", "aborted"] as const;
+export const TRANSIENT_CONFIDENCE_THRESHOLD = 0.4;
+export const TRANSIENT_CONTENT_MIN_LENGTH = 20;
+export const EXPIRY_DAYS = {
+  decision: 365,
+  constraint: 180,
+  reference: 180,
+  goal: 120,
+  preference: 90,
+  summary: 60,
+  note: 30,
+} as const;
+```
+
+## 8. Error Hierarchy
+
+```
+MemoFsError (Base error)
+├── MemoryPathError (Invalid path / traversal attempt)
+├── MemoryNotFoundError (File or asset not found)
+├── MemoryValidationError (Schema / data validation error)
+├── MemoryParseError (JSON / JSONL parse failure)
+├── MemoryCommandError (Command execution failure)
+├── MemoryStoreError (Storage driver failure)
+│   └── FsMemoryStoreError (Node filesystem error)
+│       └── LockHeldError (Advisory .lock held by another process)
+├── MemoryWriteBlockedError (Secret blocklist hard rejection)
+├── GraphError
+│   ├── GraphValidationError
+│   └── GraphNotFoundError
+├── RerankError
+│   └── RerankValidationError
+└── MemoFSCloudError
+    ├── MemoFsCloudAuthError (401)
+    ├── MemoFSCloudPermissionError (403)
+    ├── MemoFsCloudValidationError (400, 422)
+    ├── MemoFSCloudRateLimitError (429)
+    ├── MemoFSCloudNotFoundError (404)
+    ├── MemoFSCloudConflictError (409)
+    ├── MemoFSCloudServerError (>= 500)
+    ├── MemoFSCloudNetworkError
+    └── MemoFSCloudTimeoutError
+```

@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Cline"
 date: "2026-07-28"
 estimatedMinutes: 5
+description: "Configure Cline in VS Code to read and write persistent MemoFS memory via MCP stdio tools."
 ---
 
 # Overview
@@ -62,5 +63,5 @@ Reload VS Code. Check that `memofs` shows a green connected indicator in the MCP
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

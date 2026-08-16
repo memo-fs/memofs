@@ -1,0 +1,161 @@
+---
+title: "Cloud Replication (Hybrid Mode)"
+description: "Two-phase push and pull synchronization protocols for mirroring local memory with MemoFS Cloud."
+---
+
+# Cloud Replication (Hybrid Mode)
+
+In **hybrid mode**, all reads, writes, searches, graph queries, and agent sessions execute 100% locally. MemoFS Cloud functions strictly as a **file replica** holding byte-for-byte mirrors of your canonical `.memofs/` files.
+
+Cloud synchronization is driven explicitly through four operations on `memofs.sync`:
+- `memofs.sync.push`: Compute diff and obtain presigned upload targets.
+- `memofs.sync.complete`: Confirm uploads and advance the sync cursor.
+- `memofs.sync.pull`: Download updated files and delete server-removed paths.
+- `memofs.sync.status`: Inspect cloud storage usage and sync cursors.
+
+## Two-Phase Push Protocol
+
+Pushing local changes follows an explicit two-phase protocol with cryptographic hash verification:
+
+```ts
+import { assertMemoryPath } from "@memofs/core";
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+const memofs = createNodeMemoFs({
+  mode: "hybrid",
+  cloud: {
+    baseUrl: process.env.MEMOFS_CLOUD_URL!,
+    apiKey: process.env.MEMOFS_API_KEY!,
+    defaultProjectId: "project-123",
+  },
+});
+
+// Phase 1: Request presigned upload targets for changed files
+const pushResult = await memofs.sync.push({
+  manifest: localFileManifest, // Record<string, string> (canonical path -> SHA-256)
+});
+
+console.log(`Cloud requested ${pushResult.upload.length} files to upload.`);
+
+// Upload each requested file directly to presigned storage
+for (const target of pushResult.upload) {
+  assertMemoryPath(target.path);
+  const content = await memofs.store.read(target.path);
+
+  const response = await fetch(target.presignedPutUrl, {
+    method: "PUT",
+    body: content,
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Upload failed for ${target.path}: ${response.statusText}`);
+  }
+}
+
+// Phase 2: Confirm uploaded files and commit the manifest
+const commitResult = await memofs.sync.complete({
+  cursor: pushResult.cursor,
+  uploaded: pushResult.upload.map(({ path, sha256 }) => ({ path, sha256 })),
+});
+
+console.log(`Sync committed at cursor: ${commitResult.cursor}`);
+```
+
+## Pull Protocol
+
+`memofs.sync.pull()` retrieves files that have changed or were created remotely:
+
+```ts
+// Pull changes since last local manifest
+const pullResult = await memofs.sync.pull({
+  manifest: localFileManifest,
+});
+
+// 1. Download updated/new files
+for (const target of pullResult.files) {
+  assertMemoryPath(target.path);
+  const response = await fetch(target.presignedGetUrl);
+  const content = await response.text();
+  await memofs.store.write(target.path, content);
+}
+
+// 2. Remove files deleted remotely
+for (const removedPath of pullResult.removed) {
+  assertMemoryPath(removedPath);
+  await memofs.store.delete(removedPath);
+}
+
+console.log(`Pulled ${pullResult.files.length} updated files, removed ${pullResult.removed.length} paths.`);
+```
+
+## Sync Status (`memofs.sync.status`)
+
+Inspect remote manifest status, storage metrics, and the latest replication cursor:
+
+```ts
+const status = await memofs.sync.status();
+
+console.log(`Latest cursor: ${status.cursor}`);
+console.log(`Total storage: ${status.storageBytes} bytes`);
+console.log(`Last synced at: ${status.lastSyncAt}`);
+```
+
+## Standalone Cloud Client
+
+You can use the standalone cloud client from `@memofs/core/cloud-client` independently of the high-level `MemoFS` instance:
+
+```ts
+import {
+  createMemoFsCloudClient,
+  createMemoFsCloudClientFromEnv,
+  createProjectScopedClient,
+} from "@memofs/core/cloud-client";
+
+// From explicit options
+const client = createMemoFsCloudClient({
+  baseUrl: "https://memofs.dev/api/v1",
+  apiKey: process.env.MEMOFS_API_KEY,
+  defaultProjectId: "proj_123",
+});
+
+// Check replica health
+const health = await client.health();
+console.log(health.ok, health.version);
+
+// Project-scoped client wrapper
+const projectClient = createProjectScopedClient(client, "proj_123");
+const status = await projectClient.sync.status();
+```
+
+## Error Handling & Secret Redaction
+
+The cloud client automatically redacts secrets and tokens from error messages and logs using `redactSecrets`:
+
+```ts
+import { isMemoFSCloudError, MemoFSCloudRateLimitError } from "@memofs/core/cloud-client";
+
+try {
+  await client.sync.status();
+} catch (error) {
+  if (isMemoFSCloudError(error)) {
+    console.error(`Cloud error [${error.code}]: ${error.message}`);
+    if (error instanceof MemoFSCloudRateLimitError) {
+      console.warn(`Rate limited. Retry after: ${error.retryAfterMs}ms`);
+    }
+  }
+}
+```
+
+### Error Classes
+
+- `MemoFSCloudError`: Base error class.
+- `MemoFsCloudAuthError` (401): Missing or invalid API key.
+- `MemoFSCloudPermissionError` (403): Insufficient workspace permissions.
+- `MemoFsCloudValidationError` (400, 422): Malformed manifest or input.
+- `MemoFSCloudRateLimitError` (429): Rate limited; carries `retryAfterMs`.
+- `MemoFSCloudNotFoundError` (404): Project or file not found.
+- `MemoFSCloudConflictError` (409): Cursor or version conflict.
+- `MemoFSCloudServerError` (>= 500): Internal server error.
+- `MemoFSCloudNetworkError`: Network connectivity failure.
+- `MemoFSCloudTimeoutError`: Request timed out.

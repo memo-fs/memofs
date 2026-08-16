@@ -2,6 +2,7 @@
 title: "How to use MemoFS with GitHub Copilot"
 date: "2026-07-28"
 estimatedMinutes: 3
+description: "Enhance GitHub Copilot with MemoFS markdown memory files for improved codebase comprehension."
 ---
 
 # Overview
@@ -33,14 +34,23 @@ Produces:
 - **`.github/rules/git-conventions.md`**
 - **`.vscode/mcp.json`** — MCP server entry. This is project-local only — Copilot's `generate mcp` target has no documented global scope, so there's no per-machine config to fall back on; every project needs its own `.vscode/mcp.json`.
 
-### Step 3: Reload and verify
+### Step 3: Record persistent project memory
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+This stores a durable note in `.memofs/memory/notes.md`.
+
+### Step 4: Reload and verify
 
 Reload the VS Code window (or restart if using Copilot in another surface). Copilot detects `.vscode/mcp.json` and shows a **Start** action for the `memofs` server — click it, since Copilot doesn't always auto-start MCP servers on file detection alone.
 
 Verify:
 
 - Check the tools indicator in the Copilot Chat panel — `memofs` should appear with its tools listed.
-- Ask: *"Use the memofs tool to check what's in project memory."*
+- Prompt Copilot: *"Which docs framework does this project use?"*
+- Or ask: *"Use the memofs tool to check what's in project memory."*
 
 ## Notes
 
@@ -48,5 +58,5 @@ Verify:
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

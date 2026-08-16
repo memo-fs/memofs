@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Windsurf / Cascade"
 date: "2026-07-28"
 estimatedMinutes: 4
+description: "Configure Codeium Windsurf IDE with MemoFS MCP server for persistent coding agent context."
 ---
 
 # Before you start
@@ -57,5 +58,5 @@ Check the MCPs icon in the Cascade panel for a connected status on `memofs`. Ask
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

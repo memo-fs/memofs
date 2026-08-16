@@ -1,4 +1,5 @@
 ---
+title: "MemoFS Documentation — File-First Memory for AI Agents"
 layout: home
 
 hero:
@@ -13,5 +14,6 @@ hero:
     - theme: alt
       text: "Star on GitHub"
       link: https://github.com/memo-fs/memofs
+description: "File-first memory runtime for AI agents. Store decisions as markdown in your repo with local offline execution and cloud sync."
 ---
 

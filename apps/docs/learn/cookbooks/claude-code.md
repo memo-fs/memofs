@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Claude Code"
 date: "2026-07-27"
 estimatedMinutes: 3
+description: "Connect MemoFS persistent memory to Claude Code via Model Context Protocol (MCP) and SessionStart hooks."
 ---
 
 # Overview
@@ -128,5 +129,5 @@ the [Team Sync Cookbook](./sync.md).
 
 ## Related Resources
 
-- [MemoFS MCP Server Docs](/packages/mcp/)
-- [MemoFS CLI Guide](/packages/cli/)
+- [MemoFS MCP Server Docs](/mcp/)
+- [MemoFS CLI Guide](/cli/)

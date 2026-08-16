@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Command Code"
 date: "2026-07-28"
 estimatedMinutes: 6
+description: "Setup Command Code terminal assistant with file-first MemoFS project memory and recall."
 ---
 
 # Overview
@@ -20,7 +21,7 @@ If you're comfortable generating a Codex config as an intermediate step:
 ```bash
 cd /path/to/your/project
 npx @memofs/cli init
-npx @memofs/cli generate agent codex --scope local
+npx @memofs/cli generate agent codex
 ```
 
 Then inside a Command Code session:
@@ -105,7 +106,7 @@ set -euo pipefail
 
 # Replace the line below with whatever memofs CLI command prints current
 # project context as plain text — check the Memory Commands reference
-# (docs.memofs.dev/packages/cli/memory) for the exact invocation, since
+# (docs.memofs.dev/cli/memory) for the exact invocation, since
 # this cookbook hasn't been verified against that specific command yet.
 CONTEXT=$(npx @memofs/cli context 2>/dev/null || echo "memofs: no context available")
 
@@ -149,5 +150,5 @@ Restart with `cmd`. Confirm:
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

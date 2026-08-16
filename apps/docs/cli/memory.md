@@ -1,0 +1,344 @@
+---
+title: "CLI Memory Commands"
+description: "CLI commands for reading, recording, searching, and consolidating project memory."
+---
+
+# Memory Commands
+
+The memory command family provides tools for initializing workspaces, recording facts, building prompt context, auditing repository integrity, creating snapshots, and maintaining the memory knowledge graph.
+
+## `memofs init`
+
+Initializes a new canonical `.memofs/` workspace directory layout, bootstrapping all required seed files and writing a default `.memofs/config.json`.
+
+```bash
+memofs init
+memofs init -p my-project --no-input
+memofs init --force
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-f, --force` | Overwrite existing seed files if `.memofs/` already exists | `false` |
+| `-p, --project-id <id>` | Explicit project identifier to seed in `manifest.json` | Prompted or auto-generated |
+| `--no-input` | Skip interactive TTY prompt for project ID (uses random UUID if omitted) | `false` |
+
+### Behavior
+
+1. Creates canonical directory structure: `.memofs/`, `.memofs/memory/`, `.memofs/events/`, `.memofs/indexes/`, `.memofs/graph/`, `.memofs/snapshots/`, and `.memofs/tmp/`.
+2. Seeds canonical memory files via `memo.bootstrap()`: `manifest.json`, `memory/core.md`, `memory/notes.md`, `events/memory-events.jsonl`, `events/conversations.jsonl`, `indexes/chunks.jsonl`, `graph/nodes.jsonl`, `graph/edges.jsonl`, and `snapshots/snapshots.jsonl`.
+3. Writes `.memofs/config.json` configured for `local` runtime, pointing `$schema` to `../node_modules/@memofs/cli/schema/config.json` (or the hosted fallback URL `https://docs.memofs.dev/schema/config.json`).
+4. If `.memofs/manifest.json` already exists and `--force` is not set, skips bootstrapping and informs the user.
+
+---
+
+## `memofs remember`
+
+Stores a durable note block in `memory/notes.md` and appends a `memory.created` event to `events/memory-events.jsonl`.
+
+```bash
+memofs remember "Use PostgreSQL for metadata store" --kind decision --title "Metadata Engine"
+memofs remember --file ./notes/architecture.md --kind reference --tag architecture --tag database
+echo "Max request body size is 10MB" | memofs remember --stdin --kind constraint
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `[content]` | Inline text content to store | — |
+| `--stdin` | Read memory content from standard input | `false` |
+| `--file <path>` | Read memory content from a file inside the workspace root | — |
+| `-k, --kind <kind>` | Note category: `decision`, `constraint`, `goal`, `preference`, `reference`, `summary`, or `note` | `note` |
+| `--title <title>` | Optional header title for the note | — |
+| `-t, --tag <tag>` | Tag to attach (repeatable) | `[]` |
+| `--confidence <n>` | Confidence score from `0` to `1` (numeric or float string) | `1` |
+| `--source <source>` | Source identifier or URI | — |
+| `--actor <actor>` | Actor performing the write: `user`, `agent`, `system`, `api`, or `type:id` (e.g. `agent:claude`) | `user` |
+| `--metadata-json <json>` | Additional structured metadata as a JSON object string | — |
+| `--allow-secrets` | Allow content that triggers secret detection heuristics | `false` |
+
+### Content Resolution & Secret Guardrails
+
+- **Precedence**: Inline argument `[content]` -> `--file <path>` -> `--stdin`.
+- **Secret Scanning**: Scans content against automated detection patterns (`openai_key`, `github_token`, `jwt`, `pem_private_key`, `env_assignment_secret`). If a secret is detected, write fails immediately with `CLI_USAGE_ERROR` (exit code `1`) unless `--allow-secrets` is provided.
+
+---
+
+## `memofs context`
+
+Packs project memory (core memory, notes, graph entities, and relevant recall) into a condensed, token-budgeted prompt briefing for AI agents. Calls the same intelligence pipeline (`memo.context()`) used by the MCP server.
+
+```bash
+memofs context --query "how to deploy workers"
+memofs context --query "fix auth bug" --task-type debug
+memofs context --max-chars 8000 --json
+memofs context --mark-session-start
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-q, --query <query>` | Prioritize memories matching a specific task or question | `""` |
+| `--task-type <type>` | Biases strategist query expansion: `coding`, `debug`, `refactor`, `docs`, `general` | `general` |
+| `--max-chars <n>` | Maximum character limit for output briefing (maps to `maxBytes`) | `12000` |
+| `--mark-session-start` | Writes a `memory.indexed` event with `metadata: { hook: "session-start" }` | `false` |
+
+> [!TIP]
+> Use `--task-type` to refine memory retrieval:
+> - `debug`: Prioritizes recent errors, constraints, and known workarounds.
+> - `refactor`: Prioritizes architecture decisions, component boundaries, and invariants.
+> - `docs`: Prioritizes interfaces, public APIs, and user guides.
+
+---
+
+## `memofs read`
+
+Reads and outputs the raw text content of a canonical memory file.
+
+```bash
+memofs read core
+memofs read notes
+memofs read manifest
+```
+
+### Arguments
+
+| Argument | Description | Allowed Values |
+|----------|-------------|----------------|
+| `<target>` | The canonical memory document to read | `core`, `notes`, `manifest` |
+
+---
+
+## `memofs inspect`
+
+Displays an inspection dashboard of the current memory workspace, reporting physical file existence, byte sizes, line counts, JSONL record counts, and aggregate metrics.
+
+```bash
+memofs inspect
+memofs inspect --json
+```
+
+### Inspected Metrics
+
+- **Files**: `manifest.json`, `memory/core.md`, `memory/notes.md`, `events/memory-events.jsonl`, `events/conversations.jsonl`, `indexes/chunks.jsonl`, `graph/nodes.jsonl`, `graph/edges.jsonl`, `snapshots/snapshots.jsonl`.
+- **Summary Counts**: `eventCount`, `conversationCount`, `chunkCount`, `graphNodeCount`, `graphEdgeCount`, `snapshotCount`.
+
+---
+
+## `memofs search`
+
+Searches memory text files (`core.md`, `notes.md`, `conversations.jsonl`) for substring occurrences or regular expression patterns.
+
+```bash
+memofs search "authentication"
+memofs search "jwt.*expiration" --regex
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `<query>` | Text substring or regex pattern to match | (Required) |
+| `-e, --regex` | Treat query as a case-insensitive regular expression | `false` |
+
+---
+
+## `memofs events`
+
+Reads chronological records from the memory event log (`events/memory-events.jsonl`).
+
+```bash
+memofs events
+memofs events --limit 25
+memofs events --strict --json
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-l, --limit <n>` | Limit output to the last `N` events (`0` = all) | `0` |
+| `-s, --strict` | Throws `CLI_JSONL_ERROR` on malformed lines instead of skipping | `false` |
+
+---
+
+## `memofs chunks`
+
+Reads chunk index records from `indexes/chunks.jsonl`.
+
+```bash
+memofs chunks --limit 50
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-l, --limit <n>` | Limit output to the last `N` chunks (`0` = all) | `0` |
+| `-s, --strict` | Throws `CLI_JSONL_ERROR` on malformed lines instead of skipping | `false` |
+
+---
+
+## `memofs snapshot`
+
+Creates an immutable snapshot bundle containing all tracked canonical memory files under `.memofs/snapshots/<id>.json`.
+
+```bash
+memofs snapshot --label "before-migration"
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-l, --label <name>` | Snapshot label (1–80 chars; letters, numbers, dots, hyphens, underscores) | `manual` |
+
+### Snapshot Integrity
+
+1. Gathers all canonical memory files into a bundle object with a protocol version header.
+2. Computes a SHA-256 checksum over the serialized bundle.
+3. Writes `.memofs/snapshots/<label>-<timestamp>.json`.
+4. Appends index entry to `snapshots/snapshots.jsonl` and emits `snapshot.created` event in `events/memory-events.jsonl`.
+
+---
+
+## `memofs diff`
+
+Compares two memory snapshots by ID or label, identifying added, removed, or modified files and calculating byte and record deltas.
+
+```bash
+memofs diff before-migration after-migration
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `<labelA>` | ID or label of the first snapshot (baseline) |
+| `<labelB>` | ID or label of the second snapshot (target) |
+
+### Diff Output Indicators
+
+- `+` (Added file): File exists only in snapshot B.
+- `-` (Removed file): File exists only in snapshot A.
+- `~` (Modified file): File content differs; reports byte changes and JSONL record deltas.
+
+---
+
+## `memofs doctor`
+
+Audits workspace integrity, schema validity, referential links, and core memory size limits.
+
+```bash
+memofs doctor
+memofs doctor --strict
+memofs doctor --fix
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-s, --strict` | Enforces strict schema checking during JSONL record validation | `false` |
+| `--fix` | Automatically runs graph consolidation and archives deprecated memories | `false` |
+
+### Diagnostic Checks
+
+1. **Directory Structure**: Verifies presence of `.memofs/`, `memory/`, `events/`, `indexes/`, `graph/`, `snapshots/`, `tmp/`.
+2. **Required Files**: Verifies all 9 canonical seed files exist.
+3. **Manifest Schema**: Validates `manifest.json` against `ManifestSchema`.
+4. **Core Memory Soft Limit**: Emits warning if `memory/core.md` exceeds 200 lines (`CORE_MEMORY_SOFT_LIMIT`), keeping always-loaded prompt context compact.
+5. **JSONL Integrity**: Audits record schemas for events, conversations, chunks, and snapshots.
+6. **Referential Integrity**: Checks that events referencing conversation/document IDs resolve to valid entries.
+7. **Deprecated Memories**: Warns if deprecated graph nodes exist; with `--fix`, runs `memo.consolidate({ apply: true })` and `memo.archiveDeprecated()`.
+
+---
+
+## `memofs validate`
+
+Runs strict protocol and schema validation for CI/CD pipelines. Exits with code `0` on success or code `1` if any file or line fails validation.
+
+```bash
+memofs validate
+memofs validate --json
+```
+
+---
+
+## `memofs status`
+
+Displays compliance observability for the most recent agent session, checking if the agent followed memory protocol rules.
+
+```bash
+memofs status
+memofs status --hook
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--hook` | Emits Stop-hook JSON (`{"systemMessage": "MemoFS compliance — ..."}`) for Claude Code and Codex hooks | `false` |
+
+### Evaluated Compliance Rules
+
+1. **Context loaded at session start**: Checks for a `memory.indexed` event with `metadata: { hook: "session-start" }`.
+2. **Memory consulted during session**: Checks for non-sync memory read/recall events after session start.
+3. **Facts persisted**: Checks for `memory.created` events after session start.
+
+---
+
+## `memofs migrate anchors`
+
+Backfills `AnchorRef` code-location metadata onto existing structured notes in `memory/notes.md` by detecting file-path and TypeScript symbol references in note text.
+
+```bash
+memofs migrate anchors
+memofs migrate anchors --json
+```
+
+### Behavior
+
+- Scans notes for file-path references matching existing workspace files.
+- Computes SHA-256 content hashes of the referenced files.
+- Attaches structured `anchor` frontmatter metadata to the note block.
+- Idempotent: Skips notes that already carry an anchor.
+
+---
+
+## `memofs consolidate`
+
+Executes the knowledge graph consolidation pass, merging duplicate entities and retiring superseded facts.
+
+```bash
+memofs consolidate
+memofs consolidate --archive-deprecated
+```
+
+### Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--archive-deprecated` | Physically moves deprecated note blocks to `.memofs/archive/<id>.json` cold storage files and transitions graph nodes to `archived` | `false` |
+
+---
+
+## `memofs restore`
+
+Restores an archived memory from `.memofs/archive/<id>.json` back into active memory.
+
+```bash
+memofs restore 2026-08-10T11:21:09.163Z
+```
+
+### Behavior
+
+1. Reads and validates `.memofs/archive/<id>.json` against `ArchivedMemoryRecordSchema`.
+2. Writes the note block back into `memory/notes.md`.
+3. Re-indexes the memory content into the local lexical index.
+4. Transitions bound graph nodes from `archived` to `active` status (clears `validUntil`).
+5. Deletes `.memofs/archive/<id>.json` and logs a `memory.restored` event.

@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Amazon Q Developer"
 date: "2026-07-28"
 estimatedMinutes: 5
+description: "Configure Amazon Q Developer with MemoFS file-backed project memory and decision tracking."
 ---
 
 # Overview
@@ -56,5 +57,5 @@ inside a Q CLI session lists available tools, including MCP-provided ones — co
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).
