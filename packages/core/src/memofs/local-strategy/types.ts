@@ -26,6 +26,7 @@ import type {
 	GraphNodeInput,
 	SnapshotMemoryInput,
 	SnapshotMemoryResult,
+	WriteMemoryResult,
 } from "../types";
 import type { AnchorHashCache } from "./anchor-drift";
 import type { MemoryDecayMeta } from "./decay";
@@ -176,4 +177,12 @@ export interface LocalStrategyContext {
 	 * be flagged `unverified` + demoted.
 	 */
 	memoryMetaByMemoryId: Map<string, MemoryDecayMeta>;
+	/**
+	 * In-process set of all known memory record IDs (hydrated from events + updated on write).
+	 */
+	knownMemoryIds: Set<string>;
+	/**
+	 * In-process map of idempotencyKey → cached WriteMemoryResult for write deduplication.
+	 */
+	idempotencyKeys: Map<string, WriteMemoryResult>;
 }

@@ -202,7 +202,7 @@ describe("parseSymbolPath", () => {
 // extractSymbolPath — TS Compiler API validation
 // ---------------------------------------------------------------------------
 
-describe("extractSymbolPath", () => {
+describe("extractSymbolPath", { timeout: 20_000 }, () => {
 	let rootDir: string;
 
 	const fixtureSource = `

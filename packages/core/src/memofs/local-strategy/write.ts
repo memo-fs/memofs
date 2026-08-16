@@ -64,6 +64,27 @@ export async function writeMemory(
 	const durable = tierDecision.tier === "durable";
 	const now = new Date().toISOString();
 
+	if (input.idempotencyKey !== undefined) {
+		const cached = ctx.idempotencyKeys.get(input.idempotencyKey);
+		if (cached !== undefined) {
+			return {
+				...cached,
+				created: false,
+			};
+		}
+	}
+	if (input.id !== undefined && ctx.knownMemoryIds.has(input.id)) {
+		return {
+			id: input.id,
+			created: false,
+			tier: tierDecision.tier,
+			tierReason: tierDecision.reason,
+			...(input.sourceRefs === undefined
+				? {}
+				: { sourceRefs: input.sourceRefs }),
+		};
+	}
+
 	function randomUuid(): string {
 		try {
 			const c = globalThis.crypto as { randomUUID?: () => string } | undefined;
@@ -77,6 +98,7 @@ export async function writeMemory(
 	const id =
 		input.id ?? `mem_${fingerprint(`${now}:${input.content}:${randomUuid()}`)}`;
 	await appendTimestampedNote(ctx.options.store, {
+		id,
 		timestamp: now,
 		kind: input.kind ?? "note",
 		content: input.content,
@@ -97,9 +119,13 @@ export async function writeMemory(
 				? {}
 				: { sourceRefs: input.sourceRefs }),
 			...(anchor === undefined ? {} : { anchor }),
+			...(input.idempotencyKey === undefined
+				? {}
+				: { idempotencyKey: input.idempotencyKey }),
 			...(input.metadata ?? {}),
 		},
 	});
+	ctx.knownMemoryIds.add(id);
 	// Anchor is also persisted into the structured event so the cold-start
 	// hydration in `local-strategy.ts` can recover it from
 	// `memory-events.jsonl` without parsing markdown.
@@ -137,6 +163,9 @@ export async function writeMemory(
 				kind: input.kind ?? "note",
 				tags: input.tags ?? [],
 				...(anchor === undefined ? {} : { anchor }),
+				...(input.idempotencyKey === undefined
+					? {}
+					: { idempotencyKey: input.idempotencyKey }),
 			},
 		}),
 	);
@@ -170,13 +199,18 @@ export async function writeMemory(
 	// including the new memory, not a stale cached list.
 	ctx.contextCache.clear();
 
-	return {
+	const writeResult: WriteMemoryResult = {
 		id,
 		created: true,
 		tier: tierDecision.tier,
 		tierReason: tierDecision.reason,
 		...(input.sourceRefs === undefined ? {} : { sourceRefs: input.sourceRefs }),
 	};
+	if (input.idempotencyKey !== undefined) {
+		ctx.idempotencyKeys.set(input.idempotencyKey, writeResult);
+	}
+
+	return writeResult;
 }
 
 export async function updateCoreMemory(

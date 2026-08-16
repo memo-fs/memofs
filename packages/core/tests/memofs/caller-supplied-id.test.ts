@@ -94,6 +94,47 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 			}
 		});
 
+		it("deduplicates writes when idempotencyKey is provided", async () => {
+			const first = await memo.writeMemory({
+				content: "idempotent fact",
+				idempotencyKey: "idem_key_abc",
+			});
+			expect(first.created).toBe(true);
+
+			const second = await memo.writeMemory({
+				content: "idempotent fact",
+				idempotencyKey: "idem_key_abc",
+			});
+			expect(second.created).toBe(false);
+			expect(second.id).toBe(first.id);
+
+			const notes = await memo.notes.read();
+			const occurrences = notes.split("idempotent fact").length - 1;
+			expect(occurrences).toBe(1);
+		});
+
+		it("deduplicates writes when caller passes duplicate id", async () => {
+			const stableId = "fixed_mem_id_1";
+			const first = await memo.writeMemory({
+				content: "duplicate fact",
+				id: stableId,
+			});
+			expect(first.created).toBe(true);
+
+			const second = await memo.writeMemory({
+				content: "duplicate fact",
+				id: stableId,
+			});
+			expect(second.created).toBe(false);
+			expect(second.id).toBe(stableId);
+
+			const notes = await memo.notes.read();
+			const occurrences = notes.split(stableId).length - 1;
+			// Should only be written once in notes.md frontmatter/metadata
+			expect(occurrences).toBeGreaterThanOrEqual(1);
+			expect(occurrences).toBeLessThanOrEqual(2); // once in id frontmatter, once in metadata
+		});
+
 		it("references the notes memory path constant", async () => {
 			// Sanity: the canonical path constant is importable and correct.
 			expect(NOTES_MEMORY_PATH.endsWith("notes.md")).toBe(true);
