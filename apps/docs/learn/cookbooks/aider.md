@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Aider"
 date: "2026-07-28"
 estimatedMinutes: 4
+description: "Connect MemoFS persistent memory to Aider for cross-session coding context and architectural retention."
 ---
 
 # This one's different: Aider has no MCP support
@@ -38,7 +39,7 @@ Check the startup log for `.memofs/memory/core.md` in the list of read-only file
 
 ## Keeping memory current
 
-Since Aider can't call back into memofs, new facts have to get into `core.md` some other way: either edit it directly, or run the MemoFS CLI's memory commands from another terminal while you work (see the Memory Commands reference at `/packages/cli/memory`). There's no live sync mid-session — whatever's in the file when Aider starts is what it sees for that session.
+Since Aider can't call back into memofs, new facts have to get into `core.md` some other way: either edit it directly, or run the MemoFS CLI's memory commands from another terminal while you work (see the Memory Commands reference at `/cli/memory`). There's no live sync mid-session — whatever's in the file when Aider starts is what it sees for that session.
 
 ## Notes
 
@@ -46,5 +47,5 @@ Since Aider can't call back into memofs, new facts have to get into `core.md` so
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

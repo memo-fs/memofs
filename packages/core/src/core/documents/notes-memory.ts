@@ -111,6 +111,10 @@ export function normalizeTimestampedNote(
 
 	const tags = normalizeStringArray(note.tags, "note.tags");
 
+	if (note.id !== undefined) {
+		assertNonEmptyString(note.id, "note.id");
+	}
+
 	if (note.source !== undefined) {
 		assertNonEmptyString(note.source, "note.source");
 	}
@@ -132,6 +136,7 @@ export function normalizeTimestampedNote(
 		kind: note.kind,
 		content: note.content,
 		confidence,
+		...(note.id !== undefined ? { id: note.id } : {}),
 		...(note.title !== undefined ? { title: note.title } : {}),
 		...(tags !== undefined ? { tags } : {}),
 		...(note.source !== undefined ? { source: note.source } : {}),
@@ -157,6 +162,7 @@ export function formatTimestampedNote(note: TimestampedNote): string {
 
 	const lines = [
 		`## ${heading}`,
+		normalized.id ? `- id: ${singleLine(normalized.id)}` : undefined,
 		`- kind: ${singleLine(normalized.kind)}`,
 		`- tags: ${tags}`,
 		`- confidence: ${normalized.confidence}`,

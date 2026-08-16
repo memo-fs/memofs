@@ -1,7 +1,7 @@
 ---
 layout: page
 title: MemoFS Tracks
-description: Deep-dive tutorials and comprehensive guides to building production-ready AI applications.
+description: "Structured learning tracks to master MemoFS memory runtimes, agent integration, MCP servers, and cloud synchronization."
 sidebar: false
 aside: false
 ---

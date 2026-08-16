@@ -56,7 +56,7 @@ export function markConflictingEdges(
 
 	return edges.map((edge) =>
 		conflictingIds.has(edge.id)
-			? { ...edge, status: "conflicted", updatedAt: nowIso() }
+			? { ...edge, status: "conflicted", disputed: true, updatedAt: nowIso() }
 			: edge,
 	);
 }

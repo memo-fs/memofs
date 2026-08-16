@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Gemini (CLI / Code Assist)"
 date: "2026-07-28"
 estimatedMinutes: 3
+description: "Connect Google Gemini AI agents and SDKs to MemoFS persistent memory stores."
 ---
 
 # ⚠️ Before you start: check which tool you're actually running
@@ -42,15 +43,24 @@ Produces:
 - **`.gemini/rules/git-conventions.md`**
 - **`.gemini/settings.json`** — MCP server entry (project-local by default; `--scope global` writes `~/.gemini/settings.json` instead)
 
-### Step 3: Restart and verify
+### Step 3: Record persistent project memory
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+This stores a durable note in `.memofs/memory/notes.md`.
+
+### Step 4: Restart and verify
 
 Restart Gemini CLI / Gemini Code Assist. No hooks means no auto-injection — confirm the agent is calling the tool:
 
-- Ask: *"Check your memofs project memory and tell me what's there."*
+- Prompt Gemini: *"Which docs framework does this project use?"*
+- Or ask: *"Check your memofs project memory and tell me what's there."*
 
 ## Next Steps
 
 If you've since migrated to Google Antigravity (IDE or CLI), go to the [Antigravity cookbook](./antigravity.md) — rules carry over, but MCP configuration uses `.agents/mcp_settings.json` (IDE) or `agy mcp add` (CLI).
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

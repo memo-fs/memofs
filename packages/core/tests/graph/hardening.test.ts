@@ -3,6 +3,7 @@ import {
 	createInMemoryGraphStore,
 	GraphParseError,
 	GraphValidationError,
+	markConflictingEdges,
 	parseGraphSnapshot,
 	serializeGraphSnapshot,
 } from "../../src/index";
@@ -225,5 +226,32 @@ describe("hardening", () => {
 		expect(await graph.neighbors({ nodeId: "a", direction: "out" })).toEqual(
 			[],
 		);
+	});
+
+	it("markConflictingEdges marks disputed: true and status: 'conflicted'", () => {
+		const edges = [
+			storedEdge({
+				id: "e1",
+				from: "a",
+				to: "b",
+				type: "uses",
+				status: "active",
+			}),
+			storedEdge({
+				id: "e2",
+				from: "a",
+				to: "b",
+				type: "uses",
+				status: "active",
+			}),
+		];
+		const result = markConflictingEdges(
+			edges,
+			(e) => `${e.from}-${e.type}-${e.to}`,
+		);
+		expect(result[0]?.status).toBe("conflicted");
+		expect(result[0]?.disputed).toBe(true);
+		expect(result[1]?.status).toBe("conflicted");
+		expect(result[1]?.disputed).toBe(true);
 	});
 });

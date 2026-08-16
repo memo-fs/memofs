@@ -2,6 +2,7 @@
 title: "How to use MemoFS with opencode"
 date: "2026-07-28"
 estimatedMinutes: 3
+description: "Configure OpenCode autonomous terminal agent with MemoFS file-first memory."
 ---
 
 # Overview
@@ -34,11 +35,20 @@ Produces:
 - **`.opencode/plugins/memofs.js`** — handles the cloud pull, a session-start compliance marker, and an end-of-session status toast (no context injection)
 - **`opencode.json`** — the MCP server entry (project-local by default)
 
-### Step 3: Restart and verify
+### Step 3: Record persistent project memory
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+This stores a durable note in `.memofs/memory/notes.md`.
+
+### Step 4: Restart and verify
 
 Restart opencode. Since there's no auto-injection, confirm the agent is actually calling the MCP tool rather than assuming it's active:
 
-- Ask directly: *"Call your memofs context tool and tell me what's in project memory."*
+- Prompt opencode: *"Which docs framework does this project use?"*
+- Or ask directly: *"Call your memofs context tool and tell me what's in project memory."*
 - Look for the compliance toast at session end.
 
 If the agent doesn't reach for the tool on its own, double check `AGENTS.md` landed correctly — it's the only thing telling opencode's model that the tool exists and when to use it.
@@ -49,5 +59,5 @@ If the agent doesn't reach for the tool on its own, double check `AGENTS.md` lan
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

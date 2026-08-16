@@ -9,11 +9,11 @@ import CopyButton from "./CopyButton.vue";
         <p class="oss-badge">MIT Licensed · 100% open source</p>
         <h2 class="cta-headline">One command. Your agent never forgets.</h2>
         <div class="code-snippet large code-snippet-with-copy">
-          <code>npx memofs init</code>
-          <CopyButton text="npx memofs init" class="code-snippet-copy" />
+          <code>npx @memofs/cli init</code>
+          <CopyButton text="npx @memofs/cli init" class="code-snippet-copy" />
         </div>
         <div class="cta-buttons">
-          <a href="/packages/core/" class="cta-button primary">Read the Quick Start →</a>
+          <a href="/introduction" class="cta-button primary">Read the Quick Start →</a>
           <a href="https://memofs.dev" class="cta-button secondary" target="_blank" rel="noopener">
             Explore MemoFS Cloud →
           </a>

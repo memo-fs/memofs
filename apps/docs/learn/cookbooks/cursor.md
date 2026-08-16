@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Cursor"
 date: "2026-07-28"
 estimatedMinutes: 3
+description: "Configure Cursor IDE with MemoFS Model Context Protocol (MCP) server for instant context recall."
 ---
 
 # Overview
@@ -35,16 +36,24 @@ Produces:
 
 *Cursor never gets a hooks file from this command — that's by design, not a partial setup.*
 
-### Step 3: Restart and verify
+### Step 3: Record persistent project memory
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+This stores a durable note in `.memofs/memory/notes.md`.
+
+### Step 4: Restart and verify
 
 Restart Cursor. Since nothing auto-injects, verify the agent is actively reaching for memory:
 
-- Start a task and check whether it calls a memofs tool before writing code.
+- Prompt Cursor Chat or Composer: *"Which docs framework does this project use?"*
 - Or ask directly: *"What's in your memofs project memory right now?"*
 
 If it's not reaching for the tool, check that `.cursor/rules/memofs.mdc` is present and not excluded by a broader rules-ignore pattern.
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

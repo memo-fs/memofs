@@ -10,6 +10,8 @@ export type ConversationRole = "user" | "assistant" | "system" | "tool";
  * @public
  */
 export interface ConversationEntry {
+	/** Optional unique identifier for the conversation entry. */
+	id?: string;
 	/** ISO 8601 timestamp of when the entry was created. */
 	timestamp: string;
 	/** The role of the speaker (user, assistant, system, tool). */
@@ -41,6 +43,8 @@ export type NoteKind =
  * @public
  */
 export interface TimestampedNote {
+	/** Optional unique identifier for the note. */
+	id?: string;
 	/** ISO 8601 timestamp of when the note was created. */
 	timestamp: string;
 	/** The kind/category of the note. */

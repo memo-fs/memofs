@@ -45,61 +45,7 @@ const filteredCookbooks = computed(() => {
     .sort((a, b) => Number(isComingSoon(a)) - Number(isComingSoon(b)))
 })
 
-const getBrandIconType = (recipe) => {
-  const url = (recipe.url || '').toLowerCase()
-  const title = (recipe.frontmatter?.title || '').toLowerCase()
-  const combined = url + ' ' + title
-
-  if (combined.includes('aider')) return 'aider'
-  if (combined.includes('amazon')) return 'amazon-q'
-  if (combined.includes('antigravity')) return 'antigravity'
-  if (combined.includes('claude')) return 'claude'
-  if (combined.includes('cline')) return 'cline'
-  if (combined.includes('codex')) return 'codex'
-  if (combined.includes('command')) return 'command-code'
-  if (combined.includes('copilot')) return 'copilot'
-  if (combined.includes('cursor')) return 'cursor'
-  if (combined.includes('gemini')) return 'gemini'
-  if (combined.includes('github')) return 'github'
-  if (combined.includes('jetbrains')) return 'jetbrains'
-  if (combined.includes('kilo')) return 'kilo-code'
-  if (combined.includes('linear')) return 'linear'
-  if (combined.includes('notion')) return 'notion'
-  if (combined.includes('opencode')) return 'opencode'
-  if (combined.includes('vercel')) return 'vercel'
-  if (combined.includes('windsurf')) return 'windsurf'
-  if (combined.includes('zed')) return 'zed'
-  return 'memofs'
-}
-
-const brandMap = {
-  'aider': { name: 'Aider', icon: 'simple-icons:python' },
-  'amazon-q': { name: 'Amazon Q', icon: 'simple-icons:amazonaws' },
-  'antigravity': { name: 'Google Antigravity', icon: 'logos:google-icon' },
-  'claude': { name: 'Claude Code', icon: 'simple-icons:anthropic' },
-  'cline': { name: 'Cline', icon: 'ph:robot-bold' },
-  'codex': { name: 'Codex', icon: 'simple-icons:openai' },
-  'command-code': { name: 'Command Code', icon: 'ph:terminal-window-bold' },
-  'copilot': { name: 'GitHub Copilot', icon: 'simple-icons:githubcopilot' },
-  'cursor': { name: 'Cursor', icon: 'simple-icons:cursor' },
-  'gemini': { name: 'Gemini CLI', icon: 'simple-icons:googlegemini' },
-  'github': { name: 'GitHub', icon: 'simple-icons:github' },
-  'jetbrains': { name: 'JetBrains AI', icon: 'simple-icons:jetbrains' },
-  'kilo-code': { name: 'Kilo Code', icon: 'ph:lightning-bold' },
-  'linear': { name: 'Linear', icon: 'simple-icons:linear' },
-  'notion': { name: 'Notion', icon: 'simple-icons:notion' },
-  'opencode': { name: 'OpenCode', icon: 'ph:code-bold' },
-  'vercel': { name: 'Vercel AI SDK', icon: 'simple-icons:vercel' },
-  'windsurf': { name: 'Windsurf', icon: 'simple-icons:codeium' },
-  'zed': { name: 'Zed AI', icon: 'simple-icons:zeddotdev' },
-  'memofs': { name: 'MemoFS', icon: 'ph:brain-bold' },
-
-}
-
-const getBrandInfo = (recipe) => {
-  const type = getBrandIconType(recipe)
-  return brandMap[type] || brandMap['memofs']
-}
+import { getBrandIconType, getBrandInfo } from '../utils/brand'
 </script>
 
 <template>

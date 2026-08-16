@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Codex"
 date: "2026-07-28"
 estimatedMinutes: 3
+description: "Integrate MemoFS memory runtime with Codex CLI and OpenAI developer workflows."
 ---
 
 # Overview
@@ -25,7 +26,7 @@ npx @memofs/cli init
 ### Step 2: Generate the full Codex setup
 
 ```bash
-npx @memofs/cli generate agent codex --scope local --project-name "Your project name"
+npx @memofs/cli generate agent codex --project-name "Your project name"
 ```
 
 Produces:
@@ -33,7 +34,7 @@ Produces:
 - **`AGENTS.md`** — rules file (Codex's target is `agents`/`codex`, so this doubles as the cross-tool AGENTS.md standard file)
 - **`.agents/rules/git-conventions.md`**
 - **`.codex/hooks.json`** — `SessionStart`, `SubagentStart`, and `Stop` hooks
-- **MCP config** — `--scope local` writes it to `.codex/config.toml`; omit the flag and Codex defaults to the global `~/.codex/config.toml` instead
+- **MCP config** — writes to project-local `.codex/config.toml` by default; pass `--scope global` if you want the global `~/.codex/config.toml` instead
 
 ### ⚠️ Step 3: Review the hooks before Codex will run them
 
@@ -45,9 +46,15 @@ This is the step people skip, then wonder why nothing is being injected. **Codex
 
 Review and approve the memofs hook group. Until you do this, `SessionStart` won't fire and no context will be injected — Codex will run normally, just silently without memory, which looks like a bug rather than an unreviewed hook.
 
-### Step 4: Restart and verify
+### Step 4: Record persistent project memory
 
-Restart Codex. Ask it to recall something you stored in Step 1, or check for the end-of-session compliance summary in `systemMessage`.
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+### Step 5: Restart and verify
+
+Restart Codex. Ask: *"Which docs framework does this project use?"* or check for the end-of-session compliance summary in `systemMessage`.
 
 ## Notes
 
@@ -57,5 +64,5 @@ Restart Codex. Ask it to recall something you stored in Step 1, or check for the
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

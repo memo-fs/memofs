@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Kilo Code"
 date: "2026-07-28"
 estimatedMinutes: 5
+description: "Connect Kilo Code to MemoFS memory runtime for persistent context across terminal coding sessions."
 ---
 
 # Overview

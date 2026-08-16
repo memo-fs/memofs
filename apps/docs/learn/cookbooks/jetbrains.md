@@ -2,6 +2,7 @@
 title: "How to use MemoFS with JetBrains Junie"
 date: "2026-07-28"
 estimatedMinutes: 5
+description: "Configure JetBrains IDEs (IntelliJ, WebStorm, PyCharm) with MemoFS project memory."
 ---
 
 # Overview
@@ -52,5 +53,5 @@ Or through the IDE: **Settings → Tools → Junie → MCP Settings → Add**. O
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

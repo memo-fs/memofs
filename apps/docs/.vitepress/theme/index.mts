@@ -3,13 +3,13 @@ import { inBrowser } from "vitepress";
 import DefaultTheme from "vitepress/theme";
 import { nextTick, watch } from "vue";
 import AnnouncementPill from "./components/AnnouncementPill.vue";
-import BlogIndex from "./components/BlogIndex.vue";
 import CopyButton from "./components/CopyButton.vue";
 import DualEntryHero from "./components/DualEntryHero.vue";
 import HeroTerminal from "./components/HeroTerminal.vue";
 import HomeLayout from "./components/HomeLayout.vue";
 import InteractiveQuickstart from "./components/InteractiveQuickstart.vue";
 import NewsletterSignup from "./components/NewsletterSignup.vue";
+import Roadmap from "./components/Roadmap.vue";
 import "./custom.css";
 // styles/app.css design-system tokens are now inlined in custom.css (SSOT)
 import { GTAG_ID } from "../config/head.mts";
@@ -138,8 +138,6 @@ export default {
 	extends: DefaultTheme,
 	Layout: HomeLayout,
 	enhanceApp({ app, router }) {
-		// Used inside blog/index.md to render the data-driven post grid.
-		app.component("BlogIndex", BlogIndex);
 		// Newsletter signup (Resend via /api/subscribe Pages Function) — embedded in blog + changelog markdown.
 		app.component("NewsletterSignup", NewsletterSignup);
 		// Inline copy-to-clipboard for install commands + code snippets.
@@ -152,6 +150,8 @@ export default {
 		app.component("DualEntryHero", DualEntryHero);
 		// Interactive framework quickstart switcher.
 		app.component("InteractiveQuickstart", InteractiveQuickstart);
+		// Product & architecture roadmap component.
+		app.component("Roadmap", Roadmap);
 
 		if (!inBrowser) return;
 

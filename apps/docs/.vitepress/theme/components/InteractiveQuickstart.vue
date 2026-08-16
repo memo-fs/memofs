@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { Icon } from "@iconify/vue";
 import CopyButton from "./CopyButton.vue";
 
 interface StepItem {
@@ -15,7 +16,7 @@ interface StackOption {
   id: string;
   name: string;
   badge: string;
-  svg: string;
+  icon: string;
   description: string;
   steps: StepItem[];
 }
@@ -25,7 +26,7 @@ const stacks: StackOption[] = [
     id: "claude",
     name: "Claude Code",
     badge: "MCP & Hooks",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M13.84 2.5h-3.68L4 21.5h3.68l1.63-4.73h5.38l1.63 4.73h3.68L13.84 2.5zm-3.52 11.4l1.68-4.88 1.68 4.88h-3.36z"/></svg>',
+    icon: "simple-icons:anthropic",
     description: "Equip Claude Code with automatic memory loading, hooks, and MCP tools.",
     steps: [
       {
@@ -52,13 +53,21 @@ const stacks: StackOption[] = [
         htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
         lang: "bash",
       },
+      {
+        step: 4,
+        title: "Restart Claude Code",
+        description: "Restart Claude Code and prompt it to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
     ],
   },
   {
     id: "cursor",
     name: "Cursor",
     badge: "MDC Rules & MCP",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 1L1.75 6.918v10.164L12 23l10.25-5.918V6.918L12 1zm8.5 15.197L12 21.111l-8.5-4.914V7.803L12 2.889l8.5 4.914v8.394zM12 5.5L5.5 9.25v5.5L12 18.5l6.5-3.75v-5.5L12 5.5z"/></svg>',
+    icon: "simple-icons:cursor",
     description: "Configure Cursor IDE rules and MCP server configuration for MemoFS.",
     steps: [
       {
@@ -85,13 +94,21 @@ const stacks: StackOption[] = [
         htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
         lang: "bash",
       },
+      {
+        step: 4,
+        title: "Restart Cursor",
+        description: "Restart Cursor and prompt Composer / Chat to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
     ],
   },
   {
     id: "codex",
     name: "Codex",
     badge: "AGENTS.md & Hooks",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg>',
+    icon: "simple-icons:openai",
     description: "Configure Codex CLI with automatic memory loading, hooks, and MCP tools.",
     steps: [
       {
@@ -118,13 +135,21 @@ const stacks: StackOption[] = [
         htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
         lang: "bash",
       },
+      {
+        step: 4,
+        title: "Restart Codex",
+        description: "Restart Codex CLI and prompt it to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
     ],
   },
   {
     id: "opencode",
     name: "opencode",
     badge: "Plugin & Rules",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 8l-5 4 5 4M15 8l5 4-5 4M14 6l-4 12"/></svg>',
+    icon: "ph:code-bold",
     description: "Configure opencode CLI with MemoFS plugin, rules, and MCP configuration.",
     steps: [
       {
@@ -151,13 +176,144 @@ const stacks: StackOption[] = [
         htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
         lang: "bash",
       },
+      {
+        step: 4,
+        title: "Restart opencode",
+        description: "Restart opencode and prompt it to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
+    ],
+  },
+  {
+    id: "antigravity",
+    name: "Google Antigravity",
+    badge: "IDE & CLI Rules",
+    icon: "logos:google-icon",
+    description: "Connect MemoFS to Google Antigravity agents across IDE and CLI workflows.",
+    steps: [
+      {
+        step: 1,
+        title: "Initialize MemoFS in your project repository",
+        description: "Creates `.memofs/` workspace directory with default memory structures.",
+        code: "npx @memofs/cli init",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli init</span>',
+        lang: "bash",
+      },
+      {
+        step: 2,
+        title: "Generate Antigravity agent rules & MCP config",
+        description: "Emits `AGENTS.md` and registers `@memofs/mcp-server` in `.agents/mcp_settings.json`.",
+        code: "npx @memofs/cli generate agent-rules gemini",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli generate agent-rules gemini</span>',
+        lang: "bash",
+      },
+      {
+        step: 3,
+        title: "Record persistent project memory",
+        description: "Persists key decisions into `.memofs/` Markdown and JSONL files.",
+        code: 'npx @memofs/cli remember "Project uses VitePress for documentation" --kind note',
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
+        lang: "bash",
+      },
+      {
+        step: 4,
+        title: "Prompt Antigravity",
+        description: "Open Antigravity chat panel and prompt the agent to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
+    ],
+  },
+  {
+    id: "gemini",
+    name: "Gemini CLI",
+    badge: "CLI Rules & MCP",
+    icon: "simple-icons:googlegemini",
+    description: "Configure Gemini CLI and Code Assist with MemoFS rules and MCP tools.",
+    steps: [
+      {
+        step: 1,
+        title: "Initialize MemoFS in your project repository",
+        description: "Creates `.memofs/` workspace directory with default memory structures.",
+        code: "npx @memofs/cli init",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli init</span>',
+        lang: "bash",
+      },
+      {
+        step: 2,
+        title: "Generate Gemini rules & MCP config",
+        description: "Emits `GEMINI.md`, `.gemini/rules/`, and merges `.gemini/settings.json`.",
+        code: "npx @memofs/cli generate agent gemini",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli generate agent gemini</span>',
+        lang: "bash",
+      },
+      {
+        step: 3,
+        title: "Record persistent project memory",
+        description: "Persists key decisions into `.memofs/` Markdown and JSONL files.",
+        code: 'npx @memofs/cli remember "Project uses VitePress for documentation" --kind note',
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
+        lang: "bash",
+      },
+      {
+        step: 4,
+        title: "Restart Gemini CLI",
+        description: "Restart Gemini CLI and prompt it to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
+    ],
+  },
+  {
+    id: "copilot",
+    name: "GitHub Copilot",
+    badge: "Instructions & MCP",
+    icon: "simple-icons:githubcopilot",
+    description: "Equip GitHub Copilot in VS Code with MemoFS markdown memory and MCP server.",
+    steps: [
+      {
+        step: 1,
+        title: "Initialize MemoFS in your project repository",
+        description: "Creates `.memofs/` workspace directory with default memory structures.",
+        code: "npx @memofs/cli init",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli init</span>',
+        lang: "bash",
+      },
+      {
+        step: 2,
+        title: "Generate Copilot instructions & MCP config",
+        description: "Emits `.github/copilot-instructions.md` and merges `.vscode/mcp.json`.",
+        code: "npx @memofs/cli generate agent copilot",
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli generate agent copilot</span>',
+        lang: "bash",
+      },
+      {
+        step: 3,
+        title: "Record persistent project memory",
+        description: "Persists key decisions into `.memofs/` Markdown and JSONL files.",
+        code: 'npx @memofs/cli remember "Project uses VitePress for documentation" --kind note',
+        htmlCode: '<span class="token prompt">$</span> <span class="token cmd">npx @memofs/cli remember <span class="token string">"Project uses VitePress for documentation"</span> --kind note</span>',
+        lang: "bash",
+      },
+      {
+        step: 4,
+        title: "Reload VS Code & Copilot",
+        description: "Reload VS Code window and prompt Copilot Chat to ensure `.memofs/` is functional",
+        code: "Which docs framework does this project use?",
+        htmlCode: '<span class="token prompt">$</span> Which docs framework does this project use?</span>',
+        lang: "text",
+      },
     ],
   },
   {
     id: "vercel",
     name: "Vercel AI SDK",
     badge: "Framework Adapter",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 1L24 22H0L12 1Z"/></svg>',
+    icon: "simple-icons:vercel",
     description: "Equip Vercel AI SDK `generateText` or `streamText` agents with `@memofs/adapter-ai-sdk` memory tools.",
     steps: [
       {
@@ -224,7 +380,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
     id: "openai",
     name: "OpenAI Adapter",
     badge: "Embeddings Adapter",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M22.28 9.82a5.98 5.98 0 0 0-.52-4.91 6.04 6.04 0 0 0-6.51-2.9 6.07 6.07 0 0 0-4.99-2.38 6.04 6.04 0 0 0-5.77 4.22 6.03 6.03 0 0 0-4.04 2.92 6.04 6.04 0 0 0 .74 7.14 5.98 5.98 0 0 0 .52 4.91 6.04 6.04 0 0 0 6.51 2.9 6.04 6.04 0 0 0 4.99 2.38 6.04 6.04 0 0 0 5.77-4.22 6.03 6.03 0 0 0 4.04-2.92 6.04 6.04 0 0 0-.74-7.14zm-9.02 11.44a4.42 4.42 0 0 1-2.73-1.02l.14-.08 4.54-2.62a.81.81 0 0 0 .41-.7v-6.42l1.93 1.11a.08.08 0 0 1 .04.06v5.27a4.44 4.44 0 0 1-4.33 4.4zm-7.66-3.47a4.41 4.41 0 0 1-.58-2.86l.14.08 4.54 2.62a.81.81 0 0 0 .81 0l5.56-3.21v2.23a.08.08 0 0 1-.04.07l-4.57 2.64a4.44 4.44 0 0 1-5.86-1.57zm-1.12-8.38a4.4 4.4 0 0 1 2.15-1.85v5.39a.81.81 0 0 0 .41.7l5.56 3.21-1.93 1.11a.08.08 0 0 1-.08 0l-4.57-2.64a4.44 4.44 0 0 1-1.54-5.92zm14.18 4.49-5.56-3.21 1.93-1.11a.08.08 0 0 1 .08 0l4.57 2.64a4.44 4.44 0 0 1 1.54 5.92 4.4 4.4 0 0 1-2.15 1.85v-5.39a.81.81 0 0 0-.41-.7zm1.7-2.7a4.41 4.41 0 0 1 .58 2.86l-.14-.08-4.54-2.62a.81.81 0 0 0-.81 0l-5.56 3.21v-2.23a.08.08 0 0 1 .04-.07l4.57-2.64a4.44 4.44 0 0 1 5.86 1.57zM8.33 10.4l1.93-1.11a.08.08 0 0 1 .08 0l4.57 2.64a4.44 4.44 0 0 1 1.54 5.92 4.4 4.4 0 0 1-2.15 1.85v-5.39a.81.81 0 0 0-.41-.7l-5.56-3.21zM12 14.12l-2.6-1.5 2.6-1.5 2.6 1.5-2.6 1.5z"/></svg>',
+    icon: "simple-icons:openai",
     description: "Power MemoFS hybrid recall with OpenAI embedding models via `@memofs/adapter-openai`.",
     steps: [
       {
@@ -265,9 +421,9 @@ const memo = new MemoFS({
   },
   {
     id: "core",
-    name: "Direct SDK (@memofs/core)",
+    name: "Core SDK",
     badge: "Core Runtime",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 1.84L2.4 7.38v11.08L12 23.99l9.6-5.53V7.38L12 1.84zM12 4.15l7.6 4.38v8.77L12 21.68l-7.6-4.38V8.53L12 4.15z"/></svg>',
+    icon: "ph:cpu-bold",
     description: "Direct Node.js / TypeScript programmatic access to MemoFS memory operations.",
     steps: [
       {
@@ -318,7 +474,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
     id: "server",
     name: "Self-Hosted Server",
     badge: "Server Mode",
-    svg: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>',
+    icon: "simple-icons:cloudflare",
     description: "Run MemoFS HTTP API & MCP Endpoint on Node.js or Cloudflare Workers.",
     steps: [
       {
@@ -382,7 +538,9 @@ function selectStack(stack: StackOption) {
         :aria-selected="activeStackId === stack.id"
         @click="selectStack(stack)"
       >
-        <span class="iq-tab-icon" v-html="stack.svg" />
+        <span class="iq-tab-icon">
+          <Icon :icon="stack.icon" class="iq-icon-svg" />
+        </span>
         <span class="iq-tab-name">{{ stack.name }}</span>
       </button>
     </div>
@@ -391,8 +549,9 @@ function selectStack(stack: StackOption) {
     <div class="iq-card" v-if="activeStack">
       <div class="iq-card-banner">
         <div class="iq-card-title-group">
-          <span class="iq-card-badge">{{ activeStack.badge }}</span>
+          <Icon :icon="activeStack.icon" class="iq-card-brand-icon" />
           <h3 class="iq-card-name">{{ activeStack.name }}</h3>
+          <span class="iq-card-badge">{{ activeStack.badge }}</span>
         </div>
         <p class="iq-card-desc">{{ activeStack.description }}</p>
       </div>
@@ -484,6 +643,11 @@ function selectStack(stack: StackOption) {
   align-items: center;
 }
 
+.iq-icon-svg {
+  width: 16px;
+  height: 16px;
+}
+
 .iq-card {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
@@ -502,6 +666,12 @@ function selectStack(stack: StackOption) {
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
+}
+
+.iq-card-brand-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--vp-c-text-1);
 }
 
 .iq-card-badge {

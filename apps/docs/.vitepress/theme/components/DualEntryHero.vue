@@ -30,8 +30,8 @@ import CopyButton from "./CopyButton.vue";
               <CopyButton text="npx @memofs/cli init" />
             </div>
             <div class="card-links">
-              <a href="/packages/mcp/" class="card-link primary">MCP Setup Guide →</a>
-              <a href="/learn/cookbooks/" class="card-link secondary">View IDE Cookbooks ↗</a>
+              <a href="/mcp/" class="card-link primary">MCP Setup Guide →</a>
+              <a href="/learn/cookbooks/" class="card-link secondary">View IDE Cookbooks →</a>
             </div>
           </div>
         </div>
@@ -60,8 +60,8 @@ import CopyButton from "./CopyButton.vue";
               <CopyButton text="npm install @memofs/core" />
             </div>
             <div class="card-links">
-              <a href="/packages/core/" class="card-link primary">Read Core SDK Docs →</a>
-              <a href="/api/" class="card-link secondary">API Reference ↗</a>
+              <a href="/core/" class="card-link primary">Read Core SDK Docs →</a>
+              <a href="/api/" class="card-link secondary">API Reference →</a>
             </div>
           </div>
         </div>

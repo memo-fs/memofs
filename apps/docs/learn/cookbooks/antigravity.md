@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Google Antigravity"
 date: "2026-07-28"
 estimatedMinutes: 4
+description: "Connect MemoFS to Google AntiGravity agents for persistent project memory across multi-agent workflows."
 ---
 
 # Overview
@@ -94,12 +95,18 @@ agy mcp add memofs -- npx -y @memofs/mcp-server --root /absolute/path/to/your/pr
 
 ---
 
-## Step 4: Verify Setup
+## Step 4: Record Memory & Verify
+
+First, record a test decision:
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
 
 ### In Antigravity IDE:
 1. Open the sidebar chat panel in your IDE.
-2. Ask the agent: *"Check project memory using MemoFS."*
-3. Verify that the agent invokes the `memofs` MCP tools.
+2. Ask the agent: *"Which docs framework does this project use?"*
+3. Verify that the agent invokes the `memofs` MCP tools and returns the recorded fact.
 
 ### In Antigravity CLI (`agy`):
 1. Run `agy inspect` to verify active MCP tools and skills.
@@ -107,5 +114,5 @@ agy mcp add memofs -- npx -y @memofs/mcp-server --root /absolute/path/to/your/pr
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

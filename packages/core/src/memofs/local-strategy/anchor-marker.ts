@@ -133,6 +133,21 @@ export function parseSymbolPath(
 	return { file, symbol };
 }
 
+let cachedTsPromise: Promise<typeof import("typescript")> | undefined;
+
+async function loadTsModule(): Promise<
+	typeof import("typescript") | undefined
+> {
+	if (!cachedTsPromise) {
+		cachedTsPromise = import("typescript");
+	}
+	try {
+		return await cachedTsPromise;
+	} catch {
+		return undefined;
+	}
+}
+
 /**
  * Uses the TypeScript Compiler API (lazy-loaded) to validate that the
  * given dotted symbol path exists in the file. Returns the full symbol
@@ -159,12 +174,8 @@ export async function extractSymbolPath(args: {
 }): Promise<string | undefined> {
 	if (!isTsFilePath(args.file)) return undefined;
 
-	let ts: typeof import("typescript");
-	try {
-		ts = await import("typescript");
-	} catch {
-		return undefined;
-	}
+	const ts = await loadTsModule();
+	if (!ts) return undefined;
 
 	const absolutePath = resolveAnchorFilePath(args.file, args.rootDir);
 	let sourceText: string;

@@ -306,6 +306,12 @@ export interface WriteMemoryInput {
 	 */
 	id?: string;
 	/**
+	 * Optional idempotency key. When provided, duplicate calls to `writeMemory`
+	 * with the same idempotency key will return the existing record result with
+	 * `created: false` instead of appending duplicate notes and events.
+	 */
+	idempotencyKey?: string;
+	/**
 	 * Optional explicit durability tier override. When
 	 * set, the classifier returns it verbatim; when omitted, the deterministic
 	 * classifier decides from `kind` + `confidence` + content shape. `transient`
@@ -528,6 +534,9 @@ export interface GraphNodeInput {
 	confidence?: number;
 	importance?: number;
 	status?: string;
+	disputed?: boolean;
+	stale?: boolean;
+	unverified?: boolean;
 	sourceRefs?: SourceRef[];
 	metadata?: JsonObject;
 }
@@ -542,6 +551,9 @@ export interface GraphEdgeInput {
 	weight?: number;
 	confidence?: number;
 	status?: string;
+	disputed?: boolean;
+	stale?: boolean;
+	unverified?: boolean;
 	sourceRefs?: SourceRef[];
 	metadata?: JsonObject;
 }

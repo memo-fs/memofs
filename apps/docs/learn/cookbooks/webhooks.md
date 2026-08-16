@@ -1,7 +1,18 @@
 ---
-title: "MemoFS Cloud webhooks configuration"
-date: "2026-08-05"
-estimatedMinutes: 5
+title: "How to trigger Memory Sync & Reindexing on Webhook Events"
+date: "2026-08-10"
+estimatedMinutes: 4
+status: "coming-soon"
+description: "Receive real-time signed HMAC HTTP POST webhooks on MemoFS memory write and consolidation events."
 ---
 
-# Coming Soon
+# How to trigger Memory Sync & Reindexing on Webhook Events
+
+> [!NOTE]
+> **Coming Soon**: This cookbook is currently being updated with a companion end-to-end video demo and interactive webhook simulation playground.
+
+In the meantime, explore the underlying HTTP APIs and Core memory injection methods:
+
+* [Server HTTP API Reference](/server/http-api)
+* [Core Client API (`memo.writeMemory`)](/core/memory)
+* [Connectors Framework](/connectors/)

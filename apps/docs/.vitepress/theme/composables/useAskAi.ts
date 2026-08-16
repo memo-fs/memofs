@@ -11,14 +11,14 @@ interface ChatItem {
 
 const items: ChatItem[] = [
 	{
-		label: "ChatGPT",
+		label: "Chat GPT",
 		provider: "openai",
 		url: "https://chatgpt.com",
 		supportsUrlPrefill: true,
 		urlParam: "q",
 	},
 	{
-		label: "Claude",
+		label: "Claude AI",
 		provider: "anthropic",
 		url: "https://claude.ai/new",
 		supportsUrlPrefill: true,

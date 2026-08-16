@@ -14,7 +14,7 @@ export const nav: DefaultTheme.NavItem[] = [
 
 	{
 		text: "Changelog",
-		link: "/community/changelog",
+		link: "/changelog",
 		activeMatch: "/changelog",
 	},
 	{
@@ -22,13 +22,13 @@ export const nav: DefaultTheme.NavItem[] = [
 		items: [
 			{ text: "Cookbooks", link: "/learn/cookbooks/" },
 			{ text: "Tracks", link: "/learn/tracks/" },
-			{ text: "Blog", link: "/blog/" },
 		],
 		activeMatch: "/learn/",
 	},
 	{
 		text: "Community",
 		items: [
+			{ text: "Roadmap", link: "/community/roadmap" },
 			{ text: "Contributing", link: "/community/contributing" },
 			{
 				text: "GitHub Discussions",
@@ -39,6 +39,7 @@ export const nav: DefaultTheme.NavItem[] = [
 				link: "https://github.com/memo-fs/memofs/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22",
 			},
 		],
+		activeMatch: "/community/",
 	},
 	{
 		text: "Cloud",

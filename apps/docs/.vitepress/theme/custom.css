@@ -944,11 +944,28 @@ div[class*="language-"] pre {
 .changelog-page .vp-doc h4 .header-anchor { display: none; }
 
 /* ===================================================================
-   BLOG INDEX PAGE
+   BLOG INDEX & ROADMAP PAGES
    =================================================================== */
 .blog-index-page .VPDoc .container,
 .blog-index-page .VPDoc:not(.has-sidebar) .content {
 	max-width: 1152px;
+}
+
+.roadmap-page .VPDoc .container,
+.roadmap-page .VPDoc:not(.has-sidebar) .content {
+	max-width: 1152px !important;
+	padding-left: 20px !important;
+	padding-right: 20px !important;
+}
+
+.roadmap-page .VPDoc .aside,
+.roadmap-page .VPDocAside,
+.roadmap-page .aside-container {
+	display: none !important;
+}
+
+.roadmap-page .VPDoc .content-container {
+	max-width: 100% !important;
 }
 
 /* ===================================================================

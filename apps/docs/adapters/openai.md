@@ -1,0 +1,185 @@
+---
+title: "@memofs/adapter-openai"
+description: "OpenAI embeddings adapter for MemoFS vector search and semantic recall."
+---
+
+# OpenAI Adapter (`@memofs/adapter-openai`)
+
+The `@memofs/adapter-openai` adapter provides vector embedding capabilities for MemoFS using OpenAI's embeddings API (`/v1/embeddings`).
+
+It implements the core [`MemoryEmbedder`](/api/core#memoryembedder) interface, providing automatic batch chunking, dimension truncation, exponential backoff retries with jitter, and robust input/response validation.
+
+## Subpath Exports
+
+| Export Path | Target Environment | Description |
+|---|---|---|
+| **`@memofs/adapter-openai`** | Node.js (>= 22), Edge | **Root entry.** Exposes `OpenAIEmbedder`, `createOpenAIEmbedder`, `OpenAISdkEmbeddingsClient`, `createOpenAIClient`, model utilities, and error classes. |
+| **`@memofs/adapter-openai/testing`** | Test runners | Exposes `createFakeOpenAIClient` and `FakeOpenAIEmbeddingsClient` for deterministic unit and integration tests without network calls. |
+
+## Installation
+
+::: code-group
+
+```sh [pnpm]
+pnpm add @memofs/adapter-openai
+```
+
+```sh [npm]
+npm install @memofs/adapter-openai
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-openai
+```
+
+```sh [bun]
+bun add @memofs/adapter-openai
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22** when running under the Node.js runtime.
+
+## Usage
+
+Instantiate the embedder with `createOpenAIEmbedder()` and pass it to your MemoFS instance:
+
+::: code-group
+
+```ts [createNodeMemoFs (Recommended)]
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
+  embedder: createOpenAIEmbedder({
+    apiKey: process.env.OPENAI_API_KEY!,
+    model: "text-embedding-3-small",
+    dimensions: 1536,
+  }),
+});
+```
+
+```ts [MemoFS Class]
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+import { createOpenAIEmbedder } from "@memofs/adapter-openai";
+
+const memo = new MemoFS({
+  store: createNodeFsMemoryStore({ rootDir: "." }),
+  projectId: "openai-app",
+  mode: "local",
+  embedder: createOpenAIEmbedder({
+    apiKey: process.env.OPENAI_API_KEY!,
+    model: "text-embedding-3-small",
+    dimensions: 1536,
+  }),
+});
+```
+
+:::
+
+## Supported Models & Dimensions
+
+`@memofs/adapter-openai` provides built-in validation for known OpenAI embedding models and allows custom string model names for forward compatibility:
+
+| Model Identifier | Default Dimensions | Flexible Dimensions Supported | Typical Use Case |
+|---|---|---|---|
+| **`text-embedding-3-small`** | `1536` | Yes (`<= 1536`, e.g. 512, 1024) | High efficiency, general coding and documentation recall. |
+| **`text-embedding-3-large`** | `3072` | Yes (`<= 3072`, e.g. 256, 1024, 1536) | Maximum semantic precision for large multi-hop codebases. |
+| **`text-embedding-ada-002`** | `1536` | No (fixed at 1536) | Legacy compatibility. |
+| **Custom string (`string & {}`)** | Model default | Configurable | Custom or fine-tuned OpenAI proxy deployments. |
+
+## Configuration API (`OpenAIEmbedderConfig`)
+
+The `createOpenAIEmbedder(config)` factory accepts `OpenAIEmbedderConfig`:
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `apiKey` | `string` | — | OpenAI API key. Mutually exclusive with `client`. Required unless `client` is provided. |
+| `client` | `OpenAIEmbeddingsClient` | — | Pre-configured client instance (e.g. `OpenAISdkEmbeddingsClient` or test fake). |
+| `model` | `OpenAIEmbeddingModel` | `"text-embedding-3-small"` | Model identifier to use for embeddings. |
+| `dimensions` | `number` | Model default | Target vector dimensions. Validated against model capabilities. |
+| `baseUrl` | `string` | `"https://api.openai.com"` | Base URL override for custom proxies or Azure OpenAI gateways. |
+| `organization` | `string` | — | OpenAI organization identifier (`OpenAI-Organization` header). |
+| `project` | `string` | — | OpenAI project identifier (`OpenAI-Project` header). |
+| `fetch` | `OpenAIFetchLike` | `globalThis.fetch` | Custom `fetch` implementation for edge runtimes or mock interceptors. |
+| `timeoutMs` | `number` | `30000` (30s) | Request timeout in milliseconds. |
+| `retry` | `OpenAIRetryOptions` | See below | Retry options for transient network and rate limit errors. |
+| `userAgent` | `string` | — | Custom User-Agent header string. |
+| `batchSize` | `number` | `128` | Maximum texts per API request (automatically chunked up to `OPENAI_MAX_BATCH_SIZE = 2048`). |
+| `encodingFormat` | `"float"` | `"float"` | Vector encoding format. Base64 is rejected because MemoFS expects numeric arrays. |
+| `user` | `string` | — | Unique end-user identifier forwarded to OpenAI for abuse monitoring. |
+| `expectedDimensions`| `number` | — | Strict expected dimension validation check. |
+| `allowEmptyText` | `boolean` | `false` | Whether to allow empty strings (`""`) without throwing validation errors. |
+| `allowUnknownModelDimensions` | `boolean` | `true` | Whether custom models can accept explicit dimensions without failing validation. |
+
+### Retry Options (`OpenAIRetryOptions`)
+
+```ts
+interface OpenAIRetryOptions {
+  maxRetries?: number;        // Default: 2
+  baseDelayMs?: number;       // Default: 1000ms
+  maxDelayMs?: number;        // Default: 30000ms
+  jitter?: boolean;           // Default: true
+  retryableStatuses?: readonly number[]; // Default: [408, 409, 425, 429, 500, 502, 503, 504]
+}
+```
+
+## Error Classes
+
+All exceptions thrown by `@memofs/adapter-openai` inherit from `OpenAIEmbedderError` and expose a typed `.code` property:
+
+```ts
+class OpenAIEmbedderError extends Error {
+  readonly code: OpenAIErrorCode;
+  readonly cause?: unknown;
+}
+```
+
+| Error Class | `.code` | Cause |
+|---|---|---|
+| `OpenAIConfigError` | `"OPENAI_CONFIG_ERROR"` | Missing API key, conflicting client configuration, or invalid credentials. |
+| `OpenAIValidationError` | `"OPENAI_VALIDATION_ERROR"` | Invalid model name, dimension out of bounds, base64 format requested, or empty text. |
+| `OpenAIAPIError` | `"OPENAI_API_ERROR"` | Upstream API HTTP error response. Exposes `.status`, `.providerCode`, `.providerType`, `.providerBody`. |
+| `OpenAINetworkError` | `"OPENAI_NETWORK_ERROR"` | Network-level connectivity failure or DNS resolution issue. |
+| `OpenAITimeoutError` | `"OPENAI_TIMEOUT_ERROR"` | Request exceeded configured `timeoutMs`. |
+| `OpenAIResponseError` | `"OPENAI_RESPONSE_ERROR"` | Malformed JSON response, missing vector data, or index mismatch from API. |
+| `OpenAIRetryExhaustedError` | `"OPENAI_RETRY_EXHAUSTED"` | All retry attempts failed. |
+
+## Unit Testing with Fake Client
+
+Use the `@memofs/adapter-openai/testing` subpath to write fast, deterministic unit tests without network requests or API costs:
+
+```ts
+import { describe, it, expect } from "vitest";
+import { OpenAIEmbedder } from "@memofs/adapter-openai";
+import { createFakeOpenAIClient } from "@memofs/adapter-openai/testing";
+
+describe("OpenAI embedding pipeline", () => {
+  it("generates deterministic embeddings with test fake", async () => {
+    const fakeClient = createFakeOpenAIClient({
+      dimensions: 1536,
+      deterministic: true,
+    });
+
+    const embedder = new OpenAIEmbedder({
+      client: fakeClient,
+      model: "text-embedding-3-small",
+    });
+
+    const result = await embedder.embedText("Authentication rules");
+    expect(result.embedding).toHaveLength(1536);
+    expect(result.model).toBe("text-embedding-3-small");
+  });
+});
+```
+
+## See Also
+
+- [Adapters Overview](/adapters/)
+- [Voyage AI Adapter Reference](/adapters/voyage)
+- [Transformers.js Local Adapter](/adapters/transformers)
+- [Core Recall Engine](/core/recall)
+

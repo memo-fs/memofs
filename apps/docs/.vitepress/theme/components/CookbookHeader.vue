@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { useData } from 'vitepress'
+import { computed } from 'vue'
+import { useData, useRoute } from 'vitepress'
+import { Icon } from '@iconify/vue'
+import { getBrandIconType, getBrandInfo } from '../utils/brand'
 
 const { frontmatter } = useData()
+const route = useRoute()
+
+const brandType = computed(() => getBrandIconType({ url: route.path, frontmatter: frontmatter.value }))
+const brandInfo = computed(() => getBrandInfo({ url: route.path, frontmatter: frontmatter.value }))
 </script>
 
 <template>
@@ -19,6 +26,21 @@ const { frontmatter } = useData()
     <!-- Header Content -->
     <header class="cookbook-article-header">
       <div class="cookbook-meta-row">
+        <!-- Official Brand Badge -->
+        <div class="cookbook-brand-badge">
+          <svg v-if="brandType === 'memofs'" class="brand-icon-svg" viewBox="0 0 100 100">
+            <polygon fill="#4cae61" points="50,82 12,62 50,45 88,62" />
+            <polygon fill="#2c9ab8" points="50,63 12,43 50,26 88,43" />
+            <polygon fill="#258acb" points="50,45 12,25 50,8 88,25" />
+            <circle fill="#ffffff" cx="50" cy="23" r="3.5" />
+            <circle fill="#ffffff" cx="35" cy="30" r="1.5" opacity="0.6" />
+            <circle fill="#ffffff" cx="65" cy="30" r="1.5" opacity="0.6" />
+            <circle fill="#ffffff" cx="50" cy="37" r="1.5" opacity="0.6" />
+          </svg>
+          <Icon v-else :icon="brandInfo.icon" class="brand-icon-svg" />
+          <span class="brand-name">{{ brandInfo.name }}</span>
+        </div>
+        <span class="meta-dot">•</span>
         <span class="meta-recipe">Recipe</span>
         <template v-if="frontmatter.estimatedMinutes">
           <span class="meta-dot">•</span>
@@ -82,6 +104,21 @@ const { frontmatter } = useData()
   font-size: 13px;
   font-weight: 600;
   font-family: var(--vp-font-family-mono);
+}
+
+.cookbook-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.brand-icon-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .meta-recipe {

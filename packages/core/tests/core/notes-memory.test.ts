@@ -113,4 +113,24 @@ describe("notes memory", () => {
 		expect(output).toMatch(/- source: connector/);
 		expect(output).toMatch(/- writer: bob/);
 	});
+
+	it("renders typed id in frontmatter when present", () => {
+		const output = formatTimestampedNote({
+			id: "mem_12345678",
+			timestamp: "2026-05-02T12:00:00.000Z",
+			kind: "decision",
+			content: "Use typed ID.",
+		});
+		expect(output).toMatch(/- id: mem_12345678/);
+		expect(output).toMatch(/- kind: decision/);
+	});
+
+	it("omits id line when id is not set", () => {
+		const output = formatTimestampedNote({
+			timestamp: "2026-05-02T12:00:00.000Z",
+			kind: "note",
+			content: "A note",
+		});
+		expect(output).not.toMatch(/- id:/);
+	});
 });

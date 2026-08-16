@@ -88,6 +88,12 @@ export interface GraphNode {
 	confidence?: number;
 	importance?: number;
 	status?: GraphFactStatus;
+	/** Orthogonal epistemic dispute flag (true when contested by conflicting facts). */
+	disputed?: boolean;
+	/** Orthogonal drift flag (true when bound code has drifted or was deleted). */
+	stale?: boolean;
+	/** Orthogonal decay flag (true when fact age has exceeded its kind-specific floor). */
+	unverified?: boolean;
 	validFrom?: string;
 	validUntil?: string;
 	expiresAt?: string;
@@ -119,6 +125,12 @@ export interface GraphEdge {
 	weight?: number;
 	confidence?: number;
 	status?: GraphFactStatus;
+	/** Orthogonal epistemic dispute flag (true when contested by conflicting facts). */
+	disputed?: boolean;
+	/** Orthogonal drift flag (true when bound code has drifted or was deleted). */
+	stale?: boolean;
+	/** Orthogonal decay flag (true when fact age has exceeded its kind-specific floor). */
+	unverified?: boolean;
 	validFrom?: string;
 	validUntil?: string;
 	expiresAt?: string;

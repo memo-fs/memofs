@@ -1,0 +1,236 @@
+---
+title: "@memofs/adapter-voyage"
+description: "Voyage AI embeddings and neural reranking adapter for high-precision code and document recall in MemoFS."
+---
+
+# Voyage AI Adapter (`@memofs/adapter-voyage`)
+
+The `@memofs/adapter-voyage` adapter provides first-class support for Voyage AI's domain-optimized embedding models (`/v1/embeddings`) and neural cross-encoder rerankers (`/v1/rerank`).
+
+It implements both the [`MemoryEmbedder`](/api/core#memoryembedder) and [`Reranker`](/api/core#reranker) core interfaces to deliver high semantic accuracy across hybrid vector search and retrieval passes.
+
+## Subpath Exports
+
+| Export Path | Target Environment | Description |
+|---|---|---|
+| **`@memofs/adapter-voyage`** | Node.js (>= 22), Edge | **Root entry.** Exposes `VoyageEmbedder`, `createVoyageEmbedder`, `VoyageReranker`, `createVoyageReranker`, client factories, constants, and error classes. |
+| **`@memofs/adapter-voyage/testing`** | Test runners | Exposes `createFakeVoyageClient`, `FakeVoyageClient`, `createFakeVoyageRerankClient`, and `FakeVoyageRerankClient` for offline testing. |
+
+## Installation
+
+::: code-group
+
+```sh [pnpm]
+pnpm add @memofs/adapter-voyage
+```
+
+```sh [npm]
+npm install @memofs/adapter-voyage
+```
+
+```sh [yarn]
+yarn add @memofs/adapter-voyage
+```
+
+```sh [bun]
+bun add @memofs/adapter-voyage
+```
+
+:::
+
+> [!NOTE]
+> Requires **Node.js >= 22** when running under the Node.js runtime.
+
+## Usage
+
+You can configure Voyage AI as an **Embedder**, a **Reranker**, or both:
+
+::: code-group
+
+```ts [createNodeMemoFs (Recommended)]
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+import {
+  createVoyageEmbedder,
+  createVoyageReranker,
+} from "@memofs/adapter-voyage";
+
+const memo = createNodeMemoFs({
+  rootDir: ".",
+  // 1. Semantic embeddings
+  embedder: createVoyageEmbedder({
+    apiKey: process.env.VOYAGE_API_KEY!,
+    model: "voyage-3.5",
+    outputDimension: 1024,
+  }),
+  // 2. Neural reranking
+  reranker: createVoyageReranker({
+    apiKey: process.env.VOYAGE_API_KEY!,
+    model: "rerank-2.5-lite",
+  }),
+});
+```
+
+```ts [MemoFS Class]
+import { MemoFS } from "@memofs/core";
+import { createNodeFsMemoryStore } from "@memofs/core/node-fs";
+import {
+  createVoyageEmbedder,
+  createVoyageReranker,
+} from "@memofs/adapter-voyage";
+
+const memo = new MemoFS({
+  store: createNodeFsMemoryStore({ rootDir: "." }),
+  projectId: "voyage-app",
+  mode: "local",
+  embedder: createVoyageEmbedder({
+    apiKey: process.env.VOYAGE_API_KEY!,
+    model: "voyage-3.5",
+    outputDimension: 1024,
+  }),
+  reranker: createVoyageReranker({
+    apiKey: process.env.VOYAGE_API_KEY!,
+    model: "rerank-2.5-lite",
+  }),
+});
+```
+
+:::
+
+## Voyage Embedder Reference
+
+### Supported Models
+
+#### Flexible-Dimension Models (Matryoshka Embeddings)
+
+These models support dynamic output dimensions (`256`, `512`, `1024`, `2048` via `outputDimension`):
+* `voyage-4-large`, `voyage-4`, `voyage-4-lite`, `voyage-4-nano`
+* `voyage-3.5`, `voyage-3.5-lite`, `voyage-3-large`
+* `voyage-code-3`, `voyage-multimodal-3.5`
+
+#### Fixed-Dimension Models
+
+* `voyage-3` (1024 dims), `voyage-3-lite` (512 dims)
+* `voyage-code-2` (1536 dims), `voyage-multilingual-2` (1024 dims)
+* `voyage-finance-2` (1024 dims), `voyage-law-2` (1024 dims)
+* `voyage-multimodal-3` (1024 dims)
+
+### Embedder Configuration (`VoyageEmbedderConfig`)
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `apiKey` | `string` | — | Voyage AI API key. Mutually exclusive with `client`. |
+| `client` | `VoyageEmbeddingsClient` | — | Pre-configured client instance or test fake. |
+| `model` | `string` | `"voyage-3.5"` | Voyage embedding model identifier. |
+| `outputDimension` | `256 \| 512 \| 1024 \| 2048` | Model default | Target vector dimension for flexible models. |
+| `outputDtype` | `"float" \| "int8" \| "uint8" \| "binary" \| "ubinary"` | `"float"` | Data type for output embeddings. |
+| `inputType` | `"query" \| "document" \| null` | `null` | Optional input type hint to optimize query/document representations. |
+| `baseUrl` | `string` | `"https://api.voyageai.com"` | API base URL. |
+| `fetch` | `VoyageFetchLike` | `globalThis.fetch` | Custom `fetch` function. |
+| `timeoutMs` | `number` | `30000` (30s) | Request timeout in milliseconds. |
+| `retry` | `VoyageRetryOptions` | Standard jittered retry | Retry configuration for 429 and 5xx responses. |
+| `batchSize` | `number` | `128` | Max items per batch (automatically chunked up to `VOYAGE_MAX_BATCH_SIZE = 1000`). |
+| `expectedDimensions`| `number` | — | Validation check on returned vector dimensions. |
+| `allowEmptyText` | `boolean` | `false` | Allow empty strings without throwing. |
+| `allowUnknownModelDimensions` | `boolean` | `true` | Allow custom models with explicit dimensions. |
+
+## Voyage Reranker Reference
+
+### Supported Rerank Models
+
+* `rerank-2.5`
+* `rerank-2.5-lite` (default — fast, cost-effective cross-encoder)
+* `rerank-2`, `rerank-2-lite`
+* `rerank-1`, `rerank-lite-1`
+
+### Reranker Configuration (`VoyageRerankerConfig`)
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `apiKey` | `string` | — | Voyage AI API key. Mutually exclusive with `client`. |
+| `client` | `VoyageRerankClient` | — | Injected rerank client or test fake. |
+| `model` | `string` | `"rerank-2.5-lite"` | Rerank model identifier. |
+| `maxDocuments` | `number` | `1000` | Maximum candidate documents sent per request (up to `VOYAGE_RERANK_MAX_DOCUMENTS = 1000`). |
+| `truncation` | `boolean` | `true` | Whether to truncate documents exceeding context limits instead of throwing. |
+| `allowUnknownModel`| `boolean` | `true` | Whether to permit newer unlisted Voyage rerank models. |
+| `baseUrl` | `string` | `"https://api.voyageai.com"` | API base URL. |
+| `fetch` | `VoyageFetchLike` | `globalThis.fetch` | Custom `fetch` implementation. |
+| `timeoutMs` | `number` | `30000` (30s) | Request timeout in milliseconds. |
+| `retry` | `VoyageRetryOptions` | Standard jittered retry | Retry configuration. |
+
+## Error Classes
+
+All exceptions inherit from base error classes and provide stable `.code` identifiers:
+
+### Embedder Errors (`VoyageEmbedderError`)
+
+| Error Class | `.code` | Cause |
+|---|---|---|
+| `VoyageConfigError` | `"VOYAGE_CONFIG_ERROR"` | Missing API key or conflicting client configuration. |
+| `VoyageValidationError` | `"VOYAGE_VALIDATION_ERROR"` | Invalid model, unsupported output dimension, or malformed input texts. |
+| `VoyageAPIError` | `"VOYAGE_API_ERROR"` | Upstream API HTTP error. Exposes `.status`, `.providerCode`, `.providerType`, `.providerBody`. |
+| `VoyageNetworkError` | `"VOYAGE_NETWORK_ERROR"` | Network connectivity failure. |
+| `VoyageTimeoutError` | `"VOYAGE_TIMEOUT_ERROR"` | Request exceeded configured timeout. |
+| `VoyageResponseError` | `"VOYAGE_RESPONSE_ERROR"` | Invalid response format or vector dimension mismatch. |
+| `VoyageRetryExhaustedError` | `"VOYAGE_RETRY_EXHAUSTED"` | All retry attempts failed. |
+
+### Reranker Errors (`VoyageRerankError`)
+
+| Error Class | `.code` | Cause |
+|---|---|---|
+| `VoyageRerankConfigError` | `"VOYAGE_RERANK_CONFIG_ERROR"` | Missing API key or client. |
+| `VoyageRerankValidationError` | `"VOYAGE_RERANK_VALIDATION_ERROR"` | More than 1,000 documents provided or invalid model. |
+| `VoyageRerankApiError` | `"VOYAGE_RERANK_API_ERROR"` | Upstream rerank API HTTP error. |
+| `VoyageRerankNetworkError` | `"VOYAGE_RERANK_NETWORK_ERROR"` | Rerank network connection failure. |
+| `VoyageRerankTimeoutError` | `"VOYAGE_RERANK_TIMEOUT_ERROR"` | Rerank request timed out. |
+| `VoyageRerankResponseError` | `"VOYAGE_RERANK_RESPONSE_ERROR"` | Invalid index mapping from rerank response. |
+| `VoyageRerankRetryExhaustedError` | `"VOYAGE_RERANK_RETRY_EXHAUSTED"` | Retry attempts exhausted. |
+
+## Unit Testing with Fake Clients
+
+The `@memofs/adapter-voyage/testing` subpath provides test doubles for both embedder and reranker pipelines:
+
+```ts
+import { describe, it, expect } from "vitest";
+import { VoyageEmbedder, VoyageReranker } from "@memofs/adapter-voyage";
+import {
+  createFakeVoyageClient,
+  createFakeVoyageRerankClient,
+} from "@memofs/adapter-voyage/testing";
+
+describe("Voyage pipeline tests", () => {
+  it("runs embeddings and reranking offline", async () => {
+    const embedder = new VoyageEmbedder({
+      client: createFakeVoyageClient({ outputDimension: 1024, deterministic: true }),
+      model: "voyage-3.5",
+    });
+
+    const reranker = new VoyageReranker({
+      client: createFakeVoyageRerankClient({ deterministic: true }),
+      model: "rerank-2.5-lite",
+    });
+
+    const embedding = await embedder.embedText("Query text");
+    expect(embedding.dimensions).toBe(1024);
+
+    const ranked = await reranker.rerank({
+      query: "database",
+      documents: [
+        { id: "1", text: "PostgreSQL setup" },
+        { id: "2", text: "Frontend buttons" },
+      ],
+      topK: 1,
+    });
+
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0].id).toBeDefined();
+  });
+});
+```
+
+## See Also
+
+- [Adapters Overview](/adapters/)
+- [OpenAI Adapter Reference](/adapters/openai)
+- [Transformers.js Local Adapter](/adapters/transformers)
+- [Hybrid Recall & Reranking](/core/recall)
+

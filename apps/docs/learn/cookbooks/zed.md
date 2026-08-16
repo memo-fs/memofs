@@ -2,6 +2,7 @@
 title: "How to use MemoFS with Zed"
 date: "2026-07-28"
 estimatedMinutes: 4
+description: "Configure Zed editor assistant with MemoFS memory tools and workspace context."
 ---
 
 # Overview
@@ -54,5 +55,5 @@ Open Settings → AI → MCP Servers and check for a green "Server is active" in
 
 ## Next Steps
 
-- [Semantic search](/packages/adapters/transformers).
-- [Team memory sync](/packages/mcp/hybrid-mode).
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

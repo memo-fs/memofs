@@ -16,17 +16,17 @@
             <h3>Offline storage</h3>
             <p>
               All memory is written directly to your project's local file system as markdown and JSON. 
-              Fast, offline-first, and zero network latency.
+              Fast, offline-first, optimal recall intelligence, and zero network latency.
             </p>
           </div>
           <div class="runtime-visual">
             <div class="runtime-code-panel">
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
-import { <span class="token function">createNodeFsStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
+import { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
 <span class="token comment">// All memory stays on disk — offline-first.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
-  store: <span class="token function">createNodeFsStore</span>(
+  store: <span class="token function">createNodeFsMemoryStore</span>(
     { rootDir: <span class="token string">"."</span> }
   ),
   projectId: <span class="token string">"my-app"</span>,
@@ -47,11 +47,11 @@ import { <span class="token function">createNodeFsStore</span> } <span class="to
           <div class="runtime-visual">
             <div class="runtime-code-panel runtime-code-panel--gold">
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
-import { <span class="token function">createNodeFsStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
+import { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
 <span class="token comment">// Local speed + cloud replica.</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
-  store: <span class="token function">createNodeFsStore</span>(
+  store: <span class="token function">createNodeFsMemoryStore</span>(
     { rootDir: <span class="token string">"."</span> }
   ),
   mode: <span class="token string">"hybrid"</span>,

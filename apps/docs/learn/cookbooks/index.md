@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Cookbooks
-description: Step-by-step how-to tutorials for installing, configuring, and mastering MemoFS for AI memory.
+description: "Collection of practical integration recipes for AI coding assistants, autonomous agent frameworks, and custom SDKs."
 sidebar: false
 aside: false
 ---

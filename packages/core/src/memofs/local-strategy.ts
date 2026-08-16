@@ -115,6 +115,8 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	const anchorByMemoryId = new Map<string, AnchorRef>();
 	const anchorHashCache: AnchorHashCache = createAnchorHashCache();
 	const memoryMetaByMemoryId = new Map<string, MemoryDecayMeta>();
+	const knownMemoryIds = new Set<string>();
+	const idempotencyKeys = new Map<string, WriteMemoryResult>();
 	const graphNodesByMemoryId = new Map<string, string[]>();
 	const rootDir = options.rootDir ?? ".";
 
@@ -189,9 +191,18 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			for (const entry of result.entries) {
 				if (entry.type !== "memory.created") continue;
 				const meta = entry.metadata as
-					| { id?: unknown; kind?: unknown }
+					| { id?: unknown; kind?: unknown; idempotencyKey?: unknown }
 					| undefined;
 				if (!meta || typeof meta.id !== "string") continue;
+				knownMemoryIds.add(meta.id);
+				if (typeof meta.idempotencyKey === "string") {
+					idempotencyKeys.set(meta.idempotencyKey, {
+						id: meta.id,
+						created: false,
+						tier: "durable",
+						tierReason: "explicit-override",
+					});
+				}
 				if (typeof meta.kind !== "string") continue;
 				if (EXPIRY_DAYS[meta.kind as MemoryKind] === undefined) continue;
 				memoryMetaByMemoryId.set(meta.id as string, {
@@ -412,6 +423,8 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		graphNodesByMemoryId,
 		reindexGraphNodesByMemoryId,
 		memoryMetaByMemoryId,
+		knownMemoryIds,
+		idempotencyKeys,
 	};
 
 	return {

@@ -120,7 +120,7 @@ onUnmounted(() => {
       </ul>
       <p class="stats-source">
         Full methodology in
-        <a href="/packages/benchmark-kit" class="stats-source-link"
+        <a href="/tooling/benchmark-kit" class="stats-source-link"
           >benchmark-kit</a
         >.
       </p>

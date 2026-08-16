@@ -4,8 +4,6 @@ import DefaultTheme from "vitepress/theme";
 import { computed, nextTick, onMounted, watch } from "vue";
 import AnnouncementPill from "./AnnouncementPill.vue";
 import AskAiBar from "./AskAiBar.vue";
-import BlogPostFooter from "./BlogPostFooter.vue";
-import BlogPostHeader from "./BlogPostHeader.vue";
 import CookbookHeader from "./CookbookHeader.vue";
 
 import BottomCta from "./BottomCta.vue";
@@ -23,8 +21,6 @@ import EngramAI from "./EngramAI.vue";
 const { Layout } = DefaultTheme;
 
 const { frontmatter } = useData();
-/** Blog posts opt in with `blog: post` frontmatter to get editorial chrome. */
-const isBlogPost = computed(() => frontmatter.value.blog === "post");
 const isCookbook = computed(() => {
   const path = route.path;
   const layout = frontmatter.value.layout;
@@ -32,7 +28,7 @@ const isCookbook = computed(() => {
 });
 const showEngramAI = computed(() => {
   const layout = frontmatter.value.layout;
-  return !layout || layout === 'doc' || isBlogPost.value;
+  return !layout || layout === 'doc';
 });
 
 const route = useRoute();
@@ -67,16 +63,11 @@ watch(
     </template>
 
     <template #doc-before>
-      <BlogPostHeader v-if="isBlogPost" />
-      <CookbookHeader v-else-if="isCookbook" />
+      <CookbookHeader v-if="isCookbook" />
     </template>
 
     <template #aside-top>
-      <AskAiBar v-if="!isBlogPost" class="ask-ai-bar-aside" />
-    </template>
-
-    <template #doc-after>
-      <BlogPostFooter v-if="isBlogPost" />
+      <AskAiBar class="ask-ai-bar-aside" />
     </template>
 
     <template #home-hero-before>

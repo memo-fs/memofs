@@ -5,8 +5,9 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 
 import { head } from "./config/head.mts";
 import { nav } from "./config/nav.mts";
+import { buildPageHead } from "./config/seo.mts";
 import { sidebar } from "./config/sidebar.mts";
-import { resolveImageUrl, site } from "./config/site.mts";
+import { site } from "./config/site.mts";
 
 export default withMermaid(
 	defineConfig({
@@ -40,19 +41,7 @@ export default withMermaid(
 		head,
 
 		transformHead(ctx) {
-			const resHead = [...ctx.head];
-			for (const tag of resHead) {
-				if (tag[0] === "meta" && tag[1]) {
-					const prop = tag[1].property || tag[1].name;
-					if (
-						(prop === "og:image" || prop === "twitter:image") &&
-						typeof tag[1].content === "string"
-					) {
-						tag[1].content = resolveImageUrl(tag[1].content);
-					}
-				}
-			}
-			return resHead;
+			return buildPageHead(ctx);
 		},
 
 		markdown: {
@@ -99,11 +88,6 @@ export default withMermaid(
 					link: site.x,
 					ariaLabel: "MemoFS on X",
 				},
-				// {
-				// 	icon: "bluesky",
-				// 	link: site.bluesky,
-				// 	ariaLabel: "MemoFS on Bluesky",
-				// },
 				{
 					icon: "youtube",
 					link: site.youtube,

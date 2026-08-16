@@ -1,3 +1,8 @@
+---
+title: "API Reference Overview"
+description: "Complete API reference for MemoFS npm packages: @memofs/core, @memofs/server, @memofs/mcp-server, and @memofs/connectors."
+---
+
 # API Reference Overview
 
 Welcome to the MemoFS API Reference documentation.
@@ -7,9 +12,20 @@ MemoFS's application programming interfaces are structured around modular, scope
 ## Core Packages
 
 - **[`@memofs/core`](./core)**: The central memory runtime, virtual AgentFS, graph engine, and hybrid recall router.
+- **[`@memofs/cli`](./cli)**: The command-line interface, configuration generator, and programmatic CLI runner.
 - **[`@memofs/server`](./server)**: The hosted, self-deployable server wrapping the memory engine behind a JSON-RPC 2.0 API.
 - **[`@memofs/mcp-server`](./mcp-server)**: Exposes memory-control tools to AI agents using the Model Context Protocol.
 - **[`@memofs/connectors`](./connectors)**: Local ingestion plug-in framework for loading third-party sources (e.g. GitHub, Notion).
+
+## Provider Adapters
+
+- **[`@memofs/adapter-openai`](/adapters/openai)**: Hosted vector embeddings via OpenAI `text-embedding-3`.
+- **[`@memofs/adapter-voyage`](/adapters/voyage)**: Domain embeddings (`voyage-4`/`3.5`) and neural reranking (`rerank-2.5-lite`).
+- **[`@memofs/adapter-transformers`](/adapters/transformers)**: 100% offline in-process ONNX embeddings (`Xenova/all-MiniLM-L6-v2`).
+- **[`@memofs/adapter-workers-ai`](/adapters/workers-ai)**: Cloudflare serverless GPU entity extraction with Llama 3.1 8B.
+- **[`@memofs/adapter-r2`](/adapters/r2)**: Content-addressed Cloudflare R2 blob client for serverless storage.
+- **[`@memofs/adapter-turso`](/adapters/turso)**: Manifest metadata and serialized transaction locking over Turso/libSQL.
+- **[`@memofs/adapter-ai-sdk`](/adapters/ai-sdk)**: Vercel AI SDK tools, prompt context builders, and multi-tenant scoping.
 
 ## Developer Utilities
 
