@@ -15,12 +15,7 @@
                 <span class="terminal-dot green"></span>
               </div>
               <div class="terminal-content">
-                <span class="terminal-prompt">$</span> npm install -D @memofs/cli<br />
-                <span class="terminal-comment"># OR</span><br />
-                <span class="terminal-comment"># pnpm add -D @memofs/cli</span><br />
-                <span class="terminal-comment"># yarn add -D @memofs/cli</span><br />
-                <span class="terminal-comment"># bun add -d @memofs/cli</span><br />
-                <span class="terminal-comment"># deno add -D npm:@memofs/cli</span>
+                <span class="terminal-prompt">$</span> npm install -g @memofs/cli
               </div>
             </div>
             <p class="step-requirement">
@@ -39,8 +34,8 @@
                 <span class="terminal-dot green"></span>
               </div>
               <div class="terminal-content">
-                <span class="terminal-prompt">$</span> npx memofs init<br />
-                <span class="terminal-success">✓ Created .memofs/ with core memory, notes, recall indexes, and graph files.</span>
+                <span class="terminal-prompt">$</span> memofs init<br />
+                <span class="terminal-success">✓ Initialized .memofs at /Path/to/your/project (Project ID: none)</span>
               </div>
             </div>
           </div>
@@ -56,8 +51,10 @@
                 <span class="terminal-dot green"></span>
               </div>
               <div class="terminal-content">
-                <span class="terminal-prompt">$</span> npx memofs generate agent claude<br />
-                <span class="terminal-success">✓ Emitted CLAUDE.md, rules, hooks, and updated .mcp.json.</span>
+                <span class="terminal-prompt">$</span> memofs generate agent claude<br />
+                <span class="terminal-success">✓ Generated CLAUDE.md</span><br />
+                <span class="terminal-success">✓ Generated .claude/settings.json</span><br />
+                <span class="terminal-success">✓ Created .mcp.json (local)</span><br />
               </div>
             </div>
           </div>
@@ -73,7 +70,7 @@
                 <span class="terminal-dot green"></span>
               </div>
               <div class="terminal-content">
-                <span class="terminal-prompt">$</span> npx memofs remember "Auth uses JWT with refresh rotation" --kind decision<br />
+                <span class="terminal-prompt">$</span> memofs remember "Auth uses JWT with refresh rotation" --kind decision<br />
                 <span class="terminal-success">✓ Stored decision memory in .memofs/memory/notes.md</span>
               </div>
             </div>

@@ -60,7 +60,7 @@ async function handleAction(provider: string | null = null) {
 		const rawUrl = getRawMarkdownUrl(currentPath.value);
 		if (rawUrl) {
 			window.open(rawUrl, "_blank");
-			showToast("Opening raw markdown...");
+			showToast("Viewing markdown...");
 		} else {
 			showToast("Failed to get markdown URL.", "error");
 		}
@@ -118,7 +118,6 @@ async function handleAction(provider: string | null = null) {
 					<button class="ask-ai-dropdown-item" @click="handleAction('view-markdown')">
 						<span class="ask-ai-dropdown-label">View as Markdown</span>
 					</button>
-					<div class="ask-ai-dropdown-divider"></div>
 					<button
 						v-for="item in items"
 						:key="item.provider"
@@ -148,7 +147,7 @@ async function handleAction(provider: string | null = null) {
 .ask-ai-btn {
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 3px;
 	padding: 4px 12px;
 	font-size: 13px;
 	font-weight: 500;
@@ -199,7 +198,7 @@ async function handleAction(provider: string | null = null) {
 	display: flex;
 	align-items: center;
 	width: 100%;
-	padding: 8px 10px;
+	padding: 4px 5px;
 	font-size: 13px;
 	font-weight: 500;
 	color: var(--vp-c-text-1);
@@ -217,12 +216,6 @@ async function handleAction(provider: string | null = null) {
 
 .ask-ai-dropdown-label {
 	white-space: nowrap;
-}
-
-.ask-ai-dropdown-divider {
-	height: 1px;
-	margin: 4px 0;
-	background: var(--vp-c-divider);
 }
 
 .ask-ai-toast {

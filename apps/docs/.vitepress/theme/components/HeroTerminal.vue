@@ -23,24 +23,20 @@ interface TLine {
 }
 
 const script: TLine[] = [
+	{ type: "cmd", text: "npm i -g @memofs/cli" },
 	{ type: "cmd", text: "memofs init" },
-	{ type: "out", text: "✓ Created .memofs/ with core memory, notes &" },
-	{ type: "out", text: "  recall indexes." },
+	{ type: "out", text: "✓ Initialized .memofs at /Path/to/your/project" },
+	{ type: "out", text: "  (Project ID: none)" },
 	{ type: "blank", text: "" },
 	{
 		type: "cmd",
 		text: 'memofs remember "Auth uses JWT + refresh rotation" --kind decision',
 	},
-	{ type: "out", text: "✓ Stored in .memofs/memory/notes.md" },
+	{ type: "out", text: "✓ Stored decision memory in .memofs/memory/notes.md" },
 	{ type: "blank", text: "" },
-	{ type: "cmd", text: 'memofs recall "How does auth work?"' },
-	{ type: "out", text: "→ [0.94] core.md · Auth decisions" },
-	{
-		type: "out",
-		text: '   "JWT with refresh rotation. Access tokens expire…"',
-	},
-	{ type: "out", text: "→ [0.87] notes.md · Auth flow notes" },
-	{ type: "out", text: '   "Token validation middleware checks expiry…"' },
+	{ type: "cmd", text: 'memofs search "auth"' },
+	{ type: "out", text: "→ .memofs/memory/notes.md:10: Auth uses JWT with refresh rotation" },
+	{ type: "out", text: "→ Found 1 match(es)." },
 	{ type: "blank", text: "" },
 	{ type: "comment", text: "# Your agent already knows. Every session." },
 ];

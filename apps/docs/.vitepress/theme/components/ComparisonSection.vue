@@ -20,7 +20,7 @@
           <tbody>
             <tr>
               <td>Where memory lives</td>
-              <td class="col-memofs"><span class="comparison-table-check">✓</span> Plain files in your repo</td>
+              <td class="col-memofs"><span class="comparison-table-check">✓</span> Plain files in your project</td>
               <td class="col-hosted"><span class="comparison-table-cross">Locked in a remote dashboard</span></td>
             </tr>
             <tr>
