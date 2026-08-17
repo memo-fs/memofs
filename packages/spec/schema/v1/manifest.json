@@ -1,0 +1,158 @@
+{
+  "$ref": "#/definitions/MemoFsManifest",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AnchorHashCacheEntry": {
+      "additionalProperties": false,
+      "description": "One entry in the persisted anchor-hash cache.",
+      "properties": {
+        "hash": {
+          "description": "SHA-256 (hex) of the file's bytes at cache time.",
+          "type": "string"
+        },
+        "mtimeMs": {
+          "description": "File modification timestamp in milliseconds when cached.",
+          "type": "number"
+        },
+        "size": {
+          "description": "File size in bytes when cached.",
+          "type": "number"
+        },
+        "ts": {
+          "description": "Epoch milliseconds at which the entry was populated.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "hash",
+        "ts"
+      ],
+      "type": "object"
+    },
+    "MemoFsManifest": {
+      "additionalProperties": false,
+      "description": "Manifest describing the structure and file paths of a MemoFS project.",
+      "properties": {
+        "anchorHashCache": {
+          "additionalProperties": {
+            "$ref": "#/definitions/AnchorHashCacheEntry"
+          },
+          "description": "Optional persisted hash cache for code-anchor drift detection. The cache maps an anchored file's repo-relative path to its last computed SHA-256 plus the epoch-millis timestamp at which the entry was populated. Query-time reads consult this cache before re-reading the file; a 5-minute TTL plus mtime-based invalidation keep it fresh. Absent on manifests written by older runtimes; absence is equivalent to an empty cache (cold start).",
+          "type": "object"
+        },
+        "createdAt": {
+          "description": "ISO 8601 timestamp when the manifest was created.",
+          "type": "string"
+        },
+        "events": {
+          "additionalProperties": false,
+          "description": "Paths to event logs (memory events, conversations).",
+          "properties": {
+            "conversations": {
+              "description": "Path to conversations JSONL.",
+              "type": "string"
+            },
+            "memoryEvents": {
+              "description": "Path to memory events JSONL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "memoryEvents",
+            "conversations"
+          ],
+          "type": "object"
+        },
+        "graph": {
+          "additionalProperties": false,
+          "description": "Paths to graph files (nodes, edges).",
+          "properties": {
+            "edges": {
+              "description": "Path to graph edges JSONL.",
+              "type": "string"
+            },
+            "nodes": {
+              "description": "Path to graph nodes JSONL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "nodes",
+            "edges"
+          ],
+          "type": "object"
+        },
+        "indexes": {
+          "additionalProperties": false,
+          "description": "Paths to index files (chunks).",
+          "properties": {
+            "chunks": {
+              "description": "Path to chunks index JSONL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "chunks"
+          ],
+          "type": "object"
+        },
+        "memory": {
+          "additionalProperties": false,
+          "description": "Paths to memory documents (core, notes).",
+          "properties": {
+            "core": {
+              "description": "Path to core memory (core.md).",
+              "type": "string"
+            },
+            "notes": {
+              "description": "Path to notes memory (notes.md).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "core",
+            "notes"
+          ],
+          "type": "object"
+        },
+        "projectId": {
+          "description": "Optional project ID for namespacing.",
+          "type": "string"
+        },
+        "snapshots": {
+          "additionalProperties": false,
+          "description": "Paths to snapshot files.",
+          "properties": {
+            "index": {
+              "description": "Path to snapshots index JSONL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "index"
+          ],
+          "type": "object"
+        },
+        "updatedAt": {
+          "description": "ISO 8601 timestamp when the manifest was last updated.",
+          "type": "string"
+        },
+        "version": {
+          "description": "Manifest schema version (currently \"1\").",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "createdAt",
+        "updatedAt",
+        "memory",
+        "events",
+        "indexes",
+        "graph",
+        "snapshots"
+      ],
+      "type": "object"
+    }
+  }
+}
