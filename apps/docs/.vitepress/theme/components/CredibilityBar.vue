@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
 import StatBadge from "./StatBadge.vue";
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
 
 const integrationLogos = [
 	{
@@ -54,7 +57,7 @@ const integrationLogos = [
 <template>
   <section class="credibility-section tek-reveal">
     <div class="credibility-container">
-      <p class="credibility-kicker">Works out of the box with your stack</p>
+      <p class="credibility-kicker">{{ t.credibility.kicker }}</p>
       <div class="credibility-row">
         <a
           v-for="logo in integrationLogos"
@@ -74,12 +77,12 @@ const integrationLogos = [
         <StatBadge
           type="github"
           href="https://github.com/memo-fs/memofs"
-          label="GitHub stars"
+          :label="t.credibility.starsLabel"
         />
         <StatBadge
           type="npm"
           href="https://www.npmjs.com/package/@memofs/cli"
-          label="downloads/week"
+          :label="t.credibility.downloadsLabel"
         />
       </div>
     </div>

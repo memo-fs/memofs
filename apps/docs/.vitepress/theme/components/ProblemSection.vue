@@ -1,34 +1,26 @@
+<script setup lang="ts">
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
+</script>
+
 <template>
   <section id="problem" class="problem-section tek-reveal">
     <div class="problem-bg tek-dot-grid" aria-hidden="true"></div>
     <div class="container">
-      <p class="tek-kicker">The problem</p>
+      <p class="tek-kicker">{{ t.problem.kicker }}</p>
       <h2 class="problem-headline">
-        Every new session <span class="problem-em">starts from zero.</span>
+        {{ t.problem.headline }}<span class="problem-em">{{ t.problem.headlineEm }}</span>
       </h2>
       <p class="problem-body">
-        You walk your agent through the auth system. It gets it. Next session —
-        a blank stare. You paste the architecture doc again, and it ships code that
-        contradicts last week's decision. It has no memory of what you chose, because
-        there was nowhere to put it.
+        {{ t.problem.body1 }}
       </p>
       <p class="problem-body problem-body-follow">
-        And giving one agent a memory only shrinks the problem — it doesn't solve it.
-        Every agent, machine, and teammate ends up with a <em>different</em> memory,
-        and you can't see any of them:
+        {{ t.problem.body2 }}
       </p>
       <ul class="problem-symptoms">
-        <li>
-          <strong>Divergent.</strong> Your laptop, CI, and your teammate's agent each
-          remember a different project.
-        </li>
-        <li>
-          <strong>Invisible.</strong> You can't see what your agents have recorded,
-          so you can't trust it — or correct it.
-        </li>
-        <li>
-          <strong>Unreachable.</strong> No checkout means no memory: CI jobs,
-          serverless functions, and hosted agents start from zero.
+        <li v-for="symptom in t.problem.symptoms" :key="symptom.title">
+          <strong>{{ symptom.title }}</strong> {{ symptom.desc }}
         </li>
       </ul>
     </div>

@@ -1,4 +1,5 @@
 import type { DefaultTheme } from "vitepress";
+import { getVersionNav } from "./versions.mts";
 
 export const nav: DefaultTheme.NavItem[] = [
 	{
@@ -10,12 +11,6 @@ export const nav: DefaultTheme.NavItem[] = [
 		text: "API",
 		link: "/api/",
 		activeMatch: "/api/",
-	},
-
-	{
-		text: "Changelog",
-		link: "/changelog",
-		activeMatch: "/changelog",
 	},
 	{
 		text: "Learn",
@@ -45,4 +40,5 @@ export const nav: DefaultTheme.NavItem[] = [
 		text: "Cloud",
 		link: "https://memofs.dev",
 	},
+	getVersionNav(),
 ];

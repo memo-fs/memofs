@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import CopyButton from "./CopyButton.vue";
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
 </script>
 
 <template>
   <section id="get-started" class="bottom-cta-section tek-reveal">
     <div class="container">
       <div class="cta-panel">
-        <p class="oss-badge">MIT Licensed · 100% open source</p>
-        <h2 class="cta-headline">One command. Your agent never forgets.</h2>
+        <p class="oss-badge">{{ t.bottomCta.badge }}</p>
+        <h2 class="cta-headline">{{ t.bottomCta.headline }}</h2>
         <div class="code-snippet large code-snippet-with-copy">
           <code>npx @memofs/cli init</code>
           <CopyButton text="npx @memofs/cli init" class="code-snippet-copy" />
         </div>
         <div class="cta-buttons">
-          <a href="/introduction" class="cta-button primary">Read the Quick Start →</a>
+          <a :href="t.bottomCta.primaryLink" class="cta-button primary">{{ t.bottomCta.primaryBtn }}</a>
           <a href="https://memofs.dev" class="cta-button secondary" target="_blank" rel="noopener">
-            Explore MemoFS Cloud →
+            {{ t.bottomCta.secondaryBtn }}
           </a>
         </div>
         <a
@@ -24,7 +27,7 @@ import CopyButton from "./CopyButton.vue";
           target="_blank"
           rel="noopener noreferrer"
         >
-          View on GitHub
+          {{ t.bottomCta.githubLink }}
         </a>
       </div>
     </div>

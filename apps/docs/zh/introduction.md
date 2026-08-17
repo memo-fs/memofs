@@ -1,0 +1,48 @@
+---
+title: 介绍
+description: 什么是 MemoFS，以及根据你要构建的内容应该首先阅读哪篇文档。
+---
+
+# 什么是 MemoFS？
+
+MemoFS 是一个**面向 AI 智能体的文件优先记忆运行时**，同样适用于两种场景：日常**使用编程智能体 (Coding Agents)** 的开发者，以及**构建 AI 智能体应用**的开发者。
+
+本文档的一切内容都源于一个核心问题：**你打算如何使用 MemoFS？**
+
+## 哪条路径适合你？
+
+### 日常使用编程智能体
+Claude Code、Cursor、Codex、Copilot、opencode 或其他任何 AI 编程智能体都可以通过 MCP (模型上下文协议) 或生命周期钩子自动读写 MemoFS 记忆 —— 整个配置过程不到 5 分钟。
+
+→ **[在实战菜谱中找到你的智能体](/learn/cookbooks/)**
+
+→ **[MCP 服务器概述](/mcp/)**
+
+### 构建 AI 智能体与应用
+直接导入 `@memofs/core` 或 `@memofs/server`，为自定义智能体配备轻量级、文件优先、无需独立数据库的记忆运行时。
+
+→ **[@memofs/core 概述](/zh/core/)**
+
+→ **[API 参考文档](/api/core)**
+
+### 自托管服务器
+在 Node.js 或 Cloudflare Workers 上自行运行 MemoFS 服务器，替代使用云端托管服务。
+
+→ **[自托管概述](/server/)**
+
+### 托管版本，免运维基础设施
+MemoFS Cloud 为你提供文件副本、托管 MCP 端点和团队工作区，无需自行运行任何基础设施。
+
+→ **[MemoFS Cloud](https://memofs.dev)**
+
+## 三点核心心智模型
+
+1. **记忆是文件，不是黑盒数据库。** 核心事实、笔记、对话历史、召回索引和知识图谱全部以 Markdown/JSONL 格式存储在 `.memofs/` 目录下 —— 详见 [核心概念](/zh/core/concepts)。
+2. **每项能力都具备确定性兜底机制。** 检索、图谱抽取和重排序在开箱即用状态下无需任何 API 密钥（基于 BM25 + 规则解析）；添加 LLM/Embedding 适配器可进一步增强效果 —— 详见 [配置模型智能](/server/intelligence)。
+3. **分发方式适配智能体生态。** 具备生命周期钩子的智能体 (Claude Code, Codex, opencode) 可自动注入记忆；其他智能体均可通过 MCP 进行连接 —— 详见 [MCP 概述](/mcp/)。
+
+## 快速上手与交互式配置
+
+<InteractiveQuickstart />
+
+从这里开始，跳转至上方与你的构建目标相匹配的路径。完整参数参考：[CLI 概述](/cli/)。

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import CopyButton from "./CopyButton.vue";
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
 </script>
 
 <template>
@@ -13,11 +16,11 @@ import CopyButton from "./CopyButton.vue";
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
                 <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8zm.5-13h-1v6l5.2 3.1.5-.8-4.7-2.8z"/>
               </svg>
-              Coding Agents &amp; IDEs
+              {{ t.dualEntry.user.badge }}
             </div>
-            <h3 class="card-title">I use coding agents day-to-day</h3>
+            <h3 class="card-title">{{ t.dualEntry.user.title }}</h3>
             <p class="card-desc">
-              Claude Code, Cursor, Windsurf, and opencode automatically read &amp; write persistent, git-trackable memory via MCP or lifecycle hooks.
+              {{ t.dualEntry.user.desc }}
             </p>
           </div>
 
@@ -30,8 +33,8 @@ import CopyButton from "./CopyButton.vue";
               <CopyButton text="npx @memofs/cli init" />
             </div>
             <div class="card-links">
-              <a href="/mcp/" class="card-link primary">MCP Setup Guide →</a>
-              <a href="/learn/cookbooks/" class="card-link secondary">View IDE Cookbooks →</a>
+              <a :href="t.dualEntry.user.primaryLink" class="card-link primary">{{ t.dualEntry.user.primaryLinkText }}</a>
+              <a :href="t.dualEntry.user.secondaryLink" class="card-link secondary">{{ t.dualEntry.user.secondaryLinkText }}</a>
             </div>
           </div>
         </div>
@@ -43,11 +46,11 @@ import CopyButton from "./CopyButton.vue";
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
-              Core SDK &amp; Server
+              {{ t.dualEntry.builder.badge }}
             </div>
-            <h3 class="card-title">I'm building AI agents &amp; apps</h3>
+            <h3 class="card-title">{{ t.dualEntry.builder.title }}</h3>
             <p class="card-desc">
-              Import <code>@memofs/core</code> or <code>@memofs/server</code> for a lightweight, file-first, zero-database memory runtime with semantic recall.
+              {{ t.dualEntry.builder.desc }}
             </p>
           </div>
 
@@ -60,8 +63,8 @@ import CopyButton from "./CopyButton.vue";
               <CopyButton text="npm install @memofs/core" />
             </div>
             <div class="card-links">
-              <a href="/core/" class="card-link primary">Read Core SDK Docs →</a>
-              <a href="/api/" class="card-link secondary">API Reference →</a>
+              <a :href="t.dualEntry.builder.primaryLink" class="card-link primary">{{ t.dualEntry.builder.primaryLinkText }}</a>
+              <a :href="t.dualEntry.builder.secondaryLink" class="card-link secondary">{{ t.dualEntry.builder.secondaryLinkText }}</a>
             </div>
           </div>
         </div>

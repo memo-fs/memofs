@@ -1,22 +1,27 @@
+<script setup lang="ts">
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
+</script>
+
 <template>
   <section id="runtimes" class="runtimes-section">
     <div class="container-wide">
       <header class="runtimes-head tek-reveal">
-        <p class="tek-kicker">Runtimes</p>
-        <h2 class="tek-h2">One engine, three storage modes</h2>
+        <p class="tek-kicker">{{ t.runtimes.kicker }}</p>
+        <h2 class="tek-h2">{{ t.runtimes.title }}</h2>
         <p class="tek-lede">
-          MemoFS is built on a unified store abstraction. Choose where your memory resides based on your workflow and access needs.
+          {{ t.runtimes.lede }}
         </p>
       </header>
 
       <div class="runtimes-grid">
         <div class="runtime-card tek-reveal" data-delay="1">
           <div class="runtime-header">
-            <span class="tek-kicker">Local mode</span>
-            <h3>Offline storage</h3>
+            <span class="tek-kicker">{{ t.runtimes.local.kicker }}</span>
+            <h3>{{ t.runtimes.local.title }}</h3>
             <p>
-              All memory is written directly to your project's local file system as markdown and JSON. 
-              Fast, offline-first, optimal recall intelligence, and zero network latency.
+              {{ t.runtimes.local.desc }}
             </p>
           </div>
           <div class="runtime-visual">
@@ -24,7 +29,7 @@
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
 import { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
-<span class="token comment">// All memory stays on disk — offline-first.</span>
+<span class="token comment">{{ t.runtimes.local.codeComment }}</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsMemoryStore</span>(
     { rootDir: <span class="token string">"."</span> }
@@ -38,10 +43,10 @@ import { <span class="token function">createNodeFsMemoryStore</span> } <span cla
 
         <div class="runtime-card tek-reveal" data-delay="2">
           <div class="runtime-header">
-            <span class="tek-kicker gold">Hybrid mode</span>
-            <h3>Cloud synchronized</h3>
+            <span class="tek-kicker gold">{{ t.runtimes.hybrid.kicker }}</span>
+            <h3>{{ t.runtimes.hybrid.title }}</h3>
             <p>
-              Stores files locally for speed, but automatically synchronizes replicas to MemoFS Cloud so your agent memory follows you across development machines.
+              {{ t.runtimes.hybrid.desc }}
             </p>
           </div>
           <div class="runtime-visual">
@@ -49,7 +54,7 @@ import { <span class="token function">createNodeFsMemoryStore</span> } <span cla
               <pre class="runtime-pre"><code><span class="token keyword">import</span> { <span class="token class">MemoFS</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core"</span>
 import { <span class="token function">createNodeFsMemoryStore</span> } <span class="token keyword">from</span> <span class="token string">"@memofs/core/node-fs"</span>
 
-<span class="token comment">// Local speed + cloud replica.</span>
+<span class="token comment">{{ t.runtimes.hybrid.codeComment }}</span>
 <span class="token keyword">const</span> memo = <span class="token keyword">new</span> <span class="token class">MemoFS</span>({
   store: <span class="token function">createNodeFsMemoryStore</span>(
     { rootDir: <span class="token string">"."</span> }
@@ -66,14 +71,10 @@ import { <span class="token function">createNodeFsMemoryStore</span> } <span cla
 
         <div class="runtime-card runtime-card--full tek-reveal" data-delay="3">
           <div class="runtime-managed-left">
-            <span class="tek-kicker">Managed · MCP endpoint live</span>
-            <h3>Memory as an API</h3>
+            <span class="tek-kicker">{{ t.runtimes.managed.kicker }}</span>
+            <h3>{{ t.runtimes.managed.title }}</h3>
             <p>
-              MemoFS Cloud hosts the engine. Any MCP client — Cursor, Claude, a hosted
-              agent on a machine with no checkout — reads and writes memory through one
-              hosted MCP URL plus an API key, with zero local files. A raw HTTPS API for
-              CI pipelines, edge functions, and chatbots is next. Your files stay the
-              source of truth: leaving is a config change, not a migration.
+              {{ t.runtimes.managed.desc }}
             </p>
             <a
               href="https://memofs.dev"
@@ -81,7 +82,7 @@ import { <span class="token function">createNodeFsMemoryStore</span> } <span cla
               target="_blank"
               rel="noopener"
             >
-              Connect your agent →
+              {{ t.runtimes.managed.btnText }}
             </a>
           </div>
           <ul class="runtime-managed-features">
