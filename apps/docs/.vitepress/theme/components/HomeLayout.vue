@@ -5,6 +5,7 @@ import { computed, nextTick, onMounted, watch } from "vue";
 import AnnouncementPill from "./AnnouncementPill.vue";
 import AskAiBar from "./AskAiBar.vue";
 import CookbookHeader from "./CookbookHeader.vue";
+import VersionWarning from "./VersionWarning.vue";
 
 import BottomCta from "./BottomCta.vue";
 import ComparisonSection from "./ComparisonSection.vue";
@@ -17,8 +18,10 @@ import RuntimesSection from "./RuntimesSection.vue";
 import SidebarBrand from "./SidebarBrand.vue";
 import StatsStrip from "./StatsStrip.vue";
 import EngramAI from "./EngramAI.vue";
+import { useHomeI18n } from "../composables/useHomeI18n";
 
 const { Layout } = DefaultTheme;
+const { t } = useHomeI18n();
 
 const { frontmatter } = useData();
 const isCookbook = computed(() => {
@@ -63,6 +66,7 @@ watch(
     </template>
 
     <template #doc-before>
+      <VersionWarning />
       <CookbookHeader v-if="isCookbook" />
     </template>
 
@@ -72,8 +76,8 @@ watch(
 
     <template #home-hero-before>
       <AnnouncementPill
-        badge="Cloud"
-        text="MemoFS Cloud"
+        :badge="t.pill.badge"
+        :text="t.pill.text"
         href="https://memofs.dev"
       />
     </template>

@@ -1,0 +1,44 @@
+{
+	"hooks": {
+		"SessionStart": [
+			{
+				"matcher": "startup|resume|clear",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "sh -c '[ -n \"$MEMOFS_API_KEY\" ] && { if command -v memofs >/dev/null 2>&1; then memofs cloud sync pull; else npx -y @memofs/cli cloud sync pull; fi; }; if command -v memofs >/dev/null 2>&1; then memofs context --query \"project context\" --task-type general --mark-session-start; else npx -y @memofs/cli context --query \"project context\" --task-type general --mark-session-start; fi'"
+					}
+				]
+			},
+			{
+				"matcher": "compact",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "sh -c 'if command -v memofs >/dev/null 2>&1; then memofs context --query \"project context\" --task-type general; else npx -y @memofs/cli context --query \"project context\" --task-type general; fi'"
+					}
+				]
+			}
+		],
+		"SubagentStart": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "sh -c 'if command -v memofs >/dev/null 2>&1; then memofs context --query \"project context\" --task-type general; else npx -y @memofs/cli context --query \"project context\" --task-type general; fi'"
+					}
+				]
+			}
+		],
+		"Stop": [
+			{
+				"hooks": [
+					{
+						"type": "command",
+						"command": "sh -c 'if command -v memofs >/dev/null 2>&1; then memofs status --hook; else npx -y @memofs/cli status --hook; fi'"
+					}
+				]
+			}
+		]
+	}
+}

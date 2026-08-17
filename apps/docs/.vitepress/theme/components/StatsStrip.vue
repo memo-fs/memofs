@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
 
 /**
  * StatsStrip — benchmark performance stats from benchmark-results/release/.
@@ -9,28 +12,20 @@ import { onMounted, onUnmounted, ref } from "vue";
 interface Stat {
 	readonly rawValue: number;
 	readonly unit: string;
-	readonly label: string;
-	readonly detail: string;
 }
 
 const stats: ReadonlyArray<Stat> = [
 	{
 		rawValue: 0.6,
 		unit: "ms",
-		label: "Recall p50",
-		detail: "Top-10 in-memory recall over a full project memory set.",
 	},
 	{
 		rawValue: 7.4,
 		unit: "ms",
-		label: "Round-trip p50",
-		detail: "Full read + write lifecycle for the core memory store.",
 	},
 	{
 		rawValue: 0.2,
 		unit: "ms",
-		label: "Rerank p50",
-		detail: "Deterministic top-5 rerank after recall.",
 	},
 ];
 
@@ -98,30 +93,29 @@ onUnmounted(() => {
   >
     <div class="container-wide">
       <div class="stats-header">
-        <p class="stats-kicker">Performance</p>
+        <p class="stats-kicker">{{ t.stats.kicker }}</p>
         <p class="stats-subtitle">
-          Measured locally, on synthetic data — your numbers will vary by
-          embedding provider and dataset size.
+          {{ t.stats.subtitle }}
         </p>
       </div>
       <ul class="stats-grid">
         <li
           v-for="(stat, i) in stats"
-          :key="stat.label"
+          :key="i"
           class="stat-card"
           :data-delay="String(i + 1)"
         >
           <span class="stat-value"
             >{{ displayed[i] }}{{ stat.unit }}</span
           >
-          <span class="stat-label">{{ stat.label }}</span>
-          <span class="stat-detail">{{ stat.detail }}</span>
+          <span class="stat-label">{{ t.stats.items[i]?.label }}</span>
+          <span class="stat-detail">{{ t.stats.items[i]?.detail }}</span>
         </li>
       </ul>
       <p class="stats-source">
-        Full methodology in
+        {{ t.stats.sourceText }}
         <a href="/tooling/benchmark-kit" class="stats-source-link"
-          >benchmark-kit</a
+          >{{ t.stats.sourceLinkText }}</a
         >.
       </p>
     </div>

@@ -858,3 +858,43 @@ Authentication logic verifyToken
 - confidence: 1
 
 Completed manual end-to-end integration testing for Tickets #68-#73 (ADRs 0022-0027) across core, mcp-server, and cli with 16/16 passing assertions in test-demo/run-tests.js
+
+## 2026-08-17T09:07:31.537Z — Current multi-language documentation baseline
+- id: mem_85989caa7b9a753e
+- kind: reference
+- tags: docs, multi-language, http-api, mcp, oms, deferred
+- confidence: 1
+- source: assistant:codex
+- metadata: {"id":"mem_85989caa7b9a753e","sourceRefs":[{"sourceType":"document","path":"apps/docs/server/http-api.md","title":"Current HTTP API documentation"},{"sourceType":"document","path":"packages/server/src/http/index.ts","title":"Runtime HTTP core"},{"sourceType":"document","path":"docs/CONTEXT.md","title":"Current project glossary and OMS status"}]}
+
+Repository audit (2026-08-17): `@memofs/server` is the self-hostable JSON-RPC-over-HTTP runtime, whose Node entry uses `node:http` (not HTTP/2). `@memofs/json-rpc` supplies generic JSON-RPC primitives; it is not a MemoFS language-client/wire-contract package. The hosted MCP endpoint is a separate Streamable HTTP surface and exposes only four memory verbs. No Python, Go, Rust, LangChain, LlamaIndex, Pydantic AI, CrewAI, or `@memofs/spec` package exists in the workspace. The prior Open Memory Specification and schema/codegen proposal is Deferred pending AMP collaboration; do not document it as a planned/shipping public integration. `apps/docs` currently has localized sidebar definitions in `config/locales/ja.mts` and `zh.mts`, and existing cookbook location is `apps/docs/learn/cookbooks/`.
+
+## 2026-08-17T09:11:51.648Z — AI framework adapter status
+- id: mem_49c2aa70acc288e0
+- kind: reference
+- tags: adapters, ai-sdk, langchain, docs-accuracy
+- confidence: 1
+- source: assistant:codex
+- metadata: {"id":"mem_49c2aa70acc288e0","sourceRefs":[{"sourceType":"document","path":"packages/core/src/ai-runtime/types.ts","title":"Framework-neutral runtime contract"},{"sourceType":"document","path":"packages/adapter-ai-sdk/README.md","title":"Vercel AI SDK adapter boundary"},{"sourceType":"document","path":"apps/docs/api/core.md","title":"API reference wording needing correction"}]}
+
+Verified 2026-08-17: `packages/core/src/ai-runtime/types.ts` defines a framework-neutral `MemoFSMemoryRuntime` contract and explicitly identifies only `@memofs/adapter-ai-sdk` (Vercel AI SDK) as implemented today; LangChain, OpenAI Agents SDK, and Mastra are described as later/future adapters. The API docs currently say LangChain and Mastra implement the contract, which conflicts with source and the adapter README; treat that doc phrasing as inaccurate rather than evidence of shipped adapters. No Python, Go, or Rust project manifests or source artifacts exist.
+
+## 2026-08-17T09:29:58.714Z — ADR 0027 resumed
+- id: mem_fc4611bbeb9a23f7
+- kind: decision
+- tags: adr-0027, oms, tickets, unblocked, decision
+- confidence: 1
+- source: user directive relayed by assistant:codex
+- metadata: {"id":"mem_fc4611bbeb9a23f7","sourceRefs":[{"sourceType":"document","path":"docs/adr/0027-open-memory-specification.md","title":"ADR 0027 amendment history"},{"sourceType":"document","path":"docs/architecture/tickets-0022-0027-discovery-realignment.md","title":"OMS ticket dependency graph"}]}
+
+On 2026-08-17, the founder resumed ADR 0027 (Open Memory Specification) from Deferred to Draft. The AMP/OKF convergence concern remains design input but no longer blocks delivery. Ticket #83 is structurally unblocked and returns to the frontier. Ticket #84 remains blocked by #74, #76, #78, and #83; #68, #71, and #73 are complete. Ticket #85 remains blocked by #83. The active OMS ticket chain covers schema portability only; it does not schedule non-TypeScript AST-symbol extraction, so the existing file+hash anchor and path-based broken-reference contracts remain unchanged.
+
+## 2026-08-17T10:21:10.457Z — Workspace runbook realigned
+- id: mem_649964e5a0df8ac4
+- kind: decision
+- tags: documentation, workspace, validation, runbook
+- confidence: 1
+- source: assistant
+- metadata: {"id":"mem_649964e5a0df8ac4","sourceRefs":[{"sourceType":"document","path":"docs/runbook.md","title":"MemoFS Workspace Runbook"}]}
+
+On 2026-08-17, docs/releases.md was removed as obsolete. docs/runbook.md now defines MemoFS as a pnpm/Turborepo multi-package workspace: docs, benchmarks, examples, packages/* (core, CLI, MCP server, server, JSON-RPC, connectors, testing, benchmark kit, and adapters), and tooling/* (including e2e). It documents pnpm validate:workspace as the full gate: Biome check, typecheck, tests, build, publint package validation, and docs build.

@@ -1,13 +1,19 @@
+<script setup lang="ts">
+import { useHomeI18n } from "../composables/useHomeI18n";
+
+const { t } = useHomeI18n();
+</script>
+
 <template>
   <section id="how-it-works" class="how-it-works-section tek-reveal">
     <div class="container">
-      <p class="tek-kicker">How it works</p>
-      <h2 class="tek-h2">Four commands. Your agent remembers.</h2>
+      <p class="tek-kicker">{{ t.howItWorks.kicker }}</p>
+      <h2 class="tek-h2">{{ t.howItWorks.headline }}</h2>
       <ol class="steps">
         <li class="step">
           <span class="step-number">1</span>
           <div class="step-content">
-            <h3>Install</h3>
+            <h3>{{ t.howItWorks.step1.title }}</h3>
             <div class="terminal-mockup">
               <div class="terminal-header">
                 <span class="terminal-dot red"></span>
@@ -19,14 +25,14 @@
               </div>
             </div>
             <p class="step-requirement">
-              Requires <strong>Node.js &gt;= 22</strong>
+              {{ t.howItWorks.step1.req }}
             </p>
           </div>
         </li>
         <li class="step">
           <span class="step-number">2</span>
           <div class="step-content">
-            <h3>Initialize</h3>
+            <h3>{{ t.howItWorks.step2.title }}</h3>
             <div class="terminal-mockup">
               <div class="terminal-header">
                 <span class="terminal-dot red"></span>
@@ -35,7 +41,7 @@
               </div>
               <div class="terminal-content">
                 <span class="terminal-prompt">$</span> memofs init<br />
-                <span class="terminal-success">✓ Initialized .memofs at /Path/to/your/project (Project ID: none)</span>
+                <span class="terminal-success">{{ t.howItWorks.step2.output }}</span>
               </div>
             </div>
           </div>
@@ -43,7 +49,7 @@
         <li class="step">
           <span class="step-number">3</span>
           <div class="step-content">
-            <h3>Generate</h3>
+            <h3>{{ t.howItWorks.step3.title }}</h3>
             <div class="terminal-mockup">
               <div class="terminal-header">
                 <span class="terminal-dot red"></span>
@@ -52,9 +58,9 @@
               </div>
               <div class="terminal-content">
                 <span class="terminal-prompt">$</span> memofs generate agent claude<br />
-                <span class="terminal-success">✓ Generated CLAUDE.md</span><br />
-                <span class="terminal-success">✓ Generated .claude/settings.json</span><br />
-                <span class="terminal-success">✓ Created .mcp.json (local)</span><br />
+                <template v-for="output in t.howItWorks.step3.outputs" :key="output">
+                  <span class="terminal-success">{{ output }}</span><br />
+                </template>
               </div>
             </div>
           </div>
@@ -62,7 +68,7 @@
         <li class="step">
           <span class="step-number">4</span>
           <div class="step-content">
-            <h3>Record</h3>
+            <h3>{{ t.howItWorks.step4.title }}</h3>
             <div class="terminal-mockup">
               <div class="terminal-header">
                 <span class="terminal-dot red"></span>
@@ -71,15 +77,14 @@
               </div>
               <div class="terminal-content">
                 <span class="terminal-prompt">$</span> memofs remember "Auth uses JWT with refresh rotation" --kind decision<br />
-                <span class="terminal-success">✓ Stored decision memory in .memofs/memory/notes.md</span>
+                <span class="terminal-success">{{ t.howItWorks.step4.output }}</span>
               </div>
             </div>
           </div>
         </li>
       </ol>
       <p class="result-text">
-        Next session, your agent already knows. No repeating yourself. No contradictions.
-        No "what were we working on again?"
+        {{ t.howItWorks.resultText }}
       </p>
     </div>
   </section>

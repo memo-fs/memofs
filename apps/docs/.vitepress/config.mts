@@ -4,31 +4,15 @@ import llmstxtPlugin from "vitepress-plugin-llmstxt";
 import { withMermaid } from "vitepress-plugin-mermaid";
 
 import { head } from "./config/head.mts";
-import { nav } from "./config/nav.mts";
+import { enLocale } from "./config/locales/en.mts";
+import { esLocale } from "./config/locales/es.mts";
+import { jaLocale } from "./config/locales/ja.mts";
+import { zhLocale } from "./config/locales/zh.mts";
 import { buildPageHead } from "./config/seo.mts";
-import { sidebar } from "./config/sidebar.mts";
 import { site } from "./config/site.mts";
 
 export default withMermaid(
 	defineConfig({
-		lang: "en-US",
-
-		vite: {
-			optimizeDeps: {
-				include: ["mermaid", "dayjs"],
-			},
-			resolve: {
-				alias: {
-					"@": fileURLToPath(new URL("..", import.meta.url)),
-				},
-			},
-			plugins: [llmstxtPlugin()],
-		},
-
-		title: site.title,
-		titleTemplate: ":title",
-		description: site.description,
-
 		base: "/",
 		cleanUrls: true,
 		lastUpdated: true,
@@ -42,6 +26,44 @@ export default withMermaid(
 
 		transformHead(ctx) {
 			return buildPageHead(ctx);
+		},
+
+		locales: {
+			root: {
+				label: "English",
+				lang: "en-US",
+				...enLocale,
+			},
+			zh: {
+				label: "简体中文",
+				lang: "zh-CN",
+				link: "/zh/",
+				...zhLocale,
+			},
+			ja: {
+				label: "日本語",
+				lang: "ja-JP",
+				link: "/ja/",
+				...jaLocale,
+			},
+			es: {
+				label: "Español",
+				lang: "es-ES",
+				link: "/es/",
+				...esLocale,
+			},
+		},
+
+		vite: {
+			optimizeDeps: {
+				include: ["mermaid", "dayjs"],
+			},
+			resolve: {
+				alias: {
+					"@": fileURLToPath(new URL("..", import.meta.url)),
+				},
+			},
+			plugins: [llmstxtPlugin()],
 		},
 
 		markdown: {
@@ -65,16 +87,63 @@ export default withMermaid(
 
 			siteTitle: "MemoFS",
 
-			nav,
-			sidebar,
-
 			search: {
 				provider: "local",
-			},
-
-			outline: {
-				level: [2, 3],
-				label: "On this page",
+				options: {
+					locales: {
+						zh: {
+							translations: {
+								button: {
+									buttonText: "搜索文档",
+									buttonAriaLabel: "搜索文档",
+								},
+								modal: {
+									noResultsText: "未找到相关结果",
+									resetButtonTitle: "清除查询",
+									footer: {
+										selectText: "选择",
+										navigateText: "切换",
+										closeText: "关闭",
+									},
+								},
+							},
+						},
+						ja: {
+							translations: {
+								button: {
+									buttonText: "ドキュメントを検索",
+									buttonAriaLabel: "ドキュメントを検索",
+								},
+								modal: {
+									noResultsText: "検索結果が見つかりませんでした",
+									resetButtonTitle: "リセット",
+									footer: {
+										selectText: "選択",
+										navigateText: "移動",
+										closeText: "閉じる",
+									},
+								},
+							},
+						},
+						es: {
+							translations: {
+								button: {
+									buttonText: "Buscar en la documentación",
+									buttonAriaLabel: "Buscar en la documentación",
+								},
+								modal: {
+									noResultsText: "No se encontraron resultados",
+									resetButtonTitle: "Limpiar búsqueda",
+									footer: {
+										selectText: "Seleccionar",
+										navigateText: "Navegar",
+										closeText: "Cerrar",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 
 			socialLinks: [
@@ -94,29 +163,6 @@ export default withMermaid(
 					ariaLabel: "MemoFS on YouTube",
 				},
 			],
-
-			editLink: {
-				pattern: `${site.repo}/edit/main/apps/docs/:path`,
-				text: "Edit this page on GitHub",
-			},
-
-			lastUpdated: {
-				text: "Updated",
-				formatOptions: {
-					dateStyle: "medium",
-					timeStyle: "short",
-				},
-			},
-
-			docFooter: {
-				prev: "Previous",
-				next: "Next",
-			},
-
-			footer: {
-				message: `Released under the ${site.license} License.`,
-				copyright: "Copyright © 2026-present MemoFS",
-			},
 		},
 
 		mermaid: {

@@ -15,6 +15,17 @@ All notable changes to MemoFS are documented here.
 
 *No changes yet.*
 
+## v1.3.0-beta.3 — August 17, 2026
+
+Official Model Context Protocol Registry metadata, package ownership verification, and multi-transport support.
+
+### MCP Server
+
+#### Added
+- Added official Model Context Protocol Registry manifest metadata for automated ecosystem discovery and subregistry indexing.
+- Added package ownership verification property to MCP server package configuration.
+- Added multi-transport support documenting local stdio runtime configuration and hosted streamable HTTP endpoints.
+
 ## v1.3.0-beta.2 — August 16, 2026
 
 Typed note identifiers, write idempotency deduplication, and multi-dimensional status modeling.
