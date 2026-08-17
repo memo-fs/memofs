@@ -1,129 +1,77 @@
 # MemoFS Workspace Runbook
 
-Welcome to the `@memofs/core` workspace runbook. This document provides an operational and architectural overview of the monorepo, its layout, internal module structure, development guidelines, and commands.
+MemoFS is a pnpm and Turborepo monorepo. Run workspace commands from the repository root.
 
----
+## Workspace layout
 
-## Workspace Overview
-
-The MemoFS repository is structured as a **pnpm monorepo** containing:
-1. **Public Package**: `@memofs/core` (located in `packages/core`) — the unified file-first memory runtime.
-2. **Docs App**: `apps/docs` — the VitePress-based documentation site.
-3. **Tooling**: `@repo/*` packages in [tooling](file:///Users/codingsimba/Desktop/projects/oss/tooling) — private workspace support for builds, tests, and configuration.
-
-### Workspace Layout
-
-```txt
+```text
 memofs/
 ├── apps/
-│   └── docs/                  # VitePress docs site
+│   └── docs/                  # @memofs/docs VitePress site
+├── benchmarks/                # @memofs/benchmarks runner and suites
+├── examples/                  # @memofs/examples integration examples
 ├── packages/
-│   ├── memofs/               # MemoFS source package
-│   │   ├── src/               # Main source tree (all modules)
-│   │   └── tests/             # Workspace tests (unit, integration, contracts)
-│   ├── tekcode-cli/           # Future TekCode placeholder
-│   └── tekcode-desktop/       # Future TekCode placeholder
-├── tooling/                   # Private `@repo/*` workspace tooling
-│   ├── tsdown/                # Shared build configurations (@repo/tsdown)
-│   ├── typescript/            # Shared TypeScript config base (@repo/typescript)
-│   └── utils/                 # Shared utility helpers (@repo/utils)
-├── docs/                      # General repository and operational notes
-├── projects/                  # Architectural notes and plans
-└── scripts/                   # Repository maintenance scripts
+│   ├── core/                  # @memofs/core runtime and file-first primitives
+│   ├── cli/                   # @memofs/cli command-line distribution
+│   ├── mcp-server/            # @memofs/mcp-server agent-tool server
+│   ├── server/                # @memofs/server self-hostable runtime
+│   ├── json-rpc/              # @memofs/json-rpc shared protocol primitives
+│   ├── connectors/            # @memofs/connectors connector framework
+│   ├── testing/               # @memofs/testing fixtures and test helpers
+│   ├── benchmark-kit/         # @memofs/benchmark-kit benchmark library
+│   └── adapter-*/             # Provider and framework adapters
+├── tooling/
+│   ├── e2e/                   # @repo/e2e release and simulation harness
+│   ├── tsdown/                # @repo/tsdown shared build configuration
+│   ├── typescript/            # @repo/typescript shared TypeScript config
+│   └── utils/                 # @repo/utils internal utilities
+├── docs/                      # Repository documentation and local decision records
+├── scripts/                   # Repository maintenance scripts
+├── pnpm-workspace.yaml        # Workspace membership
+└── turbo.json                 # Task pipeline
 ```
 
----
+The pnpm workspace includes `apps/docs`, `benchmarks`, `examples`, every package in `packages/*`, and every internal tool in `tooling/*`. `apps/cloud` is also reserved in the workspace configuration for the local-only cloud app; it is gitignored and is absent from a normal checkout.
 
-## Module Map (`packages/core/src/`)
+The current adapter packages are AI SDK, OpenAI, R2, Transformers, Turso, Voyage, and Workers AI. They are separate packages, not modules re-exported by `@memofs/core`.
 
-All MemoFS capabilities live as **internal modules** under `packages/core/src/` and are re-exported from the package root: [index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). There are **no public subpath imports** or separate adapter packages.
-
-| Module | Description |
-| :--- | :--- |
-| **`core`** | Fundamental constants, schemas, interfaces, default templates, validation, errors, and memory store contracts. |
-| **`fs`** | Local filesystem storage implementation (`NodeFsMemoryStore`), safe paths, directories, atomic writes, and missing-file behavior. |
-| **`openai`** | OpenAI client and embeddings adapter (`OpenAIEmbedder`). |
-| **`voyageai`** | VoyageAI client and embeddings adapter (`VoyageEmbedder`). |
-| **`recall`** | Vector recall abstractions, in-memory + filesystem-backed recall stores, cosine similarity metrics, and filter evaluations. |
-| **`rerank`** | Reranking interfaces and deterministic fallback rerankers. |
-| **`rerank-voyage`** | VoyageAI-backed reranking adapter (`VoyageReranker`). |
-| **`agentfs`** | AgentFS workspace client and remote adapter capabilities. |
-| **`graph`** | Graph-structured memory contracts and utilities. |
-| **`ai-sdk`** | Vercel AI SDK utility integrations (tools, system prompts, structures). |
-| **`cli`** | Local memory CLI commands (`init`, `search`, `inspect`, `edit`, `agent`). |
-| **`mcp-server`** | Model Context Protocol (MCP) server boundary for exposing memory tools to agents. |
-| **`cloud-client`** | Connection client for MemoFS Cloud API (without SaaS business logic). |
-| **`benchmark-kit`** | Performance benchmarking kit and test runners. |
-| **`testing`** | Shared test-only fixtures and mock implementations. |
-
----
-
-## Canonical Local Protocol
-
-By default, MemoFS writes its file-first structure under a ``.memofs`` directory at the project root:
-
-```txt
-`.memofs/`
-├── manifest.json              # Version, capabilities, and schema configuration
-├── memory/
-│   ├── core.md                # System prompt instructions and global core memory
-│   └── notes.md               # User-appended timestamped notes
-├── events/
-│   ├── memory-events.jsonl    # Log of all mutating operations and events
-│   └── conversations.jsonl    # Active chat history logs
-├── indexes/
-│   └── chunks.jsonl           # Document text chunks mapped to IDs and sources
-├── graph/
-│   ├── nodes.jsonl            # Graph memory vertices
-│   └── edges.jsonl            # Graph memory relationships
-└── snapshots/
-    └── snapshots.jsonl        # Incremental snapshot log
-```
-
----
-
-## Workspace Commands
-
-All operations should be initiated from the repository root:
+## Common commands
 
 ```bash
-# Clean install all dependencies
+# Install the locked dependency set
 pnpm install
 
-# Build the packages and modules
-pnpm build
+# Start development tasks
+pnpm dev
 
-# Run TypeScript checks across the workspace
-pnpm typecheck
-
-# Run tests
-pnpm test
-
-# Format code and check style rules
+# Run formatting and lint checks
 pnpm format-and-lint
 
-# Automatically fix format/lint errors
-pnpm format-and-lint:fix
+# Type-check workspace packages and apps
+pnpm typecheck
 
-# Validate package settings
+# Run unit tests once
+pnpm test
+
+# Build workspace packages and apps
+pnpm build
+
+# Validate publishable package exports
 pnpm lint:package
 
-# Launch the docs site local dev server
+# Start or build the documentation site
 pnpm docs:dev
-
-# Build the docs site for production
 pnpm docs:build
 
-# Validate workspace settings
+# Run the complete workspace validation gate
 pnpm validate:workspace
 ```
 
----
+`pnpm validate:workspace` runs formatting and lint checks, type checks, unit tests, builds, package-export validation, and the documentation build. Use it before handing off a workspace-wide change or preparing a release.
 
-## Style & Safety Rules
+## Working safely
 
-1. **Exports Consolidation**: All public APIs must be re-exported through [packages/core/src/index.ts](file:///Users/codingsimba/Desktop/projects/oss/packages/core/src/index.ts). Subpath imports are prohibited.
-2. **Typing Standards**: Always use TypeScript strict mode. Prefer `unknown` for unchecked outer boundaries. Avoid using `any` unless explicitly justified by comments.
-3. **Style and Formatting**: Use Biome for formatting (uses tabs and double quotes). Do not install Prettier.
-4. **SaaS Boundary**: Do not add billing, tenancy, user dashboards, or encrypted BYOK storage to the open-source repository. Keep cloud features strictly bounded to client transport APIs (`@memofs/core/cloud`).
-5. **Credentials Security**: Do not hardcode or commit keys, secrets, `.env` configs, or cloud credentials. Pass security tokens down from host applications at runtime.
+- Use Biome for formatting and linting; this workspace does not use Prettier.
+- Keep public package code under the `@memofs/*` scope. The `@repo/*` scope is private tooling only.
+- Keep credentials in ignored environment files. Do not commit API keys, tokens, or local cloud configuration.
+- Keep the internal decision records in `docs/CONTEXT.md`, `docs/adr/`, and `docs/architecture/` local-only. Do not add them to commits or link to them from public documentation.
