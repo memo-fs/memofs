@@ -37,9 +37,12 @@ import {
 import type { Logger } from "../../core/types/logger";
 import type { GraphNode } from "../../graph/types";
 import { nowIso } from "../../graph/utils/time";
+import { memoryLexicalDocId } from "../../recall/identity";
+import { classifyDurability } from "../../security/durability-tier";
 import type { GraphNodeInput, MemoryKind } from "../types";
 import { parseNoteBlocks } from "./notes-parser";
 import type { LocalStrategyContext } from "./types";
+import { indexDocument } from "./write";
 
 /**
  * A single archived memory record (full-fidelity JSON).
@@ -425,13 +428,32 @@ export async function archiveDeprecated(
 	}
 
 	// Prune lexical entries for the archived memory bodies themselves.
-	// `writeMemory` indexes each note under its memory id (e.g.
-	// `mem_xxx`); removing the note from notes.md without pruning the
-	// lexical store would leave the archived memory surfaced in
+	// `writeMemory` indexes each note under its canonical doc id
+	// (`{memoryId}#0`); removing the note from notes.md without pruning
+	// the lexical store would leave the archived memory surfaced in
 	// `memofs.recall` until a process restart — contradicting the
 	// "archived memories NOT surfaced in recall" contract.
 	if (archived > 0) {
-		ctx.pruneLexical(archivedIds);
+		ctx.pruneLexical(archivedIds.map((id) => memoryLexicalDocId(id)));
+		// Cascade to the vector store: chunks are filed under
+		// metadata.sourceId = memory id, so deleteBySource removes every
+		// chunk of the archived memory — no ghost chunks left retrievable.
+		if (ctx.options.recallStore) {
+			for (const id of archivedIds) {
+				try {
+					await ctx.options.recallStore.deleteBySource({
+						projectId: ctx.options.projectId,
+						sourceType: "note",
+						sourceId: id,
+					});
+				} catch (error) {
+					logger?.warn("archive: vector chunk deletion failed (best-effort)", {
+						error: error instanceof Error ? error.message : String(error),
+						sourceId: id,
+					});
+				}
+			}
+		}
 	}
 
 	// Append memory.archived events.
@@ -522,10 +544,36 @@ export async function restoreMemory(
 		normalizeMarkdownDocument(newContent),
 	);
 	// Re-index the restored memory body so `memofs.recall` surfaces it
-	// immediately (mirrors `writeMemory`'s `ctx.indexLexical({ id, text })`
-	// call so the restored memory is on equal footing with new writes).
+	// immediately — under the SAME canonical doc ids the memory was
+	// originally written with, so the restored memory is on equal footing
+	// with new writes on both retrieval paths.
 	const noteText = `${record.title ?? record.content.slice(0, 80)}\n${record.content}`;
-	ctx.indexLexical({ id, text: noteText });
+	ctx.indexLexical({ id: memoryLexicalDocId(id), text: noteText });
+	// Vector re-index mirrors the write path and only runs when the record
+	// classifies durable — transient notes were never vector-indexed, so
+	// re-indexing them on restore would silently promote their tier.
+	const durability = classifyDurability({
+		content: record.content,
+		// Same validated-disk-record cast as `recordToNoteBlock` above.
+		kind: record.kind as MemoryKind,
+		confidence: record.confidence,
+	});
+	if (
+		durability.tier === "durable" &&
+		ctx.options.embedder &&
+		ctx.options.recallStore
+	) {
+		await indexDocument(ctx, noteText, {
+			sourceType: "note",
+			sourceId: id,
+			sourcePath: NOTES_MEMORY_PATH,
+			memoryType: "notes",
+			memoryId: id,
+			tags: record.tags,
+			kind: record.kind,
+			confidence: record.confidence,
+		});
+	}
 
 	// 3. Transition archived graph nodes → active.
 	const allNodes = await ctx.graphStore.queryNodes({ includeInactive: true });

@@ -17,6 +17,7 @@ import type {
 	MemoryType,
 } from "../../core/types/memory-documents";
 import type { GraphEdge } from "../../graph/types";
+import { memoryLexicalDocId, memoryRecallDocId } from "../../recall/identity";
 import { classifyDurability } from "../../security/durability-tier";
 import { assertWriteAllowed } from "../../security/secret-blocklist";
 import type {
@@ -33,6 +34,14 @@ import {
 	toGraphNodeInput,
 } from "./helpers";
 import type { LocalStrategyContext } from "./types";
+
+/** Characters rejected from recall doc ids (everything outside this set). */
+const RECALL_ID_UNSAFE_CHARS = /[^A-Za-z0-9._:@#-]/g;
+
+/** Sanitizes an id component for the recall store's safe-id whitelist. */
+function sanitizeRecallId(raw: string): string {
+	return raw.replace(RECALL_ID_UNSAFE_CHARS, "_");
+}
 
 export async function writeMemory(
 	ctx: LocalStrategyContext,
@@ -176,16 +185,17 @@ export async function writeMemory(
 		if (ctx.options.embedder && ctx.options.recallStore) {
 			await indexDocument(ctx, noteText, {
 				sourceType: "note",
-				sourceId: now,
+				sourceId: id,
 				sourcePath: NOTES_MEMORY_PATH,
 				memoryType: "notes",
+				memoryId: id,
 				tags: input.tags,
 				kind: input.kind,
 				confidence: input.confidence,
 			});
 		}
 
-		ctx.indexLexical({ id, text: noteText });
+		ctx.indexLexical({ id: memoryLexicalDocId(id), text: noteText });
 
 		if (ctx.options.autoExtractGraph !== false) {
 			await autoExtractGraph(ctx, noteText, {
@@ -234,6 +244,20 @@ export async function updateCoreMemory(
 	);
 
 	if (ctx.options.embedder && ctx.options.recallStore) {
+		// Drop the previous core chunks before re-indexing — upsert alone
+		// cannot shrink an index, so a shorter core document would leave
+		// stale chunks retrievable forever.
+		try {
+			await ctx.options.recallStore.deleteBySource({
+				projectId: ctx.options.projectId,
+				sourceType: "document",
+				sourceId: "core",
+			});
+		} catch (error) {
+			ctx.options.logger?.warn("stale core chunk deletion failed", {
+				error: message(error),
+			});
+		}
 		await indexDocument(ctx, content, {
 			sourceType: "document",
 			sourceId: "core",
@@ -264,6 +288,13 @@ export async function indexDocument(
 		sourceId: string;
 		sourcePath: string;
 		memoryType: MemoryType;
+		/**
+		 * Memory id the text belongs to. When set, chunks are indexed under
+		 * canonical `{memoryId}#{ordinal}` doc ids so they fuse with the
+		 * lexical whole-note doc (ordinal 0) and `deleteBySource` reaches
+		 * every chunk of the memory.
+		 */
+		memoryId?: string;
 		tags?: string[];
 		kind?: string;
 		confidence?: number;
@@ -297,7 +328,10 @@ export async function indexDocument(
 			const embRecord = embedResult.embeddings[i];
 			if (!embRecord)
 				throw new Error("Mismatch between chunk index and embedding output.");
-			const safeRecallId = c.id.replace(/[^A-Za-z0-9._:@#-]/g, "_");
+			const safeRecallId =
+				meta.memoryId !== undefined
+					? memoryRecallDocId(sanitizeRecallId(meta.memoryId), c.index)
+					: sanitizeRecallId(c.id);
 			return {
 				id: safeRecallId,
 				text: c.text,
