@@ -2,7 +2,10 @@ import { readCoreMemory } from "../../core/documents/core-memory";
 import { readNotesMemory } from "../../core/documents/notes-memory";
 import { searchMemoryText } from "../../core/search/search-memory";
 import type { JsonObject } from "../../core/types/json";
-import { mergeHybridCandidates } from "../../recall/hybrid/hybrid-recall";
+import {
+	HYBRID_SINGLE_PATH_WEIGHTS,
+	mergeHybridCandidates,
+} from "../../recall/hybrid/hybrid-recall";
 import type { RecallInput, RecallResult } from "../types";
 import { applyAnchorDrift } from "./anchor-drift";
 import { applyDecay } from "./decay";
@@ -73,9 +76,9 @@ export async function localRecall(
 	// so scores are not deflated by the static 0.6/0.4 split.
 	let vectorWeight: number | undefined;
 	if (!hasVector && hasLexical) {
-		vectorWeight = 0; // lexical weight becomes 1.0
+		vectorWeight = HYBRID_SINGLE_PATH_WEIGHTS.lexicalOnly; // lexical weight becomes 1.0
 	} else if (hasVector && !hasLexical) {
-		vectorWeight = 1; // lexical weight becomes 0, vector full
+		vectorWeight = HYBRID_SINGLE_PATH_WEIGHTS.vectorOnly; // lexical weight becomes 0
 	}
 
 	const items = await mergeHybridCandidates(candidates as never, {

@@ -213,6 +213,19 @@ export interface RecallStore {
 	 * @returns Promise that resolves when the operation is complete
 	 */
 	deleteBySource(input: DeleteBySourceInput): Promise<void>;
+	/**
+	 * List all documents in the store (optional capability).
+	 *
+	 * @remarks
+	 * Enumerates every stored document, optionally scoped to a namespace.
+	 * Used by maintenance passes that need full enumeration (e.g. one-time
+	 * legacy-row scrubs). Callers must feature-detect the method before use —
+	 * stores without enumeration support simply do not implement it.
+	 *
+	 * @param input - Optional namespace scope
+	 * @returns Promise resolving to all matching documents (cloned)
+	 */
+	listDocuments?(input?: { namespace?: string }): Promise<RecallDocument[]>;
 }
 
 /**

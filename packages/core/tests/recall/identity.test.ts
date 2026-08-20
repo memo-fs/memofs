@@ -63,7 +63,9 @@ describe("parseRecallDocId", () => {
 		// recall documents.
 		expect(parseRecallDocId("graph:auth-service")).toBeUndefined();
 		expect(parseRecallDocId("core:document")).toBeUndefined();
-		expect(parseRecallDocId("note_2026-08-18T00:00:00.000Z:0:1a2b3c4d")).toBeUndefined();
+		expect(
+			parseRecallDocId("note_2026-08-18T00:00:00.000Z:0:1a2b3c4d"),
+		).toBeUndefined();
 		expect(parseRecallDocId("core_0_0123456789abcdef")).toBeUndefined();
 		expect(parseRecallDocId("mem_abc")).toBeUndefined();
 		expect(parseRecallDocId("")).toBeUndefined();
@@ -75,9 +77,9 @@ describe("resolveMemoryId", () => {
 
 	it("prefers the exact raw key (yesterday's item ids were memory ids)", () => {
 		expect(resolveMemoryId("mem_abc", (k) => known.has(k))).toBe("mem_abc");
-		expect(
-			resolveMemoryId("legacy-plain-id", (k) => known.has(k)),
-		).toBe("legacy-plain-id");
+		expect(resolveMemoryId("legacy-plain-id", (k) => known.has(k))).toBe(
+			"legacy-plain-id",
+		);
 	});
 
 	it("resolves a canonical doc id to its parent memory id", () => {

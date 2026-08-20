@@ -215,6 +215,20 @@ export class FsRecallStore implements RecallStore {
 	}
 
 	/**
+	 * Lists documents currently indexed, after hydrating from disk.
+	 *
+	 * @remarks
+	 * Delegates to the in-memory index; see {@link InMemoryRecallStore.listDocuments}
+	 * for scoping and cloning semantics.
+	 */
+	async listDocuments(input?: {
+		namespace?: string;
+	}): Promise<RecallDocument[]> {
+		await this.hydrate();
+		return this.inner.listDocuments(input);
+	}
+
+	/**
 	 * Returns the count of documents currently indexed in memory.
 	 */
 	async count(namespace?: string): Promise<number> {

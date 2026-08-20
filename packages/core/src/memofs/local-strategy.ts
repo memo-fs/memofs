@@ -57,6 +57,7 @@ import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import { migrateAnchors } from "./local-strategy/migrate-anchors";
 import { localRecall } from "./local-strategy/recall";
 import { listRecentMemories as listRecentMemoriesFn } from "./local-strategy/recent";
+import { scrubLegacyEmbeddingRows } from "./local-strategy/scrub";
 import {
 	appendAgentSessionFile,
 	completeAgentSession,
@@ -251,6 +252,10 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				if (!metadata || typeof metadata.id !== "string") continue;
 				const id = metadata.id;
 				if (!id.startsWith("mem_")) continue;
+				// Notes sections are a second source of known memory ids (events
+				// are the first) — the legacy-embedding scrub resolves sourceIds
+				// against this set, so more sources means fewer false ghosts.
+				knownMemoryIds.add(id);
 				// Canonical doc id — joins the vector chunk-0 doc written by
 				// `writeMemory` so both retrieval paths hydrate to one identity.
 				const docId = memoryLexicalDocId(id);
@@ -379,6 +384,12 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 			await hydrateMemoryMetaFromEvents();
 			await hydrateLexicalFromNotes();
 			await hydrateAnchorHashCacheFromManifest();
+			await scrubLegacyEmbeddingRows({
+				store,
+				recallStore: options.recallStore,
+				knownMemoryIds,
+				...(options.logger === undefined ? {} : { logger: options.logger }),
+			});
 		}
 		bootstrapped = true;
 	}

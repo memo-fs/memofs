@@ -364,3 +364,49 @@ describe("FsGraphStore", () => {
 		}
 	});
 });
+
+describe("FsRecallStore.listDocuments", () => {
+	it("rehydrates persisted rows into a fresh store before enumerating", async () => {
+		const { rootDir, cleanup } = await createTempMemoFsDir();
+		try {
+			const store = createNodeFsMemoryStore({
+				rootDir,
+				missingFileBehavior: "empty",
+				createRoot: true,
+			});
+
+			const first = createFsRecallStore({ store });
+			await first.upsert([
+				{
+					id: "doc_1",
+					text: "authentication login flow",
+					embedding: [0.1, 0.2, 0.3],
+					metadata: {
+						projectId: "p1",
+						sourceType: "note",
+						sourceId: "n1",
+						memoryType: "notes",
+					},
+				},
+				{
+					id: "doc_2",
+					text: "database connection pooling",
+					embedding: [0.4, 0.5, 0.6],
+					metadata: {
+						projectId: "p1",
+						sourceType: "document",
+						sourceId: "core",
+						memoryType: "core",
+					},
+				},
+			]);
+
+			const second = createFsRecallStore({ store });
+			const documents = await second.listDocuments();
+
+			expect(documents.map((doc) => doc.id).sort()).toEqual(["doc_1", "doc_2"]);
+		} finally {
+			await cleanup();
+		}
+	});
+});

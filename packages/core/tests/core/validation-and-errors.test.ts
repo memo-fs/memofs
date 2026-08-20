@@ -173,4 +173,47 @@ describe("manifest validation", () => {
 			}),
 		).toThrow(MemoryValidationError);
 	});
+
+	it("accepts a maintenance marker with an ISO timestamp", () => {
+		const manifest = createDefaultMemoFsManifest({
+			now: () => "2026-05-02T00:00:00.000Z",
+		});
+
+		const validated = validateMemoFsManifest({
+			...manifest,
+			maintenance: {
+				legacyEmbeddingsScrubbedAt: "2026-08-19T00:00:00.000Z",
+			},
+		});
+
+		expect(validated.maintenance?.legacyEmbeddingsScrubbedAt).toBe(
+			"2026-08-19T00:00:00.000Z",
+		);
+	});
+
+	it("rejects a maintenance marker with a non-timestamp value", () => {
+		const manifest = createDefaultMemoFsManifest({
+			now: () => "2026-05-02T00:00:00.000Z",
+		});
+
+		expect(() =>
+			validateMemoFsManifest({
+				...manifest,
+				maintenance: { legacyEmbeddingsScrubbedAt: "yesterday" },
+			}),
+		).toThrow(MemoryValidationError);
+	});
+
+	it("rejects a non-object maintenance marker", () => {
+		const manifest = createDefaultMemoFsManifest({
+			now: () => "2026-05-02T00:00:00.000Z",
+		});
+
+		expect(() =>
+			validateMemoFsManifest({
+				...manifest,
+				maintenance: "done",
+			}),
+		).toThrow(MemoryValidationError);
+	});
 });

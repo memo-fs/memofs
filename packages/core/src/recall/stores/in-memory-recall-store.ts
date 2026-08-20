@@ -292,6 +292,28 @@ export class InMemoryRecallStore implements RecallStore {
 	}
 
 	/**
+	 * Lists documents in the store, optionally scoped to a namespace.
+	 *
+	 * @remarks
+	 * Returns cloned documents — mutating the result cannot affect store
+	 * state. Without a namespace scope, documents across ALL namespaces are
+	 * returned.
+	 *
+	 * @public
+	 */
+	async listDocuments(input?: {
+		namespace?: string;
+	}): Promise<RecallDocument[]> {
+		const all = this.snapshot();
+		if (input?.namespace === undefined) return all;
+		const namespace = normalizeNamespace(
+			input.namespace,
+			this.defaultNamespace,
+		);
+		return all.filter((document) => document.namespace === namespace);
+	}
+
+	/**
 	 * Returns a snapshot of all documents in the store.
 	 *
 	 * @remarks

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { HybridCandidate, JsonObject } from "../../src/index";
 import {
 	createDeterministicFallbackReranker,
+	HYBRID_SCORING_DEFAULTS,
+	HYBRID_SINGLE_PATH_WEIGHTS,
 	mergeHybridCandidates,
+	parseRecallDocId,
 	readConfidence,
 	recencyBoost,
 } from "../../src/index";
@@ -159,5 +162,138 @@ describe("mergeHybridCandidates", () => {
 			reranker: failingReranker,
 		});
 		expect(result).toHaveLength(1);
+	});
+});
+
+describe("per-memory consolidation (reranker input is per memory, not per chunk)", () => {
+	it("collapses a memory's chunks into one best-evidence candidate", async () => {
+		// Chunk 0 carries the lexical whole-note hit (strongest combined
+		// evidence); chunk 2 carries the strongest vector evidence. One
+		// memory → one list entry joining BOTH chunks' signals.
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_a#0", candidate("mem_a#0", 0.1, 0.9, { source: "bm25" })],
+			["mem_a#2", candidate("mem_a#2", 0.8, 0, { sourceId: "mem_a" })],
+			["graph:node1", candidate("graph:node1", 0.5, 0.5)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 10,
+		});
+
+		const memA = result.filter(
+			(item) => parseRecallDocId(item.id)?.memoryId === "mem_a",
+		);
+		expect(
+			memA,
+			"one memory in N chunks must surface as exactly one list entry",
+		).toHaveLength(1);
+		// Highest-evidence chunk wins the surfaced id and text (here the
+		// ordinal-0 whole-note doc: 0.1 + 0.9 beats 0.8 + 0).
+		expect(memA[0]?.id).toBe("mem_a#0");
+		// Fused metadata: the vector marker from chunk 2 merged in.
+		expect(memA[0]?.metadata?.source).toBe("bm25");
+		expect(memA[0]?.metadata?.sourceId).toBe("mem_a");
+		// Non-canonical ids are never consolidated.
+		expect(result.some((item) => item.id === "graph:node1")).toBe(true);
+	});
+
+	it("merges per-path scores as the group max", async () => {
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_a#0", candidate("mem_a#0", 0.2, 0.7)],
+			["mem_a#1", candidate("mem_a#1", 0.9, 0.3)],
+			["mem_b#0", candidate("mem_b#0", 0.85, 0)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 10,
+		});
+
+		const memA = result.find(
+			(item) => parseRecallDocId(item.id)?.memoryId === "mem_a",
+		);
+		expect(memA).toBeDefined();
+		// mem_a carries max(vector)=0.9 AND max(lexical)=0.7 of its chunks,
+		// which must outrank mem_b's strong vector-only 0.85.
+		expect(result[0]?.id).toBe("mem_a#1");
+	});
+
+	it("tie-breaks equal-evidence chunks toward the lower ordinal", async () => {
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_a#3", candidate("mem_a#3", 0.6, 0.2)],
+			["mem_a#1", candidate("mem_a#1", 0.2, 0.6)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 10,
+		});
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.id).toBe("mem_a#1");
+	});
+});
+
+describe("double-hit fusion bonus", () => {
+	it("ranks an equal-base double hit above equal-base single-path hits", async () => {
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_b#0", candidate("mem_b#0", 0.5, 0.5)],
+			["mem_c#0", candidate("mem_c#0", 0.5, 0)],
+			["mem_d#0", candidate("mem_d#0", 0, 0.5)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 3,
+		});
+
+		expect(result.map((item) => item.id)).toEqual([
+			"mem_b#0",
+			"mem_c#0",
+			"mem_d#0",
+		]);
+	});
+
+	it("lets a moderate double hit overtake a strong single-path hit", async () => {
+		// The fusion reward the hybrid model promises: evidence from BOTH
+		// retrieval paths beats an extreme score from one path alone.
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_vec#0", candidate("mem_vec#0", 1.0, 0)],
+			["mem_both#0", candidate("mem_both#0", 0.5, 0.5)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 2,
+		});
+
+		expect(result[0]?.id).toBe("mem_both#0");
+	});
+
+	it("keeps a strong single-path hit above a weak double hit", async () => {
+		// The bonus is gated by the weaker path's score, so weak second-path
+		// evidence must not flip a clear winner.
+		const candidates = new Map<string, HybridCandidate>([
+			["mem_strong#0", candidate("mem_strong#0", 0.9, 0)],
+			["mem_weak#0", candidate("mem_weak#0", 0.25, 0.2)],
+		]);
+
+		const result = await mergeHybridCandidates(candidates, {
+			query: "x",
+			topK: 2,
+		});
+
+		expect(result[0]?.id).toBe("mem_strong#0");
+	});
+
+	it("exposes the locked formula as frozen named constants", () => {
+		expect(Object.isFrozen(HYBRID_SCORING_DEFAULTS)).toBe(true);
+		expect(HYBRID_SCORING_DEFAULTS.vectorWeight).toBe(0.6);
+		expect(HYBRID_SCORING_DEFAULTS.doubleHitBonusWeight).toBeGreaterThan(0);
+		expect(HYBRID_SCORING_DEFAULTS.doubleHitBonusWeight).toBeLessThanOrEqual(1);
+		expect(Object.isFrozen(HYBRID_SINGLE_PATH_WEIGHTS)).toBe(true);
+		expect(HYBRID_SINGLE_PATH_WEIGHTS.lexicalOnly).toBe(0);
+		expect(HYBRID_SINGLE_PATH_WEIGHTS.vectorOnly).toBe(1);
 	});
 });
