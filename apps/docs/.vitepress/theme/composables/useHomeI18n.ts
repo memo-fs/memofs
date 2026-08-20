@@ -134,12 +134,12 @@ const en: HomeTranslations = {
 	},
 	dualEntry: {
 		user: {
-			badge: "Coding Agents & IDEs",
-			title: "I use coding agents day-to-day",
-			desc: "Claude Code, Cursor, Windsurf, and opencode automatically read & write persistent, git-trackable memory via MCP or lifecycle hooks.",
+			badge: "AI Agents & IDEs",
+			title: "I use AI agents day-to-day",
+			desc: "Claude Code, Cursor, Windsurf, research tools, and custom agents automatically read & write persistent, git-trackable memory via MCP or lifecycle hooks.",
 			primaryLinkText: "MCP Setup Guide →",
 			primaryLink: "/mcp/",
-			secondaryLinkText: "View IDE Cookbooks →",
+			secondaryLinkText: "View Agent Cookbooks →",
 			secondaryLink: "/learn/cookbooks/",
 		},
 		builder: {
@@ -162,21 +162,21 @@ const en: HomeTranslations = {
 		headline: "Every new session ",
 		headlineEm: "starts from zero.",
 		body1:
-			"You walk your agent through the auth system. It gets it. Next session — a blank stare. You paste the architecture doc again, and it ships code that contradicts last week's decision. It has no memory of what you chose, because there was nowhere to put it.",
+			"You brief your agent on your project, domain rules, and key constraints. It gets it. Next session — a blank stare. You re-explain everything, only for it to contradict yesterday's decisions. It has no memory of what you chose, because there was nowhere durable to put it.",
 		body2:
-			"And giving one agent a memory only shrinks the problem — it doesn't solve it. Every agent, machine, and teammate ends up with a different memory, and you can't see any of them:",
+			"And giving one agent a local scratchpad only shrinks the problem — it doesn't solve it. Every machine, tool, and teammate ends up with fractured, divergent memory you can't inspect or trust:",
 		symptoms: [
 			{
 				title: "Divergent.",
-				desc: "Your laptop, CI, and your teammate's agent each remember a different project.",
+				desc: "Your desktop, cloud instances, and your teammates' agents each remember conflicting, fragmented context.",
 			},
 			{
 				title: "Invisible.",
-				desc: "You can't see what your agents have recorded, so you can't trust it — or correct it.",
+				desc: "You can't see what your agents have recorded, so you can't trust it — or correct it when they learn bad assumptions.",
 			},
 			{
 				title: "Unreachable.",
-				desc: "No checkout means no memory: CI jobs, serverless functions, and hosted agents start from zero.",
+				desc: "Hosted agents, serverless functions, and remote workflows start from scratch on every invocation with no shared ground truth.",
 			},
 		],
 	},
@@ -254,7 +254,7 @@ const en: HomeTranslations = {
 	comparison: {
 		kicker: "Why file-first",
 		title: "MemoFS vs. hosted memory tools",
-		lede: "Most memory tools hide your data in a dashboard you can't inspect. MemoFS stores everything as plain text and JSON in your project's .memofs/ directory — alongside the code it describes.",
+		lede: "Most memory tools hide your data in an opaque dashboard or black-box vector store. MemoFS stores everything as plain text and JSON in your workspace's .memofs/ directory — inspectable, diffable, and fully owned by you.",
 		headers: {
 			feature: "Feature",
 			memofs: "MemoFS",
@@ -263,7 +263,7 @@ const en: HomeTranslations = {
 		rows: [
 			{
 				feature: "Where memory lives",
-				memofs: "Plain files in your project",
+				memofs: "Plain files in your workspace",
 				hosted: "Locked in a remote dashboard",
 			},
 			{
@@ -273,7 +273,7 @@ const en: HomeTranslations = {
 			},
 			{
 				feature: "Version control",
-				memofs: "Git-tracked with your code",
+				memofs: "Git-tracked with your project",
 				hosted: "Separate system (if at all)",
 			},
 			{
@@ -311,12 +311,12 @@ const zh: HomeTranslations = {
 	},
 	dualEntry: {
 		user: {
-			badge: "编程智能体与 IDE",
-			title: "日常使用编程智能体",
-			desc: "Claude Code、Cursor、Windsurf 与 opencode 通过 MCP 或生命周期钩子，自动读写持久化、可 Git 跟踪的记忆。",
+			badge: "AI 智能体与 IDE",
+			title: "日常使用 AI 智能体",
+			desc: "Claude Code、Cursor、Windsurf、研究助手与自定义智能体通过 MCP 或生命周期钩子，自动读写持久化、可 Git 跟踪的记忆。",
 			primaryLinkText: "MCP 配置指南 →",
 			primaryLink: "/mcp/",
-			secondaryLinkText: "查看 IDE 实战菜谱 →",
+			secondaryLinkText: "查看智能体实战菜谱 →",
 			secondaryLink: "/learn/cookbooks/",
 		},
 		builder: {
@@ -339,21 +339,21 @@ const zh: HomeTranslations = {
 		headline: "每次开启新会话，智能体都",
 		headlineEm: "从零开始。",
 		body1:
-			"你耐心地向智能体讲解鉴权架构，它当下理解了。但在下一次会话中 —— 再次陷入茫然。你不得不重新粘贴架构文档，而它生成的代码却与上周定下的决策相违背。它没有关于你选择的任何记忆，因为过去根本无处存放这些记忆。",
+			"你向智能体详细阐述了业务规则、领域约束与决策准则，它当下理解了。但在下一次会话中 —— 再次陷入茫然。你不得不反复解释，而它给出的结论甚至与昨天的决定互相矛盾。因为过去根本无处持久化存放这些关键记忆。",
 		body2:
-			"只给单个智能体配备本地记忆只是缓解了局部问题 —— 并未从根本上解决。每台机器、每位队友与每个智能体最终都保留着互不相同的孤立记忆，而且你完全无法直观查看或纠正它们：",
+			"只给单个智能体配备临时草稿纸只是缓解了局部问题 —— 并未根本解决。不同设备、云端环境与每位队友的智能体保留着互不相同的孤立记忆，而且你完全无法直观查看或纠偏：",
 		symptoms: [
 			{
 				title: "记忆发散不一致。",
-				desc: "你的笔记本、CI 构建流水线以及队友的智能体各自记住的是完全不同的项目状态。",
+				desc: "本地设备、云端环境与队友的智能体各自记住互不相同的碎片上下文。",
 			},
 			{
 				title: "黑盒不可见。",
-				desc: "你无法直观查看智能体记录了什么，因此无法给予充分信任 —— 更无法主动纠错。",
+				desc: "你无法直观查看智能体记录了什么，因此无法给予充分信任 —— 出现错误假设时更无法主动纠错。",
 			},
 			{
 				title: "无法触达。",
-				desc: "无本地代码检出意味着无记忆可用：CI 任务、无服务器函数与托管智能体每次都必须从零开始。",
+				desc: "无共享状态意味着无记忆可用：无服务器函数、云端容器与托管智能体每次都必须从零开始。",
 			},
 		],
 	},
@@ -430,7 +430,7 @@ const zh: HomeTranslations = {
 	comparison: {
 		kicker: "为何坚持文件优先",
 		title: "MemoFS 与传统云端记忆工具对比",
-		lede: "多数记忆工具将你的数据隐藏在不可视察的远程控制台中。MemoFS 将所有内容作为纯文本和 JSON 保存在项目 .memofs/ 目录下 —— 与代码并肩存放。",
+		lede: "多数记忆工具将你的数据隐藏在黑盒向量数据库或不可视察的远程控制台中。MemoFS 将所有内容作为纯文本和 JSON 保存在工作区的 .memofs/ 目录下 —— 可视察、可 Diff，完全由你掌控。",
 		headers: {
 			feature: "对比维度",
 			memofs: "MemoFS",
@@ -439,7 +439,7 @@ const zh: HomeTranslations = {
 		rows: [
 			{
 				feature: "记忆存放位置",
-				memofs: "项目中的纯文本文件",
+				memofs: "工作区中的纯文本文件",
 				hosted: "锁定在厂商的远程控制台",
 			},
 			{
@@ -449,7 +449,7 @@ const zh: HomeTranslations = {
 			},
 			{
 				feature: "版本控制",
-				memofs: "与项目代码一同 Git 跟踪",
+				memofs: "与项目数据一同 Git 跟踪",
 				hosted: "独立的黑盒系统（如有）",
 			},
 			{
@@ -487,12 +487,12 @@ const ja: HomeTranslations = {
 	},
 	dualEntry: {
 		user: {
-			badge: "コーディングエージェント & IDE",
-			title: "日常的にコーディングエージェントを使う",
-			desc: "Claude Code、Cursor、Windsurf、opencode が MCP やライフサイクルフックを通じて、Git 追跡可能な永続メモリを自動的に読み書きします。",
+			badge: "AI エージェント & IDE",
+			title: "日常的に AI エージェントを使う",
+			desc: "Claude Code、Cursor、Windsurf、リサーチツール、カスタムエージェントが MCP やライフサイクルフックを通じて、Git 追跡可能な永続メモリを自動的に読み書きします。",
 			primaryLinkText: "MCP セットアップガイド →",
 			primaryLink: "/mcp/",
-			secondaryLinkText: "IDE クックブックを見る →",
+			secondaryLinkText: "エージェント クックブックを見る →",
 			secondaryLink: "/learn/cookbooks/",
 		},
 		builder: {
@@ -515,21 +515,21 @@ const ja: HomeTranslations = {
 		headline: "新しいセッションは毎回、",
 		headlineEm: "ゼロから始まります。",
 		body1:
-			"認証アーキテクチャをエージェントに説明すると、その場では理解します。しかし次のセッションでは再び無知に戻ります。同じドキュメントを何度も貼り付けることになり、先週決定した方針と矛盾するコードが生成されてしまいます。記憶を保持する場所が存在しないからです。",
+			"プロジェクトの前提、ドメインルール、重要な制約をエージェントに説明すると、その場では理解します。しかし次のセッションでは再び記憶がリセットされます。何度も同じ説明を繰り返すことになり、前回の決定と矛盾する回答が返ってくることもあります。決定事項を永続的に保持する場所が存在しないからです。",
 		body2:
-			"1 つのエージェントにローカルメモリを持たせるだけでは根本的な解決になりません。マシン、CI、チームメイトごとに異なる孤立したメモリが散在し、中身を直接確認することも修正することもできません：",
+			"1 つのエージェントに一時的な作業スペースを持たせるだけでは根本的な解決になりません。マシン、クラウド環境、チームメンバーごとに孤立したメモリが散在し、中身を直接確認することも修正することもできません：",
 		symptoms: [
 			{
 				title: "記憶の不一致。",
-				desc: "PC、CI パイプライン、チームメンバーのエージェントがそれぞれ異なるプロジェクト状態を記憶してしまいます。",
+				desc: "ローカル環境、クラウドサービス、チームメンバーのエージェントがそれぞれ異なる断片的なコンテキストを記憶してしまいます。",
 			},
 			{
 				title: "ブラックボックス。",
-				desc: "エージェントが何を記録したのかが見えないため、信頼することも修正することもできません。",
+				desc: "エージェントが何を記録したのかが見えないため、信頼することも誤った前提を修正することもできません。",
 			},
 			{
 				title: "共有不能。",
-				desc: "ローカルのコードチェックアウトがない CI ジョブ、サーバーレス関数、ホスト型エージェントは常にゼロスタートを強いられます。",
+				desc: "ホスト型エージェント、サーバーレス関数、リモートワークフローは、共通のメモリ基盤がないため毎回ゼロスタートを強いられます。",
 			},
 		],
 	},
@@ -610,7 +610,7 @@ const ja: HomeTranslations = {
 	comparison: {
 		kicker: "ファイルファーストの理由",
 		title: "MemoFS と従来のホスト型メモリツールの比較",
-		lede: "多くのメモリツールはデータをリモートのダッシュボードに隠蔽します。MemoFS はすべてをプロジェクトの .memofs/ ディレクトリ内にプレーンテキストと JSON で保存します。",
+		lede: "多くのメモリツールはデータをブラックボックスのベクトルデータベースやリモートダッシュボードに隔離します。MemoFS はすべてをワークスペースの .memofs/ ディレクトリ内にプレーンテキストと JSON で保存し、ユーザー自身が完全に所有・検証できます。",
 		headers: {
 			feature: "機能・特徴",
 			memofs: "MemoFS",
@@ -619,7 +619,7 @@ const ja: HomeTranslations = {
 		rows: [
 			{
 				feature: "メモリの保存場所",
-				memofs: "プロジェクト内のプレーンファイル",
+				memofs: "ワークスペース内のプレーンファイル",
 				hosted: "リモートダッシュボードに隔離",
 			},
 			{
@@ -629,7 +629,7 @@ const ja: HomeTranslations = {
 			},
 			{
 				feature: "バージョン管理",
-				memofs: "コードと一緒に Git で追跡",
+				memofs: "プロジェクトと一緒に Git で追跡",
 				hosted: "別系統のシステム（または非対応）",
 			},
 			{
@@ -667,12 +667,12 @@ const es: HomeTranslations = {
 	},
 	dualEntry: {
 		user: {
-			badge: "Agentes de Código e IDEs",
-			title: "Uso agentes de código en mi día a día",
-			desc: "Claude Code, Cursor, Windsurf y opencode leen y escriben automáticamente memoria persistente y rastreable por Git a través de MCP o ganchos de ciclo de vida.",
+			badge: "Agentes de IA e IDEs",
+			title: "Uso agentes de IA en mi día a día",
+			desc: "Claude Code, Cursor, Windsurf, asistentes de investigación y agentes personalizados leen y escriben automáticamente memoria persistente y rastreable por Git a través de MCP o ganchos de ciclo de vida.",
 			primaryLinkText: "Guía de Configuración MCP →",
 			primaryLink: "/mcp/",
-			secondaryLinkText: "Ver Recetarios de IDEs →",
+			secondaryLinkText: "Ver Recetarios de Agentes →",
 			secondaryLink: "/learn/cookbooks/",
 		},
 		builder: {
@@ -695,21 +695,21 @@ const es: HomeTranslations = {
 		headline: "Cada nueva sesión ",
 		headlineEm: "comienza desde cero.",
 		body1:
-			"Le explicas a tu agente la arquitectura de autenticación. La entiende. En la siguiente sesión: mirada en blanco. Vuelves a pegar el documento de arquitectura y genera código que contradice la decisión de la semana pasada. No recuerda lo que elegiste porque no había dónde guardarlo.",
+			"Le explicas a tu agente las reglas del proyecto, los requisitos del dominio y las restricciones clave. Lo entiende. En la siguiente sesión: mirada en blanco. Tienes que volver a explicarlo todo, y genera respuestas que contradicen las decisiones anteriores. No recuerda lo que acordasteis porque no había dónde guardarlo.",
 		body2:
-			"Y darle memoria a un solo agente solo mitiga el problema, no lo resuelve. Cada máquina, entorno de CI y compañero de equipo termina con una memoria diferente y no puedes ver ninguna de ellas:",
+			"Y darle a un solo agente un bloc de notas temporal solo mitiga el problema, no lo resuelve. Cada máquina, servicio en la nube y compañero de equipo termina con una memoria fragmentada que no puedes inspeccionar ni confiar:",
 		symptoms: [
 			{
 				title: "Divergente.",
-				desc: "Tu portátil, la integración continua y el agente de tu compañero recuerdan cada uno un proyecto distinto.",
+				desc: "Tu equipo local, las instancias en la nube y los agentes de tus compañeros recuerdan contextos fragmentados y contradictorios.",
 			},
 			{
 				title: "Invisible.",
-				desc: "No puedes ver lo que tus agentes han registrado, por lo que no puedes confiar en ello ni corregirlo.",
+				desc: "No puedes ver lo que tus agentes han registrado, por lo que no puedes confiar en ello ni corregir suposiciones erróneas.",
 			},
 			{
 				title: "Inaccesible.",
-				desc: "Sin repositorio local no hay memoria: tareas de CI, funciones serverless y agentes en la nube empiezan de cero.",
+				desc: "Agentes alojados, funciones serverless y flujos remotos empiezan de cero en cada ejecución sin una verdad compartida.",
 			},
 		],
 	},
@@ -789,7 +789,7 @@ const es: HomeTranslations = {
 	comparison: {
 		kicker: "Por qué basado en archivos",
 		title: "MemoFS frente a herramientas de memoria alojadas",
-		lede: "La mayoría de herramientas ocultan tus datos en un panel de control que no puedes inspeccionar. MemoFS almacena todo como texto plano y JSON en el directorio .memofs/ de tu proyecto, junto al código que describe.",
+		lede: "La mayoría de herramientas ocultan tus datos en paneles remotos o almacenes vectoriales de caja negra. MemoFS almacena todo como texto plano y JSON en el directorio .memofs/ de tu espacio de trabajo — inspeccionable, auditable y de tu total propiedad.",
 		headers: {
 			feature: "Característica",
 			memofs: "MemoFS",
@@ -798,7 +798,7 @@ const es: HomeTranslations = {
 		rows: [
 			{
 				feature: "Dónde reside la memoria",
-				memofs: "Archivos de texto plano en tu proyecto",
+				memofs: "Archivos de texto plano en tu espacio de trabajo",
 				hosted: "Bloqueada en un panel remoto",
 			},
 			{
@@ -808,7 +808,7 @@ const es: HomeTranslations = {
 			},
 			{
 				feature: "Control de versiones",
-				memofs: "Rastreado por Git junto a tu código",
+				memofs: "Rastreado por Git junto a tu proyecto",
 				hosted: "Sistema separado (si existe)",
 			},
 			{

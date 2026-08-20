@@ -2,7 +2,7 @@
 title: "How to connect agents to Hosted MemoFS MCP Endpoints"
 date: "2026-08-04"
 estimatedMinutes: 3
-description: "Connect AI coding agents to MemoFS Cloud Hosted MCP Endpoint over HTTPS with API key authentication."
+description: "Connect AI agents to MemoFS Cloud Hosted MCP Endpoint over HTTPS with API key authentication."
 ---
 
 # How to connect agents to Hosted MemoFS MCP Endpoints

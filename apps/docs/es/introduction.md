@@ -5,14 +5,14 @@ description: Qué es MemoFS y qué documento leer primero según lo que estés c
 
 # ¿Qué es MemoFS?
 
-MemoFS es un **entorno de ejecución de memoria basado en archivos para agentes de IA**, diseñado por igual para dos caminos: desarrolladores que **utilizan agentes de programación** en su día a día y desarrolladores que **construyen agentes y aplicaciones de IA**.
+MemoFS es un **entorno de ejecución de memoria basado en archivos para agentes de IA**, diseñado por igual para dos caminos: desarrolladores y equipos que **utilizan agentes de IA en su día a día** (agentes de programación, asistentes de investigación y copilotos de IDE/CLI) y desarrolladores que **construyen agentes y aplicaciones personalizadas de IA**.
 
 Todo en esta documentación se ramifica a partir de una pregunta: **¿cómo estás usando MemoFS?**
 
 ## ¿Qué camino se adapta a ti?
 
-### Uso de agentes de programación en el día a día
-Claude Code, Cursor, Codex, Copilot, opencode o cualquier otro agente de programación con IA pueden leer y escribir memoria de MemoFS automáticamente mediante MCP o ganchos de ciclo de vida (lifecycle hooks); la configuración lleva menos de 5 minutos.
+### Uso de agentes de IA en el día a día
+Claude Code, Cursor, Codex, Copilot, opencode, asistentes de investigación o cualquier otro agente de IA pueden leer y escribir memoria de MemoFS automáticamente mediante MCP o ganchos de ciclo de vida (lifecycle hooks); la configuración lleva menos de 5 minutos.
 
 → **[Encuentra tu agente en los Recetarios](/learn/cookbooks/)**
 

@@ -7,7 +7,7 @@ description: "Ingest Notion workspace pages and databases into structured MemoFS
 
 # How to ingest Notion Pages into MemoFS
 
-This cookbook shows you how to connect your team's Notion workspace or project database to MemoFS, enabling AI coding agents to recall architecture specifications, product requirements, and design docs written in Notion.
+This cookbook shows you how to connect your team's Notion workspace or project database to MemoFS, enabling AI agents to recall architecture specifications, product requirements, and knowledge docs written in Notion.
 
 ## Prerequisites
 

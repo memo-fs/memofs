@@ -124,7 +124,7 @@ const METADATA_MAP = {
 	"learn/cookbooks/hosted-mcp.md": {
 		title: "Connecting to Hosted MCP",
 		description:
-			"Connect AI coding agents to MemoFS Cloud Hosted MCP Endpoint over HTTPS with API key authentication.",
+			"Connect AI agents to MemoFS Cloud Hosted MCP Endpoint over HTTPS with API key authentication.",
 	},
 	"learn/cookbooks/jetbrains.md": {
 		title: "How to use MemoFS with JetBrains IDEs",

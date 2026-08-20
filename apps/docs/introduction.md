@@ -6,14 +6,14 @@ description: What MemoFS is, and which doc to read first depending on what you'r
 
 # What is MemoFS?
 
-MemoFS is a **file-first memory runtime for AI agents**, designed equally for two paths: developers **using coding agents** day-to-day, and developers **building AI agents**.
+MemoFS is a **file-first memory runtime for AI agents**, designed equally for two paths: developers and teams **using AI agents day-to-day** (coding agents, research assistants, and IDE/CLI copilots), and developers **building custom AI agents & applications**.
 
 Everything in these docs branches off one question: **how are you using MemoFS?**
 
 ## Which path fits you?
 
-### Using coding agents day-to-day
-Claude Code, Cursor, Codex, Copilot, opencode, or any other AI coding agent can all read and write MemoFS memory automatically via MCP or lifecycle hooks — setup takes under 5 minutes.
+### Using AI agents day-to-day
+Claude Code, Cursor, Codex, Copilot, opencode, research assistants, or any other AI agent can read and write MemoFS memory automatically via MCP or lifecycle hooks — setup takes under 5 minutes.
 
 → **[Find your agent in Cookbooks](/learn/cookbooks/)**
 

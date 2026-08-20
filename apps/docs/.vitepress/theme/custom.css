@@ -470,9 +470,34 @@
 	height: 100%;
 }
 
-@media (max-width: 959px) {
+@media (max-width: 1080px) {
 	.hero-visual-container {
 		display: none !important;
+	}
+	.VPHero.has-image .container {
+		flex-direction: column !important;
+		align-items: center !important;
+		text-align: center !important;
+		margin: 0 auto !important;
+		max-width: 100% !important;
+	}
+	.VPHero.has-image .main {
+		max-width: 760px !important;
+		width: 100% !important;
+		padding-right: 0 !important;
+		text-align: center !important;
+		margin: 0 auto !important;
+	}
+	.VPHero.has-image .actions {
+		justify-content: center !important;
+		margin: 0 auto !important;
+	}
+	.VPHero.has-image .name,
+	.VPHero.has-image .text,
+	.VPHero.has-image .tagline {
+		text-align: center !important;
+		margin-left: auto !important;
+		margin-right: auto !important;
 	}
 }
 
@@ -953,9 +978,7 @@ div[class*="language-"] pre {
 
 .roadmap-page .VPDoc .container,
 .roadmap-page .VPDoc:not(.has-sidebar) .content {
-	max-width: 1152px !important;
-	padding-left: 20px !important;
-	padding-right: 20px !important;
+	max-width: 1152px;
 }
 
 .roadmap-page .VPDoc .aside,
@@ -965,7 +988,8 @@ div[class*="language-"] pre {
 }
 
 .roadmap-page .VPDoc .content-container {
-	max-width: 100% !important;
+	max-width: 860px !important;
+	margin: 0 auto;
 }
 
 /* ===================================================================

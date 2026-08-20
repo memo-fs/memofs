@@ -9,7 +9,7 @@ const { t } = useHomeI18n();
   <section class="dual-entry-section">
     <div class="dual-entry-container">
       <div class="dual-grid">
-        <!-- Card 1: Coding Agent Users -->
+        <!-- Card 1: AI Agent Users -->
         <div class="dual-card card-user">
           <div class="card-header">
             <div class="card-badge badge-user">
@@ -75,19 +75,22 @@ const { t } = useHomeI18n();
 
 <style scoped>
 .dual-entry-section {
-  padding: 32px 24px 0;
+  padding: 28px 0 0;
   max-width: var(--tek-container);
   margin: 0 auto;
+  width: 100%;
 }
 
 .dual-entry-container {
   width: 100%;
+  margin: 0 auto;
 }
 
 .dual-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+  width: 100%;
 }
 
 .dual-card {
@@ -244,6 +247,8 @@ const { t } = useHomeI18n();
 @media (max-width: 860px) {
   .dual-grid {
     grid-template-columns: 1fr;
+    max-width: 580px;
+    margin: 0 auto;
     gap: 16px;
   }
 

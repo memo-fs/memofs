@@ -5,7 +5,7 @@ description: "Model Context Protocol (MCP) server package for exposing MemoFS me
 
 # Model Context Protocol (MCP) Server
 
-`@memofs/mcp-server` lets AI coding agents (Claude Code, Claude Desktop, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot, Zed, and any other MCP client) securely read and write MemoFS memory through standard Model Context Protocol tools.
+`@memofs/mcp-server` lets AI agents (Claude Code, Claude Desktop, Codex, Cursor, opencode, Gemini CLI, GitHub Copilot, Zed, and any other MCP client) securely read and write MemoFS memory through standard Model Context Protocol tools.
 
 ## Quick setup (recommended)
 
