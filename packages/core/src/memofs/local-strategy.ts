@@ -20,6 +20,7 @@ import {
 	type Extractor,
 } from "../graph/extraction/extractor";
 import { createFsGraphStore } from "../graph/stores/fs-graph-store";
+import { memoryLexicalDocId } from "../recall/identity";
 import type { BM25Store } from "../recall/lexical/bm25";
 import { createBM25Store } from "../recall/lexical/bm25";
 import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
@@ -250,8 +251,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				if (!metadata || typeof metadata.id !== "string") continue;
 				const id = metadata.id;
 				if (!id.startsWith("mem_")) continue;
-				if (lexicalTextById.has(id)) continue;
-				indexLexical({ id, text: section });
+				// Canonical doc id — joins the vector chunk-0 doc written by
+				// `writeMemory` so both retrieval paths hydrate to one identity.
+				const docId = memoryLexicalDocId(id);
+				if (lexicalTextById.has(docId)) continue;
+				indexLexical({ id: docId, text: section });
 			}
 		} catch (error) {
 			options.logger?.warn(

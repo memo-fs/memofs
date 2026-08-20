@@ -7,6 +7,13 @@ export const head: HeadConfig[] = [
 	// theme-color matches the true brand palette (#258acb light / #1b1b1f dark),
 	// not the stray Tailwind blue-600 value it held before.
 	["meta", { name: "theme-color", content: "#258acb" }],
+	[
+		"meta",
+		{
+			name: "msvalidate.01",
+			content: "471697018F51A070DE0EAA3B6E96851E",
+		},
+	],
 	// Type system — Sora (display + body) and JetBrains Mono (code / kickers),
 	// matching the cloud design system. Loaded via <link> to avoid a build dep.
 	["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],

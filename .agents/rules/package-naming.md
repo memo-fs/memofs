@@ -25,6 +25,7 @@ Public packages use the `@memofs/*` npm scope. The CLI is published as
 | `packages/json-rpc` | `@memofs/json-rpc` | `@memofs` | Shared JSON-RPC 2.0 protocol primitives |
 | `packages/mcp-server` | `@memofs/mcp-server` | `@memofs` | Model Context Protocol server |
 | `packages/server` | `@memofs/server` | `@memofs` | OSS-deployable hosted-memory server |
+| `packages/spec` | `@memofs/spec` | `@memofs` | Versioned JSON Schemas and structural validation for portable memory data |
 | `packages/testing` | `@memofs/testing` | `@memofs` | Shared contract tests, fixtures, and fakes |
 
 ### Internal Workspace Tooling

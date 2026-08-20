@@ -5,14 +5,14 @@ description: 什么是 MemoFS，以及根据你要构建的内容应该首先阅
 
 # 什么是 MemoFS？
 
-MemoFS 是一个**面向 AI 智能体的文件优先记忆运行时**，同样适用于两种场景：日常**使用编程智能体 (Coding Agents)** 的开发者，以及**构建 AI 智能体应用**的开发者。
+MemoFS 是一个**面向 AI 智能体的文件优先记忆运行时**，同样适用于两种场景：日常**使用 AI 智能体 (包括编程助手、研究智能体与 IDE/CLI Copilot)** 的开发者与团队，以及**构建自定义 AI 智能体应用**的开发者。
 
 本文档的一切内容都源于一个核心问题：**你打算如何使用 MemoFS？**
 
 ## 哪条路径适合你？
 
-### 日常使用编程智能体
-Claude Code、Cursor、Codex、Copilot、opencode 或其他任何 AI 编程智能体都可以通过 MCP (模型上下文协议) 或生命周期钩子自动读写 MemoFS 记忆 —— 整个配置过程不到 5 分钟。
+### 日常使用 AI 智能体
+Claude Code、Cursor、Codex、Copilot、opencode、研究智能体或其他任何 AI 智能体都可以通过 MCP (模型上下文协议) 或生命周期钩子自动读写 MemoFS 记忆 —— 整个配置过程不到 5 分钟。
 
 → **[在实战菜谱中找到你的智能体](/learn/cookbooks/)**
 

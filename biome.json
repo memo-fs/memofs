@@ -35,6 +35,15 @@
 	},
 	"overrides": [
 		{
+			"includes": ["packages/spec/schema/**/*.json"],
+			"formatter": {
+				"enabled": false
+			},
+			"linter": {
+				"enabled": false
+			}
+		},
+		{
 			"includes": ["**/components/site/brand-icons.tsx"],
 			"linter": {
 				"rules": {

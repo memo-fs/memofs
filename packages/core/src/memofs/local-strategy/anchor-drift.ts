@@ -58,6 +58,7 @@ import { isNotFoundError } from "../../core/internal/is-not-found-error";
 import type { Logger } from "../../core/types/logger";
 import type { AnchorHashCacheEntry } from "../../core/types/memory-documents";
 import type { GraphNode } from "../../graph/types";
+import { resolveMemoryId } from "../../recall/identity";
 import { sha256BytesHex } from "../sync/sha256";
 import type { AnchorRef, GraphNodeInput, RecallItem } from "../types";
 import type { LocalGraphStore } from "./types";
@@ -258,7 +259,12 @@ export async function applyAnchorDrift(args: {
 	const staleNodesToUpsert: GraphNodeInput[] = [];
 
 	for (const item of args.items) {
-		const anchor = args.anchorByMemoryId.get(item.id);
+		// Items carry canonical `{memoryId}#{ordinal}` doc ids while the
+		// anchor map is keyed by raw memory id — resolve before lookup.
+		const memoryId = resolveMemoryId(item.id, (candidate) =>
+			args.anchorByMemoryId.has(candidate),
+		);
+		const anchor = args.anchorByMemoryId.get(memoryId);
 		if (anchor === undefined) continue;
 
 		// Security: skip drift detection for anchor paths that escape the
@@ -288,7 +294,7 @@ export async function applyAnchorDrift(args: {
 		item.stale = true;
 		item.score = (item.score ?? 1) * 0.5;
 
-		const nodeIds = args.graphNodesByMemoryId.get(item.id) ?? [];
+		const nodeIds = args.graphNodesByMemoryId.get(memoryId) ?? [];
 		for (const nodeId of nodeIds) {
 			const node = args.graphNodes.get(nodeId);
 			if (node === undefined) continue;

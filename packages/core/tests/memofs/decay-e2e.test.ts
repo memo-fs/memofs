@@ -26,6 +26,7 @@ import {
 	MEMORY_EVENTS_PATH,
 	MemoFS,
 	type MemoryEvent,
+	memoryLexicalDocId,
 	readMemoryEvents,
 } from "../../src/index";
 import { UNVERIFIED_REVERIFY_MESSAGE } from "../../src/memofs/helpers/renderers";
@@ -102,7 +103,9 @@ describe("cognitive decay floor end-to-end", () => {
 			const decayed = await coldMemo.recall("build step observation", {
 				limit: 5,
 			});
-			const decayedHit = decayed.items.find((i) => i.id === result.id);
+			const decayedHit = decayed.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(
 				decayedHit,
 				"expected the backdated memory in decay recall results",
@@ -127,7 +130,9 @@ describe("cognitive decay floor end-to-end", () => {
 
 		try {
 			const recall = await coldMemo.recall("Fresh observation", { limit: 5 });
-			const hit = recall.items.find((i) => i.id === result.id);
+			const hit = recall.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(hit, "expected the fresh memory in recall results").toBeDefined();
 			expect(hit?.unverified).toBeUndefined();
 			expect(hit?.metadata?.unverified).toBeUndefined();
@@ -152,7 +157,9 @@ describe("cognitive decay floor end-to-end", () => {
 			const recall = await coldMemo.recall("build system decision", {
 				limit: 5,
 			});
-			const hit = recall.items.find((i) => i.id === result.id);
+			const hit = recall.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(
 				hit,
 				"expected the decision memory in recall results",
@@ -183,7 +190,9 @@ describe("cognitive decay floor end-to-end", () => {
 				"Boundary observation decay floor",
 				{ limit: 5 },
 			);
-			const hitUnder = recallUnder.items.find((i) => i.id === result.id);
+			const hitUnder = recallUnder.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(hitUnder).toBeDefined();
 			expect(
 				hitUnder?.unverified,
@@ -210,7 +219,9 @@ describe("cognitive decay floor end-to-end", () => {
 				"Past-floor observation decay floor",
 				{ limit: 5 },
 			);
-			const hitPast = recallPast.items.find((i) => i.id === resultPast.id);
+			const hitPast = recallPast.items.find(
+				(i) => i.id === memoryLexicalDocId(resultPast.id),
+			);
 			expect(hitPast).toBeDefined();
 			expect(hitPast?.unverified).toBe(true);
 		} finally {
@@ -231,7 +242,9 @@ describe("cognitive decay floor end-to-end", () => {
 			const recall = await coldMemo.recall("unkinded observation", {
 				limit: 5,
 			});
-			const hit = recall.items.find((i) => i.id === result.id);
+			const hit = recall.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(hit).toBeDefined();
 			expect(hit?.unverified).toBeUndefined();
 			expect(hit?.metadata?.unverified).toBeUndefined();
@@ -257,7 +270,9 @@ describe("cognitive decay floor end-to-end", () => {
 			const recall = await coldMemo.recall("Cold-start decay recovery", {
 				limit: 5,
 			});
-			const hit = recall.items.find((i) => i.id === result.id);
+			const hit = recall.items.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(
 				hit,
 				"expected cold-started recall to surface the decayed memory",
@@ -298,7 +313,9 @@ describe("cognitive decay floor end-to-end", () => {
 			// The structured items[] still carry the typed fields for programmatic
 			// consumers (the banner is the rendered-text counterpart, not a
 			// replacement for the typed payload).
-			const decayedHit = decayedContext.items?.find((i) => i.id === result.id);
+			const decayedHit = decayedContext.items?.find(
+				(i) => i.id === memoryLexicalDocId(result.id),
+			);
 			expect(decayedHit?.unverified).toBe(true);
 		} finally {
 			await coldStore.dispose();

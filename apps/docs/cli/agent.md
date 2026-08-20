@@ -1,11 +1,11 @@
 ---
 title: "CLI Agent Commands"
-description: "CLI commands for managing AgentFS-backed coding agent sessions and working memory."
+description: "CLI commands for managing AgentFS-backed AI agent sessions and working memory."
 ---
 
 # Agent Commands
 
-The `agent` command family manages local AgentFS session workspaces for coding agents (Codex, Claude Code, etc.). Sessions provide isolated scratch workspaces containing context snapshots, working progress files, and structured output files.
+The `agent` command family manages local AgentFS session workspaces for AI agents (Codex, Claude Code, custom agent swarms, etc.). Sessions provide isolated scratch workspaces containing context snapshots, working progress files, and structured output files.
 
 ## Session Architecture & Layout
 

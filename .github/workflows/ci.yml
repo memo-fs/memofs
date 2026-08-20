@@ -60,6 +60,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Verify generated schemas
+        run: |
+          pnpm build:specs
+          git diff --exit-code -- packages/spec/schema/
+
       - name: Lint packages
         run: pnpm lint:package
 

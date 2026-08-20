@@ -7,7 +7,7 @@ description: "Create pre-sync memory checkpoints and execute 1-click rollbacks u
 
 # How to rollback and checkpoint agent memory with Snapshots
 
-AI coding agents occasionally make mistakes or record bad architectural assumptions. MemoFS provides **Snapshots** — point-in-time versioned checkpoints of the entire `.memofs/` memory filesystem — enabling instant, safe rollbacks.
+AI agents occasionally make mistakes or record bad assumptions. MemoFS provides **Snapshots** — point-in-time versioned checkpoints of the entire `.memofs/` memory filesystem — enabling instant, safe rollbacks.
 
 ## Creating a Snapshot Checkpoint
 
