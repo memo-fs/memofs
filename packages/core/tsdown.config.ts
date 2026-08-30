@@ -6,4 +6,7 @@ export default pkgConfig({
 		"cloud-client": "src/cloud-client/index.ts",
 		"node-fs": "src/node-fs.ts",
 	},
+	deps: {
+		neverBundle: [/^@memofs\/adapter-/],
+	},
 });

@@ -101,9 +101,12 @@ export function createLazyLocalEmbedder(
 				});
 			}
 			// Dynamic import keeps the adapter an optional peer dependency.
-			// `import(variable)` requires the relative-specifier form to be valid
-			// for the bundler; we pass the bare specifier directly.
-			const mod = (await import(adapterModule)) as {
+			// Literal specifier allows bundlers and Vitest mock interceptors to statically track the module.
+			const mod = (
+				options.adapterModule !== undefined
+					? await import(options.adapterModule)
+					: await import("@memofs/adapter-transformers")
+			) as {
 				createTransformersEmbedder?: (opts: {
 					model: string;
 					cacheDir?: string;
