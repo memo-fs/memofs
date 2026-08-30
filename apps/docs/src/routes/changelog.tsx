@@ -13,7 +13,7 @@ import { baseOptions } from "../lib/layout.shared";
 import { createPageMeta } from "../lib/meta";
 import { createRelativeLink } from "../lib/relative-link";
 import { ROUTES, SITE } from "../lib/site";
-import { docs, source } from "../lib/source";
+import { docs } from "../lib/source";
 import type { Route } from "./+types/changelog";
 
 /** Metadata for the public changelog route. */
@@ -44,13 +44,13 @@ function getTextContent(node: React.ReactNode): string {
 /** Badge style mapping for change types across light and dark modes. */
 const TAG_BADGES: Record<string, string> = {
 	Added:
-		"bg-emerald-500/10 text-emerald-700 border-emerald-500/25 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60",
+		"bg-emerald-500/10 text-emerald-700 border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60",
 	Changed:
-		"bg-sky-500/10 text-sky-700 border-sky-500/25 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800/60",
+		"bg-sky-500/10 text-sky-700 border-sky-500/30 dark:bg-sky-950/40 dark:text-sky-400 dark:border-sky-800/60",
 	Fixed:
-		"bg-amber-500/10 text-amber-700 border-amber-500/25 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60",
+		"bg-amber-500/10 text-amber-700 border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800/60",
 	Removed:
-		"bg-rose-500/10 text-rose-700 border-rose-500/25 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60",
+		"bg-rose-500/10 text-rose-700 border-rose-500/30 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/60",
 };
 
 /** Custom heading component for release headers (H2). */
@@ -82,28 +82,28 @@ function ChangelogH2({
 	const isLatest = version === "v1.3.0-beta.3";
 
 	return (
-		<div className="relative group pt-10 first:pt-2">
-			{/* Timeline node marker */}
-			<div
-				className="absolute -left-[31px] sm:-left-[47px] top-12.5 first:top-4.5 size-4 rounded-full border-2 border-zinc-900 bg-white dark:border-white dark:bg-black group-hover:scale-125 transition-transform"
+		<div className="not-prose relative mt-10 first:mt-0 pt-1">
+			{/* Timeline node marker - placed at exact pixel height aligned with h2 text line */}
+			<span
+				className="absolute -left-[30.5px] sm:-left-[46.5px] top-[7px] size-3 rounded-full border-2 border-zinc-900 bg-white dark:border-zinc-100 dark:bg-zinc-950 ring-4 ring-white dark:ring-black"
 				aria-hidden="true"
 			/>
-			<div className="flex flex-wrap items-center gap-3">
+			<div className="flex flex-wrap items-center gap-2 sm:gap-2.5 leading-none">
 				<h2
 					id={id}
-					className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white m-0 scroll-mt-24"
+					className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-white m-0 p-0 leading-none scroll-mt-24"
 					{...props}
 				>
 					{version}
 				</h2>
 				{date && (
-					<span className="rounded-full border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 px-2.5 py-0.5 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+					<span className="inline-flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-900/70 px-2 py-0.5 font-mono text-[11px] text-zinc-500 dark:text-zinc-400 leading-none">
 						{date}
 					</span>
 				)}
 				{isLatest && (
-					<span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-						Latest Release
+					<span className="inline-flex items-center rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 leading-none">
+						Latest
 					</span>
 				)}
 			</div>
@@ -120,7 +120,7 @@ function ChangelogH3({
 	return (
 		<h3
 			id={id}
-			className="mt-6 mb-2 font-mono text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-200 border-b border-dashed border-zinc-200 dark:border-zinc-800/80 pb-1.5 scroll-mt-24"
+			className="mt-4 mb-2 font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 scroll-mt-24"
 			{...props}
 		>
 			{children}
@@ -139,24 +139,36 @@ function ChangelogH4({
 
 	if (badgeStyle) {
 		return (
-			<h4 id={id} className="mt-4 mb-2 flex items-center" {...props}>
+			<div className="not-prose mt-2.5 mb-1 flex items-center">
 				<span
-					className={`inline-flex items-center rounded border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider leading-none shrink-0 ${badgeStyle}`}
+					className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider leading-none border ${badgeStyle}`}
 				>
 					{rawText}
 				</span>
-			</h4>
+			</div>
 		);
 	}
 
 	return (
 		<h4
 			id={id}
-			className="mt-4 mb-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 scroll-mt-24"
+			className="mt-2.5 mb-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 scroll-mt-24"
 			{...props}
 		>
 			{children}
 		</h4>
+	);
+}
+
+/** Custom list container for changelog entries. */
+function ChangelogUl({
+	children,
+	...props
+}: React.ComponentPropsWithoutRef<"ul">) {
+	return (
+		<ul className="not-prose mt-1 mb-4 space-y-1 list-none pl-0" {...props}>
+			{children}
+		</ul>
 	);
 }
 
@@ -167,15 +179,40 @@ function ChangelogLi({
 }: React.ComponentPropsWithoutRef<"li">) {
 	return (
 		<li
-			className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 my-1"
+			className="flex items-start gap-2 text-xs sm:text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300"
 			{...props}
 		>
 			<span
-				className="mt-1.5 size-1.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-600"
+				className="mt-1.5 size-1 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500"
 				aria-hidden="true"
 			/>
-			<span className="flex-1">{children}</span>
+			<span className="flex-1 min-w-0">{children}</span>
 		</li>
+	);
+}
+
+/** Custom paragraph styling. */
+function ChangelogP({
+	children,
+	...props
+}: React.ComponentPropsWithoutRef<"p">) {
+	return (
+		<p
+			className="mt-2 mb-3 text-xs sm:text-sm leading-normal text-zinc-600 dark:text-zinc-400"
+			{...props}
+		>
+			{children}
+		</p>
+	);
+}
+
+/** Custom horizontal divider. */
+function ChangelogHr(props: React.ComponentPropsWithoutRef<"hr">) {
+	return (
+		<hr
+			className="my-6 border-t border-dashed border-zinc-200 dark:border-zinc-800"
+			{...props}
+		/>
 	);
 }
 
@@ -188,31 +225,34 @@ export default function ChangelogPage() {
 	return (
 		<HomeLayout {...baseOptions()}>
 			<div className="relative w-full bg-white text-zinc-900 transition-colors duration-300 dark:bg-black dark:text-white">
-				<header className="border-b border-dashed border-zinc-200 bg-zinc-50/50 py-16 dark:border-zinc-800/80 dark:bg-zinc-950/40 sm:py-20">
-					<div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+				<header className="border-b border-dashed border-zinc-200 bg-zinc-50/50 py-10 dark:border-zinc-800/80 dark:bg-zinc-950/40 sm:py-14">
+					<div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
 						<span className="inline-flex items-center rounded border border-dashed border-zinc-300 bg-zinc-100 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
 							Release History
 						</span>
-						<h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl">
+						<h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-white">
 							Changelog
 						</h1>
-						<p className="mt-4 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-base">
+						<p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
 							All notable changes, architectural milestones, bug fixes, and
 							feature additions across all {SITE.name} workspace packages.
 						</p>
 					</div>
 				</header>
 
-				<main className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
-					<div className="relative border-l border-dashed border-zinc-300 dark:border-zinc-800 pl-6 sm:pl-10 space-y-4">
+				<main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+					<div className="relative border-l border-dashed border-zinc-300 dark:border-zinc-800 pl-6 sm:pl-10">
 						<DocsBody className="max-w-none">
 							<Mdx
 								components={useMDXComponents({
-									a: createRelativeLink(source, { url: ROUTES.changelog }),
+									a: createRelativeLink({ url: ROUTES.changelog }),
 									h2: ChangelogH2,
 									h3: ChangelogH3,
 									h4: ChangelogH4,
+									ul: ChangelogUl,
 									li: ChangelogLi,
+									p: ChangelogP,
+									hr: ChangelogHr,
 								})}
 							/>
 						</DocsBody>
