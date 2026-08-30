@@ -1,76 +1,58 @@
-.opencode
 # Dependencies
 node_modules
 .pnp
 .pnp.js
 .pnpm-store
-.mcp.json
 
-# Local env files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Testing
-coverage
-benchmark-results
+# Build & Cache Outputs
+dist/
+build/
+.turbo/
+.wrangler/
+.cache/
+coverage/
+benchmark-results/
 benchmarks/reports/*
 !benchmarks/reports/.gitkeep
 
-# Turbo
-.turbo
+# Environment & Credentials
+.env
+.env.*
+*.pem
 
+# Operating System
+.DS_Store
+Thumbs.db
 
-build
-dist
-
-
-# Debug
+# Logs & Debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Misc
-.DS_Store
-*.pem
-
-# Editor / agent tool config (local-only, machine-specific)
-# opencode.json
-# skills-lock.json
+# Editor & AI Tool Configs (Local / Machine-Specific)
 .vscode/
+.claude/
+.codex/
+.cursor/
+.opencode/
+.mcp.json
+opencode.json
+skills-lock.json
+CLAUDE.md
+.agents/skills/
 
-# Agent runtime data
+# Memory Runtime Data (Local Stores)
+.memofs/
 agent-sessions/
-
-# Example agent runtime stores (demo memory created by examples/*)
 examples/**/.memofs/
-
-# Sub-package runtime data (regenerable; root .memofs/ is the project's own store)
 packages/**/.memofs/
 
-# at run time from an opaque secretRef; this local file is a dev convenience only.
-.memofs/secrets.json
-
-# Wrangler build cache
-.wrangler/
-
-# E2E model cache (Transformers tiny model, ~100MB quantized) — local only
-.cache/
-.cache/e2e-models/
-packages/testing/.cache/
-packages/testing/.cache/e2e-models/
-
-# Internal docs - not tracked
-docs/adr/
-docs/agents/
-docs/architecture/
-docs/CONTEXT.md
+# Internal Docs & Experiments
+CONTEXT.md
+teasers.md
+adr/
+agents/
+architecture/
 internal/
-skills-lock.json
-.agents/skills/
 test-demo/
-
-live_memofs_demo.mp4
-live_memofs_demo.tape

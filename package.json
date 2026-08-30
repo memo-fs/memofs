@@ -1,5 +1,5 @@
 {
-	"name": "memofs/dev",
+	"name": "memofs/root",
 	"version": "0.0.1",
 	"private": true,
 	"repository": {
@@ -31,6 +31,9 @@
 		"docs:dev": "pnpm --filter @memofs/docs dev",
 		"docs:build": "pnpm --filter @memofs/docs build",
 		"docs:preview": "pnpm --filter @memofs/docs preview",
+		"docs:backup": "bash scripts/backup-internal-docs.sh",
+		"docs:restore": "bash scripts/restore-internal-docs.sh",
+		"docs:setup-hooks": "chmod +x scripts/backup-internal-docs.sh scripts/restore-internal-docs.sh .git/hooks/post-commit",
 		"packages:build": "turbo run build --filter=./packages/*",
 		"packages:test": "turbo run test:run --filter=./packages/*",
 		"release:dry-run": "pnpm -r publish --dry-run",

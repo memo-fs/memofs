@@ -308,18 +308,21 @@ export function createToolDefinitions(
 			name: "memofs.remember",
 			title: "Remember MemoFS Memory",
 			description:
-				"Persist a durable fact so future agents benefit — call this WITHOUT being asked whenever you discover a decision, constraint, preference, or architectural fact. Use kind to classify (decision/constraint/goal/preference/reference/summary/note). Set confidence to reflect certainty. Hosts may require user consent; never store secrets. This is what makes memory accumulate intelligently.",
+				'Persist a durable, high-signal fact so future agents benefit. Quality bar: one fact per note, and only facts that would change a future task\'s behavior — root causes, contracts, conventions, decisions. Use durable kinds (decision/constraint/goal/preference/reference) for facts; note/summary are transient scratch that is never indexed. Before writing, recall what is already stored and update or supersede an existing memory instead of appending a near-duplicate — the runtime skips writes that near-duplicate an indexed memory. Never record transcripts, step logs, or verification output ("tests pass") — only the durable residue. Call this without being asked when you discover such a fact; set confidence to reflect certainty. Hosts may require user consent; never store secrets.',
 			safety: "write",
 			annotations: {
 				readOnlyHint: false,
 				destructiveHint: false,
-				idempotentHint: false,
+				idempotentHint: true,
 				openWorldHint: false,
 			},
 			inputSchema: objectSchema(
 				{
 					title: stringSchema("Optional title.", 512),
-					content: stringSchema("Memory note content.", 100_000),
+					content: stringSchema(
+						"One high-signal fact — not a transcript, step log, or verification output.",
+						100_000,
+					),
 					kind: kindSchema,
 					confidence: numberSchema("Confidence score.", 0, 1),
 					source: stringSchema("Source actor or origin label.", 512),

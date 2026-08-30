@@ -7,6 +7,8 @@ These are enforced by Biome — do not fight them:
 - **Imports**: auto-organized by Biome assist
 - **Trailing commas**: yes
 - **Semicolons**: yes
+- **File Length Limit**: files should not exceed 500 LOC (extract cohesive sub-modules or helpers when approaching this limit)
+
 
 ## TSDoc Documentation Rules
 

@@ -1,20 +1,41 @@
-# MemoFS — Agent Rules
+# MemoFS — Agent Guidelines
 
-This file is the bootstrap for every agent working in this repo, and it is binding, not advisory. **All project knowledge lives in MemoFS — use MCP tools, not this file.** If something you already believe about this codebase isn't confirmed there, treat it as unverified until MemoFS says otherwise.
+MemoFS is the open-source, file-first memory runtime for AI agents.
 
-## MemoFS Memory (**REQUIRED** — no exceptions)
+## Monorepo Architecture
 
-This repo uses MemoFS as its single source of truth for project knowledge.
-At the **start of every task**, agents **MUST**:
+- **Package Manager & Monorepo**: `pnpm` workspace with Turborepo.
+- **Package Scopes**:
+  - `@memofs/*`: Public, published packages (`packages/*`).
+  - `@repo/*`: Private internal tooling and build configs (`tooling/*`).
+- **Core Runtime & Entrypoints (`@memofs/core`)**:
+  - Universal/Edge entrypoint: `@memofs/core` (no Node.js-specific dependencies).
+  - Node.js filesystem entrypoint: `@memofs/core/node-fs`.
+  - Cloud replication client: `@memofs/core/cloud-client`.
+- **Tooling Stack**: TypeScript, Biome for formatting and linting, tsdown / rolldown for builds, Vitest for testing.
 
-1. **Load context** — call the MemoFS `context` tool (e.g. `memofs.context`) with the task description to load core memory, notes, and recall, before your first file read or edit this session.
-2. **Look up details** — call the MemoFS `recall` tool (e.g. `memofs.recall`) before acting on anything not already covered by loaded context. If you're not certain it's covered, that counts as "not covered" — call it.
-3. **Adhere to memory** — treat constraints, decisions, and references returned as binding. If a task conflicts with them, stop and surface the conflict instead of quietly choosing your own approach.
-4. **Persist new facts** — before considering any task finished, call the MemoFS `remember` tool (e.g. `memofs.remember`) for every new fact, decision, or constraint discovered along the way — root causes, interface changes, conventions you had to infer.
+## Core Behavioral Principles
 
-**MUST NOT:**
-- Answer questions about this codebase's conventions, architecture, or past decisions from assumption or general knowledge instead of MemoFS.
-- Skip step 4 because a task felt too small to be worth persisting.
-- Continue silently if a MemoFS tool errors or is unavailable — stop and tell the user instead of proceeding without memory.
+- **Positioning & Terminology**: MemoFS is a file-first memory runtime for **AI agents in general** (not exclusively coding agents). Always balance framing 50/50 between **users of AI agents** (running agents day-to-day via MCP or lifecycle hooks) and **builders of AI agents** (building agents and frameworks with `@memofs/core` or `@memofs/server`).
+- **Facts Over Assumptions**: Always inspect source code and verify contracts directly. Do not rely on unverified assumptions.
+- **Package Boundaries**: Strictly preserve package isolation. Do not import private `@repo/*` packages into public `@memofs/*` distributions.
+- **Code Style & Modularity**: Keep source and test files cohesive and modular (target `<= 500 LOC` per file). Use structured logging rather than raw `console.log` in library code.
+- **Build Configurations**: Reuse shared build configs from `@repo/tsdown` (`pkgConfig`) rather than duplicating build flags.
+- **Clean Git Hygiene**: Never commit secrets, API keys, `.env` files, or gitignored runtime data.
 
-**Before ending any task**, confirm: did anything warrant a `recall` call, and did you make it? Did you learn anything new that needs `remember`? Resolve both before finishing.
+## Workspace Rules
+
+- [Monorepo structure](./.agents/rules/monorepo-structure.md)
+- [Package naming](./.agents/rules/package-naming.md)
+- [Package boundaries](./.agents/rules/package-boundaries.md)
+- [Package build rules](./.agents/rules/package-build-rules.md)
+- [Adding a new package](./.agents/rules/adding-new-package.md)
+- [Code style](./.agents/rules/code-style.md)
+- [TypeScript rules](./.agents/rules/typescript-rules.md)
+- [Technology stack](./.agents/rules/technology-stack.md)
+- [Development commands](./.agents/rules/development-commands.md)
+- [Git conventions](./.agents/rules/git-conventions.md)
+- [Testing](./.agents/rules/testing.md)
+- [Testing requirements](./.agents/rules/testing-requirements.md)
+- [Core concepts](./.agents/rules/core-concepts.md)
+

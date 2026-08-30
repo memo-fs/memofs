@@ -34,6 +34,7 @@ export class FakeEmbedder implements MinimalEmbedder {
 			embeddings: input.texts.map((text, index) => ({
 				text,
 				index,
+				model: "fake-embedder",
 				dimensions: this.dimensions,
 				embedding: createVector(this.dimensions, text.length + index),
 			})),

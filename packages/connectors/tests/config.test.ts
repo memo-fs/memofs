@@ -142,6 +142,17 @@ describe("validateConnectorsFile", () => {
 		expect(file.connectors).toEqual([]);
 	});
 
+	it("tolerates a top-level $schema key (editor autocomplete reference)", () => {
+		const file = validateConnectorsFile({
+			$schema: "https://docs.memofs.dev/schema/connectors.json",
+			connectors: [
+				{ id: "x", type: "github", enabled: true, secretRef: "ss_a" },
+			],
+		});
+		expect(file.connectors).toHaveLength(1);
+		expect(file.connectors[0]?.id).toBe("x");
+	});
+
 	it("rejects a non-object row", () => {
 		expect(() => validateConnectorsFile({ connectors: ["nope"] })).toThrow(
 			/object/i,

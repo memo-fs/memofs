@@ -70,6 +70,7 @@ export interface MinimalEmbedder {
 			embedding: number[];
 			index?: number;
 			dimensions?: number;
+			model?: string;
 		}>;
 		model?: string;
 		usage?: Record<string, unknown>;
@@ -87,6 +88,7 @@ export interface MinimalEmbedder {
 		embedding: number[];
 		index?: number;
 		dimensions?: number;
+		model?: string;
 	}>;
 }
 
