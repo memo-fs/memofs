@@ -36,6 +36,7 @@ async function createTempRoot(): Promise<{
 /** Shared scratch dirs cleaned up after each test. */
 const dirsToClean: string[] = [];
 afterEach(async () => {
+	vi.unstubAllEnvs();
 	while (dirsToClean.length > 0) {
 		const dir = dirsToClean.pop();
 		if (dir) await rm(dir, { recursive: true, force: true });
@@ -43,6 +44,7 @@ afterEach(async () => {
 });
 
 beforeEach(() => {
+	vi.unstubAllEnvs();
 	createTransformersEmbedder.mockReset();
 	createTransformersEmbedder.mockImplementation(() => {
 		throw new Error("transformers adapter unavailable");
