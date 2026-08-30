@@ -9,7 +9,7 @@ import { ProblemSection } from "../components/problem-section";
 import { RuntimesSection } from "../components/runtimes-section";
 import { baseOptions } from "../lib/layout.shared";
 import { createPageMeta } from "../lib/meta";
-import { ROUTES } from "../lib/site";
+import { ROUTES, SITE } from "../lib/site";
 import type { Route } from "./+types/index";
 
 export const meta: Route.MetaFunction = () => {
@@ -57,7 +57,7 @@ export default function HomePage() {
 			<div className="relative flex min-h-[calc(100dvh-3.5rem)] w-full flex-col justify-center overflow-hidden bg-white text-zinc-900 dark:bg-black dark:text-white px-4 sm:px-6 lg:px-8 py-12 md:py-0 transition-colors duration-300">
 				{/* Ambient background glow */}
 				<div
-					className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[350px] w-[650px] rounded-full bg-zinc-200/60 dark:bg-zinc-900/30 blur-[120px] -z-10"
+					className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-87.5 w-162.5 rounded-full bg-zinc-200/60 dark:bg-zinc-900/30 blur-[120px] -z-10"
 					aria-hidden="true"
 				/>
 
@@ -106,7 +106,7 @@ export default function HomePage() {
 
 						{/* Headline Section (Full Width) */}
 						<div className="px-4 py-8 text-center sm:px-8 sm:py-10 md:py-12">
-							<h1 className="mx-auto max-w-4xl text-balance text-3xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl lg:text-6xl">
+							<h1 className="mx-auto max-w-4xl text-balance text-3xl font-bold font-sans tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl lg:text-6xl">
 								The File-First Memory Runtime for AI Agents
 							</h1>
 						</div>
@@ -122,9 +122,9 @@ export default function HomePage() {
 
 						{/* Subtitle Section (Full Width) */}
 						<div className="px-4 py-5 text-center sm:px-8 sm:py-6 md:py-8">
-							<p className="mx-auto max-w-2xl text-balance text-xs sm:text-sm md:text-base text-zinc-600 dark:text-zinc-400 leading-relaxed font-normal">
+							<p className="mx-auto max-w-2xl text-balance md:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
 								Store decisions as simple markdown files —{" "}
-								<strong className="font-semibold text-zinc-900 dark:text-zinc-100">
+								<strong className="text-zinc-900 dark:text-zinc-100">
 									versioned, portable, and always there when the next session
 									starts
 								</strong>
@@ -156,13 +156,13 @@ export default function HomePage() {
 
 								<div className="flex flex-wrap items-center justify-center gap-3">
 									<Link
-										to="/docs/introduction"
+										to={ROUTES.introduction}
 										className="inline-flex h-9 sm:h-10 items-center justify-center rounded bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-white dark:text-black dark:hover:bg-zinc-200 px-4 sm:px-5 text-xs sm:text-sm font-medium transition-colors shadow-sm"
 									>
 										Get Started
 									</Link>
 									<a
-										href="https://github.com/memo-fs/memofs"
+										href={SITE.githubUrl}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="inline-flex h-9 sm:h-10 items-center justify-center rounded border border-zinc-300 bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white px-4 sm:px-5 text-xs sm:text-sm font-medium transition-colors"

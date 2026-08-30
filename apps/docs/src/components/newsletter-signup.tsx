@@ -107,7 +107,7 @@ export function NewsletterSignup({
 			<div
 				className={`w-full border-b border-dashed border-zinc-200 pb-10 dark:border-zinc-800/80 ${className}`}
 			>
-				<div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+				<div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 					<div className="max-w-xl">
 						<div className="flex items-center gap-2">
 							<span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />

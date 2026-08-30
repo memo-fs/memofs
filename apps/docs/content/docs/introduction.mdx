@@ -15,7 +15,7 @@ Whether you are a developer **using AI coding agents day-to-day** (Claude Code, 
 <Cards>
   <Card
     title="Using AI Coding Agents"
-    href="/docs/cookbooks"
+    href="/docs/mcp"
     description="Equip Claude Code, Cursor, Codex, Copilot, Cline, or Aider with automatic memory via MCP."
   />
   <Card
@@ -41,47 +41,34 @@ Whether you are a developer **using AI coding agents day-to-day** (Claude Code, 
 
 Every effective AI agent follows the four-phase MemoFS memory cycle:
 
-<div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-blue-500">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="flex size-6 items-center justify-center rounded bg-blue-500/10 text-xs font-bold text-blue-500">1</span>
-      <h3 className="text-base font-semibold">Load Context</h3>
-    </div>
-    <div className="text-sm text-fd-muted-foreground mb-3">
-      At the start of every session or task, the agent calls <code>memofs.context</code> to load core rules, architecture constraints, and recent briefing fragments.
-    </div>
-  </div>
+<Cards>
+  <Card
+    icon={<div className='size-0 font-bold text-center'>1</div>}
+    title="1. Load Context"
+  >
+    At the start of every session or task, the agent calls <code>memofs.context</code> to load core rules, architecture constraints, and recent briefing fragments.
+  </Card>
+  <Card
+    icon={<div className='size-4 font-bold text-center'>2</div>}
+    title="Recall Past Decisions"
+  >
+    Before modifying code or making assumptions, the agent queries <code>memofs.recall</code> to surface exact past reasoning, schemas, or prior bug fixes.
+  </Card>
+  <Card
+    icon={<div className='size-4 font-bold text-center'>3</div>}
+    title="Execute With Memory"
+  >
+    The agent performs the code modifications, refactors, or tests while strictly adhering to recalled decisions and repository constraints.
+  </Card>
+  <Card
+    icon={<div className='size-4 font-bold text-center'>4</div>}
+    title="Persist Discoveries"
+  >
+    Before ending the turn, the agent will write newly learned facts, root causes, or architectural patterns into <code>.memofs/</code>.
+  </Card>
+</Cards>
 
-  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-purple-500">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="flex size-6 items-center justify-center rounded bg-purple-500/10 text-xs font-bold text-purple-500">2</span>
-      <h3 className="text-base font-semibold">Recall Past Decisions</h3>
-    </div>
-    <div className="text-sm text-fd-muted-foreground mb-3">
-      Before modifying code or making assumptions, the agent queries <code>memofs.recall</code> to surface exact past reasoning, schemas, or prior bug fixes.
-    </div>
-  </div>
 
-  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-amber-500">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="flex size-6 items-center justify-center rounded bg-amber-500/10 text-xs font-bold text-amber-500">3</span>
-      <h3 className="text-base font-semibold">Execute With Memory</h3>
-    </div>
-    <div className="text-sm text-fd-muted-foreground mb-3">
-      The agent performs the code modifications, refactors, or tests while strictly adhering to recalled decisions and repository constraints.
-    </div>
-  </div>
-
-  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-emerald-500">
-    <div className="flex items-center gap-2 mb-2">
-      <span className="flex size-6 items-center justify-center rounded bg-emerald-500/10 text-xs font-bold text-emerald-500">4</span>
-      <h3 className="text-base font-semibold">Persist Discoveries</h3>
-    </div>
-    <div className="text-sm text-fd-muted-foreground mb-3">
-      Before ending the turn, the agent calls <code>memofs.remember</code> to write newly learned facts, root causes, or architectural patterns into <code>.memofs/</code>.
-    </div>
-  </div>
-</div>
 
 ---
 

@@ -1,6 +1,6 @@
 import { createFromSource } from "fumadocs-core/search/server";
 import { source } from "../lib/source";
-import type { Route } from "./+types/api.search";
+import type { Route } from "./+types/search";
 
 const server = createFromSource(source);
 

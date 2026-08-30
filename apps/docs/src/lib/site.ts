@@ -12,9 +12,12 @@ export const SITE = {
 	githubUrl: "https://github.com/memo-fs/memofs",
 	xUrl: "https://x.com/memofsdev",
 	xHandle: "@memofsdev",
+	wist: "https://wist.memofs.dev",
+	engram: "https://engram.memofs.dev",
+	engine: "https://engine.memofs.dev",
 	defaultImagePath: "/og-default.png",
 	description:
-		"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready.",
+		"File-first memory runtime for AI agents. Store decisions as markdown in your project. Local by default, cloud-ready.",
 } as const;
 
 /** Canonical internal routes shared by navigation, metadata, and prerendering. */
@@ -27,7 +30,6 @@ export const ROUTES = {
 	cli: "/docs/cli",
 	server: "/docs/server",
 	api: "/docs/api",
-	cookbooks: "/cookbooks",
 	changelog: "/changelog",
 	llms: "/llms.txt",
 	llmsFull: "/llms-full.txt",
@@ -40,19 +42,12 @@ export const STATIC_PRERENDER_PATHS = [
 	ROUTES.llms,
 	ROUTES.llmsFull,
 	ROUTES.docs,
-	ROUTES.cookbooks,
 	ROUTES.changelog,
 ] as const;
 
 /** Primary navigation rendered by the Fumadocs layouts. */
 export const PRIMARY_NAVIGATION = [
 	{ text: "Docs", url: ROUTES.docs, active: "url", on: "all" },
-	{
-		text: "Cookbooks",
-		url: ROUTES.cookbooks,
-		active: "nested-url",
-		on: "all",
-	},
 	{
 		text: "Changelog",
 		url: ROUTES.changelog,
@@ -95,13 +90,23 @@ export const FOOTER_NAVIGATION = [
 	{
 		title: "Resources & AI",
 		links: [
-			{ label: "Cookbooks", href: ROUTES.cookbooks },
 			{ label: "Changelog", href: ROUTES.changelog },
 			{ label: "API Reference", href: ROUTES.api },
 			{ label: "llms.txt", href: ROUTES.llms, external: true },
 			{ label: "llms-full.txt", href: ROUTES.llmsFull, external: true },
 			{ label: "GitHub", href: SITE.githubUrl, external: true },
-			{ label: "X (@memofsdev)", href: SITE.xUrl, external: true },
+			{ label: "X", href: SITE.xUrl, external: true },
+		],
+	},
+	{
+		title: "Products",
+		links: [
+			{ label: "MemoFS", href: "/" },
+			{ label: "MemoFS CLoud", href: SITE.productUrl, external: true },
+			// { label: "Wist", href: SITE.wist, external: true },
+			// { label: "Wist Code", href: SITE.wist, external: true },
+			// { label: "Wist CI", href: SITE.wist, external: true },
+			// { label: "Engram", href: SITE.engram, external: true },
 		],
 	},
 ] as const;

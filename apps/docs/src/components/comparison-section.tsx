@@ -2,7 +2,7 @@ export function ComparisonSection() {
 	const rows = [
 		{
 			feature: "Where memory lives",
-			memofs: "Plain markdown files in your repo",
+			memofs: "Plain markdown files in your project",
 			others: "Locked in a proprietary cloud database",
 		},
 		{
@@ -69,7 +69,7 @@ export function ComparisonSection() {
 										<td className="py-4 px-6 font-medium text-zinc-800 dark:text-zinc-300">
 											{row.feature}
 										</td>
-										<td className="py-4 px-6 font-semibold text-emerald-600 dark:text-emerald-400">
+										<td className="py-4 px-6 font-semibold">
 											<span className="mr-2">✓</span>
 											{row.memofs}
 										</td>

@@ -6,7 +6,6 @@ import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import { TypeTable } from "fumadocs-ui/components/type-table";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
-import { CookbookIndex } from "./cookbook-index";
 import { DocsCategory } from "./docs-category";
 import { Mermaid } from "./mermaid";
 
@@ -16,7 +15,6 @@ export function getMDXComponents(components?: MDXComponents) {
 		Accordion,
 		Accordions,
 		Callout,
-		CookbookIndex,
 		DocsCategory,
 		File,
 		Files,

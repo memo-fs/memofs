@@ -11,13 +11,13 @@ const linkClassName =
 export function Footer() {
 	return (
 		<footer className="relative w-full border-t border-dashed border-zinc-300/90 dark:border-zinc-800/80 bg-white text-zinc-600 dark:bg-black dark:text-zinc-400 transition-colors">
-			<div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+			<div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
 				<div className="mb-12">
 					<NewsletterSignup variant="strip" />
 				</div>
 
-				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
-					<div className="flex flex-col space-y-4">
+				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+					<div className="flex flex-col space-y-2">
 						<Link to={ROUTES.home} className="flex items-center gap-2.5">
 							<img
 								src="/logo.svg"
@@ -30,6 +30,14 @@ export function Footer() {
 								{SITE.name}
 							</span>
 						</Link>
+						<div>
+							<a
+								href="mailto:hello@memofs.dev"
+								className="underline underline-offset-2"
+							>
+								hello@memofs.dev
+							</a>
+						</div>
 						<p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
 							The file-first memory runtime for AI agents. Local by default,
 							git-branchable, and cloud-ready.

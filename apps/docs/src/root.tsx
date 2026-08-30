@@ -39,7 +39,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				<RootProvider search={{ options: { api: "/api/search" } }}>
+				<RootProvider search={{ options: { api: "/search" } }}>
 					{children}
 				</RootProvider>
 				<ScrollRestoration />

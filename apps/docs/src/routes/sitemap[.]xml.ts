@@ -7,7 +7,6 @@ export function loader() {
 	const urls = [
 		{ loc: toSiteUrl(ROUTES.home), changefreq: "daily", priority: "1.0" },
 		{ loc: toSiteUrl(ROUTES.docs), changefreq: "daily", priority: "0.9" },
-		{ loc: toSiteUrl(ROUTES.cookbooks), changefreq: "daily", priority: "0.9" },
 		{ loc: toSiteUrl(ROUTES.changelog), changefreq: "weekly", priority: "0.8" },
 		{ loc: toSiteUrl(ROUTES.llms), changefreq: "weekly", priority: "0.6" },
 		{ loc: toSiteUrl(ROUTES.llmsFull), changefreq: "weekly", priority: "0.6" },
