@@ -1,23 +1,11 @@
 import { generate as DefaultImage } from "fumadocs-ui/og/takumi";
 import { ImageResponse } from "takumi-js/response";
-import { source } from "~/lib/source";
+import { resolveDocPage } from "~/lib/source";
 import type { Route } from "./+types/$";
 
 export async function loader({ params }: Route.LoaderArgs) {
-	let rawSlug = (params as Record<string, string | undefined>)["*"] || "";
-	if (rawSlug.endsWith(".data")) {
-		rawSlug = rawSlug.slice(0, -5);
-	}
-	const slugs = rawSlug
-		.split("/")
-		.filter((v) => v.length > 0 && v !== ".data")
-		.slice(0, -1); // strip trailing 'image.webp'
-
-	const page = source.getPage(slugs);
-
-	if (!page) {
-		throw new Response("Not Found", { status: 404 });
-	}
+	const rawSlug = (params as Record<string, string | undefined>)["*"] || "";
+	const { page } = resolveDocPage(rawSlug, { stripTrailingImage: true });
 
 	return new ImageResponse(
 		<DefaultImage

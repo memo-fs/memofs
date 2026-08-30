@@ -4,6 +4,14 @@ import { Footer } from "~/components/footer";
 import { baseOptions } from "~/lib/layout.shared";
 import type { Route } from "./+types/changelog";
 
+export async function loader() {
+	return {};
+}
+
+export async function clientLoader() {
+	return {};
+}
+
 export const meta: Route.MetaFunction = () => {
 	const pageTitle = "Changelog & Release Notes — MemoFS";
 	const description =
@@ -340,7 +348,7 @@ export default function ChangelogPage() {
 								Release History
 							</span>
 							<h1 className="mt-4 text-3xl font-bold tracking-tight text-zinc-900 dark:text-white sm:text-5xl">
-								MemoFS Changelog
+								Changelog
 							</h1>
 							<p className="mt-4 text-sm sm:text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
 								All notable changes, architectural milestones, bug fixes, and

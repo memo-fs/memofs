@@ -10,6 +10,14 @@ import { RuntimesSection } from "~/components/runtimes-section";
 import { baseOptions } from "~/lib/layout.shared";
 import type { Route } from "./+types/index";
 
+export async function loader() {
+	return {};
+}
+
+export async function clientLoader() {
+	return {};
+}
+
 export const meta: Route.MetaFunction = () => {
 	const pageTitle = "MemoFS — The File-First Memory for AI Agents";
 	const description =

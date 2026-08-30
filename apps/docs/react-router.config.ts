@@ -12,6 +12,7 @@ export default {
 		paths.add("/sitemap.xml");
 		paths.add("/llms.txt");
 		paths.add("/llms-full.txt");
+		paths.add("/docs");
 		paths.add("/cookbooks");
 		paths.add("/changelog");
 

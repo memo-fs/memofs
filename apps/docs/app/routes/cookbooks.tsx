@@ -5,6 +5,14 @@ import { Footer } from "~/components/footer";
 import { baseOptions } from "~/lib/layout.shared";
 import type { Route } from "./+types/cookbooks";
 
+export async function loader() {
+	return {};
+}
+
+export async function clientLoader() {
+	return {};
+}
+
 export const meta: Route.MetaFunction = () => {
 	const pageTitle = "Cookbooks & Integration Recipes — MemoFS";
 	const description =

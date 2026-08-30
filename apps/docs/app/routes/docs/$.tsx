@@ -16,28 +16,17 @@ import { getLLMText } from "~/lib/get-llm-text";
 import { baseOptions } from "~/lib/layout.shared";
 import { createRelativeLink } from "~/lib/relative-link";
 import { getPageImagePath } from "~/lib/shared";
-import { docs, source } from "~/lib/source";
+import { docs, resolveDocPage, source } from "~/lib/source";
 import type { Route } from "./+types/$";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
-	let slugStr = (params as Record<string, string | undefined>)["*"] ?? "";
+	const rawSlug = (params as Record<string, string | undefined>)["*"] ?? "";
 	const isMarkdownRequested =
-		slugStr.endsWith(".md") ||
-		slugStr.endsWith(".mdx") ||
+		rawSlug.endsWith(".md") ||
+		rawSlug.endsWith(".mdx") ||
 		request.headers.get("Accept")?.includes("text/markdown");
 
-	if (slugStr.endsWith(".data")) {
-		slugStr = slugStr.slice(0, -5);
-	}
-	if (slugStr.endsWith(".mdx")) {
-		slugStr = slugStr.slice(0, -4);
-	} else if (slugStr.endsWith(".md")) {
-		slugStr = slugStr.slice(0, -3);
-	}
-
-	const slugs = slugStr.split("/").filter((v) => v.length > 0 && v !== ".data");
-	const page = source.getPage(slugs);
-	if (!page) throw new Response("Not found", { status: 404 });
+	const { page } = resolveDocPage(rawSlug);
 
 	if (isMarkdownRequested) {
 		const markdown = await getLLMText(page);
@@ -81,6 +70,20 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 		description: page.data.description,
 		imagePath: getPageImagePath(page.slugs),
 		lastModified,
+		pageTree: await source.serializePageTree(source.getPageTree()),
+	};
+}
+
+export async function clientLoader({ params }: Route.ClientLoaderArgs) {
+	const rawSlug = (params as Record<string, string | undefined>)["*"] ?? "";
+	const { page } = resolveDocPage(rawSlug);
+
+	return {
+		path: page.path,
+		url: page.url,
+		title: page.data.title,
+		description: page.data.description,
+		imagePath: getPageImagePath(page.slugs),
 		pageTree: await source.serializePageTree(source.getPageTree()),
 	};
 }
