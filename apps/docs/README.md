@@ -1,87 +1,34 @@
-# Welcome to React Router!
+# MemoFS Documentation Site
 
-A modern, production-ready template for building full-stack React applications using React Router.
+The MemoFS documentation site is a React Router + Fumadocs application deployed to Cloudflare Pages.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Architecture
 
-## Features
+- `content/docs/` is the single source of truth for documentation, including the changelog. It powers the docs pages, search index, sitemap, and LLM text exports.
+- `src/lib/site.ts` owns public URLs, internal route constants, and shared navigation data.
+- `src/lib/meta.ts` produces consistent canonical, Open Graph, and Twitter metadata.
+- `functions/subscribe.ts` is the only server-side endpoint. Everything else is prerendered into `build/client` and served statically by Cloudflare Pages.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Development
 
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+From the repository root:
 
 ```bash
-npm install
+pnpm docs:dev
 ```
 
-### Development
-
-Start the development server with HMR:
+Run the type check with:
 
 ```bash
-npm run dev
+pnpm --filter @memofs/docs typecheck
 ```
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
+## Build and deploy
 
 ```bash
-npm run build
+pnpm --filter @memofs/docs build
 ```
 
-## Deployment
+Deploy `build/client` as the Cloudflare Pages output directory. Cloudflare discovers the `functions/` directory and deploys `/subscribe` as a Pages Function alongside the static output.
 
-### Docker Deployment
-
-To build and run using Docker:
-
-```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
-```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+For local newsletter development, copy `.dev.vars.example` to `.dev.vars` and set `RESEND_API_KEY`. In Cloudflare Pages, configure `RESEND_API_KEY` as a secret; `RESEND_SEGMENT_ID` and `RESEND_FROM` are non-secret vars in `wrangler.jsonc`.

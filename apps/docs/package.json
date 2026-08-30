@@ -13,6 +13,7 @@
 	"scripts": {
 		"build": "react-router build && node scripts/generate-og.mjs",
 		"dev": "react-router dev",
+		"preview": "wrangler pages dev build/client",
 		"start": "react-router-serve ./build/server/index.js",
 		"typecheck": "react-router typegen && tsc"
 	},
@@ -45,6 +46,7 @@
 		"@types/react-dom": "^19.2.3",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^5.9.3",
-		"vite": "^8.0.3"
+		"vite": "^8.0.3",
+		"wrangler": "4.106.0"
 	}
 }
