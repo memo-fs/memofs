@@ -169,7 +169,11 @@ function resolveRecallStore(self: MemoFS): RecallStore | undefined {
 
 export function createStrategy(
 	self: MemoFS,
-	resolved: { mode: string; autoBootstrap?: boolean },
+	resolved: {
+		mode: string;
+		autoBootstrap?: boolean;
+		dedupeOnWrite?: boolean;
+	},
 	// biome-ignore lint/suspicious/noExplicitAny: return type is a union of strategy implementations
 ): any {
 	if (resolved.mode === "hybrid") {
@@ -197,6 +201,7 @@ export function createStrategy(
 			projectId: self.projectId,
 			tenantId: self.tenantId,
 			autoBootstrap: resolved.autoBootstrap ?? false,
+			dedupeOnWrite: resolved.dedupeOnWrite ?? true,
 			name: self.name,
 			version: self.version,
 			syncLayer: sync,
@@ -218,6 +223,7 @@ export function createStrategy(
 		projectId: self.projectId,
 		tenantId: self.tenantId,
 		autoBootstrap: resolved.autoBootstrap ?? false,
+		dedupeOnWrite: resolved.dedupeOnWrite ?? true,
 		name: self.name,
 		version: self.version,
 		rootDir: self.rootDir,

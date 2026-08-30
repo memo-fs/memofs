@@ -112,7 +112,7 @@ describe("createLazyLocalEmbedder", () => {
 			});
 			await embedder.embedText("warmup");
 			expect(seen).toHaveBeenCalledWith({
-				model: "Xenova/all-MiniLM-L6-v2",
+				model: "Xenova/bge-small-en-v1.5",
 			});
 		});
 
@@ -157,7 +157,7 @@ describe("createLazyLocalEmbedder", () => {
 			});
 			await embedder.embedText("warmup");
 			expect(seen).toHaveBeenCalledWith({
-				model: "Xenova/all-MiniLM-L6-v2",
+				model: "Xenova/bge-small-en-v1.5",
 				onProgress,
 			});
 		});

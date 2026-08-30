@@ -14,11 +14,12 @@
  * @public
  */
 
-import type {
-	EmbeddingRecord,
-	EmbedTextsInput,
-	EmbedTextsResult,
-	MemoryEmbedder,
+import {
+	DEFAULT_LOCAL_EMBEDDING_MODEL,
+	type EmbeddingRecord,
+	type EmbedTextsInput,
+	type EmbedTextsResult,
+	type MemoryEmbedder,
 } from "../core/types/embeddings";
 
 /**
@@ -29,7 +30,7 @@ import type {
 export interface LazyLocalEmbedderOptions {
 	/**
 	 * Transformers.js-compatible model id. Loaded by the adapter on first use.
-	 * @defaultValue `"Xenova/all-MiniLM-L6-v2"`
+	 * @defaultValue {@link DEFAULT_LOCAL_EMBEDDING_MODEL}
 	 */
 	model?: string;
 	/**
@@ -80,7 +81,7 @@ export interface LazyLocalEmbedderOptions {
 export function createLazyLocalEmbedder(
 	options: LazyLocalEmbedderOptions = {},
 ): MemoryEmbedder {
-	const model = options.model ?? "Xenova/all-MiniLM-L6-v2";
+	const model = options.model ?? DEFAULT_LOCAL_EMBEDDING_MODEL;
 	const adapterModule = options.adapterModule ?? "@memofs/adapter-transformers";
 
 	let embedderPromise: Promise<MemoryEmbedder> | undefined;
@@ -154,6 +155,15 @@ export function createLazyLocalEmbedder(
 		): Promise<EmbeddingRecord> {
 			const embedder = await loadEmbedder();
 			return embedder.embedText(text, options);
+		},
+		async embedQuery(
+			text: string,
+			options?: Omit<EmbedTextsInput, "texts" | "purpose">,
+		): Promise<EmbeddingRecord> {
+			const embedder = await loadEmbedder();
+			// Adapters without query-side handling degrade to the generic path.
+			if (!embedder.embedQuery) return embedder.embedText(text, options);
+			return embedder.embedQuery(text, options);
 		},
 	};
 }

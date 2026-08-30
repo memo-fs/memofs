@@ -69,6 +69,15 @@ export interface LocalStrategyOptions {
 	llmClient?: LlmClient;
 	graphStore?: LocalGraphStore;
 	autoExtractGraph?: boolean;
+	/**
+	 * When `true` (default), `writeMemory` no-ops a note whose text
+	 * near-duplicates an already-indexed memory (deterministic token-set
+	 * similarity over the lexical index) and returns
+	 * `created: false` + `duplicateOf` instead of appending. Disable only for
+	 * capture-everything pipelines that want every write appended verbatim.
+	 * @defaultValue `true`
+	 */
+	dedupeOnWrite?: boolean;
 	syncLayer?: FileSyncLayer;
 	logger?: Logger;
 	/**
@@ -93,6 +102,14 @@ export interface LocalStrategyContext {
 	graphEdges: Map<string, GraphEdgeInput>;
 	lexicalStore: BM25Store;
 	lexicalTextById: Map<string, string>;
+	/**
+	 * memoryId → note content body (no heading/metadata lines). Fed by
+	 * durable writes and by cold-start hydration with the identical value,
+	 * so the dedup-on-write guard compares content-for-content whether the
+	 * existing memory was written in this process or loaded from disk.
+	 * Cleaned by `pruneLexical` alongside the lexical index.
+	 */
+	memoryContentById: Map<string, string>;
 	contextCache: ContextCache;
 	agentfsClient: AgentfsLikeClient;
 	extractor: Extractor;

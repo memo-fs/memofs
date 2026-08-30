@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import {
 	appendConversationEntry,
 	appendTimestampedNote,
@@ -7,8 +8,7 @@ import {
 	readCoreMemory,
 	readNotesMemory,
 	writeCoreMemory,
-} from "@memofs/core";
-import { describe, expect, test } from "vitest";
+} from "../../src/index";
 import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempRoot } from "./test-utils";
 

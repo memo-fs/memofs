@@ -20,7 +20,7 @@ import {
 	type Extractor,
 } from "../graph/extraction/extractor";
 import { createFsGraphStore } from "../graph/stores/fs-graph-store";
-import { memoryLexicalDocId } from "../recall/identity";
+import { memoryLexicalDocId, parseRecallDocId } from "../recall/identity";
 import type { BM25Store } from "../recall/lexical/bm25";
 import { createBM25Store } from "../recall/lexical/bm25";
 import { DeterministicFallbackReranker } from "../rerank/fallback/deterministic-fallback-reranker";
@@ -55,6 +55,7 @@ import {
 } from "./local-strategy/helpers";
 import type { MigrateAnchorsResult } from "./local-strategy/migrate-anchors";
 import { migrateAnchors } from "./local-strategy/migrate-anchors";
+import { parseBlock } from "./local-strategy/notes-parser";
 import { localRecall } from "./local-strategy/recall";
 import { listRecentMemories as listRecentMemoriesFn } from "./local-strategy/recent";
 import { scrubLegacyEmbeddingRows } from "./local-strategy/scrub";
@@ -114,6 +115,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		options.graphStore ?? createFsGraphStore({ store });
 	const lexicalStore: BM25Store = createBM25Store();
 	const lexicalTextById = new Map<string, string>();
+	const memoryContentById = new Map<string, string>();
 	const anchorByMemoryId = new Map<string, AnchorRef>();
 	const anchorHashCache: AnchorHashCache = createAnchorHashCache();
 	const memoryMetaByMemoryId = new Map<string, MemoryDecayMeta>();
@@ -256,6 +258,11 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 				// are the first) — the legacy-embedding scrub resolves sourceIds
 				// against this set, so more sources means fewer false ghosts.
 				knownMemoryIds.add(id);
+				// Content body for the dedup-on-write guard — mirrors what a live
+				// durable write records, so warm and hydrated memories compare
+				// identically. Set before the has-continue below: even an
+				// already-indexed doc id needs its content mapped.
+				memoryContentById.set(id, parseBlock(section).content);
 				// Canonical doc id — joins the vector chunk-0 doc written by
 				// `writeMemory` so both retrieval paths hydrate to one identity.
 				const docId = memoryLexicalDocId(id);
@@ -332,7 +339,13 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 	function pruneLexical(ids: string[]): void {
 		if (ids.length === 0) return;
 		lexicalStore.delete(ids);
-		for (const id of ids) lexicalTextById.delete(id);
+		for (const id of ids) {
+			lexicalTextById.delete(id);
+			const identity = parseRecallDocId(id);
+			if (identity !== undefined) {
+				memoryContentById.delete(identity.memoryId);
+			}
+		}
 	}
 
 	function isRetiredGraphDoc(lexicalId: string): boolean {
@@ -419,6 +432,7 @@ export function createLocalStrategy(options: LocalStrategyOptions) {
 		graphEdges,
 		lexicalStore,
 		lexicalTextById,
+		memoryContentById,
 		contextCache,
 		agentfsClient,
 		extractor,

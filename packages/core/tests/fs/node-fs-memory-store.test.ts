@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { describe, expect, test } from "vitest";
 import {
 	CORE_MEMORY_PATH,
+	FsMemoryStoreError,
 	MemoryNotFoundError,
 	MemoryPathError,
-} from "@memofs/core";
-import { describe, expect, test } from "vitest";
-import { FsMemoryStoreError } from "../../src/index";
+} from "../../src/index";
 import { createNodeFsMemoryStore, NodeFsMemoryStore } from "../../src/node-fs";
 import { createTempRoot, readFile } from "./test-utils";
 

@@ -1,6 +1,5 @@
-import { MEMOFS_PATHS } from "@memofs/core";
 import { describe, expect, test } from "vitest";
-import { AgentfsMemoryStore } from "../../src/index";
+import { AgentfsMemoryStore, MEMOFS_PATHS } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";
 
 describe("same-instance append serialization", () => {
