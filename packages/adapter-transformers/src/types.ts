@@ -43,14 +43,16 @@ export interface TransformersEmbedderOptions {
 	/**
 	 * Hugging Face model id (or a local path under `cacheDir`) supported by
 	 * Transformers.js. Defaults to a small, fast sentence-embedding model that
-	 * needs no API key and downloads once.
-	 * @defaultValue `"Xenova/all-MiniLM-L6-v2"`
+	 * needs no API key and downloads once (~32 MB quantized).
+	 * @defaultValue `"Xenova/bge-small-en-v1.5"`
 	 */
 	model?: string;
 	/**
-	 * Directory used to cache downloaded ONNX weights. Defaults to a
-	 * `.memofs/models` directory when resolved by the runtime, or the
-	 * Transformers.js default cache otherwise.
+	 * Directory used to cache downloaded ONNX weights. When omitted, a shared
+	 * user-level cache is resolved automatically — `$XDG_CACHE_HOME/memofs/models`
+	 * (or `~/.cache/memofs/models`) — so weights download once per machine
+	 * instead of once per process working directory.
+	 * @defaultValue {@link resolveModelCacheDir}
 	 */
 	cacheDir?: string;
 	/**
@@ -65,8 +67,10 @@ export interface TransformersEmbedderOptions {
 	 */
 	device?: "cpu" | "gpu" | "wasm";
 	/**
-	 * ONNX runtime data type. `"fp32"` is safest across platforms.
-	 * @defaultValue `"fp32"`
+	 * ONNX runtime data type. `"q8"` (quantized) is the default — roughly a
+	 * quarter of the fp32 download size and faster on CPU with negligible
+	 * retrieval-quality loss. `"fp32"` is the most conservative choice.
+	 * @defaultValue `"q8"`
 	 */
 	dtype?: "fp32" | "fp16" | "q8" | "int8";
 	/**

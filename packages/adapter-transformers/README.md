@@ -40,21 +40,20 @@ that implements MemoFS's provider-neutral `MemoryEmbedder` contract.
 ```ts
 import { createTransformersEmbedder } from "@memofs/adapter-transformers";
 
-const embedder = createTransformersEmbedder({
-  model: "Xenova/all-MiniLM-L6-v2",
-});
+const embedder = createTransformersEmbedder(); // defaults to Xenova/bge-small-en-v1.5
 
 // Embed a batch of texts (mean-pooled + L2-normalized vectors)
 const { embeddings } = await embedder.embedTexts({
-  texts: ["MemoFS gives agents durable memory.", "All-MiniLM-L6-v2 is a small model."],
+  texts: ["MemoFS gives agents durable memory.", "bge-small is a small model."],
 });
 
 console.log(embeddings[0].embedding.length); // 384
-console.log(embeddings[0].model);            // "Xenova/all-MiniLM-L6-v2"
+console.log(embeddings[0].model);            // "Xenova/bge-small-en-v1.5"
 ```
 
-The first call downloads the ONNX weights once and caches them; subsequent calls
-are fully offline.
+The first call downloads the ONNX weights once into a shared user-level cache
+(`$XDG_CACHE_HOME/memofs/models`, or `~/.cache/memofs/models`); subsequent
+calls are fully offline and every project on the machine shares the download.
 
 ### With MemoFS core
 
@@ -109,23 +108,49 @@ discoverable and writes are never broken.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `model` | `string` | `"Xenova/all-MiniLM-L6-v2"` | Hugging Face model id (or local path under `cacheDir`) supported by Transformers.js. |
-| `cacheDir` | `string` | Transformers.js default | Directory used to cache downloaded ONNX weights. |
+| `model` | `string` | `"Xenova/bge-small-en-v1.5"` | Hugging Face model id (or local path under `cacheDir`) supported by Transformers.js. |
+| `cacheDir` | `string` | `resolveModelCacheDir()` | Directory used to cache downloaded ONNX weights. Defaults to a shared user-level cache so weights download once per machine instead of once per working directory. |
 | `device` | `"cpu" \| "gpu" \| "wasm"` | `"cpu"` | Inference device. Use `"gpu"` or `"wasm"` when the runtime supports it. |
-| `dtype` | `"fp32" \| "fp16" \| "q8" \| "int8"` | `"fp32"` | ONNX runtime data type. `"fp32"` is the safest across platforms. |
+| `dtype` | `"fp32" \| "fp16" \| "q8" \| "int8"` | `"q8"` | ONNX runtime data type. `"q8"` (quantized) is ~4x smaller to download and faster on CPU with negligible retrieval-quality loss; `"fp32"` is the most conservative choice. |
 | `batchSize` | `number` | `32` | Maximum texts per inference batch. Larger batches trade memory for throughput. |
 | `retries` | `number` | `2` | Maximum retry attempts when the initial model download/load fails with a transient network error. Set to `0` to disable. |
 | `onProgress` | `(info) => void` | — | Callback for model download/load progress. Use it to show a one-time "warming up" notice. |
 
 ### Default model
 
-`Xenova/all-MiniLM-L6-v2` is a 384-dimensional sentence-embedding model: small,
-fast, and good enough for local agent memory. To use a different Transformers.js
-model, pass its id:
+`Xenova/bge-small-en-v1.5` is a 384-dimensional sentence-embedding model: small,
+fast, and strong on retrieval — it outperforms the earlier all-MiniLM generation
+on retrieval benchmarks at the same vector size. Its quantized (`q8`) weights
+download once (~32 MB) and all later calls are fully offline.
+
+Instruction-tuned model families (bge, e5, nomic) expect different text prefixes
+on the query side vs the document side. The adapter applies them automatically:
+`embedTexts` prefixes documents (e.g. `passage: ` for e5) and the optional
+`embedQuery` method prefixes queries (e.g. bge's `Represent this sentence for
+searching relevant passages: `), so MemoFS's hybrid recall queries hit the model
+the way it was trained. Symmetric models (all-MiniLM, gte) get no prefixes.
+
+To use a different Transformers.js model, pass its id:
 
 ```ts
 createTransformersEmbedder({ model: "Xenova/all-MiniLM-L12-v2" });
 ```
+
+### Model cache
+
+Weights are cached in one shared, user-level directory, resolved by the
+exported `resolveModelCacheDir()`:
+
+- `$XDG_CACHE_HOME/memofs/models` when `XDG_CACHE_HOME` is set to a non-empty value
+- `~/.cache/memofs/models` otherwise
+
+MemoFS runs from several working directories over the lifetime of a machine
+(`memofs init` from a project root, an MCP server launched by an IDE, test
+runners), and Transformers.js's default cache is relative to the process
+working directory — without an explicit shared path, each directory would
+re-download the same weights. The shared cache means one download per machine,
+and the model that `memofs init` predownloads is the exact one an MCP server
+finds on connect. Pass an explicit `cacheDir` to override the location.
 
 ## When to use this vs. a provider adapter
 

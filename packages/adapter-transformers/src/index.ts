@@ -13,6 +13,7 @@ export {
 	TransformersInferenceError,
 	TransformersValidationError,
 } from "./errors";
+export { resolveModelCacheDir } from "./model-cache";
 export {
 	createTransformersEmbedder,
 	TransformersEmbedder,
