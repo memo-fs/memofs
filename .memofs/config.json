@@ -1,9 +1,0 @@
-{
-	"$schema": "../node_modules/@memofs/cli/schema/config.json",
-	"runtime": "local",
-	"root": ".",
-	"recall": {
-		"engine": "auto",
-		"localEmbeddings": true
-	}
-}
