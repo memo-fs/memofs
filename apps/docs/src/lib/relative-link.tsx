@@ -1,10 +1,7 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { ComponentProps } from "react";
 
-export function createRelativeLink(
-	_source: unknown,
-	page: { url: string; slugs?: string[] },
-) {
+export function createRelativeLink(page: { url: string; slugs?: string[] }) {
 	const DefaultLink = defaultMdxComponents.a;
 
 	return function RelativeLink(props: ComponentProps<typeof DefaultLink>) {

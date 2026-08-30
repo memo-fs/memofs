@@ -141,7 +141,7 @@ function Content({
 			<DocsBody className="max-w-3xl">
 				<Mdx
 					components={useMDXComponents({
-						a: createRelativeLink(source, { url }),
+						a: createRelativeLink({ url }),
 					})}
 				/>
 			</DocsBody>
