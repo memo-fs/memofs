@@ -84,6 +84,7 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
 		title: page.data.title,
 		description: page.data.description,
 		imagePath: getPageImagePath(page.slugs),
+		lastModified: undefined as number | undefined,
 		pageTree: await source.serializePageTree(source.getPageTree()),
 	};
 }
