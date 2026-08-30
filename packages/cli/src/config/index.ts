@@ -5,4 +5,8 @@
  */
 
 export type { MemoFsConfigFile } from "./runtime";
-export { resolveSchemaPath, writeDefaultCliConfig } from "./runtime";
+export {
+	resolveConnectorsSchemaPath,
+	resolveSchemaPath,
+	writeDefaultCliConfig,
+} from "./runtime";

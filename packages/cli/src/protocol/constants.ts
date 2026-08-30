@@ -70,3 +70,16 @@ export const REQUIRED_DIRS = [
  * loaded on demand, not always-injected, so the same cap does not apply.
  */
 export const CORE_MEMORY_SOFT_LIMIT = 200;
+
+/**
+ * Soft advisory note cap for `.memofs/memory/notes.md`.
+ *
+ * `notes.md` is the append-only audit trail — it is meant to grow — but an
+ * unbounded note count signals low write hygiene (near-duplicates,
+ * transient scratch that should live in AgentFS sessions, narration that
+ * never belonged in memory). Above this cap, `memofs doctor` warns and
+ * points at the curation tools: consolidate + archive-deprecated, and
+ * higher-signal future writes (the runtime already no-ops near-duplicate
+ * durable writes). Advisory only, like the core-memory limit above.
+ */
+export const NOTES_MEMORY_SOFT_LIMIT = 200;

@@ -72,6 +72,12 @@ describe("init and inspect", () => {
 			expect(typeof config.$schema).toBe("string");
 			expect(config.runtime).toBe("local");
 			expect(config.root).toBe(".");
+			// Init writes the recall block explicitly so hybrid recall with
+			// local embeddings is on before the MCP server connects.
+			expect(config.recall).toEqual({
+				engine: "auto",
+				localEmbeddings: true,
+			});
 		} finally {
 			await temp.cleanup();
 		}

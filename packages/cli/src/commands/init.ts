@@ -18,6 +18,23 @@ import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
 import { MEMOFS_CLI_PATHS, REQUIRED_DIRS } from "../protocol/constants";
 import { createDefaultManifest } from "../protocol/manifest";
+import {
+	type ModelPredownloadResult,
+	predownloadLocalEmbeddingModel,
+} from "../utils/model-predownload";
+
+/**
+ * Default recall block written into `.memofs/config.json` at init.
+ *
+ * The core resolver defaults `localEmbeddings` to `false` in local mode while
+ * the MCP runtime defaults it to `true` — writing the block explicitly makes
+ * the config file the single source of truth and matches the init-time
+ * model predownload, so hybrid recall is on before the MCP server connects.
+ */
+const DEFAULT_RECALL_CONFIG = {
+	engine: "auto",
+	localEmbeddings: true,
+} as const;
 
 /**
  * Options configuration for the init command.
@@ -47,6 +64,17 @@ export interface InitCommandOptions {
 	 * If true, suppresses interactive TTY prompt for project ID.
 	 */
 	noInput?: boolean | undefined;
+	/**
+	 * If true, skips the init-time local embedding model predownload
+	 * (`--no-embeddings`).
+	 */
+	noEmbeddings?: boolean | undefined;
+	/**
+	 * Replacement for the model predownload implementation. Test seam.
+	 *
+	 * @internal
+	 */
+	predownloadModel?: typeof predownloadLocalEmbeddingModel;
 }
 
 /**
@@ -75,6 +103,7 @@ export async function runInitCommand(
 				$schema: resolveSchemaPath(rootDir),
 				runtime: "local",
 				root: ".",
+				recall: DEFAULT_RECALL_CONFIG,
 			},
 		});
 		const data = {
@@ -140,8 +169,23 @@ export async function runInitCommand(
 			$schema: resolveSchemaPath(rootDir),
 			runtime: "local",
 			root: ".",
+			recall: DEFAULT_RECALL_CONFIG,
 		},
 	});
+
+	// Predownload the embedding model so the first agent connection does not
+	// pay the weight download. Non-fatal by contract; skipped for offline or
+	// adapter-less projects.
+	let embeddings: ModelPredownloadResult | undefined;
+	if (!options.noEmbeddings) {
+		embeddings = await (
+			options.predownloadModel ?? predownloadLocalEmbeddingModel
+		)({
+			rootDir,
+			output: options.output,
+			json: options.json,
+		});
+	}
 
 	const data = {
 		created: true,
@@ -149,6 +193,7 @@ export async function runInitCommand(
 		manifest,
 		files: bootstrapResult,
 		config: configResult,
+		...(embeddings !== undefined ? { embeddings } : {}),
 	};
 	if (options.json) printJsonEnvelope(options.output, "init", data);
 	else

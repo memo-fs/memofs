@@ -13,6 +13,7 @@ import type { CliOutput } from "../output/output";
 import {
 	CORE_MEMORY_SOFT_LIMIT,
 	MEMOFS_CLI_PATHS,
+	NOTES_MEMORY_SOFT_LIMIT,
 	REQUIRED_DIRS,
 	REQUIRED_FILES,
 } from "../protocol/constants";
@@ -141,6 +142,24 @@ export async function runDoctorCommand(
 					level: "warning",
 					code: "core_memory_oversize",
 					message: `${MEMOFS_CLI_PATHS.coreMemory}: ${lineCount} lines (soft limit ${CORE_MEMORY_SOFT_LIMIT}). Core memory is injected in full on every session — trim it to keep context tight.`,
+				});
+			}
+		}
+
+		spinner.update("Checking notes memory budget...");
+		const notesContent = await readTextIfExists(
+			options.memo.store,
+			MEMOFS_CLI_PATHS.notesMemory,
+		);
+		if (notesContent !== undefined) {
+			// Both note writers (core `writeMemory` and the CLI remember command)
+			// emit one `## ` heading per note, so heading count == note count.
+			const noteCount = (notesContent.match(/^## /gm) ?? []).length;
+			if (noteCount > NOTES_MEMORY_SOFT_LIMIT) {
+				issues.push({
+					level: "warning",
+					code: "notes_memory_oversize",
+					message: `${MEMOFS_CLI_PATHS.notesMemory}: ${noteCount} notes (soft limit ${NOTES_MEMORY_SOFT_LIMIT}). notes.md is the append-only audit trail, but this count suggests low write hygiene — run "memofs consolidate" / "memofs doctor --fix" to archive deprecated items, keep scratch in AgentFS sessions, and record only high-signal durable facts.`,
 				});
 			}
 		}

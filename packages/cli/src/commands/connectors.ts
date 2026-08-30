@@ -23,6 +23,7 @@ import {
 import type { JsonObject, MemoFS } from "@memofs/core";
 import { CONNECTORS_PATH } from "@memofs/core";
 import { getRootDir, readTextIfExists, writeText } from "../cli/store-helpers";
+import { resolveConnectorsSchemaPath } from "../config";
 import { CliUsageError, CliValidationError } from "../errors/cli-errors";
 import type { CliOutput } from "../output/output";
 import { printJsonEnvelope } from "../output/output";
@@ -132,16 +133,21 @@ export async function runConnectorsAddCommand(
 		connectors: [...file.connectors, newConnector],
 	};
 
+	// Stamp `$schema` on every write so editors get validation + autocomplete
+	// (self-healing: files written before the schema existed upgrade in place).
+	const schemaRef = resolveConnectorsSchemaPath(getRootDir(options.memo.store));
+
 	// Validate the full file before writing — catches token-leak fields and
 	// structural issues (validateConnectorsFile throws ConnectorConfigError).
 	const validated = validateConnectorsFile({
+		$schema: schemaRef,
 		connectors: next.connectors,
 	});
 
 	await writeText(
 		options.memo.store,
 		CONNECTORS_PATH,
-		`${JSON.stringify({ connectors: validated.connectors }, null, 2)}\n`,
+		`${JSON.stringify({ $schema: schemaRef, connectors: validated.connectors }, null, 2)}\n`,
 	);
 
 	const data = { added: newConnector, total: validated.connectors.length };
@@ -185,10 +191,12 @@ export async function runConnectorsRemoveCommand(
 		throw new CliValidationError(`No connector with id "${options.id}" found.`);
 	}
 
+	const schemaRef = resolveConnectorsSchemaPath(getRootDir(options.memo.store));
+
 	await writeText(
 		options.memo.store,
 		CONNECTORS_PATH,
-		`${JSON.stringify({ connectors: remaining }, null, 2)}\n`,
+		`${JSON.stringify({ $schema: schemaRef, connectors: remaining }, null, 2)}\n`,
 	);
 
 	if (options.json) {
