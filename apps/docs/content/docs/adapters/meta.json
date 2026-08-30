@@ -1,0 +1,14 @@
+{
+	"title": "Adapters",
+	"icon": "Puzzle",
+	"pages": [
+		"index",
+		"openai",
+		"voyage",
+		"transformers",
+		"workers-ai",
+		"r2",
+		"turso",
+		"ai-sdk"
+	]
+}

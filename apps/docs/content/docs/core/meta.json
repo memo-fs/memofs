@@ -1,0 +1,17 @@
+{
+	"title": "Core Runtime",
+	"icon": "Cpu",
+	"pages": [
+		"index",
+		"concepts",
+		"configuration",
+		"memory",
+		"recall",
+		"graph",
+		"snapshots",
+		"agentfs",
+		"sync",
+		"utilities",
+		"reference"
+	]
+}

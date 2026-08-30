@@ -1,0 +1,19 @@
+{
+	"pages": [
+		"---Getting Started---",
+		"index",
+		"introduction",
+		"---Runtime & Protocols---",
+		"core",
+		"mcp",
+		"cli",
+		"adapters",
+		"connectors",
+		"---Self-Hosting & Cloud---",
+		"server",
+		"---Developer Tooling---",
+		"tooling",
+		"---Reference---",
+		"api"
+	]
+}

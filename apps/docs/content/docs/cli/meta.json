@@ -1,0 +1,13 @@
+{
+	"title": "CLI",
+	"icon": "Terminal",
+	"pages": [
+		"index",
+		"memory",
+		"agent",
+		"generate",
+		"connectors",
+		"cloud",
+		"config"
+	]
+}

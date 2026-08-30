@@ -1,0 +1,197 @@
+---
+title: "Knowledge Graph Engine"
+description: "Entity-relationship modeling, graph extraction, traversal, pathfinding, and memory consolidation in @memofs/core."
+---
+
+`@memofs/core` includes an integrated, versioned Knowledge Graph engine stored in `.memofs/graph/nodes.jsonl` and `.memofs/graph/edges.jsonl`. It models structured relationships between concepts, code symbols (for coding agents), tools, and decisions.
+
+## Graph Data Model
+
+### Node Model
+
+```ts
+interface GraphNode {
+  id: string;                      // Unique entity identifier (e.g. "auth_jwt")
+  type: GraphNodeType;             // Standard or custom entity type
+  label: string;                   // Canonical human-readable name
+  aliases?: string[];              // Synonyms (used for duplicate detection)
+  summary?: string;                // Condensed description of the entity
+  confidence?: number;             // Confidence score (0.0 to 1.0)
+  importance?: number;             // Relative importance weight
+  status?: GraphFactStatus;        // "active" | "deprecated" | "stale" | etc.
+  disputed?: boolean;              // True if contested by conflicting facts
+  stale?: boolean;                 // True if anchored code drifted
+  unverified?: boolean;            // True if age > EXPIRY_DAYS
+  sourceRefs?: GraphSourceRef[];   // Provenance references
+  metadata?: GraphMetadata;        // Custom JSON metadata
+}
+```
+
+### Edge Model
+
+```ts
+interface GraphEdge {
+  id?: string;                     // Unique edge ID (auto-generated if omitted)
+  from: string;                    // Source node ID
+  to: string;                      // Target node ID
+  type: GraphEdgeType;             // Relationship type (e.g. "depends_on")
+  directed?: boolean;              // True for directional relationships (default: true)
+  weight?: number;                 // Pathfinding traversal weight (default: 1.0)
+  confidence?: number;             // Edge confidence score
+  dedupeKey?: string;              // Salt for preserving parallel facts
+  status?: GraphFactStatus;        // "active" | "deprecated" | etc.
+  disputed?: boolean;              // True if contested
+  sourceRefs?: GraphSourceRef[];   // Provenance references
+  metadata?: GraphMetadata;        // Custom JSON metadata
+}
+```
+
+## Standard Types & Taxonomy
+
+### Entity Types
+
+| Type | Description |
+|---|---|
+| `"concept"` | Abstract domain concepts, patterns, or algorithms. |
+| `"code_symbol"` | Classes, functions, interfaces, or modules. |
+| `"decision"` | Architectural decisions and standardizations. |
+| `"tool"` | Third-party libraries, CLI tools, or services. |
+| `"project"` | Project workspaces and repositories. |
+| `"person"` | Authors, contributors, or team members. |
+| `"policy"` | Security policies, coding guidelines, or constraints. |
+| `"procedure"` | Runbooks, deployment workflows, or checklist procedures. |
+| `"custom"` | User-defined domain entity types. |
+
+### Edge Types
+
+| Type | Description |
+|---|---|
+| `"depends_on"` | Subject requires the target entity to function. |
+| `"uses"` | Subject consumes or interacts with the target. |
+| `"supersedes"` | Subject replaces/deprecates the target entity or fact. |
+| `"mentions"` | Subject references the target entity. |
+| `"authored_by"` | Subject was created or modified by the target person. |
+| `"decided"` | Subject resolved a specific architectural decision. |
+| `"blocks"` | Subject prevents or gates the target from progressing. |
+| `"prefers"` | Subject establishes a preference for the target. |
+| `"related_to"` | Generic bidirectional association. |
+
+## Client API
+
+### 1. Upserting Entities & Relationships
+
+```ts
+// Upsert nodes
+await memofs.graph.upsertNodes({
+  nodes: [
+    { id: "oauth2", type: "concept", label: "OAuth 2.0 Auth" },
+    { id: "jwt", type: "concept", label: "JSON Web Token", aliases: ["JWT", "jwt-token"] },
+    { id: "api_gateway", type: "tool", label: "API Gateway" },
+  ],
+});
+
+// Upsert relationship edges
+await memofs.graph.upsertEdges({
+  edges: [
+    { from: "api_gateway", to: "oauth2", type: "uses" },
+    { from: "oauth2", to: "jwt", type: "depends_on" },
+  ],
+});
+```
+
+### 2. Exploring Neighbors
+
+Retrieve 1-hop connected nodes and edges with directional filtering:
+
+```ts
+const result = await memofs.graph.neighbors({
+  nodeId: "api_gateway",
+  direction: "out", // "in" | "out" | "both"
+  edgeTypes: ["uses", "depends_on"],
+});
+
+for (const { node, edge, direction } of result.items) {
+  console.log(`[${direction}] -> ${edge.type} -> ${node.label} (${node.id})`);
+}
+```
+
+### 3. Pathfinding & Dependency Tracing
+
+Find paths between entities using weighted Dijkstra or unweighted fewest-hops BFS:
+
+```ts
+const path = await memofs.graph.path({
+  from: "api_gateway",
+  to: "jwt",
+  weighted: true,
+  maxDepth: 5,
+});
+
+if (path.found) {
+  console.log(`Found path with ${path.nodes.length} nodes (total cost: ${path.totalCost})`);
+  for (const node of path.nodes) {
+    console.log(` -> ${node.label}`);
+  }
+}
+```
+
+### 4. Listing Nodes and Edges
+
+Paginate through graph entities with cursor support:
+
+```ts
+const nodesPage = await memofs.graph.listNodes({ limit: 50 });
+const edgesPage = await memofs.graph.listEdges({ limit: 50 });
+```
+
+## Automated Graph Extraction
+
+`@memofs/core` provides the provider-neutral `Extractor` interface. By default, it runs the built-in **Rule-Based Extractor** (`createRuleBasedExtractor`), extracting entities and relationships with zero API keys:
+
+```ts
+import { createRuleBasedExtractor } from "@memofs/core";
+
+const extractor = createRuleBasedExtractor();
+const result = await extractor.extract({
+  text: "The payment service depends on Stripe API and uses Redis for idempotency caching.",
+});
+
+console.log(result.nodes); // Extracted entities: payment service, Stripe API, Redis
+console.log(result.edges); // Extracted edges: depends_on, uses
+```
+
+### Built-In Extraction Patterns
+
+The rule-based extractor recognizes seven core linguistic prose patterns:
+
+| Pattern Category | Prose Pattern Trigger | Extracted Subject → Edge → Object |
+|---|---|---|
+| **Definitions & Roles** | `"X is a Y"` | `X (concept) --is_a--> Y` |
+| **Dependencies** | `"X depends on Y"`, `"X requires Y"` | `X --depends_on--> Y` |
+| **Usage** | `"X uses Y"`, `"X connects to Y"` | `X --uses--> Y` |
+| **Decisions** | `"We decided on X"`, `"Chosen X for Y"` | `X (decision) --decided--> Y` |
+| **Authorship** | `"X was written by Y"`, `"X authored by Y"` | `X --authored_by--> Y` |
+| **Preferences** | `"Prefer X over Y"` | `X --prefers--> Y` |
+| **Supersession & Migration** | `"Migrated from X to Y"`, `"Replaced X with Y"` | `Y --supersedes--> X` |
+
+## Memory Consolidation
+
+Memory consolidation is a deterministic maintenance pass that prevents graph entropy without ever deleting historical audit trails:
+
+```ts
+// Dry run preview (plan only)
+const preview = await memofs.consolidate({ apply: false });
+console.log(`Proposed merges: ${preview.plan.merges}`);
+console.log(`Proposed retirements: ${preview.plan.retiredNodes}`);
+
+// Apply consolidation plan
+const applied = await memofs.consolidate({ apply: true });
+console.log(`Merges applied: ${applied.mergesApplied}`);
+console.log(`Retirements applied: ${applied.retirementsApplied}`);
+```
+
+### Consolidation Mechanics
+
+1. **Duplicate Entity Merging:** Identifies duplicate nodes sharing identical case-insensitive labels or matching aliases. The earlier created node is kept, the duplicate is absorbed, and edges are rewired.
+2. **Fact Supersession:** When an edge `A supersedes B` is discovered, entity `B` and all non-superseding active edges referencing `B` are transitioned to `deprecated` with a `validUntil` timestamp.
+3. **No Data Loss:** Deprecated facts remain in the graph files for historical provenance and auditability.

@@ -1,0 +1,65 @@
+---
+title: "How to use MemoFS with Cline"
+date: "2026-07-28"
+estimatedMinutes: 5
+description: "Configure Cline in VS Code to read and write persistent MemoFS memory via MCP stdio tools."
+---
+
+Cline uses project rules (`AGENTS.md` / `.clinerules`) and MCP tools to interact with MemoFS memory. You can generate your rules file directly using `npx @memofs/cli generate agent-rules agents` and register the MemoFS MCP server via Cline's MCP Settings panel.
+
+## Prerequisites
+
+- Node.js v22+
+- Cline installed as a VS Code extension (or the Cline CLI)
+
+## Setup (5 Minutes)
+
+### Step 1: Initialize project memory
+
+```bash
+cd /path/to/your/project
+npx @memofs/cli init
+```
+
+### Step 2: Create a rules file
+
+Generate a starting point using the closest existing target, then adapt it:
+
+```bash
+npx @memofs/cli generate agent-rules agents --project-name "Your project name"
+```
+
+This gives you `AGENTS.md` with the memofs workflow instructions already written. Cline reads project-level rules from a `.clinerules` file or `.clinerules/` folder — copy `AGENTS.md`'s body into `.clinerules` (double-check the exact convention against Cline's current docs, since rules-file handling has changed across versions).
+
+### Step 3: Register the MCP server
+
+Use Cline's built-in UI rather than hand-editing a config path — Cline's own docs and code have disagreed on the exact file location before, so the UI is the more reliable path:
+
+1. Open the Cline panel → click the MCP Servers icon → **Configure MCP Servers**.
+2. This opens Cline's MCP settings JSON. Add:
+
+```json title="cline_mcp_settings.json"
+{
+  "mcpServers": {
+    "memofs": {
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"]
+    }
+  }
+}
+```
+
+3. Save and close.
+
+### Step 4: Verify
+
+Reload VS Code. Check that `memofs` shows a green connected indicator in the MCP Servers panel. Ask Cline: *"Check your memofs project memory and tell me what's there."*
+
+## Notes
+
+- No hooks means no compliance summary and no auto re-priming after context gets summarized — `.clinerules` is doing all the work of telling Cline when to reach for memory.
+
+## Next Steps
+
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

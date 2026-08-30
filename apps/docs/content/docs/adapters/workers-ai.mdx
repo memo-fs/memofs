@@ -1,0 +1,140 @@
+---
+title: "Cloudflare Workers AI Adapter"
+description: "Cloudflare Workers AI graph extractor adapter for serverless edge inference in MemoFS."
+---
+
+The `@memofs/adapter-workers-ai` adapter provides LLM-based entity-relationship knowledge graph extraction for MemoFS running on Cloudflare Workers using serverless GPU inference (`env.AI`).
+
+It implements core's provider-neutral [`Extractor`](/api/core#extractor) interface, translating memory note text into structured graph nodes and typed relational edges using the canonical MemoFS relation vocabulary.
+
+## Installation
+
+
+<Tabs items={['npm', 'pnpm', 'bun', 'deno']}>
+  <Tab value="npm">
+```bash
+npm install @memofs/adapter-workers-ai
+```
+  </Tab>
+  <Tab value="pnpm">
+```bash
+pnpm add @memofs/adapter-workers-ai
+```
+  </Tab>
+  <Tab value="bun">
+```bash
+bun add @memofs/adapter-workers-ai
+```
+  </Tab>
+  <Tab value="deno">
+```bash
+deno add npm:@memofs/adapter-workers-ai
+```
+  </Tab>
+</Tabs>
+
+
+<Callout type="info">
+Requires **Node.js >= 22** or the **Cloudflare Workers** runtime.
+</Callout>
+
+## Usage in Cloudflare Workers
+
+In Cloudflare Workers, pass the `env.AI` binding to `createWorkersAiExtractor()` and provide it to your `MemoFS` instance:
+
+```ts
+import { MemoFS, RemoteBlobMemoryStore } from "@memofs/core";
+import { createWorkersAiExtractor } from "@memofs/adapter-workers-ai";
+import { createR2BlobClient } from "@memofs/adapter-r2";
+import { createTursoMetadataStore } from "@memofs/adapter-turso";
+import { createClient } from "@libsql/client";
+
+export interface Env {
+  BLOBS: R2Bucket;
+  TURSO_DATABASE_URL: string;
+  TURSO_AUTH_TOKEN: string;
+  AI: Ai; // Injected Cloudflare Workers AI binding
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const projectId = "serverless-project";
+
+    // 1. Initialize remote blob memory store (R2 + Turso)
+    const store = new RemoteBlobMemoryStore({
+      blobClient: createR2BlobClient({ binding: env.BLOBS }),
+      metadata: createTursoMetadataStore({
+        client: createClient({
+          url: env.TURSO_DATABASE_URL,
+          authToken: env.TURSO_AUTH_TOKEN,
+        }),
+        projectId,
+      }),
+      rootKey: projectId,
+    });
+
+    // 2. Initialize MemoFS client with Workers AI extractor
+    const memo = new MemoFS({
+      store,
+      projectId,
+      mode: "local",
+      extractor: createWorkersAiExtractor({
+        ai: env.AI,
+        model: "@cf/meta/llama-3.1-8b-instruct",
+      }),
+    });
+
+    // 3. Writing memories automatically extracts entities and relationships
+    const result = await memo.writeMemory({
+      title: "Auth Middleware Migration",
+      content: "The AuthModule depends on the RedisSessionStore and supersedes the LegacyCookieAuth.",
+      kind: "decision",
+    });
+
+    return new Response(JSON.stringify(result), {
+      headers: { "Content-Type": "application/json" },
+    });
+  },
+};
+```
+
+## Extraction & Graph Schema
+
+The Workers AI extractor prompts the model to parse input text into subject–predicate–object triples using MemoFS's canonical relation vocabulary:
+
+| Relation Type | Semantics | Example Extraction |
+|---|---|---|
+| `uses` | Component or library utilization | `[AuthService] --uses--> [Bcrypt]` |
+| `depends_on` | Structural or architectural dependency | `[BillingModule] --depends_on--> [StripeSDK]` |
+| `prefers` | Architectural convention or preference | `[Team] --prefers--> [pnpm]` |
+| `blocks` | Blocker or issue dependency | `[Bug #402] --blocks--> [Release v2.0]` |
+| `supersedes` | Replaces or invalidates older architecture/decision | `[v2Router] --supersedes--> [v1Router]` |
+| `owns` | Team or domain ownership | `[SecurityTeam] --owns--> [KMSVault]` |
+| `related_to` | General conceptual association | `[VectorIndex] --related_to--> [Recall]` |
+
+## Defensive Parsing & Resilience
+
+The extractor employs strict defensive parsing:
+
+1. **Zero Runtime Halts:** If the LLM generates malformed JSON, truncated markdown, or unexpected tokens, the adapter catches the error and returns an empty `{ nodes: [], edges: [] }` result rather than throwing.
+2. **Resilient Write Path:** A failure in LLM extraction never aborts or blocks the primary memory note write; the markdown note is committed safely and the rule-based extractor acts as fallback.
+3. **Provenance Stamping:** Every extracted node and edge automatically inherits the source memory note reference (`sourceRef`) for full traceability and auditability.
+
+## Configuration API (`CreateWorkersAiExtractorOptions`)
+
+The `createWorkersAiExtractor(options)` factory accepts `CreateWorkersAiExtractorOptions`:
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `ai` | `Ai` | — (**Required**) | Cloudflare Workers AI binding object (`env.AI`). |
+| `model` | `string` | `"@cf/meta/llama-3.1-8b-instruct"` | Cloudflare Workers AI model identifier. |
+| `defaultNodeType` | `GraphNodeType` | `"concept"` | Default node type assigned to entities (`"concept" \| "entity" \| "file" \| "module"`). |
+| `stampProvenance` | `boolean` | `true` | Whether to stamp the input's `sourceRef` onto all extracted nodes and edges. |
+
+## See Also
+
+- [Adapters Overview](/adapters/)
+- [Cloudflare R2 Adapter Reference](/adapters/r2)
+- [Turso / libSQL Adapter Reference](/adapters/turso)
+- [Knowledge Graph Concepts](/core/graph)
+

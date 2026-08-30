@@ -1,0 +1,150 @@
+---
+title: "Connectors Commands"
+description: "CLI commands for configuring and running data ingestion connectors (GitHub, Notion)."
+---
+
+`memofs connectors` manages `.memofs/connectors.json` and runs the [Connectors Framework](/connectors/) (`@memofs/connectors`) to ingest external sources into local memory. This page covers the CLI surface; see the framework page for the underlying config schema, validation rules, and secret-resolver types.
+
+<Callout type="info">
+Every subcommand below accepts `--json`, which prints a single-line envelope — `{ "ok": boolean, "command": "connectors.<name>", "data": {...} }` on success, or an `error: { code, message }` object on failure — instead of the human-readable text shown in these examples. Script against `--json`; the plain-text format is for humans and may change wording between releases.
+</Callout>
+
+## `memofs connectors list`
+
+Lists configured connectors from `connectors.json`.
+
+```bash
+memofs connectors list
+```
+
+With no connectors configured:
+
+```
+No connectors configured.
+Add one with: memofs connectors add --type <type> --secret-ref <ref>
+```
+
+With connectors configured, one block per row — showing the connector's opaque `secretRef` (never the resolved token) and its `sourceMapping`, if set:
+
+```
+Connectors:
+
+- github-main (github) [enabled, schedule: @hourly]
+  secretRef: ss_abc123
+  source: {"repository":"owner/repo","kinds":["issues","prs"]}
+```
+
+## `memofs connectors add`
+
+Adds a connector row to `.memofs/connectors.json`.
+
+```bash
+# GitHub connector using shorthand repository mapping
+memofs connectors add --type github --secret-ref gh_token --id my-github --source-mapping owner/repo
+
+# Notion connector using shorthand database ID
+memofs connectors add --type notion --secret-ref notion_key --id my-notion --source-mapping 12345678-1234-1234-1234-123456789abc
+
+# Using full JSON configuration
+memofs connectors add --type github --secret-ref gh_token --source-mapping '{"repository":"owner/repo","kinds":["issues","prs"]}'
+```
+
+**Options:**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--type <type>` | Connector type (`github`, `notion`, etc.) (required) | — |
+| `--secret-ref <ref>` | Opaque pointer to a token stored server-side or stored in `.memofs/secrets.json` (required) | — |
+| `--id <id>` | Connector ID | Auto-derived from `--type` if omitted: `<type>`, or `<type>-2`, `<type>-3`, … if that id is already taken |
+| `--schedule <schedule>` | Schedule hint (e.g. `@hourly`, `@daily`) | — |
+| `--source-mapping <json\|shorthand>` | Source config as JSON string (`{"repository":"..."}`) or shorthand (`owner/repo` for GitHub, database UUID for Notion) | — |
+| `--disabled` | Add the connector in disabled state (`enabled: false`) | `false` |
+
+On success:
+
+```
+Added connector "my-github" (type: github). 1 connector(s) configured.
+```
+
+`--id` is optional — omit it and the CLI assigns one for you — but it must be unique if you do supply it: adding a connector whose `--id` already exists fails immediately with a clear error rather than overwriting the existing row.
+
+The full file is re-validated before it's written, so a `--source-mapping` value that trips one of the framework's [config validation guardrails](/connectors/#config-validation-guardrails) (a forbidden key substring like `token` or `secret`, or a value that looks like a real credential) fails the same way it would if you'd hand-edited `connectors.json` — the row is never written.
+
+Every write also stamps a `$schema` reference into the file, so editors validate and autocomplete `connectors.json` the same way they do `config.json`. The reference is the portable `../node_modules/@memofs/cli/schema/connectors.json` path when the CLI package is present under the project root, and the hosted `https://docs.memofs.dev/schema/connectors.json` URL otherwise — files written before this behavior existed upgrade in place on the next add or remove.
+
+## `memofs connectors remove`
+
+Removes a connector by ID.
+
+```bash
+memofs connectors remove my-github
+```
+
+The id can also be passed as `--id <id>` instead of positionally; either form works.
+
+On success:
+
+```
+Removed connector "my-github". 0 connector(s) remaining.
+```
+
+Removing an id that doesn't exist fails with an error rather than silently succeeding.
+
+## `memofs connectors run`
+
+Runs enabled connectors to ingest data into `.memofs/`.
+
+```bash
+memofs connectors run
+memofs connectors run --type github
+```
+
+**Options:**
+
+| Flag | Description | Default |
+|---|---|---|
+| `--type <type>` | Run only connectors of this type | — |
+
+### Secret resolution
+
+`run` picks a [`SecretResolver`](/connectors/#secret-resolution) for you — you don't configure this directly:
+
+- If the project has cloud credentials configured (an API key and cloud base URL), it uses `CloudSecretResolver` and resolves `secretRef`s against the MemoFS cloud API.
+- Otherwise, it falls back to `EnvSecretResolver`, which reads `.memofs/secrets.json` locally.
+
+### Output and exit codes
+
+On success, plain-text output looks like:
+
+```
+✓ Connectors run complete (3 written, 12 skipped)
+Connectors run summary:
+- ran: github-main, notion-main
+- written: 3
+- skipped (already ingested): 12
+```
+
+If any connector errored, a warning and error summary are displayed:
+
+```
+⚠ Connectors run completed with 1 error(s)
+Connectors run summary:
+- ran: github-main
+- written: 0
+- skipped (already ingested): 0
+- errors: 1
+  [github] GitHub API rate limited (reset: 1712345678).
+```
+
+<Callout type="warn">
+The process exits with code `1` whenever `result.errors` is non-empty — **even if other connectors in the same run succeeded and wrote data.** A CI job or cron wrapper that treats any non-zero exit as a hard failure will flag partial-success runs too; check the `errors` count (or the `--json` output's `data.errors` array) if you need to distinguish "some connectors failed" from "nothing ran."
+</Callout>
+
+`--json` output includes all four `RunConnectorsResult` fields — `written`, `skipped`, `errors`, and `ran` — under `data`.
+
+## See Also
+
+- [Connectors Framework](/connectors/) — `.memofs/connectors.json` schema, validation guardrails, secret resolvers, and the built-in GitHub/Notion connectors.
+- [Built-In Connectors](/connectors/built-in-connectors)
+- [Writing Custom Connectors](/connectors/custom-connectors)
+- [`@memofs/connectors` API Reference](/api/connectors)
