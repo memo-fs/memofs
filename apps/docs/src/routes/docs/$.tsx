@@ -10,13 +10,15 @@ import {
 	EditOnGitHub,
 	PageLastUpdate,
 } from "fumadocs-ui/layouts/docs/page";
-import { LLMCopyButton, ViewOptions } from "~/components/ai/page-actions";
-import { useMDXComponents } from "~/components/mdx";
-import { getLLMText } from "~/lib/get-llm-text";
-import { baseOptions } from "~/lib/layout.shared";
-import { createRelativeLink } from "~/lib/relative-link";
-import { getPageImagePath } from "~/lib/shared";
-import { docs, resolveDocPage, source } from "~/lib/source";
+import { LLMCopyButton, ViewOptions } from "../../components/ai/page-actions";
+import { useMDXComponents } from "../../components/mdx";
+import { getLLMText } from "../../lib/get-llm-text";
+import { baseOptions } from "../../lib/layout.shared";
+import { createPageMeta } from "../../lib/meta";
+import { createRelativeLink } from "../../lib/relative-link";
+import { getPageImagePath } from "../../lib/shared";
+import { SITE } from "../../lib/site";
+import { docs, resolveDocPage, source } from "../../lib/source";
 import type { Route } from "./+types/$";
 
 export async function loader({ params, request }: Route.LoaderArgs) {
@@ -98,29 +100,12 @@ export const meta: Route.MetaFunction = ({ matches }) => {
 	const pageTitle = data?.title
 		? `${data.title} | MemoFS`
 		: "MemoFS Documentation";
-	const description =
-		data?.description ||
-		"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready.";
-	const canonicalUrl = `https://docs.memofs.dev${data?.url ?? "/docs"}`;
-	const ogImageUrl = data?.imagePath
-		? `https://docs.memofs.dev${data.imagePath}`
-		: "https://docs.memofs.dev/og-default.png";
-
-	return [
-		{ title: pageTitle },
-		{ name: "description", content: description },
-		{ property: "og:title", content: pageTitle },
-		{ property: "og:description", content: description },
-		{ property: "og:url", content: canonicalUrl },
-		{ property: "og:image", content: ogImageUrl },
-		{ property: "og:site_name", content: "MemoFS" },
-		{ name: "twitter:card", content: "summary_large_image" },
-		{ name: "twitter:site", content: "@memofsdev" },
-		{ name: "twitter:title", content: pageTitle },
-		{ name: "twitter:description", content: description },
-		{ name: "twitter:image", content: ogImageUrl },
-		{ tagName: "link", rel: "canonical", href: canonicalUrl },
-	];
+	return createPageMeta({
+		title: pageTitle,
+		description: data?.description || SITE.description,
+		path: data?.url ?? "/docs",
+		imagePath: data?.imagePath,
+	});
 };
 
 function Content({
@@ -139,7 +124,7 @@ function Content({
 	const cleanDocPath =
 		path.endsWith(".mdx") || path.endsWith(".md") ? path : `${path}.mdx`;
 	const markdownUrl = `${url}.md`;
-	const githubUrl = `https://github.com/memo-fs/memofs/blob/main/apps/docs/content/docs/${cleanDocPath}`;
+	const githubUrl = `${SITE.githubUrl}/blob/main/apps/docs/content/docs/${cleanDocPath}`;
 
 	return (
 		<DocsPage

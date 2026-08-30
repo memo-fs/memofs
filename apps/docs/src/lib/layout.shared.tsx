@@ -1,57 +1,29 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import { PRIMARY_NAVIGATION, ROUTES, SITE } from "./site";
 
 export function baseOptions(): BaseLayoutProps {
 	return {
 		nav: {
-			url: "/",
+			url: ROUTES.home,
 			transparentMode: "top",
 			title: (
 				<span className="flex items-center gap-2.5 font-semibold tracking-tight">
 					<img
 						src="/logo.svg"
-						alt="MemoFS"
+						alt={SITE.name}
 						className="size-6 shrink-0"
 						width={24}
 						height={24}
 					/>
-					<span className="font-bold text-[0.95rem]">MemoFS</span>
+					<span className="font-bold text-[0.95rem]">{SITE.name}</span>
 				</span>
 			),
 		},
 		links: [
-			{
-				text: "Docs",
-				url: "/docs",
-				active: "url",
-				on: "all",
-			},
-			{
-				text: "Cookbooks",
-				url: "/cookbooks",
-				active: "nested-url",
-				on: "all",
-			},
-			{
-				text: "Changelog",
-				url: "/changelog",
-				active: "nested-url",
-				on: "all",
-			},
-			{
-				text: "Articles",
-				url: "https://memofs.dev/articles",
-				external: true,
-				on: "all",
-			},
-			{
-				text: "Cloud",
-				url: "https://memofs.dev",
-				external: true,
-				on: "all",
-			},
+			...PRIMARY_NAVIGATION,
 			{
 				type: "icon",
-				url: "https://x.com/memofsdev",
+				url: SITE.xUrl,
 				label: "X (formerly Twitter)",
 				text: "X",
 				external: true,
@@ -67,6 +39,6 @@ export function baseOptions(): BaseLayoutProps {
 				),
 			},
 		],
-		githubUrl: "https://github.com/memo-fs/memofs",
+		githubUrl: SITE.githubUrl,
 	};
 }

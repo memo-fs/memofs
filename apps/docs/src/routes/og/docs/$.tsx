@@ -1,6 +1,6 @@
 import { generate as DefaultImage } from "fumadocs-ui/og/takumi";
 import { ImageResponse } from "takumi-js/response";
-import { resolveDocPage } from "~/lib/source";
+import { resolveDocPage } from "../../../lib/source";
 import type { Route } from "./+types/$";
 
 export async function loader({ params }: Route.LoaderArgs) {

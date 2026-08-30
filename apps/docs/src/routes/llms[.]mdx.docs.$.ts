@@ -1,5 +1,5 @@
-import { getLLMText } from "~/lib/get-llm-text";
-import { resolveDocPage } from "~/lib/source";
+import { getLLMText } from "../lib/get-llm-text";
+import { resolveDocPage } from "../lib/source";
 import type { Route } from "./+types/llms[.]mdx.docs.$";
 
 export async function loader({ params }: Route.LoaderArgs) {

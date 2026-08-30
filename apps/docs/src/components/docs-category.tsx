@@ -1,6 +1,6 @@
 import { Card, Cards } from "fumadocs-ui/components/card";
 import { useLocation } from "react-router";
-import { source } from "~/lib/source";
+import { source } from "../lib/source";
 
 export function DocsCategory({ url }: { url?: string }) {
 	const location = useLocation();

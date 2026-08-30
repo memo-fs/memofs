@@ -10,48 +10,18 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { createPageMeta } from "./lib/meta";
+import { ROUTES, SITE } from "./lib/site";
 
 export const meta: Route.MetaFunction = () => [
-	{ title: "MemoFS — The File-First Memory Runtime for AI Agents" },
-	{
-		name: "description",
-		content:
-			"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
-	},
+	...createPageMeta({
+		title: "MemoFS — The File-First Memory Runtime for AI Agents",
+		description: SITE.description,
+		path: ROUTES.home,
+	}),
 	{ name: "theme-color", content: "#258acb" },
 	{ name: "msvalidate.01", content: "471697018F51A070DE0EAA3B6E96851E" },
-	{ property: "og:site_name", content: "MemoFS" },
 	{ property: "og:locale", content: "en_US" },
-	{ property: "og:type", content: "website" },
-	{
-		property: "og:title",
-		content: "MemoFS — The File-First Memory Runtime for AI Agents",
-	},
-	{
-		property: "og:description",
-		content:
-			"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
-	},
-	{
-		property: "og:image",
-		content: "https://docs.memofs.dev/og-default.png",
-	},
-	{ name: "twitter:card", content: "summary_large_image" },
-	{ name: "twitter:site", content: "@memofsdev" },
-	{ name: "twitter:creator", content: "@memofsdev" },
-	{
-		name: "twitter:title",
-		content: "MemoFS — The File-First Memory Runtime for AI Agents",
-	},
-	{
-		name: "twitter:description",
-		content:
-			"File-first memory runtime for AI agents. Store decisions as markdown in your repo. Local by default, cloud-ready. MIT licensed.",
-	},
-	{
-		name: "twitter:image",
-		content: "https://docs.memofs.dev/og-default.png",
-	},
 ];
 
 export const links: Route.LinksFunction = () => [

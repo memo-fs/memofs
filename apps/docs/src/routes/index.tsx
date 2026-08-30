@@ -1,45 +1,23 @@
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { useState } from "react";
 import { Link } from "react-router";
-import { BottomCta } from "~/components/bottom-cta";
-import { ComparisonSection } from "~/components/comparison-section";
-import { FeaturesSection } from "~/components/features-section";
-import { Footer } from "~/components/footer";
-import { ProblemSection } from "~/components/problem-section";
-import { RuntimesSection } from "~/components/runtimes-section";
-import { baseOptions } from "~/lib/layout.shared";
+import { BottomCta } from "../components/bottom-cta";
+import { ComparisonSection } from "../components/comparison-section";
+import { FeaturesSection } from "../components/features-section";
+import { Footer } from "../components/footer";
+import { ProblemSection } from "../components/problem-section";
+import { RuntimesSection } from "../components/runtimes-section";
+import { baseOptions } from "../lib/layout.shared";
+import { createPageMeta } from "../lib/meta";
+import { ROUTES } from "../lib/site";
 import type { Route } from "./+types/index";
-
-export async function loader() {
-	return {};
-}
-
-export async function clientLoader() {
-	return {};
-}
 
 export const meta: Route.MetaFunction = () => {
 	const pageTitle = "MemoFS — The File-First Memory for AI Agents";
 	const description =
 		"Store decisions and facts as markdown in your repository. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents.";
-	const canonicalUrl = "https://docs.memofs.dev";
-	const ogImageUrl = "https://docs.memofs.dev/og-default.png";
 
-	return [
-		{ title: pageTitle },
-		{ name: "description", content: description },
-		{ property: "og:title", content: pageTitle },
-		{ property: "og:description", content: description },
-		{ property: "og:url", content: canonicalUrl },
-		{ property: "og:image", content: ogImageUrl },
-		{ property: "og:site_name", content: "MemoFS" },
-		{ name: "twitter:card", content: "summary_large_image" },
-		{ name: "twitter:site", content: "@memofsdev" },
-		{ name: "twitter:title", content: pageTitle },
-		{ name: "twitter:description", content: description },
-		{ name: "twitter:image", content: ogImageUrl },
-		{ tagName: "link", rel: "canonical", href: canonicalUrl },
-	];
+	return createPageMeta({ title: pageTitle, description, path: ROUTES.home });
 };
 
 function CommandPrompt() {

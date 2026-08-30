@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { source } from "~/lib/source";
+import { source } from "../lib/source";
 
 interface Category {
 	id: string;

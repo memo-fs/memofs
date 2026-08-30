@@ -1,7 +1,7 @@
 import { glob } from "node:fs/promises";
 import type { Config } from "@react-router/dev/config";
 import { createGetUrl, getSlugs } from "fumadocs-core/source";
-import { STATIC_PRERENDER_PATHS } from "./app/lib/site";
+import { STATIC_PRERENDER_PATHS } from "./src/lib/site";
 
 const getUrl = createGetUrl("/docs");
 
@@ -11,6 +11,7 @@ export default {
 	// Router server build. Load the complete route manifest in each document so
 	// client navigation never requests the unavailable `/__manifest` endpoint.
 	routeDiscovery: { mode: "initial" },
+	appDirectory: "src",
 	async prerender({ getStaticPaths }) {
 		const paths = new Set<string>(getStaticPaths());
 

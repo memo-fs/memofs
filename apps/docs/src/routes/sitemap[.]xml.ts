@@ -1,20 +1,20 @@
-import { source } from "~/lib/source";
+import { ROUTES, toSiteUrl } from "../lib/site";
+import { source } from "../lib/source";
 
 export function loader() {
-	const baseUrl = "https://docs.memofs.dev";
 	const pages = source.getPages();
 
 	const urls = [
-		{ loc: `${baseUrl}/`, changefreq: "daily", priority: "1.0" },
-		{ loc: `${baseUrl}/docs`, changefreq: "daily", priority: "0.9" },
-		{ loc: `${baseUrl}/cookbooks`, changefreq: "daily", priority: "0.9" },
-		{ loc: `${baseUrl}/changelog`, changefreq: "weekly", priority: "0.8" },
-		{ loc: `${baseUrl}/llms.txt`, changefreq: "weekly", priority: "0.6" },
-		{ loc: `${baseUrl}/llms-full.txt`, changefreq: "weekly", priority: "0.6" },
+		{ loc: toSiteUrl(ROUTES.home), changefreq: "daily", priority: "1.0" },
+		{ loc: toSiteUrl(ROUTES.docs), changefreq: "daily", priority: "0.9" },
+		{ loc: toSiteUrl(ROUTES.cookbooks), changefreq: "daily", priority: "0.9" },
+		{ loc: toSiteUrl(ROUTES.changelog), changefreq: "weekly", priority: "0.8" },
+		{ loc: toSiteUrl(ROUTES.llms), changefreq: "weekly", priority: "0.6" },
+		{ loc: toSiteUrl(ROUTES.llmsFull), changefreq: "weekly", priority: "0.6" },
 		...pages
 			.filter((page) => page.url !== "/docs")
 			.map((page) => ({
-				loc: `${baseUrl}${page.url}`,
+				loc: toSiteUrl(page.url),
 				changefreq: "weekly",
 				priority: page.url.startsWith("/docs/introduction")
 					? "0.9"

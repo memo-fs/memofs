@@ -1,40 +1,22 @@
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { Link } from "react-router";
-import { CookbookIndex } from "~/components/cookbook-index";
-import { Footer } from "~/components/footer";
-import { baseOptions } from "~/lib/layout.shared";
+import { CookbookIndex } from "../components/cookbook-index";
+import { Footer } from "../components/footer";
+import { baseOptions } from "../lib/layout.shared";
+import { createPageMeta } from "../lib/meta";
+import { ROUTES } from "../lib/site";
 import type { Route } from "./+types/cookbooks";
-
-export async function loader() {
-	return {};
-}
-
-export async function clientLoader() {
-	return {};
-}
 
 export const meta: Route.MetaFunction = () => {
 	const pageTitle = "Cookbooks & Integration Recipes — MemoFS";
 	const description =
 		"Step-by-step practical integration recipes for connecting MemoFS to AI coding assistants (Claude Code, Cursor, Copilot, Cline, Aider), agent frameworks, and custom SDKs.";
-	const canonicalUrl = "https://docs.memofs.dev/cookbooks";
-	const ogImageUrl = "https://docs.memofs.dev/og-default.png";
 
-	return [
-		{ title: pageTitle },
-		{ name: "description", content: description },
-		{ property: "og:title", content: pageTitle },
-		{ property: "og:description", content: description },
-		{ property: "og:url", content: canonicalUrl },
-		{ property: "og:image", content: ogImageUrl },
-		{ property: "og:site_name", content: "MemoFS" },
-		{ name: "twitter:card", content: "summary_large_image" },
-		{ name: "twitter:site", content: "@memofsdev" },
-		{ name: "twitter:title", content: pageTitle },
-		{ name: "twitter:description", content: description },
-		{ name: "twitter:image", content: ogImageUrl },
-		{ tagName: "link", rel: "canonical", href: canonicalUrl },
-	];
+	return createPageMeta({
+		title: pageTitle,
+		description,
+		path: ROUTES.cookbooks,
+	});
 };
 
 export default function CookbooksPage() {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SITE } from "../../lib/site";
 
 interface PageActionsProps {
 	markdownUrl: string;
@@ -130,7 +131,7 @@ export function ViewOptions({
 	const fullMarkdownUrl =
 		typeof window !== "undefined"
 			? new URL(markdownUrl, window.location.origin).href
-			: `https://docs.memofs.dev${markdownUrl}`;
+			: `${SITE.docsUrl}${markdownUrl}`;
 
 	const chatGptUrl = `https://chatgpt.com/?q=${encodeURIComponent(
 		`Read the documentation at ${fullMarkdownUrl} and help me understand it.`,
