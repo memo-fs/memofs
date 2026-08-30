@@ -187,3 +187,69 @@ describe("InMemoryRecallStore", () => {
 		expect(result?.metadata?.projectId).toBe("proj_1");
 	});
 });
+
+describe("InMemoryRecallStore.listDocuments", () => {
+	test("enumerates all documents across namespaces", async () => {
+		const store = createInMemoryRecallStore();
+		await store.upsert([
+			createRecallDocument({
+				id: "doc_1",
+				embedding: [1, 0],
+				namespace: "ns_a",
+			}),
+			createRecallDocument({
+				id: "doc_2",
+				embedding: [1, 0],
+				namespace: "ns_b",
+			}),
+		]);
+
+		const documents = await store.listDocuments();
+
+		expect(documents.map((doc) => doc.id).sort()).toEqual(["doc_1", "doc_2"]);
+	});
+
+	test("scopes enumeration to a namespace when given", async () => {
+		const store = createInMemoryRecallStore();
+		await store.upsert([
+			createRecallDocument({
+				id: "doc_1",
+				embedding: [1, 0],
+				namespace: "ns_a",
+			}),
+			createRecallDocument({
+				id: "doc_2",
+				embedding: [1, 0],
+				namespace: "ns_b",
+			}),
+		]);
+
+		const documents = await store.listDocuments({ namespace: "ns_b" });
+
+		expect(documents.map((doc) => doc.id)).toEqual(["doc_2"]);
+	});
+
+	test("returns cloned documents that cannot mutate store state", async () => {
+		const store = createInMemoryRecallStore();
+		await store.upsert([
+			createRecallDocument({
+				id: "doc_1",
+				embedding: [1, 0],
+				metadata: {
+					projectId: "proj_1",
+					sourceType: "note",
+					sourceId: "note_1",
+					memoryType: "notes",
+				},
+			}),
+		]);
+
+		const documents = await store.listDocuments();
+		const [document] = documents;
+		if (!document) throw new Error("Expected a listed document.");
+		document.metadata.projectId = "changed";
+
+		const [result] = await store.query({ embedding: [1, 0], topK: 1 });
+		expect(result?.metadata?.projectId).toBe("proj_1");
+	});
+});

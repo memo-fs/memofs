@@ -203,6 +203,19 @@ export interface MemoFsManifest {
 	 * absence is equivalent to an empty cache (cold start).
 	 */
 	anchorHashCache?: Record<string, AnchorHashCacheEntry>;
+	/**
+	 * Optional one-time maintenance markers. Absent on manifests written by
+	 * runtimes that predate a given maintenance pass; the presence of a
+	 * marker means that pass already ran and must not run again.
+	 */
+	maintenance?: {
+		/**
+		 * ISO 8601 timestamp when legacy unresolvable-source embedding rows
+		 * were scrubbed from the vector index (rows whose `sourceId` was a
+		 * write timestamp instead of a memory id).
+		 */
+		legacyEmbeddingsScrubbedAt: string;
+	};
 }
 
 /**

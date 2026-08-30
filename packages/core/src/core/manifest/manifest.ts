@@ -177,9 +177,33 @@ export function validateMemoFsManifest(value: unknown): MemoFsManifest {
 	if (manifest.anchorHashCache !== undefined) {
 		validateAnchorHashCache(manifest.anchorHashCache);
 	}
+	if (manifest.maintenance !== undefined) {
+		validateMaintenance(manifest.maintenance);
+	}
 	assertJsonSerializable(manifest, "manifest");
 
 	return manifest as MemoFsManifest;
+}
+
+/**
+ * Validates that a value is a well-formed maintenance marker block
+ * ({@link MemoFsManifest.maintenance}).
+ *
+ * @throws {@link MemoryValidationError} If validation fails.
+ */
+function validateMaintenance(
+	value: unknown,
+): asserts value is NonNullable<MemoFsManifest["maintenance"]> {
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		throw new MemoryValidationError("manifest.maintenance must be an object.");
+	}
+	const record = value as { legacyEmbeddingsScrubbedAt?: unknown };
+	if (record.legacyEmbeddingsScrubbedAt !== undefined) {
+		assertIsoTimestamp(
+			record.legacyEmbeddingsScrubbedAt,
+			"manifest.maintenance.legacyEmbeddingsScrubbedAt",
+		);
+	}
 }
 
 /**
