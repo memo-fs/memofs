@@ -1,8 +1,0 @@
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-writable_roots = ["../memofs-cloud"]
-network_access = false
-[mcp_servers.memofs]
-command = "npx"
-args = ["-y","@memofs/mcp-server"]

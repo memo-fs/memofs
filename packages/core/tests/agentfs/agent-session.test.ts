@@ -1,4 +1,3 @@
-import { InMemoryMemoryStore } from "@memofs/core";
 import { describe, expect, test, vi } from "vitest";
 import {
 	MEMORY_EVENTS_PATH,
@@ -8,6 +7,7 @@ import {
 	createAgentWorkspacePaths,
 	createMemoFsAgentSession,
 	extractSessionMemory,
+	InMemoryMemoryStore,
 } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";
 

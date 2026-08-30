@@ -1,0 +1,67 @@
+---
+title: "How to share Organization-Wide Core Memory across Repositories"
+date: "2026-08-09"
+estimatedMinutes: 4
+description: "Align development teams with organization-level core memory rules and shared architectural invariants."
+---
+
+Many engineering teams have baseline policies (coding style, security constraints, deployment protocols, API design rules) that apply across **all** repositories in an organization.
+
+This cookbook shows you how to structure shared organization-wide core memory alongside project-specific memory.
+
+---
+
+## Strategy 1: Shared Git Submodule / Template
+
+Maintain canonical organization standards in a shared repo (e.g. `github.com/my-org/engineering-standards`):
+
+1. Store shared guidelines in `standards/core-org.md`.
+2. Include or reference it in each project's `.memofs/memory/core.md`:
+
+```markdown
+# Project Core Memory
+
+## Organization Standards (Inherited)
+- Security: All public API endpoints require HMAC or JWT validation.
+- Tooling: Default to TypeScript strict mode with pnpm package manager.
+- Formatting: Follow Biome style rules.
+
+## Project-Specific Rules
+- Database: Primary database is PostgreSQL on AWS RDS.
+- Auth: Multi-tenant auth with organization tenancy keys.
+```
+
+---
+
+## Strategy 2: MemoFS Cloud Shared Workspace
+
+When using MemoFS Cloud, organization rules can be managed in an Organization Workspace:
+
+1. Create an Organization Workspace in the [MemoFS Cloud Dashboard](https://memofs.dev).
+2. Set the organization ID in your `.memofs/config.json`:
+
+```json
+{
+  "runtime": "hybrid",
+  "workspaceId": "ws_engineering_org",
+  "projectId": "proj_billing_service",
+  "cloud": {
+    "baseUrl": "https://api.memofs.dev/v1"
+  }
+}
+```
+
+3. MemoFS context queries will blend organization-level constraints with project-level memories seamlessly.
+
+---
+
+## Best Practices
+
+* **Keep Core Memory Lean**: Core memory is loaded on every agent session. Reserve `core.md` for non-negotiable rules; store detailed guides in `notes.md`.
+* **Use Classified Kinds**: Tag organization rules with `--kind constraint` or `--kind decision` so they receive appropriate decay thresholds.
+
+## Related Resources
+
+* [Core Memory Concepts](/core/concepts)
+* [Configuration File Specs](/core/configuration)
+* [Team Memory Sync](./sync.md)

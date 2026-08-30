@@ -1,34 +1,50 @@
 {
 	"name": "@memofs/docs",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"scripts": {
-		"dev": "vitepress dev .",
-		"build": "vitepress build .",
-		"preview": "vitepress preview .",
-		"typecheck": "tsc --noEmit --skipLibCheck",
-		"check:links": "node scripts/check-doc-links.mjs",
-		"check": "npm run check:links && npm run typecheck",
-		"typecheck:functions": "tsc --noEmit --project functions/tsconfig.json"
-	},
-	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260630.1",
-		"@iconify-json/radix-icons": "^1.2.6",
-		"@iconify/vue": "^5.0.1",
-		"@repo/typescript": "workspace:*",
-		"mermaid": "^11.16.0",
-		"tailwindcss": "^4.3.2",
-		"vitepress": "2.0.0-alpha.17",
-		"vitepress-plugin-llmstxt": "^0.5.2",
-		"vitepress-plugin-mermaid": "^2.0.17",
-		"vue": "^3.5.35"
-	},
+	"description": "MemoFS documentation site.",
+	"homepage": "https://docs.memofs.dev/",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/memo-fs/memofs.git",
 		"directory": "apps/docs"
 	},
-	"description": "MemoFS documentation site.",
-	"homepage": "https://docs.memofs.dev/"
+	"scripts": {
+		"build": "react-router build && node scripts/generate-og.mjs",
+		"dev": "react-router dev",
+		"start": "react-router-serve ./build/server/index.js",
+		"typecheck": "react-router typegen && tsc"
+	},
+	"dependencies": {
+		"@fontsource-variable/jetbrains-mono": "^5.3.0",
+		"@fontsource-variable/sora": "^5.3.0",
+		"@react-router/node": "^8",
+		"@react-router/serve": "^8",
+		"@types/mdx": "^2.0.14",
+		"fumadocs-core": "^16.15.4",
+		"fumadocs-mdx": "^15.4.0",
+		"fumadocs-ui": "^16.15.4",
+		"isbot": "^5.1.36",
+		"katex": "^0.16.21",
+		"mermaid": "^11.16.0",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"react-router": "^8",
+		"react-router-auto-routes": "^1.0.0",
+		"rehype-katex": "^7.0.1",
+		"remark-math": "^6.0.0",
+		"takumi-js": "^2.13.1"
+	},
+	"devDependencies": {
+		"@react-router/dev": "^8",
+		"@tailwindcss/vite": "^4.2.2",
+		"@types/katex": "^0.16.7",
+		"@types/node": "^22",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^5.9.3",
+		"vite": "^8.0.3"
+	}
 }

@@ -1,0 +1,54 @@
+{
+	"$id": "https://docs.memofs.dev/schema/connectors.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "MemoFS Connectors Configuration",
+	"type": "object",
+	"properties": {
+		"$schema": {
+			"type": "string",
+			"description": "URL to the schema for this configuration file."
+		},
+		"connectors": {
+			"type": "array",
+			"description": "Connector rows pointing at external sources (GitHub, Notion, …). The file is synced as a canonical unit — tokens must never ride in it.",
+			"items": {
+				"type": "object",
+				"description": "A single connector instance. Credentials are resolved at run time from the opaque \"secretRef\" — raw tokens and token-shaped fields are rejected by the runtime validator.",
+				"required": ["id", "type", "secretRef"],
+				"properties": {
+					"id": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Stable id for this connector instance within the project (e.g. \"github-main\"). Unique across rows."
+					},
+					"type": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Connector type — matches a registered connector type (e.g. \"github\", \"notion\")."
+					},
+					"enabled": {
+						"type": "boolean",
+						"default": true,
+						"description": "Whether the runner should include this connector. Defaults to true."
+					},
+					"schedule": {
+						"type": "string",
+						"description": "Optional schedule hint (cron-ish). Stored but not enforced — execution happens only while the local runtime is alive."
+					},
+					"sourceMapping": {
+						"type": "object",
+						"description": "Source-specific configuration opaque to the framework (e.g. {\"repository\":\"owner/repo\"} for GitHub). Forwarded verbatim to the connector's ingest call."
+					},
+					"secretRef": {
+						"type": "string",
+						"minLength": 1,
+						"description": "Opaque pointer to a credential resolved at run time via a SecretResolver (e.g. \"ss_abc123\"). Never the token itself."
+					}
+				},
+				"additionalProperties": false
+			}
+		}
+	},
+	"required": ["connectors"],
+	"additionalProperties": false
+}

@@ -1,0 +1,13 @@
+{
+	"title": "Self-Hosting",
+	"icon": "Server",
+	"pages": [
+		"index",
+		"node",
+		"cloudflare",
+		"http-api",
+		"storage",
+		"intelligence",
+		"api-reference"
+	]
+}

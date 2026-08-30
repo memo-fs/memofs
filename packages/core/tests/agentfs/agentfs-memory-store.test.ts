@@ -1,17 +1,15 @@
-import {
-	bootstrapMemoryStore,
-	CORE_MEMORY_PATH,
-	MANIFEST_PATH,
-	MEMOFS_PATHS,
-	MemoryNotFoundError,
-	MemoryPathError,
-} from "@memofs/core";
 import { describe, expect, test } from "vitest";
 import {
 	AgentfsClientError,
 	AgentfsMemoryStore,
 	AgentfsValidationError,
+	bootstrapMemoryStore,
+	CORE_MEMORY_PATH,
 	createAgentfsMemoryStore,
+	MANIFEST_PATH,
+	MEMOFS_PATHS,
+	MemoryNotFoundError,
+	MemoryPathError,
 	resolveAgentfsMemoryPath,
 } from "../../src/index";
 import { InMemoryAgentfsClient } from "./test-utils";

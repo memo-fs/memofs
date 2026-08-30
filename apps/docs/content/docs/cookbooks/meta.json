@@ -1,0 +1,6 @@
+{
+	"title": "Cookbooks",
+	"icon": "BookOpen",
+	"root": true,
+	"pages": ["index"]
+}

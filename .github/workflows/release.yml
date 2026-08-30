@@ -85,6 +85,10 @@ jobs:
 
           echo "Found passing benchmark run: ${benchmark_url}"
 
+      - name: Validate changesets
+        if: github.event.inputs.mode == 'prepare'
+        run: node scripts/validate-changesets.mjs
+
       - name: Create release PR
         if: github.event.inputs.mode == 'prepare'
         uses: changesets/action@v1
@@ -102,3 +106,9 @@ jobs:
         run: |
           pnpm release
           git push --follow-tags
+
+      - name: Create GitHub Releases
+        if: github.event.inputs.mode == 'publish'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/create-github-releases.mjs

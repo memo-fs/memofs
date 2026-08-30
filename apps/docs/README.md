@@ -1,38 +1,87 @@
-# MemoFS Docs App
+# Welcome to React Router!
 
-Developer documentation for the MemoFS OSS workspace.
+A modern, production-ready template for building full-stack React applications using React Router.
 
-## Scope
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
 
-This VitePress app documents the MemoFS OSS workspace:
+## Features
 
-- `@memofs/core` (core runtime, filesystem store, agentfs, graph memory, vector/provider adapters, reranking, benchmarks)
-- `memofs` (CLI distribution)
-- `@memofs/mcp-server` (Model Context Protocol server)
-- examples and architecture
+- 🚀 Server-side rendering
+- ⚡️ Hot Module Replacement (HMR)
+- 📦 Asset bundling and optimization
+- 🔄 Data loading and mutations
+- 🔒 TypeScript by default
+- 🎉 TailwindCSS for styling
+- 📖 [React Router docs](https://reactrouter.com/)
 
-It also hosts the engineering blog (`/blog/`), changelog (`/changelog/`), and
-FAQs (`/faqs/`) — engineering content lives where developers already read it
-(per the ADR 0008 docs-IA decision, 2026-06-20). **Commercial pages — pricing,
-billing, legal, roadmap, competitor content — belong in the MemoFS Cloud app,
-not here**, and are blocked from the OSS docs by `scripts/check-doc-links.mjs`.
+## Getting Started
 
-**MemoFS Cloud ships at v1 alongside the OSS**, so cloud-client, hosted-MCP,
-and sync content is documented here too — not deferred to a separate CMS. Every doc claim must be derivable from code and tests; when code and docs disagree, code wins and the doc is the bug.
+### Installation
 
-## Commands
+Install the dependencies:
 
 ```bash
-pnpm --filter @memofs/docs dev
-pnpm --filter @memofs/docs build
-pnpm --filter @memofs/docs preview
-pnpm --filter @memofs/docs check:links
+npm install
 ```
 
-## Environment
+### Development
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `RESEND_API_KEY` | required server-side | Resend **secret** API key (`re_…`) used by the `functions/api/subscribe.ts` Pages Function to create contacts. Set via `wrangler pages secret put` — never inline as a `VITE_` var or commit it. |
-| `RESEND_SEGMENT_ID` | required server-side | UUID of the Resend segment for docs newsletter contacts. Mirrors the cloud app's `RESEND_SEGMENT_ID` pattern (one segment per audience). Set via `wrangler pages secret put` or in `wrangler.jsonc` `vars` (it's not secret). |
-| `RESEND_FROM` | optional | Sender for welcome email — e.g. `MemoFS Team <team@mail.memofs.dev>`. Set in `wrangler.jsonc` `vars` or via secret. If missing, contact is still created but no welcome email is sent. |
+Start the development server with HMR:
+
+```bash
+npm run dev
+```
+
+Your application will be available at `http://localhost:5173`.
+
+## Building for Production
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Deployment
+
+### Docker Deployment
+
+To build and run using Docker:
+
+```bash
+docker build -t my-app .
+
+# Run the container
+docker run -p 3000:3000 my-app
+```
+
+The containerized application can be deployed to any platform that supports Docker, including:
+
+- AWS ECS
+- Google Cloud Run
+- Azure Container Apps
+- Digital Ocean App Platform
+- Fly.io
+- Railway
+
+### DIY Deployment
+
+If you're familiar with deploying Node applications, the built-in app server is production-ready.
+
+Make sure to deploy the output of `npm run build`
+
+```
+├── package.json
+├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
+├── build/
+│   ├── client/    # Static assets
+│   └── server/    # Server-side code
+```
+
+## Styling
+
+This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+
+---
+
+Built with ❤️ using React Router.

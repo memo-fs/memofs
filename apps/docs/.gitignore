@@ -1,4 +1,8 @@
-.vitepress/cache/
-.vitepress/dist/
-.vitepress/.temp/
-node_modules/
+.DS_Store
+.env
+/node_modules/
+
+# React Router
+.react-router/
+.source/
+/build/

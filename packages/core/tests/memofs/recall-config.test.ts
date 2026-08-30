@@ -51,7 +51,7 @@ async function readConfigFileAsFileConfig(
 	}
 }
 
-const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
+const DEFAULT_MODEL = "Xenova/bge-small-en-v1.5";
 
 describe("resolveMemoFsConfig — recall engine", () => {
 	describe("defaults", () => {

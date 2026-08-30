@@ -1,0 +1,291 @@
+---
+title: "JSON-RPC Primitives"
+description: "Zero-dependency JSON-RPC 2.0 protocol primitives, request validation, error envelopes, and spec codes for MemoFS."
+---
+
+`@memofs/json-rpc` is a **zero-dependency**, neutral JSON-RPC 2.0 protocol implementation and Single Source of Truth (SSOT) shared across the MemoFS workspace. It powers both the Model Context Protocol (MCP) server (`@memofs/mcp-server`) and the self-hostable HTTP runtime (`@memofs/server`), ensuring that transport layers never vendor duplicated protocol logic.
+
+## Installation
+
+Install `@memofs/json-rpc` in your project:
+
+
+<Tabs items={['npm', 'pnpm', 'bun', 'deno']}>
+  <Tab value="npm">
+```bash
+npm install @memofs/json-rpc
+```
+  </Tab>
+  <Tab value="pnpm">
+```bash
+pnpm add @memofs/json-rpc
+```
+  </Tab>
+  <Tab value="bun">
+```bash
+bun add @memofs/json-rpc
+```
+  </Tab>
+  <Tab value="deno">
+```bash
+deno add npm:@memofs/json-rpc
+```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+Requires **Node.js >= 22**, or any modern JavaScript environment (Cloudflare Workers, Deno, Bun, Browser) with zero external dependencies.
+</Callout>
+
+## Key Features
+
+- **Zero Runtime Dependencies:** Pure TypeScript implementation with zero external dependencies.
+- **Spec-Compliant Validation:** Strict conformance to the [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification) (§4, §4.1, §4.2, §5, §5.1).
+- **Safe Payload Parsing:** `parseJsonRpcPayload` converts raw strings into parsed objects, automatically mapping syntax errors to `-32700` (`parseError`).
+- **Request & Notification Discrimination:** Distinguishes between requests (carrying an `id`) and fire-and-forget notifications (`isNotification(request)`).
+- **Strongly Typed Envelopes:** Pre-built constructors (`success`, `failure`) for building type-safe JSON-RPC 2.0 response objects.
+
+## Core Protocol Types
+
+```ts
+import type {
+  JsonRpcId,
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcSuccessResponse,
+  JsonRpcErrorResponse,
+  JsonValue,
+  JsonObject,
+} from "@memofs/json-rpc";
+```
+
+### Identifier (`JsonRpcId`)
+
+Per spec §4, request correlation IDs must be a string, number, or `null`:
+
+```ts
+type JsonRpcId = string | number | null;
+```
+
+### Request Structure (`JsonRpcRequest`)
+
+```ts
+interface JsonRpcRequest {
+  /** JSON-RPC protocol version. Must be "2.0". */
+  jsonrpc: "2.0";
+  /** Optional identifier. Omitted in notifications. */
+  id?: JsonRpcId;
+  /** Name of the method to invoke. */
+  method: string;
+  /** Method arguments object (must be a plain JavaScript object). */
+  params?: JsonObject;
+}
+```
+
+### Response Envelopes (`JsonRpcResponse`)
+
+```ts
+interface JsonRpcSuccessResponse {
+  jsonrpc: "2.0";
+  id: JsonRpcId;
+  result: JsonValue;
+}
+
+interface JsonRpcErrorResponse {
+  jsonrpc: "2.0";
+  id: JsonRpcId;
+  error: {
+    code: number;
+    message: string;
+    data?: JsonValue;
+  };
+}
+
+type JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse;
+```
+
+## Parsing & Request Validation
+
+### 1. Safe JSON Payload Parsing (`parseJsonRpcPayload`)
+
+Parses raw JSON strings into JavaScript values. If parsing fails, it throws a `JsonRpcProtocolError` mapped to `JSON_RPC_ERRORS.parseError` (`-32700`):
+
+```ts
+import { parseJsonRpcPayload, JsonRpcProtocolError } from "@memofs/json-rpc";
+
+try {
+  const rawBody = '{"jsonrpc":"2.0","id":1,"method":"recall","params":{"query":"database"}}';
+  const parsed = parseJsonRpcPayload(rawBody);
+  console.log("Parsed payload:", parsed);
+} catch (error) {
+  if (error instanceof JsonRpcProtocolError) {
+    console.error(`Parse failed with code ${error.jsonRpcCode}: ${error.message}`);
+  }
+}
+```
+
+### 2. Request Validation (`validateJsonRpcRequest`)
+
+Validates that an unknown value conforms to `JsonRpcRequest`. It verifies:
+1. The value is a plain JavaScript object (`isPlainObject(value)`).
+2. `jsonrpc` equals `"2.0"`.
+3. `method` is a non-empty string.
+4. `id` is a string, number, `null`, or `undefined`.
+5. `params` (if provided) is a plain JavaScript object.
+
+```ts
+import {
+  validateJsonRpcRequest,
+  isNotification,
+  JsonRpcProtocolError,
+} from "@memofs/json-rpc";
+
+try {
+  const request = validateJsonRpcRequest(parsedPayload);
+
+  if (isNotification(request)) {
+    console.log(`Received notification: ${request.method}`);
+    // Process without returning a response
+  } else {
+    console.log(`Processing request #${request.id}: ${request.method}`);
+    // Process and return response
+  }
+} catch (error) {
+  if (error instanceof JsonRpcProtocolError) {
+    // Throws invalidRequest (-32600) or invalidParams (-32602)
+    console.error(`Invalid request [${error.jsonRpcCode}]: ${error.message}`);
+  }
+}
+```
+
+## Building Responses
+
+`@memofs/json-rpc` provides helper functions to construct spec-compliant response envelopes:
+
+```ts
+import { success, failure, JSON_RPC_ERRORS } from "@memofs/json-rpc";
+
+// 1. Build a successful response
+const successResponse = success("req-123", {
+  items: [{ id: "mem_1", content: "We use Postgres." }],
+});
+// Result:
+// {
+//   jsonrpc: "2.0",
+//   id: "req-123",
+//   result: { items: [{ id: "mem_1", content: "We use Postgres." }] }
+// }
+
+// 2. Build an error response
+const errorResponse = failure(
+  "req-123",
+  JSON_RPC_ERRORS.methodNotFound,
+  "Method 'unknownMethod' not found on server",
+  { availableMethods: ["recall", "context", "write"] }
+);
+// Result:
+// {
+//   jsonrpc: "2.0",
+//   id: "req-123",
+//   error: {
+//     code: -32601,
+//     message: "Method 'unknownMethod' not found on server",
+//     data: { availableMethods: ["recall", "context", "write"] }
+//   }
+// }
+```
+
+## Standard Spec Error Codes (`JSON_RPC_ERRORS`)
+
+The `JSON_RPC_ERRORS` constant catalogs all five standard JSON-RPC 2.0 error codes defined in §5.1:
+
+| Key | Code | Spec Meaning | When Thrown |
+|---|---|---|---|
+| `parseError` | **`-32700`** | Parse error | Invalid JSON received by the server. |
+| `invalidRequest` | **`-32600`** | Invalid Request | JSON sent does not conform to the Request schema (`jsonrpc !== "2.0"`, missing method, invalid `id`). |
+| `methodNotFound` | **`-32601`** | Method not found | The requested method does not exist or is not available. |
+| `invalidParams` | **`-32602`** | Invalid params | Method parameter object is invalid or not a plain object. |
+| `internalError` | **`-32603`** | Internal error | Internal JSON-RPC execution error. |
+
+```ts
+import { JSON_RPC_ERRORS } from "@memofs/json-rpc";
+
+console.log(JSON_RPC_ERRORS.parseError);     // -32700
+console.log(JSON_RPC_ERRORS.invalidRequest); // -32600
+console.log(JSON_RPC_ERRORS.methodNotFound); // -32601
+console.log(JSON_RPC_ERRORS.invalidParams);  // -32602
+console.log(JSON_RPC_ERRORS.internalError);  // -32603
+```
+
+## The Protocol Error Class (`JsonRpcProtocolError`)
+
+`JsonRpcProtocolError` is thrown by `parseJsonRpcPayload` and `validateJsonRpcRequest`. Consumers can inspect the `jsonRpcCode` and attach custom structured `data`:
+
+```ts
+import { JsonRpcProtocolError, JSON_RPC_ERRORS } from "@memofs/json-rpc";
+
+const error = new JsonRpcProtocolError("Missing required parameter: query", {
+  jsonRpcCode: JSON_RPC_ERRORS.invalidParams,
+  data: { field: "query", expected: "string" },
+});
+
+console.log(error.name);        // "JsonRpcProtocolError"
+console.log(error.message);     // "Missing required parameter: query"
+console.log(error.jsonRpcCode); // -32602
+console.log(error.data);        // { field: "query", expected: "string" }
+```
+
+## Complete Request Handler Example
+
+Here is a complete JSON-RPC 2.0 dispatch pipeline combining all primitives:
+
+```ts
+import {
+  parseJsonRpcPayload,
+  validateJsonRpcRequest,
+  isNotification,
+  success,
+  failure,
+  JSON_RPC_ERRORS,
+  JsonRpcProtocolError,
+  type JsonRpcResponse,
+} from "@memofs/json-rpc";
+
+export async function handleJsonRpcMessage(
+  rawInput: string,
+  dispatcher: (method: string, params?: Record<string, unknown>) => Promise<unknown>
+): Promise<JsonRpcResponse | null> {
+  let requestId: string | number | null = null;
+
+  try {
+    // 1. Parse JSON string
+    const parsed = parseJsonRpcPayload(rawInput);
+
+    // 2. Validate request schema
+    const request = validateJsonRpcRequest(parsed);
+    requestId = request.id ?? null;
+
+    // 3. Handle notifications (no response returned)
+    if (isNotification(request)) {
+      await dispatcher(request.method, request.params);
+      return null;
+    }
+
+    // 4. Dispatch method
+    const result = await dispatcher(request.method, request.params);
+    return success(request.id!, result as any);
+
+  } catch (error) {
+    if (error instanceof JsonRpcProtocolError) {
+      return failure(requestId, error.jsonRpcCode, error.message, error.data);
+    }
+
+    // Unhandled application errors map to Internal Error (-32603)
+    return failure(
+      requestId,
+      JSON_RPC_ERRORS.internalError,
+      error instanceof Error ? error.message : "Internal error"
+    );
+  }
+}
+```

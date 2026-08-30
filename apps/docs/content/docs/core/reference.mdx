@@ -1,0 +1,192 @@
+---
+title: "MemoFS Client Reference"
+description: "Complete API reference for the MemoFS unified client class, instance properties, and sub-namespace methods."
+---
+
+The `MemoFS` class is the central client orchestrating storage, intelligence, retrieval, graph operations, agent sessions, and cloud replication.
+
+```ts
+import { MemoFS } from "@memofs/core";
+import { createNodeMemoFs } from "@memofs/core/node-fs";
+```
+
+## Constructor
+
+```ts
+constructor(config?: MemoFsConfig)
+```
+
+Creates a new `MemoFS` instance:
+```ts
+const memofs = new MemoFS(config);
+```
+When running under Node.js, `createNodeMemoFs(config)` is recommended to automatically supply the Node filesystem store and configuration file parser.
+
+## Instance Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `memofs.mode` | `"local" \| "hybrid"` | Active runtime mode. |
+| `memofs.projectId` | `string` | Unique project workspace ID. |
+| `memofs.rootDir` | `string` | Resolved workspace root directory. |
+| `memofs.store` | `MemoryStore` | Underlying canonical storage adapter. |
+| `memofs.embedder` | `MemoryEmbedder \| undefined` | Injected vector embedder. |
+| `memofs.extractor` | `Extractor \| undefined` | Injected or default graph extractor. |
+| `memofs.reranker` | `Reranker \| undefined` | Injected or default retrieval reranker. |
+| `memofs.llmClient` | `LlmClient \| undefined` | Injected provider-neutral LLM client. |
+| `memofs.recallStore`| `RecallStore \| undefined` | Injected or auto-configured vector store. |
+| `memofs.cloud` | `MemoFsCloudClient \| undefined` | Injected or configured cloud sync client. |
+| `memofs.name` | `string` | Runtime client name (`"@memofs/core"`). |
+| `memofs.version` | `string` | Runtime package version. |
+| `memofs.recallConfig`| `ResolvedMemoFsConfig["recall"]` | Resolved recall engine settings. |
+| `memofs.tenantId` | `string \| undefined` | Optional multi-tenant identifier. |
+| `memofs.workspaceId`| `string \| undefined` | Optional sub-workspace identifier. |
+
+## Root Instance Methods
+
+### `memofs.recall(query, options)`
+Performs hybrid lexical and vector search over memory chunks.
+```ts
+memofs.recall(
+  query: string,
+  options?: {
+    limit?: number;
+    filter?: RecallFilter;
+    namespace?: string;
+    workspaceId?: string;
+    projectId?: string;
+  }
+): Promise<RecallResult>
+```
+
+### `memofs.context(input, signal)`
+Assembles a progressive-disclosure prompt briefing for an AI agent.
+```ts
+memofs.context(
+  input: MemoryContextInput,
+  signal?: AbortSignal
+): Promise<MemoryContextResult>
+```
+
+### `memofs.writeMemory(input, signal)`
+Writes a classified, durable memory entry with secret-blocklist validation.
+```ts
+memofs.writeMemory(
+  input: WriteMemoryInput,
+  signal?: AbortSignal
+): Promise<WriteMemoryResult>
+```
+
+### `memofs.listRecentMemories(input, signal)`
+Lists recent memory audit events.
+```ts
+memofs.listRecentMemories(
+  input?: RecentMemoryInput,
+  signal?: AbortSignal
+): Promise<RecentMemoryResult>
+```
+
+### `memofs.validate(input, signal)`
+Validates filesystem, JSONL, and graph integrity.
+```ts
+memofs.validate(
+  input?: ValidateMemoryInput,
+  signal?: AbortSignal
+): Promise<ValidateMemoryResult>
+```
+
+### `memofs.consolidate(input, signal)`
+Runs memory consolidation: merges duplicate entities and retires superseded facts.
+```ts
+memofs.consolidate(
+  input?: ConsolidateMemoryInput,
+  signal?: AbortSignal
+): Promise<ConsolidateMemoryResult>
+```
+
+### `memofs.migrateAnchors()`
+Backfills `AnchorRef` code bindings on existing notes.
+```ts
+memofs.migrateAnchors(): Promise<MigrateAnchorsResult>
+```
+
+### `memofs.archiveDeprecated()`
+Moves deprecated memories to `.memofs/archive/<id>.json`.
+```ts
+memofs.archiveDeprecated(): Promise<ArchiveDeprecatedResult>
+```
+
+### `memofs.restoreMemory(id, signal)`
+Restores an archived memory back into active notes and reactivates graph nodes.
+```ts
+memofs.restoreMemory(
+  id: string,
+  signal?: AbortSignal
+): Promise<RestoreMemoryResult>
+```
+
+### `memofs.health(signal)`
+Checks runtime health and discovered capabilities.
+```ts
+memofs.health(signal?: AbortSignal): Promise<MemoFSHealthResult>
+```
+
+### `memofs.runCommand(command)`
+Executes a structured `MemoryCommand` (`view`, `create`, `update`, `search`).
+```ts
+memofs.runCommand(command: MemoryCommand): Promise<string>
+```
+
+### `memofs.bootstrap(options)`
+Bootstraps all 11 canonical `.memofs/` files with default templates if missing.
+```ts
+memofs.bootstrap(options?: BootstrapMemoryStoreOptions): Promise<void>
+```
+
+## Sub-Namespaces
+
+### `memofs.core`
+- `read(signal?: AbortSignal): Promise<string>`
+- `update(content: string, signal?: AbortSignal): Promise<void>`
+
+### `memofs.notes`
+- `read(signal?: AbortSignal): Promise<string>`
+- `record(note: TimestampedNoteInput, signal?: AbortSignal): Promise<WriteMemoryResult>`
+
+### `memofs.conversations`
+- `read(options?: ReadConversationHistoryOptions): Promise<ConversationEntry[]>`
+- `append(entry: ConversationEntry): Promise<void>`
+
+### `memofs.graph`
+- `upsertNodes(input: { nodes: GraphNodeInput[] }, signal?: AbortSignal): Promise<{ nodes: GraphNodeInput[] }>`
+- `upsertEdges(input: { edges: GraphEdgeInput[] }, signal?: AbortSignal): Promise<{ edges: GraphEdgeInput[] }>`
+- `neighbors(input: GraphNeighborsInput, signal?: AbortSignal): Promise<GraphNeighborsResult>`
+- `path(input: GraphPathInput, signal?: AbortSignal): Promise<GraphPathResult>`
+- `listNodes(input: ListGraphInput, signal?: AbortSignal): Promise<{ items: GraphNodeInput[]; nextCursor?: string }>`
+- `listEdges(input: ListGraphInput, signal?: AbortSignal): Promise<{ items: GraphEdgeInput[]; nextCursor?: string }>`
+
+### `memofs.snapshots`
+- `create(input?: SnapshotMemoryInput, signal?: AbortSignal): Promise<SnapshotMemoryResult>`
+- `list(): Promise<SnapshotRecord[]>`
+- `restore(id: string): Promise<void>`
+
+### `memofs.agentfs`
+- `startSession(input: AgentSessionStartInput, signal?: AbortSignal): Promise<AgentSessionResult>`
+- `readFile(input: AgentSessionFileInput, signal?: AbortSignal): Promise<string>`
+- `writeFile(input: AgentSessionFileInput, signal?: AbortSignal): Promise<void>`
+- `appendFile(input: AgentSessionFileInput, signal?: AbortSignal): Promise<void>`
+- `extract(input: { sessionId: string }, signal?: AbortSignal): Promise<AgentSessionExtractResult>`
+- `complete(input: AgentSessionCompleteInput, signal?: AbortSignal): Promise<AgentSessionCompleteResult>`
+- `createSession(options: CreateMemoFSAgentSessionOptions): MemoFSAgentSession`
+- `store(client: AgentfsLikeClient, config: AgentfsMemoryStoreConfig): AgentfsMemoryStore`
+
+### `memofs.sync` (Hybrid Mode)
+- `push(input: SyncPushInput, signal?: AbortSignal): Promise<SyncPushResult>`
+- `complete(input: SyncPushCompleteInput, signal?: AbortSignal): Promise<SyncPushCompleteResult>`
+- `pull(input: SyncPullInput, signal?: AbortSignal): Promise<SyncPullResult>`
+- `status(input?: SyncStatusInput, signal?: AbortSignal): Promise<SyncStatusResult>`
+
+### `memofs.rerank`
+- `sort: stableSortRerankResults`
+- `applyTopK: applyTopK`
+- `createFallback(): DeterministicFallbackReranker`

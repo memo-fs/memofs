@@ -13,7 +13,10 @@
 import type { LlmClient } from "../ai-runtime/llm-client";
 import { DEFAULT_CLOUD_BASE_URL } from "../cloud-client/client";
 import type { MemoFsCloudClientOptions } from "../cloud-client/types";
-import type { MemoryEmbedder } from "../core/types/embeddings";
+import {
+	DEFAULT_LOCAL_EMBEDDING_MODEL,
+	type MemoryEmbedder,
+} from "../core/types/embeddings";
 import type { MemoryStore } from "../core/types/memory-store";
 import type { Extractor } from "../graph/extraction/extractor";
 import type { RecallStore } from "../recall/types";
@@ -73,6 +76,14 @@ export interface MemoFsConfig {
 	cloud?: MemoFsCloudOptions;
 	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap?: boolean;
+	/**
+	 * When `true` (default), `writeMemory` no-ops notes that near-duplicate an
+	 * already-indexed memory (deterministic dedup-on-write guard) and returns
+	 * `created: false` + `duplicateOf` instead of appending. Set `false` for
+	 * capture-everything pipelines that want every write appended verbatim.
+	 * @defaultValue `true`
+	 */
+	dedupeOnWrite?: boolean;
 	name?: string;
 	version?: string;
 	/**
@@ -105,7 +116,7 @@ export interface RecallEngineConfig {
 	localEmbeddings?: boolean;
 	/**
 	 * Optional local embedding model id (Transformers.js compatible).
-	 * @defaultValue `"Xenova/all-MiniLM-L6-v2"`
+	 * @defaultValue {@link DEFAULT_LOCAL_EMBEDDING_MODEL}
 	 */
 	embeddingModel?: string;
 }
@@ -125,6 +136,7 @@ export interface ResolvedMemoFsConfig {
 	cloud?: MemoFsCloudClientOptions;
 	cloudClient?: import("../cloud-client/types").MemoFsCloudClient;
 	autoBootstrap: boolean;
+	dedupeOnWrite: boolean;
 	name: string;
 	version: string;
 	recall: Required<RecallEngineConfig>;
@@ -219,6 +231,7 @@ export function resolveMemoFsConfig(input: {
 			? { cloudClient: config.cloudClient }
 			: {}),
 		autoBootstrap: config.autoBootstrap ?? true,
+		dedupeOnWrite: config.dedupeOnWrite ?? true,
 		name: config.name ?? "memofs",
 		version: config.version ?? "0.1.0",
 		recall,
@@ -264,7 +277,7 @@ function resolveRecallEngine(
 			? env.MEMOFS_EMBEDDING_MODEL
 			: undefined) ??
 		fileRecall.embeddingModel ??
-		"Xenova/all-MiniLM-L6-v2";
+		DEFAULT_LOCAL_EMBEDDING_MODEL;
 
 	return { engine, localEmbeddings: localEmbeddingsRaw, embeddingModel };
 }

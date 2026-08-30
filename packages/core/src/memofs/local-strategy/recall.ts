@@ -30,10 +30,23 @@ export async function localRecall(
 	>();
 	if (ctx.options.embedder && ctx.options.recallStore) {
 		try {
-			const embedResult = await ctx.options.embedder.embedText(input.query);
+			// Query-side embedding: adapters for instruction-tuned models
+			// (bge, e5, nomic) apply the model's query prefix here.
+			const embedResult = ctx.options.embedder.embedQuery
+				? await ctx.options.embedder.embedQuery(input.query)
+				: await ctx.options.embedder.embedText(input.query);
+			// Only score chunks embedded by the same model — vectors from
+			// different models live in incomparable spaces, and unstamped
+			// legacy rows predate model tracking. Both drop out of the
+			// vector path; lexical recall still covers them. Embedders that
+			// violate the contract by omitting `model` skip the guard.
+			const queryModel = embedResult.model;
 			const results = await ctx.options.recallStore.query({
 				embedding: embedResult.embedding,
 				topK: limit * 3,
+				...(typeof queryModel === "string" && queryModel.length > 0
+					? { filter: { model: queryModel } }
+					: {}),
 			});
 			for (const r of results) {
 				vectorCandidates.set(r.id, {

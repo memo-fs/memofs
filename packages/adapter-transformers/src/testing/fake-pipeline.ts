@@ -17,7 +17,7 @@ import type {
 const DEFAULT_DIMENSIONS = 384;
 
 export interface FakePipelineOptions {
-	/** Embedding dimension. Defaults to 384 (matches all-MiniLM-L6-v2). */
+	/** Embedding dimension. Defaults to 384 (matches the default embed models). */
 	dimensions?: number;
 }
 

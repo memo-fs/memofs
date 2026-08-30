@@ -29,7 +29,8 @@
 				"default": "./dist/index.cjs"
 			}
 		},
-		"./schema/config.json": "./schema/config.json"
+		"./schema/config.json": "./schema/config.json",
+		"./schema/connectors.json": "./schema/connectors.json"
 	},
 	"bin": {
 		"memofs": "./dist/bin/memofs.mjs"
@@ -38,6 +39,7 @@
 		"dist",
 		"schema",
 		"README.md",
+		"CHANGELOG.md",
 		"LICENSE"
 	],
 	"publishConfig": {

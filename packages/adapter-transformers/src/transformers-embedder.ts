@@ -9,17 +9,19 @@
  * @public
  */
 
-import type {
-	EmbeddingRecord,
-	EmbedTextsInput,
-	EmbedTextsResult,
-	MemoryEmbedder,
+import {
+	DEFAULT_LOCAL_EMBEDDING_MODEL,
+	type EmbeddingRecord,
+	type EmbedTextsInput,
+	type EmbedTextsResult,
+	type MemoryEmbedder,
 } from "@memofs/core";
 import { omitUndefined, withRetry } from "@repo/utils";
 import {
 	TransformersInferenceError,
 	TransformersValidationError,
 } from "./errors";
+import { resolveModelCacheDir } from "./model-cache";
 import type {
 	FeatureExtractionPipeline,
 	FeatureExtractionPipelineFactory,
@@ -27,12 +29,60 @@ import type {
 	TransformersProgressCallback,
 } from "./types";
 
-const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
 const DEFAULT_DEVICE = "cpu";
-const DEFAULT_DTYPE = "fp32";
+const DEFAULT_DTYPE = "q8";
 const DEFAULT_BATCH_SIZE = 32;
 const DEFAULT_RETRIES = 2;
 const MAX_TEXT_LENGTH = 8192;
+
+/**
+ * Per-family instruction prefixes for asymmetric embedding models.
+ *
+ * Models like bge, e5, and nomic are instruction-tuned: they expect (or
+ * recommend) different text prefixes on the query side vs the document side.
+ * Prefix-less models (all-MiniLM, gte, paraphrase-*) are symmetric — no
+ * prefixes apply. Matched by substring so versioned ids (e.g.
+ * `Xenova/multilingual-e5-small`) resolve without an exact allowlist.
+ */
+const INSTRUCTION_PREFIXES: Array<{
+	matches: (model: string) => boolean;
+	query?: string;
+	document?: string;
+}> = [
+	{
+		// bge v1.5 en embedders (NOT rerankers — those are cross-encoders).
+		matches: (m) => m.includes("bge-") && !m.includes("reranker"),
+		query: "Represent this sentence for searching relevant passages: ",
+	},
+	{
+		matches: (m) => m.includes("e5"),
+		query: "query: ",
+		document: "passage: ",
+	},
+	{
+		matches: (m) => m.includes("nomic"),
+		query: "search_query: ",
+		document: "search_document: ",
+	},
+];
+
+/**
+ * Resolve the instruction prefixes for a model id.
+ *
+ * @internal
+ */
+export function instructionPrefixesFor(model: string): {
+	query?: string;
+	document?: string;
+} {
+	const lowered = model.toLowerCase();
+	for (const entry of INSTRUCTION_PREFIXES) {
+		if (entry.matches(lowered)) {
+			return { query: entry.query, document: entry.document };
+		}
+	}
+	return {};
+}
 
 /**
  * Normalize a pipeline output into a flat `number[]` embedding vector.
@@ -133,7 +183,7 @@ function isPipelineLoadRetryable(error: unknown): boolean {
  */
 export class TransformersEmbedder implements MemoryEmbedder {
 	private readonly model: string;
-	private readonly cacheDir?: string;
+	private readonly cacheDir: string;
 	private readonly device: string;
 	private readonly dtype: string;
 	private readonly batchSize: number;
@@ -145,8 +195,10 @@ export class TransformersEmbedder implements MemoryEmbedder {
 	private inferredDimensions: number | undefined;
 
 	constructor(options: TransformersEmbedderOptions = {}) {
-		this.model = options.model ?? DEFAULT_MODEL;
-		this.cacheDir = options.cacheDir;
+		this.model = options.model ?? DEFAULT_LOCAL_EMBEDDING_MODEL;
+		// Always explicit: a shared user-level cache means weights download
+		// once per machine instead of once per process working directory.
+		this.cacheDir = options.cacheDir ?? resolveModelCacheDir();
 		this.device = options.device ?? DEFAULT_DEVICE;
 		this.dtype = options.dtype ?? DEFAULT_DTYPE;
 		this.batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
@@ -190,6 +242,28 @@ export class TransformersEmbedder implements MemoryEmbedder {
 		return first;
 	}
 
+	/**
+	 * Embed a retrieval query with the model's query-side instruction prefix
+	 * applied (bge/e5/nomic families). Records still carry the original text.
+	 */
+	async embedQuery(
+		text: string,
+		options?: Omit<EmbedTextsInput, "texts" | "purpose">,
+	): Promise<EmbeddingRecord> {
+		const result = await this.embedTexts({
+			...options,
+			texts: [text],
+			purpose: "query",
+		});
+		const first = result.embeddings[0];
+		if (!first) {
+			throw new TransformersInferenceError(
+				"Transformers pipeline returned no embedding for a single input.",
+			);
+		}
+		return first;
+	}
+
 	async embedTexts(input: EmbedTextsInput): Promise<EmbedTextsResult> {
 		const allowEmpty = input.allowEmptyText ?? false;
 		validateTexts(input.texts, allowEmpty);
@@ -204,7 +278,19 @@ export class TransformersEmbedder implements MemoryEmbedder {
 
 		const pipeline = await this.loadPipeline();
 		const batchSize = input.batchSize ?? this.batchSize;
-		const batches = batch(input.texts, batchSize);
+
+		// Instruction-tuned models expect a purpose-specific prefix; the
+		// prefix feeds the pipeline only — returned records keep the
+		// caller's original text.
+		const prefixes = instructionPrefixesFor(this.model);
+		const prefix =
+			(input.purpose ?? "document") === "query"
+				? prefixes.query
+				: prefixes.document;
+		const effectiveTexts = prefix
+			? input.texts.map((text) => prefix + text)
+			: input.texts;
+		const batches = batch(effectiveTexts, batchSize);
 
 		const records: EmbeddingRecord[] = [];
 		let approxTokens = 0;
@@ -239,10 +325,17 @@ export class TransformersEmbedder implements MemoryEmbedder {
 					{ expected: input.expectedDimensions, actual: dim },
 				);
 			}
-			for (const [i, text] of texts.entries()) {
+			for (const [i] of texts.entries()) {
 				const start = i * dim;
 				const embedding = flat.slice(start, start + dim);
 				const originalIndex = batchIndex * batchSize + i;
+				const text = input.texts[originalIndex];
+				if (text === undefined) {
+					throw new TransformersInferenceError(
+						"Batch bookkeeping desynced from the input texts.",
+						{ originalIndex },
+					);
+				}
 				// Rough token estimate (words) — used only for usage accounting.
 				approxTokens += text.split(/\s+/).filter(Boolean).length;
 				records.push({

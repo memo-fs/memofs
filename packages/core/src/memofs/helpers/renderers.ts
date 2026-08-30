@@ -25,7 +25,7 @@ import type {
  */
 export const AGENT_CONTEXT_DIRECTIVE = `MemoFS is your long-term memory — treat it as the single source of truth for project identity, architecture, constraints, and decisions.
 
-- Adhere to memory: follow the constraints, decisions, and preferences below. Stored facts override assumptions and guesses.
+- Adhere to memory: follow the constraints, decisions, preferences, and other sections below. Stored facts override assumptions and guesses.
 - Recall before answering: when a fact, convention, or prior decision might exist, call memofs.recall instead of re-deriving it.
 - Persist discoveries: when you learn a durable decision, constraint, preference, or architectural fact, call memofs.remember (classify with kind, set confidence) without waiting to be asked.
 - Never store secrets, credentials, or environment values. Respect read-only intent where indicated.`;

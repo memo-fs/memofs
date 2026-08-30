@@ -1,0 +1,245 @@
+---
+title: "Command Line Interface"
+description: "Command-line interface (@memofs/cli) reference for initializing, syncing, and managing agent memory."
+---
+
+The `@memofs/cli` package provides the primary command-line tool for managing local and hybrid memory workflows.
+
+## Installation
+
+Install the CLI as a development dependency in your project:
+
+
+<Tabs items={['npm', 'pnpm', 'bun', 'deno']}>
+  <Tab value="npm">
+```bash
+npm install -D @memofs/cli
+```
+  </Tab>
+  <Tab value="pnpm">
+```bash
+pnpm add -D @memofs/cli
+```
+  </Tab>
+  <Tab value="bun">
+```bash
+bun add -d @memofs/cli
+```
+  </Tab>
+  <Tab value="deno">
+```bash
+deno add -D npm:@memofs/cli
+```
+  </Tab>
+</Tabs>
+
+
+<Callout type="info">
+Requires **Node.js >= 22**.
+</Callout>
+
+Or install globally:
+
+
+<Tabs items={["npm", "pnpm", "bun", "deno"]}>
+  <Tab value="npm">
+```bash
+npm install -g @memofs/cli
+```
+  </Tab>
+  <Tab value="pnpm">
+```bash
+pnpm add -g @memofs/cli
+```
+  </Tab>
+  <Tab value="bun">
+```bash
+bun add -g @memofs/cli
+```
+  </Tab>
+  <Tab value="deno">
+```bash
+deno install --global -A npm:@memofs/cli
+```
+  </Tab>
+</Tabs>
+
+
+You can also run it on demand without installation:
+
+```bash
+npx @memofs/cli --help
+```
+
+## Global Flags
+
+All commands accept these global flags before the subcommand:
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-r, --root <path>` | Project root containing `.memofs/` | Current directory |
+| `--runtime <mode>` | Runtime mode: `local` or `hybrid` | `local` |
+| `--cloud-url <url>` | MemoFS Cloud API URL | `MEMOFS_CLOUD_URL` env |
+| `--api-key <key>` | MemoFS Cloud API key | `MEMOFS_API_KEY` env |
+| `--workspace-id <id>` | Default cloud workspace ID | `MEMOFS_WORKSPACE_ID` env |
+| `-p, --project-id <id>` | Default cloud project ID | `MEMOFS_PROJECT_ID` env |
+| `--timeout-ms <n>` | Cloud request timeout in milliseconds (positive integer) | — |
+| `-j, --json` | Output machine-readable JSON envelope | `false` |
+| `-v, --verbose` | Show detailed output | `false` |
+| `-q, --quiet` | Suppress all output except errors | `false` |
+| `--no-color` | Disable colored terminal output (`NO_COLOR` env supported) | `false` |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `MEMOFS_RUNTIME` | Runtime mode: `local` or `hybrid` |
+| `MEMOFS_CLOUD_URL` | MemoFS Cloud API URL |
+| `MEMOFS_API_KEY` | MemoFS Cloud API key |
+| `MEMOFS_WORKSPACE_ID` | Cloud workspace ID |
+| `MEMOFS_PROJECT_ID` | Cloud project ID |
+| `MEMOFS_ROOT` | Project root containing `.memofs/` |
+| `MEMOFS_RECALL_ENGINE` | Recall engine: `lexical`, `vector`, `hybrid`, or `auto` |
+| `MEMOFS_LOCAL_EMBEDDINGS` | Enable local embeddings (`1` or `true`) |
+| `MEMOFS_EMBEDDING_MODEL` | Transformers.js embedding model ID |
+| `NO_COLOR` | When present, disables ANSI colors in terminal output |
+
+## JSON Output & Envelopes
+
+When running with `-j` or `--json`, every command formats its stdout as a single JSON object conforming to `JsonEnvelope<T>`:
+
+### Success Envelope
+
+```json
+{
+  "ok": true,
+  "command": "remember",
+  "data": {
+    "stored": true,
+    "eventId": "evt_1723766400000_abc123",
+    "path": ".memofs/memory/notes.md",
+    "kind": "decision",
+    "tags": ["auth"],
+    "confidence": 1
+  }
+}
+```
+
+### Error Envelope
+
+```json
+{
+  "ok": false,
+  "command": "remember",
+  "error": {
+    "code": "CLI_USAGE_ERROR",
+    "message": "Refusing to store possible secret (openai_key). Use --allow-secrets only after review."
+  }
+}
+```
+
+### Error Codes
+
+The CLI emits standardized, machine-readable error codes:
+
+| Error Code | Exit Code | Description |
+|------------|-----------|-------------|
+| `CLI_USAGE_ERROR` | `1` | Invalid flags, missing required arguments, or invalid option combinations. |
+| `CLI_VALIDATION_ERROR` | `1` | Schema validation failures in config, manifest, or connector definitions. |
+| `CLI_FS_ERROR` | `1` | Filesystem operation failure, missing directory, or path traversal attempt. |
+| `CLI_PROTOCOL_ERROR` | `1` | Corrupted `.memofs/` protocol files or invalid manifest format. |
+| `CLI_JSONL_ERROR` | `1` | Malformed JSONL lines encountered in strict parsing mode. |
+| `CLI_UNEXPECTED_ERROR` | `1` | Unhandled runtime errors or exceptions. |
+
+## Configuration File
+
+Create `.memofs/config.json` to persist defaults without storing secrets:
+
+```bash
+memofs config init --runtime hybrid -p frozen-crest --cloud-url https://memofs.dev/api/v1
+```
+
+```json
+{
+  "$schema": "../node_modules/@memofs/cli/schema/config.json",
+  "runtime": "hybrid",
+  "root": ".",
+  "cloud": {
+    "baseUrl": "https://memofs.dev/api/v1",
+    "projectId": "frozen-crest"
+  },
+  "recall": {
+    "engine": "hybrid",
+    "localEmbeddings": true
+  }
+}
+```
+
+Inspect the resolved configuration:
+
+```bash
+memofs config get
+```
+
+## Package Exports & Programmatic Usage
+
+In addition to the binary `memofs`, the `@memofs/cli` npm package exports its runner, helper functions, types, and schema:
+
+### Subpaths
+
+- **`@memofs/cli`**: The primary JavaScript/TypeScript module exporting `runMemoFsCli`, `createMemoFSFromCli`, output writers, constants, and utilities.
+- **`@memofs/cli/schema/config.json`**: The JSON Schema draft-07 definition for `.memofs/config.json`.
+
+### Programmatic Invocation
+
+You can invoke the CLI command runner programmatically:
+
+```ts
+import { runMemoFsCli } from "@memofs/cli";
+
+const result = await runMemoFsCli({
+  argv: ["remember", "Use PostgreSQL for metadata", "--kind", "decision"],
+  cwd: process.cwd(),
+});
+
+console.log("Exit code:", result.exitCode);
+console.log("Output:", result.stdout);
+```
+
+### Direct `MemoFS` Client Creation
+
+Or construct the underlying [`MemoFS`](/core/configuration) class instance with automatic CLI flag, environment variable, and `.memofs/config.json` resolution:
+
+```ts
+import { createMemoFSFromCli } from "@memofs/cli";
+
+// Returns a fully configured MemoFS instance
+const memo = createMemoFSFromCli({
+  root: ".",
+  runtime: "hybrid",
+});
+
+// Call core memory methods directly
+await memo.writeMemory({
+  content: "Use PostgreSQL for metadata",
+  kind: "decision",
+});
+
+const context = await memo.context({
+  query: "database configuration",
+  taskType: "coding",
+});
+```
+
+For the complete TypeScript programmatic API specification, see the [CLI API Reference](/api/cli) and [Core API Reference](/api/core).
+
+## Command Categories
+
+| Category | Description | Documentation |
+|----------|-------------|---------------|
+| **Memory** | Read, record, pack, audit, search, snapshot, and consolidate memory. | [Memory Commands](/cli/memory) |
+| **Agent** | Manage local AgentFS sessions and working files. | [Agent Commands](/cli/agent) |
+| **Generate** | Scaffold agent rules (`AGENTS.md`, `CLAUDE.md`, etc.), hooks, and MCP configs. | [Generate Commands](/cli/generate) |
+| **Connectors** | Manage and run external data ingestion connectors (GitHub, Notion). | [Connectors Commands](/cli/connectors) |
+| **Cloud** | Verify health, check readiness, and sync file replicas with MemoFS Cloud. | [Cloud Commands](/cli/cloud) |
+| **Config** | Inspect and initialize `.memofs/config.json`. | [Config Commands](/cli/config) |

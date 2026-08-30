@@ -44,6 +44,13 @@ export * from "./fs";
 export * from "./graph";
 export type { RecallResult } from "./memofs";
 export * from "./memofs";
+export {
+	type DuplicateMemoryMatch,
+	// Dedup-on-write guard constants (the write-path sibling of the
+	// durability-tier thresholds below) — exported for the benchmark kit.
+	MEMORY_DEDUPE_CANDIDATES,
+	MEMORY_DEDUPE_SIMILARITY_THRESHOLD,
+} from "./memofs/local-strategy/dedupe";
 export type { RecallResult as StoreRecallResult } from "./recall";
 export * from "./recall";
 export { assertNonEmptyString } from "./recall";

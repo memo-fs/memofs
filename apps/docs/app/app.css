@@ -1,0 +1,294 @@
+@import '@fontsource-variable/sora';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import 'katex/dist/katex.css';
+
+@theme {
+  --font-sans: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --radius: 0.25rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.25rem;
+  --radius-2xl: 0.25rem;
+  --radius-3xl: 0.25rem;
+}
+
+:root {
+  --radius: 0.25rem;
+  --fd-radius: 0.25rem;
+  --font-sans: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--font-sans);
+}
+
+/* Ensure navbar background matches page background seamlessly in both modes */
+header#nd-nav,
+header#nd-nav > div,
+nav#nd-nav {
+  background-color: #ffffff !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: none !important;
+  border-bottom-width: 0 !important;
+}
+
+.dark header#nd-nav,
+.dark header#nd-nav > div,
+.dark nav#nd-nav {
+  background-color: #000000 !important;
+  border-bottom: none !important;
+  border-bottom-width: 0 !important;
+}
+
+body {
+  font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code, kbd, samp, pre, .nd-codeblock {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* Ensure inline code is crisp and bold */
+code:not(pre code) {
+  font-weight: 700 !important;
+  font-size: 0.85em !important;
+}
+
+/* Ensure codeblocks have increased font size and bold weight */
+pre,
+pre code,
+pre code span,
+figure.shiki,
+figure.shiki pre,
+figure.shiki code,
+figure.shiki span,
+.nd-codeblock,
+.fd-codeblock,
+.fd-scroll-container,
+.fd-scroll-container pre,
+.fd-scroll-container code,
+.fd-scroll-container span {
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  line-height: 1.65 !important;
+}
+
+/* Ensure all elements with radius more than rounded (4px) are capped to rounded (4px) */
+[class*="rounded-md"],
+[class*="rounded-lg"],
+[class*="rounded-xl"],
+[class*="rounded-2xl"],
+[class*="rounded-3xl"],
+header#nd-nav [data-search-full],
+header#nd-nav button[data-search-full] {
+  border-radius: 0.25rem !important;
+}
+
+/* Compact search input in navbar */
+header#nd-nav [data-search-full],
+header#nd-nav button[data-search-full] {
+  max-width: 170px !important;
+  height: 1.875rem !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  font-size: 0.8125rem !important;
+}
+
+header#nd-nav [data-search-full] kbd,
+header#nd-nav button[data-search-full] kbd {
+  font-size: 0.7rem !important;
+  padding-top: 0.05rem !important;
+  padding-bottom: 0.05rem !important;
+}
+
+[class*="rounded-t-md"],
+[class*="rounded-t-lg"],
+[class*="rounded-t-xl"],
+[class*="rounded-t-2xl"] {
+  border-top-left-radius: 0.25rem !important;
+  border-top-right-radius: 0.25rem !important;
+}
+
+[class*="rounded-b-md"],
+[class*="rounded-b-lg"],
+[class*="rounded-b-xl"],
+[class*="rounded-b-2xl"] {
+  border-bottom-left-radius: 0.25rem !important;
+  border-bottom-right-radius: 0.25rem !important;
+}
+
+#nd-page {
+  max-width: 48rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 640px) {
+  #nd-page {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+/* ===================================================================
+   CHANGELOG HEADING BADGES & HIGHLIGHTS (Added, Changed, Fixed, etc.)
+   =================================================================== */
+.prose h4:has(a[href*="added"]),
+.prose h4:has(a[href*="changed"]),
+.prose h4:has(a[href*="fixed"]),
+.prose h4:has(a[href*="removed"]),
+.prose h4:has(a[href*="deprecated"]),
+.prose h4[id*="added"],
+.prose h4[id*="changed"],
+.prose h4[id*="fixed"],
+.prose h4[id*="removed"],
+.prose h4[id*="deprecated"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  width: fit-content !important;
+  max-width: max-content !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.25rem !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 0.25rem !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.65rem !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+/* Hide header anchor links inside badge headings */
+.prose h4[id*="added"] > a,
+.prose h4[id*="changed"] > a,
+.prose h4[id*="fixed"] > a,
+.prose h4[id*="removed"] > a,
+.prose h4[id*="deprecated"] > a,
+.prose h4:has(a[href*="added"]) > a,
+.prose h4:has(a[href*="changed"]) > a,
+.prose h4:has(a[href*="fixed"]) > a,
+.prose h4:has(a[href*="removed"]) > a,
+.prose h4:has(a[href*="deprecated"]) > a {
+  display: none !important;
+}
+
+.prose h4[id*="added"],
+.prose h4:has(a[href*="added"]) {
+  color: #059669 !important;
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+.dark .prose h4[id*="added"],
+.dark .prose h4:has(a[href*="added"]) {
+  color: #34d399 !important;
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+
+.prose h4[id*="changed"],
+.prose h4:has(a[href*="changed"]) {
+  color: #0284c7 !important;
+  background-color: rgba(14, 165, 233, 0.12) !important;
+  border: 1px solid rgba(14, 165, 233, 0.25) !important;
+}
+.dark .prose h4[id*="changed"],
+.dark .prose h4:has(a[href*="changed"]) {
+  color: #38bdf8 !important;
+  background-color: rgba(14, 165, 233, 0.15) !important;
+}
+
+.prose h4[id*="fixed"],
+.prose h4:has(a[href*="fixed"]) {
+  color: #d97706 !important;
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+}
+.dark .prose h4[id*="fixed"],
+.dark .prose h4:has(a[href*="fixed"]) {
+  color: #fbbf24 !important;
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+.prose h4[id*="removed"],
+.prose h4[id*="deprecated"],
+.prose h4:has(a[href*="removed"]),
+.prose h4:has(a[href*="deprecated"]) {
+  color: #e11d48 !important;
+  background-color: rgba(244, 63, 94, 0.12) !important;
+  border: 1px solid rgba(244, 63, 94, 0.25) !important;
+}
+.dark .prose h4[id*="removed"],
+.dark .prose h4[id*="deprecated"],
+.dark .prose h4:has(a[href*="removed"]),
+.dark .prose h4:has(a[href*="deprecated"]) {
+  color: #fb7185 !important;
+  background-color: rgba(244, 63, 94, 0.15) !important;
+}
+
+@keyframes gridDash {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+@keyframes slowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reverseSpin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes beamSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-grid-dash {
+  animation: gridDash 12s linear infinite;
+}
+
+.animate-slow-spin {
+  animation: slowSpin 35s linear infinite;
+}
+
+.animate-reverse-spin {
+  animation: reverseSpin 28s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.animate-beam {
+  animation: beamSweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

@@ -1,0 +1,155 @@
+---
+title: What is MemoFS?
+description: The file-first memory runtime for AI agents — architecture, mental model, and agent memory loop.
+icon: BookOpen
+---
+
+MemoFS is a **file-first memory runtime for AI agents**. It bridges the gap between ephemeral agent context windows and persistent codebase evolution by storing decisions, architectural constraints, project conventions, and search indexes directly as **Markdown and JSONL files in your repository**.
+
+<Callout type="info" title="Designed for Two Primary Paths">
+Whether you are a developer **using AI coding agents day-to-day** (Claude Code, Cursor, Codex, Copilot, Cline) or an engineer **building custom AI agents and agentic systems**, MemoFS provides the standard runtime for structured, persistent agent memory.
+</Callout>
+
+## Which Path Fits You?
+
+<Cards>
+  <Card
+    title="Using AI Coding Agents"
+    href="/docs/cookbooks"
+    description="Equip Claude Code, Cursor, Codex, Copilot, Cline, or Aider with automatic memory via MCP."
+  />
+  <Card
+    title="Building Custom AI Agents"
+    href="/docs/core"
+    description="Import @memofs/core or @memofs/server directly into your TypeScript or Node.js agent architecture."
+  />
+  <Card
+    title="Self-Hosting & Deploying"
+    href="/docs/server"
+    description="Run the MemoFS HTTP server on Node.js or deploy globally on Cloudflare Workers."
+  />
+  <Card
+    title="MemoFS Cloud (Managed)"
+    href="https://memofs.dev"
+    description="Zero-maintenance managed MCP endpoint, file replica, and team workspaces in the cloud."
+  />
+</Cards>
+
+---
+
+## The 4-Stage Agent Memory Loop
+
+Every effective AI agent follows the four-phase MemoFS memory cycle:
+
+<div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-blue-500">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="flex size-6 items-center justify-center rounded bg-blue-500/10 text-xs font-bold text-blue-500">1</span>
+      <h3 className="text-base font-semibold">Load Context</h3>
+    </div>
+    <div className="text-sm text-fd-muted-foreground mb-3">
+      At the start of every session or task, the agent calls <code>memofs.context</code> to load core rules, architecture constraints, and recent briefing fragments.
+    </div>
+  </div>
+
+  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-purple-500">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="flex size-6 items-center justify-center rounded bg-purple-500/10 text-xs font-bold text-purple-500">2</span>
+      <h3 className="text-base font-semibold">Recall Past Decisions</h3>
+    </div>
+    <div className="text-sm text-fd-muted-foreground mb-3">
+      Before modifying code or making assumptions, the agent queries <code>memofs.recall</code> to surface exact past reasoning, schemas, or prior bug fixes.
+    </div>
+  </div>
+
+  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-amber-500">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="flex size-6 items-center justify-center rounded bg-amber-500/10 text-xs font-bold text-amber-500">3</span>
+      <h3 className="text-base font-semibold">Execute With Memory</h3>
+    </div>
+    <div className="text-sm text-fd-muted-foreground mb-3">
+      The agent performs the code modifications, refactors, or tests while strictly adhering to recalled decisions and repository constraints.
+    </div>
+  </div>
+
+  <div className="rounded border border-dashed bg-fd-card p-5 border-l-4 border-l-emerald-500">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="flex size-6 items-center justify-center rounded bg-emerald-500/10 text-xs font-bold text-emerald-500">4</span>
+      <h3 className="text-base font-semibold">Persist Discoveries</h3>
+    </div>
+    <div className="text-sm text-fd-muted-foreground mb-3">
+      Before ending the turn, the agent calls <code>memofs.remember</code> to write newly learned facts, root causes, or architectural patterns into <code>.memofs/</code>.
+    </div>
+  </div>
+</div>
+
+---
+
+## The Mental Model in 3 Core Tenets
+
+<Accordions>
+  <Accordion title="1. Memory is files, not an external database">
+    Core facts, notes, conversation history, recall indexes, and knowledge graph relations all live under `.memofs/` in your repository as Markdown and JSONL. They can be inspected in any editor, version-controlled with Git, and reviewed in Pull Requests just like code.
+  </Accordion>
+  <Accordion title="2. Every capability has a deterministic fallback">
+    Retrieval, graph extraction, and search all work with zero API keys out of the box using local BM25 ranking and regex rule-based parsers. Adding an LLM or embedding adapter (OpenAI, Voyage, Transformers, Cloudflare Workers AI) seamlessly upgrades them to hybrid search without changing your codebase.
+  </Accordion>
+  <Accordion title="3. Universal protocol distribution">
+    Whether an agent supports native lifecycle hooks (Claude Code, Codex, opencode) or standard Model Context Protocol (MCP) tool calling (Cursor, Copilot, Cline, Aider), MemoFS adapts seamlessly across environments.
+  </Accordion>
+</Accordions>
+
+---
+
+## Architectural Comparison
+
+<Tabs items={["MemoFS", "Flat AGENTS.md / CursorRules", "External Vector DB"]}>
+  <Tab value="MemoFS">
+    - **Storage**: Plain Markdown & JSONL in `.memofs/`
+    - **Offline Execution**: 100% local, 0 external API keys required
+    - **Search**: BM25 keyword + optional vector hybrid search + knowledge graph
+    - **Collaboration**: Git-versioned with optional cloud edge replication
+    - **Transparency**: Fully human-auditable and editable in any IDE
+  </Tab>
+  <Tab value="Flat AGENTS.md / CursorRules">
+    - **Storage**: Single monolithic static markdown file
+    - **Context Window**: Consumes large token volume unconditionally on every prompt
+    - **Search**: None (agent must read entire file into context)
+    - **Persistence**: Agent cannot reliably self-update without overwriting prompt files
+    - **Scalability**: Degrades rapidly as project context grows beyond a few pages
+  </Tab>
+  <Tab value="External Vector DB">
+    - **Storage**: Opaque vector embeddings in proprietary cloud database
+    - **Offline Execution**: Fails without internet or external API keys
+    - **Search**: Semantic vector similarity only (poor for exact symbol/error matching)
+    - **Collaboration**: Disconnected from Git history and PR review flows
+    - **Transparency**: Impossible to inspect or edit memory in standard text editors
+  </Tab>
+</Tabs>
+
+---
+
+## Explore the Documentation
+
+<Cards>
+  <Card
+    title="Quick Start Guide"
+    href="/docs"
+    description="Initialize MemoFS and connect your agent in 3 minutes."
+  />
+  <Card
+    title="Core Runtime & SDK"
+    href="/docs/core"
+    description="Dive into @memofs/core: memory architecture, recall, graph, and snapshots."
+  />
+  <Card
+    title="MCP Server"
+    href="/docs/mcp"
+    description="Configure local and hosted Model Context Protocol endpoints."
+  />
+  <Card
+    title="CLI Reference"
+    href="/docs/cli"
+    description="Learn all command-line tools for memory inspection, indexing, and cloud sync."
+  />
+</Cards>

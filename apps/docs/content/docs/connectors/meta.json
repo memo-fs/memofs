@@ -1,0 +1,5 @@
+{
+	"title": "Connectors",
+	"icon": "Plug",
+	"pages": ["index", "built-in-connectors", "custom-connectors"]
+}

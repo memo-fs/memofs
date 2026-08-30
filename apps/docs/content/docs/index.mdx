@@ -1,0 +1,283 @@
+---
+title: Quick Start
+description: Get up and running with MemoFS — the file-first memory runtime for AI agents.
+icon: Rocket
+---
+
+MemoFS is the **file-first memory runtime for AI agents**. It stores decisions, architectural conventions, conversation context, and recall indexes directly as versioned Markdown and JSONL files in your project under `.memofs/` — no database required.
+
+<Callout type="info" title="Zero Infrastructure by Default">
+MemoFS runs completely locally with **zero external dependencies**. Deterministic BM25 keyword ranking and rule-based graph extraction work out of the box with **0 API keys**. You can optionally attach embeddings or LLM adapters when you want enhanced semantic synthesis.
+</Callout>
+
+## Choose Your Path
+
+<Cards>
+  <Card
+    title="Using AI Agents"
+    href="/docs/cookbooks"
+    description="Connect Claude Code, Cursor, Codex, Copilot, Cline, or Aider in under 2 minutes."
+  />
+  <Card
+    title="Building Custom Agents"
+    href="/docs/core"
+    description="Embed @memofs/core directly in TypeScript, Node.js, or Edge agent runtimes."
+  />
+  <Card
+    title="Model Context Protocol (MCP)"
+    href="/docs/mcp"
+    description="Equip any MCP-compatible agent with context, recall, and persistence tools."
+  />
+  <Card
+    title="Self-Hosting & Server"
+    href="/docs/server"
+    description="Deploy MemoFS server on Node.js or Cloudflare Workers with local or cloud storage."
+  />
+</Cards>
+
+---
+
+## 3-Minute Quickstart
+
+Follow these steps to initialize and use MemoFS in any project:
+
+<Steps>
+<Step>
+### 1. Initialize MemoFS in your repository
+
+Run the interactive CLI setup in the root of your project:
+
+<Tabs items={["npx", "pnpm", "bun"]}>
+  <Tab value="npx">
+  ```bash
+  npx @memofs/cli init
+  ```
+  </Tab>
+  <Tab value="pnpm">
+  ```bash
+  pnpm dlx @memofs/cli init
+  ```
+  </Tab>
+  <Tab value="bun">
+  ```bash
+  bunx @memofs/cli init
+  ```
+  </Tab>
+</Tabs>
+
+The CLI scans your project, creates the `.memofs/` directory, and scaffolds your project's core facts and agent instructions.
+</Step>
+
+<Step>
+### 2. Inspect your `.memofs/` memory files
+
+All agent memory lives in plain, human-readable files that you can inspect, edit, and commit to git:
+
+<Files>
+  <Folder name=".memofs" defaultOpen>
+    <File name="manifest.json" />
+    <File name="config.json" />
+    <File name="connectors.json" />
+    <Folder name="memory" defaultOpen>
+      <File name="core.md" />
+      <File name="notes.md" />
+    </Folder>
+    <Folder name="events">
+      <File name="memory-events.jsonl" />
+      <File name="conversations.jsonl" />
+    </Folder>
+    <Folder name="indexes">
+      <File name="chunks.jsonl" />
+      <File name="embeddings.jsonl" />
+    </Folder>
+    <Folder name="graph">
+      <File name="nodes.jsonl" />
+      <File name="edges.jsonl" />
+    </Folder>
+    <Folder name="snapshots">
+      <File name="snapshots.jsonl" />
+    </Folder>
+  </Folder>
+  <File name="AGENTS.md" />
+  <File name="package.json" />
+</Files>
+
+<Callout type="warn" title="Git-Tracked Project Memory">
+Because memory is just markdown and JSONL in `.memofs/`, your agent's memory travels with git branches, pull requests, and across team members automatically.
+</Callout>
+</Step>
+
+<Step>
+### 3. Connect your AI agent
+
+Choose how your agent communicates with MemoFS:
+
+<Tabs items={["Claude Code", "Cursor", "Cline / Roo", "TypeScript SDK"]}>
+  <Tab value="Claude Code">
+  Add the MemoFS MCP server to Claude Code:
+  ```bash
+  claude mcp add memofs npx -y @memofs/mcp-server
+  ```
+  Claude Code will now automatically load context at task start (`memofs.context`), recall relevant decisions (`memofs.recall`), and persist learned facts (`memofs.remember`).
+  </Tab>
+  <Tab value="Cursor">
+  Add MemoFS to your Cursor MCP settings (`.cursor/mcp.json`):
+  ```json
+  {
+    "mcpServers": {
+      "memofs": {
+        "command": "npx",
+        "args": ["-y", "@memofs/mcp-server"]
+      }
+    }
+  }
+  ```
+  </Tab>
+  <Tab value="Cline / Roo">
+  Add to your `cline_mcp_settings.json`:
+  ```json
+  {
+    "mcpServers": {
+      "memofs": {
+        "command": "npx",
+        "args": ["-y", "@memofs/mcp-server"]
+      }
+    }
+  }
+  ```
+  </Tab>
+  <Tab value="TypeScript SDK">
+  Install `@memofs/core` to build memory directly into custom AI applications:
+
+  <Tabs items={["npm", "pnpm", "bun", "deno"]}>
+    <Tab value="npm">
+  ```bash
+  npm install @memofs/core
+  ```
+    </Tab>
+    <Tab value="pnpm">
+  ```bash
+  pnpm add @memofs/core
+  ```
+    </Tab>
+    <Tab value="bun">
+  ```bash
+  bun add @memofs/core
+  ```
+    </Tab>
+    <Tab value="deno">
+  ```bash
+  deno add npm:@memofs/core
+  ```
+    </Tab>
+  </Tabs>
+  ```ts
+  import { createNodeMemoFs } from "@memofs/core/node-fs";
+
+  const memofs = createNodeMemoFs({ rootDir: "." });
+
+  // 1. Load task-ready briefing
+  const briefing = await memofs.context({
+    query: "Implement JWT authentication middleware",
+  });
+
+  // 2. Persist new decisions and discoveries
+  await memofs.writeMemory({
+    content: "Auth tokens use Ed25519 with 15-minute rotation",
+    kind: "decision",
+    tags: ["auth", "security"],
+  });
+  ```
+  </Tab>
+</Tabs>
+</Step>
+
+<Step>
+### 4. Verify your memory loop
+
+Test that your memory is searchable and active:
+
+```bash
+# Query memory with hybrid keyword & semantic search
+npx @memofs/cli context --query "authentication"
+
+# Manually store a decision or constraint
+npx @memofs/cli remember "Use strict TypeScript types without any" --kind decision
+```
+</Step>
+</Steps>
+
+---
+
+## Core Pillars
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="rounded border bg-fd-card p-4 transition-colors hover:border-fd-primary/40">
+    <div className="text-2xl mb-2">📁</div>
+    <h3 className="text-base font-semibold mb-1">File-First & Git-Native</h3>
+    <div className="text-sm text-fd-muted-foreground">
+      No opaque databases. Human-readable Markdown and JSONL files versioned directly alongside your source code.
+    </div>
+  </div>
+  <div className="rounded border bg-fd-card p-4 transition-colors hover:border-fd-primary/40">
+    <div className="text-2xl mb-2">⚡</div>
+    <h3 className="text-base font-semibold mb-1">Deterministic Fallbacks</h3>
+    <div className="text-sm text-fd-muted-foreground">
+      Works 100% offline out of the box with BM25 search and rule-based graph extraction. Zero API keys required.
+    </div>
+  </div>
+  <div className="rounded border bg-fd-card p-4 transition-colors hover:border-fd-primary/40">
+    <div className="text-2xl mb-2">🌐</div>
+    <h3 className="text-base font-semibold mb-1">Cloud & Team Sync</h3>
+    <div className="text-sm text-fd-muted-foreground">
+      Optional real-time sync with Cloudflare R2, Turso, or MemoFS Cloud for distributed multi-agent teams.
+    </div>
+  </div>
+</div>
+
+---
+
+## Frequently Asked Questions
+
+<Accordions>
+  <Accordion title="How does MemoFS differ from external vector databases?">
+    Traditional vector databases store opaque vector embeddings in an external service that requires remote API calls, secret API keys, and recurring subscription costs. MemoFS keeps structured Markdown, notes, and local inverted indexes right inside your repository (`.memofs/`), making memory transparent, diffable in pull requests, and instant to query offline.
+  </Accordion>
+  <Accordion title="Do I need an OpenAI or Anthropic API key to use MemoFS?">
+    **No.** MemoFS operates with deterministic local fallbacks out of the box. BM25 keyword search, regex entity extraction, and local markdown parsing work completely offline with 0 API keys. You can optionally configure an embedding adapter (OpenAI, Voyage, Transformers, Cloudflare Workers AI) whenever you want enhanced vector search.
+  </Accordion>
+  <Accordion title="How does memory get shared across my team?">
+    Since `.memofs/` is part of your git repository, committing and pushing changes automatically shares core decisions, conventions, and architectural context with everyone on your team. For multi-agent systems requiring real-time live sync, MemoFS Server provides edge-replicated cloud storage.
+  </Accordion>
+  <Accordion title="Can I use MemoFS with multiple agents at once?">
+    **Yes.** MemoFS is designed for multi-agent workflows. For example, a planner agent can write architecture decisions, and coding agents (Claude Code, Cursor, Copilot) can query `memofs.context` and `memofs.recall` simultaneously.
+  </Accordion>
+</Accordions>
+
+---
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="What is MemoFS? (Deep Dive)"
+    href="/docs/introduction"
+    description="Understand the architecture, mental model, and agent memory loop."
+  />
+  <Card
+    title="Explore Agent Cookbooks"
+    href="/docs/cookbooks"
+    description="Step-by-step setup guides for Claude Code, Cursor, Copilot, Cline, Aider, and more."
+  />
+  <Card
+    title="Core Concepts & Architecture"
+    href="/docs/core/concepts"
+    description="Learn how core memory, notes, recall indexes, and knowledge graphs interact."
+  />
+  <Card
+    title="API Reference"
+    href="/docs/api"
+    description="Full TypeScript SDK and CLI command reference."
+  />
+</Cards>
+

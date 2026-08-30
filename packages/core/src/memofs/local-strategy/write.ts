@@ -26,6 +26,7 @@ import type {
 	WriteMemoryResult,
 } from "../types";
 import { resolveWriteAnchor } from "./anchor-marker";
+import { findDuplicateMemory } from "./dedupe";
 import {
 	fingerprint,
 	message,
@@ -92,6 +93,39 @@ export async function writeMemory(
 				? {}
 				: { sourceRefs: input.sourceRefs }),
 		};
+	}
+
+	// Dedup-on-write guard: a near-duplicate of an already-indexed memory is
+	// a no-op. BM25 is queried with the exact text a durable write would
+	// index; the verdict compares note content bodies only.
+	const noteText = `${input.title ?? input.content.slice(0, 80)}\n${input.content}`;
+	const duplicate = findDuplicateMemory(
+		ctx,
+		{ searchText: noteText, content: input.content },
+		{
+			...(input.id === undefined
+				? {}
+				: { excludeMemoryIds: new Set([input.id]) }),
+		},
+	);
+	if (duplicate !== undefined) {
+		const dedupeResult: WriteMemoryResult = {
+			id: duplicate.memoryId,
+			created: false,
+			tier: tierDecision.tier,
+			tierReason: tierDecision.reason,
+			duplicateOf: duplicate.memoryId,
+			warnings: [
+				`Near-duplicate of existing memory ${duplicate.memoryId} (similarity ${duplicate.similarity.toFixed(2)}) — nothing written. Update or supersede the existing memory instead of appending; if this fact is genuinely distinct, rewrite the content to capture what is new.`,
+			],
+			...(input.sourceRefs === undefined
+				? {}
+				: { sourceRefs: input.sourceRefs }),
+		};
+		if (input.idempotencyKey !== undefined) {
+			ctx.idempotencyKeys.set(input.idempotencyKey, dedupeResult);
+		}
+		return dedupeResult;
 	}
 
 	function randomUuid(): string {
@@ -179,8 +213,6 @@ export async function writeMemory(
 		}),
 	);
 
-	const noteText = `${input.title ?? input.content.slice(0, 80)}\n${input.content}`;
-
 	if (durable) {
 		if (ctx.options.embedder && ctx.options.recallStore) {
 			await indexDocument(ctx, noteText, {
@@ -196,6 +228,10 @@ export async function writeMemory(
 		}
 
 		ctx.indexLexical({ id: memoryLexicalDocId(id), text: noteText });
+		// Content body for the dedup-on-write guard — same value the cold-start
+		// hydration recovers from the note section, so the guard's comparison
+		// basis is identical for warm and hydrated memories.
+		ctx.memoryContentById.set(id, input.content);
 
 		if (ctx.options.autoExtractGraph !== false) {
 			await autoExtractGraph(ctx, noteText, {
@@ -344,6 +380,9 @@ export async function indexDocument(
 					sourceType: meta.sourceType,
 					sourceId: meta.sourceId,
 					memoryType: meta.memoryType,
+					// Stamp the producing model so vector queries can exclude
+					// chunks embedded by a different model (incomparable spaces).
+					model: embedResult.model,
 					...c.metadata,
 				},
 			};

@@ -96,6 +96,20 @@
           ],
           "type": "object"
         },
+        "maintenance": {
+          "additionalProperties": false,
+          "description": "Optional one-time maintenance markers. Absent on manifests written by runtimes that predate a given maintenance pass; the presence of a marker means that pass already ran and must not run again.",
+          "properties": {
+            "legacyEmbeddingsScrubbedAt": {
+              "description": "ISO 8601 timestamp when legacy unresolvable-source embedding rows were scrubbed from the vector index (rows whose `sourceId` was a write timestamp instead of a memory id).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "legacyEmbeddingsScrubbedAt"
+          ],
+          "type": "object"
+        },
         "memory": {
           "additionalProperties": false,
           "description": "Paths to memory documents (core, notes).",

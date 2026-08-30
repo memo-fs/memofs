@@ -1,0 +1,57 @@
+---
+title: "How to use MemoFS with Zed"
+date: "2026-07-28"
+estimatedMinutes: 4
+description: "Configure Zed editor assistant with MemoFS memory tools and workspace context."
+---
+
+Zed natively reads `AGENTS.md` as part of the cross-tool AGENTS.md standard. You can generate your workspace rules file directly using `npx @memofs/cli generate agent-rules agents` and register the MemoFS MCP server in your Zed settings.
+
+## Setup (4 Minutes)
+
+### Step 1: Initialize project memory
+
+```bash
+cd /path/to/your/project
+npx @memofs/cli init
+```
+
+### Step 2: Generate the rules file
+
+```bash
+npx @memofs/cli generate agent-rules agents --project-name "Your project name"
+```
+
+Zed picks up `AGENTS.md` automatically — no copying or renaming needed.
+
+### Step 3: Register the MCP server
+
+Add a `context_servers` block to `.zed/settings.json` (project-level) or `~/.config/zed/settings.json` (global):
+
+```json title=".zed/settings.json"
+{
+  "context_servers": {
+    "memofs": {
+      "source": "custom",
+      "command": "npx",
+      "args": ["-y", "@memofs/mcp-server"],
+      "env": {}
+    }
+  }
+}
+```
+
+Or through the UI: **Settings → AI → MCP Servers → Add Server**.
+
+### Step 4: Verify
+
+Open Settings → AI → MCP Servers and check for a green "Server is active" indicator next to `memofs`. Ask Zed's agent panel to check project memory.
+
+## Notes
+
+- No hooks — `AGENTS.md` is what tells Zed's agent to reach for the tool; nothing injects automatically at session start.
+
+## Next Steps
+
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

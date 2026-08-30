@@ -1,0 +1,66 @@
+---
+title: "How to use MemoFS with Codex"
+date: "2026-07-28"
+estimatedMinutes: 3
+description: "Integrate MemoFS memory runtime with Codex CLI and OpenAI developer workflows."
+---
+
+Connect MemoFS to OpenAI's Codex for persistent, file-based project memory — distributed the same way as Claude Code: hooks for automatic context injection, plus an MCP server for on-demand recall. There's one extra step Codex requires that Claude Code doesn't — see Step 3.
+
+## Prerequisites
+
+- Node.js v22+
+- No install needed — `npx @memofs/cli` fetches on first run.
+
+## Quick Start
+
+### Step 1: Initialize project memory
+
+```bash
+cd /path/to/your/project
+npx @memofs/cli init
+```
+
+### Step 2: Generate the full Codex setup
+
+```bash
+npx @memofs/cli generate agent codex --project-name "Your project name"
+```
+
+Produces:
+
+- **`AGENTS.md`** — rules file (Codex's target is `agents`/`codex`, so this doubles as the cross-tool AGENTS.md standard file)
+- **`.agents/rules/git-conventions.md`**
+- **`.codex/hooks.json`** — `SessionStart`, `SubagentStart`, and `Stop` hooks
+- **MCP config** — writes to project-local `.codex/config.toml` by default; pass `--scope global` if you want the global `~/.codex/config.toml` instead
+
+### ⚠️ Step 3: Review the hooks before Codex will run them
+
+This is the step people skip, then wonder why nothing is being injected. **Codex only loads project-local `.codex/` hooks once the project layer is trusted, and any new hook group needs an explicit review the first time it appears.** Inside a Codex CLI session in this project:
+
+```
+/hooks
+```
+
+Review and approve the memofs hook group. Until you do this, `SessionStart` won't fire and no context will be injected — Codex will run normally, just silently without memory, which looks like a bug rather than an unreviewed hook.
+
+### Step 4: Record persistent project memory
+
+```bash
+npx @memofs/cli remember "Project uses VitePress for documentation" --kind note
+```
+
+### Step 5: Restart and verify
+
+Restart Codex. Ask: *"Which docs framework does this project use?"* or check for the end-of-session compliance summary in `systemMessage`.
+
+## Notes
+
+- Writes to `.codex/hooks.json` are merge-safe — existing hook groups are preserved; a prior memofs-owned group is replaced only with `-f`/`--force`.
+- Re-injection after compaction goes through the same `SessionStart` `compact` matcher as Claude Code.
+- If hooks still don't seem to run after approval, re-check `/hooks` — a project can lose "trusted" status (e.g. after certain config changes) and silently stop loading project-local hooks again.
+
+## Next Steps
+
+- [Semantic search](/adapters/transformers).
+- [Team memory sync](/mcp/hybrid-mode).

@@ -1,0 +1,128 @@
+---
+title: "API Reference"
+description: "Complete API reference for @memofs/server functions, options, dispatch handlers, and protocol constants."
+---
+
+## Factories & Runtime Assembly
+
+### `createHostedRuntime(options: HostedRuntimeOptions): MemoFS`
+
+Assembles a provider-neutral `MemoFS` instance for the hosted server runtime.
+
+```ts
+import { createHostedRuntime } from "@memofs/server";
+
+const memofs = createHostedRuntime({
+  store: memoryStore,
+  projectId: "prod-project",
+  embedder: customEmbedder,
+});
+```
+
+#### `HostedRuntimeOptions`
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `store` | `MemoryStore` | **Yes** | Foundational memory store (file replica). |
+| `projectId` | `string` | **Yes** | Project identifier scoping the store. |
+| `embedder` | `MemoryEmbedder` | No | Vector embedding provider for semantic recall. |
+| `recallStore` | `RecallStore` | No | Custom vector index storage adapter. |
+| `reranker` | `Reranker` | No | Reranking provider for search candidate scoring. |
+| `extractor` | `Extractor` | No | Knowledge graph entity/edge extractor. |
+| `llmClient` | `LlmClient` | No | LLM transport for generative consolidation. |
+| `name` | `string` | No | Runtime client name (default: `"memofs-server"`). |
+| `version` | `string` | No | Runtime version (default: `"0.1.0"`). |
+
+## HTTP Request Handlers
+
+### `handleRuntimeRequest(request: Request, options: RuntimeHttpOptions): Promise<Response>`
+
+Processes standard Web `Request` objects containing JSON-RPC payloads and returns a Web `Response`.
+
+```ts
+import { handleRuntimeRequest } from "@memofs/server";
+
+const response = await handleRuntimeRequest(request, {
+  runtime: memofs,
+  requireAuth: true,
+  bearerToken: "secret-token",
+});
+```
+
+#### `RuntimeHttpOptions`
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `runtime` | `MemoFS` | **Yes** | The assembled runtime instance. |
+| `concurrencyLayer` | `ConcurrencyLayer` | No | Lock coordinator for gating mutating methods. |
+| `requireAuth` | `boolean` | No | Require a bearer token on `POST /` (default: `false`). |
+| `bearerToken` | `string` | No | Expected token when `requireAuth` is `true`. |
+| `allowedOrigins` | `readonly string[]` | No | Allowed origins for CORS headers. |
+
+### `createRuntimeFetchHandler(options: RuntimeFetchHandlerOptions)`
+*(Exported from `@memofs/server/worker`)*
+
+Builds a Cloudflare Workers `fetch(request, env, ctx)` handler.
+
+```ts
+import { createRuntimeFetchHandler } from "@memofs/server/worker";
+
+export default {
+  fetch: createRuntimeFetchHandler({
+    createRuntime: (env, request) => buildRuntime(env, request),
+    requireAuth: false,
+  }),
+};
+```
+
+## JSON-RPC Dispatch Utilities
+
+### `dispatchRuntimeMessage(runtime: MemoFS, payload: unknown, options?: DispatchOptions): Promise<JsonRpcResponse | undefined>`
+
+Dispatches a parsed JSON-RPC request object or batch array across the runtime.
+
+```ts
+import { dispatchRuntimeMessage } from "@memofs/server";
+
+const response = await dispatchRuntimeMessage(
+  memofs,
+  { jsonrpc: "2.0", id: 1, method: "recall", params: { query: "auth" } },
+  { concurrencyLayer: myMutex }
+);
+```
+
+### `dispatchRuntimeText(runtime: MemoFS, text: string, options?: DispatchOptions): Promise<string | undefined>`
+
+Parses and dispatches a raw JSON-RPC string payload, returning a stringified JSON-RPC response.
+
+```ts
+import { dispatchRuntimeText } from "@memofs/server";
+
+const responseString = await dispatchRuntimeText(
+  memofs,
+  '{"jsonrpc":"2.0","id":1,"method":"health"}'
+);
+```
+
+## Protocol Constants
+
+### `RUNTIME_METHOD`
+
+Symbolic dictionary of all registered JSON-RPC method strings:
+- Live Methods: `health`, `recall`, `context`, `memory.readCore`, `memory.readNotes`, `memory.readConversations`, `memory.listRecent`, `memory.validate`, `graph.listNodes`, `graph.listEdges`, `graph.neighbors`, `graph.path`, `snapshots.list`.
+- Gated Methods: `memory.write`, `memory.recordNote`, `memory.updateCore`, `memory.appendConversation`, `graph.upsertNodes`, `graph.upsertEdges`, `consolidate`, `snapshots.create`, `snapshots.restore`.
+
+### `LIVE_METHODS: ReadonlySet<string>`
+Set of method names that execute concurrently without requiring a concurrency layer.
+
+### `GATED_METHODS: ReadonlySet<string>`
+Set of mutating method names that return `503` when no concurrency layer is injected.
+
+### `CONCURRENCY_GATE_ERROR_CODE`
+`-32000` (JSON-RPC server error code for concurrency lock requirements).
+
+### `CONCURRENCY_GATE_HTTP_STATUS`
+`503` (HTTP status code carried in gate failure `data`).
+
+### `CONCURRENCY_GATE_MESSAGE`
+`"Concurrent writes require the concurrency layer. This method is read-only until it is injected."`

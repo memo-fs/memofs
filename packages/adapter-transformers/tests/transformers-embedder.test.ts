@@ -1,11 +1,17 @@
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	createTransformersEmbedder,
 	type FeatureExtractionPipelineFactory,
+	resolveModelCacheDir,
 	TransformersInferenceError,
 	TransformersValidationError,
 } from "../src/index";
-import { createFakePipelineFactory } from "../src/testing/fake-pipeline";
+import {
+	createFakePipeline,
+	createFakePipelineFactory,
+} from "../src/testing/fake-pipeline";
 
 function embedderWith(dimensions = 384) {
 	return createTransformersEmbedder({
@@ -204,7 +210,121 @@ describe("TransformersEmbedder", () => {
 			const embedder = createTransformersEmbedder({
 				pipelineFactory: createFakePipelineFactory(),
 			});
-			expect(embedder.modelName).toBe("Xenova/all-MiniLM-L6-v2");
+			expect(embedder.modelName).toBe("Xenova/bge-small-en-v1.5");
+		});
+
+		it("loads quantized weights by default", async () => {
+			const seen: Array<Record<string, unknown>> = [];
+			const embedder = createTransformersEmbedder({
+				pipelineFactory: async (options) => {
+					seen.push(options);
+					return createFakePipeline();
+				},
+			});
+			await embedder.prewarm();
+			expect(seen[0]?.dtype).toBe("q8");
+		});
+	});
+
+	describe("model cache", () => {
+		it("resolves XDG_CACHE_HOME when set", () => {
+			expect(
+				resolveModelCacheDir({ XDG_CACHE_HOME: "/tmp/custom-cache" }),
+			).toBe(path.join("/tmp/custom-cache", "memofs", "models"));
+		});
+
+		it("falls back to ~/.cache when XDG_CACHE_HOME is unset or blank", () => {
+			const expected = path.join(os.homedir(), ".cache", "memofs", "models");
+			expect(resolveModelCacheDir({})).toBe(expected);
+			expect(resolveModelCacheDir({ XDG_CACHE_HOME: "   " })).toBe(expected);
+		});
+
+		it("defaults the pipeline cacheDir to the shared user-level cache", async () => {
+			const seen: Array<Record<string, unknown>> = [];
+			const embedder = createTransformersEmbedder({
+				pipelineFactory: async (options) => {
+					seen.push(options);
+					return createFakePipeline();
+				},
+			});
+			await embedder.prewarm();
+			expect(seen[0]?.cacheDir).toBe(resolveModelCacheDir());
+		});
+
+		it("passes an explicit cacheDir through unchanged", async () => {
+			const seen: Array<Record<string, unknown>> = [];
+			const embedder = createTransformersEmbedder({
+				cacheDir: "/tmp/memofs-custom-cache",
+				pipelineFactory: async (options) => {
+					seen.push(options);
+					return createFakePipeline();
+				},
+			});
+			await embedder.prewarm();
+			expect(seen[0]?.cacheDir).toBe("/tmp/memofs-custom-cache");
+		});
+	});
+
+	describe("instruction prefixes", () => {
+		function capturingPipeline() {
+			const inputs: string[][] = [];
+			const pipeline = async (texts: string[]) => {
+				inputs.push(texts);
+				return createFakePipeline()(texts, {
+					pooling: "mean",
+					normalize: true,
+				});
+			};
+			return { inputs, pipeline };
+		}
+
+		it("embedQuery applies the bge query prefix and keeps the original text", async () => {
+			const { inputs, pipeline } = capturingPipeline();
+			const embedder = createTransformersEmbedder({
+				model: "Xenova/bge-small-en-v1.5",
+				pipelineFactory: async () => pipeline,
+			});
+			const record = await embedder.embedQuery("vault rotation cadence");
+			expect(inputs[0]?.[0]).toBe(
+				"Represent this sentence for searching relevant passages: vault rotation cadence",
+			);
+			expect(record.text).toBe("vault rotation cadence");
+		});
+
+		it("embedTexts applies the e5 passage prefix to documents by default", async () => {
+			const { inputs, pipeline } = capturingPipeline();
+			const embedder = createTransformersEmbedder({
+				model: "Xenova/multilingual-e5-small",
+				pipelineFactory: async () => pipeline,
+			});
+			const result = await embedder.embedTexts({ texts: ["memory one"] });
+			expect(inputs[0]?.[0]).toBe("passage: memory one");
+			expect(result.embeddings[0]?.text).toBe("memory one");
+		});
+
+		it("embedTexts honors an explicit query purpose", async () => {
+			const { inputs, pipeline } = capturingPipeline();
+			const embedder = createTransformersEmbedder({
+				model: "Xenova/multilingual-e5-small",
+				pipelineFactory: async () => pipeline,
+			});
+			await embedder.embedTexts({
+				texts: ["memory one"],
+				purpose: "query",
+			});
+			expect(inputs[0]?.[0]).toBe("query: memory one");
+		});
+
+		it("adds no prefix for symmetric models", async () => {
+			const { inputs, pipeline } = capturingPipeline();
+			const embedder = createTransformersEmbedder({
+				model: "Xenova/all-MiniLM-L6-v2",
+				pipelineFactory: async () => pipeline,
+			});
+			await embedder.embedQuery("plain query");
+			await embedder.embedTexts({ texts: ["plain document"] });
+			expect(inputs[0]?.[0]).toBe("plain query");
+			expect(inputs[1]?.[0]).toBe("plain document");
 		});
 	});
 });

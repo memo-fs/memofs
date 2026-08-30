@@ -345,6 +345,13 @@ export interface WriteMemoryInput {
 export interface WriteMemoryResult {
 	id: string;
 	created: boolean;
+	/**
+	 * Present when the write was skipped as a near-duplicate of an
+	 * already-indexed memory (`created: false`, nothing appended). Names the
+	 * existing memory's id so callers can update or supersede it instead of
+	 * re-recording the same fact.
+	 */
+	duplicateOf?: string;
 	sourceRefs?: SourceRef[];
 	/**
 	 * The durability tier the write was classified into.

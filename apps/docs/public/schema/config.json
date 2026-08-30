@@ -73,7 +73,7 @@
 				},
 				"embeddingModel": {
 					"type": "string",
-					"description": "Transformers.js-compatible local embedding model id. Only used when local embeddings are enabled. Defaults to \"Xenova/all-MiniLM-L6-v2\"."
+					"description": "Transformers.js-compatible local embedding model id. Only used when local embeddings are enabled. Defaults to \"Xenova/bge-small-en-v1.5\"."
 				}
 			},
 			"additionalProperties": false

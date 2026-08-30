@@ -7,7 +7,7 @@
 import { z } from "zod";
 
 const JsonRecordSchema = z.record(z.string(), z.unknown());
-const IsoDateSchema = z.string().datetime();
+const IsoDateSchema = z.iso.datetime();
 const NonEmptyStringSchema = z.string().min(1);
 
 /**

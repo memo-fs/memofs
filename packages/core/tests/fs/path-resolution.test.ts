@@ -1,6 +1,6 @@
 import path from "node:path";
-import { MemoryPathError } from "@memofs/core";
 import { describe, expect, test } from "vitest";
+import { MemoryPathError } from "../../src/index";
 import {
 	normalizeOptions,
 	normalizeRootDir,
