@@ -18,6 +18,9 @@ benchmarks/reports/*
 # Environment & Credentials
 .env
 .env.*
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 *.pem
 
 # Operating System

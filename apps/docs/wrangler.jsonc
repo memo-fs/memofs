@@ -1,0 +1,11 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "memofs-docs",
+	"pages_build_output_dir": "./build/client",
+	"compatibility_date": "2026-07-15",
+	"compatibility_flags": ["nodejs_compat"],
+	"vars": {
+		"RESEND_SEGMENT_ID": "35f954a3-f5b7-4f40-8c61-032710a93bb3",
+		"RESEND_FROM": "MemoFS Team <team@mail.memofs.dev>"
+	}
+}

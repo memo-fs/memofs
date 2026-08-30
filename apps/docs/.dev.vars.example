@@ -1,0 +1,4 @@
+# Cloudflare Pages / Local development variables for @memofs/docs
+RESEND_API_KEY=re_your_resend_api_key_here
+RESEND_SEGMENT_ID=35f954a3-f5b7-4f40-8c61-032710a93bb3
+RESEND_FROM=MemoFS Team <team@mail.memofs.dev>
