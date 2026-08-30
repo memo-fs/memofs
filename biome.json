@@ -17,7 +17,9 @@
 			"!**/components/ui/**",
 			"!**/drizzle/meta/**",
 			"!**/./agents/**",
-			"!**/./memofs/**"
+			"!**/./memofs/**",
+			"!**/.source/**",
+			"!**/build/**"
 		]
 	},
 	"formatter": {
@@ -28,6 +30,9 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off"
+			},
 			"suspicious": {
 				"useBiomeIgnoreFolder": "off"
 			}
