@@ -102,14 +102,10 @@
 		"zod": "^4.4.2"
 	},
 	"peerDependencies": {
-		"@modelcontextprotocol/sdk": ">=1.29.0",
-		"@memofs/adapter-transformers": "workspace:^"
+		"@modelcontextprotocol/sdk": ">=1.29.0"
 	},
 	"peerDependenciesMeta": {
 		"@modelcontextprotocol/sdk": {
-			"optional": true
-		},
-		"@memofs/adapter-transformers": {
 			"optional": true
 		}
 	}
