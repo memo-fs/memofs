@@ -43,25 +43,25 @@ Every effective AI agent follows the four-phase MemoFS memory cycle:
 
 <Cards>
   <Card
-    icon={<div className='size-0 font-bold text-center'>1</div>}
-    title="1. Load Context"
+    icon={<span className="flex size-6 items-center justify-center bg-primary text-primary-foreground text-xs font-bold">1</span>}
+    title="Load Context"
   >
     At the start of every session or task, the agent calls <code>memofs.context</code> to load core rules, architecture constraints, and recent briefing fragments.
   </Card>
   <Card
-    icon={<div className='size-4 font-bold text-center'>2</div>}
+    icon={<span className="flex size-6 items-center justify-center bg-primary text-primary-foreground text-xs font-bold">2</span>}
     title="Recall Past Decisions"
   >
     Before modifying code or making assumptions, the agent queries <code>memofs.recall</code> to surface exact past reasoning, schemas, or prior bug fixes.
   </Card>
   <Card
-    icon={<div className='size-4 font-bold text-center'>3</div>}
+    icon={<span className="flex size-6 items-center justify-center bg-primary text-primary-foreground text-xs font-bold">3</span>}
     title="Execute With Memory"
   >
     The agent performs the code modifications, refactors, or tests while strictly adhering to recalled decisions and repository constraints.
   </Card>
   <Card
-    icon={<div className='size-4 font-bold text-center'>4</div>}
+    icon={<span className="flex size-6 items-center justify-center bg-primary text-primary-foreground text-xs font-bold">4</span>}
     title="Persist Discoveries"
   >
     Before ending the turn, the agent will write newly learned facts, root causes, or architectural patterns into <code>.memofs/</code>.
