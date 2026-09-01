@@ -24,21 +24,29 @@ Each MemoFS package maintains its own changelog. This page highlights notable ch
 ## Unreleased
 
 ### Core
+
+#### Added
 - Improved hybrid recall to merge duplicate hits and reward double matches, with single candidate per memory for reranking
 - Added one-time cleanup for legacy embeddings on first load
 - Switched default local embedding model to a stronger 384-dimension variant
 - Added instruction-aware embedding and cross-model safety for queries
 
 ### CLI
+
+#### Added
 - Added validation schema for connectors configuration
 - Connectors commands now stamp editor schema reference on every write
 - Init now predownloads the embedding model and sets hybrid recall defaults
 
 ### Adapter Transformers
+
+#### Added
 - New default model and quantized weights for smaller and faster downloads
 - Added instruction prefix handling and shared model cache
 
 ### Spec
+
+#### Added
 - Added manifest schema and validator
 
 ## v1.3.0-beta.3 — August 17, 2026
