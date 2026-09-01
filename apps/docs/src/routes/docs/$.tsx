@@ -134,7 +134,7 @@ function Content({
 		>
 			<DocsTitle>{page.title}</DocsTitle>
 			<DocsDescription>{page.description}</DocsDescription>
-			<div className="not-prose my-4 flex flex-row items-center gap-2 border-b border-dashed border-zinc-200 dark:border-zinc-800 pb-4">
+			<div className="not-prose my-4 flex flex-row items-center gap-2 border-b border-dashed border-border pb-4">
 				<LLMCopyButton markdownUrl={markdownUrl} />
 				<ViewOptions markdownUrl={markdownUrl} githubUrl={githubUrl} />
 			</div>
@@ -145,7 +145,7 @@ function Content({
 					})}
 				/>
 			</DocsBody>
-			<div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-dashed border-zinc-200 pt-4 text-xs text-zinc-500 dark:border-zinc-800">
+			<div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-dashed border-border pt-4 text-xs text-muted-foreground dark:border-border">
 				<EditOnGitHub href={githubUrl} />
 				{lastModified ? <PageLastUpdate date={new Date(lastModified)} /> : null}
 			</div>

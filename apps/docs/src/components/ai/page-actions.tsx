@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { cn } from "~/lib/utils";
 import { SITE } from "../../lib/site";
 
 interface PageActionsProps {
@@ -38,11 +46,12 @@ export function LLMCopyButton({
 	}
 
 	return (
-		<button
-			type="button"
+		<Button
+			variant="secondary"
+			size="sm"
 			onClick={handleCopy}
 			disabled={loading}
-			className={`inline-flex items-center gap-2 rounded-md border border-zinc-300/80 bg-zinc-100/90 px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm transition-all hover:bg-zinc-200/80 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer ${className}`}
+			className={cn("gap-2", className)}
 		>
 			{copied ? (
 				<>
@@ -64,7 +73,7 @@ export function LLMCopyButton({
 			) : loading ? (
 				<>
 					<svg
-						className="size-3.5 animate-spin text-zinc-500"
+						className="size-3.5 animate-spin text-muted-foreground"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -83,7 +92,7 @@ export function LLMCopyButton({
 			) : (
 				<>
 					<svg
-						className="size-3.5 text-zinc-500 dark:text-zinc-400"
+						className="size-3.5 text-muted-foreground"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -97,7 +106,7 @@ export function LLMCopyButton({
 					<span>Copy Markdown</span>
 				</>
 			)}
-		</button>
+		</Button>
 	);
 }
 
@@ -110,24 +119,6 @@ export function ViewOptions({
 	githubUrl: string;
 	className?: string;
 }) {
-	const [isOpen, setIsOpen] = useState(false);
-	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		function handleClickOutside(e: MouseEvent) {
-			if (
-				dropdownRef.current &&
-				!dropdownRef.current.contains(e.target as Node)
-			) {
-				setIsOpen(false);
-			}
-		}
-
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, []);
-
-	// Absolute URL for external AI services
 	const fullMarkdownUrl =
 		typeof window !== "undefined"
 			? new URL(markdownUrl, window.location.origin).href
@@ -224,68 +215,58 @@ export function ViewOptions({
 	];
 
 	return (
-		<div ref={dropdownRef} className={`relative inline-block ${className}`}>
-			<button
-				type="button"
-				onClick={() => setIsOpen((prev) => !prev)}
-				className="inline-flex items-center gap-1.5 rounded-md border border-zinc-300/80 bg-zinc-100/90 px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm transition-all hover:bg-zinc-200/80 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900/90 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:hover:text-white cursor-pointer"
-				aria-expanded={isOpen}
-				aria-haspopup="true"
-				aria-label="Open page in..."
-			>
-				<span>Open</span>
-				<svg
-					className={`size-3.5 text-zinc-500 dark:text-zinc-400 transition-transform ${
-						isOpen ? "rotate-180" : ""
-					}`}
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					strokeWidth="2"
-					strokeLinecap="round"
-					strokeLinejoin="round"
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="secondary"
+					size="sm"
+					className={cn("gap-1.5", className)}
 				>
-					<polyline points="6 9 12 15 18 9" />
-				</svg>
-			</button>
-
-			{isOpen && (
-				<div className="absolute left-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-white/95 p-1.5 shadow-xl backdrop-blur-md z-50 dark:border-zinc-800 dark:bg-zinc-950/95 dark:shadow-2xl">
-					<div className="flex flex-col gap-0.5">
-						{menuItems.map((item) => (
-							<a
-								key={item.label}
-								href={item.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								onClick={() => setIsOpen(false)}
-								className="group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-white"
+					<span>Open</span>
+					<svg
+						className="size-3.5 text-muted-foreground"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+					>
+						<polyline points="6 9 12 15 18 9" />
+					</svg>
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="start" className="w-56 p-1.5">
+				{menuItems.map((item) => (
+					<DropdownMenuItem key={item.label} asChild>
+						<a
+							href={item.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="flex w-full items-center justify-between"
+						>
+							<span className="flex items-center gap-2.5">
+								<span className="text-muted-foreground">{item.icon}</span>
+								<span>{item.label}</span>
+							</span>
+							<svg
+								className="size-3.5 opacity-60"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
 							>
-								<div className="flex items-center gap-2.5">
-									<span className="text-zinc-500 transition-colors group-hover:text-zinc-900 dark:text-zinc-400 dark:group-hover:text-white">
-										{item.icon}
-									</span>
-									<span>{item.label}</span>
-								</div>
-								<svg
-									className="size-3.5 text-zinc-400 opacity-60 transition-opacity group-hover:opacity-100 dark:text-zinc-500"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								>
-									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-									<polyline points="15 3 21 3 21 9" />
-									<line x1="10" y1="14" x2="21" y2="3" />
-								</svg>
-							</a>
-						))}
-					</div>
-				</div>
-			)}
-		</div>
+								<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								<polyline points="15 3 21 3 21 9" />
+								<line x1="10" y1="14" x2="21" y2="3" />
+							</svg>
+						</a>
+					</DropdownMenuItem>
+				))}
+			</DropdownMenuContent>
+		</DropdownMenu>
 	);
 }
 
@@ -295,7 +276,7 @@ export function PageActions({
 	className = "",
 }: PageActionsProps) {
 	return (
-		<div className={`flex flex-row items-center gap-2 ${className}`}>
+		<div className={cn("flex flex-row items-center gap-2", className)}>
 			<LLMCopyButton markdownUrl={markdownUrl} />
 			<ViewOptions markdownUrl={markdownUrl} githubUrl={githubUrl} />
 		</div>

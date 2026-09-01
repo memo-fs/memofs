@@ -7,6 +7,7 @@
 import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import type React from "react";
+import { Badge } from "~/components/ui/badge";
 import { Footer } from "../components/footer";
 import { useMDXComponents } from "../components/mdx";
 import { baseOptions } from "../lib/layout.shared";
@@ -14,6 +15,7 @@ import { createPageMeta } from "../lib/meta";
 import { createRelativeLink } from "../lib/relative-link";
 import { ROUTES, SITE } from "../lib/site";
 import { docs } from "../lib/source";
+import { cn } from "../lib/utils";
 import type { Route } from "./+types/changelog";
 
 /** Metadata for the public changelog route. */
@@ -85,26 +87,26 @@ function ChangelogH2({
 		<div className="not-prose relative mt-10 first:mt-0 pt-1">
 			{/* Timeline node marker - placed at exact pixel height aligned with h2 text line */}
 			<span
-				className="absolute -left-[30.5px] sm:-left-[46.5px] top-[7px] size-3 rounded-full border-2 border-zinc-900 bg-white dark:border-zinc-100 dark:bg-zinc-950 ring-4 ring-white dark:ring-black"
+				className="absolute -left-[30.5px] sm:-left-[46.5px] top-[7px] size-3 rounded-full border-2 border-primary bg-background dark:border-primary dark:bg-background ring-4 ring-background"
 				aria-hidden="true"
 			/>
 			<div className="flex flex-wrap items-center gap-2 sm:gap-2.5 leading-none">
 				<h2
 					id={id}
-					className="text-lg sm:text-xl font-bold tracking-tight text-zinc-900 dark:text-white m-0 p-0 leading-none scroll-mt-24"
+					className="text-lg sm:text-xl font-bold tracking-tight text-foreground m-0 p-0 leading-none scroll-mt-24"
 					{...props}
 				>
 					{version}
 				</h2>
 				{date && (
-					<span className="inline-flex items-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-100/70 dark:bg-zinc-900/70 px-2 py-0.5 font-mono text-[11px] text-zinc-500 dark:text-zinc-400 leading-none">
+					<Badge variant="secondary" className="font-mono text-[11px]">
 						{date}
-					</span>
+					</Badge>
 				)}
 				{isLatest && (
-					<span className="inline-flex items-center rounded-md bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 leading-none">
+					<Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:text-emerald-400 font-mono text-[10px] uppercase tracking-wider">
 						Latest
-					</span>
+					</Badge>
 				)}
 			</div>
 		</div>
@@ -120,7 +122,7 @@ function ChangelogH3({
 	return (
 		<h3
 			id={id}
-			className="mt-4 mb-2 font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 scroll-mt-24"
+			className="mt-4 mb-2 font-mono text-[11px] font-bold uppercase tracking-wider text-foreground scroll-mt-24"
 			{...props}
 		>
 			{children}
@@ -140,11 +142,14 @@ function ChangelogH4({
 	if (badgeStyle) {
 		return (
 			<div className="not-prose mt-2.5 mb-1 flex items-center">
-				<span
-					className={`inline-flex items-center rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider leading-none border ${badgeStyle}`}
+				<Badge
+					className={cn(
+						"font-mono text-[10px] uppercase tracking-wider",
+						badgeStyle,
+					)}
 				>
 					{rawText}
-				</span>
+				</Badge>
 			</div>
 		);
 	}
@@ -152,7 +157,7 @@ function ChangelogH4({
 	return (
 		<h4
 			id={id}
-			className="mt-2.5 mb-1 text-xs font-semibold text-zinc-700 dark:text-zinc-300 scroll-mt-24"
+			className="mt-2.5 mb-1 text-xs font-semibold text-foreground scroll-mt-24"
 			{...props}
 		>
 			{children}
@@ -179,11 +184,11 @@ function ChangelogLi({
 }: React.ComponentPropsWithoutRef<"li">) {
 	return (
 		<li
-			className="flex items-start gap-2 text-xs sm:text-[13px] leading-relaxed text-zinc-700 dark:text-zinc-300"
+			className="flex items-start gap-2 text-xs sm:text-[13px] leading-relaxed text-foreground"
 			{...props}
 		>
 			<span
-				className="mt-1.5 size-1 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-500"
+				className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground"
 				aria-hidden="true"
 			/>
 			<span className="flex-1 min-w-0">{children}</span>
@@ -198,7 +203,7 @@ function ChangelogP({
 }: React.ComponentPropsWithoutRef<"p">) {
 	return (
 		<p
-			className="mt-2 mb-3 text-xs sm:text-sm leading-normal text-zinc-600 dark:text-zinc-400"
+			className="mt-2 mb-3 text-xs sm:text-sm leading-normal text-muted-foreground"
 			{...props}
 		>
 			{children}
@@ -209,10 +214,7 @@ function ChangelogP({
 /** Custom horizontal divider. */
 function ChangelogHr(props: React.ComponentPropsWithoutRef<"hr">) {
 	return (
-		<hr
-			className="my-6 border-t border-dashed border-zinc-200 dark:border-zinc-800"
-			{...props}
-		/>
+		<hr className="my-6 border-t border-dashed border-border" {...props} />
 	);
 }
 
@@ -224,16 +226,19 @@ export default function ChangelogPage() {
 
 	return (
 		<HomeLayout {...baseOptions()}>
-			<div className="relative w-full bg-white text-zinc-900 transition-colors duration-300 dark:bg-black dark:text-white">
-				<header className="border-b border-dashed border-zinc-200 bg-zinc-50/50 py-10 dark:border-zinc-800/80 dark:bg-zinc-950/40 sm:py-14">
+			<div className="relative w-full bg-background text-foreground">
+				<header className="border-b border-dashed border-border bg-muted/50 py-10 dark:border-border/80 dark:bg-muted/40 sm:py-14">
 					<div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-						<span className="inline-flex items-center rounded border border-dashed border-zinc-300 bg-zinc-100 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+						<Badge
+							variant="secondary"
+							className="border-dashed font-mono text-[11px]"
+						>
 							Release History
-						</span>
-						<h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl text-zinc-900 dark:text-white">
+						</Badge>
+						<h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
 							Changelog
 						</h1>
-						<p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+						<p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 							All notable changes, architectural milestones, bug fixes, and
 							feature additions across all {SITE.name} workspace packages.
 						</p>
@@ -241,7 +246,7 @@ export default function ChangelogPage() {
 				</header>
 
 				<main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
-					<div className="relative border-l border-dashed border-zinc-300 dark:border-zinc-800 pl-6 sm:pl-10">
+					<div className="relative border-l border-dashed border-border pl-6 sm:pl-10">
 						<DocsBody className="max-w-none">
 							<Mdx
 								components={useMDXComponents({
