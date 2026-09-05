@@ -139,7 +139,7 @@ When `runConnectors` executes, it builds a deduplication index of existing note 
 2. **Fallback path (Recent Memories):** If the store does not expose an event log directly, falls back to `memo.listRecentMemories({ limit: 500 })`.
 3. **In-Run Tracking:** When a record is written during the active pass, its ID is immediately added to the in-memory set to prevent duplicate writes within the same batch.
 
-## Workspace Configuration (`connectors.json`)
+## Workspace Configuration
 
 Connectors are configured in `.memofs/connectors.json`:
 
@@ -173,7 +173,7 @@ Connectors are configured in `.memofs/connectors.json`:
 }
 ```
 
-### Configuration Schema (`ConnectorConfig`)
+### Configuration Schema
 
 | Property | Type | Required | Description |
 |---|---|---|---|
@@ -222,7 +222,7 @@ export interface SecretResolver {
 }
 ```
 
-### 1. `EnvSecretResolver` (Local Development)
+### 1. Local Development
 
 Reads a `{ "secretRef": "token" }` map from the local, gitignored file `.memofs/secrets.json`:
 
@@ -240,10 +240,10 @@ const secretResolver = new EnvSecretResolver({ rootDir: "." });
 ```
 
 <Callout type="info">
-`EnvSecretResolver` reads from `.memofs/secrets.json` on disk (cached in memory); it does not read OS environment variables (`process.env`). Always ensure `.memofs/secrets.json` is listed in your project's `.gitignore`.
+`EnvSecretResolver` reads from `.memofs/secrets.json` on disk (cached in memory); it does not read OS environment variables. Always ensure `.memofs/secrets.json` is listed in your project's `.gitignore`.
 </Callout>
 
-### 2. `CloudSecretResolver` (Production & Hosted CLI)
+### 2. Production & Hosted CLI
 
 Fetches decrypted credentials on demand from MemoFS Cloud using the project's Bearer API key:
 
@@ -259,7 +259,7 @@ const secretResolver = new CloudSecretResolver({
 
 Calls `GET {cloudBaseUrl}/projects/:projectId/connectors/secret?ref=:secretRef` with `Authorization: Bearer <apiKey>` and `Accept: application/json`.
 
-### 3. `StaticSecretResolver` (Testing & Embedding)
+### 3. Testing & Embedding
 
 Uses an in-memory dictionary. Ideal for automated testing or environments where secrets are pre-loaded in memory:
 

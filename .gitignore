@@ -35,14 +35,8 @@ yarn-error.log*
 
 # Editor & AI Tool Configs (Local / Machine-Specific)
 .vscode/
-.claude/
-.codex/
-.cursor/
-.opencode/
-.mcp.json
 opencode.json
 skills-lock.json
-CLAUDE.md
 .agents/skills/
 
 # Memory Runtime Data (Local Stores)
@@ -54,6 +48,7 @@ packages/**/.memofs/
 # Internal Docs & Experiments
 CONTEXT.md
 teasers.md
+tickets-to-close.md
 adr/
 agents/
 architecture/

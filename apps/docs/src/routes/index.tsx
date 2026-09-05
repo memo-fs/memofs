@@ -14,9 +14,9 @@ import { ROUTES } from "../lib/site";
 import type { Route } from "./+types/index";
 
 export const meta: Route.MetaFunction = () => {
-	const pageTitle = "MemoFS — The File-First Memory for AI Agents";
+	const pageTitle = "MemoFS — The File-First Memory Runtime for AI Agents";
 	const description =
-		"Store decisions and facts as markdown in your repository. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents.";
+		"Store decisions, facts, and context as markdown in your project. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents, research workflows, and applications.";
 
 	return createPageMeta({ title: pageTitle, description, path: ROUTES.home });
 };
@@ -51,81 +51,80 @@ function CommandPrompt() {
 	);
 }
 
+function Crosshair({ className }: { className?: string }) {
+	return (
+		<svg
+			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
+			viewBox="0 0 14 14"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.2"
+			aria-hidden="true"
+		>
+			<line x1="7" y1="0" x2="7" y2="14" />
+			<line x1="0" y1="7" x2="14" y2="7" />
+		</svg>
+	);
+}
+
 export default function HomePage() {
 	return (
 		<HomeLayout {...baseOptions()}>
-			{/* 1. HERO SECTION */}
-			<div className="relative flex min-h-[calc(100dvh-3.5rem)] w-full flex-col justify-center overflow-hidden bg-background text-foreground px-4 sm:px-6 lg:px-8 py-12 md:py-0 transition-colors duration-300">
-				{/* Ambient background glow */}
+			{/* 1. HERO SECTION - FILESYSTEM / INODE MATRIX */}
+			<div className="relative flex min-h-[calc(100dvh-3.5rem)] w-full flex-col justify-center overflow-hidden bg-background text-foreground px-4 sm:px-6 lg:px-8 py-6 md:py-8 transition-colors duration-300">
+				{/* Ambient technical grid texture */}
 				<div
-					className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-87.5 w-162.5 rounded-full bg-muted/60 blur-[120px] -z-10"
+					className="pointer-events-none absolute inset-0 bg-[radial-gradient(var(--color-border)_1px,transparent_1px)] bg-size-[24px_24px] opacity-40 mask-[radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] -z-10"
 					aria-hidden="true"
 				/>
 
-				{/* Contained hero blueprint box */}
-				<div className="relative mx-auto w-full max-w-5xl px-4 sm:px-8">
-					{/* Top Extension Space & Guide with crossing lines */}
-					<div className="relative border-b border-dashed border-border py-2 sm:py-3">
-						{/* Horizontal line extending past left/right edges */}
-						<div className="pointer-events-none absolute -left-6 -right-6 bottom-0 border-b border-dashed border-border sm:-left-10 sm:-right-10" />
+				{/* Contained Hero Inode Box */}
+				<div className="relative mx-auto w-full max-w-5xl">
+					{/* Outer animated drafting guidelines that intersect at outer corners */}
+					<div className="pointer-events-none absolute -left-6 -right-6 top-0 border-t border-dashed border-border/70 origin-center animate-line-x sm:-left-10 sm:-right-10" />
+					<div className="pointer-events-none absolute -left-6 -right-6 bottom-0 border-b border-dashed border-border/70 origin-center animate-line-x sm:-left-10 sm:-right-10" />
+					<div className="pointer-events-none absolute left-0 -top-6 -bottom-6 border-l border-dashed border-border/70 origin-top animate-line-y sm:-top-8 sm:-bottom-8" />
+					<div className="pointer-events-none absolute right-0 -top-6 -bottom-6 border-r border-dashed border-border/70 origin-top animate-line-y sm:-top-8 sm:-bottom-8" />
 
-						{/* Top Left Circle with smooth rotation animation */}
-						<div
-							className="pointer-events-none absolute -left-8 -bottom-8 h-16 w-16 rounded-full border border-dashed border-border animate-slow-spin sm:-left-10 sm:-bottom-10 sm:h-20 sm:w-20"
-							aria-hidden="true"
-						/>
+					{/* Outer corner intersection crosshairs */}
+					<Crosshair className="-top-1.75 -left-1.75" />
+					<Crosshair className="-top-1.75 -right-1.75" />
+					<Crosshair className="-bottom-1.75 -left-1.75" />
+					<Crosshair className="-bottom-1.75 -right-1.75" />
 
-						{/* Outer left/right vertical lines extending up through top guide */}
-						<div className="pointer-events-none absolute left-0 -top-4 bottom-0 border-l border-dashed border-border sm:-top-6" />
-						<div className="pointer-events-none absolute right-0 -top-4 bottom-0 border-r border-dashed border-border sm:-top-6" />
-
-						{/* Top inner vertical lines (aligned with bottom button column) */}
-						<div className="grid grid-cols-12 h-full">
-							<div className="col-span-12 md:col-start-4 md:col-span-6 border-x border-dashed border-border h-4 sm:h-6" />
-						</div>
-
-						{/* Subtle beam sweep on top line */}
-						<div className="pointer-events-none absolute inset-x-0 bottom-0 h-px overflow-hidden">
-							<div className="h-full w-48 bg-linear-to-r from-transparent via-zinc-400/50 to-transparent animate-beam" />
+					{/* Top Inode Specification / Breadcrumb Header Bar */}
+					<div className="relative flex items-center justify-between border-x border-t border-border border-dashed px-4 py-2 font-mono text-xs text-muted-foreground backdrop-blur-xs sm:px-6">
+						<div className="flex items-center gap-2">
+							<span className="font-semibold font-mono text-foreground">
+								{"~"} <code>ls .memofs/</code>
+							</span>
 						</div>
 					</div>
 
-					{/* Main Grid Content Area */}
-					<div className="relative">
-						{/* Outer left/right vertical lines extending past top and bottom */}
-						<div className="pointer-events-none absolute left-0 -top-6 -bottom-6 border-l border-dashed border-border sm:-top-10 sm:-bottom-10" />
-						<div className="pointer-events-none absolute right-0 -top-6 -bottom-6 border-r border-dashed border-border sm:-top-10 sm:-bottom-10" />
-
-						{/* Top horizontal line extending past corners */}
-						<div className="pointer-events-none absolute -left-6 -right-6 top-0 border-t border-dashed border-border sm:-left-10 sm:-right-10" />
-
-						{/* Top Left Circle centered at the top-left intersection */}
-						<div
-							className="pointer-events-none absolute -left-8 -top-8 h-16 w-16 rounded-full border border-dashed border-border animate-slow-spin sm:-left-10 sm:-top-10 sm:h-20 sm:w-20"
-							aria-hidden="true"
-						/>
-
-						{/* Headline Section (Full Width) */}
-						<div className="px-4 py-8 text-center sm:px-8 sm:py-10 md:py-12">
+					{/* Main Content Box with Precision Grid */}
+					<div className="relative border border-border border-dashed">
+						{/* Headline Section */}
+						<div className="relative px-4 py-8 text-center sm:px-8 sm:py-10 md:py-12">
 							<h1 className="mx-auto max-w-4xl text-balance text-3xl font-bold font-sans tracking-tight text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
 								The File-First Memory Runtime for AI Agents
 							</h1>
 						</div>
 
-						{/* Middle Horizontal Border with extensions */}
+						{/* Mid Dashed Animated Divider with Intersecting Crosshairs */}
 						<div className="relative border-t border-dashed border-border">
-							<div className="pointer-events-none absolute -left-6 -right-6 top-0 border-t border-dashed border-border sm:-left-10 sm:-right-10" />
-							{/* Light beam on middle line */}
-							<div className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden">
-								<div className="h-full w-64 bg-linear-to-r from-transparent via-zinc-400/40 to-transparent animate-beam [animation-delay:2s]" />
-							</div>
+							<div className="pointer-events-none absolute inset-x-0 top-0 border-t border-dashed border-border origin-left animate-line-x" />
+							<Crosshair className="-top-1.75 -left-1.75" />
+							<Crosshair className="-top-1.75 -right-1.75" />
+							<Crosshair className="-top-1.75 left-[calc(25%-7px)] hidden md:block" />
+							<Crosshair className="-top-1.75 right-[calc(25%-7px)] hidden md:block" />
 						</div>
 
-						{/* Subtitle Section (Full Width) */}
-						<div className="px-4 py-5 text-center sm:px-8 sm:py-6 md:py-8">
+						{/* Subtitle Section */}
+						<div className="px-4 py-5 text-center sm:px-8 sm:py-6 md:py-7">
 							<p className="mx-auto max-w-2xl text-balance md:text-lg text-muted-foreground leading-relaxed font-medium">
-								Store decisions as simple markdown files —{" "}
-								<strong className="text-foreground">
+								Store decisions, facts, and context as simple markdown files in
+								your project —{" "}
+								<strong className="text-foreground font-semibold">
 									versioned, portable, and always there when the next session
 									starts
 								</strong>
@@ -133,61 +132,67 @@ export default function HomePage() {
 							</p>
 						</div>
 
-						{/* Lower Horizontal Border with extensions */}
+						{/* Lower Dashed Animated Divider with Intersecting Crosshairs */}
 						<div className="relative border-t border-dashed border-border">
-							<div className="pointer-events-none absolute -left-6 -right-6 top-0 border-t border-dashed border-border sm:-left-10 sm:-right-10" />
+							<div className="pointer-events-none absolute inset-x-0 top-0 border-t border-dashed border-border origin-right animate-line-x" />
+							<Crosshair className="-top-1.75 -left-1.75" />
+							<Crosshair className="-top-1.75 -right-1.75" />
+							<Crosshair className="-top-1.75 left-[calc(25%-7px)] hidden md:block" />
+							<Crosshair className="-top-1.75 right-[calc(25%-7px)] hidden md:block" />
 						</div>
 
-						{/* CTA & CLI Section (Third Row with two vertical lines housing buttons & command) */}
-						<div className="relative grid grid-cols-12">
-							{/* Left empty flank */}
-							<div className="hidden md:block md:col-span-3" />
+						{/* CTA & CLI Section with Animated Vertical Intersecting Dividers */}
+						<div className="relative grid grid-cols-12 divide-y divide-border md:divide-y-0">
+							{/* Vertical animated dashed divider lines */}
+							<div className="hidden md:block pointer-events-none absolute top-0 bottom-0 left-1/4 border-l border-dashed border-border origin-top animate-line-y" />
+							<div className="hidden md:block pointer-events-none absolute top-0 bottom-0 right-1/4 border-r border-dashed border-border origin-top animate-line-y" />
 
-							{/* Center column housing buttons and install command with vertical dashed borders */}
-							<div className="relative col-span-12 md:col-span-6 border-dashed border-border md:border-x px-4 py-6 text-center sm:px-6 sm:py-8 md:py-10">
-								{/* Inner vertical lines extending downward past bottom line */}
-								<div className="hidden md:block pointer-events-none absolute left-0 -bottom-6 border-l border-dashed border-border h-6 sm:-bottom-10 sm:h-10" />
-								<div className="hidden md:block pointer-events-none absolute right-0 -bottom-6 border-r border-dashed border-border h-6 sm:-bottom-10 sm:h-10" />
+							{/* Left technical spec column */}
+							<div className="hidden md:flex md:col-span-3 flex-col justify-between p-4 font-mono text-xs text-muted-foreground/70">
+								<div className="text-muted-foreground/40 font-mono text-[10px]">
+									cursor: cur_0x4f02a9
+								</div>
+							</div>
 
-								{/* Bottom Right Circle on the inner column intersection */}
-								<div
-									className="pointer-events-none absolute -right-8 -bottom-8 h-16 w-16 rounded-full border border-dashed border-border animate-reverse-spin sm:-right-10 sm:-bottom-10 sm:h-20 sm:w-20"
-									aria-hidden="true"
-								/>
-
+							{/* Center Action Column */}
+							<div className="col-span-12 md:col-span-6 px-4 py-6 text-center sm:px-6 sm:py-8">
 								<div className="flex flex-wrap items-center justify-center gap-3">
-									<Button asChild size="lg">
+									<Button
+										asChild
+										size="lg"
+										className="rounded-none font-bold tracking-wide"
+									>
 										<Link to={ROUTES.introduction}>Get Started</Link>
 									</Button>
-									<Button asChild variant="secondary" size="lg">
-										<Link to="/#features">Features →</Link>
+									<Button
+										asChild
+										variant="secondary"
+										size="lg"
+										className="rounded-none font-bold tracking-wide"
+									>
+										<Link to="/#features">Features &rarr;</Link>
 									</Button>
 								</div>
 
-								<div className="flex justify-center">
+								<div className="flex justify-center mt-2">
 									<CommandPrompt />
 								</div>
 							</div>
 
-							{/* Right empty flank */}
-							<div className="hidden md:block md:col-span-3" />
-						</div>
-
-						{/* Bottom Border with extensions */}
-						<div className="relative border-t border-dashed border-border">
-							<div className="pointer-events-none absolute -left-6 -right-6 top-0 border-t border-dashed border-border sm:-left-10 sm:-right-10" />
-							{/* Light beam on bottom line */}
-							<div className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden">
-								<div className="h-full w-56 bg-linear-to-r from-transparent via-zinc-400/40 to-transparent animate-beam [animation-delay:4s]" />
+							{/* Right technical spec column */}
+							<div className="hidden md:flex md:col-span-3 flex-col justify-between p-4 font-mono text-xs text-muted-foreground/70 text-right">
+								<div className="text-muted-foreground/40 font-mono text-[10px]">
+									digest: sha256
+								</div>
 							</div>
 						</div>
 					</div>
 
-					{/* Bottom Extension Space */}
-					<div className="relative py-2 sm:py-3">
-						{/* Outer left/right vertical lines extending down through bottom guide */}
-						<div className="pointer-events-none absolute left-0 top-0 h-4 sm:h-6 border-l border-dashed border-border" />
-						<div className="pointer-events-none absolute right-0 top-0 h-4 sm:h-6 border-r border-dashed border-border" />
+					{/* Bottom Partition Footer Bar */}
+					<div className="relative flex items-center justify-end border-x border-b border-dashed border-border px-4 py-2 font-mono text-xs text-muted-foreground/70 backdrop-blur-xs sm:px-6">
+						<div className="flex items-center gap-3">
+							<span>[mount: file-first]</span>
+						</div>
 					</div>
 				</div>
 			</div>

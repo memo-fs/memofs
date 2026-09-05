@@ -4,10 +4,10 @@ description: The file-first memory runtime for AI agents — architecture, menta
 icon: BookOpen
 ---
 
-MemoFS is a **file-first memory runtime for AI agents**. It bridges the gap between ephemeral agent context windows and persistent codebase evolution by storing decisions, architectural constraints, project conventions, and search indexes directly as **Markdown and JSONL files in your repository**.
+MemoFS is the **default file-first AI runtime memory**. It bridges the gap between ephemeral context windows and persistent project evolution by storing decisions, research findings, architectural constraints, and search indexes directly as **Markdown and JSONL files in your project repository**.
 
 <Callout type="info" title="Designed for Two Primary Paths">
-Whether you are a developer **using AI coding agents day-to-day** (Claude Code, Cursor, Codex, Copilot, Cline) or an engineer **building custom AI agents and agentic systems**, MemoFS provides the standard runtime for structured, persistent agent memory.
+Whether you are **using AI agents day-to-day** (coding agents, research assistants, data tools, CLI workflows) or an engineer **building custom AI agents and runtime systems**, MemoFS provides the standard runtime for structured, persistent AI memory.
 </Callout>
 
 ## Which Path Fits You?
@@ -79,7 +79,7 @@ Every effective AI agent follows the four-phase MemoFS memory cycle:
     Core facts, notes, conversation history, recall indexes, and knowledge graph relations all live under `.memofs/` in your repository as Markdown and JSONL. They can be inspected in any editor, version-controlled with Git, and reviewed in Pull Requests just like code.
   </Accordion>
   <Accordion title="2. Every capability has a deterministic fallback">
-    Retrieval, graph extraction, and search all work with zero API keys out of the box using local BM25 ranking and regex rule-based parsers. Adding an LLM or embedding adapter (OpenAI, Voyage, Transformers, Cloudflare Workers AI) seamlessly upgrades them to hybrid search without changing your codebase.
+    Retrieval, graph extraction, and search all work with zero API keys out of the box using local BM25 ranking and regex rule-based parsers. Adding an LLM or embedding adapter (OpenAI, Voyage, Transformers, Cloudflare Workers AI) seamlessly upgrades them to hybrid search without changing your project configuration.
   </Accordion>
   <Accordion title="3. Universal protocol distribution">
     Whether an agent supports native lifecycle hooks (Claude Code, Codex, opencode) or standard Model Context Protocol (MCP) tool calling (Cursor, Copilot, Cline, Aider), MemoFS adapts seamlessly across environments.

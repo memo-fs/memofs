@@ -69,7 +69,7 @@ The `memofs-server` binary comes pre-configured with defensive network timeouts 
 - **Payload Limit (`MAX_BODY_BYTES`):** `1,048,576` bytes (1MB). Oversized payloads immediately receive `413 Payload Too Large`.
 - **Graceful Shutdown:** Handles `SIGTERM` and `SIGINT` signals, draining existing connections before exiting.
 
-## 2. Programmatic Node.js Deployment (`node:http`)
+## 2. Programmatic Node.js Deployment
 
 To inject persistent storage adapters (e.g. SQLite, PostgreSQL, S3, or R2) or AI providers (OpenAI, Voyage AI), instantiate `createHostedRuntime` and route incoming requests through `handleRuntimeRequest`:
 

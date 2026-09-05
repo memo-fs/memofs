@@ -46,7 +46,21 @@ Most AI memory systems are database-first, vendor-locked, hard to inspect, and h
 
 ## Quick Start
 
-Reach first success in under a minute. No API keys, no database setup, no cloud required.
+MemoFS serves two primary paths: **users running AI agents day-to-day** and **engineers building custom agents & runtimes**.
+
+### Path A: For Users of AI Agents (Cursor, Claude Code, Codex, Copilot, Cline, etc.)
+
+Initialize MemoFS in any project in under a minute. The CLI creates `.memofs/`, sets up project rules, pre-wires platform lifecycle hooks, and configures the local MCP server:
+
+```bash
+npx @memofs/cli init
+```
+
+Your agent now automatically inherits durable memory across sessions — zero manual prompting required.
+
+### Path B: For Builders of AI Agents & Runtimes
+
+Embed the runtime directly into your TypeScript or Node.js agent architecture:
 
 ```bash
 npm install @memofs/core
@@ -82,9 +96,7 @@ await memo.notes.record({
 const hits = await memo.recall("TypeScript configuration");
 ```
 
-To upgrade to semantic/vector search, plug in an embedder adapter like OpenAI (`@memofs/adapter-openai`) or Voyage AI (`@memofs/adapter-voyage`). For **zero-API-key local vector search**, enable the ONNX embedder (`@memofs/adapter-transformers`) to run embeddings completely in-process.
-
-To connect your coding agent (Cursor, Claude Code, etc.), use the stdio-compatible [@memofs/mcp-server](packages/mcp-server).
+To upgrade to semantic vector search, plug in an embedder adapter like OpenAI (`@memofs/adapter-openai`) or Voyage AI (`@memofs/adapter-voyage`). For **zero-API-key local vector search**, enable the ONNX embedder (`@memofs/adapter-transformers`) to run embeddings completely in-process.
 
 ---
 
@@ -117,16 +129,19 @@ Three runtime modes are supported: **`local`** (filesystem-only, default), **`hy
 
 ### Memory Intelligence
 
-- **Code anchoring & drift detection** — bind memories to source files; stale memories are rank-demoted at recall time when anchored code changes.
-- **Memory decay floors** — kind-specific expiry thresholds (30–365 days) transition old memories to `unverified` status.
-- **Semantic GC** — archive deprecated memories to cold storage; restore on demand via `memofs restore`.
-- **Session outcomes** — `success` / `failure` / `aborted` outcome on `complete()` governing durable memory promotion and workspace cleanup.
+- **Project & Source Anchoring** — bind memories to project files, data schemas, byte hashes, and symbol paths; query-time drift detection automatically demotes stale knowledge when assets change.
+- **Agent Behavior Enforcement** — deterministic push hooks across 9+ agent tools (Claude Code, Cursor, Copilot, Codex, OpenCode, Cline, etc.) inject active memory context at session start and preserve it across context compactions.
+- **Causal Lineage & Action Receipts** — traverse decision provenance (`memofs why <id>`) backed by append-only action receipts with task correlation (`taskRef`).
+- **Ephemeral Coordination Stream** — real-time cross-agent pub/sub (`stream.jsonl`) with typed coordination events (`agent.heartbeat`, `resource.intent`, `task.status`, `agent.hint`) filtered out of durable recall.
+- **Static Memory Linter** — `memofs lint` CI/CD rule pipeline detecting broken references, contradictory assertions, and broken provenance links.
+- **Cognitive Decay & Cold Archive** — kind-specific expiry thresholds transition old memories to `unverified` status before semantic archiving.
+- **Session Outcomes & AgentFS** — isolated workspace scratchpads with `success` / `failure` / `aborted` outcome gates governing durable memory promotion and cleanup.
 
 ---
 
 ## Packages
 
-MemoFS is structured as a monorepo containing 15 published public packages under the `@memofs/` scope. The CLI ships as `@memofs/cli` and installs the `memofs` command.
+MemoFS is structured as a monorepo containing 16 published public packages under the `@memofs/` scope. The CLI ships as `@memofs/cli` and installs the `memofs` command.
 
 ### Core Engine & Servers
 
@@ -136,6 +151,7 @@ MemoFS is structured as a monorepo containing 15 published public packages under
 | [`@memofs/cli`](packages/cli) | CLI tool for local and cloud memory workflows (`npx memofs`). |
 | [`@memofs/server`](packages/server) | Self-hostable, OSS-deployable memory server for Node and Workers. |
 | [`@memofs/mcp-server`](packages/mcp-server) | Model Context Protocol server exposing memory tools to AI agents. |
+| [`@memofs/spec`](packages/spec) | Canonical JSON schemas, TypeScript contracts, and schema validators. |
 | [`@memofs/connectors`](packages/connectors) | Local ingestion framework plugins (Notion, GitHub). |
 | [`@memofs/json-rpc`](packages/json-rpc) | Message schemas and validation for JSON-RPC 2.0. |
 
@@ -186,8 +202,8 @@ The **core runtime is open source** (MIT) and fully functional locally. You do n
 ```text
 memofs/
 ├── apps/
-│   └── docs/         # VitePress documentation (docs.memofs.dev)
-├── packages/         # 15 published @memofs/* packages
+│   └── docs/         # React Router & Fumadocs documentation (docs.memofs.dev)
+├── packages/         # 16 published @memofs/* packages
 ├── tooling/          # Private @repo/* workspace build packages
 ├── benchmarks/       # Workspace benchmarking suite
 ├── examples/         # Runnable examples
@@ -213,11 +229,14 @@ pnpm typecheck
 # Run unit tests across all packages
 pnpm test
 
-# Run code style checks (Biome)
-pnpm format-and-lint
+# Run code style and lint checks (Biome)
+pnpm check
 
 # Fix linting and formatting issues automatically
 pnpm format-and-lint:fix
+
+# Run local documentation dev server
+pnpm docs:dev
 
 # Build documentation locally
 pnpm docs:build
