@@ -16,7 +16,7 @@ export function Footer() {
 					<NewsletterSignup variant="strip" className="border-0 pb-0" />
 				</div>
 
-				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+				<div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
 					<div className="flex flex-col space-y-2">
 						<Link to={ROUTES.home} className="flex items-center gap-2.5">
 							<img
@@ -33,7 +33,7 @@ export function Footer() {
 						<div>
 							<a
 								href="mailto:hello@memofs.dev"
-								className="underline underline-offset-2"
+								className="underline text-sm underline-offset-2"
 							>
 								hello@memofs.dev
 							</a>

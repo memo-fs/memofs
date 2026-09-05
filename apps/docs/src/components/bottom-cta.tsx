@@ -8,7 +8,7 @@ export function BottomCta() {
 		<section className="relative w-full border-t border-dashed border-border bg-background py-20 text-foreground sm:py-28 transition-colors duration-300">
 			<div className="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
 				<Badge variant="secondary" className="border-dashed font-mono text-xs">
-					MIT Licensed · Open Source
+					MIT Licensed
 				</Badge>
 
 				<h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-5xl">

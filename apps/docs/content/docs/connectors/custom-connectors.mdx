@@ -7,7 +7,7 @@ The MemoFS connector architecture is provider-neutral and extensible. Adding a n
 
 Like embedder and extractor adapters across MemoFS, custom connectors act as pure **fetch and normalize plugins**. Connectors never write files directly to disk; the runner manages deduplication, deterministic ID generation, and the single-writer write discipline.
 
-## 1. The `Connector` Interface
+## 1. The Connector Interface
 
 Every connector implements the `Connector` interface:
 
@@ -31,7 +31,7 @@ export interface Connector {
 }
 ```
 
-### `ConnectorIngestContext`
+### Context Ingestion
 
 When `runConnectors()` invokes `connector.ingest(ctx)`, it provides a runtime context:
 
@@ -42,7 +42,7 @@ When `runConnectors()` invokes `connector.ingest(ctx)`, it provides a runtime co
 | **`ctx.memo`** | `MemoFS` | The host's `MemoFS` instance (maintains the single-writer lock). Connectors must not instantiate their own `MemoFS` client. |
 | **`ctx.signal`** | `AbortSignal?` | Optional cancellation abort signal passed from the caller. |
 
-## 2. Producing `ConnectorRecord` Objects
+## 2. Producing Objects
 
 Your `ingest()` implementation fetches external resources and maps each item into a `ConnectorRecord`:
 

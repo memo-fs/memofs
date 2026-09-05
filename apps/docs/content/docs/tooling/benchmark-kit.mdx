@@ -106,7 +106,7 @@ const suite: BenchmarkSuite = createBenchmarkSuite({
 });
 ```
 
-## 2. Executing Suites (`BenchmarkRunner`)
+## 2. Executing Suites
 
 `BenchmarkRunner` orchestrates warmup runs, concurrent workers, timeout tracking, and latency collection:
 
@@ -126,7 +126,7 @@ for (const caseResult of suiteResult.cases) {
 }
 ```
 
-## 3. Built-In Workload Factories (`@memofs/benchmark-kit/workloads`)
+## 3. Built-In Workload Factories
 
 Pre-built workloads let you benchmark custom adapters in one line:
 
@@ -139,7 +139,7 @@ import {
 } from "@memofs/benchmark-kit/workloads";
 ```
 
-### Embedder Workload (`createEmbedderWorkloads`)
+### Embedder Workload
 
 Measures batch and single-text vector computation latency:
 
@@ -156,7 +156,7 @@ const embedderCase = createEmbedderWorkloads({
 });
 ```
 
-### Reranker Workload (`createRerankWorkloads`)
+### Reranker Workload
 
 Measures document scoring and rank-ordering throughput:
 
@@ -178,7 +178,7 @@ const rerankCase = createRerankWorkloads({
 });
 ```
 
-### Recall Store Workload (`createRecallWorkloads`)
+### Recall Store Workload
 
 Generates both upsert and top-K vector query benchmark cases:
 
@@ -202,7 +202,7 @@ const { upsert: upsertCase, query: queryCase } = createRecallWorkloads({
 });
 ```
 
-### Memory Store Workload (`createMemoryStoreWorkloads`)
+### Memory Store Workload
 
 Generates both write and read throughput benchmark cases:
 
@@ -220,7 +220,7 @@ const { write: writeCase, read: readCase } = createMemoryStoreWorkloads({
 });
 ```
 
-## 4. Statistical Metrics (`BenchmarkCaseStats`)
+## 4. Statistical Metrics
 
 For every benchmark case, the kit computes comprehensive statistical metrics:
 
@@ -266,7 +266,7 @@ if (!evaluation.ok) {
 
 ## 6. Generating Reports
 
-### Markdown Table Report (`markdownBenchmarkReport`)
+### Markdown Table Report
 
 Generates a formatted Markdown report table suitable for GitHub Actions step summaries, PR comments, or documentation:
 
@@ -295,7 +295,7 @@ Example output:
 | memory-store/read | 50 | 50 | 0.00% | 4.20ms | 3.90ms | 6.50ms | 8.20ms | 238.10 |
 ```
 
-### JSON Report (`jsonBenchmarkReport`)
+### JSON Report
 
 Serializes raw results and iteration logs for long-term historical tracking:
 

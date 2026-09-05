@@ -57,7 +57,7 @@ export function ComparisonSection() {
 					</p>
 				</div>
 
-				<div className="overflow-hidden rounded border border-dashed border-border bg-muted/70">
+				<div className="overflow-hidden border border-dashed border-border bg-muted/70">
 					<Table>
 						<TableHeader>
 							<TableRow className="border-b border-dashed bg-secondary font-mono text-xs uppercase tracking-wider hover:bg-secondary">

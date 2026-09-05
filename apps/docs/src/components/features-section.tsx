@@ -44,11 +44,11 @@ export function FeaturesSection() {
 											{feature.numberLabel}
 										</span>
 										{feature.isImplemented ? (
-											<span className="font-mono text-[10px] text-muted-foreground border border-border px-2 py-0.5 rounded bg-secondary">
+											<span className="font-mono text-[10px] text-muted-foreground border border-border px-2 py-0.5 bg-secondary">
 												{feature.badge}
 											</span>
 										) : (
-											<span className="font-mono text-[10px] text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/30 px-2 py-0.5 rounded bg-amber-50/80 dark:bg-amber-950/30">
+											<span className="font-mono text-[10px] text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-500/30 px-2 py-0.5 bg-amber-50/80 dark:bg-amber-950/30">
 												{feature.badge}
 											</span>
 										)}

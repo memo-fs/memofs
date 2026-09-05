@@ -24,13 +24,11 @@ export function ProblemSection() {
 						</p>
 						<h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
 							Every new session{" "}
-							<span className="bg-linear-to-r from-cyan-500 to-amber-500 dark:from-cyan-400 dark:to-amber-300 bg-clip-text text-transparent">
-								starts from zero.
-							</span>
+							<span className="text-muted-foreground">starts from zero.</span>
 						</h2>
 						<p className="mt-6 text-base leading-relaxed text-muted-foreground">
 							You brief your agent on project conventions, domain rules, and
-							architecture. It gets it. Next session — a blank stare. You
+							architecture. It gets it. Next session, a blank stare. You
 							re-explain everything, only for it to contradict yesterday&apos;s
 							decisions.
 						</p>

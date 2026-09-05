@@ -11,8 +11,8 @@ import {
 	EphemeralStreamDiagram,
 	MemoryLinterDiagram,
 	MemoryStudioDiagram,
-	MultiLanguageSdkDiagram,
 	ProceduralPlaybookDiagram,
+	VendorMemoryImportDiagram,
 } from "./pending-diagrams";
 import type { FeatureItem } from "./types";
 
@@ -118,14 +118,14 @@ export const FEATURES: FeatureItem[] = [
 		diagram: MemoryStudioDiagram,
 	},
 	{
-		id: "multilang-sdks",
+		id: "memory-import",
 		numberLabel: "FEATURE 11",
-		title: "Multi-Language SDKs",
+		title: "Vendor Memory Import",
 		description:
-			"Native reader libraries and typed JSON-RPC clients for Python, Rust, and Go runtimes. Built from version-locked Open Memory Schemas and verified against a shared cross-language test suite.",
+			"One command to bring your existing memory with you — import from Claude Code, Codex, Cursor, Copilot and other coding agents, plus Mem0, Zep/Graphiti, Letta, and Cognee exports. Offline file adapters write through the standard durable path as unverified with full provenance, idempotent and dry-runnable.",
 		badge: "Coming Soon",
 		isImplemented: false,
-		diagram: MultiLanguageSdkDiagram,
+		diagram: VendorMemoryImportDiagram,
 	},
 	{
 		id: "action-receipts",

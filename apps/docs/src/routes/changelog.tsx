@@ -87,7 +87,7 @@ function ChangelogH2({
 		<div className="not-prose relative mt-10 first:mt-0 pt-1">
 			{/* Timeline node marker - placed at exact pixel height aligned with h2 text line */}
 			<span
-				className="absolute -left-[30.5px] sm:-left-[46.5px] top-[7px] size-3 rounded-full border-2 border-primary bg-background dark:border-primary dark:bg-background ring-4 ring-background"
+				className="absolute left-[-30.5px] sm:left-[-46.5px] top-1.75 size-3 rounded-full border-2 border-primary bg-background dark:border-primary dark:bg-background ring-4 ring-background"
 				aria-hidden="true"
 			/>
 			<div className="flex flex-wrap items-center gap-2 sm:gap-2.5 leading-none">

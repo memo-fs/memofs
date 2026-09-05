@@ -59,7 +59,7 @@ import type {
 } from "@memofs/json-rpc";
 ```
 
-### Identifier (`JsonRpcId`)
+### Identifier
 
 Per spec §4, request correlation IDs must be a string, number, or `null`:
 
@@ -67,7 +67,7 @@ Per spec §4, request correlation IDs must be a string, number, or `null`:
 type JsonRpcId = string | number | null;
 ```
 
-### Request Structure (`JsonRpcRequest`)
+### Request Structure
 
 ```ts
 interface JsonRpcRequest {
@@ -82,7 +82,7 @@ interface JsonRpcRequest {
 }
 ```
 
-### Response Envelopes (`JsonRpcResponse`)
+### Response Envelopes
 
 ```ts
 interface JsonRpcSuccessResponse {
@@ -106,7 +106,7 @@ type JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse;
 
 ## Parsing & Request Validation
 
-### 1. Safe JSON Payload Parsing (`parseJsonRpcPayload`)
+### 1. Safe JSON Payload Parsing
 
 Parses raw JSON strings into JavaScript values. If parsing fails, it throws a `JsonRpcProtocolError` mapped to `JSON_RPC_ERRORS.parseError` (`-32700`):
 
@@ -124,7 +124,7 @@ try {
 }
 ```
 
-### 2. Request Validation (`validateJsonRpcRequest`)
+### 2. Request Validation
 
 Validates that an unknown value conforms to `JsonRpcRequest`. It verifies:
 1. The value is a plain JavaScript object (`isPlainObject(value)`).
@@ -195,7 +195,7 @@ const errorResponse = failure(
 // }
 ```
 
-## Standard Spec Error Codes (`JSON_RPC_ERRORS`)
+## Standard Spec Error Codes
 
 The `JSON_RPC_ERRORS` constant catalogs all five standard JSON-RPC 2.0 error codes defined in §5.1:
 
@@ -217,7 +217,7 @@ console.log(JSON_RPC_ERRORS.invalidParams);  // -32602
 console.log(JSON_RPC_ERRORS.internalError);  // -32603
 ```
 
-## The Protocol Error Class (`JsonRpcProtocolError`)
+## The Protocol Error Class
 
 `JsonRpcProtocolError` is thrown by `parseJsonRpcPayload` and `validateJsonRpcRequest`. Consumers can inspect the `jsonRpcCode` and attach custom structured `data`:
 
