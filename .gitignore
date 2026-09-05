@@ -48,6 +48,7 @@ packages/**/.memofs/
 # Internal Docs & Experiments
 CONTEXT.md
 teasers.md
+tickets-to-close.md
 adr/
 agents/
 architecture/
