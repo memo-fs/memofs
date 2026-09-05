@@ -11,33 +11,48 @@ export function ComparisonSection() {
 	const rows = [
 		{
 			feature: "Where memory lives",
-			memofs: "Plain markdown files in your project",
+			memofs: "Plain Markdown & JSONL files in .memofs/",
 			others: "Locked in a proprietary cloud database",
 		},
 		{
+			feature: "Project drift detection",
+			memofs: "File hash, AST symbol & schema validation (memofs lint)",
+			others: "None; stale memories reference deleted assets & data",
+		},
+		{
+			feature: "Behavior enforcement",
+			memofs: "Deterministic push hooks across 9+ AI tools & runtimes",
+			others: "Passive pull tools; relies on model to remember to search",
+		},
+		{
+			feature: "Causal lineage & audit",
+			memofs: "Immutable action receipts & causal traversal (memofs why)",
+			others: "Opaque similarity scores; ephemeral chat logs lost",
+		},
+		{
 			feature: "Inspect & edit",
-			others: "Vendor web UI only",
-			memofs: "Any editor (VS Code, Cursor, Vim)",
+			memofs: "Any editor (VS Code, Cursor, Neovim, CLI)",
+			others: "Vendor web dashboard or raw unindexed file",
 		},
 		{
 			feature: "Version control",
-			memofs: "Git-tracked alongside your codebase",
-			others: "Separate external system",
+			memofs: "Git-tracked & branchable alongside your project",
+			others: "Separate external database decoupled from project history",
 		},
 		{
-			feature: "Data ownership",
-			memofs: "100% owned and controlled by you",
-			others: "Subject to vendor lock-in & terms",
+			feature: "Context efficiency",
+			memofs: "Token-budgeted hybrid recall (BM25 + vector + graph)",
+			others: "Monolithic prompt bloat or noisy top-k embeddings",
 		},
 		{
 			feature: "Offline execution",
-			memofs: "Full offline support by default",
-			others: "Requires persistent network connection",
+			memofs: "100% local-first; runs offline & in sandboxes",
+			others: "Requires persistent network & cloud API keys",
 		},
 		{
-			feature: "Protocol compatibility",
-			memofs: "Native Model Context Protocol (MCP)",
-			others: "Custom proprietary SDKs only",
+			feature: "Multi-agent coordination",
+			memofs: "Advisory file locks & standard stream schemas",
+			others: "Unsynchronized writes or heavy external daemons",
 		},
 	];
 
@@ -52,8 +67,10 @@ export function ComparisonSection() {
 						MemoFS vs. Black-Box Memory
 					</h2>
 					<p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto">
-						Most memory tools hide your data in opaque remote dashboards. MemoFS
-						keeps everything transparent, diffable, and versioned in `.memofs/`.
+						Most memory tools hide your data in opaque remote databases or rely
+						on static rule files that drift and bloat prompt context. MemoFS
+						combines deterministic local execution, project-anchored
+						verification, and git-native transparency.
 					</p>
 				</div>
 

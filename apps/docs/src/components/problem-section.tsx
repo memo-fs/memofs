@@ -1,16 +1,16 @@
 export function ProblemSection() {
 	const symptoms = [
 		{
-			title: "Divergent.",
-			desc: "Your desktop, remote containers, and teammates' agents each remember conflicting, fragmented context.",
+			title: "Silent Project Drift.",
+			desc: "When project files, schemas, docs, or code change, unanchored memories reference deleted assets and obsolete facts, turning into toxic ghost context that actively steers AI into hallucinations.",
 		},
 		{
-			title: "Invisible.",
-			desc: "Black-box vector databases hide what agents have learned, preventing inspection, verification, or manual correction.",
+			title: "The Black-Box Silo.",
+			desc: "Proprietary vector databases lock learned knowledge behind opaque APIs. You can't inspect what the AI learned, edit it in your local editor, or review it in a git diff alongside your project.",
 		},
 		{
-			title: "Unreachable.",
-			desc: "Serverless functions, CI/CD runners, and hosted workflows start from scratch on every invocation with zero ground truth.",
+			title: "The Prompt-Bloat Dilemma.",
+			desc: "Static rulebooks (like 50KB instruction files) burn thousands of prompt tokens on every turn, while AI models forget to query dynamic memory unless the runtime deterministically pushes it.",
 		},
 	];
 
@@ -23,18 +23,31 @@ export function ProblemSection() {
 							The Problem
 						</p>
 						<h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-							Every new session{" "}
-							<span className="text-muted-foreground">starts from zero.</span>
+							AI Agents memory is broken{" "}
+							<span className="text-muted-foreground">in two directions.</span>
 						</h2>
 						<p className="mt-6 text-base leading-relaxed text-muted-foreground">
-							You brief your agent on project conventions, domain rules, and
-							architecture. It gets it. Next session, a blank stare. You
-							re-explain everything, only for it to contradict yesterday&apos;s
-							decisions.
+							On one side, static markdown rulebooks like{" "}
+							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+								AGENTS.md
+							</code>
+							,{" "}
+							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+								CLAUDE.md
+							</code>{" "}
+							and{" "}
+							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">
+								.cursor/rules
+							</code>{" "}
+							bloat context windows with massive token dumps that silently drift
+							the moment project files, docs, data schemas, or implementations
+							change.
 						</p>
 						<p className="mt-4 text-base leading-relaxed text-muted-foreground">
-							Local scratchpads only shrink the problem. Every tool, machine,
-							and collaborator ends up with fractured, uncoordinated memory.
+							On the other side, hosted vector databases lock learned facts
+							inside proprietary black boxes, invisible, impossible to review in
+							a git diff, disconnected from your project, and trapped in someone
+							else&apos;s cloud.
 						</p>
 					</div>
 
