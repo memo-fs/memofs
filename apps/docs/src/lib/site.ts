@@ -12,11 +12,10 @@ export const SITE = {
 	githubUrl: "https://github.com/memo-fs/memofs",
 	xUrl: "https://x.com/memofsdev",
 	xHandle: "@memofsdev",
-	wist: "https://wist.memofs.dev",
 	academy: "https://academy.memofs.dev",
 	defaultImagePath: "/og-default.png",
 	description:
-		"File-first memory runtime for AI agents. Store decisions as markdown in your project. Local by default, cloud-ready.",
+		"The file-first memory runtime for AI agents. Store decisions, facts, and context as markdown in your project. Local by default, cloud-ready.",
 } as const;
 
 /** Canonical internal routes shared by navigation, metadata, and prerendering. */
@@ -46,7 +45,7 @@ export const STATIC_PRERENDER_PATHS = [
 
 /** Primary navigation rendered by the Fumadocs layouts. */
 export const PRIMARY_NAVIGATION = [
-	{ text: "Docs", url: ROUTES.docs, active: "url", on: "all" },
+	{ text: "Documentation", url: ROUTES.docs, active: "url", on: "all" },
 	{
 		text: "Changelog",
 		url: ROUTES.changelog,

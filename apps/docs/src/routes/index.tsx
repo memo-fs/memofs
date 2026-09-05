@@ -14,9 +14,9 @@ import { ROUTES } from "../lib/site";
 import type { Route } from "./+types/index";
 
 export const meta: Route.MetaFunction = () => {
-	const pageTitle = "MemoFS — The File-First Memory for AI Agents";
+	const pageTitle = "MemoFS — The File-First Memory Runtime for AI Agents";
 	const description =
-		"Store decisions and facts as markdown in your repository. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents.";
+		"Store decisions, facts, and context as markdown in your project. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents, research workflows, and applications.";
 
 	return createPageMeta({ title: pageTitle, description, path: ROUTES.home });
 };
@@ -122,7 +122,8 @@ export default function HomePage() {
 						{/* Subtitle Section */}
 						<div className="px-4 py-5 text-center sm:px-8 sm:py-6 md:py-7">
 							<p className="mx-auto max-w-2xl text-balance md:text-lg text-muted-foreground leading-relaxed font-medium">
-								Store decisions as simple markdown files —{" "}
+								Store decisions, facts, and context as simple markdown files in
+								your project —{" "}
 								<strong className="text-foreground font-semibold">
 									versioned, portable, and always there when the next session
 									starts
