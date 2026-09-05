@@ -17,7 +17,7 @@ export function FeaturesSection() {
 						Engineered for autonomous agent memory
 					</h2>
 					<p className="mt-4 text-base text-muted-foreground max-w-2xl mx-auto">
-						From sub-millisecond local hybrid recall to self-healing code
+						From sub-millisecond local hybrid recall to self-healing project
 						anchors and multi-agent coordination. Built with transparent files,
 						deterministic logic, and zero black boxes.
 					</p>

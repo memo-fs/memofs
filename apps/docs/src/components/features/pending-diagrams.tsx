@@ -20,13 +20,7 @@ export function EphemeralStreamDiagram({ className }: DiagramProps) {
 				className="fill-muted"
 			/>
 			<rect x="25" y="72" width="110" height="16" rx="8" />
-			<line
-				x1="52"
-				y1="76"
-				x2="72"
-				y2="76"
-				strokeOpacity="0.4"
-			/>
+			<line x1="52" y1="76" x2="72" y2="76" strokeOpacity="0.4" />
 			<line
 				x1="35"
 				y1="82"
@@ -80,13 +74,7 @@ export function EphemeralStreamDiagram({ className }: DiagramProps) {
 				<circle cx="0" cy="0" r="5" />
 				<path d="M0 -3 L0 0 L2 1" />
 			</g>
-			<line
-				x1="90"
-				y1="82"
-				x2="98"
-				y2="82"
-				strokeOpacity="0.5"
-			/>
+			<line x1="90" y1="82" x2="98" y2="82" strokeOpacity="0.5" />
 		</svg>
 	);
 }
@@ -212,14 +200,7 @@ export function MemoryStudioDiagram({ className }: DiagramProps) {
 			<circle cx="28" cy="32" r="2" fill="currentColor" />
 			<circle cx="35" cy="32" r="2" fill="currentColor" />
 			<circle cx="42" cy="32" r="2" fill="currentColor" />
-			<rect
-				x="65"
-				y="30"
-				width="50"
-				height="5"
-				rx="2.5"
-				strokeOpacity="0.4"
-			/>
+			<rect x="65" y="30" width="50" height="5" rx="2.5" strokeOpacity="0.4" />
 			<rect
 				x="26"
 				y="46"
@@ -280,33 +261,82 @@ export function VendorMemoryImportDiagram({ className }: DiagramProps) {
 			strokeWidth="1.2"
 		>
 			<title>Vendor Memory Import</title>
-			<rect x="12" y="22" width="36" height="22" rx="3" className="fill-muted" />
+			<rect
+				x="12"
+				y="22"
+				width="36"
+				height="22"
+				rx="3"
+				className="fill-muted"
+			/>
 			<rect x="12" y="22" width="36" height="22" rx="3" />
 			<line x1="20" y1="31" x2="40" y2="31" strokeOpacity="0.7" />
 			<line x1="23" y1="36" x2="37" y2="36" strokeOpacity="0.4" />
-			<rect x="62" y="22" width="36" height="22" rx="3" className="fill-muted" />
+			<rect
+				x="62"
+				y="22"
+				width="36"
+				height="22"
+				rx="3"
+				className="fill-muted"
+			/>
 			<rect x="62" y="22" width="36" height="22" rx="3" />
 			<line x1="70" y1="31" x2="90" y2="31" strokeOpacity="0.7" />
 			<line x1="73" y1="36" x2="87" y2="36" strokeOpacity="0.4" />
-			<rect x="112" y="22" width="36" height="22" rx="3" className="fill-muted" />
+			<rect
+				x="112"
+				y="22"
+				width="36"
+				height="22"
+				rx="3"
+				className="fill-muted"
+			/>
 			<rect x="112" y="22" width="36" height="22" rx="3" />
 			<line x1="120" y1="31" x2="140" y2="31" strokeOpacity="0.7" />
 			<line x1="123" y1="36" x2="137" y2="36" strokeOpacity="0.4" />
 			<line x1="30" y1="44" x2="80" y2="64" strokeDasharray="2 2" />
 			<line x1="80" y1="44" x2="80" y2="64" strokeDasharray="2 2" />
 			<line x1="130" y1="44" x2="80" y2="64" strokeDasharray="2 2" />
-			<rect x="48" y="64" width="64" height="26" rx="3" className="fill-muted" />
+			<rect
+				x="48"
+				y="64"
+				width="64"
+				height="26"
+				rx="3"
+				className="fill-muted"
+			/>
 			<rect x="48" y="64" width="64" height="26" rx="3" />
 			<line x1="60" y1="73" x2="100" y2="73" strokeOpacity="0.8" />
-			<line x1="66" y1="79" x2="94" y2="79" strokeOpacity="0.5" strokeDasharray="3 2" />
+			<line
+				x1="66"
+				y1="79"
+				x2="94"
+				y2="79"
+				strokeOpacity="0.5"
+				strokeDasharray="3 2"
+			/>
 			<line x1="70" y1="84" x2="90" y2="84" strokeOpacity="0.4" />
 			<line x1="80" y1="90" x2="80" y2="104" strokeDasharray="2 2" />
 			<polygon points="78,100 80,104 82,100" fill="currentColor" />
-			<rect x="32" y="104" width="96" height="36" rx="4" className="fill-muted" />
+			<rect
+				x="32"
+				y="104"
+				width="96"
+				height="36"
+				rx="4"
+				className="fill-muted"
+			/>
 			<rect x="32" y="104" width="96" height="36" rx="4" />
 			<line x1="64" y1="113" x2="96" y2="113" strokeOpacity="0.8" />
 			<line x1="56" y1="119" x2="104" y2="119" strokeOpacity="0.4" />
-			<line x1="60" y1="125" x2="100" y2="125" strokeOpacity="0.4" strokeDasharray="3 2" />
+			<line
+				x1="60"
+				y1="125"
+				x2="100"
+				y2="125"
+				strokeOpacity="0.4"
+				strokeDasharray="3 2"
+			/>
 			<circle cx="48" cy="122" r="2" fill="currentColor" />
 			<circle cx="80" cy="132" r="2" fill="currentColor" />
 			<circle cx="112" cy="122" r="2" fill="currentColor" />
@@ -375,7 +405,14 @@ export function MultiLanguageSdkDiagram({ className }: DiagramProps) {
 				strokeDasharray="2 2"
 				strokeOpacity="0.5"
 			/>
-			<line x1="62" y1="130" x2="98" y2="130" strokeOpacity="0.6" strokeDasharray="4 2" />
+			<line
+				x1="62"
+				y1="130"
+				x2="98"
+				y2="130"
+				strokeOpacity="0.6"
+				strokeDasharray="4 2"
+			/>
 			<circle cx="38" cy="134" r="2" fill="currentColor" />
 			<circle cx="80" cy="134" r="2" fill="currentColor" />
 			<circle cx="122" cy="134" r="2" fill="currentColor" />
@@ -402,11 +439,25 @@ export function ActionReceiptsDiagram({ className }: DiagramProps) {
 			/>
 			<rect x="38" y="20" width="84" height="28" rx="3" />
 			<line x1="64" y1="31" x2="108" y2="31" strokeOpacity="0.8" />
-			<line x1="64" y1="37" x2="98" y2="37" strokeOpacity="0.4" strokeDasharray="3 2" />
+			<line
+				x1="64"
+				y1="37"
+				x2="98"
+				y2="37"
+				strokeOpacity="0.4"
+				strokeDasharray="3 2"
+			/>
 			<circle cx="48" cy="34" r="3" fill="currentColor" />
 			<line x1="80" y1="48" x2="80" y2="60" strokeDasharray="2 2" />
 			<circle cx="80" cy="54" r="3" />
-			<line x1="88" y1="54" x2="100" y2="54" strokeOpacity="0.5" strokeDasharray="2 2" />
+			<line
+				x1="88"
+				y1="54"
+				x2="100"
+				y2="54"
+				strokeOpacity="0.5"
+				strokeDasharray="2 2"
+			/>
 			<rect
 				x="38"
 				y="60"

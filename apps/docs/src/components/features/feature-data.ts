@@ -20,10 +20,10 @@ export const FEATURES: FeatureItem[] = [
 	{
 		id: "code-anchoring",
 		numberLabel: "FEATURE 01",
-		title: "Code Anchoring & Drift Detection",
+		title: "Project Anchoring & Drift Detection",
 		description:
-			"Designed specifically for coding agents: memories bind directly to source code files, byte hashes, and AST symbol paths. When underlying code changes, query-time drift detection automatically demotes stale memory relevance.",
-		badge: "Coding Agents",
+			"Memories bind directly to project files, research documents, data schemas, byte hashes, and symbol paths. When underlying assets change, query-time drift detection automatically demotes stale memory relevance before it causes hallucinations.",
+		badge: "Drift Defense",
 		isImplemented: true,
 		diagram: CodeAnchoringDiagram,
 	},
@@ -40,9 +40,9 @@ export const FEATURES: FeatureItem[] = [
 	{
 		id: "entity-graph",
 		numberLabel: "FEATURE 03",
-		title: "Entity Graph & Consolidation",
+		title: "Entity Graph & Causal Provenance",
 		description:
-			"Extracts entities and relationships into transparent nodes.jsonl and edges.jsonl files. Deterministic and critic-gated consolidation merges redundant facts and automatically retires conflicting assertions.",
+			"Extracts entities, relationships, and causal lineage (memofs why) into transparent nodes.jsonl and edges.jsonl files. Deterministic and critic-gated consolidation merges redundant facts and traces decisions back to source evidence.",
 		badge: "Graph Native",
 		isImplemented: true,
 		diagram: EntityGraphDiagram,
@@ -60,9 +60,9 @@ export const FEATURES: FeatureItem[] = [
 	{
 		id: "behavior-enforcement",
 		numberLabel: "FEATURE 05",
-		title: "Agent Behavior Enforcement",
+		title: "Runtime Behavior Enforcement",
 		description:
-			"Deterministic push hooks across 9+ agent environments including Claude Code, Cursor, Copilot, Codex, and Gemini CLI. Injects relevant memory context before tool execution and preserves state across context compactions.",
+			"Deterministic push hooks across 9+ AI tools and agent environments including Claude Code, Cursor, Copilot, Codex, and Gemini CLI. Automatically injects relevant memory context at session start, enforces project constraints, and preserves state across context compactions.",
 		badge: "Zero Omission",
 		isImplemented: true,
 		diagram: BehaviorEnforcementDiagram,
@@ -82,7 +82,7 @@ export const FEATURES: FeatureItem[] = [
 		numberLabel: "FEATURE 07",
 		title: "Ephemeral Stream & Agent Pub/Sub",
 		description:
-			"Real-time append-only stream for transient cross-agent coordination and human steering hints. Filtered out of durable recall to eliminate noise, with automated TTL garbage collection on maintenance runs.",
+			"Real-time append-only stream for transient cross-agent coordination (heartbeats, file intent, task status) and human steering hints. Filtered out of durable recall to eliminate noise, with automated TTL garbage collection on maintenance runs.",
 		badge: "Coming Soon",
 		isImplemented: false,
 		diagram: EphemeralStreamDiagram,
@@ -92,7 +92,7 @@ export const FEATURES: FeatureItem[] = [
 		numberLabel: "FEATURE 08",
 		title: "Procedural Memory & Playbooks",
 		description:
-			"Actionable step-by-step workflow recipes stored as human-readable Markdown and structured JSON. Context strategist dynamically matches and surfaces relevant playbooks based on agent task type.",
+			"Actionable step-by-step workflow recipes and standard operating procedures stored as human-readable Markdown and structured JSON. Context strategist dynamically matches and surfaces relevant playbooks based on task type.",
 		badge: "Coming Soon",
 		isImplemented: false,
 		diagram: ProceduralPlaybookDiagram,
@@ -102,7 +102,7 @@ export const FEATURES: FeatureItem[] = [
 		numberLabel: "FEATURE 09",
 		title: "Static Memory Linter",
 		description:
-			"Semantic static analyzer CLI for CI/CD pipelines. Detects contradictory assertions across stored notes, identifies dead code anchor references, and flags orphaned knowledge graph entities before merge.",
+			"Semantic static analyzer CLI (memofs lint) for CI/CD pipelines. Detects contradictory assertions across stored notes, broken causal provenance links, dead project references, and orphaned knowledge graph entities before merge.",
 		badge: "Coming Soon",
 		isImplemented: false,
 		diagram: MemoryLinterDiagram,
@@ -120,9 +120,9 @@ export const FEATURES: FeatureItem[] = [
 	{
 		id: "memory-import",
 		numberLabel: "FEATURE 11",
-		title: "Vendor Memory Import",
+		title: "Vendor Memory Import & Setup",
 		description:
-			"One command to bring your existing memory with you — import from Claude Code, Codex, Cursor, Copilot and other coding agents, plus Mem0, Zep/Graphiti, Letta, and Cognee exports. Offline file adapters write through the standard durable path as unverified with full provenance, idempotent and dry-runnable.",
+			"One command to bring your existing memory with you — import from developer tools, research agents, plus Mem0, Zep/Graphiti, Letta, and Cognee exports. Full offline file adapters write through the standard durable path with provenance and dry-run preview.",
 		badge: "Coming Soon",
 		isImplemented: false,
 		diagram: VendorMemoryImportDiagram,
@@ -132,7 +132,7 @@ export const FEATURES: FeatureItem[] = [
 		numberLabel: "FEATURE 12",
 		title: "Immutable Action Receipts",
 		description:
-			"Append-only audit receipts capturing consequential agent actions, reversibility metadata, argument digests, and before/after snapshot hashes for complete execution accountability.",
+			"Append-only audit receipts capturing consequential AI actions, task correlation, causal parentage, reversibility metadata, argument digests, and before/after snapshot hashes for complete execution accountability.",
 		badge: "Coming Soon",
 		isImplemented: false,
 		diagram: ActionReceiptsDiagram,

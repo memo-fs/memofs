@@ -36,12 +36,26 @@ export function CodeAnchoringDiagram({ className }: DiagramProps) {
 					className="fill-card dark:fill-muted"
 				/>
 				<rect x="-16" y="-8" width="32" height="16" rx="3" />
-				<line x1="-8" y1="0" x2="8" y2="0" strokeWidth="1.5" strokeOpacity="0.8" />
+				<line
+					x1="-8"
+					y1="0"
+					x2="8"
+					y2="0"
+					strokeWidth="1.5"
+					strokeOpacity="0.8"
+				/>
 			</g>
 			<path d="M80 125 L125 105 L80 85 L35 105 Z" className="fill-muted" />
 			<path d="M35 105 L35 125 L80 145 L125 125 L125 105" />
 			<path d="M80 105 L80 145" />
-			<line x1="60" y1="115" x2="100" y2="115" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="60"
+				y1="115"
+				x2="100"
+				y2="115"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="55" y1="122" x2="105" y2="122" strokeOpacity="0.5" />
 			<path
 				d="M80 135 L120 117 L80 99 L40 117 Z"
@@ -65,14 +79,28 @@ export function HybridRecallDiagram({ className }: DiagramProps) {
 			<path d="M22 30 L22 46 L45 58 L68 46 L68 30" />
 			<line x1="33" y1="31" x2="55" y2="31" strokeOpacity="0.6" />
 			<line x1="30" y1="36" x2="52" y2="36" strokeOpacity="0.6" />
-			<line x1="35" y1="44" x2="55" y2="44" strokeWidth="1.5" strokeOpacity="0.7" />
+			<line
+				x1="35"
+				y1="44"
+				x2="55"
+				y2="44"
+				strokeWidth="1.5"
+				strokeOpacity="0.7"
+			/>
 			<path d="M115 42 L138 30 L115 18 L92 30 Z" className="fill-muted" />
 			<path d="M92 30 L92 46 L115 58 L138 46 L138 30" />
 			<path d="M115 42 L115 58" />
 			<circle cx="108" cy="28" r="1.5" fill="currentColor" />
 			<circle cx="115" cy="32" r="1.5" fill="currentColor" />
 			<circle cx="122" cy="27" r="1.5" fill="currentColor" />
-			<line x1="105" y1="44" x2="125" y2="44" strokeWidth="1.5" strokeOpacity="0.7" />
+			<line
+				x1="105"
+				y1="44"
+				x2="125"
+				y2="44"
+				strokeWidth="1.5"
+				strokeOpacity="0.7"
+			/>
 			<path d="M45 58 L72 82" strokeDasharray="3 3" />
 			<path d="M115 58 L88 82" strokeDasharray="3 3" />
 			<circle cx="80" cy="88" r="10" className="fill-card dark:fill-muted" />
@@ -151,7 +179,14 @@ export function AgentFsDiagram({ className }: DiagramProps) {
 				className="fill-muted"
 			/>
 			<rect x="35" y="30" width="38" height="45" rx="2" />
-			<line x1="42" y1="38" x2="58" y2="38" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="42"
+				y1="38"
+				x2="58"
+				y2="38"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="42" y1="44" x2="66" y2="44" strokeOpacity="0.6" />
 			<line x1="42" y1="50" x2="60" y2="50" strokeOpacity="0.6" />
 			<line x1="42" y1="56" x2="64" y2="56" strokeOpacity="0.6" />
@@ -164,7 +199,14 @@ export function AgentFsDiagram({ className }: DiagramProps) {
 				className="fill-muted"
 			/>
 			<rect x="87" y="30" width="38" height="45" rx="2" />
-			<line x1="94" y1="38" x2="114" y2="38" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="94"
+				y1="38"
+				x2="114"
+				y2="38"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<circle cx="106" cy="50" r="7" strokeDasharray="2 2" />
 			<line x1="94" y1="66" x2="118" y2="66" strokeOpacity="0.6" />
 			<path d="M80 75 L80 105" strokeDasharray="2 2" />
@@ -175,7 +217,14 @@ export function AgentFsDiagram({ className }: DiagramProps) {
 			</g>
 			<path d="M80 134 L120 118 L80 102 L40 118 Z" className="fill-muted" />
 			<path d="M40 118 L40 128 L80 144 L120 128 L120 118" />
-			<line x1="65" y1="124" x2="95" y2="124" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="65"
+				y1="124"
+				x2="95"
+				y2="124"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="70" y1="130" x2="90" y2="130" strokeOpacity="0.4" />
 		</svg>
 	);
@@ -193,7 +242,14 @@ export function BehaviorEnforcementDiagram({ className }: DiagramProps) {
 			<line x1="20" y1="80" x2="140" y2="80" strokeOpacity="0.4" />
 			<path d="M32 30 L48 30 L40 50 Z" className="fill-muted" />
 			<path d="M32 30 L48 30 L40 50 Z" />
-			<line x1="34" y1="24" x2="46" y2="24" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="34"
+				y1="24"
+				x2="46"
+				y2="24"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="40" y1="50" x2="40" y2="76" strokeDasharray="2 2" />
 			<circle cx="40" cy="80" r="4" fill="currentColor" />
 			<g transform="translate(80, 80)">
@@ -216,7 +272,14 @@ export function BehaviorEnforcementDiagram({ className }: DiagramProps) {
 					className="fill-muted"
 				/>
 				<rect x="-18" y="-42" width="36" height="14" rx="2" />
-				<line x1="-12" y1="-35" x2="12" y2="-35" strokeWidth="1.5" strokeOpacity="0.8" />
+				<line
+					x1="-12"
+					y1="-35"
+					x2="12"
+					y2="-35"
+					strokeWidth="1.5"
+					strokeOpacity="0.8"
+				/>
 			</g>
 			<rect
 				x="108"
@@ -227,7 +290,14 @@ export function BehaviorEnforcementDiagram({ className }: DiagramProps) {
 				className="fill-muted"
 			/>
 			<rect x="108" y="38" width="30" height="20" rx="2" />
-			<line x1="114" y1="45" x2="132" y2="45" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="114"
+				y1="45"
+				x2="132"
+				y2="45"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<path d="M114 52 L117 55 L124 49" />
 			<line x1="123" y1="58" x2="123" y2="76" strokeDasharray="2 2" />
 			<circle cx="123" cy="80" r="4" fill="currentColor" />
@@ -251,7 +321,14 @@ export function CognitiveDecayDiagram({ className }: DiagramProps) {
 			<title>Cognitive Decay & Cold Archive</title>
 			<path d="M80 40 L120 25 L80 10 L40 25 Z" className="fill-muted" />
 			<path d="M40 25 L40 31 L80 46 L120 31 L120 25" />
-			<line x1="65" y1="26" x2="95" y2="26" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="65"
+				y1="26"
+				x2="95"
+				y2="26"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="70" y1="32" x2="90" y2="32" strokeOpacity="0.5" />
 			<path d="M80 46 L80 62" strokeDasharray="2 2" />
 			<path
@@ -265,7 +342,14 @@ export function CognitiveDecayDiagram({ className }: DiagramProps) {
 			<path d="M80 120 L120 104 L80 88 L40 104 Z" className="fill-muted" />
 			<path d="M40 104 L40 126 L80 142 L120 126 L120 104" />
 			<path d="M80 120 L80 142" />
-			<line x1="65" y1="114" x2="95" y2="114" strokeWidth="1.5" strokeOpacity="0.8" />
+			<line
+				x1="65"
+				y1="114"
+				x2="95"
+				y2="114"
+				strokeWidth="1.5"
+				strokeOpacity="0.8"
+			/>
 			<line x1="70" y1="120" x2="90" y2="120" strokeOpacity="0.5" />
 			<circle cx="80" cy="104" r="3" fill="currentColor" />
 			<path d="M78 104 L78 100 A 2 2 0 0 1 82 100 L82 104" />
