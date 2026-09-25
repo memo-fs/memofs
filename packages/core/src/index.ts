@@ -57,6 +57,7 @@ export { assertNonEmptyString } from "./recall";
 export * from "./rerank";
 export * from "./security/durability-tier";
 export * from "./security/secret-blocklist";
+export * from "./trials/index";
 // `./testing` (createTempMemoFsDir) is NOT re-exported here — it imports
 // `node:fs`/`node:os`/`node:path`, which would pull `node:fs` into this barrel
 // and break the runtime Worker. It lives behind the Node-only

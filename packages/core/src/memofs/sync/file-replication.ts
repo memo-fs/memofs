@@ -41,6 +41,7 @@ import type {
 import {
 	CANONICAL_MEMOFS_FILES,
 	createSnapshotPath,
+	createWarrantPath,
 	type MemoryPath,
 } from "../../core/constants/memory-paths";
 import { readSnapshotRecords } from "../../core/snapshots/snapshot-records";
@@ -325,12 +326,12 @@ async function fetchText(url: string, signal?: AbortSignal): Promise<string> {
 	return response.text();
 }
 
-/** Coerces an arbitrary string into a canonical/snapshot MemoryPath, or undefined. */
+/** Coerces an arbitrary string into a canonical/snapshot/warrant MemoryPath, or undefined. */
 function safeMemoryPath(path: string): MemoryPath | undefined {
 	for (const canonical of CANONICAL_MEMOFS_FILES) {
 		if (canonical === path) return canonical;
 	}
-	return safeSnapshotPathFromPath(path);
+	return safeSnapshotPathFromPath(path) ?? safeWarrantPathFromPath(path);
 }
 
 /** Builds a snapshot MemoryPath from a record id, or undefined if invalid. */
@@ -348,6 +349,18 @@ function safeSnapshotPathFromPath(path: string): MemoryPath | undefined {
 	if (!path.endsWith(".json")) return undefined;
 	const id = path.slice(".memofs/snapshots/".length, -".json".length);
 	return safeSnapshotPath(id);
+}
+
+/** Recognizes an existing per-memory warrant file path string. */
+function safeWarrantPathFromPath(path: string): MemoryPath | undefined {
+	if (!path.startsWith(".memofs/warrants/")) return undefined;
+	if (!path.endsWith(".json")) return undefined;
+	const id = path.slice(".memofs/warrants/".length, -".json".length);
+	try {
+		return createWarrantPath(id);
+	} catch {
+		return undefined;
+	}
 }
 
 /**

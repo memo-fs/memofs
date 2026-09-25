@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	BOOTSTRAP_FILE_PATHS,
 	bootstrapMemoryStore,
 	CANONICAL_MEMOFS_FILES,
 	CORE_MEMORY_PATH,
@@ -7,18 +8,40 @@ import {
 	MANIFEST_PATH,
 	NOTES_MEMORY_PATH,
 	readManifest,
+	TRIALS_ASSIGNMENTS_PATH,
+	TRIALS_OUTCOMES_PATH,
+	WARRANTS_HISTORY_PATH,
 } from "../../src/index";
 
 describe("bootstrapMemoryStore", () => {
-	it("seeds the canonical .memofs protocol files", async () => {
+	it("seeds the bootstrap .memofs protocol files", async () => {
 		const store = new InMemoryMemoryStore();
 		const result = await bootstrapMemoryStore(store, {
 			now: () => "2026-05-02T00:00:00.000Z",
 		});
 
-		expect(result.created).toEqual([...CANONICAL_MEMOFS_FILES]);
-		for (const path of CANONICAL_MEMOFS_FILES) {
+		expect(result.created).toEqual([...BOOTSTRAP_FILE_PATHS]);
+		for (const path of BOOTSTRAP_FILE_PATHS) {
 			await expect(store.exists(path)).resolves.toBe(true);
+		}
+	});
+
+	it("leaves trial ledgers absent until the first append", async () => {
+		const store = new InMemoryMemoryStore();
+		await bootstrapMemoryStore(store, {
+			now: () => "2026-05-02T00:00:00.000Z",
+		});
+
+		for (const path of CANONICAL_MEMOFS_FILES) {
+			if (
+				path === TRIALS_ASSIGNMENTS_PATH ||
+				path === TRIALS_OUTCOMES_PATH ||
+				path === WARRANTS_HISTORY_PATH
+			) {
+				await expect(store.exists(path)).resolves.toBe(false);
+			} else {
+				await expect(store.exists(path)).resolves.toBe(true);
+			}
 		}
 	});
 

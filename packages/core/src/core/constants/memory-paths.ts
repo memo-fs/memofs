@@ -44,6 +44,15 @@ export const MEMOFS_PATHS = Object.freeze({
 	}),
 	/** Connector config — the 11th canonical file. No secrets. */
 	connectors: `${MEMOFS_DIR}/connectors.json`,
+	/** Trials ledger (ticket 1, spec-0038): append-only assignment/outcome logs. */
+	trials: Object.freeze({
+		assignments: `${MEMOFS_DIR}/trials/assignments.jsonl`,
+		outcomes: `${MEMOFS_DIR}/trials/outcomes.jsonl`,
+	}),
+	/** Warrant authority transitions (ticket 1, spec-0038): append-only history. */
+	warrants: Object.freeze({
+		history: `${MEMOFS_DIR}/warrants/history.jsonl`,
+	}),
 	tmpDir: `${MEMOFS_DIR}/tmp`,
 } as const);
 
@@ -69,6 +78,12 @@ export const GRAPH_EDGES_PATH = MEMOFS_PATHS.graph.edges;
 export const SNAPSHOTS_INDEX_PATH = MEMOFS_PATHS.snapshots.index;
 /** Path to the connector-config JSON file (no secrets; `secretRef` only). */
 export const CONNECTORS_PATH = MEMOFS_PATHS.connectors;
+/** Path to the trial assignments JSONL file (append-only ledger). */
+export const TRIALS_ASSIGNMENTS_PATH = MEMOFS_PATHS.trials.assignments;
+/** Path to the trial outcomes JSONL file (append-only ledger). */
+export const TRIALS_OUTCOMES_PATH = MEMOFS_PATHS.trials.outcomes;
+/** Path to the warrant history JSONL file (append-only transitions). */
+export const WARRANTS_HISTORY_PATH = MEMOFS_PATHS.warrants.history;
 
 export const CANONICAL_MEMOFS_FILES = [
 	MANIFEST_PATH,
@@ -82,6 +97,9 @@ export const CANONICAL_MEMOFS_FILES = [
 	GRAPH_EDGES_PATH,
 	SNAPSHOTS_INDEX_PATH,
 	CONNECTORS_PATH,
+	TRIALS_ASSIGNMENTS_PATH,
+	TRIALS_OUTCOMES_PATH,
+	WARRANTS_HISTORY_PATH,
 ] as const;
 
 /**
@@ -92,14 +110,18 @@ export const MEMORY_PATHS = CANONICAL_MEMOFS_FILES;
 export type CanonicalMemoFSFile = (typeof CANONICAL_MEMOFS_FILES)[number];
 export type SnapshotFilePath = `${typeof MEMOFS_DIR}/snapshots/${string}.json`;
 export type ArchiveFilePath = `${typeof MEMOFS_DIR}/archive/${string}.json`;
+/** Per-memory warrant state file (current authority, one JSON doc per memory). */
+export type WarrantFilePath = `${typeof MEMOFS_DIR}/warrants/${string}.json`;
 export type MemoryPath =
 	| CanonicalMemoFSFile
 	| SnapshotFilePath
-	| ArchiveFilePath;
+	| ArchiveFilePath
+	| WarrantFilePath;
 
 const CANONICAL_MEMOFS_FILE_SET = new Set<string>(CANONICAL_MEMOFS_FILES);
 const SNAPSHOT_FILE_PATTERN = /^\.memofs\/snapshots\/[a-zA-Z0-9_.-]+\.json$/;
 const ARCHIVE_FILE_PATTERN = /^\.memofs\/archive\/[a-zA-Z0-9_.-]+\.json$/;
+const WARRANT_FILE_PATTERN = /^\.memofs\/warrants\/[a-zA-Z0-9_.-]+\.json$/;
 
 /**
  * Checks if a value is a valid memory path.
@@ -112,7 +134,8 @@ export function isMemoryPath(path: unknown): path is MemoryPath {
 		typeof path === "string" &&
 		(CANONICAL_MEMOFS_FILE_SET.has(path) ||
 			SNAPSHOT_FILE_PATTERN.test(path) ||
-			ARCHIVE_FILE_PATTERN.test(path))
+			ARCHIVE_FILE_PATTERN.test(path) ||
+			WARRANT_FILE_PATTERN.test(path))
 	);
 }
 
@@ -157,7 +180,7 @@ export function assertMemoryPath(path: unknown): asserts path is MemoryPath {
 		throw new MemoryPathError(`Unsupported MemoFS path: ${path}`, {
 			path,
 			supported: CANONICAL_MEMOFS_FILES,
-			dynamic: `${MEMOFS_DIR}/snapshots/<safe-name>.json or ${MEMOFS_DIR}/archive/<safe-name>.json`,
+			dynamic: `${MEMOFS_DIR}/snapshots/<safe-name>.json, ${MEMOFS_DIR}/archive/<safe-name>.json, or ${MEMOFS_DIR}/warrants/<safe-name>.json`,
 		});
 	}
 }
@@ -214,6 +237,38 @@ export function createArchivePath(memoryId: string): ArchiveFilePath {
 	return path;
 }
 
+/**
+ * Creates a warrant-state path from a memory ID.
+ *
+ * @param memoryId - The memory ID to create a warrant path for.
+ * @returns A valid {@link WarrantFilePath}.
+ * @throws {@link MemoryPathError} If the memory ID is invalid.
+ */
+export function createWarrantPath(memoryId: string): WarrantFilePath {
+	if (typeof memoryId !== "string" || memoryId.trim().length === 0) {
+		throw new MemoryPathError("memoryId must be a non-empty string.", {
+			memoryId,
+		});
+	}
+
+	const normalized = memoryId.trim();
+	if (!/^[a-zA-Z0-9_.-]+$/.test(normalized)) {
+		throw new MemoryPathError("memoryId contains unsupported characters.", {
+			memoryId,
+		});
+	}
+	if (normalized === "history") {
+		throw new MemoryPathError(
+			'memoryId "history" is reserved for warrants/history.jsonl.',
+			{ memoryId },
+		);
+	}
+
+	const path = `${MEMOFS_DIR}/warrants/${normalized}.json` as WarrantFilePath;
+	assertMemoryPath(path);
+	return path;
+}
+
 export type PathKind =
 	| "manifest"
 	| "core"
@@ -226,6 +281,10 @@ export type PathKind =
 	| "graph-edge"
 	| "snapshot-index"
 	| "connector"
+	| "trial-assignment"
+	| "trial-outcome"
+	| "warrant"
+	| "warrant-history"
 	| "snapshot"
 	| "archive";
 
@@ -261,7 +320,14 @@ export function memoryTypeFromPath(path: MemoryPath): PathKind {
 			return "snapshot-index";
 		case CONNECTORS_PATH:
 			return "connector";
+		case TRIALS_ASSIGNMENTS_PATH:
+			return "trial-assignment";
+		case TRIALS_OUTCOMES_PATH:
+			return "trial-outcome";
+		case WARRANTS_HISTORY_PATH:
+			return "warrant-history";
 		default:
+			if (WARRANT_FILE_PATTERN.test(path)) return "warrant";
 			if (ARCHIVE_FILE_PATTERN.test(path)) return "archive";
 			return "snapshot";
 	}

@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import {
 	appendConversationEntry,
 	appendTimestampedNote,
+	BOOTSTRAP_FILE_PATHS,
 	bootstrapMemoryStore,
-	CANONICAL_MEMOFS_FILES,
 	readConversationHistory,
 	readCoreMemory,
 	readNotesMemory,
@@ -18,7 +18,7 @@ describe("MemoFS core integration", () => {
 		const store = createNodeFsMemoryStore({ rootDir });
 
 		const bootstrap = await bootstrapMemoryStore(store);
-		expect(bootstrap.created).toEqual([...CANONICAL_MEMOFS_FILES]);
+		expect(bootstrap.created).toEqual([...BOOTSTRAP_FILE_PATHS]);
 
 		await writeCoreMemory(
 			store,
@@ -53,6 +53,6 @@ describe("MemoFS core integration", () => {
 		const second = await bootstrapMemoryStore(store);
 
 		expect(second.created).toEqual([]);
-		expect(second.skipped).toEqual([...CANONICAL_MEMOFS_FILES]);
+		expect(second.skipped).toEqual([...BOOTSTRAP_FILE_PATHS]);
 	});
 });

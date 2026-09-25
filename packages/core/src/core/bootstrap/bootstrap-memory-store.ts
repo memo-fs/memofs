@@ -2,7 +2,8 @@
  * Bootstrap utilities for initializing a new MemoFS project.
  *
  * @remarks
- * Ensures all canonical `.memofs/` files exist with sensible defaults.
+ * Ensures the bootstrap `.memofs/` files exist with sensible defaults.
+ * Trial ledgers are created lazily on first append, never here.
  * Can optionally overwrite existing files.
  *
  * @public
@@ -73,14 +74,22 @@ const BOOTSTRAP_FILE_ORDER: Array<{
 ];
 
 /**
- * Bootstrap a memory store by creating all canonical .memofs/ files.
+ * Canonical files created by {@link bootstrapMemoryStore}.
  *
- * @param store - The memory store to bootstrap.
- * @param options - Bootstrap options.
- * @returns A result object describing which files were created, overwritten, or skipped.
+ * @remarks
+ * Deliberately narrower than `CANONICAL_MEMOFS_FILES`: trial ledgers
+ * (`trials/*.jsonl`, `warrants/history.jsonl`) are created lazily on first
+ * append so `init` output is unchanged until Trials runs. Dynamic families
+ * (`snapshots/`, `archive/`, per-memory `warrants/` files) are never
+ * bootstrapped either.
+ *
+ * @public
  */
+export const BOOTSTRAP_FILE_PATHS: readonly CanonicalMemoFSFile[] =
+	Object.freeze(BOOTSTRAP_FILE_ORDER.map((file) => file.path));
+
 /**
- * Bootstrap a memory store by creating all canonical .memofs/ files.
+ * Bootstrap a memory store by creating the bootstrap .memofs/ files.
  *
  * @param store - The memory store to bootstrap.
  * @param options - Bootstrap options.
