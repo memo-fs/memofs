@@ -156,7 +156,7 @@ The CLI emits standardized, machine-readable error codes:
 Create `.memofs/config.json` to persist defaults without storing secrets:
 
 ```bash
-memofs config init --runtime hybrid -p frozen-crest --cloud-url https://memofs.dev/api/v1
+memofs config init --runtime hybrid -p frozen-crest --cloud-url https://cloud.memofs.dev/api/v1
 ```
 
 ```json
@@ -165,7 +165,7 @@ memofs config init --runtime hybrid -p frozen-crest --cloud-url https://memofs.d
   "runtime": "hybrid",
   "root": ".",
   "cloud": {
-    "baseUrl": "https://memofs.dev/api/v1",
+    "baseUrl": "https://cloud.memofs.dev/api/v1",
     "projectId": "frozen-crest"
   },
   "recall": {

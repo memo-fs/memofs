@@ -79,7 +79,7 @@ You can commit a `.memofs/config.json` file in your repository root:
 
 ```json title=".memofs/config.json"
 {
-  "$schema": "https://docs.memofs.dev/schema/config.json",
+  "$schema": "https://memofs.dev/schema/config.json",
   "runtime": "local",
   "projectId": "proj_abc123",
   "recall": {
@@ -88,7 +88,7 @@ You can commit a `.memofs/config.json` file in your repository root:
     "localEmbeddings": false
   },
   "cloud": {
-    "baseUrl": "https://memofs.dev/api/v1"
+    "baseUrl": "https://cloud.memofs.dev/api/v1"
   }
 }
 ```
@@ -110,7 +110,7 @@ console.log(fileConfig.projectId);
 |---|---|---|---|
 | `MEMOFS_RUNTIME` | `string` | `"local"` | Overrides the runtime mode (`"local"` or `"hybrid"`). |
 | `MEMOFS_PROJECT_ID` | `string` | `undefined` | Unique project workspace ID. |
-| `MEMOFS_CLOUD_URL` | `string` | `https://memofs.dev/api/v1` | Base URL of the MemoFS Cloud sync API. |
+| `MEMOFS_CLOUD_URL` | `string` | `https://cloud.memofs.dev/api/v1` | Base URL of the MemoFS Cloud sync API. |
 | `MEMOFS_API_KEY` | `string` | `undefined` | API key (`mfs_...`) used to authenticate with MemoFS Cloud. |
 | `MEMOFS_RECALL_ENGINE` | `string` | `"auto"` | Recall engine strategy: `"lexical"`, `"vector"`, `"hybrid"`, or `"auto"`. |
 | `MEMOFS_LOCAL_EMBEDDINGS` | `string` | `"false"` | Set to `"1"` or `"true"` to enable local ONNX embeddings in CLI/core. In `@memofs/mcp-server`, local embeddings are enabled by default and disabled with `"0"` or `"false"`. |

@@ -33,7 +33,7 @@ Creates or updates `.memofs/config.json` with portable `$schema` validation and 
 
 ```bash
 memofs config init
-memofs config init --runtime hybrid --cloud-url https://memofs.dev/api/v1 --project-id my-project
+memofs config init --runtime hybrid --cloud-url https://cloud.memofs.dev/api/v1 --project-id my-project
 memofs config init --force
 ```
 
@@ -52,7 +52,7 @@ memofs config init --force
 `config init` automatically resolves a portable relative `$schema` pointer:
 
 1. If `node_modules/@memofs/cli/schema/config.json` exists relative to the workspace root, writes `../node_modules/@memofs/cli/schema/config.json`.
-2. Otherwise, falls back to the hosted URL `https://docs.memofs.dev/schema/config.json`.
+2. Otherwise, falls back to the hosted URL `https://memofs.dev/schema/config.json`.
 
 ```json title=".memofs/config.json"
 {
@@ -60,7 +60,7 @@ memofs config init --force
   "runtime": "hybrid",
   "root": ".",
   "cloud": {
-    "baseUrl": "https://memofs.dev/api/v1",
+    "baseUrl": "https://cloud.memofs.dev/api/v1",
     "workspaceId": "ws_12345",
     "projectId": "my-project",
     "timeoutMs": 15000

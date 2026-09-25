@@ -77,7 +77,7 @@ import { createMemoFSFromCli } from "@memofs/cli";
 const memo = createMemoFSFromCli({
   root: "./my-project",
   runtime: "hybrid",
-  cloudUrl: "https://memofs.dev/api/v1",
+  cloudUrl: "https://cloud.memofs.dev/api/v1",
   apiKey: process.env.MEMOFS_API_KEY,
   timeoutMs: 15000,
 });
@@ -149,7 +149,7 @@ console.log("Path:", result.path);
 
 ### `resolveSchemaPath(rootDir: string): string`
 
-Returns a portable relative path (`../node_modules/@memofs/cli/schema/config.json`) if the package schema exists on disk, or the hosted fallback URL (`https://docs.memofs.dev/schema/config.json`).
+Returns a portable relative path (`../node_modules/@memofs/cli/schema/config.json`) if the package schema exists on disk, or the hosted fallback URL (`https://memofs.dev/schema/config.json`).
 
 ---
 

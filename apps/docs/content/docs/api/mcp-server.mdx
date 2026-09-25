@@ -71,7 +71,7 @@ const runtime = createMemoFSMcpRuntimeFromConfig({
   rootDir: "./my-project",
   mode: "hybrid",
   cloud: {
-    baseUrl: "https://memofs.dev/api/v1",
+    baseUrl: "https://cloud.memofs.dev/api/v1",
     apiKey: process.env.MEMOFS_API_KEY,
   },
   recall: {
@@ -157,7 +157,7 @@ import { createMemoFSMcpFetchHandler } from "@memofs/mcp-server/http";
 export default {
   fetch: createMemoFSMcpFetchHandler({
     cloud: {
-      baseUrl: "https://memofs.dev/api/v1",
+      baseUrl: "https://cloud.memofs.dev/api/v1",
     },
   }),
 };

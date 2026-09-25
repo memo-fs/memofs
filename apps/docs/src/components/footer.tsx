@@ -114,7 +114,7 @@ export function Footer() {
 							X
 						</a>
 						<a
-							href={SITE.productUrl}
+							href={SITE.cloudUrl}
 							target="_blank"
 							rel="noopener noreferrer"
 							className={linkClassName}

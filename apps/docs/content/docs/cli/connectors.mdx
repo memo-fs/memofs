@@ -70,7 +70,7 @@ Added connector "my-github" (type: github). 1 connector(s) configured.
 
 The full file is re-validated before it's written, so a `--source-mapping` value that trips one of the framework's [config validation guardrails](/connectors/#config-validation-guardrails) (a forbidden key substring like `token` or `secret`, or a value that looks like a real credential) fails the same way it would if you'd hand-edited `connectors.json` — the row is never written.
 
-Every write also stamps a `$schema` reference into the file, so editors validate and autocomplete `connectors.json` the same way they do `config.json`. The reference is the portable `../node_modules/@memofs/cli/schema/connectors.json` path when the CLI package is present under the project root, and the hosted `https://docs.memofs.dev/schema/connectors.json` URL otherwise — files written before this behavior existed upgrade in place on the next add or remove.
+Every write also stamps a `$schema` reference into the file, so editors validate and autocomplete `connectors.json` the same way they do `config.json`. The reference is the portable `../node_modules/@memofs/cli/schema/connectors.json` path when the CLI package is present under the project root, and the hosted `https://memofs.dev/schema/connectors.json` URL otherwise — files written before this behavior existed upgrade in place on the next add or remove.
 
 ## `memofs connectors remove`
 

@@ -4,6 +4,7 @@
  * LLM exports without a second hand-maintained dataset.
  */
 
+import { Callout } from "fumadocs-ui/components/callout";
 import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import type React from "react";
@@ -13,7 +14,7 @@ import { useMDXComponents } from "../components/mdx";
 import { baseOptions } from "../lib/layout.shared";
 import { createPageMeta } from "../lib/meta";
 import { createRelativeLink } from "../lib/relative-link";
-import { ROUTES, SITE } from "../lib/site";
+import { ROUTES } from "../lib/site";
 import { docs } from "../lib/source";
 import { cn } from "../lib/utils";
 import type { Route } from "./+types/changelog";
@@ -41,6 +42,22 @@ function getTextContent(node: React.ReactNode): string {
 		);
 	}
 	return "";
+}
+
+function Crosshair({ className }: { className?: string }) {
+	return (
+		<svg
+			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
+			viewBox="0 0 14 14"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="1.2"
+			aria-hidden="true"
+		>
+			<line x1="7" y1="0" x2="7" y2="14" />
+			<line x1="0" y1="7" x2="14" y2="7" />
+		</svg>
+	);
 }
 
 /** Badge style mapping for change types across light and dark modes. */
@@ -196,11 +213,15 @@ function ChangelogLi({
 	);
 }
 
-/** Custom paragraph styling. */
+/** Custom paragraph styling. — hides the intro paragraph moved into the hero */
 function ChangelogP({
 	children,
 	...props
 }: React.ComponentPropsWithoutRef<"p">) {
+	const text = getTextContent(children).trim();
+	if (text === "All notable changes to MemoFS are documented here.") {
+		return null;
+	}
 	return (
 		<p
 			className="mt-2 mb-3 text-xs sm:text-sm leading-normal text-muted-foreground"
@@ -218,6 +239,19 @@ function ChangelogHr(props: React.ComponentPropsWithoutRef<"hr">) {
 	);
 }
 
+/** Suppress the per-package Callout moved into the hero */
+function ChangelogCallout(props: React.ComponentProps<typeof Callout>) {
+	const { title, children, ...rest } = props;
+	const titleText =
+		typeof title === "string" ? title.trim() : getTextContent(title).trim();
+	if (titleText === "Per-Package Changelogs") return null;
+	return (
+		<Callout title={title} {...rest}>
+			{children}
+		</Callout>
+	);
+}
+
 /** Renders the changelog MDX content with the marketing-site shell. */
 export default function ChangelogPage() {
 	const page = docs.getPage("changelog.mdx");
@@ -227,25 +261,153 @@ export default function ChangelogPage() {
 	return (
 		<HomeLayout {...baseOptions()}>
 			<div className="relative w-full bg-background text-foreground">
-				<header className="border-b border-dashed border-border bg-muted/50 py-10 dark:border-border/80 dark:bg-muted/40 sm:py-14">
-					<div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-						<Badge
-							variant="secondary"
-							className="border-dashed font-mono text-[11px]"
-						>
-							Release History
-						</Badge>
-						<h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl text-foreground">
-							Changelog
-						</h1>
-						<p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-							All notable changes, architectural milestones, bug fixes, and
-							feature additions across all {SITE.name} workspace packages.
-						</p>
-					</div>
-				</header>
+				{/* Changelog Hero — minimal landing hero with per-package panel */}
+				<section className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+					<div className="relative mx-auto w-full max-w-5xl">
+						{/* Outer drafting guidelines */}
+						<div className="pointer-events-none absolute -left-6 -right-6 top-0 origin-center animate-line-x border-t border-dashed border-border/70 sm:-left-10 sm:-right-10" />
+						<div className="pointer-events-none absolute -left-6 -right-6 bottom-0 origin-center animate-line-x border-b border-dashed border-border/70 sm:-left-10 sm:-right-10" />
+						<div className="pointer-events-none absolute -top-6 -bottom-6 left-0 origin-top animate-line-y border-l border-dashed border-border/70 sm:-top-8 sm:-bottom-8" />
+						<div className="pointer-events-none absolute -top-6 -bottom-6 right-0 origin-top animate-line-y border-r border-dashed border-border/70 sm:-top-8 sm:-bottom-8" />
 
-				<main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+						<Crosshair className="-top-1.75 -left-1.75" />
+						<Crosshair className="-top-1.75 -right-1.75" />
+						<Crosshair className="-bottom-1.75 -left-1.75" />
+						<Crosshair className="-bottom-1.75 -right-1.75" />
+
+						{/* Top bar */}
+						<div className="relative flex items-center justify-between border-x border-t border-dashed border-border px-4 py-2 font-mono text-xs text-muted-foreground backdrop-blur-xs sm:px-6">
+							<span className="font-semibold text-foreground">
+								~ <code>cat CHANGELOG.md</code>
+							</span>
+							<span className="hidden text-[10px] tracking-widest uppercase sm:inline">
+								release / history
+							</span>
+						</div>
+
+						{/* Main box */}
+						<div className="relative border border-dashed border-border">
+							{/* Headline */}
+							<div className="relative px-4 py-8 text-center sm:px-8 sm:py-10">
+								<div className="flex items-center justify-center gap-2">
+									<span aria-hidden className="size-1.5 bg-amber-400" />
+									<span className="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-amber-400">
+										Release History
+									</span>
+								</div>
+								<h1 className="mx-auto mt-3 max-w-3xl text-balance text-4xl font-bold leading-[1.04] tracking-[-0.035em] text-foreground sm:text-5xl lg:text-6xl">
+									Changelog
+								</h1>
+							</div>
+
+							{/* Mid divider with crosshairs */}
+							<div className="relative border-t border-dashed border-border">
+								<div className="pointer-events-none absolute inset-x-0 top-0 origin-left animate-line-x border-t border-dashed border-border" />
+								<Crosshair className="-top-1.75 -left-1.75" />
+								<Crosshair className="-top-1.75 -right-1.75" />
+							</div>
+
+							{/* Subtitle */}
+							<div className="px-4 py-5 text-center sm:px-8 sm:py-6">
+								<p className="mx-auto max-w-2xl text-balance text-sm leading-relaxed text-muted-foreground sm:text-base">
+									All notable changes to MemoFS are documented here —
+									architectural milestones, bug fixes, and feature additions
+									across all workspace packages.
+								</p>
+							</div>
+
+							{/* Per-package panel */}
+							<div className="relative border-t border-dashed border-border">
+								<div className="pointer-events-none absolute inset-x-0 top-0 origin-right animate-line-x border-t border-dashed border-border" />
+								<Crosshair className="-top-1.75 -left-1.75" />
+								<Crosshair className="-top-1.75 -right-1.75" />
+								<div className="px-4 py-5 sm:px-8">
+									<div className="mx-auto max-w-3xl space-y-3">
+										<div className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
+											<span>Per-Package Changelogs</span>
+										</div>
+										<nav
+											aria-label="Per-package changelogs"
+											className="flex flex-wrap items-center justify-center gap-1.5 font-mono text-xs sm:gap-2"
+										>
+											<a
+												href="https://github.com/memo-fs/memofs/blob/main/packages/core/CHANGELOG.md"
+												target="_blank"
+												rel="noreferrer"
+												className="text-muted-foreground transition-colors hover:text-foreground"
+											>
+												@memofs/core
+											</a>
+											<span aria-hidden className="text-muted-foreground/30">
+												·
+											</span>
+											<a
+												href="https://github.com/memo-fs/memofs/blob/main/packages/cli/CHANGELOG.md"
+												target="_blank"
+												rel="noreferrer"
+												className="text-muted-foreground transition-colors hover:text-foreground"
+											>
+												@memofs/cli
+											</a>
+											<span aria-hidden className="text-muted-foreground/30">
+												·
+											</span>
+											<a
+												href="https://github.com/memo-fs/memofs/blob/main/packages/mcp-server/CHANGELOG.md"
+												target="_blank"
+												rel="noreferrer"
+												className="text-muted-foreground transition-colors hover:text-foreground"
+											>
+												@memofs/mcp-server
+											</a>
+											<span aria-hidden className="text-muted-foreground/30">
+												·
+											</span>
+											<a
+												href="https://github.com/memo-fs/memofs/blob/main/packages/server/CHANGELOG.md"
+												target="_blank"
+												rel="noreferrer"
+												className="text-muted-foreground transition-colors hover:text-foreground"
+											>
+												@memofs/server
+											</a>
+											<span aria-hidden className="text-muted-foreground/30">
+												·
+											</span>
+											<a
+												href="https://github.com/memo-fs/memofs/releases"
+												target="_blank"
+												rel="noreferrer"
+												className="font-semibold text-amber-400 transition-colors hover:text-amber-500"
+											>
+												all packages →
+											</a>
+										</nav>
+										<p className="text-center font-mono text-[11px] leading-relaxed text-muted-foreground">
+											<a
+												href="https://github.com/memo-fs/memofs/releases"
+												target="_blank"
+												rel="noreferrer"
+												className="font-medium text-foreground underline decoration-dashed underline-offset-4 transition-colors hover:text-amber-400"
+											>
+												GitHub Releases
+											</a>{" "}
+											for tagged releases with notes.
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						{/* Bottom bar */}
+						<div className="relative flex items-center justify-between border-x border-b border-dashed border-border px-4 py-2 font-mono text-[10px] text-muted-foreground/70 backdrop-blur-xs sm:px-6">
+							<span>[source: changelog.mdx]</span>
+							<span>[latest: v1.3.0-beta.3]</span>
+						</div>
+					</div>
+				</section>
+
+				<main className="mx-auto max-w-4xl px-4 pb-10 sm:px-6 sm:pb-12 lg:px-8">
 					<div className="relative border-l border-dashed border-border pl-6 sm:pl-10">
 						<DocsBody className="max-w-none">
 							<Mdx
@@ -258,6 +420,7 @@ export default function ChangelogPage() {
 									li: ChangelogLi,
 									p: ChangelogP,
 									hr: ChangelogHr,
+									Callout: ChangelogCallout,
 								})}
 							/>
 						</DocsBody>

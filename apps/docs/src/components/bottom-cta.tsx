@@ -30,7 +30,7 @@ export function BottomCta() {
 						</a>
 					</Button>
 					<Button asChild variant="outline" size="lg">
-						<a href={SITE.productUrl} target="_blank" rel="noopener noreferrer">
+						<a href={SITE.cloudUrl} target="_blank" rel="noopener noreferrer">
 							MemoFS Cloud
 						</a>
 					</Button>

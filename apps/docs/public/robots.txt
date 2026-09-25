@@ -54,4 +54,4 @@ User-agent: Diffbot
 Allow: /
 
 # Sitemaps
-Sitemap: https://docs.memofs.dev/sitemap.xml
+Sitemap: https://memofs.dev/sitemap.xml

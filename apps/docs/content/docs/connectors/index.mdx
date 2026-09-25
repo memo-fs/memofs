@@ -189,7 +189,7 @@ If `.memofs/connectors.json` does not exist on disk, `readConnectorsFile()` grac
 </Callout>
 
 <Callout type="info">
-The `$schema` key is optional but recommended — it gives editors validation and autocomplete for the file. `memofs connectors add` and `memofs connectors remove` stamp it automatically on every write, so existing files upgrade in place. When the CLI package is installed under the project root, the portable relative reference shown above is used; otherwise the hosted copy at `https://docs.memofs.dev/schema/connectors.json`. The key is ignored by validation.
+The `$schema` key is optional but recommended — it gives editors validation and autocomplete for the file. `memofs connectors add` and `memofs connectors remove` stamp it automatically on every write, so existing files upgrade in place. When the CLI package is installed under the project root, the portable relative reference shown above is used; otherwise the hosted copy at `https://memofs.dev/schema/connectors.json`. The key is ignored by validation.
 </Callout>
 
 ## Config Validation Guardrails
@@ -253,7 +253,7 @@ import { CloudSecretResolver } from "@memofs/connectors";
 const secretResolver = new CloudSecretResolver({
   projectId: "proj_abc123",
   apiKey: "tm_live_xxxxxxxxxxxx",
-  cloudBaseUrl: "https://memofs.dev/api/v1",
+  cloudBaseUrl: "https://cloud.memofs.dev/api/v1",
 });
 ```
 
