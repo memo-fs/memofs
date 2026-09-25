@@ -7,8 +7,9 @@
 /** Public MemoFS URLs and default social metadata. */
 export const SITE = {
 	name: "MemoFS",
-	docsUrl: "https://docs.memofs.dev",
-	productUrl: "https://memofs.dev",
+	docsUrl: "https://memofs.dev",
+	productUrl: "https://cloud.memofs.dev",
+	cloudUrl: "https://cloud.memofs.dev",
 	githubUrl: "https://github.com/memo-fs/memofs",
 	xUrl: "https://x.com/memofsdev",
 	xHandle: "@memofsdev",
@@ -29,6 +30,8 @@ export const ROUTES = {
 	server: "/docs/server",
 	api: "/docs/api",
 	changelog: "/changelog",
+	articles: "/articles",
+	manifesto: "/manifesto",
 	llms: "/llms.txt",
 	llmsFull: "/llms-full.txt",
 	sitemap: "/sitemap.xml",
@@ -41,24 +44,32 @@ export const STATIC_PRERENDER_PATHS = [
 	ROUTES.llmsFull,
 	ROUTES.docs,
 	ROUTES.changelog,
+	ROUTES.manifesto,
+	ROUTES.articles,
 ] as const;
 
 /** Primary navigation rendered by the Fumadocs layouts. */
 export const PRIMARY_NAVIGATION = [
 	{ text: "Documentation", url: ROUTES.docs, active: "url", on: "all" },
 	{
+		text: "Manifesto",
+		url: ROUTES.manifesto,
+		active: "url",
+		on: "all",
+	},
+	{
+		text: "Articles",
+		url: ROUTES.articles,
+		active: "nested-url",
+		on: "all",
+	},
+	{
 		text: "Changelog",
 		url: ROUTES.changelog,
 		active: "nested-url",
 		on: "all",
 	},
-	{
-		text: "Articles",
-		url: `${SITE.productUrl}/articles`,
-		external: true,
-		on: "all",
-	},
-	{ text: "Cloud", url: SITE.productUrl, external: true, on: "all" },
+	{ text: "Cloud", url: SITE.cloudUrl, external: true, on: "all" },
 ] as const;
 
 /** Link data for the footer, grouped independently from its presentation. */
@@ -88,6 +99,8 @@ export const FOOTER_NAVIGATION = [
 	{
 		title: "Resources & AI",
 		links: [
+			{ label: "Articles", href: ROUTES.articles },
+			{ label: "Manifesto", href: ROUTES.manifesto },
 			{ label: "Changelog", href: ROUTES.changelog },
 			{ label: "API Reference", href: ROUTES.api },
 			{ label: "sitemap.xml", href: ROUTES.sitemap, external: true },

@@ -23,7 +23,7 @@ The hosted endpoint is available on **Pro and Teams** plans. The dashboard's Mem
 Find your project's exact URL on the dashboard's **Memory page**. It has the form:
 
 ```
-https://memofs.dev/api/v1/projects/<project-id>/mcp
+https://cloud.memofs.dev/api/v1/projects/<project-id>/mcp
 ```
 
 Replace `<project-id>` with your project's real ID (shown on the dashboard). You'll also need an API key from the **API Keys page** — pass it as a Bearer token in the `Authorization` header, exactly as shown in each snippet below.
@@ -32,7 +32,7 @@ The hosted endpoint speaks standard MCP streamable-HTTP, so any client that supp
 
 
 ```sh
-claude mcp add --transport http memofs https://memofs.dev/api/v1/projects/<project-id>/mcp \
+claude mcp add --transport http memofs https://cloud.memofs.dev/api/v1/projects/<project-id>/mcp \
   --header "Authorization: Bearer <your-api-key>"
 
 # Run from your project directory, then restart Claude Code.
@@ -43,7 +43,7 @@ claude mcp add --transport http memofs https://memofs.dev/api/v1/projects/<proje
 {
   "mcpServers": {
     "memofs": {
-      "url": "https://memofs.dev/api/v1/projects/<project-id>/mcp",
+      "url": "https://cloud.memofs.dev/api/v1/projects/<project-id>/mcp",
       "headers": {
         "Authorization": "Bearer <your-api-key>"
       }
@@ -58,7 +58,7 @@ claude mcp add --transport http memofs https://memofs.dev/api/v1/projects/<proje
   "servers": {
     "memofs": {
       "type": "http",
-      "url": "https://memofs.dev/api/v1/projects/<project-id>/mcp",
+      "url": "https://cloud.memofs.dev/api/v1/projects/<project-id>/mcp",
       "headers": {
         "Authorization": "Bearer <your-api-key>"
       }

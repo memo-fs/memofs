@@ -72,7 +72,7 @@ async function sendWelcomeEmail(apiKey: string, from: string, to: string) {
 				<a href="${SITE.githubUrl}" style="color: #111; text-decoration: underline;">Star on GitHub</a> ·
 				<a href="${SITE.productUrl}" style="color: #111; text-decoration: underline;">MemoFS Cloud</a>
 			</p>
-			<p style="margin: 24px 0 0; font-size: 12px; color: #666;">You’re receiving this because you subscribed at docs.memofs.dev. Unsubscribe anytime via the link in future emails.</p>
+			<p style="margin: 24px 0 0; font-size: 12px; color: #666;">You’re receiving this because you subscribed at memofs.dev. Unsubscribe anytime via the link in future emails.</p>
 		</div>
 	`.trim();
 

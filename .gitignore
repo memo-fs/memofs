@@ -50,6 +50,7 @@ CONTEXT.md
 teasers.md
 tickets-to-close.md
 adr/
+internals/
 agents/
 architecture/
 internal/

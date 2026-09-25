@@ -38,7 +38,7 @@ Put the API key in the `env` block so it stays out of committed config. The `--c
         "-y",
         "@memofs/mcp-server",
         "--runtime", "hybrid",
-        "--cloud-url", "https://memofs.dev/api/v1"
+        "--cloud-url", "https://cloud.memofs.dev/api/v1"
       ],
       "env": {
         "MEMOFS_API_KEY": "your-api-key"
@@ -55,7 +55,7 @@ For project-scoped configs (committed to the repo), omit `--root` — the client
 | Flag | Required? | Description |
 |---|---|---|
 | `--runtime hybrid` | **Yes** | Enables cloud mirroring. Default is `local` (no cloud calls). |
-| `--cloud-url <url>` | **Yes** | MemoFS Cloud API root, e.g. `https://memofs.dev/api/v1`. |
+| `--cloud-url <url>` | **Yes** | MemoFS Cloud API root, e.g. `https://cloud.memofs.dev/api/v1`. |
 | `--root <dir>` | No | Absolute path to the project root containing `.memofs/`. Defaults to the current working directory. Required only in global / app-level configs. |
 | `--project-id <id>` | No | The cloud project to mirror to. If omitted, the server uses the project bound to the API key's default workspace. |
 | `--workspace-id <id>` | No | Default cloud workspace ID. |
@@ -78,7 +78,7 @@ Every flag has an environment-variable equivalent (passed through the `env` bloc
 
 ## Choosing an API key scope
 
-API keys are either **read-write** or **read-only** (managed on the [dashboard's API Keys](https://memofs.dev/dashboard/api-keys) page). Each scope enables a different subset of the four memory verbs:
+API keys are either **read-write** or **read-only** (managed on the [dashboard's API Keys](https://cloud.memofs.dev/dashboard/api-keys) page). Each scope enables a different subset of the four memory verbs:
 
 | Key scope | `memofs.context` | `memofs.recall` | `memofs.remember` | `memofs.consolidate` |
 |---|:---:|:---:|:---:|:---:|

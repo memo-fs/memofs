@@ -57,14 +57,18 @@ function MermaidContent({ chart }: { chart: string }) {
 		startOnLoad: false,
 		securityLevel: "loose",
 		fontFamily: "var(--font-sans, inherit)",
-		themeCSS: "margin: 1.5rem auto 0; text-align: center;",
+		themeCSS:
+			"margin: 1.5rem auto 0; text-align: center; .node foreignObject, .node foreignObject > div, .label, .node { overflow: visible !important; }",
 		theme: resolvedTheme === "dark" ? "dark" : "default",
 	});
 
 	const { svg, bindFunctions } = use(
 		cachePromise<{ svg: string; bindFunctions?: (element: Element) => void }>(
 			`${chart}-${resolvedTheme}`,
-			() => {
+			async () => {
+				if (typeof document !== "undefined" && document.fonts?.ready) {
+					await document.fonts.ready;
+				}
 				return mermaid.render(id, chart.replaceAll("\\n", "\n"));
 			},
 		),
@@ -72,7 +76,7 @@ function MermaidContent({ chart }: { chart: string }) {
 
 	return (
 		<div
-			className="my-6 overflow-x-auto flex justify-center [&_svg]:max-w-full"
+			className="my-6 overflow-x-auto flex justify-center [&_svg]:max-w-full [&_foreignObject]:overflow-visible [&_foreignObject>div]:overflow-visible [&_.node]:overflow-visible [&_.label]:overflow-visible"
 			ref={(container) => {
 				if (container) bindFunctions?.(container);
 			}}

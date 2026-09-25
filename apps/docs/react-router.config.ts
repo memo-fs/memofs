@@ -4,6 +4,7 @@ import { createGetUrl, getSlugs } from "fumadocs-core/source";
 import { STATIC_PRERENDER_PATHS } from "./src/lib/site";
 
 const getUrl = createGetUrl("/docs");
+const getArticlesUrl = createGetUrl("/articles");
 
 export default {
 	ssr: true,
@@ -22,6 +23,13 @@ export default {
 		for await (const entry of glob("**/*.mdx", { cwd: "content/docs" })) {
 			const slugs = getSlugs(entry);
 			paths.add(getUrl(slugs));
+		}
+
+		for await (const entry of glob("**/*.{md,mdx}", {
+			cwd: "content/articles",
+		})) {
+			const slugs = getSlugs(entry);
+			paths.add(getArticlesUrl(slugs));
 		}
 
 		return Array.from(paths);
