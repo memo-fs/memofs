@@ -14,7 +14,7 @@ import { useMDXComponents } from "../components/mdx";
 import { baseOptions } from "../lib/layout.shared";
 import { createPageMeta } from "../lib/meta";
 import { createRelativeLink } from "../lib/relative-link";
-import { ROUTES } from "../lib/site";
+import { ROUTES, releaseTagUrl, SITE } from "../lib/site";
 import { docs } from "../lib/source";
 import { cn } from "../lib/utils";
 import type { Route } from "./+types/changelog";
@@ -98,7 +98,10 @@ function ChangelogH2({
 		date = (parts[1] ?? "").trim();
 	}
 
-	const isLatest = version === "v1.3.0-beta.3";
+	const isLatest = version === SITE.latestRelease;
+	// Version trains (e.g. "v1.3.0-beta.3") deep-link to their tagged GitHub
+	// release; "Unreleased" and other headings render as plain text.
+	const releaseUrl = /^v\d/.test(version) ? releaseTagUrl(version) : null;
 
 	return (
 		<div className="not-prose relative mt-10 first:mt-0 pt-1">
@@ -113,7 +116,18 @@ function ChangelogH2({
 					className="text-lg sm:text-xl font-bold tracking-tight text-foreground m-0 p-0 leading-none scroll-mt-24"
 					{...props}
 				>
-					{version}
+					{releaseUrl ? (
+						<a
+							href={releaseUrl}
+							target="_blank"
+							rel="noreferrer"
+							className="transition-colors hover:text-amber-400"
+						>
+							{version}
+						</a>
+					) : (
+						version
+					)}
 				</h2>
 				{date && (
 					<Badge variant="secondary" className="font-mono text-[11px]">
@@ -375,7 +389,7 @@ export default function ChangelogPage() {
 												·
 											</span>
 											<a
-												href="https://github.com/memo-fs/memofs/releases"
+												href={SITE.githubReleasesUrl}
 												target="_blank"
 												rel="noreferrer"
 												className="font-semibold text-amber-400 transition-colors hover:text-amber-500"
@@ -385,7 +399,7 @@ export default function ChangelogPage() {
 										</nav>
 										<p className="text-center font-mono text-[11px] leading-relaxed text-muted-foreground">
 											<a
-												href="https://github.com/memo-fs/memofs/releases"
+												href={SITE.githubReleasesUrl}
 												target="_blank"
 												rel="noreferrer"
 												className="font-medium text-foreground underline decoration-dashed underline-offset-4 transition-colors hover:text-amber-400"
@@ -402,7 +416,7 @@ export default function ChangelogPage() {
 						{/* Bottom bar */}
 						<div className="relative flex items-center justify-between border-x border-b border-dashed border-border px-4 py-2 font-mono text-[10px] text-muted-foreground/70 backdrop-blur-xs sm:px-6">
 							<span>[source: changelog.mdx]</span>
-							<span>[latest: v1.3.0-beta.3]</span>
+							<span>[latest: {SITE.latestRelease}]</span>
 						</div>
 					</div>
 				</section>

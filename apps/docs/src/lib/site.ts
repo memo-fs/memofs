@@ -13,11 +13,19 @@ export const SITE = {
 	githubUrl: "https://github.com/memo-fs/memofs",
 	xUrl: "https://x.com/memofsdev",
 	xHandle: "@memofsdev",
-	academy: "https://academy.memofs.dev",
+	engram: "https://engram.memofs.dev",
 	defaultImagePath: "/og-default.png",
 	description:
 		"The file-first memory runtime for AI agents. Store decisions, facts, and context as markdown in your project. Local by default, cloud-ready.",
+	githubReleasesUrl: "https://github.com/memo-fs/memofs/releases",
+	/** Newest tagged release train (also the GitHub "Latest" release). */
+	latestRelease: "v1.3.0-beta.3",
 } as const;
+
+/** Builds the GitHub release URL for a tagged version train (e.g. `v1.3.0-beta.3`). */
+export function releaseTagUrl(version: string): string {
+	return `${SITE.githubReleasesUrl}/tag/${version}`;
+}
 
 /** Canonical internal routes shared by navigation, metadata, and prerendering. */
 export const ROUTES = {
