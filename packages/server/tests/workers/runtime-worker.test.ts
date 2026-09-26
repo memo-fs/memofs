@@ -2,7 +2,7 @@
  * Worker integration test — the runtime API against the REAL Worker target.
  *
  * @remarks
- * The s3-execution-plan slice-1 bar: "Miniflare where the target is a Worker."
+ * The bar: "Miniflare where the target is a Worker."
  * Runs the SAME `createRuntimeFetchHandler` surface the production Worker
  * mounts (`tests/workers/worker.ts`), fetched through the pool's `SELF`. Proves
  * the fetch-handler + dispatch + HTTP wiring is live end-to-end against the

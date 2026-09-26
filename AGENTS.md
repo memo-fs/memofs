@@ -31,6 +31,7 @@ MemoFS is the open-source, file-first memory runtime for AI agents.
 - [Package build rules](./.agents/rules/package-build-rules.md)
 - [Adding a new package](./.agents/rules/adding-new-package.md)
 - [Code style](./.agents/rules/code-style.md)
+- [Changelog and comment hygiene](./.agents/rules/changelog-and-comment-hygiene.md)
 - [TypeScript rules](./.agents/rules/typescript-rules.md)
 - [Technology stack](./.agents/rules/technology-stack.md)
 - [Development commands](./.agents/rules/development-commands.md)

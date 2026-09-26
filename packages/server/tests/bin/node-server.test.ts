@@ -2,18 +2,18 @@
  * Node bin smoke test — the runtime API over the Node single-process deploy.
  *
  * @remarks
- * The s3-execution-plan slice-1 bar: "containerized where it's Node." Boots the
+ * The bar: "containerized where it's Node." Boots the
  * real **built** `dist/bin/memofs-server.mjs` entry as a child process on an
  * ephemeral port, waits for it to listen, then exercises the HTTP surface over
  * real sockets. The built artifact (not the raw `.ts`) is used so the bin's
  * bundled deps resolve — this is how the MCP bin runs too
  * (`dist/bin/memofs-mcp.mjs`).
  *
- * Proves's "the cloud and the OSS self-hoster run identical
+ * Proves "the cloud and the OSS self-hoster run identical
  * `memofs-server` code" at the Node target: the same `handleRuntimeRequest`
  * core the Worker uses serves the same shapes from `node:http`.
  *
- * The bin ships a deterministic in-memory runtime at slice 1 (no provider
+ * The bin ships a deterministic in-memory runtime (no provider
  * bundle wired); the deploy doc covers wiring R2-compatible + Turso + OpenAI.
  * We assert it boots, serves health, dispatches a read, and gates writes —
  * the contract that holds regardless of which bundle is injected.

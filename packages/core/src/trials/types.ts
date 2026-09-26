@@ -1,5 +1,5 @@
 /**
- * Trial ledger + warrant types (spec-0038, ticket 1).
+ * Trial ledger + warrant types.
  *
  * @remarks
  * A trial assigns a candidate memory to an exposure arm, runs an agent,
@@ -18,8 +18,9 @@ export type TrialSourceState = "current" | "stale" | "unverified";
 
 /**
  * One exposure assignment: a memory shown to (treatment/shadow) or withheld
- * from (control) an agent run for a task. Design records arrive in ticket 2;
- * until then `designRef` is an opaque reference carried through, not resolved.
+ * from (control) an agent run for a task. Design records are a future
+ * extension; until then `designRef` is an opaque reference carried through,
+ * not resolved.
  */
 export interface TrialAssignment {
 	/** Unique assignment id. */
@@ -30,7 +31,7 @@ export interface TrialAssignment {
 	task: string;
 	/** Exposure arm. */
 	arm: TrialArm;
-	/** Predeclared design reference (opaque until ticket 2). */
+	/** Predeclared design reference (opaque; reserved for future design records). */
 	designRef?: string;
 	/** ISO timestamp of assignment. */
 	timestamp: string;
@@ -39,8 +40,8 @@ export interface TrialAssignment {
 /**
  * One validator outcome: an independent signal's verdict on an assignment.
  * Agent self-reported success is recorded as observation only and can never
- * validate (enforced in ticket 3) — this row carries whatever the validator
- * reported, including its source-state fingerprint.
+ * validate; this row carries whatever the validator reported, including its
+ * source-state fingerprint.
  */
 export interface TrialOutcome {
 	/** Unique outcome id. */
@@ -63,7 +64,7 @@ export interface TrialOutcome {
 	detail?: string;
 }
 
-/** Authority lifecycle states for a memory (ADR-0030). */
+/** Authority lifecycle states for a memory. */
 export type WarrantStateName =
 	| "candidate"
 	| "probation"

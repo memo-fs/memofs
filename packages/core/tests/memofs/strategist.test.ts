@@ -1,5 +1,5 @@
 /**
- * Unit tests for the 4-stage retrieval strategist (ADR 0009 Component 2 / Q23).
+ * Unit tests for the 4-stage retrieval strategist.
  *
  * Each stage is a pure function, so each is tested in isolation — mirroring the
  * `consolidateGraph` / `applyConsolidation` split. The end-to-end behavior
@@ -126,7 +126,7 @@ describe("rewriteQuery (stage 1)", () => {
 		expect(result.expandedTerms).not.toContain("architecture");
 	});
 
-	it("prepends task-type query phrase per ADR 0020 ID5", () => {
+	it("prepends task-type query phrase", () => {
 		const debugResult = rewriteQuery({
 			query: "login fails",
 			taskType: "debug",
@@ -246,7 +246,7 @@ describe("resolveEntities (stage 2)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Stage 2b — Resolve: entity enrichment (ADR 0009 Component 3 / Q26)
+// Stage 2b — Resolve: entity enrichment
 // ---------------------------------------------------------------------------
 
 /**
@@ -273,7 +273,7 @@ const SAMPLE_EDGES: ResolveGraphEdge[] = [
 		from: "node-jwt",
 		to: "node-old-auth",
 		type: "uses",
-		status: "deprecated", // Component 5 filter: dropped.
+		status: "deprecated", // Staleness filter: dropped.
 	},
 ];
 
@@ -307,7 +307,7 @@ describe("resolveEntityState (stage 2b — entity enrichment)", () => {
 		expect(oauth?.currentState).toContain("supersedes JWT");
 	});
 
-	it("drops deprecated edges (Component 5 staleness filter)", () => {
+	it("drops deprecated edges (staleness filter)", () => {
 		const resolved = resolveEntities(SAMPLE_NODES, ["jwt"]);
 		const enriched = resolveEntityState(
 			resolved,

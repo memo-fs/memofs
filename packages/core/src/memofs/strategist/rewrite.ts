@@ -74,7 +74,7 @@ const TASK_TYPE_EXPANSIONS: Record<Exclude<TaskType, "general">, string[]> = {
 };
 
 /**
- * Phrases prepended to the recall query per task type, per ADR 0020 ID5.
+ * Phrases prepended to the recall query per task type.
  * These steer the recall engine toward the most relevant memories before
  * lexicon expansion adds synonyms.
  */

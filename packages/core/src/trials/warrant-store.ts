@@ -1,12 +1,13 @@
 /**
- * Warrant-state store (spec-0038, ticket 1).
+ * Warrant-state store.
  *
  * @remarks
  * Current authority lives in `warrants/<memory-id>.json`; every transition
  * appends to `warrants/history.jsonl` with its reason. A memory with no
  * warrant file reads back as `candidate` — authority is derived, and absence
- * of evidence is never authority. Transition *policy* (when evidence warrants)
- * arrives with the ticket-4 estimator; this module owns durable state only.
+ * of evidence is never authority. Transition *policy* (when evidence
+ * authorizes a state change) lives in a separate estimator; this module owns
+ * durable state only.
  *
  * @public
  */

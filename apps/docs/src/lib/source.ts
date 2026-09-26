@@ -1,8 +1,7 @@
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons";
-import { pageSchema } from "fumadocs-core/source/schema";
 import { defineDocs } from "fumadocs-mdx/macro";
-import { z } from "zod";
+import { articleFrontmatterSchema } from "./article-schema";
 
 export const docs = defineDocs({
 	dir: "content/docs",
@@ -22,21 +21,10 @@ export const source = loader({
 export const articlesDocs = defineDocs({
 	dir: "content/articles",
 	docs: {
-		// Mirror of the schema in source.config.ts so page.data is typed
-		// with the custom article frontmatter fields.
-		schema: pageSchema.extend({
-			category: z.string().default("Engineering"),
-			publishedAt: z.string().default("2026-08-20"),
-			authorName: z.string().default("Christopher S. Aondona"),
-			authorRole: z.string().default("Founder & Engine Lead"),
-			authorInitials: z.string().default("CS"),
-			authorHandle: z.string().optional(),
-			authorAvatarUrl: z
-				.string()
-				.default("https://github.com/christophersesugh.png"),
-			featured: z.boolean().default(false),
-			tags: z.array(z.string()).default([]),
-		}),
+		// Mirror of the build-time collection schema in source.config.ts —
+		// both import the shared articleFrontmatterSchema so page.data is
+		// typed with the custom article fields in exactly one place.
+		schema: articleFrontmatterSchema,
 		postprocess: {
 			includeProcessedMarkdown: true,
 		},

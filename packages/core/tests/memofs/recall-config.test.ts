@@ -14,7 +14,7 @@ import { createTempMemoFsDir } from "../../src/testing/temp-dir";
  * var parsing for `MEMOFS_RECALL_ENGINE` / `MEMOFS_LOCAL_EMBEDDINGS` /
  * `MEMOFS_EMBEDDING_MODEL`.
  *
- * Core no longer reads the filesystem (ADR 0013 — the root barrel stays free
+ * Core no longer reads the filesystem (the root barrel stays free
  * of `node:fs`). The `.memofs/config.json` file is the **caller's**
  * responsibility: these tests mirror a Node consumer by writing the file,
  * reading + parsing it, and passing it as `config.fileConfig`.

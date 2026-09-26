@@ -11,7 +11,7 @@ import {
 	PageLastUpdate,
 } from "fumadocs-ui/layouts/docs/page";
 import { LLMCopyButton, ViewOptions } from "../../components/ai/page-actions";
-import { useMDXComponents } from "../../components/mdx";
+import { getMDXComponents } from "../../components/mdx";
 import { getLLMText } from "../../lib/get-llm-text";
 import { baseOptions } from "../../lib/layout.shared";
 import { createPageMeta } from "../../lib/meta";
@@ -140,7 +140,7 @@ function Content({
 			</div>
 			<DocsBody className="max-w-3xl">
 				<Mdx
-					components={useMDXComponents({
+					components={getMDXComponents({
 						a: createRelativeLink({ url }),
 					})}
 				/>

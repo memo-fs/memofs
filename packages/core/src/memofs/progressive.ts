@@ -8,8 +8,8 @@
  * `expand` to pull only the section it needs and stops. Compact ≈ 6kb; full ≈
  * 80kb; the agent pulls the 2kb it needs — vs ~64kb truncated previously.
  *
- * The strategist intelligence (Rewrite → Resolve → Filter → Budget
- * Component 2) already exists. This is a *delivery* change plus one genuinely
+ * The strategist pipeline (rewrite → resolve → filter → budget)
+ * already exists. This is a *delivery* change plus one genuinely
  * new piece of machinery: the strategist must be **stateful across two calls**
  * so the second call re-resolves fast. Today's `buildContext()` is stateless.
  *
@@ -23,8 +23,6 @@
  * not inspect it. This mirrors the `encodeCursor` / `decodeCursor` pattern in
  * `helpers.ts` (the recall/list pagination cursors) — consistent cursor
  * hygiene across the runtime.
- *
- * @see — Component 4 (progressive recall).
  *
  * @public
  */

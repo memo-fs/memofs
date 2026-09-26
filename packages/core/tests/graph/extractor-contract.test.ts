@@ -9,10 +9,8 @@ import {
 /**
  * Contract every {@link Extractor} implementation must satisfy — written
  * against the rule-based adapter so it doubles as a reference for adapter
- * packages. Any future LLM extractor should pass this same suite.
- *
- * @see ADR 0004 — the rule-based extractor is the zero-config fallback; LLM
- *      extractors layer on top and must satisfy the same shape.
+ * packages. The rule-based extractor is the zero-config fallback; any future
+ * LLM extractor should pass this same suite.
  */
 describe("Extractor contract", () => {
 	it("createRuleBasedExtractor returns an Extractor with a stable name", () => {

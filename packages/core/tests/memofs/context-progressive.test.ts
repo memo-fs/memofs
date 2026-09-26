@@ -1,5 +1,5 @@
 /**
- * End-to-end tests for progressive recall (ADR 0009 Component 4 / Q27).
+ * End-to-end tests for progressive recall.
  *
  * The unit tests in `progressive.test.ts` cover the machinery in isolation.
  * This file covers the integration through the public `memo.context()` API:
@@ -61,7 +61,7 @@ async function seedFixture(rootDir: string, projectId = "progressive") {
 	return memo;
 }
 
-describe("memofs.context — progressive recall (ADR 0009 Component 4 / Q27)", () => {
+describe("memofs.context — progressive recall", () => {
 	describe("compact default", () => {
 		it("returns a small briefing with expandable affordances", async () => {
 			const { rootDir, cleanup } = await createTempMemoFsDir();

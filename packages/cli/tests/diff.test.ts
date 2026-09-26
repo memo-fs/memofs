@@ -7,9 +7,9 @@ import { describe, expect, it } from "vitest";
 import { runMemoFsCli } from "../src";
 
 /**
- * Releases the Q28 advisory lock held by a direct MemoFS so a subsequent CLI
+ * Releases the advisory lock held by a direct MemoFS so a subsequent CLI
  * write call (e.g. `snapshot`) on the same root can acquire it. The local
- * single-writer contract (Q28) forbids two live writers on one `.memofs/`
+ * single-writer contract forbids two live writers on one `.memofs/`
  * root, so a direct memo must be disposed before interleaving CLI writes.
  */
 async function releaseLock(memo: MemoFS): Promise<void> {

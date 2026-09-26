@@ -9,8 +9,9 @@ import { DocsBody } from "fumadocs-ui/layouts/docs/page";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import type React from "react";
 import { Badge } from "~/components/ui/badge";
+import { Crosshair } from "../components/crosshair";
 import { Footer } from "../components/footer";
-import { useMDXComponents } from "../components/mdx";
+import { getMDXComponents } from "../components/mdx";
 import { baseOptions } from "../lib/layout.shared";
 import { createPageMeta } from "../lib/meta";
 import { createRelativeLink } from "../lib/relative-link";
@@ -22,7 +23,7 @@ import type { Route } from "./+types/changelog";
 /** Metadata for the public changelog route. */
 export const meta: Route.MetaFunction = () =>
 	createPageMeta({
-		title: "Changelog & Release Notes — MemoFS",
+		title: "Changelog & Release Notes",
 		description:
 			"All notable changes, new features, bug fixes, and releases across MemoFS packages (@memofs/core, @memofs/cli, @memofs/server, @memofs/mcp-server, adapters).",
 		path: ROUTES.changelog,
@@ -42,22 +43,6 @@ function getTextContent(node: React.ReactNode): string {
 		);
 	}
 	return "";
-}
-
-function Crosshair({ className }: { className?: string }) {
-	return (
-		<svg
-			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
-			viewBox="0 0 14 14"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.2"
-			aria-hidden="true"
-		>
-			<line x1="7" y1="0" x2="7" y2="14" />
-			<line x1="0" y1="7" x2="14" y2="7" />
-		</svg>
-	);
 }
 
 /** Badge style mapping for change types across light and dark modes. */
@@ -228,12 +213,19 @@ function ChangelogLi({
 }
 
 /** Custom paragraph styling. — hides the intro paragraph moved into the hero */
+// Both strings below mirror copy in `content/docs/changelog.mdx`. If that
+// source sentence is reworded, update the constant here — never re-type the
+// literal at the use site.
+const CHANGELOG_INTRO_SENTENCE =
+	"All notable changes to MemoFS are documented here.";
+const PER_PACKAGE_CALLOUT_TITLE = "Per-Package Changelogs";
+
 function ChangelogP({
 	children,
 	...props
 }: React.ComponentPropsWithoutRef<"p">) {
 	const text = getTextContent(children).trim();
-	if (text === "All notable changes to MemoFS are documented here.") {
+	if (text === CHANGELOG_INTRO_SENTENCE) {
 		return null;
 	}
 	return (
@@ -258,13 +250,27 @@ function ChangelogCallout(props: React.ComponentProps<typeof Callout>) {
 	const { title, children, ...rest } = props;
 	const titleText =
 		typeof title === "string" ? title.trim() : getTextContent(title).trim();
-	if (titleText === "Per-Package Changelogs") return null;
+	if (titleText === PER_PACKAGE_CALLOUT_TITLE) return null;
 	return (
 		<Callout title={title} {...rest}>
 			{children}
 		</Callout>
 	);
 }
+
+/** Renders the changelog MDX content with the marketing-site shell. */
+// Module scope: identical on every render (pure object spread, no hooks).
+const changelogComponents = getMDXComponents({
+	a: createRelativeLink({ url: ROUTES.changelog }),
+	h2: ChangelogH2,
+	h3: ChangelogH3,
+	h4: ChangelogH4,
+	ul: ChangelogUl,
+	li: ChangelogLi,
+	p: ChangelogP,
+	hr: ChangelogHr,
+	Callout: ChangelogCallout,
+});
 
 /** Renders the changelog MDX content with the marketing-site shell. */
 export default function ChangelogPage() {
@@ -328,88 +334,17 @@ export default function ChangelogPage() {
 									architectural milestones, bug fixes, and feature additions
 									across all workspace packages.
 								</p>
-							</div>
-
-							{/* Per-package panel */}
-							<div className="relative border-t border-dashed border-border">
-								<div className="pointer-events-none absolute inset-x-0 top-0 origin-right animate-line-x border-t border-dashed border-border" />
-								<Crosshair className="-top-1.75 -left-1.75" />
-								<Crosshair className="-top-1.75 -right-1.75" />
-								<div className="px-4 py-5 sm:px-8">
-									<div className="mx-auto max-w-3xl space-y-3">
-										<div className="flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60">
-											<span>Per-Package Changelogs</span>
-										</div>
-										<nav
-											aria-label="Per-package changelogs"
-											className="flex flex-wrap items-center justify-center gap-1.5 font-mono text-xs sm:gap-2"
-										>
-											<a
-												href="https://github.com/memo-fs/memofs/blob/main/packages/core/CHANGELOG.md"
-												target="_blank"
-												rel="noreferrer"
-												className="text-muted-foreground transition-colors hover:text-foreground"
-											>
-												@memofs/core
-											</a>
-											<span aria-hidden className="text-muted-foreground/30">
-												·
-											</span>
-											<a
-												href="https://github.com/memo-fs/memofs/blob/main/packages/cli/CHANGELOG.md"
-												target="_blank"
-												rel="noreferrer"
-												className="text-muted-foreground transition-colors hover:text-foreground"
-											>
-												@memofs/cli
-											</a>
-											<span aria-hidden className="text-muted-foreground/30">
-												·
-											</span>
-											<a
-												href="https://github.com/memo-fs/memofs/blob/main/packages/mcp-server/CHANGELOG.md"
-												target="_blank"
-												rel="noreferrer"
-												className="text-muted-foreground transition-colors hover:text-foreground"
-											>
-												@memofs/mcp-server
-											</a>
-											<span aria-hidden className="text-muted-foreground/30">
-												·
-											</span>
-											<a
-												href="https://github.com/memo-fs/memofs/blob/main/packages/server/CHANGELOG.md"
-												target="_blank"
-												rel="noreferrer"
-												className="text-muted-foreground transition-colors hover:text-foreground"
-											>
-												@memofs/server
-											</a>
-											<span aria-hidden className="text-muted-foreground/30">
-												·
-											</span>
-											<a
-												href={SITE.githubReleasesUrl}
-												target="_blank"
-												rel="noreferrer"
-												className="font-semibold text-amber-400 transition-colors hover:text-amber-500"
-											>
-												all packages →
-											</a>
-										</nav>
-										<p className="text-center font-mono text-[11px] leading-relaxed text-muted-foreground">
-											<a
-												href={SITE.githubReleasesUrl}
-												target="_blank"
-												rel="noreferrer"
-												className="font-medium text-foreground underline decoration-dashed underline-offset-4 transition-colors hover:text-amber-400"
-											>
-												GitHub Releases
-											</a>{" "}
-											for tagged releases with notes.
-										</p>
-									</div>
-								</div>
+								<p className="mx-auto mt-3 max-w-2xl font-mono text-[11px] leading-relaxed text-muted-foreground">
+									<a
+										href={SITE.githubReleasesUrl}
+										target="_blank"
+										rel="noreferrer"
+										className="font-medium text-foreground underline decoration-dashed underline-offset-4 transition-colors hover:text-amber-400"
+									>
+										GitHub Releases
+									</a>{" "}
+									for tagged releases with notes.
+								</p>
 							</div>
 						</div>
 
@@ -424,19 +359,7 @@ export default function ChangelogPage() {
 				<main className="mx-auto max-w-4xl px-4 pb-10 sm:px-6 sm:pb-12 lg:px-8">
 					<div className="relative border-l border-dashed border-border pl-6 sm:pl-10">
 						<DocsBody className="max-w-none">
-							<Mdx
-								components={useMDXComponents({
-									a: createRelativeLink({ url: ROUTES.changelog }),
-									h2: ChangelogH2,
-									h3: ChangelogH3,
-									h4: ChangelogH4,
-									ul: ChangelogUl,
-									li: ChangelogLi,
-									p: ChangelogP,
-									hr: ChangelogHr,
-									Callout: ChangelogCallout,
-								})}
-							/>
+							<Mdx components={changelogComponents} />
 						</DocsBody>
 					</div>
 				</main>

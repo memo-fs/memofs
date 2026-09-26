@@ -10,9 +10,9 @@ import { defineConfig } from "vitest/config";
  * factory unit tests. Driven against `InMemoryMemoryStore` + fakes; no
  * Worker bindings. The fast feedback loop.
  * 2. `server-workers` — Miniflare pool. Proves the runtime-API boundary
- * end-to-end against the Worker target (the s3-execution-plan slice-1
- * "Miniflare where the target is a Worker" bar) via `SELF.fetch` against
- * the test entry in `tests/workers/worker.ts`.
+ * end-to-end against the Worker target ("Miniflare where the target is a
+ * Worker") via `SELF.fetch` against the test entry in
+ * `tests/workers/worker.ts`.
  * 3. `server-bin` — Node pool. Boots the Node bin on an ephemeral port and
  * exercises the same HTTP surface over real sockets (the "Node process"
  * bar).

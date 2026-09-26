@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { cn } from "../../lib/utils";
 import { ArticleVisualBanner } from "./article-visual-banner";
+import { AuthorAvatar } from "./author-avatar";
 
 export interface ArticleCardData {
 	slug: string;
@@ -72,18 +73,12 @@ export function ArticleCard({
 				{/* Author & Date Footer */}
 				<div className="mt-4 flex items-center justify-between border-border/30 border-t pt-3">
 					<div className="flex items-center gap-2">
-						<div className="flex size-5.5 shrink-0 items-center justify-center overflow-hidden border border-border/80 bg-secondary font-mono font-semibold text-[9px] text-foreground">
-							{article.authorAvatarUrl ? (
-								<img
-									src={article.authorAvatarUrl}
-									alt={article.authorName}
-									className="size-full object-cover"
-								/>
-							) : (
-								article.authorInitials ||
-								article.authorName.slice(0, 2).toUpperCase()
-							)}
-						</div>
+						<AuthorAvatar
+							name={article.authorName}
+							avatarUrl={article.authorAvatarUrl}
+							initials={article.authorInitials}
+							className="size-5.5 border-border/80 text-[9px] text-foreground"
+						/>
 						<span className="font-mono text-[11px] text-muted-foreground">
 							{article.authorName}
 						</span>
@@ -152,18 +147,12 @@ function FeaturedHeroCard({
 				{/* Author & Date Footer */}
 				<div className="mt-5 flex items-center justify-between border-border/40 border-t pt-3.5">
 					<div className="flex items-center gap-2.5">
-						<div className="flex size-6 shrink-0 items-center justify-center overflow-hidden border border-border bg-secondary font-mono font-semibold text-[10px] text-foreground">
-							{article.authorAvatarUrl ? (
-								<img
-									src={article.authorAvatarUrl}
-									alt={article.authorName}
-									className="size-full object-cover"
-								/>
-							) : (
-								article.authorInitials ||
-								article.authorName.slice(0, 2).toUpperCase()
-							)}
-						</div>
+						<AuthorAvatar
+							name={article.authorName}
+							avatarUrl={article.authorAvatarUrl}
+							initials={article.authorInitials}
+							className="size-6 border-border text-[10px] text-foreground"
+						/>
 						<div className="flex items-center gap-2">
 							<span className="font-medium font-mono text-foreground text-xs">
 								{article.authorName}

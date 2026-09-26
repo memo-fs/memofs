@@ -5,7 +5,7 @@ category: Architecture
 publishedAt: "2026-07-28"
 authorName: "Christopher S. Aondona"
 authorRole: "Founder & Engine Lead"
-authorInitials: "CS"
+authorInitials: "CSA"
 authorHandle: "christophersesugh"
 authorAvatarUrl: "https://github.com/christophersesugh.png"
 featured: true

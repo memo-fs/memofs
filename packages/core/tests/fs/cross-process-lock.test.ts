@@ -1,7 +1,7 @@
 /**
- * Cross-process advisory lock tests (Q28).
+ * Cross-process advisory lock tests.
  *
- * These are the *real* proof of Q28: two actual OS processes contending on the
+ * These are the *real* proof of the lock: two actual OS processes contending on the
  * same `.memofs/.lock`. The single-process tests (store-lock.test.ts) verify
  * the store wiring; these verify the lock actually works across a process
  * boundary — the whole point of the feature.
@@ -54,7 +54,7 @@ function spawnChildHolder(
 	);
 }
 
-describe("cross-process advisory lock (Q28)", () => {
+describe("cross-process advisory lock", () => {
 	test("a second OS process is blocked while the first holds the lock", async () => {
 		const rootDir = await createTempRoot();
 		const marker = path.join(rootDir, ".child-ready");

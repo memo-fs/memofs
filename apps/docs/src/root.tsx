@@ -10,8 +10,10 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import SearchDialog from "fumadocs-ui/components/dialog/search-default";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { Link } from "react-router";
+import { Crosshair } from "./components/crosshair";
 import { Footer } from "./components/footer";
 import { Button } from "./components/ui/button";
 import { baseOptions } from "./lib/layout.shared";
@@ -20,7 +22,7 @@ import { ROUTES, SITE } from "./lib/site";
 
 export const meta: Route.MetaFunction = () => [
 	...createPageMeta({
-		title: "MemoFS — The File-First Memory Runtime for AI Agents",
+		title: "The File-First Memory Runtime for AI Agents | MemoFS",
 		description: SITE.description,
 		path: ROUTES.home,
 	}),
@@ -44,7 +46,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				<RootProvider search={{ options: { api: "/search" } }}>
+				<RootProvider
+					search={{
+						SearchDialog,
+						options: { type: "static", api: ROUTES.searchIndex },
+					}}
+				>
 					{children}
 				</RootProvider>
 				<ScrollRestoration />
@@ -56,22 +63,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
 	return <Outlet />;
-}
-
-function Crosshair({ className }: { className?: string }) {
-	return (
-		<svg
-			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
-			viewBox="0 0 14 14"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.2"
-			aria-hidden="true"
-		>
-			<line x1="7" y1="0" x2="7" y2="14" />
-			<line x1="0" y1="7" x2="14" y2="7" />
-		</svg>
-	);
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

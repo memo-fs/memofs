@@ -5,10 +5,10 @@ category: Engineering
 publishedAt: "2026-08-17"
 authorName: "Christopher S. Aondona"
 authorRole: "Founder & Engine Lead"
-authorInitials: "CS"
+authorInitials: "CSA"
 authorHandle: "christophersesugh"
 authorAvatarUrl: "https://github.com/christophersesugh.png"
-featured: true
+featured: false
 tags: [code-anchoring, drift-detection, staleness, recall, memory-intelligence, engineering]
 ---
 

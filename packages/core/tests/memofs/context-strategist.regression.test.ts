@@ -1,6 +1,5 @@
 /**
- * Regression harness for the `memofs.context` retrieval strategist (ADR 0009,
- * Component 2 / Q23).
+ * Regression harness for the `memofs.context` retrieval strategist.
  *
  * Before replacing the flat `buildContext()` assembler with the 4-stage
  * pipeline (Rewrite → Resolve → Filter → Budget), this file froze the CURRENT
@@ -78,7 +77,7 @@ const FIXTURE: Fixture = {
 			content: "Vitest is the test runner for the memofs package.",
 			kind: "reference",
 		},
-		// Supersession case: the staleness filter (Q24) must keep JWT out of
+		// Supersession case: the staleness filter must keep JWT out of
 		// context after consolidation retires it in favor of OAuth2.
 		{
 			title: "Auth migration",
@@ -267,7 +266,7 @@ describe("memofs.context strategist — regression harness", () => {
 		try {
 			const entry = await captureEntry(memo, QUERY_CASES[2]);
 			expect(entry.contains.pnpm).toBe(true);
-			// Q26 (ADR 0009 Component 3): when an Entities section is present, it
+			// When an Entities section is present, it
 			// must sit after core and before recall in trust order. The
 			// zero-config extractor may or may not emit a node for the pnpm note,
 			// so this only asserts the ordering contract when the section exists.
@@ -371,7 +370,7 @@ describe("memofs.context strategist — regression harness", () => {
 	});
 
 	// --------------------------------------------------------------------
-	// Q27 (ADR 0009 Component 4): progressive recall. The default call is now
+	// Progressive recall. The default call is now
 	// a compact briefing with expandable sections; `detail: "full"` restores
 	// the whole-budget behavior. The golden-content assertions above survive
 	// the compact cap (the fixture corpus is small and the golden notes are

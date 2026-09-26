@@ -1,5 +1,5 @@
 /**
- * Unit tests for the progressive-recall machinery (ADR 0009 Component 4 / Q27).
+ * Unit tests for the progressive-recall machinery.
  *
  * The end-to-end behavior (compact briefing → expand round-trip) is covered in
  * `context-progressive.test.ts`. This file pins the pure pieces in isolation:

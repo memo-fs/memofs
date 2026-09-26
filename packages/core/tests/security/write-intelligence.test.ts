@@ -17,7 +17,7 @@ import {
 import { createTempMemoFsDir } from "../../src/testing/temp-dir";
 
 /**
- * Write intelligence — ADR 0009 Component 6.
+ * Write intelligence — the write-time gate.
  *
  * Two layers: (1) a secret/PII blocklist that hard-rejects, and (2) a
  * durability tier classifier that decides whether a memory gets indexed. This

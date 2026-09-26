@@ -2,7 +2,7 @@
  * HTTP layer for the `memofs-server` runtime API (`handleRuntimeRequest`).
  *
  * @remarks
- * Proves the framework-free core's contract at slice 1:
+ * Proves the framework-free core's contract:
  * - `GET /health` returns liveness JSON.
  * - `POST /` dispatches JSON-RPC and returns the envelope (success + gate).
  * - The concurrency gate surfaces as an HTTP `503` (so client retry engages).

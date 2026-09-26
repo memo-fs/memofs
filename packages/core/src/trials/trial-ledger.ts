@@ -1,5 +1,5 @@
 /**
- * Append-only trial assignment/outcome ledger (spec-0038, ticket 1).
+ * Append-only trial assignment/outcome ledger.
  *
  * @remarks
  * Assignments land in `trials/assignments.jsonl`, outcomes in
