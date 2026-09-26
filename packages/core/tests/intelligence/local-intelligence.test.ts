@@ -256,7 +256,7 @@ describe("best-effort write path (failing embedder)", () => {
 });
 
 /**
- * Consolidation end-to-end: the second half of v1 intelligence (ADR 0004).
+ * Consolidation end-to-end: the second half of built-in intelligence.
  * Extraction grows the graph from prose; consolidation keeps it tidy by
  * retiring facts a `supersedes` edge marks as replaced — without ever deleting
  * (the audit trail is preserved).
@@ -352,7 +352,7 @@ describe("consolidation (end-to-end)", () => {
 });
 
 /**
- * The staleness loop (ADR 0009 Component 5): consolidation retires a superseded
+ * The staleness loop: consolidation retires a superseded
  * fact, and recall must stop serving it. Before the fix, `runLexicalRecall`
  * served graph facts from the BM25 store without ever consulting node status, so
  * a `deprecated` JWT kept surfacing after "OAuth2 supersedes JWT" was

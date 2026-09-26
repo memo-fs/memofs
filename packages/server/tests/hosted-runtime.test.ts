@@ -22,12 +22,12 @@ import { createHostedRuntime } from "../src";
  * different bundles and get the identical engine.
  * 2. `store` is the only required slot; missing it throws a clear error.
  * 3. Every intelligence slot is optional and threads through to the assembled
- * runtime (the `llmClient` seam especially — slice 6 reads it).
+ * runtime (the `llmClient` seam especially — later work asserts on it).
  *
  * No real provider is ever called: the local fakes stand in for the whole
  * bundle (mirrors how `apps/cloud`'s hosted-runtime test builds local doubles).
  */
-describe("createHostedRuntime — provider-neutral factory (slice 0)", () => {
+describe("createHostedRuntime — provider-neutral factory", () => {
 	let store: InMemoryMemoryStore;
 
 	beforeEach(() => {
@@ -185,8 +185,9 @@ function createFakeExtractor(): Extractor {
 }
 
 /**
- * Fake LLM client: echoes the user turn. Records the seam is threaded (slice 6
- * will assert on `complete` calls; slice 0 only wires it onto the runtime).
+ * Fake LLM client: echoes the user turn. Records the seam is threaded (this
+ * file only wires it onto the runtime; `complete` calls are asserted where
+ * the seam is exercised).
  */
 function createFakeLlmClient(): LlmClient {
 	return {

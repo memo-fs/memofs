@@ -1,5 +1,5 @@
 /**
- * Outcome-warranted memory trials (spec-0038).
+ * Outcome-warranted memory trials.
  *
  * @public
  */

@@ -8,10 +8,11 @@ import {
 } from "../../components/articles/article-card";
 import { ArticleHeader } from "../../components/articles/article-header";
 import { ArticleShare } from "../../components/articles/article-share";
-import { calculateReadingTime } from "../../components/articles/reading-time";
+import { AuthorAvatar } from "../../components/articles/author-avatar";
 import { Footer } from "../../components/footer";
-import { useMDXComponents } from "../../components/mdx";
+import { getMDXComponents } from "../../components/mdx";
 import { Badge } from "../../components/ui/badge";
+import { sortArticlesNewestFirst, toArticleCard } from "../../lib/articles";
 import { baseOptions } from "../../lib/layout.shared";
 import { createPageMeta } from "../../lib/meta";
 import { createRelativeLink } from "../../lib/relative-link";
@@ -22,7 +23,7 @@ import type { Route } from "./+types/$slug";
 export const meta: Route.MetaFunction = ({ loaderData }) => {
 	if (!loaderData?.article) {
 		return createPageMeta({
-			title: "Article Not Found — MemoFS",
+			title: "Article Not Found",
 			description: "The requested engineering article could not be found.",
 			path: ROUTES.articles,
 		});
@@ -30,7 +31,7 @@ export const meta: Route.MetaFunction = ({ loaderData }) => {
 
 	const { article } = loaderData;
 	return createPageMeta({
-		title: `${article.title} — MemoFS`,
+		title: article.title,
 		description: article?.description ?? "",
 		path: `${ROUTES.articles}/${article.slug}`,
 	});
@@ -45,71 +46,15 @@ export async function loader({ params }: Route.LoaderArgs) {
 		throw new Response("Article not found", { status: 404 });
 	}
 
-	const data = page.data as unknown as Record<string, string>;
-	// getText("processed") returns the compiled markdown (needs
-	// `includeProcessedMarkdown: true` in the collection config).
-	let rawContent = "";
-	try {
-		rawContent = await page.data.getText("processed");
-	} catch {
-		try {
-			rawContent = await page.data.getText("raw");
-		} catch {
-			rawContent = "";
-		}
-	}
-	const readingTimeMinutes = calculateReadingTime(rawContent);
-
-	const article: ArticleCardData = {
-		slug: cleanSlug,
-		title: page.data.title,
-		description: page.data.description,
-		category: data.category,
-		publishedAt: data.publishedAt,
-		readingTimeMinutes,
-		authorName: data.authorName,
-		authorRole: data.authorRole,
-		authorInitials: data.authorInitials,
-		authorAvatarUrl: data.authorAvatarUrl,
-		featured: Boolean(data.featured),
-		tags: Array.isArray(data.tags) ? data.tags : [],
-	};
+	const article: ArticleCardData = await toArticleCard(page, cleanSlug);
 
 	// Determine next, prev, and related articles
 	const allPages = articles.getPages();
 	const allArticles: ArticleCardData[] = await Promise.all(
-		allPages.map(async (p) => {
-			const pData = p.data as unknown as Record<string, unknown>;
-			let relatedContent = "";
-			try {
-				relatedContent = await p.data.getText("processed");
-			} catch {
-				try {
-					relatedContent = await p.data.getText("raw");
-				} catch {
-					relatedContent = "";
-				}
-			}
-			return {
-				slug: p.slugs[0] || "",
-				title: p.data.title,
-				description: p.data.description,
-				category: (pData.category as string) || "Engineering",
-				publishedAt: (pData.publishedAt as string) || "2026-08-20",
-				readingTimeMinutes: calculateReadingTime(relatedContent),
-				authorName: (pData.authorName as string) || "Christopher S. Aondona",
-				authorAvatarUrl:
-					(pData.authorAvatarUrl as string) ||
-					"https://github.com/christophersesugh.png",
-				tags: Array.isArray(pData.tags) ? (pData.tags as string[]) : [],
-			};
-		}),
+		allPages.map((p) => toArticleCard(p)),
 	);
 
-	allArticles.sort(
-		(a, b) =>
-			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-	);
+	sortArticlesNewestFirst(allArticles);
 
 	const currentIndex = allArticles.findIndex((a) => a.slug === cleanSlug);
 	const prevArticle = currentIndex > 0 ? allArticles[currentIndex - 1] : null;
@@ -156,7 +101,7 @@ export default function ArticleDetailPage({
 			}
 		)?.body;
 
-	const mdxComponents = useMDXComponents({
+	const mdxComponents = getMDXComponents({
 		a: createRelativeLink({ url: `/articles/${article.slug}` }),
 	});
 
@@ -179,17 +124,12 @@ export default function ArticleDetailPage({
 						{/* Author byline & Quick Share bar */}
 						<div className="mb-10 flex flex-wrap items-center justify-between gap-4 border-border/40 border-b pb-6">
 							<div className="flex items-center gap-3">
-								<div className="flex size-9 shrink-0 items-center justify-center overflow-hidden border border-border bg-secondary font-mono font-semibold text-foreground text-xs">
-									{article.authorAvatarUrl ? (
-										<img
-											src={article.authorAvatarUrl}
-											alt={article.authorName}
-											className="size-full object-cover"
-										/>
-									) : (
-										article.authorInitials
-									)}
-								</div>
+								<AuthorAvatar
+									name={article.authorName}
+									avatarUrl={article.authorAvatarUrl}
+									initials={article.authorInitials}
+									className="size-9 border-border text-foreground text-xs"
+								/>
 								<div>
 									<p className="font-mono font-semibold text-foreground text-xs">
 										{article.authorName}

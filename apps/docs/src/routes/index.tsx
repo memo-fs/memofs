@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { BottomCta } from "../components/bottom-cta";
 import { ComparisonSection } from "../components/comparison-section";
+import { Crosshair } from "../components/crosshair";
 import { FeaturesSection } from "../components/features-section";
 import { Footer } from "../components/footer";
 import { ProblemSection } from "../components/problem-section";
@@ -14,7 +15,7 @@ import { ROUTES } from "../lib/site";
 import type { Route } from "./+types/index";
 
 export const meta: Route.MetaFunction = () => {
-	const pageTitle = "MemoFS — The File-First Memory Runtime for AI Agents";
+	const pageTitle = "The File-First Memory Runtime for AI Agents";
 	const description =
 		"Store decisions, facts, and context as markdown in your project. Deterministic local execution, git-branchable memory, and cloud synchronization for AI agents, research workflows, and applications.";
 
@@ -48,22 +49,6 @@ function CommandPrompt() {
 				{copied ? "copied" : ""}
 			</span>
 		</button>
-	);
-}
-
-function Crosshair({ className }: { className?: string }) {
-	return (
-		<svg
-			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
-			viewBox="0 0 14 14"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.2"
-			aria-hidden="true"
-		>
-			<line x1="7" y1="0" x2="7" y2="14" />
-			<line x1="0" y1="7" x2="14" y2="7" />
-		</svg>
 	);
 }
 

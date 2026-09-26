@@ -9,12 +9,12 @@ import {
 } from "../../src/node-fs";
 
 /**
- * Q3 (ADR 0002) contract: a caller-supplied stable `id` on WriteMemoryInput is
+ * Caller-supplied stable `id` contract: an `id` on WriteMemoryInput is
  * honored verbatim by the local and memory strategies, so connectors can write
  * content-derived ids with no wall-clock in the hashed bytes. Omitting `id`
  * preserves the historical wall-clock-seeded behavior.
  */
-describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
+describe("WriteMemoryInput.id — caller-supplied stable id", () => {
 	describe("local (filesystem) strategy", () => {
 		let rootDir: string;
 		let memo: MemoFS;
@@ -22,7 +22,7 @@ describe("WriteMemoryInput.id — caller-supplied stable id (Q3)", () => {
 
 		beforeEach(async () => {
 			rootDir = await mkdtemp(join(tmpdir(), "memofs-caller-id-"));
-			// The lock contract is single-process per root (Q28). A fresh temp
+			// The lock contract is single-process per root. A fresh temp
 			// root per test isolates writers naturally.
 			const storeOptions: NodeFsMemoryStoreOptions = { rootDir };
 			store = new NodeFsMemoryStore(storeOptions);

@@ -44,12 +44,12 @@ export const MEMOFS_PATHS = Object.freeze({
 	}),
 	/** Connector config — the 11th canonical file. No secrets. */
 	connectors: `${MEMOFS_DIR}/connectors.json`,
-	/** Trials ledger (ticket 1, spec-0038): append-only assignment/outcome logs. */
+	/** Trials ledger: append-only assignment/outcome logs. */
 	trials: Object.freeze({
 		assignments: `${MEMOFS_DIR}/trials/assignments.jsonl`,
 		outcomes: `${MEMOFS_DIR}/trials/outcomes.jsonl`,
 	}),
-	/** Warrant authority transitions (ticket 1, spec-0038): append-only history. */
+	/** Warrant authority transitions: append-only history. */
 	warrants: Object.freeze({
 		history: `${MEMOFS_DIR}/warrants/history.jsonl`,
 	}),

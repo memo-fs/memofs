@@ -5,7 +5,7 @@ import { createNodeFsMemoryStore } from "../../src/node-fs";
 import { createTempRoot, pathExists } from "./test-utils";
 
 /**
- * Store-level integration tests for the cross-process advisory lock (Q28).
+ * Store-level integration tests for the cross-process advisory lock.
  *
  * These exercise the lock through the public MemoryStore surface — the same
  * path real consumers (the runtime, the CLI, the MCP server) take — rather than
@@ -24,7 +24,7 @@ afterEach(async () => {
 	);
 });
 
-describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
+describe("NodeFsMemoryStore — cross-process advisory lock", () => {
 	test("a write acquires and persists the .lock file", async () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
@@ -141,7 +141,7 @@ describe("NodeFsMemoryStore — cross-process advisory lock (Q28)", () => {
 		}
 	});
 
-	test("the .lock file lives inside .memofs/ (Q28: .memofs/.lock)", async () => {
+	test("the .lock file lives inside .memofs/", async () => {
 		const rootDir = await createTempRoot();
 		const store = createNodeFsMemoryStore({ rootDir });
 		stores.push(store);

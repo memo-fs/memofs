@@ -43,6 +43,7 @@ export const ROUTES = {
 	llms: "/llms.txt",
 	llmsFull: "/llms-full.txt",
 	sitemap: "/sitemap.xml",
+	searchIndex: "/search-index.json",
 } as const;
 
 /** Static application pages in addition to documentation pages discovered from MDX. */
@@ -50,6 +51,7 @@ export const STATIC_PRERENDER_PATHS = [
 	ROUTES.sitemap,
 	ROUTES.llms,
 	ROUTES.llmsFull,
+	ROUTES.searchIndex,
 	ROUTES.docs,
 	ROUTES.changelog,
 	ROUTES.manifesto,

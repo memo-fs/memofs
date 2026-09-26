@@ -5,7 +5,7 @@ category: Guide
 publishedAt: "2026-08-20"
 authorName: "Christopher S. Aondona"
 authorRole: "Founder & Engine Lead"
-authorInitials: "CS"
+authorInitials: "CSA"
 authorHandle: "christophersesugh"
 authorAvatarUrl: "https://github.com/christophersesugh.png"
 featured: false

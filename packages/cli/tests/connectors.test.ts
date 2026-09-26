@@ -75,7 +75,7 @@ describe("connectors CLI", () => {
 		});
 
 		afterEach(async () => {
-			// Release the Q28 advisory lock via the store (MemoFS itself has no
+			// Release the advisory lock via the store (MemoFS itself has no
 			// dispose — the store owns the lock).
 			const store = memo.store as { dispose?: () => Promise<void> };
 			await store.dispose?.();

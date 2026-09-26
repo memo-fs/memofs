@@ -22,7 +22,7 @@ describe("atomic writes and append locking", () => {
 		await store.write(".memofs/memory/core.md", "clean\n");
 
 		// The .memofs dir now contains the advisory .lock (acquired by the
-		// write, Q28) plus the memory/ subtree. Critically: NO leftover .tmp
+		// write) plus the memory/ subtree. Critically: NO leftover .tmp
 		// temp files from the atomic write.
 		const entries = await fs.readdir(path.join(rootDir, ".memofs"));
 		expect(entries).toEqual([".lock", "memory"]);

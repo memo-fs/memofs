@@ -106,7 +106,7 @@ describe("fakes", () => {
 		expect(typeof result.text).toBe("string");
 	});
 
-	// Defensive-parse parity (s3-execution-plan.md universal bar): a resolver that
+	// Defensive-parse parity: a resolver that
 	// throws never escapes the client — it surfaces a text-only empty result, the
 	// same contract a real adapter must satisfy so the deterministic fallback
 	// stays reachable on malformed provider output.

@@ -1,12 +1,12 @@
 /**
- * End-to-end test for entity-centric recall (ADR 0009 Component 3 / Q26).
+ * End-to-end test for entity-centric recall.
  *
  * The unit tests in `strategist.test.ts` cover `resolveEntityState` in
  * isolation. This file covers the integration: seeding explicit graph nodes +
  * edges through the public `memo.graph` API, then asserting `memo.context()`
  * renders the enriched Entities section (current state from active edges +
- * provenance), and that deprecated edges are excluded (the Component 5
- * staleness loop, honored inside the Entities section).
+ * provenance), and that deprecated edges are excluded (the staleness loop,
+ * honored inside the Entities section).
  */
 
 import { describe, expect, it } from "vitest";
@@ -31,7 +31,7 @@ async function seedMemo() {
 	return { memo, cleanup };
 }
 
-describe("memofs.context — entity-centric recall (ADR 0009 Component 3 / Q26)", () => {
+describe("memofs.context — entity-centric recall", () => {
 	it("renders the current state derived from active edges", async () => {
 		const { memo, cleanup } = await seedMemo();
 		try {
@@ -76,7 +76,7 @@ describe("memofs.context — entity-centric recall (ADR 0009 Component 3 / Q26)"
 		}
 	});
 
-	it("excludes deprecated edges from the current state (Component 5)", async () => {
+	it("excludes deprecated edges from the current state", async () => {
 		const { memo, cleanup } = await seedMemo();
 		try {
 			await memo.graph.upsertNodes({

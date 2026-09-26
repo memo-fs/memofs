@@ -26,7 +26,7 @@ source: user_message
 channel: direct_session
 durability: durable
 confidence: high
-entities: [tekmemo, staging-env]
+entities: [engram, staging-env]
 supersedes: mem_4f2a91
 ---
 User now prefers staging deploys on any weekday, since the team added
@@ -101,30 +101,30 @@ MemoFS is our attempt at that for agent memory: an open-source runtime where the
 
 ```mermaid
 flowchart TD
-    Files["<b>FILES — Canonical Source of Truth</b><br/>Markdown + YAML Frontmatter · Git-Versioned<br/>Media bytes are evidence beside the repo, never memory"]
+    Files["<b>FILES — Canonical Source of Truth</b>"]
 
     subgraph WritePath ["WRITE PATH — discipline before storage"]
-        Extract["<b>MEDIA ONLY · QUARANTINE → SANDBOXED LOCAL EXTRACT</b><br/>Transcripts · OCR · captions — text finds, evidence verifies"]
+        Extract["<b>MEDIA ONLY · QUARANTINE → SANDBOXED LOCAL EXTRACT</b>"]
         HardReject["<b>HARD REJECT</b><br/>Secrets · PII<br/>Trust scoring"]
         Classify["<b>CLASSIFY</b><br/>Durable / Transient<br/>Deterministic first"]
         Atomize["<b>ATOMIZE</b><br/>One fact per unit<br/>Metadata + anchors"]
-        WriteLog["<b>IMMUTABLE WRITE LOG</b><br/>Everything that clears the<br/>screen, kept"]
-        ArtifactStore["<b>ARTIFACT STORE</b><br/>Content-addressed media bytes<br/>keep · window · discard"]
+        WriteLog["<b>IMMUTABLE WRITE LOG</b>"]
+        ArtifactStore["<b>ARTIFACT STORE</b><br/>Content-addressed media bytes"]
     end
 
     subgraph DerivedIndex ["DERIVED INDEX — disposable, rebuildable, never authoritative"]
-        IndexEngine["<b>BM25 + Vector + Entity Graph + Temporal Metadata</b><br/>+ Media Derivations (transcripts · OCR · captions)<br/>+ Anchor Drift (code · media) + Expiry Decay"]
+        IndexEngine["<b>BM25 + Vector + Entity Graph + Temporal Metadata</b>"]
     end
 
     subgraph ReadPath ["READ PATH — tiered, fused, trust-ordered"]
-        Tier1["<b>TIER 1 · CORE MEM</b><br/>Always injected<br/>Fixed budget · text"]
+        Tier1["<b>TIER 1 · CORE MEM</b><br/>Always injected<br/>Fixed budget"]
         Tier2["<b>TIER 2 · ARCHIVAL</b><br/>Multi-signal recall<br/>Fused by rank (RRF)"]
-        TrustRender["<b>TRUST-ORDER RENDER</b> — supersession always wins, disclosed<br/>progressively, never dumped<br/>Media: claim + locator first, clip or frame on request"]
+        TrustRender["<b>TRUST-ORDER RENDER</b> — disclosed progressively."]
     end
 
     subgraph Distribution ["DISTRIBUTION — dual exposure"]
-        NativeSDK["<b>NATIVE SDK</b><br/>Low-latency hot path<br/>Tier 1 injection, text only"]
-        MCPServer["<b>MCP SERVER</b><br/>Tools (CRUD) + Resources<br/>Media via fragment URIs"]
+        NativeSDK["<b>NATIVE SDK</b>"]
+        MCPServer["<b>MCP SERVER</b>"]
     end
 
     Files --> Extract

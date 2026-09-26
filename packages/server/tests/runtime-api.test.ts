@@ -2,11 +2,11 @@
  * Runtime-API dispatcher — the core of the `memofs-server` HTTP surface.
  *
  * @remarks
- * Proves the slice-1 bars (s3-execution-plan.md slice 1, "Test bars"):
+ * Proves the dispatcher's test bars:
  * 1. A read method (`recall`) round-trips data over the JSON-RPC envelope.
  * 2. **Every gated mutating method returns the `503` concurrency gate** — the
- * "second concurrent writer gets 503" bar, proven trivially-correct
- * pre-slice-3 (no write path is reachable).
+ * "second concurrent writer gets 503" bar, proven trivially-correct here
+ * (no write path is reachable).
  * 3. JSON-RPC parse + validation errors map to the correct spec codes.
  * 4. Batch dispatch + notification handling behave per spec.
  *
@@ -32,7 +32,7 @@ import {
 	dispatchRuntimeText,
 } from "../src/runtime-api/dispatch";
 
-describe("runtime-API dispatch — slice 1", () => {
+describe("runtime-API dispatch", () => {
 	let tek: MemoFS;
 
 	beforeEach(() => {

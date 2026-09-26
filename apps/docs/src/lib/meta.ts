@@ -22,9 +22,9 @@ export function createPageMeta({
 	const imageUrl = toSiteUrl(imagePath);
 
 	return [
-		{ title },
+		{ title: `${title} | MemoFS` },
 		{ name: "description", content: description },
-		{ property: "og:title", content: title },
+		{ property: "og:title", content: `${title} | MemoFS` },
 		{ property: "og:description", content: description },
 		{ property: "og:url", content: canonicalUrl },
 		{ property: "og:image", content: imageUrl },

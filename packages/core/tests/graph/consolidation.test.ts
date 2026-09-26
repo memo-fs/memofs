@@ -9,8 +9,6 @@ import { storedEdge, storedNode } from "./fixtures";
 /**
  * Pure `consolidateGraph`: the "decide" half of consolidation. Reads a graph
  * snapshot, returns a plan, mutates nothing.
- *
- * @see ADR 0004 — v1 intelligence = extraction + consolidation.
  */
 describe("consolidateGraph (pure decision)", () => {
 	it("returns an empty, unchanged plan when there are no duplicates or supersessions", () => {

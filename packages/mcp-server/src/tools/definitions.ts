@@ -9,7 +9,7 @@
  * demoted to runtime methods (`MemoFSMcpRuntime`) the developer/host calls
  * imperatively — capabilities are preserved, only the model-facing wrapper
  * was removed. The strategist lives behind
- * `memofs.context`; the write gate (Component 6) lives behind
+ * `memofs.context`; the write gate lives behind
  * `memofs.remember`.
  * - 6 AgentFS session tools: `memofs_agent_session_*`. A separate axis (a
  * coding-agent scratch filesystem, not the memory store), kept model-facing
@@ -53,8 +53,8 @@ const kindSchema: JsonObject = {
 /**
  * Creates and returns all model-facing MCP tool definitions supported by MemoFS.
  *
- * The surface is the 4 memory verbs plus the 6 AgentFS session tools (
- * Component 1). Developer-level operations (graph/sync/health/snapshot/validate/
+ * The surface is the 4 memory verbs plus the 6 AgentFS session tools.
+ * Developer-level operations (graph/sync/health/snapshot/validate/
  * core-memory-update) are runtime methods on `MemoFSMcpRuntime`, not tools.
  *
  * @param maxPageSize - The maximum allowed page limit size constraint.

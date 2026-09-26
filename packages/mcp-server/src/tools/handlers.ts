@@ -349,7 +349,7 @@ function validateToolArguments(
 				1024,
 				262144,
 			);
-			// Progressive disclosure ( / Q27).
+			// Progressive disclosure (compact vs full detail).
 			const detailRaw = optionalString(object.detail, "detail", 16);
 			if (
 				detailRaw !== undefined &&

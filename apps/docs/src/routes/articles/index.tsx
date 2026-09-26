@@ -6,10 +6,15 @@ import {
 	ArticleCard,
 	type ArticleCardData,
 } from "../../components/articles/article-card";
-import { calculateReadingTime } from "../../components/articles/reading-time";
+import { Crosshair } from "../../components/crosshair";
 import { Footer } from "../../components/footer";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
+import {
+	normalizeCat,
+	sortArticlesNewestFirst,
+	toArticleCard,
+} from "../../lib/articles";
 import { baseOptions } from "../../lib/layout.shared";
 import { createPageMeta } from "../../lib/meta";
 import { ROUTES } from "../../lib/site";
@@ -17,32 +22,9 @@ import { articles } from "../../lib/source";
 import { cn } from "../../lib/utils";
 import type { Route } from "./+types/index";
 
-function normalizeCat(c: string) {
-	const lower = c.toLowerCase();
-	if (lower === "guides") return "guide";
-	if (lower === "announcements") return "announcement";
-	return lower;
-}
-
-function Crosshair({ className }: { className?: string }) {
-	return (
-		<svg
-			className={`pointer-events-none absolute h-3.5 w-3.5 text-muted-foreground/70 animate-crosshair ${className}`}
-			viewBox="0 0 14 14"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="1.2"
-			aria-hidden="true"
-		>
-			<line x1="7" y1="0" x2="7" y2="14" />
-			<line x1="0" y1="7" x2="14" y2="7" />
-		</svg>
-	);
-}
-
 export const meta: Route.MetaFunction = () =>
 	createPageMeta({
-		title: "Articles & Engineering Deep Dives — MemoFS",
+		title: "Articles & Engineering Deep Dives",
 		description:
 			"Technical deep dives on distributed memory planes, monotonic sync protocols, AI agent state, and edge runtime systems.",
 		path: ROUTES.articles,
@@ -56,46 +38,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const pages = articles.getPages();
 
 	const allArticles: ArticleCardData[] = await Promise.all(
-		pages.map(async (p) => {
-			const data = p.data as unknown as Record<string, unknown>;
-			// getText("processed") returns the compiled markdown (needs
-			// `includeProcessedMarkdown: true` in the collection config).
-			let rawContent = "";
-			try {
-				rawContent = await p.data.getText("processed");
-			} catch {
-				try {
-					rawContent = await p.data.getText("raw");
-				} catch {
-					rawContent = "";
-				}
-			}
-			const readingTimeMinutes = calculateReadingTime(rawContent);
-
-			return {
-				slug: p.slugs[0] || "",
-				title: p.data.title,
-				description: p.data.description,
-				category: (data.category as string) || "Engineering",
-				publishedAt: (data.publishedAt as string) || "2026-08-20",
-				readingTimeMinutes,
-				authorName: (data.authorName as string) || "Christopher S. Aondona",
-				authorRole: (data.authorRole as string) || "Founder & Engine Lead",
-				authorInitials: (data.authorInitials as string) || "CS",
-				authorAvatarUrl:
-					(data.authorAvatarUrl as string) ||
-					"https://github.com/christophersesugh.png",
-				featured: Boolean(data.featured),
-				tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
-			};
-		}),
+		pages.map((p) => toArticleCard(p)),
 	);
 
 	// Sort newest first
-	allArticles.sort(
-		(a, b) =>
-			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-	);
+	sortArticlesNewestFirst(allArticles);
 
 	const CATEGORY_TABS = [
 		{ id: "all", label: "All Articles" },

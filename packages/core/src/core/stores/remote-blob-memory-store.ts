@@ -81,12 +81,12 @@ export interface BlobClient {
  * which files exist and where their bytes live. A remote-blob backend has no
  * directory listing, so this manifest *is* existence.
  *
- * ## Transactional serialization (ADR 0010 — slice 3)
+ * ## Transactional serialization
  *
  * An implementation MAY provide {@link MetadataStore.withTransaction} to
  * serialize mutating ops. When present, {@link RemoteBlobMemoryStore} wraps
  * every `write` / `append` / `delete` inside it so concurrent multi-agent
- * writers to one project cannot interleave (the D6 lost-write hazard). The
+ * writers to one project cannot interleave and lose writes. The
  * Turso/libSQL adapter implements it via `BEGIN IMMEDIATE`; in-memory and
  * file-backed test stores omit it (no concurrency → no serialization needed).
  *
@@ -198,7 +198,7 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 			// concat, write the new blob, upsert the manifest row. The manifest
 			// read + upsert MUST be inside the same transaction so two
 			// concurrent appends serialize — the second read sees the first
-			// commit (ADR 0010, slice 3).
+			// commit.
 			const existing = await this.safeReadVia(meta, path);
 			const merged = existing + content;
 			const bytes = encodeUtf8(merged);
@@ -233,8 +233,8 @@ export class RemoteBlobMemoryStore implements MemoryStore {
 
 	/**
 	 * Runs a mutating metadata operation, serializing it through
-	 * {@link MetadataStore.withTransaction} when the backend supports it
-	 * (ADR 0010). When `withTransaction` is absent (in-memory, file-backed test
+	 * {@link MetadataStore.withTransaction} when the backend supports it.
+	 * When `withTransaction` is absent (in-memory, file-backed test
 	 * stores), the function runs directly — correct for single-writer
 	 * scenarios with no concurrency.
 	 *

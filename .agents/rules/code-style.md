@@ -21,7 +21,7 @@ Required tags (where applicable):
 - `@throws` when the function can throw
 - `@example` for complex/public APIs
 - `@defaultValue` for optional params with a default
-- `@see` for cross-references to related modules, ADRs, or architecture docs
+- `@see` for cross-references to related modules and symbols — never to ADRs, specs, or tickets (see `changelog-and-comment-hygiene.md`)
 
 Forbidden patterns:
 

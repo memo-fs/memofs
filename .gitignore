@@ -47,6 +47,7 @@ packages/**/.memofs/
 
 # Internal Docs & Experiments
 CONTEXT.md
+docs/README.md
 teasers.md
 tickets-to-close.md
 adr/
